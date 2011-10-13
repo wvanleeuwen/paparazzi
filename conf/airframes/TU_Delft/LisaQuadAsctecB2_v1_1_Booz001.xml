@@ -98,7 +98,7 @@
 
  <section name="AUTOPILOT">
    <define name="MODE_MANUAL" value="AP_MODE_ATTITUDE_DIRECT"/>
-   <define name="MODE_AUTO1"  value="AP_MODE_ATTITUDE_RC_CLIMB"/>
+   <define name="MODE_AUTO1"  value="AP_MODE_ATTITUDE_Z_HOLD"/>
    <define name="MODE_AUTO2"  value="AP_MODE_ATTITUDE_Z_HOLD"/>
  </section>
 
@@ -190,22 +190,22 @@ AP_MODE_NAV
     <define name="PSI_DDGAIN"   value=" 300"/>
 
   </section>
-    <!--Rotterdam
+    <!--Rotterdam--> 
   <section name="AHRS" prefix="AHRS_">
     <define name="PROPAGATE_FREQUENCY" value="512"/>
     <define name="H_X" value=" 0.3913233"/>
     <define name="H_Y" value=" 0.0005934"/>
     <define name="H_Z" value=" 0.9202531"/>
   </section>
--->        
-    <!--Antwerpen-->
+       
+    <!--Antwerpen
   <section name="AHRS" prefix="AHRS_">
     <define name="PROPAGATE_FREQUENCY" value="512"/>
     <define name="H_X" value=" 0.4006406"/>
     <define name="H_Y" value=" 0.0008547"/>
     <define name="H_Z" value=" 0.9162349"/>
   </section>
-          
+     -->      
   <section name="INS" prefix="INS_">
     <define name="BARO_SENS" value="10." integer="16"/>
     <define name="UNTILT_ACCEL" value="1"/>
@@ -275,8 +275,7 @@ AP_MODE_NAV
     <subsystem name="telemetry"     type="transparent"/>
     <subsystem name="imu"           type="b2_v1.1"/>
     <subsystem name="gps"           type="ublox">
-      <configure name="GPS_BAUD"    value="B57600"/>
-      <configure name="GPS_PORT"    value="UART3"/>
+      <configure name="GPS_PORT"    value="UART1"/>
     </subsystem>
     <!--<subsystem name="ahrs"          type="cmpl"/>!-->
     <subsystem name="stabilization"   type="euler"/>
