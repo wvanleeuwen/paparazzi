@@ -37,37 +37,60 @@ comment everything that is 2 lines back when you stop simulaton-->
   </section>
 
   <section name="IMU" prefix="IMU_">
-	<define name="GYRO_P_NEUTRAL" value="37"/>
-	<define name="GYRO_Q_NEUTRAL" value="-19"/>
-	<define name="GYRO_R_NEUTRAL" value="63"/>
-	<define name="GYRO_P_SENS" value="4.412" integer="16"/>
-	<define name="GYRO_Q_SENS" value="4.412" integer="16"/>
-	<define name="GYRO_R_SENS" value="4.412" integer="16"/>
-    <define name="GYRO_PQ_SENS" value="0.0" integer="16"/>
-    <define name="GYRO_PR_SENS" value="0.0" integer="16"/>
-    <define name="GYRO_QR_SENS" value="0.0" integer="16"/>
+<!--
+      <define name="GYRO_P_CHAN" value="1"/>
+      <define name="GYRO_Q_CHAN" value="0"/>
+      <define name="GYRO_R_CHAN" value="2"/>
+-->
+      <define name="GYRO_P_SIGN" value="1"/>
+      <define name="GYRO_Q_SIGN" value="-1"/>
+      <define name="GYRO_R_SIGN" value="-1"/>
 
-	<define name="ACCEL_X_NEUTRAL" value="3"/>
-	<define name="ACCEL_Y_NEUTRAL" value="4"/>
-	<define name="ACCEL_Z_NEUTRAL" value="-22"/>
-	<define name="ACCEL_X_SENS" value="38.7383331684" integer="16"/>
-	<define name="ACCEL_Y_SENS" value="38.5891507833" integer="16"/>
-	<define name="ACCEL_Z_SENS" value="39.5957362728" integer="16"/>
-    <define name="ACCEL_XY_SENS" value="0.0" integer="16"/>
-    <define name="ACCEL_XZ_SENS" value="0.0" integer="16"/>
-    <define name="ACCEL_YZ_SENS" value="0.0" integer="16"/>
+    <define name="GYRO_P_NEUTRAL" value="31948"/>
+    <define name="GYRO_Q_NEUTRAL" value="31834"/>
+    <define name="GYRO_R_NEUTRAL" value="32687"/>
 
-	<define name="MAG_X_NEUTRAL" value="-75"/>
-	<define name="MAG_Y_NEUTRAL" value="17"/>
-	<define name="MAG_Z_NEUTRAL" value="-115"/>
-	<define name="MAG_X_SENS" value="4.65021015649" integer="16"/>
-	<define name="MAG_Y_SENS" value="4.45946702982" integer="16"/>
-	<define name="MAG_Z_SENS" value="4.50518931605" integer="16"/>
-    <define name="MAG_XY_SENS" value="0.0" integer="16"/>
-    <define name="MAG_XZ_SENS" value="0.0" integer="16"/>
-    <define name="MAG_YZ_SENS" value="0.0" integer="16"/>
+    <define name="GYRO_P_SENS" value=" 1.101357422" integer="16"/>
+    <define name="GYRO_Q_SENS" value=" 1.122670898" integer="16"/>
+    <define name="GYRO_R_SENS" value=" 1.104890137" integer="16"/>
+<!--
+      <define name="ACCEL_X_CHAN" value="3"/>
+      <define name="ACCEL_Y_CHAN" value="5"/>
+      <define name="ACCEL_Z_CHAN" value="6"/>
+-->
+      <define name="ACCEL_X_SIGN" value="-1"/>
+      <define name="ACCEL_Y_SIGN" value="-1"/>
+      <define name="ACCEL_Z_SIGN" value="-1"/>
 
-    
+<define name="ACCEL_X_SENS" value="2.5518688889" integer="16"/>
+<define name="ACCEL_Y_SENS" value="2.54239768247" integer="16"/>
+<define name="ACCEL_Z_SENS" value="2.54900395804" integer="16"/>
+
+<define name="ACCEL_X_NEUTRAL" value="32828"/>
+<define name="ACCEL_Y_NEUTRAL" value="32559"/>
+<define name="ACCEL_Z_NEUTRAL" value="32554"/>
+<!--
+      <define name="MAG_X_CHAN" value="4"/>
+      <define name="MAG_Y_CHAN" value="0"/>
+      <define name="MAG_Z_CHAN" value="2"/>
+
+      <define name="MAG_45_HACK" value="1"/>
+-->
+      <define name="MAG_X_SIGN" value="-1"/>
+      <define name="MAG_Y_SIGN" value=" 1"/>
+      <define name="MAG_Z_SIGN" value="-1"/>
+
+
+
+
+<define name="MAG_X_SENS" value="4.68438721124" integer="16"/>
+<define name="MAG_Y_SENS" value="4.54132316969" integer="16"/>
+<define name="MAG_Z_SENS" value="2.69730737452" integer="16"/>
+
+<define name="MAG_X_NEUTRAL" value="27"/>
+<define name="MAG_Y_NEUTRAL" value="-12"/>
+<define name="MAG_Z_NEUTRAL" value="-13"/>
+
     <define name="BODY_TO_IMU_PHI"   value="RadOfDeg(  0.)"/>
     <define name="BODY_TO_IMU_THETA" value="RadOfDeg(  0.)"/>
     <define name="BODY_TO_IMU_PSI"   value="RadOfDeg(  135)"/>
@@ -238,8 +261,8 @@ http://ngdc.noaa.gov/geomag/magfield.shtml
     <subsystem name="telemetry"     type="transparent"/>
     <subsystem name="radio_control" type="ppm"/>
     <subsystem name="actuators"     type="mkk"/>
-    <subsystem name="imu"           type="aspirin"/>
-    <subsystem name="ahrs"          type="cmpl"/>
+    <subsystem name="imu"           type="b2_v1.1"/>
+    <subsystem name="ahrs"          type="int_cmpl_euler"/>
  <!--     <subsystem name="ahrs"          type="ic"/> activate section name="AHRS" for local magnetiq feeld-->
     <subsystem name="gps"           type="ublox">
       <configure name="GPS_PORT" value="UART3"/>

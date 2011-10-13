@@ -331,8 +331,8 @@
     <!-- Sensors -->
 
     <subsystem name="imu" type="aspirin_i2c"/>
-    <subsystem name="attitude" type="dcm"/>
-    <subsystem name="gps" type="ublox_lea5h"/>
+    <subsystem name="ahrs" type="dcm"/>
+    <subsystem name="gps" type="ublox"/>
     <subsystem name="navigation" type="extra"/><!--this includes OSAMNav, nav, discsurvey and nav_cube as well-->
     <subsystem name="i2c"/>
   </firmware>

@@ -162,6 +162,9 @@
       <define name="CHIMU_BIG_ENDIAN" />
     </load>
     <load name="./TUDelft/campoint60Hz.xml" />
+    <load name="gps_ubx_ucenter.xml">
+      <define name="GPS_PORT_ID" value="GPS_PORT_UART2" />
+    </load>
   </modules>
 
   <firmware name="fixedwing">
