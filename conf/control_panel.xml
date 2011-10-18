@@ -74,6 +74,15 @@
         <arg flag="-c" constant="telemetry"/>
       </program>
     </session>
+    <session name="Forward AC via UDP">
+      <program name="Ivy2Udp">
+        <arg flag="-b" constant="127:2010"/>
+        <arg flag="-h" constant="192.168.78.1"/>
+        <arg flag="-p" constant="4242"/>
+        <arg flag="-dp" constant="4243"/>
+        <arg flag="-id" constant="16"/>
+      </program>
+    </session>
     <session name="Debug Graphs">
       <program name="Real-time Plotter">
         <arg flag="-t" constant="phi"/>

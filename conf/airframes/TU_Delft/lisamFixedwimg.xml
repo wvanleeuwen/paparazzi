@@ -1,10 +1,7 @@
 <!-- this is a fixed wing equiped with  Lisa_m_1.0 and a aspirin imu (026 calibration parameters) pwm receiver on pin 6-->
 
-<!--
-	YAPA + XSens + XBee
--->
 
-<airframe name="Yapa v1">
+<airframe name="Lisa _FW">
 
   <servos>
     <servo name="THROTTLE" no="0" min="1000" neutral="1000" max="2000"/>
@@ -238,8 +235,8 @@
     </subsystem>
     <subsystem name="imu" type="aspirin_i2c"/>
     -->
-    <subsystem name="imu" type="ppzuav"/>
-    <subsystem name="ahrs" type="dcm">
+    <subsystem name="imu" type="aspirin"/>
+    <subsystem name="ahrs" type="float_dcm">
 <!--      <define name="USE_MAGNETOMETER" /> -->
     </subsystem>
 
