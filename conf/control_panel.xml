@@ -173,5 +173,19 @@
     <session name="Vision Results">
       <program name="Vision"/>
     </session>
+    <session name="USB: 868MHz Transparant @ 9600">
+      <program name="Data Link">
+        <arg flag="-d" constant="/dev/ttyUSB0"/>
+        <arg flag="-uplink"/>
+        <arg flag="-s" constant="9600"/>
+      </program>
+      <program name="Server"/>
+      <program name="GCS">
+        <arg flag="-layout" constant="./TUDelft/gcsHeering.xml"/>
+      </program>
+      <program name="Messages">
+        <arg flag="-c" constant="telemetry"/>
+      </program>
+    </session>
   </section>
 </control_panel>
