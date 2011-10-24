@@ -30,6 +30,16 @@
    gui_color="white"
   />
   <aircraft
+   name="C172"
+   ac_id="25"
+   airframe="airframes/TUDelft/c172.xml"
+   radio="radios/cockpitSX.xml"
+   telemetry="telemetry/xbee868_etsi_compliant.xml"
+   flight_plan="flight_plans/basic.xml"
+   settings=" settings/basic.xml"
+   gui_color="blue"
+  />
+  <aircraft
    name="CDW_LISA_HELI"
    ac_id="77"
    airframe="airframes/TUDelft/cdw_lisa_heli.xml"
