@@ -1,3 +1,4 @@
+#include <glib.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -13,6 +14,7 @@
 #include <Ivy/ivyloop.h>
 #include <Ivy/timer.h>
 #include <Ivy/version.h>
+#include <Ivy/ivyglibloop.h>
 
 //////////////////////////////////////////////////////////////////////////////////
 // SETTINGS
@@ -204,7 +206,7 @@ void send_ivy(void)
 //////////////////////////////////////////////////////////////////////////////////
 
 // pointer
-int fd;
+int fd = 0;
 
 /// Open
 void open_port(const char* device) {
@@ -304,7 +306,7 @@ void close_port(void)
 //////////////////////////////////////////////////////////////////////////////////
 
 // Timer
-void handle_timer (TimerId id, void *data, unsigned long delta) 
+gboolean timeout_callback(gpointer data) 
 {
   static unsigned char dispatch = 0;
   
@@ -321,6 +323,7 @@ void handle_timer (TimerId id, void *data, unsigned long delta)
   {
     dispatch ++;
   }
+  return TRUE;
 }
 
 TimerId tid;
@@ -329,8 +332,9 @@ TimerId tid;
 void sigint_handler(int sig) {
   printf("\nCLEAN STOP\n");
   IvyStop();
-  TimerRemove(tid);
+//  TimerRemove(tid);
   close_port(); 
+  exit(0);
 }
 
 //////////////////////////////////////////////////////////////////////////////////
@@ -341,6 +345,8 @@ int main ( int argc, char** argv)
 {
   int s = sizeof(local_uav);
  
+  GMainLoop *ml =  g_main_loop_new(NULL, FALSE);
+
   if (argc < 3)
   {
     printf("Use: ivy2serial ac_id serial_device\n");
@@ -349,7 +355,7 @@ int main ( int argc, char** argv)
   
   local_uav.ac_id = atoi(argv[1]);
 
-  printf("Listening to AC=%d, \nSending Size of Data = %d \n",local_uav.ac_id, s);
+  printf("IVY: Listening to AC=%d, \nTTY: Data Size = %d \n",local_uav.ac_id, s);
 
   // make Ctrl-C stop the main loop and clean up properly
   signal(SIGINT, sigint_handler);
@@ -364,18 +370,22 @@ int main ( int argc, char** argv)
   remote_uav.theta = 200;
   remote_uav.psi = -3140;
 
-
-  // create timer (Ivy)
-  tid = TimerRepeatAfter (0, delay / 2, handle_timer, 0);
-
-
+  // Start IVY
   IvyInit ("IVY <-> Serial", "IVY <-> Serial READY", NULL, NULL, NULL, NULL);
   IvyBindMsg(on_Desired, NULL, "^%d DESIRED (\\S*) (\\S*) (\\S*) (\\S*) (\\S*) (\\S*) (\\S*)",local_uav.ac_id);
   IvyBindMsg(on_Attitude, NULL, "^%d ATTITUDE (\\S*) (\\S*) (\\S*)", local_uav.ac_id);
   IvyBindMsg(on_Gps, NULL, "^%d GPS (\\S*) (\\S*) (\\S*) (\\S*) (\\S*) (\\S*) (\\S*) (\\S*) (\\S*) (\\S*) (\\S*)",local_uav.ac_id);
   IvyStart("127.255.255.255");
+
+  // Add Timer
+  g_timeout_add(delay / 2, timeout_callback, NULL);
   
-  IvyMainLoop ();
+  // Run
+  g_main_loop_run(ml);
+
+  // Clean up
+  fprintf(stderr,"Stopping\n");  
+  
 
   return 0;
 }

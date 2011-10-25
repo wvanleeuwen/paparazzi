@@ -84,7 +84,7 @@
 /sw/ground_segment/tmtc/diadec
 /sw/ground_segment/tmtc/TUDelft/sony
 /sw/ground_segment/tmtc/TUDelft/visionresult
-/sw/ground_segment/misc/ivy2serial
+/sw/ground_segment/tmtc/ivy_serial_bridge
 /sw/ground_segment/tmtc/GSM/SMS_GS
 
 # /sw/ground_segment/joystick

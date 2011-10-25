@@ -170,6 +170,11 @@
         <arg flag="-norc"/>
       </program>
     </session>
+    <session name="Forward Skywalker to C172 over ttyUSB1">
+      <program name="GCS">
+        <arg flag="8" constant="/dev/ttyUSB1"/>
+      </program>
+    </session>
     <session name="Vision Results">
       <program name="Vision"/>
     </session>

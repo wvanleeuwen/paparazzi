@@ -1,9 +1,7 @@
 <!DOCTYPE airframe SYSTEM "../airframe.dtd">
 
-<!-- Microjet Multiplex (http://www.multiplex-rc.de/)
-     Tiny 1.1 board (http://paparazzi.enac.fr/wiki/Tiny)
-     Tilted infrared sensor
-     Xbee modem in API mode
+<!-- YAPA + GPS
+     C172
 -->
 
 <airframe name="C172">
@@ -168,7 +166,7 @@
 
     <subsystem name="control"/>
     <!-- Sensors -->
-    <subsystem name="attitude" 		type="infrared"/>
+    <subsystem name="ahrs" 		type="infrared"/>
     <subsystem name="gps" 		    type="ublox"/>
     <subsystem name="navigation"/>
 
