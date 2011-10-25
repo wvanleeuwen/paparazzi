@@ -24,6 +24,8 @@
       <arg flag="-h" constant="192.168.153.1"/>
       <arg flag="-p" constant="5000"/>
     </program>
+    <program name="IvySerialBridge" command="sw/ground_segment/tmtc/ivy_serial_bridge">
+    </program>
     <program name="GCS" command="sw/ground_segment/cockpit/gcs">
       <arg flag="-b" variable="ivy_bus"/>
       <arg flag="-layout" constant="./TUDelft/papgetsBart.xml"/>
@@ -171,8 +173,13 @@
       </program>
     </session>
     <session name="Forward Skywalker to C172 over ttyUSB1">
-      <program name="GCS">
+      <program name="IvySerialBridge">
         <arg flag="8" constant="/dev/ttyUSB1"/>
+      </program>
+    </session>
+    <session name="Forward C172 to SkyWalker over ttyUSB1">
+      <program name="IvySerialBridge">
+        <arg flag="25" constant="/dev/ttyUSB1"/>
       </program>
     </session>
     <session name="Vision Results">
