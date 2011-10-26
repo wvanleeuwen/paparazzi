@@ -258,7 +258,7 @@ http://ngdc.noaa.gov/geomag/magfield.shtml
     <target name="sim" board="pc">
       <subsystem name="fdm"           type="nps"/>
     </target>
-    <subsystem name="telemetry"     type="transparent"/>
+    <subsystem name="telemetry"     type="xbee_api"/>
     <subsystem name="radio_control" type="ppm"/>
     <subsystem name="actuators"     type="mkk"/>
     <subsystem name="imu"           type="b2_v1.1"/>

@@ -92,7 +92,7 @@
     
     <define name="BODY_TO_IMU_PHI"   value="RadOfDeg(  0.0 )"/>
     <define name="BODY_TO_IMU_THETA" value="RadOfDeg(  -0.8 )"/>
-    <define name="BODY_TO_IMU_PSI"   value="RadOfDeg(  315. )"/>
+    <define name="BODY_TO_IMU_PSI"   value="RadOfDeg(  315.0 )"/>
 
   </section>
 
@@ -252,6 +252,9 @@ AP_MODE_NAV
    <define name="SENSORS_PARAMS" value="&quot;nps_sensors_params_booz2_a1.h&quot;"/>
  </section>
 
+ <modules main_freq="60">
+   <load name="gps_ubx_ucenter.xml"/>
+ </modules>
 <!-- 
  <modules main_freq="512">
    <load name="vehicle_interface_overo_link.xml"/>
@@ -272,10 +275,10 @@ AP_MODE_NAV
       <subsystem name="fdm"           type="nps"/>
       <subsystem name="actuators"     type="mkk"/>
     </target>
-    <subsystem name="telemetry"     type="transparent"/>
+    <subsystem name="telemetry"     type="xbee_api"/>
     <subsystem name="imu"           type="b2_v1.1"/>
     <subsystem name="gps"           type="ublox">
-      <configure name="GPS_PORT"    value="UART1"/>
+      <configure name="GPS_PORT"    value="UART3"/>
     </subsystem>
     <!--<subsystem name="ahrs"          type="cmpl"/>!-->
     <subsystem name="stabilization"   type="euler"/>
