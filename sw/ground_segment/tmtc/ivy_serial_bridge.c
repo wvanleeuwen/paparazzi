@@ -1,4 +1,6 @@
 #include <glib.h>
+#include <gtk/gtk.h>
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -14,7 +16,7 @@
 #include <Ivy/ivyloop.h>
 #include <Ivy/timer.h>
 #include <Ivy/version.h>
-#include <Ivy/ivyglibloop.h>
+//#include <Ivy/ivyglibloop.h>
 
 //////////////////////////////////////////////////////////////////////////////////
 // SETTINGS
@@ -22,6 +24,22 @@
 
 // Serial Repeat Rate
 long delay = 1000;
+
+
+GtkWidget *status_ivy;
+GtkWidget *status_serial;
+GtkWidget *status;
+
+char status_str[256];
+char status_ivy_str[256];
+char status_serial_str[256];
+char *port = "";
+
+long int count_ivy = 0;
+long int count_serial = 0;
+
+long int rx_bytes = 0;
+long int tx_bytes = 0;
 
 //////////////////////////////////////////////////////////////////////////////////
 // local_uav DATA
@@ -198,7 +216,10 @@ void send_ivy(void)
 */
   IvySendMsg("%d DESIRED 0 0 0 0 0 %f 0 \n", remote_uav.ac_id, remote_uav.desired_alt);
 
-  printf("IVY %d\n",remote_uav.ac_id);
+  count_serial++;
+
+  sprintf(status_serial_str, "Read %d from '%s': forwarding to IVY [%ld] {Rx=%ld}", remote_uav.ac_id, port,  count_serial, rx_bytes);
+  gtk_label_set_text( GTK_LABEL(status_serial), status_serial_str );
 }
 
 //////////////////////////////////////////////////////////////////////////////////
@@ -253,7 +274,15 @@ void send_port(void)
     printf("%x ", buf_tx[i]);
   }
   bytes = write(fd, &local_uav, sizeof(local_uav));
+
+  tx_bytes += bytes;
+
   printf("SENT: %d (%d bytes)\n",local_uav.ac_id, bytes);
+
+  count_ivy++;
+
+  sprintf(status_ivy_str, "Received %d from IVY: forwarding to '%s' [%ld] {Tx=%ld}", local_uav.ac_id, port, count_ivy, tx_bytes);
+  gtk_label_set_text( GTK_LABEL(status_ivy), status_ivy_str );
 }
 
 void read_port(void)
@@ -268,6 +297,8 @@ void read_port(void)
 
   if (bytes <= 0)
     return;
+
+  rx_bytes += bytes;
 
   counter += bytes;
 
@@ -290,7 +321,6 @@ void read_port(void)
     counter -= sizeof(remote_uav);
 
     new_serial_data = 1;
-    remote_uav.ac_id = 6;
 
     send_ivy();
   }
@@ -306,7 +336,7 @@ void close_port(void)
 //////////////////////////////////////////////////////////////////////////////////
 
 // Timer
-gboolean timeout_callback(gpointer data) 
+gboolean timeout_callback(gpointer data)
 {
   static unsigned char dispatch = 0;
   
@@ -326,26 +356,30 @@ gboolean timeout_callback(gpointer data)
   return TRUE;
 }
 
-TimerId tid;
-
-/// Handler for Ctrl-C, exits the main loop
-void sigint_handler(int sig) {
-  printf("\nCLEAN STOP\n");
-  IvyStop();
-//  TimerRemove(tid);
-  close_port(); 
-  exit(0);
-}
-
 //////////////////////////////////////////////////////////////////////////////////
 // MAIN
 //////////////////////////////////////////////////////////////////////////////////
+
+gint delete_event( GtkWidget *widget,
+                   GdkEvent  *event,
+                   gpointer   data )
+{
+  g_print ("CLEAN STOP\n");
+  
+  close_port(); 
+  IvyStop();
+
+  exit(0);
+
+  return(FALSE); // false = delete window, FALSE = keep active
+}
+
 
 int main ( int argc, char** argv) 
 {
   int s = sizeof(local_uav);
  
-  GMainLoop *ml =  g_main_loop_new(NULL, FALSE);
+  gtk_init(&argc, &argv);
 
   if (argc < 3)
   {
@@ -355,13 +389,14 @@ int main ( int argc, char** argv)
   
   local_uav.ac_id = atoi(argv[1]);
 
-  printf("IVY: Listening to AC=%d, \nTTY: Data Size = %d \n",local_uav.ac_id, s);
-
-  // make Ctrl-C stop the main loop and clean up properly
-  signal(SIGINT, sigint_handler);
+  sprintf(status_str, "Listening to AC=%d, Serial Data Size = %d",local_uav.ac_id, s);
+  sprintf(status_ivy_str, "---");
+  sprintf(status_serial_str, "---");
+  printf("%s\n",status_str);
 
   // Open Serial or Die
-  open_port(argv[2]);
+  port = argv[2];
+  open_port(port);
 
   // Init UAV
   remote_uav.ac_id = 6;
@@ -378,10 +413,49 @@ int main ( int argc, char** argv)
   IvyStart("127.255.255.255");
 
   // Add Timer
-  g_timeout_add(delay / 2, timeout_callback, NULL);
-  
-  // Run
-  g_main_loop_run(ml);
+  gtk_timeout_add(delay / 2, timeout_callback, NULL);
+
+  // GTK Window  
+  GtkWidget *window = gtk_window_new (GTK_WINDOW_TOPLEVEL);
+  gtk_window_set_title (GTK_WINDOW (window), "IVY_Serial_Bridge");
+
+  gtk_signal_connect (GTK_OBJECT (window), "delete_event",
+                        GTK_SIGNAL_FUNC (delete_event), NULL);
+
+  GtkWidget *box = gtk_vbox_new(TRUE, 1);
+  gtk_container_add (GTK_CONTAINER (window), box);
+
+  GtkWidget *hbox = gtk_hbox_new(FALSE, 1);
+  gtk_container_add (GTK_CONTAINER (box), hbox);
+  status = gtk_label_new( "Status:" );
+  gtk_box_pack_start(GTK_BOX(hbox), status, FALSE, FALSE, 1);
+  gtk_label_set_justify( (GtkLabel*) status, GTK_JUSTIFY_LEFT );
+  status = gtk_label_new( status_str );
+  gtk_box_pack_start(GTK_BOX(hbox), status, FALSE, FALSE, 1);
+  gtk_label_set_justify( (GtkLabel*) status, GTK_JUSTIFY_LEFT );
+
+  hbox = gtk_hbox_new(FALSE, 1);
+  gtk_container_add (GTK_CONTAINER (box), hbox);
+  status = gtk_label_new( "IVY->SERIAL:" );
+  gtk_box_pack_start(GTK_BOX(hbox), status, FALSE, FALSE, 1);
+  gtk_label_set_justify( (GtkLabel*) status, GTK_JUSTIFY_LEFT );
+  status_ivy = gtk_label_new( status_ivy_str );
+  gtk_box_pack_start(GTK_BOX(hbox), status_ivy, FALSE, FALSE, 1);
+  gtk_label_set_justify( (GtkLabel*) status_ivy, GTK_JUSTIFY_LEFT );
+
+  hbox = gtk_hbox_new(FALSE, 1);
+  gtk_container_add (GTK_CONTAINER (box), hbox);
+  status = gtk_label_new( "SERIAL->IVY:" );
+  gtk_box_pack_start(GTK_BOX(hbox), status, FALSE, FALSE, 1);
+  gtk_label_set_justify( (GtkLabel*) status, GTK_JUSTIFY_LEFT );
+  status_serial = gtk_label_new( status_serial_str );
+  gtk_label_set_justify( GTK_LABEL(status_serial), GTK_JUSTIFY_LEFT );
+  gtk_box_pack_start(GTK_BOX(hbox), status_serial, FALSE, FALSE, 1);
+
+
+  gtk_widget_show_all(window);
+
+  gtk_main();
 
   // Clean up
   fprintf(stderr,"Stopping\n");  
