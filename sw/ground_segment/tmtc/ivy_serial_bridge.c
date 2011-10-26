@@ -447,7 +447,7 @@ int handle_api(void)
   case 10:
     sprintf(buff,"ATPL%d\r", power_level);
     write(fd, (unsigned char*) buff, strlen(buff));
-    printf("ATPL4\n");
+    printf("ATPL%d\n",power_level);
 
     buff[strlen(buff) - 1] = 0;
     strcpy(status_ivy_str,buff);
@@ -578,7 +578,7 @@ int handle_api(void)
   case 33:
     bytes = read(fd, (unsigned char*) buff, 32);
     printf("Bytes %d %d\n",bytes, fd);
-    if (bytes > 1)
+    if ((bytes > 1) && (bytes < 10))
     {
       buff[bytes-1] = 0;
       strcpy(status_serial_str, buff);

@@ -6,60 +6,11 @@
       <widget NAME="aircraft"/>
     </rows>
     <rows>
-      <widget SIZE="45" name="altgraph"/>
       <widget NAME="map2d" >
-        <papget type="message_field" display="text" x="10" y="360">
-          <property name="scale" value="1"/>
-          <property name="field" value="ENERGY:amp"/>
-          <property name="format" value="Bat:%.2fA"/>
-          <property name="size" value="15."/>
-          <property name="color" value="green"/>
-        </papget>
-        <papget type="message_field" display="text" x="10" y="390">
-          <property name="scale" value="1"/>
-          <property name="field" value="ENERGY:energy"/>
-          <property name="format" value="%.2fmAh"/>
-          <property name="size" value="15."/>
-          <property name="color" value="green"/>
-        </papget>
-        <papget type="message_field" display="text" x="10" y="420">
-          <property name="scale" value="1"/>
-          <property name="field" value="DC_SHOT:photo_nr"/>
-          <property name="format" value="Photo:%.0f"/>
-          <property name="size" value="15."/>
-          <property name="color" value="green"/>
-        </papget>
-
-        <papget type="goto_block" display="button" x="10" y="190">
-          <property name="block_name" value="Takeoff"/>
-          <property name="icon" value="takeoff.png"/>
-        </papget>
-        <papget type="goto_block" display="button" x="10" y="220">
-          <property name="block_name" value="Standby"/>
-          <property name="icon" value="home.png"/>
-        </papget>
-        <papget type="goto_block" display="button" x="10" y="250">
-          <property name="block_name" value="Oval 1-2"/>
-          <property name="icon" value="oval.png"/>
-        </papget>
-        <papget type="goto_block" display="button" x="10" y="280">
-          <property name="block_name" value="Land Left AF-TD"/>
-          <property name="icon" value="land-left.png"/>
-        </papget>
-        <papget type="goto_block" display="button" x="10" y="310">
-          <property name="block_name" value="Land Right AF-TD"/>
-          <property name="icon" value="land-right.png"/>
-        </papget>
-        <papget type="message_field" display="ruler" x="50" y="240">
-          <property name="scale" value="1"/>
-          <property name="field" value="ESTIMATOR:z"/>
-          <property name="height" value="100."/>
-          <property name="index_on_right" value="false"/>
-          <property name="width" value="32."/>
-          <property name="point_per_unit" value="2."/>
-          <property name="step" value="10"/>
-        </papget>
       </widget>
     </rows>
+    <row>
+      <widget SIZE="45" name="altgraph"/>
+    </row>
   </columns>
 </layout>
