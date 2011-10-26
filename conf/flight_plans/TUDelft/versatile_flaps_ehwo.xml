@@ -20,6 +20,7 @@
     <waypoint name="_3" x="100" y="200"/>
     <waypoint name="_4" x="100" y="0"/>
     <waypoint name="CLIMB" x="-122.5" y="35.4"/>
+    <waypoint name="EBHN" lat="51.3068" lon="4.3874"/>
   </waypoints>
   <sectors>
     <sector name="Square">
