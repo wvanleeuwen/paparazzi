@@ -46,6 +46,9 @@ long int rx_bytes = 0;
 long int tx_bytes = 0;
 long int rx_error = 0;
 
+char modem_id[32] = "";
+int power_level = 4;
+
 //////////////////////////////////////////////////////////////////////////////////
 // local_uav DATA
 //////////////////////////////////////////////////////////////////////////////////
@@ -280,7 +283,7 @@ void send_ivy(void)
    </message>
 */
 
-  IvySendMsg("%d BAT 0 81 0 %ld 0 0 0 0\n", remote_uav.ac_id, count_serial);
+  // IvySendMsg("%d BAT 0 81 0 %ld 0 0 0 0\n", remote_uav.ac_id, count_serial);
 
 /*
    <message name="PPRZ_MODE" id="11">
@@ -293,7 +296,7 @@ void send_ivy(void)
    </message>
 */
 
-  IvySendMsg("%d PPRZ_MODE 0 0 0 0 0 0\n", remote_uav.ac_id);
+  // IvySendMsg("%d PPRZ_MODE 0 0 0 0 0 0\n", remote_uav.ac_id);
 
 /*	// Needed to show any NAV info like current block number
    <message name="NAVIGATION_REF" id="9">
@@ -303,7 +306,13 @@ void send_ivy(void)
    </message>
 */
 
-  IvySendMsg("%d NAVIGATION_REF %d %d %d\n", remote_uav.ac_id, remote_uav.utm_east, remote_uav.utm_north, remote_uav.utm_zone);
+  static int delayer = 10;
+  delayer++;
+  if (delayer > 5)
+  {
+    IvySendMsg("%d NAVIGATION_REF %d %d %d\n", remote_uav.ac_id, remote_uav.utm_east, remote_uav.utm_north, remote_uav.utm_zone);
+    delayer = 0;
+  }
 
 
 
@@ -376,6 +385,235 @@ void send_port(void)
   sprintf(status_ivy_str, "Received %d from IVY: forwarding to '%s' [%ld] {Tx=%ld}", local_uav.ac_id, port, count_ivy, tx_bytes);
   gtk_label_set_text( GTK_LABEL(status_ivy), status_ivy_str );
 }
+
+int set_power_level = -1;
+int get_power_level = -1;
+
+int handle_api(void)
+{
+  static int step = 0;
+  int bytes;
+  int i=0;
+  char buff[32];
+  
+  // ATPL4 = power level 4
+  // ATMT0 = zero retry on broadcast
+  // ATRR = mac retry on NACK
+
+  // ATDH = 0x00000000
+  // ATDL = 0x0000FFFF
+
+  // read only: 
+  // Serial High
+  // Serial Low
+
+  // ATDC = duty cycle status (percent 0 - 100)
+  // ATDB = Signal Strength
+
+
+  // ATWR = write to flash
+  // ATCN = exit command mode
+
+
+  step++;
+
+  if (step > 35)
+  {
+    step = 35;
+    return 1;
+  }
+
+  switch(step)
+  {
+  case 1:
+    sprintf(buff,"+++");
+    bytes = write(fd, buff, strlen(buff));
+    printf("+++ (bytes=%d %d)\n",bytes, fd);
+
+    buff[strlen(buff)] = 0;
+    strcpy(status_ivy_str,buff);
+    gtk_label_set_text( GTK_LABEL(status_ivy), status_ivy_str );    
+
+    break;
+  case 8:
+    sprintf(buff,"ATPL\r");
+    write(fd, (unsigned char*) buff, strlen(buff));
+    printf("ATPL\n");
+
+    buff[strlen(buff) - 1] = 0;
+    strcpy(status_ivy_str,buff);
+    gtk_label_set_text( GTK_LABEL(status_ivy), status_ivy_str );    
+    break;
+  case 10:
+    sprintf(buff,"ATPL%d\r", power_level);
+    write(fd, (unsigned char*) buff, strlen(buff));
+    printf("ATPL4\n");
+
+    buff[strlen(buff) - 1] = 0;
+    strcpy(status_ivy_str,buff);
+    gtk_label_set_text( GTK_LABEL(status_ivy), status_ivy_str );    
+    break;
+  case 12:
+    sprintf(buff,"ATPL\r");
+    write(fd, (unsigned char*) buff, strlen(buff));
+    printf("ATPL\n");
+
+    buff[strlen(buff) - 1] = 0;
+    strcpy(status_ivy_str,buff);
+    gtk_label_set_text( GTK_LABEL(status_ivy), status_ivy_str );    
+    break;
+  case 14:
+    sprintf(buff,"ATDH\r");
+    write(fd, (unsigned char*) buff, strlen(buff));
+    printf("ATDH\n");
+
+    buff[strlen(buff) - 1] = 0;
+    strcpy(status_ivy_str,buff);
+    gtk_label_set_text( GTK_LABEL(status_ivy), status_ivy_str );    
+    break;
+  case 16:
+    sprintf(buff,"ATDL\r");
+    write(fd, (unsigned char*) buff, strlen(buff));
+    printf("ATDL\n");
+
+    buff[strlen(buff) - 1] = 0;
+    strcpy(status_ivy_str,buff);
+    gtk_label_set_text( GTK_LABEL(status_ivy), status_ivy_str );    
+    break;
+  case 18:
+    sprintf(buff,"ATSH\r");
+    write(fd, (unsigned char*) buff, strlen(buff));
+    printf("ATSH\n");
+
+    buff[strlen(buff) - 1] = 0;
+    strcpy(status_ivy_str,buff);
+    gtk_label_set_text( GTK_LABEL(status_ivy), status_ivy_str );    
+    break;
+  case 20:
+    sprintf(buff,"ATSL\r");
+    write(fd, (unsigned char*) buff, strlen(buff));
+    printf("ATSL\n");
+
+    buff[strlen(buff) - 1] = 0;
+    strcpy(status_ivy_str,buff);
+    gtk_label_set_text( GTK_LABEL(status_ivy), status_ivy_str );    
+    break;
+  case 22:
+    sprintf(buff,"ATMT0\r");
+    write(fd, (unsigned char*) buff, strlen(buff));
+    printf("ATMT0\n");
+
+    buff[strlen(buff) - 1] = 0;
+    strcpy(status_ivy_str,buff);
+    gtk_label_set_text( GTK_LABEL(status_ivy), status_ivy_str );    
+    break;
+  case 24:
+    sprintf(buff,"ATRR0\r");
+    write(fd, (unsigned char*) buff, strlen(buff));
+    printf("ATRR0\n");
+
+    buff[strlen(buff) - 1] = 0;
+    strcpy(status_ivy_str,buff);
+    gtk_label_set_text( GTK_LABEL(status_ivy), status_ivy_str );    
+    break;
+  case 26:
+    sprintf(buff,"ATDH00000000\r");
+    write(fd, (unsigned char*) buff, strlen(buff));
+    printf("ATDH00000000\n");
+
+    buff[strlen(buff) - 1] = 0;
+    strcpy(status_ivy_str,buff);
+    gtk_label_set_text( GTK_LABEL(status_ivy), status_ivy_str );    
+    break;
+  case 28:
+    sprintf(buff,"ATDL0000FFFF\r");
+    write(fd, (unsigned char*) buff, strlen(buff));
+    printf("ATDL0000FFFF\n");
+
+    buff[strlen(buff) - 1] = 0;
+    strcpy(status_ivy_str,buff);
+    gtk_label_set_text( GTK_LABEL(status_ivy), status_ivy_str );    
+    break;
+  case 30:
+    sprintf(buff,"ATWR\r");
+    write(fd, (unsigned char*) buff, strlen(buff));
+    printf("ATWR\n");
+
+    buff[strlen(buff) - 1] = 0;
+    strcpy(status_ivy_str,buff);
+    gtk_label_set_text( GTK_LABEL(status_ivy), status_ivy_str );    
+    break;
+  case 32:
+    sprintf(buff,"ATCN\r");
+    write(fd, (unsigned char*) buff, strlen(buff));
+    printf("ATCN\n");
+    printf("Quit API\n");
+    modem_id[16]=0;
+    sprintf(buff, ", XB_ADDR='%s', ", modem_id);
+    strcat(status_str,buff);
+    sprintf(buff, "ATPL=%d", power_level);
+    strcat(status_str,buff);
+    gtk_label_set_text( GTK_LABEL(status), status_str );
+    break;
+  case 34:
+    sprintf(status_ivy_str, "---");
+    gtk_label_set_text( GTK_LABEL(status_ivy), status_ivy_str );    
+    sprintf(status_serial_str, "---");
+    gtk_label_set_text( GTK_LABEL(status_serial), status_serial_str );    
+    
+    break;
+  case 7:
+  case 9:
+  case 11:
+  case 13:
+  case 15:
+  case 17:
+  case 19:
+  case 21:
+  case 23:
+  case 25:
+  case 27:
+  case 29:
+  case 31:
+  case 33:
+    bytes = read(fd, (unsigned char*) buff, 32);
+    printf("Bytes %d %d\n",bytes, fd);
+    if (bytes > 1)
+    {
+      buff[bytes-1] = 0;
+      strcpy(status_serial_str, buff);
+      gtk_label_set_text( GTK_LABEL(status_serial), status_serial_str );
+    }
+    for (i=0;i<bytes;i++)
+    {
+      printf("%c",buff[i]);
+      if ((step == 13) && (i==0))
+      {
+        power_level = (int)buff[0] - (int)'0';
+      }
+      else if (step == 19)
+      {
+        if ((buff[i] != '\r') && (buff[i] != '\n'))
+        { 
+          modem_id[strlen(modem_id)] = buff[i];
+          modem_id[strlen(modem_id)+1] = 0;
+        }
+      }
+      else if (step == 21)
+      {
+        if ((buff[i] != '\r') && (buff[i] != '\n'))
+        { 
+          modem_id[strlen(modem_id)] = buff[i];
+          modem_id[strlen(modem_id)+1] = 0;
+        }
+      }
+    }
+    printf("\n");
+    break;
+  }
+  return 0;
+}
+
 
 void read_port(void)
 {
@@ -464,11 +702,15 @@ gboolean timeout_callback(gpointer data)
 {
   static unsigned char dispatch = 0;
   
+  // Only do the settings if in xbee mode
+  if ((power_level >= 0) && (handle_api() == 0))
+    return TRUE;
+
   // Every Time
   read_port();
 
-  // One out of 2
-  if (dispatch > 0)
+  // One out of 4
+  if (dispatch > 2)
   {
     send_port();
     dispatch = 0;
@@ -508,7 +750,24 @@ int main ( int argc, char** argv)
   if (argc < 3)
   {
     printf("Use: ivy2serial ac_id serial_device\n");
+    printf("or\n");
+    printf("Use: ivy2serial ac_id serial_device xbee_power_level [0-4] to configure the xbee as broadcast, no retries\n");
     return -1;
+  }
+
+  if (argc == 4)
+  {
+    printf("Programming XBee Modem\n");
+    power_level = (int) (argv[3][0]) - (int) '0';
+    if (power_level < 0)
+      power_level = 0;
+    else if (power_level > 4)
+      power_level = 4;
+    printf("Set Power Level To: '%d'\n", power_level);
+  }
+  else
+  {
+    power_level = -1;
   }
   
   local_uav.ac_id = atoi(argv[1]);
@@ -539,7 +798,7 @@ int main ( int argc, char** argv)
   IvyStart("127.255.255.255");
 
   // Add Timer
-  gtk_timeout_add(delay / 2, timeout_callback, NULL);
+  gtk_timeout_add(delay / 4, timeout_callback, NULL);
 
   // GTK Window  
   GtkWidget *window = gtk_window_new (GTK_WINDOW_TOPLEVEL);
@@ -562,18 +821,18 @@ int main ( int argc, char** argv)
 
   hbox = gtk_hbox_new(FALSE, 1);
   gtk_container_add (GTK_CONTAINER (box), hbox);
-  status = gtk_label_new( "IVY->SERIAL:" );
-  gtk_box_pack_start(GTK_BOX(hbox), status, FALSE, FALSE, 1);
-  gtk_label_set_justify( (GtkLabel*) status, GTK_JUSTIFY_LEFT );
+  status_ivy = gtk_label_new( "IVY->SERIAL:" );
+  gtk_box_pack_start(GTK_BOX(hbox), status_ivy, FALSE, FALSE, 1);
+  gtk_label_set_justify( (GtkLabel*) status_ivy, GTK_JUSTIFY_LEFT );
   status_ivy = gtk_label_new( status_ivy_str );
   gtk_box_pack_start(GTK_BOX(hbox), status_ivy, FALSE, FALSE, 1);
   gtk_label_set_justify( (GtkLabel*) status_ivy, GTK_JUSTIFY_LEFT );
 
   hbox = gtk_hbox_new(FALSE, 1);
   gtk_container_add (GTK_CONTAINER (box), hbox);
-  status = gtk_label_new( "SERIAL->IVY:" );
-  gtk_box_pack_start(GTK_BOX(hbox), status, FALSE, FALSE, 1);
-  gtk_label_set_justify( (GtkLabel*) status, GTK_JUSTIFY_LEFT );
+  status_serial = gtk_label_new( "SERIAL->IVY:" );
+  gtk_box_pack_start(GTK_BOX(hbox), status_serial, FALSE, FALSE, 1);
+  gtk_label_set_justify( (GtkLabel*) status_serial, GTK_JUSTIFY_LEFT );
   status_serial = gtk_label_new( status_serial_str );
   gtk_label_set_justify( GTK_LABEL(status_serial), GTK_JUSTIFY_LEFT );
   gtk_box_pack_start(GTK_BOX(hbox), status_serial, FALSE, FALSE, 1);
