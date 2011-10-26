@@ -62,6 +62,7 @@ struct _uav_type_
   unsigned char utm_zone;
   unsigned char pprz_mode;
   float desired_alt;
+  float climb;
   unsigned char block;
 
   // Footer
@@ -94,6 +95,36 @@ static void on_Attitude(IvyClientPtr app, void *user_data, int argc, char *argv[
   local_uav.theta = (short int) (atof(argv[2]) * 1000.0);
 
   //Dprintf("ATTITUDE ac=%d phi=%d theta=%d psi=%d ",local_uav.ac_id, local_uav.phi, local_uav.theta, local_uav.psi);
+}
+
+static void on_Estimator(IvyClientPtr app, void *user_data, int argc, char *argv[])
+{
+/*
+  <message name="ESTIMATOR" id="42">
+    <field name="z" type="float" unit="m"/>
+    <field name="z_dot" type="float" unit="m/s"/>
+  </message>
+*/
+
+  local_uav.climb   = atof(argv[1]);
+}
+
+static void on_Navigation(IvyClientPtr app, void *user_data, int argc, char *argv[])
+{
+/*
+   <message name="NAVIGATION" id="10">
+     <field name="cur_block" type="uint8"/>
+     <field name="cur_stage" type="uint8"/>
+     <field name="pos_x" type="float" unit="m" format="%.1f"/>
+     <field name="pos_y" type="float" unit="m" format="%.1f"/>
+     <field name="dist2_wp" type="float" format="%.1f" unit="m^2"/>
+     <field name="dist2_home" type="float" format="%.1f" unit="m^2"/>
+     <field name="circle_count" type="uint8"/>
+     <field name="oval_count" type="uint8"/>
+   </message>
+*/
+
+  local_uav.block   = atoi(argv[0]);
 }
 
 static void on_Desired(IvyClientPtr app, void *user_data, int argc, char *argv[])
@@ -204,7 +235,7 @@ void send_ivy(void)
   IvySendMsg("%d FBW_STATUS 2 0 1 81 0 \n", remote_uav.ac_id);
 
   z = ((float)remote_uav.utm_z) / 1000.0f;
-  zdot = 0.0f;
+  zdot = remote_uav.climb;
   IvySendMsg("%d ESTIMATOR %f %f \n", remote_uav.ac_id, z, zdot);
 
 /*
@@ -219,6 +250,22 @@ void send_ivy(void)
    </message>
 */
   IvySendMsg("%d DESIRED 0 0 0 0 0 %f 0 \n", remote_uav.ac_id, remote_uav.desired_alt);
+
+/*
+   <message name="NAVIGATION" id="10">
+     <field name="cur_block" type="uint8"/>
+     <field name="cur_stage" type="uint8"/>
+     <field name="pos_x" type="float" unit="m" format="%.1f"/>
+     <field name="pos_y" type="float" unit="m" format="%.1f"/>
+     <field name="dist2_wp" type="float" format="%.1f" unit="m^2"/>
+     <field name="dist2_home" type="float" format="%.1f" unit="m^2"/>
+     <field name="circle_count" type="uint8"/>
+     <field name="oval_count" type="uint8"/>
+   </message>
+*/
+
+  IvySendMsg("%d NAVIGATION %d 0 0 0 0 0 0 0 \n", remote_uav.ac_id, remote_uav.block);
+
 
   count_serial++;
 
@@ -442,6 +489,8 @@ int main ( int argc, char** argv)
   // Start IVY
   IvyInit ("IVY <-> Serial", "IVY <-> Serial READY", NULL, NULL, NULL, NULL);
   IvyBindMsg(on_Desired, NULL, "^%d DESIRED (\\S*) (\\S*) (\\S*) (\\S*) (\\S*) (\\S*) (\\S*)",local_uav.ac_id);
+  IvyBindMsg(on_Estimator, NULL, "^%d ESTIMATOR (\\S*) (\\S*)",local_uav.ac_id);
+  IvyBindMsg(on_Navigation, NULL, "^%d NAVIGATION (\\S*) (\\S*) (\\S*) (\\S*) (\\S*) (\\S*) (\\S*) (\\S*)",local_uav.ac_id);
   IvyBindMsg(on_Attitude, NULL, "^%d ATTITUDE (\\S*) (\\S*) (\\S*)", local_uav.ac_id);
   IvyBindMsg(on_Gps, NULL, "^%d GPS (\\S*) (\\S*) (\\S*) (\\S*) (\\S*) (\\S*) (\\S*) (\\S*) (\\S*) (\\S*) (\\S*)",local_uav.ac_id);
   IvyStart("127.255.255.255");
