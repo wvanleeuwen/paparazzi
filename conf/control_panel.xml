@@ -180,6 +180,7 @@
     <session name="Forward C172 to SkyWalker over ttyUSB1">
       <program name="IvySerialBridge">
         <arg flag="25" constant="/dev/ttyUSB1"/>
+        <arg flag="4" constant=""/>
       </program>
     </session>
     <session name="Vision Results">
