@@ -44,6 +44,7 @@ long int count_serial = 0;
 
 long int rx_bytes = 0;
 long int tx_bytes = 0;
+long int rx_error = 0;
 
 //////////////////////////////////////////////////////////////////////////////////
 // local_uav DATA
@@ -269,7 +270,7 @@ void send_ivy(void)
 
   count_serial++;
 
-  sprintf(status_serial_str, "Read %d from '%s': forwarding to IVY [%ld] {Rx=%ld}", remote_uav.ac_id, port,  count_serial, rx_bytes);
+  sprintf(status_serial_str, "Read %d from '%s': forwarding to IVY [%ld] {Rx=%ld} {Err=%ld}", remote_uav.ac_id, port,  count_serial, rx_bytes, rx_error);
   gtk_label_set_text( GTK_LABEL(status_serial), status_serial_str );
 }
 
@@ -377,6 +378,7 @@ void read_port(void)
       }
       else
       {
+        rx_error++;
         Dprintf("Header Not Found at All (bytes=%d)\n",bytes);
         for (i=0;i<counter;i++)
         {
@@ -397,6 +399,7 @@ void read_port(void)
     if (buf_rx[sizeof(remote_uav)-1] != crc)
     {
       Dprintf("Checksum Error\n");
+      rx_error++;
     }
     Dprintf("RECEIVED %d (%d bytes)\n",remote_uav.ac_id, counter);
     counter -= sizeof(remote_uav);
