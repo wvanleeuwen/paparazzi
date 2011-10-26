@@ -34,7 +34,7 @@
    ac_id="25"
    airframe="airframes/TUDelft/c172.xml"
    radio="radios/cockpitSX.xml"
-   telemetry="telemetry/xbee868_etsi_compliant.xml"
+   telemetry="telemetry/default.xml"
    flight_plan="flight_plans/TUDelft/versatile_flaps_ehwo.xml"
    settings=" settings/basic.xml"
    gui_color="blue"

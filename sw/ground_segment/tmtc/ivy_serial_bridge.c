@@ -18,6 +18,10 @@
 #include <Ivy/version.h>
 //#include <Ivy/ivyglibloop.h>
 
+
+#define Dprintf(X, ... ) 
+//#define Dprintf printf
+
 //////////////////////////////////////////////////////////////////////////////////
 // SETTINGS
 //////////////////////////////////////////////////////////////////////////////////
@@ -89,7 +93,7 @@ static void on_Attitude(IvyClientPtr app, void *user_data, int argc, char *argv[
   local_uav.psi   = (short int) (atof(argv[1]) * 1000.0);
   local_uav.theta = (short int) (atof(argv[2]) * 1000.0);
 
-  //printf("ATTITUDE ac=%d phi=%d theta=%d psi=%d ",local_uav.ac_id, local_uav.phi, local_uav.theta, local_uav.psi);
+  //Dprintf("ATTITUDE ac=%d phi=%d theta=%d psi=%d ",local_uav.ac_id, local_uav.phi, local_uav.theta, local_uav.psi);
 }
 
 static void on_Desired(IvyClientPtr app, void *user_data, int argc, char *argv[])
@@ -133,8 +137,8 @@ static void on_Gps(IvyClientPtr app, void *user_data, int argc, char *argv[])
   local_uav.utm_zone = atoi(argv[9]);
   local_uav.speed = atoi(argv[5]);
 
-  //printf("ATTITUDE ac=%d phi=%d theta=%d psi=%d ",local_uav.ac_id, local_uav.phi, local_uav.theta, local_uav.psi);
-  //printf("GPS ac=%d %d %d %d %d\n",local_uav.ac_id, local_uav.utm_east, local_uav.utm_north, local_uav.utm_z, local_uav.utm_zone);
+  //Dprintf("ATTITUDE ac=%d phi=%d theta=%d psi=%d ",local_uav.ac_id, local_uav.phi, local_uav.theta, local_uav.psi);
+  //Dprintf("GPS ac=%d %d %d %d %d\n",local_uav.ac_id, local_uav.utm_east, local_uav.utm_north, local_uav.utm_z, local_uav.utm_zone);
 
   new_ivy_data = 1;
 }
@@ -271,13 +275,13 @@ void send_port(void)
   for (i=0;i<(sizeof(local_uav)-1);i++)
   {
     local_uav.footer += buf_tx[i];
-    printf("%x ", buf_tx[i]);
+    Dprintf("%x ", buf_tx[i]);
   }
   bytes = write(fd, &local_uav, sizeof(local_uav));
 
   tx_bytes += bytes;
 
-  printf("SENT: %d (%d bytes)\n",local_uav.ac_id, bytes);
+  Dprintf("SENT: %d (%d bytes)\n",local_uav.ac_id, bytes);
 
   count_ivy++;
 
@@ -296,7 +300,7 @@ void read_port(void)
   // Init CRC
   unsigned char crc = 0;
 
-  // printf("READ: %d bytes",bytes);
+  // Dprintf("READ: %d bytes",bytes);
 
   if (bytes <= 0)
     return;
@@ -310,23 +314,29 @@ void read_port(void)
     if (buf_rx[0] != '@')
     {
       int head = 0;
-      for (head=0; head<(sizeof(remote_uav)-1);head++)
+      for (head=0; head<sizeof(remote_uav);head++)
       {
         if (buf_rx[head] == '@')
         {
-          printf("Found header location %d\n",head);
+          Dprintf("Found header location %d\n",head);
           break;
         }
       }
-      if (head<(sizeof(remote_uav)-1))
+      if (head<sizeof(remote_uav))
       {
         int movesize = (sizeof(remote_uav)-head);
         memcpy(&buf_rx[0],&buf_rx[head],movesize );
-        printf("Moved %d bytes to the front\n",movesize);
+        Dprintf("Moved %d bytes to the front\n",movesize);
       }
       else
       {
-        printf("Header Not Found at All\n");
+        Dprintf("Header Not Found at All (bytes=%d)\n",bytes);
+        for (i=0;i<counter;i++)
+        {
+          crc += buf_rx[i];
+          Dprintf("%x ", buf_rx[i]);
+        }
+        Dprintf("\n");
       }
       counter -= head;
       return; 
@@ -335,13 +345,13 @@ void read_port(void)
     for (i=0;i<(sizeof(remote_uav)-1);i++)
     {
       crc += buf_rx[i];
-      printf("%x ", buf_rx[i]);
+      Dprintf("%x ", buf_rx[i]);
     }
     if (buf_rx[sizeof(remote_uav)-1] != crc)
     {
-      printf("Checksum Error\n");
+      Dprintf("Checksum Error\n");
     }
-    printf("RECEIVED %d (%d bytes)\n",remote_uav.ac_id, counter);
+    Dprintf("RECEIVED %d (%d bytes)\n",remote_uav.ac_id, counter);
     counter -= sizeof(remote_uav);
 
     new_serial_data = 1;
