@@ -750,6 +750,8 @@ int main ( int argc, char** argv)
   if (argc < 3)
   {
     printf("Use: ivy2serial ac_id serial_device\n");
+    printf("or\n");
+    printf("Use: ivy2serial ac_id serial_device xbee_power_level [0-4] to configure the xbee as broadcast, no retries\n");
     return -1;
   }
 
