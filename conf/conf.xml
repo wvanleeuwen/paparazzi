@@ -30,6 +30,16 @@
    gui_color="white"
   />
   <aircraft
+   name="C172"
+   ac_id="25"
+   airframe="airframes/TUDelft/c172.xml"
+   radio="radios/cockpitSX.xml"
+   telemetry="telemetry/default.xml"
+   flight_plan="flight_plans/TUDelft/versatile_flaps_ehwo.xml"
+   settings=" settings/basic.xml"
+   gui_color="red"
+  />
+  <aircraft
    name="CDW_LISA_HELI"
    ac_id="77"
    airframe="airframes/TUDelft/cdw_lisa_heli.xml"
@@ -134,7 +144,7 @@
    ac_id="18"
    airframe="airframes/TU_Delft/lisamFixedwimg.xml"
    radio="radios/cockpitSX.xml"
-   telemetry="telemetry/default_fixedwing_imu.xml"
+   telemetry="telemetry/default_fixedwing_imu_9k6.xml"
    flight_plan="flight_plans/basic.xml"
    settings=" settings/tuning_ins.xml"
    gui_color="blue"
@@ -195,7 +205,7 @@
    airframe="airframes/TU_Delft/skywalker.xml"
    radio="radios/R6107SP_7ch.xml"
    telemetry="telemetry/default_fixedwing_imu_9k6.xml"
-   flight_plan="flight_plans/versatile_flaps.xml"
+   flight_plan="flight_plans/TUDelft/versatile_flaps_ehwo.xml"
    settings=" settings/tune_agr_climb.xml settings/tuning_ins.xml"
    gui_color="blue"
   />
@@ -204,7 +214,7 @@
    ac_id="24"
    airframe="airframes/TU_Delft/skywalkerfiber.xml"
    radio="radios/R6107SP_7ch.xml"
-   telemetry="telemetry/default.xml"
+   telemetry="telemetry/default_fixedwing_imu_9k6.xml"
    flight_plan="flight_plans/versatile_flaps.xml"
    settings=" settings/tuning_ins.xml settings/tune_agr_climb.xml"
    gui_color="blue"

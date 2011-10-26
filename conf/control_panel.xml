@@ -24,6 +24,8 @@
       <arg flag="-h" constant="192.168.153.1"/>
       <arg flag="-p" constant="5000"/>
     </program>
+    <program name="IvySerialBridge" command="sw/ground_segment/tmtc/ivy_serial_bridge">
+    </program>
     <program name="GCS" command="sw/ground_segment/cockpit/gcs">
       <arg flag="-b" variable="ivy_bus"/>
       <arg flag="-layout" constant="./TUDelft/papgetsBart.xml"/>
@@ -72,6 +74,15 @@
       </program>
       <program name="Messages">
         <arg flag="-c" constant="telemetry"/>
+      </program>
+    </session>
+    <session name="Forward AC via UDP">
+      <program name="Ivy2Udp">
+        <arg flag="-b" constant="127:2010"/>
+        <arg flag="-h" constant="192.168.78.1"/>
+        <arg flag="-p" constant="4242"/>
+        <arg flag="-dp" constant="4243"/>
+        <arg flag="-id" constant="16"/>
       </program>
     </session>
     <session name="Debug Graphs">
@@ -161,8 +172,32 @@
         <arg flag="-norc"/>
       </program>
     </session>
+    <session name="Forward Skywalker to C172 over ttyUSB1">
+      <program name="IvySerialBridge">
+        <arg flag="8" constant="/dev/ttyUSB1"/>
+      </program>
+    </session>
+    <session name="Forward C172 to SkyWalker over ttyUSB1">
+      <program name="IvySerialBridge">
+        <arg flag="25" constant="/dev/ttyUSB1"/>
+      </program>
+    </session>
     <session name="Vision Results">
       <program name="Vision"/>
+    </session>
+    <session name="USB: 868MHz Transparant @ 9600">
+      <program name="Data Link">
+        <arg flag="-d" constant="/dev/ttyUSB0"/>
+        <arg flag="-uplink"/>
+        <arg flag="-s" constant="9600"/>
+      </program>
+      <program name="Server"/>
+      <program name="GCS">
+        <arg flag="-layout" constant="./TUDelft/gcsHeering.xml"/>
+      </program>
+      <program name="Messages">
+        <arg flag="-c" constant="telemetry"/>
+      </program>
     </session>
   </section>
 </control_panel>
