@@ -289,8 +289,11 @@ void read_port(void)
 {
   int i;
   static int counter = 0;
+  // Never ever read more than the available space
   int readsize = sizeof(remote_uav) - counter;
   int bytes = read(fd, buf_rx + counter, readsize);
+
+  // Init CRC
   unsigned char crc = 0;
 
   // printf("READ: %d bytes",bytes);
@@ -306,7 +309,28 @@ void read_port(void)
   {
     if (buf_rx[0] != '@')
     {
-      printf("Protocol Error\n");
+      int head = 0;
+      for (head=0; head<(sizeof(remote_uav)-1);head++)
+      {
+        if (buf_rx[head] == '@')
+        {
+          printf("Found header location %d\n",head);
+          break;
+        }
+      }
+      if (head<(sizeof(remote_uav)-1))
+      {
+        int movesize = (sizeof(remote_uav)-head);
+        memcpy(&buf_rx[0],&buf_rx[head],movesize );
+        printf("Moved %d bytes to the front\n",movesize);
+      }
+      else
+      {
+        printf("Header Not Found at All\n");
+      }
+      counter -= head;
+      return; 
+      // Wait for more data
     }
     for (i=0;i<(sizeof(remote_uav)-1);i++)
     {
