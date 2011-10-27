@@ -182,6 +182,25 @@
         <arg flag="8" constant="/dev/ttyUSB1"/>
       </program>
     </session>
+    <session name="Skywalker woensd">
+      <program name="Data Link">
+        <arg flag="-d" constant="/dev/ttyUSB0"/>
+        <arg flag="-transport" constant="xbee"/>
+        <arg flag="-uplink"/>
+        <arg flag="-s" constant="57600"/>
+      </program>
+      <program name="GCS">
+        <arg flag="-speech"/>
+        <arg flag="-layout" constant="./TUDelft/gcsHeering.xml"/>
+      </program>
+      <program name="Server">
+        <arg flag="-no_md5_check"/>
+      </program>
+      <program name="Messages"/>
+      <program name="IvySerialBridge">
+        <arg flag="8" constant="/dev/ttyUSB1"/>
+      </program>
+    </session>
     <session name="Vision Results">
       <program name="Vision"/>
     </session>
