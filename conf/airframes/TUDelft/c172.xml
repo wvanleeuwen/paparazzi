@@ -17,6 +17,7 @@
     <axis name="THROTTLE" failsafe_value="0"/>
     <axis name="ROLL"     failsafe_value="0"/>
     <axis name="PITCH"    failsafe_value="0"/>
+    <axis name="BRAKE"    failsafe_value="0"/>
   </commands>
 
   <rc_commands>
@@ -46,7 +47,7 @@
   <section name="INFRARED" prefix="IR_">
     <define name="ADC_IR1_NEUTRAL" value="512"/>
     <define name="ADC_IR2_NEUTRAL" value="512"/>
-    <define name="ADC_TOP_NEUTRAL" value="1024"/>
+    <define name="ADC_TOP_NEUTRAL" value="512"/>
 
     <define name="LATERAL_CORRECTION" value="0"/>
     <define name="LONGITUDINAL_CORRECTION" value="0"/>
@@ -146,6 +147,7 @@
 
 
   <modules>
+    <load name="infrared_adc.xml"/>
     <!-- load name="gps_ubx_ucenter.xml" / -->
   </modules>
 
@@ -160,7 +162,7 @@
     <subsystem name="radio_control" type="ppm"/>
 
     <!-- Communication -->
-    <subsystem name="telemetry" 	type="transparent">
+    <subsystem name="telemetry" 	type="xbee_api">
       <configure name="MODEM_BAUD" 		value="B9600"/>
     </subsystem>
 
