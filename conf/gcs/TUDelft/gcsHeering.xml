@@ -5,12 +5,7 @@
       <widget NAME="strips" SIZE="210"/>
       <widget NAME="aircraft"/>
     </rows>
-    <rows>
-      <widget NAME="map2d" >
-      </widget>
-    </rows>
-    <row>
+      <widget NAME="map2d" />
       <widget SIZE="45" name="altgraph"/>
-    </row>
   </columns>
 </layout>
