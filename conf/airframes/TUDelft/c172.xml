@@ -1,7 +1,8 @@
 <!DOCTYPE airframe SYSTEM "../airframe.dtd">
 
-<!-- YAPA + GPS
-     C172
+<!-- 
+    YAPA + ublox GPS
+    C172 No attitude
 -->
 
 <airframe name="C172">
