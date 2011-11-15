@@ -47,9 +47,9 @@
       <define name="GYRO_Q_SIGN" value="-1"/>
       <define name="GYRO_R_SIGN" value="-1"/>
 
-    <define name="GYRO_P_NEUTRAL" value="31948"/>
-    <define name="GYRO_Q_NEUTRAL" value="31834"/>
-    <define name="GYRO_R_NEUTRAL" value="32687"/>
+    <define name="GYRO_P_NEUTRAL" value="33330"/>
+    <define name="GYRO_Q_NEUTRAL" value="33100"/>
+    <define name="GYRO_R_NEUTRAL" value="31400"/>
 
     <define name="GYRO_P_SENS" value=" 1.101357422" integer="16"/>
     <define name="GYRO_Q_SENS" value=" 1.122670898" integer="16"/>
@@ -74,11 +74,11 @@
       <define name="MAG_X_CHAN" value="4"/>
       <define name="MAG_Y_CHAN" value="0"/>
       <define name="MAG_Z_CHAN" value="2"/>
-
-      <define name="MAG_45_HACK" value="1"/>
 -->
+      <define name="MAG_45_HACK" value="1"/>
+
       <define name="MAG_X_SIGN" value=" -1"/>
-      <define name="MAG_Y_SIGN" value=" 1"/>
+      <define name="MAG_Y_SIGN" value=" -1"/>
       <define name="MAG_Z_SIGN" value=" -1"/>
 
 <define name="MAG_X_NEUTRAL" value="23"/>
@@ -99,7 +99,7 @@
  <section name="AUTOPILOT">
    <define name="MODE_MANUAL" value="AP_MODE_ATTITUDE_DIRECT"/>
    <define name="MODE_AUTO1"  value="AP_MODE_ATTITUDE_Z_HOLD"/>
-   <define name="MODE_AUTO2"  value="AP_MODE_ATTITUDE_Z_HOLD"/>
+   <define name="MODE_AUTO2"  value="AP_MODE_HOVER_Z_HOLD"/>
  </section>
 
 <!--
@@ -190,22 +190,22 @@ AP_MODE_NAV
     <define name="PSI_DDGAIN"   value=" 300"/>
 
    </section>
-    <!--Rotterdam -->
+    <!--Rotterdam 
   <section name="AHRS" prefix="AHRS_">
     <define name="PROPAGATE_FREQUENCY" value="512"/>
     <define name="H_X" value=" 0.3913233"/>
     <define name="H_Y" value=" 0.0005934"/>
     <define name="H_Z" value=" 0.9202531"/>
   </section>
-       
-    <!--Antwerpen
+       -->
+    <!--Antwerpen -->  
   <section name="AHRS" prefix="AHRS_">
     <define name="PROPAGATE_FREQUENCY" value="512"/>
     <define name="H_X" value=" 0.4006406"/>
     <define name="H_Y" value=" 0.0008547"/>
     <define name="H_Z" value=" 0.9162349"/>
   </section>
-     -->      
+        
   <section name="INS" prefix="INS_">
     <define name="BARO_SENS" value="10." integer="16"/>
     <define name="UNTILT_ACCEL" value="1"/>

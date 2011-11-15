@@ -14,8 +14,8 @@ lat0="52.265039" lon0="9.994458" IMAV2010 oevenveld
 lat0="52.523886" lon0="10.463764" IMAV2010
 lat0="51.341192" lon0="3.242396" knokke heist
 lat0="49.870106" lon0="4.983287" gros fays
--->
-<flight_plan alt="50" ground_alt="-1" lat0="51.979506" lon0="4.390265" max_dist_from_home="2500" name="DelftVersatile" qfu="90" security_height="125">
+lat0="50.800944" lon0="4.663181" de kluis-->
+<flight_plan alt="50" ground_alt="-1" lat0="50.800944" lon0="4.663181" max_dist_from_home="2500" name="DelftVersatile" qfu="90" security_height="125">
   <header>
 #include "datalink.h"
 #include "subsystems/navigation/nav_line.h"

@@ -47,9 +47,9 @@
       <define name="GYRO_Q_SIGN" value="-1"/>
       <define name="GYRO_R_SIGN" value="-1"/>
 
-    <define name="GYRO_P_NEUTRAL" value="31948"/>
-    <define name="GYRO_Q_NEUTRAL" value="31834"/>
-    <define name="GYRO_R_NEUTRAL" value="32687"/>
+    <define name="GYRO_P_NEUTRAL" value="33330"/>
+    <define name="GYRO_Q_NEUTRAL" value="33100"/>
+    <define name="GYRO_R_NEUTRAL" value="31400"/>
 
     <define name="GYRO_P_SENS" value=" 1.101357422" integer="16"/>
     <define name="GYRO_Q_SENS" value=" 1.122670898" integer="16"/>

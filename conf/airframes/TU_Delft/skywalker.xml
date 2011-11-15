@@ -103,8 +103,8 @@
   </section>
 
   <section name="INS" prefix="INS_">
-    <define name="ROLL_NEUTRAL_DEFAULT" value="-0.205" unit="rad"/>
-    <define name="PITCH_NEUTRAL_DEFAULT" value="-0.232" unit="rad"/>
+    <define name="ROLL_NEUTRAL_DEFAULT" value="-0.186000004411" unit="rad"/>
+    <define name="PITCH_NEUTRAL_DEFAULT" value="-0.254000008106" unit="rad"/>
   </section>
 
   <section name="MISC">
@@ -130,25 +130,25 @@
     <define name="ALTITUDE_MAX_CLIMB" value="2."/>
 
     <!-- auto throttle inner loop -->
-    <define name="AUTO_THROTTLE_NOMINAL_CRUISE_THROTTLE" value="0.312000006437"/>
+    <define name="AUTO_THROTTLE_NOMINAL_CRUISE_THROTTLE" value="0.638000011444"/>
     <define name="AUTO_THROTTLE_MIN_CRUISE_THROTTLE" value="0.25"/>
     <define name="AUTO_THROTTLE_MAX_CRUISE_THROTTLE" value="0.65"/>
     <define name="AUTO_THROTTLE_LOITER_TRIM" value="1500"/>
     <define name="AUTO_THROTTLE_DASH_TRIM" value="-4000"/>
-    <define name="AUTO_THROTTLE_CLIMB_THROTTLE_INCREMENT" value="0.250999987125" unit="%/(m/s)"/>
+    <define name="AUTO_THROTTLE_CLIMB_THROTTLE_INCREMENT" value="0.207000002265" unit="%/(m/s)"/>
     <define name="AUTO_THROTTLE_PGAIN" value="-0.00700000021607"/>
     <define name="AUTO_THROTTLE_IGAIN" value="0.0309999994934"/>
-    <define name="AUTO_THROTTLE_PITCH_OF_VZ_PGAIN" value="0.171000003815"/>
+    <define name="AUTO_THROTTLE_PITCH_OF_VZ_PGAIN" value="0.256999999285"/>
 
     <define name="THROTTLE_SLEW_LIMITER" value="2" unit="s"/>
   </section>
 
   <section name="HORIZONTAL CONTROL" prefix="H_CTL_">
-    <define name="COURSE_PGAIN" value="-1.16799998283"/>
-    <define name="COURSE_DGAIN" value="0.280999988317"/>
-    <define name="COURSE_PRE_BANK_CORRECTION" value="1.0039999485"/>
+    <define name="COURSE_PGAIN" value="-1.06700003147"/>
+    <define name="COURSE_DGAIN" value="0.358999997377"/>
+    <define name="COURSE_PRE_BANK_CORRECTION" value="0.913999974728"/>
 
-    <define name="ROLL_MAX_SETPOINT" value="0.851999998093" unit="radians"/>
+    <define name="ROLL_MAX_SETPOINT" value="0.847999989986" unit="radians"/>
     <define name="PITCH_MAX_SETPOINT" value="0.5" unit="radians"/>
     <define name="PITCH_MIN_SETPOINT" value="-0.5" unit="radians"/>
 
@@ -208,7 +208,7 @@
 
   <firmware name="fixedwing">
 
-    <target name="ap" board="tiny_2.11" />
+    <target name="ap" board="tiny_2.11"/>
     <target name="sim" board="pc"/>
 
       <define name="STRONG_WIND"/>
@@ -230,7 +230,7 @@
     <!-- Sensors -->
     <subsystem name="navigation"/>
     <subsystem name="ins" type="xsens">
-      <configure name="XSENS_UART_NR" value="0" />
+      <configure name="XSENS_UART_NR" value="0"/>
     </subsystem>
 
 
