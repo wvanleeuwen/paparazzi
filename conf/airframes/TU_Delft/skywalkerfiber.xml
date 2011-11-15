@@ -53,24 +53,25 @@
 
 <!-- **************************** MODULES ********************************** --> 
   <modules>
-    <load name="light.xml">
+<!--    <load name="light.xml">
       <define name="LIGHT_LED_STROBE" value="3"/>
       <define name="LIGHT_LED_NAV" value="2"/>
       <define name="STROBE_LIGHT_MODE_DEFAULT" value="6"/>
       <define name="NAV_LIGHT_MODE_DEFAULT" value="4"/>
     </load>
+-->
 
 <!--    <load name="digital_cam_i2c.xml"/>  -->
   <!--    <load name="ins_ppzuavimu.xml"/>  -->
     <load name="digital_cam.xml">
-      <define name="DC_SHUTTER_LED" value="2"/>
+      <define name="DC_SHUTTER_LED" value="3"/>
     </load>
   </modules>
 
 <!-- ***************************** SERVOS ********************************** --> 
   <servos>
     <!-- Define here to which CONNECTOR NUMBER the servo is connected to, on the autopilot cicuit board -->
-    <servo name="THROTTLE"      no="9" min="1100" neutral="1100" max="1900"/>
+    <servo name="THROTTLE"      no="9" min="1000" neutral="1000" max="2000"/>
     <servo name="AILERON_LEFT"  no="4" min="1000" neutral="1500" max="2000"/>
     <servo name="AILERON_RIGHT" no="8" min="1000" neutral="1500" max="2000"/>
     <servo name="ELEVATOR"      no="5" min="1900" neutral="1500" max="1100"/>
@@ -178,10 +179,11 @@
     <define name="GYRO_Q_NEUTRAL" value="0"/>
     <define name="GYRO_R_NEUTRAL" value="0"/>
 
-    <!-- SENS = 14.375 LSB/(deg/sec) * 57.6 deg/rad = 828 LSB/rad/sec / 12bit FRAC: 4096 / 828 -->
-    <define name="GYRO_P_SENS" value="4.947" integer="16"/>
-    <define name="GYRO_Q_SENS" value="4.947" integer="16"/>
-    <define name="GYRO_R_SENS" value="4.947" integer="16"/>
+    <!-- ITG3200: SENS = 14.375 LSB/(deg/sec) * 57.6 deg/rad = 828 LSB/rad/sec / 12bit FRAC: 4096 / 828 -->
+    <!-- IMU3000: SENS = 16.4 LSB/(deg/sec) * 57.6 deg/rad = 828 LSB/rad/sec / 12bit FRAC: 4096 / 828 -->
+    <define name="GYRO_P_SENS" value="4.336" integer="16"/>
+    <define name="GYRO_Q_SENS" value="4.336" integer="16"/>
+    <define name="GYRO_R_SENS" value="4.336" integer="16"/>
 
     <define name="GYRO_P_Q" value="0."/>
     <define name="GYRO_P_R" value="0"/>
@@ -191,12 +193,12 @@
     <define name="GYRO_R_Q" value="0."/>
 
     <define name="GYRO_P_SIGN" value="1"/>
-    <define name="GYRO_Q_SIGN" value="1"/>
-    <define name="GYRO_R_SIGN" value="1"/>
+    <define name="GYRO_Q_SIGN" value="-1"/>
+    <define name="GYRO_R_SIGN" value="-1"/>
 
-    <define name="ACCEL_X_NEUTRAL" value="-14"/>
-    <define name="ACCEL_Y_NEUTRAL" value="0"/>
-    <define name="ACCEL_Z_NEUTRAL" value="0"/>
+    <define name="ACCEL_X_NEUTRAL" value="-12"/>
+    <define name="ACCEL_Y_NEUTRAL" value="+3"/>
+    <define name="ACCEL_Z_NEUTRAL" value="-30"/>
 
     <!-- SENS = 256 LSB/g @ 2.5V [X&Y: 265 LSB/g @ 3.3V] / 9.81 ms2/g = 26.095 LSB/ms2 / 10bit FRAC: 1024 / 26.095 for z and 1024 / 27.01 for X&Y -->
     <define name="ACCEL_X_SENS" value="37.9" integer="16"/>
@@ -204,8 +206,8 @@
     <define name="ACCEL_Z_SENS" value="39.24" integer="16"/>
 
     <define name="ACCEL_X_SIGN" value="1"/>
-    <define name="ACCEL_Y_SIGN" value="1"/>
-    <define name="ACCEL_Z_SIGN" value="1"/>
+    <define name="ACCEL_Y_SIGN" value="-1"/>
+    <define name="ACCEL_Z_SIGN" value="-1"/>
 
     <define name="MAG_X_NEUTRAL" value="0"/>
     <define name="MAG_Y_NEUTRAL" value="0"/>
@@ -230,6 +232,10 @@
   </section>
 
   <section name="MISC">
+
+    <define name="COMMAND_ROLL_TRIM" value="1" />
+    <define name="COMMAND_PITCH_TRIM" value="-1" />
+
     <define name="NOMINAL_AIRSPEED" value="17." unit="m/s"/>
     <define name="CARROT" value="5." unit="s"/>
     <define name="CONTROL_RATE" value="60" unit="Hz"/>

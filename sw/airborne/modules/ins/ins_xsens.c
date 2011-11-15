@@ -71,11 +71,11 @@ INS_FORMAT ins_mz;
 float ins_pitch_neutral;
 float ins_roll_neutral;
 
-volatile uint8_t new_ins_attitude;
+//volatile uint8_t new_ins_attitude;
 
 #include "subsystems/imu.h"
 
-void imu_init(void)
+void ahrs_init(void)
 {
   ins_init();
 }

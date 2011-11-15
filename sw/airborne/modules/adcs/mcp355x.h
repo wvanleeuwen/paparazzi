@@ -1,6 +1,5 @@
-/*  $Id$
- *
- * (c) 2006 Pascal Brisset, Antoine Drouin
+/*
+ * Copyright (C) 2011 Gautier Hattenberger
  *
  * This file is part of paparazzi.
  *
@@ -21,23 +20,12 @@
  *
  */
 
-/** \file commands.c
- *  \brief Hardware independent data structures for commands handling
- *
+/* driver for MCP3550/1/3 (Module wrapper)
  */
 
-#include "commands.h"
+#ifndef MCP355X_MODULE_H
+#define MCP355X_MODULE_H
 
-#ifndef COMMAND_ROLL_TRIM
-#define COMMAND_ROLL_TRIM 0
+#include "peripherals/mcp355x.h"
+
 #endif
-
-#ifndef COMMAND_PITCH_TRIM
-#define COMMAND_PITCH_TRIM 0
-#endif
-
-pprz_t command_roll_trim = COMMAND_ROLL_TRIM;
-pprz_t command_pitch_trim = COMMAND_PITCH_TRIM;
-
-pprz_t commands[COMMANDS_NB];
-const pprz_t commands_failsafe[COMMANDS_NB] = COMMANDS_FAILSAFE;
