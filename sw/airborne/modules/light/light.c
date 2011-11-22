@@ -24,7 +24,6 @@
 
 #include "light.h"
 #include "led.h"
-#include "generated/airframe.h"
 
 uint8_t strobe_light_mode;
 uint8_t nav_light_mode;

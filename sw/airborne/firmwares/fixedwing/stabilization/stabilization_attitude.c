@@ -193,23 +193,51 @@ void h_ctl_course_loop ( void ) {
        (estimator_hspeed_mod < reference_advance)  // Small path speed is due to wind (small groundspeed)
      )
   {
+/*
+    // rough crabangle approximation
+    float wind_mod = sqrt(wind_east*wind_east + wind_north*wind_north);
+    float wind_dir = atan2(wind_east,wind_north);
+
+    float wind_course = h_ctl_course_setpoint - wind_dir;
+    NormRadAngle(wind_course);
+
+    estimator_hspeed_dir = estimator_psi;
+
+    float crab = sin(wind_dir-estimator_psi) * atan2(wind_mod,NOMINAL_AIRSPEED);
+    //crab = estimator_hspeed_mod - estimator_psi;
+    NormRadAngle(crab);
+*/
+
     // Heading error
     float herr = estimator_psi - h_ctl_course_setpoint; //+crab);
     NormRadAngle(herr);
 
-    if (advance < -0.5)              //<! moving in the wrong direction use heading only to steer
+    if (advance < -0.5)              //<! moving in the wrong direction / big > 90 degree turn
     {
       err = herr;
     }
-    else if (advance < 0.)           //<! linearly reduce the phi command when not moving to avoid bang-bang
+    else if (advance < 0.)           //<!
     {
       err = (-advance)*2. * herr;
     }
-    else		    	     //<! linearly reduce the gps_track command when not moving to avoid bang-bang
+    else
     {
       err = advance * err;
     }
+
+    // Reset differentiator when switching mode
+    //if (h_ctl_course_heading_mode == 0)
+    //  last_err = err;
+    //h_ctl_course_heading_mode = 1;
   }
+/*  else
+  {
+    // Reset differentiator when switching mode
+    if (h_ctl_course_heading_mode == 1)
+      last_err = err;
+    h_ctl_course_heading_mode = 0;
+  }
+*/
 #endif
 
   float d_err = err - last_err;

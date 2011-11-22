@@ -1814,9 +1814,9 @@
     <field name="ref_alt" type="float"></field>
   </message>
 
-  <message name="ONBOARDCAM" id="235">
-    <field name="est_phi" type="uint16"></field>
-    <field name="est_theta" type="uint16"></field>
+  <message name="VISUALTARGET" id="235">
+    <field name="x" type="uint16"></field>
+    <field name="y" type="uint16"></field>
   </message>
 
  <!--236 is free -->
