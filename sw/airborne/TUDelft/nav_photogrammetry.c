@@ -46,8 +46,8 @@ float ytop_low;
 // Calculate sine and cosine for rotation and Translation in x and y between World and Photogrammetry coordinates (usage depends on direction!!)
 float T_sin;
 float T_cos;
-float TransX; 
-float TransY; 
+float TransX;
+float TransY;
 
 static void Rot_Trans_Init(float Zrot, uint8_t wp1)
 {
@@ -58,7 +58,7 @@ static void Rot_Trans_Init(float Zrot, uint8_t wp1)
 }
 
 
-static void TranslateAndRotateFromPhotogrammetrytoWorld(struct XYPoint *p, float transX, float transY) 
+static void TranslateAndRotateFromPhotogrammetrytoWorld(struct XYPoint *p, float transX, float transY)
 {
 	float temp;
 
@@ -70,7 +70,7 @@ static void TranslateAndRotateFromPhotogrammetrytoWorld(struct XYPoint *p, float
 	p->y = p->y + transY;
 }
 
-static void TranslateAndRotateFromWorldtoPhotogrammetry(struct XYPoint *p, float transX, float transY) 
+static void TranslateAndRotateFromWorldtoPhotogrammetry(struct XYPoint *p, float transX, float transY)
 {
 	float temp;
 
@@ -85,8 +85,8 @@ static void TranslateAndRotateFromWorldtoPhotogrammetry(struct XYPoint *p, float
 bool_t  nav_photogrammetry_init(uint8_t wp1, float _photogrammetry_overlap, float photogrammetry_sidelap, float _wind_threshold, bool_t new_block)
 {
   // Eerst 4 punten inlezen (Photo_to, Photo_from, Top_1 en Top_2)
-  // Photogrammetry flightline direction is de baseline Photo_from --> Photo_to 
-  // Daarna, met sidelap zoals bepaald, vlieglijnen beide kanten op laten vliegen  
+  // Photogrammetry flightline direction is de baseline Photo_from --> Photo_to
+  // Daarna, met sidelap zoals bepaald, vlieglijnen beide kanten op laten vliegen
   // De vlieglijnen worden aangepast aan de 'zijkanten' van het gebied, van photo_from/to naar de dichtstbijzijnde top
   // Als een van beide toppen verder van de baseline ligt dan de ander, wordt de lengte van de vliegpaden aangepast
   // Hiermee heb je vanaf grondstation invloed op vliegrichting en gebiedsgrens (handmatig afstemmen windrichting)!!
@@ -98,10 +98,10 @@ bool_t  nav_photogrammetry_init(uint8_t wp1, float _photogrammetry_overlap, floa
   photogrammetry_height = waypoints[wp1].a;
   struct XYPoint Base2;
   Base2.x = waypoints[wp1+1].x;
-  Base2.y = waypoints[wp1+1].y;  
+  Base2.y = waypoints[wp1+1].y;
   struct XYPoint Top;
   Top.x = waypoints[wp1+2].x;
-  Top.y = waypoints[wp1+2].y; 
+  Top.y = waypoints[wp1+2].y;
   struct XYPoint Top2;
   Top2.x = waypoints[wp1+3].x;
   Top2.y = waypoints[wp1+3].y;
@@ -109,7 +109,7 @@ bool_t  nav_photogrammetry_init(uint8_t wp1, float _photogrammetry_overlap, floa
   struct XYPoint Top_to;
 
    // Determine offset and rotation between photogrammetry and world coordinates
-  flight_lines_direction = atan2(Base2.y-Base1.y,Base2.x-Base1.x); 
+  flight_lines_direction = atan2(Base2.y-Base1.y,Base2.x-Base1.x);
   Rot_Trans_Init(flight_lines_direction, wp1);
 
   //Determine local coordinates for Base2, Top and Top2;
@@ -119,7 +119,7 @@ bool_t  nav_photogrammetry_init(uint8_t wp1, float _photogrammetry_overlap, floa
 
   if(Top.x < Top2.x)
    {
-    Top_from = Top; 
+    Top_from = Top;
     Top_to = Top2;
    }
   else
@@ -127,7 +127,7 @@ bool_t  nav_photogrammetry_init(uint8_t wp1, float _photogrammetry_overlap, floa
     Top_from = Top2;
     Top_to = Top;
    }
-   
+
   float minimum_top_distance = 300;
 
   if(fabs(Top_from.x - Top_to.x) < minimum_top_distance)
@@ -140,7 +140,7 @@ bool_t  nav_photogrammetry_init(uint8_t wp1, float _photogrammetry_overlap, floa
    {
      vertical_sign = -1.0;
    }
-  else 
+  else
    {
      vertical_sign = 1.0;
    }
@@ -162,7 +162,7 @@ bool_t  nav_photogrammetry_init(uint8_t wp1, float _photogrammetry_overlap, floa
      top_step = 0;
     else
      top_step = (Top_to.x - (Top_from.x + minimum_top_distance)) / (Top_to.y - Top_from.y);
-   }  
+   }
   else
    {
     ymax = Top_to.y;
@@ -177,40 +177,40 @@ bool_t  nav_photogrammetry_init(uint8_t wp1, float _photogrammetry_overlap, floa
   // Photogrammetry
   photogrammetry_overlap = _photogrammetry_overlap;
   wind_threshold = _wind_threshold;
-  
-  
+
+
 
   if(new_block)
    {
     photo_lines_completed = 0;
-    block_status = ENTRY; 
+    block_status = ENTRY;
     final_line = FALSE;
    }
   else if(block_status == LINE_HEAD)
    block_status = ENTRY;
   else if(block_status == LINE_TAIL || block_status == RETURN)
    block_status = RETURN;
-  else 
+  else
    block_status = ENTRY;
 
-  LINE_STOP_FUNCTION; 
+  LINE_STOP_FUNCTION;
   return FALSE;
 }
 
 bool_t nav_photogrammetry(){
-  
+
     struct XYPoint temp1;
     struct XYPoint temp2;
     struct XYPoint position_photogrammetry;
 
     switch(block_status){
-   
-    case ENTRY: 
+
+    case ENTRY:
       temp1.y = photo_lines_completed * photogrammetry_sidestep + photogrammetry_radius;
       temp1.x = photogrammetry_bb_offset + temp1.y * from_step;
       temp2.y = (photo_lines_completed * photogrammetry_sidestep);
       temp2.x = photogrammetry_bb_offset + temp1.y * from_step;
-      
+
       if(fabs(temp1.y) > fabs(ytop_low) && top_from_below_to == TRUE)
        {
         temp1.x = fabs(ytop_low) * from_step + fabs(temp1.y-ytop_low)*top_step + photogrammetry_bb_offset;
@@ -223,10 +223,10 @@ bool_t nav_photogrammetry(){
       if( fabs(estimator_x - temp2.x)<10 && fabs(estimator_y - temp2.y)<10)
        {
           block_status = LINE_HEAD;
-          LINE_START_FUNCTION; 
+          LINE_START_FUNCTION;
        }
       break;
-    
+
     case LINE_HEAD:
       temp1.y = (photo_lines_completed * photogrammetry_sidestep);
       temp1.x = photogrammetry_bb_offset + temp1.y * from_step;
@@ -236,17 +236,17 @@ bool_t nav_photogrammetry(){
        }
       temp2.y = (photo_lines_completed * photogrammetry_sidestep);
       temp2.x = xmax - photogrammetry_bb_offset + temp2.y * to_step;
-  
+
       if(fabs(temp2.y) > fabs(ytop_low) && top_from_below_to == FALSE)
        {
-        temp2.x = xmax + ytop_low * to_step - photogrammetry_bb_offset + fabs(temp2.y-ytop_low) * top_step; 
+        temp2.x = xmax + ytop_low * to_step - photogrammetry_bb_offset + fabs(temp2.y-ytop_low) * top_step;
        }
       position_photogrammetry.x = estimator_x;
       position_photogrammetry.y = estimator_y;
 
-      TranslateAndRotateFromWorldtoPhotogrammetry(&position_photogrammetry, TransX, TransY); 
+      TranslateAndRotateFromWorldtoPhotogrammetry(&position_photogrammetry, TransX, TransY);
       TranslateAndRotateFromPhotogrammetrytoWorld(&temp1, TransX, TransY);
-      TranslateAndRotateFromPhotogrammetrytoWorld(&temp2, TransX, TransY);   
+      TranslateAndRotateFromPhotogrammetrytoWorld(&temp2, TransX, TransY);
 
       nav_route_xy(temp1.x, temp1.y, temp2.x, temp2.y);
       if(nav_approaching_xy(temp2.x, temp2.y, temp1.x, temp1.y, 0))
@@ -269,11 +269,11 @@ bool_t nav_photogrammetry(){
           photo_lines_completed = photo_lines_completed + 4;
           block_status = RETURN;
          }
-        else 
+        else
          {
           photo_lines_completed = photo_lines_completed + 5;
           block_status = RETURN;
-         }    
+         }
 
       }
       break;
@@ -281,9 +281,9 @@ bool_t nav_photogrammetry(){
     case RETURN:
       temp1.y = (photo_lines_completed * photogrammetry_sidestep)  - photogrammetry_radius;
       temp1.x = xmax - photogrammetry_bb_offset + temp1.y * to_step;
-      temp2.y = (photo_lines_completed * photogrammetry_sidestep); 
+      temp2.y = (photo_lines_completed * photogrammetry_sidestep);
       temp2.x = xmax - photogrammetry_bb_offset + temp1.y * to_step;
-      
+
       if((fabs(temp1.y) -fabs(photogrammetry_radius)) > fabs(ytop_low) && //7dec: bij fabs(temp1.y) - halve radius weggehaald
          top_from_below_to == FALSE)
        {
@@ -300,32 +300,32 @@ bool_t nav_photogrammetry(){
        {
          block_status = LINE_TAIL;
 
-        LINE_START_FUNCTION; 
+        LINE_START_FUNCTION;
        }
       break;
-    
+
     case LINE_TAIL:
       temp1.y = (photo_lines_completed * photogrammetry_sidestep);
       temp2.y = temp1.y;
       temp1.x = xmax - photogrammetry_bb_offset + temp1.y * to_step;
       temp2.x = photogrammetry_bb_offset + (temp2.y - photogrammetry_radius) * from_step;
-      
+
       if(fabs(temp1.y) > fabs(ytop_low) && top_from_below_to == FALSE)
        {
         temp1.x = xmax + ytop_low * to_step - photogrammetry_bb_offset + fabs(temp1.y-ytop_low) * top_step;
        }
-           
+
       if(fabs(temp2.y) > fabs(ytop_low) && top_from_below_to == TRUE)
        {
         temp2.x = fabs(ytop_low) * from_step + fabs(temp1.y-ytop_low) * top_step + photogrammetry_bb_offset;
        }
-         
+
       TranslateAndRotateFromPhotogrammetrytoWorld(&temp1, TransX, TransY);
       TranslateAndRotateFromPhotogrammetrytoWorld(&temp2, TransX, TransY);
 
       nav_route_xy(temp1.x, temp1.y, temp2.x, temp2.y);
       if(nav_approaching_xy(temp2.x, temp2.y, temp1.x, temp1.y, 0))
-      { 
+      {
        LINE_STOP_FUNCTION;
        if(final_line == TRUE)
         {
@@ -333,9 +333,9 @@ bool_t nav_photogrammetry(){
         }
        else if(photo_lines_completed == 3)
         photo_lines_completed = photo_lines_completed -2;
-       else 
+       else
         photo_lines_completed = photo_lines_completed -3;
-       
+
        block_status = ENTRY;
       }
       break;
@@ -356,8 +356,8 @@ bool_t nav_photogrammetry(){
 
        nav_circle_XY(temp1.x, temp1.y, -photogrammetry_radius);
        if( fabs(estimator_x - temp2.x)<10 && fabs(estimator_y - temp2.y)<10)
-        { 
-         LINE_START_FUNCTION; 
+        {
+         LINE_START_FUNCTION;
          block_status = LINE_HEAD;
         }
        break; */
@@ -386,7 +386,7 @@ bool_t  nav_photogrammetry_init_extra(uint8_t wp1, uint8_t nr_of_wp, float _phot
   xmax = -1e20;
   ymin = 1e20;
   ymax = -1e20;
- 
+
   // Determine Area of Interest (AoI) coordinates in Photogrammetry coordinates
   for(i=0;(i<nr_of_wp) ;i++) //&& ((wp1+i) < NB_WAYPOINT)
   {
@@ -403,11 +403,11 @@ bool_t  nav_photogrammetry_init_extra(uint8_t wp1, uint8_t nr_of_wp, float _phot
       ymin = temp.y - block_margin;
     if (temp.y > ymax)
       ymax = temp.y + block_margin;
-  } 
+  }
 
   if( (ymax-ymin) < 100) //flight lines are at least 100 metres long
     ymax =  ymin + 100;
-  
+
   if(new_block)
     photo_lines_completed = 0;
 
@@ -415,7 +415,7 @@ bool_t  nav_photogrammetry_init_extra(uint8_t wp1, uint8_t nr_of_wp, float _phot
   weak_wind = TRUE;
   if(wind_east * wind_east + wind_north * wind_north > wind_threshold * wind_threshold)
   {
-    weak_wind = FALSE; 
+    weak_wind = FALSE;
   }
 
   pre_photogrammetry_position.x = estimator_x;
@@ -436,7 +436,7 @@ bool_t  nav_photogrammetry_init_extra(uint8_t wp1, uint8_t nr_of_wp, float _phot
     {
       left_corner.x = temp.x;
       left_corner.y = temp.y;
-    }    
+    }
     else if(fabs(temp.x -(xmax - block_margin))<5)
     {
       right_corner.x = temp.x;
@@ -452,21 +452,21 @@ bool_t  nav_photogrammetry_init_extra(uint8_t wp1, uint8_t nr_of_wp, float _phot
       top_corner.x = temp.x;
       top_corner.y = temp.y;
     }
-  } 
- 
+  }
+
  return FALSE;
 }
 */
 
 /*
 // NAV_PHOTOGRAMMETRY_TRI_BB covers a rectangular area described by the bounding box around a triangle,
-// defined by BASE_FROM, BASE_TO and TOP. Flight lines are parallel to and start from BASE_FROM to BASE_TO. 
+// defined by BASE_FROM, BASE_TO and TOP. Flight lines are parallel to and start from BASE_FROM to BASE_TO.
 // The AC will not cross the line BASE_FROM to BASE_TO and as such this can be used as a limit (in case of highway, etc).
 
 bool_t  nav_photogrammetry_init_tri_bb(uint8_t wp1, float _photogrammetry_overlap, float photogrammetry_sidelap, float _wind_threshold, bool_t new_block)
 {
   // Eerst 3 punten inlezen (Base1, Base2 en Top)
-  // Photogrammetry flightdirection is Base1 - Base2 
+  // Photogrammetry flightdirection is Base1 - Base2
   // Daarna, met sidelap zoals bepaald, vlieglijnen verleggen richting Top
   // Hoogte = hoogte van Base1
   // Hiermee heb je vanaf grondstation invloed op vliegrichting (handmatig afstemmen op omgeving&windrichting)!!
@@ -478,17 +478,17 @@ bool_t  nav_photogrammetry_init_tri_bb(uint8_t wp1, float _photogrammetry_overla
   photogrammetry_height = waypoints[wp1].a;
   struct XYPoint Base2;
   Base2.x = waypoints[wp1+1].x;
-  Base2.y = waypoints[wp1+1].y;  
+  Base2.y = waypoints[wp1+1].y;
   struct XYPoint Top;
   Top.x = waypoints[wp1+2].x;
-  Top.y = waypoints[wp1+2].y;  
+  Top.y = waypoints[wp1+2].y;
 
   flight_lines_direction = atan2(Base1.y-Base2.y,Base2.x-Base1.x);
   // Determine offset and rotation between photogrammetry and world coordinates
   Rot_Trans_Init(flight_lines_direction, wp1);
 
   //Determine local coordinates for Base2 and Top ==> gives limits for photogrammetry coordinates
-  
+
   TranslateAndRotateFromWorldtoPhotogrammetry(&Base2, TransX, TransY);
   TranslateAndRotateFromWorldtoPhotogrammetry(&Top, TransX, TransY);
 
@@ -499,7 +499,7 @@ bool_t  nav_photogrammetry_init_tri_bb(uint8_t wp1, float _photogrammetry_overla
      vertical_sign = -1.0;
      flight_line_correction = 0.0;
    }
-  else 
+  else
    {
      vertical_sign = 1.0;
      flight_line_correction = 180.0;
@@ -514,20 +514,20 @@ bool_t  nav_photogrammetry_init_tri_bb(uint8_t wp1, float _photogrammetry_overla
   ymax = Top.y;
 
   // Photogrammetry
-  
+
   photogrammetry_overlap = _photogrammetry_overlap;
   wind_threshold = _wind_threshold;
 
-  
+
   if(new_block)
     photo_lines_completed = 0;
 
-  block_status = PRE_ENTRY; 
+  block_status = PRE_ENTRY;
   return FALSE;
 }
 
 bool_t nav_photogrammetry_tri_bb(){
-  
+
     struct XYPoint temp1;
     struct XYPoint temp2;
     struct XYPoint position_photogrammetry;
@@ -545,9 +545,9 @@ bool_t nav_photogrammetry_tri_bb(){
        nav_circle_XY(temp1.x, temp1.y, -photogrammetry_radius);
        if( nav_in_circle && NavQdrCloseTo(DegOfRad(flight_lines_direction)-flight_line_correction))
          block_status = LINE_HEAD;
-       break; 
-   
-    case ENTRY: 
+       break;
+
+    case ENTRY:
       temp1.x = fabs(photogrammetry_radius);
       temp1.y = photo_lines_completed * photogrammetry_sidestep + photogrammetry_radius;
       TranslateAndRotateFromPhotogrammetrytoWorld(&temp1, TransX, TransY);
@@ -556,10 +556,10 @@ bool_t nav_photogrammetry_tri_bb(){
       if( nav_in_circle && NavQdrCloseTo(DegOfRad(flight_lines_direction)-flight_line_correction))
        {
           block_status = LINE_HEAD;
-          LINE_START_FUNCTION; 
+          LINE_START_FUNCTION;
        }
       break;
-    
+
     case LINE_HEAD:
       temp1.x = fabs(photogrammetry_radius) +10;
       temp1.y = (photo_lines_completed * photogrammetry_sidestep);
@@ -568,9 +568,9 @@ bool_t nav_photogrammetry_tri_bb(){
       position_photogrammetry.x = estimator_x;
       position_photogrammetry.y = estimator_y;
 
-      TranslateAndRotateFromWorldtoPhotogrammetry(&position_photogrammetry, TransX, TransY); 
+      TranslateAndRotateFromWorldtoPhotogrammetry(&position_photogrammetry, TransX, TransY);
       TranslateAndRotateFromPhotogrammetrytoWorld(&temp1, TransX, TransY);
-      TranslateAndRotateFromPhotogrammetrytoWorld(&temp2, TransX, TransY);   
+      TranslateAndRotateFromPhotogrammetrytoWorld(&temp2, TransX, TransY);
 
       nav_route_xy(temp1.x, temp1.y, temp2.x, temp2.y);
       if(nav_approaching_xy(temp2.x, temp2.y, temp1.x, temp1.y, 0))
@@ -580,7 +580,7 @@ bool_t nav_photogrammetry_tri_bb(){
         LINE_STOP_FUNCTION;
         photo_lines_completed++;
         block_status = RETURN;
-     
+
       }
       break;
 
@@ -594,7 +594,7 @@ bool_t nav_photogrammetry_tri_bb(){
       if( nav_in_circle && NavQdrCloseTo(DegOfRad(flight_lines_direction + flight_line_correction - 180)))
        {
         block_status = LINE_TAIL;
-        LINE_START_FUNCTION; 
+        LINE_START_FUNCTION;
        }
       break;
 
@@ -607,7 +607,7 @@ bool_t nav_photogrammetry_tri_bb(){
       position_photogrammetry.y = estimator_y;
 
       TranslateAndRotateFromWorldtoPhotogrammetry(&position_photogrammetry, TransX, TransY);
-         
+
       TranslateAndRotateFromPhotogrammetrytoWorld(&temp1, TransX, TransY);
       TranslateAndRotateFromPhotogrammetrytoWorld(&temp2, TransX, TransY);
 
@@ -630,17 +630,17 @@ bool_t nav_photogrammetry_tri_bb(){
 
 nav_photogrammetry function: runs the photo acquisition sequence:
 Consists of 4(+1) parts:
-- PRE_ENTRY: fly to point 'below' photogrammetry block to guarantee correct entrance 
+- PRE_ENTRY: fly to point 'below' photogrammetry block to guarantee correct entrance
 - ENTRY: turn upwind to photo-line (switch to next stage when heading within 10 degrees, start taking pictures)
 - LINE_HEAD: upwind line ( switch to next stage when fully completed, stop taking pictures ...
   turn to downwind in weak wind and start taking pictures, else switch to entry for next upwind line.
 - RETURN: turn downwind for photo line (switch to next stage when heading within 10 degrees, start taking pictures )
 - LINE_TAIL: downwind line (switch to next stage when fully completed, stop taking pictures)
 
-nog opnemen: boundary lines om AoI weer te geven 
+nog opnemen: boundary lines om AoI weer te geven
 
 bool_t nav_photogrammetry(){
-  
+
     struct XYPoint temp1;
     struct XYPoint temp2;
     struct XYPoint position_photogrammetry;
@@ -649,15 +649,15 @@ bool_t nav_photogrammetry(){
 
     case PRE_ENTRY:
        temp1.x = xmin + (photo_lines_completed * photogrammetry_sidestep) + photogrammetry_radius;
-       temp1.y = ymin - 2 * photogrammetry_radius; 
+       temp1.y = ymin - 2 * photogrammetry_radius;
        TranslateAndRotateFromPhotogrammetrytoWorld(&temp1, TransX, TransY);
-       
+
        nav_route_xy(pre_photogrammetry_position.x, pre_photogrammetry_position.y, temp1.x, temp1.y);
        if( nav_approaching_xy(temp1.x, temp1.y, pre_photogrammetry_position.x, pre_photogrammetry_position.y, 0))
           block_status = ENTRY;
-    break;   
+    break;
 
-    case ENTRY: 
+    case ENTRY:
       temp1.x = xmin + (photo_lines_completed * photogrammetry_sidestep) + photogrammetry_radius;
       temp1.y = ymin;
       TranslateAndRotateFromPhotogrammetrytoWorld(&temp1, TransX, TransY);
@@ -666,7 +666,7 @@ bool_t nav_photogrammetry(){
       if( NavQdrCloseTo(DegOfRad(photogrammetry_wind_direction)-180))
           block_status = LINE_HEAD;
       break;
-    
+
     case LINE_HEAD:
       temp1.x = xmin + (photo_lines_completed * photogrammetry_sidestep);
       temp1.y = ymin;
@@ -679,7 +679,7 @@ bool_t nav_photogrammetry(){
       TranslateAndRotateFromWorldtoPhotogrammetry(&position_photogrammetry, TransX, TransY);
 
       if(position_photogrammetry.y > ymin)
-        LINE_START_FUNCTION;     
+        LINE_START_FUNCTION;
 
       nav_route_xy(temp1.x, temp1.y, temp2.x, temp2.y);
       if(nav_approaching_xy(temp2.x, temp2.y, temp1.x, temp1.y, 0))
@@ -689,7 +689,7 @@ bool_t nav_photogrammetry(){
         if(weak_wind)
           block_status = RETURN;
         else
-          block_status = ENTRY; 
+          block_status = ENTRY;
         //A block consists of a minimum of 3 flight lines and is completed if xmax is reached
         if((xmin + (photo_lines_completed * photogrammetry_sidestep) > xmax) && (photo_lines_completed >3))
           return FALSE;
@@ -718,7 +718,7 @@ bool_t nav_photogrammetry(){
       TranslateAndRotateFromWorldtoPhotogrammetry(&position_photogrammetry, TransX, TransY);
 
       if(position_photogrammetry.y < ymax)
-        LINE_START_FUNCTION;  
+        LINE_START_FUNCTION;
 
       nav_route_xy(temp1.x, temp1.y, temp2.x, temp2.y);
       if(nav_approaching_xy(temp2.x, temp2.y, temp1.x, temp1.y, 0))
@@ -736,7 +736,7 @@ bool_t nav_photogrammetry(){
 }
 
 bool_t nav_photogrammetry2(){
-  
+
     struct XYPoint temp1;
     struct XYPoint temp2;
     struct XYPoint position_photogrammetry;
@@ -745,15 +745,15 @@ bool_t nav_photogrammetry2(){
 
     case PRE_ENTRY:
        temp1.x = xmin + (photo_lines_completed * photogrammetry_sidestep) + photogrammetry_radius;
-       temp1.y = ymin - 2 * photogrammetry_radius;  
+       temp1.y = ymin - 2 * photogrammetry_radius;
        TranslateAndRotateFromPhotogrammetrytoWorld(&temp1, TransX, TransY);
-       
+
        nav_route_xy(pre_photogrammetry_position.x, pre_photogrammetry_position.y, temp1.x, temp1.y);
        if( nav_approaching_xy(temp1.x, temp1.y, pre_photogrammetry_position.x, pre_photogrammetry_position.y, 0))
           block_status = ENTRY;
-    break;   
+    break;
 
-    case ENTRY: 
+    case ENTRY:
       temp1.x = xmin + (photo_lines_completed * photogrammetry_sidestep) + photogrammetry_radius;
       if(temp1.x < bottom_corner.x)
         temp1.y = (ymin + ((bottom_corner.x - temp1.x) * (tan(-photogrammetry_wind_direction))));
@@ -765,7 +765,7 @@ bool_t nav_photogrammetry2(){
       if( NavQdrCloseTo(DegOfRad(photogrammetry_wind_direction)-180))
           block_status = LINE_HEAD;
       break;
-    
+
     case LINE_HEAD:
       temp1.x = xmin + (photo_lines_completed * photogrammetry_sidestep);
       if(temp1.x < bottom_corner.x)
@@ -784,7 +784,7 @@ bool_t nav_photogrammetry2(){
       TranslateAndRotateFromWorldtoPhotogrammetry(&position_photogrammetry, TransX, TransY);
 
       if(position_photogrammetry.y > ymin)
-        LINE_START_FUNCTION;     
+        LINE_START_FUNCTION;
 
       nav_route_xy(temp1.x, temp1.y, temp2.x, temp2.y);
       if(nav_approaching_xy(temp2.x, temp2.y, temp1.x, temp1.y, 0))
@@ -794,7 +794,7 @@ bool_t nav_photogrammetry2(){
         if(weak_wind)
           block_status = RETURN;
         else
-          block_status = ENTRY; 
+          block_status = ENTRY;
         //A block consists of a minimum of 3 flight lines and is completed if xmax is reached
         if((xmin + (photo_lines_completed * photogrammetry_sidestep) > xmax) && (photo_lines_completed >3))
           return FALSE;
@@ -815,7 +815,7 @@ bool_t nav_photogrammetry2(){
       break;
 
     case LINE_TAIL:
-      temp1.x = xmin + (photo_lines_completed * photogrammetry_sidestep) + 2 * photogrammetry_radius;    
+      temp1.x = xmin + (photo_lines_completed * photogrammetry_sidestep) + 2 * photogrammetry_radius;
       if(temp1.x < top_corner.x)
         temp1.y = (ymax - ((top_corner.x - temp1.x) / (tan(-photogrammetry_wind_direction))));
       else
@@ -832,7 +832,7 @@ bool_t nav_photogrammetry2(){
       TranslateAndRotateFromWorldtoPhotogrammetry(&position_photogrammetry, TransX, TransY);
 
       if(position_photogrammetry.y < ymax)
-        LINE_START_FUNCTION;  
+        LINE_START_FUNCTION;
 
       nav_route_xy(temp1.x, temp1.y, temp2.x, temp2.y);
       if(nav_approaching_xy(temp2.x, temp2.y, temp1.x, temp1.y, 0))

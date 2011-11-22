@@ -1,4 +1,4 @@
-<!-- this is an asctec frame equiped with  Lisa/L#3 and asctec V2 controllers and MKK controles for simulation 
+<!-- this is an asctec frame equiped with  Lisa/L#3 and asctec V2 controllers and MKK controles for simulation
 comment everything that is 2 lines back when you stop simulaton-->
 
 <airframe name="booz2_a7">
@@ -97,7 +97,7 @@ comment everything that is 2 lines back when you stop simulaton-->
  <section name="AUTOPILOT">
    <define name="MODE_MANUAL" value="AP_MODE_ATTITUDE_DIRECT"/>
    <define name="MODE_AUTO1"  value="AP_MODE_HOVER_Z_HOLD"/>
-   <define name="MODE_AUTO2"  value="AP_MODE_NAV"/> 
+   <define name="MODE_AUTO2"  value="AP_MODE_NAV"/>
  </section>
 <!--
 AP_MODE_RATE_DIRECT		AP_MODE_ATTITUDE_DIRECT			AP_MODE_HOVER_DIRECT
@@ -245,7 +245,7 @@ http://ngdc.noaa.gov/geomag/magfield.shtml
    Other flags of interest are for "ahrs"          type="ic"
        apply a low pass filter on rotational velocity
        use mag to update yaw only
-     <define name="AHRS_PROPAGATE_LOW_PASS_RATES"/> 
+     <define name="AHRS_PROPAGATE_LOW_PASS_RATES"/>
      <define name="AHRS_MAG_UPDATE_YAW_ONLY "/>-->
     <target name="ap" board="lisa_l_1.0"/>
     <target name="sim" board="pc">

@@ -44,18 +44,18 @@ void init_onboardcam(void)
 // multi byte resolution
 static inline void scale_pprz_to_blackfin(float var, uint8_t* buff)
 {
-  buff[0] = (var + 100) 
+  buff[0] = (var + 100)
 }
 
 static inline int scale_blackfin_to_pprz(uint8_t* buff)
 {
-  float  
+  float
 }
 
 */
 
 /**********************************************************************
- AFSPRAKEN MET BLACKFIN: interface_sky_segmentation.c 
+ AFSPRAKEN MET BLACKFIN: interface_sky_segmentation.c
  *********************************************************************/
 
 const int MAX_ROLL_ANGLE = 60;
@@ -152,7 +152,7 @@ void periodic_onboardcam(void)
 		}
 	}
 	// Infrared Attitude
-	else	
+	else
 	{
 		infrared_adc_update();
 		estimator_update_state_infrared();
@@ -160,18 +160,18 @@ void periodic_onboardcam(void)
 
    // downlink_onboardcam();
 
- 
+
 //   float cam_pan = 0;
 //   float pan_diff = 0;
 
 //       pan_diff = adc_onboardcama;
-//       pan_diff /=512.0f; 
-//      pan_diff -=1.0f; 
+//       pan_diff /=512.0f;
+//      pan_diff -=1.0f;
 
-//         cam_pan = MAX_PPRZ * (pan_diff / (RadOfDeg(CAM_PAN_MAX - CAM_PAN_NEUTRAL))); 
+//         cam_pan = MAX_PPRZ * (pan_diff / (RadOfDeg(CAM_PAN_MAX - CAM_PAN_NEUTRAL)));
 
 //        cam_pan = TRIM_PPRZ(cam_pan);
-  
+
 //        #ifdef COMMAND_CAM_PAN
 //          ap_state->commands[COMMAND_CAM_PAN] = cam_pan;
 //        #endif
@@ -185,7 +185,7 @@ void downlink_onboardcam(uint8_t channel)
 //  RunOnceEvery(0.02/PERIOD_VISUALTARGET_DefaultChannel_0, DOWNLINK_SEND_VISUALTARGET (DefaultChannel, &adc_onboardcama,&adc_onboardcamb));
 	if ( onboardcam_mode != IS_CAMERA )
 	{
-		
+
 		DOWNLINK_SEND_VISUALTARGET (channel, &adc_onboardcama,&adc_onboardcamb);
 		DOWNLINK_SEND_IR_SENSORS(channel, &ir_ir1, &ir_ir2, &ir_pitch, &ir_roll, &ir_top);
 	}

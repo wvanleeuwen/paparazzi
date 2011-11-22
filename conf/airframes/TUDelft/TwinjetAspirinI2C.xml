@@ -52,7 +52,7 @@
 
   <command_laws>
     <let var="aileron" value="@ROLL  * AILEVON_AILERON_RATE"/>
-    <let var="elevator" value="@PITCH * AILEVON_ELEVATOR_RATE"/>  
+    <let var="elevator" value="@PITCH * AILEVON_ELEVATOR_RATE"/>
     <let var="yaw" value="@YAW   * MOTOR_YAW_RATE"/>
     <set servo="MOTOR_LEFT" value="@THROTTLE - $yaw"/>
     <set servo="MOTOR_RIGHT" value="@THROTTLE + $yaw"/>
@@ -182,7 +182,7 @@
     <define name="MILLIAMP_AT_FULL_THROTTLE" value="5000"/>
     <define name="CATASTROPHIC_BAT_LEVEL" value="9.3" unit="V"/>
   </section>
- 
+
   <section name="MISC">
 <!--    <define name="MINIMUM_AIRSPEED" value="8." unit="m/s"/>-->
     <define name="NOMINAL_AIRSPEED" value="15." unit="m/s"/>

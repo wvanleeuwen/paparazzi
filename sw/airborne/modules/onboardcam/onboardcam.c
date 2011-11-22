@@ -5,7 +5,7 @@
 #include "generated/airframe.h"
 #include "firmwares/fixedwing/stabilization/stabilization_attitude.h"
 
-#ifndef ADC_CHANNEL_ONBOARDCAMA 
+#ifndef ADC_CHANNEL_ONBOARDCAMA
 #error "ON BOARD CAM needs ADC_CHANNEL_ONBOARDCAMA or ADC_CHANNEL_ONBOARDCAMB"
 #endif
 
@@ -44,7 +44,7 @@ void init_onboardcam(void)
 void periodic_onboardcam(void)
 {
 #ifndef SITL
-  adc_onboardcama = (buf_onboardcama.sum / buf_onboardcama.av_nb_sample); //gaat van 0-3 vold dus 3*1024/3,3 0 tot 930 
+  adc_onboardcama = (buf_onboardcama.sum / buf_onboardcama.av_nb_sample); //gaat van 0-3 vold dus 3*1024/3,3 0 tot 930
   adc_onboardcamb = (buf_onboardcamb.sum / buf_onboardcamb.av_nb_sample);
 //adc_onboardcama = 1.0f;
 //adc_onboardcamb = 2.0f;
@@ -70,18 +70,18 @@ void periodic_onboardcam(void)
 
    // downlink_onboardcam();
 
- 
+
 //   float cam_pan = 0;
 //   float pan_diff = 0;
 
 //       pan_diff = adc_onboardcama;
-//       pan_diff /=512.0f; 
-//      pan_diff -=1.0f; 
+//       pan_diff /=512.0f;
+//      pan_diff -=1.0f;
 
-//         cam_pan = MAX_PPRZ * (pan_diff / (RadOfDeg(CAM_PAN_MAX - CAM_PAN_NEUTRAL))); 
+//         cam_pan = MAX_PPRZ * (pan_diff / (RadOfDeg(CAM_PAN_MAX - CAM_PAN_NEUTRAL)));
 
 //        cam_pan = TRIM_PPRZ(cam_pan);
-  
+
 //        #ifdef COMMAND_CAM_PAN
 //          ap_state->commands[COMMAND_CAM_PAN] = cam_pan;
 //        #endif
@@ -95,7 +95,7 @@ void downlink_onboardcam(uint8_t channel)
 //  RunOnceEvery(0.02/PERIOD_VISUALTARGET_DefaultChannel_0, DOWNLINK_SEND_VISUALTARGET (DefaultChannel, &adc_onboardcama,&adc_onboardcamb));
 	if ( onboardcam_mode != IS_CAMERA )
 	{
-		
+
 		DOWNLINK_SEND_VISUALTARGET (channel, &adc_onboardcama,&adc_onboardcamb);
 		DOWNLINK_SEND_IR_SENSORS(channel, &ir_ir1, &ir_ir2, &ir_pitch, &ir_roll, &ir_top);
 	}

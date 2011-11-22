@@ -1,6 +1,6 @@
 /*
  * $Id: onboardcam_module.h 3079 2009-03-11 16:55:42Z gautier $
- *  
+ *
  * Copyright (C) 2009  Gautier Hattenberger
  *
  * This file is part of paparazzi.
@@ -18,12 +18,12 @@
  * You should have received a copy of the GNU General Public License
  * along with paparazzi; see the file COPYING.  If not, write to
  * the Free Software Foundation, 59 Temple Place - Suite 330,
- * Boston, MA 02111-1307, USA. 
+ * Boston, MA 02111-1307, USA.
  *
  */
 
 /** \file onboardcam_module.h
- * 
+ *
  * onboardcam module with blinking LEDs
  */
 
@@ -40,11 +40,11 @@ extern uint16_t adc_onboardcam_sim;
 extern uint8_t onboardcam_mode;
 extern uint8_t blackfin_mode;
 
-// On Board Settings 
+// On Board Settings
 extern uint8_t onboardcam_status;
 
 //void downlink_onboardcam(uint8_t channel);
-#define PERIODIC_SEND_ONBOARDCAM(_chan) DOWNLINK_SEND_ONBOARDCAM (_chan, &adc_onboardcama,&adc_onboardcamb); 
+#define PERIODIC_SEND_ONBOARDCAM(_chan) DOWNLINK_SEND_ONBOARDCAM (_chan, &adc_onboardcama,&adc_onboardcamb);
 #define PERIODIC_SEND_IR_SENSORS_CAM(_chan) DOWNLINK_SEND_IR_SENSORS(_chan, &infrared.value.ir1, &infrared.value.ir2, &infrared.pitch, &infrared.roll, &infrared.top);
 
 // Module Functions

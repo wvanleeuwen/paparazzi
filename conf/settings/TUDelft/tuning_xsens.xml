@@ -34,7 +34,7 @@
       <dl_setting MAX="1" MIN="0" STEP="1" VAR="launch"/>
       <dl_setting MAX="1" MIN="0" STEP="1" VAR="kill_throttle"/>
       <dl_setting MAX="2" MIN="0" STEP="1" VAR="telemetry_mode_Ap_DefaultChannel" shortname="tele_AP" module="downlink"/>
- 
+
       <dl_setting MAX="200" MIN="-200" STEP="10" VAR="nav_radius" module="subsystems/nav" handler="SetNavRadius">
         <strip_button icon="circle-right.png" name="Circle right" value="1"/>
         <strip_button icon="circle-left.png" name="Circle left" value="-1"/>

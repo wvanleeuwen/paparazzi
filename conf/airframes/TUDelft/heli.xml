@@ -108,7 +108,7 @@
  <section name="AUTOPILOT">
    <define name="MODE_MANUAL" value="AP_MODE_ATTITUDE_DIRECT"/>
    <define name="MODE_AUTO1"  value="AP_MODE_HOVER_Z_HOLD"/>
-   <define name="MODE_AUTO2"  value="AP_MODE_NAV"/> 
+   <define name="MODE_AUTO2"  value="AP_MODE_NAV"/>
  </section>
 <!--
 AP_MODE_RATE_DIRECT		AP_MODE_ATTITUDE_DIRECT			AP_MODE_HOVER_DIRECT
@@ -265,7 +265,7 @@ http://ngdc.noaa.gov/geomag/magfield.shtml
    Other flags of interest are for "ahrs"          type="ic"
        apply a low pass filter on rotational velocity
        use mag to update yaw only
-     <define name="AHRS_PROPAGATE_LOW_PASS_RATES"/> 
+     <define name="AHRS_PROPAGATE_LOW_PASS_RATES"/>
      <define name="AHRS_MAG_UPDATE_YAW_ONLY "/>-->
     <target name="ap" board="lisa_m_1.0"/>
     <subsystem name="telemetry"     type="transparent"/>

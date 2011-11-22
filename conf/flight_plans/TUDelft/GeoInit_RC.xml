@@ -60,7 +60,7 @@ lat0="51.221714" lon0="4.366303"linkeroever
       <attitude roll="0" throttle="0" vmode="throttle"/>
       <exception cond="RCChannel(RADIO_THROTTLE) > 1800" deroute="Takeoff"/>
     </block>
-    <block name="Takeoff" strip_button="Takeoff (wp CLIMB)" strip_icon="takeoff.png" pre_call="if (RCChannel(RADIO_THROTTLE) > 1800) launch=TRUE;"> 
+    <block name="Takeoff" strip_button="Takeoff (wp CLIMB)" strip_icon="takeoff.png" pre_call="if (RCChannel(RADIO_THROTTLE) > 1800) launch=TRUE;">
       <exception cond="estimator_z > ground_alt+40" deroute="Standby"/>
       <set value="0" var="kill_throttle"/>
       <go wp="CLIMB"/>

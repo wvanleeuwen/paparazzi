@@ -89,7 +89,7 @@
 <define name="MAG_Y_SENS" value="5.50237197013" integer="16"/>
 <define name="MAG_Z_SENS" value="2.93637457985" integer="16"/>
 
-    
+
     <define name="BODY_TO_IMU_PHI"   value="RadOfDeg(  0.0 )"/>
     <define name="BODY_TO_IMU_THETA" value="RadOfDeg(  0.0 )"/>
     <define name="BODY_TO_IMU_PSI"   value="RadOfDeg(  90.0 )"/>
@@ -190,7 +190,7 @@ AP_MODE_NAV
     <define name="PSI_DDGAIN"   value=" 300"/>
 
    </section>
-    <!--Rotterdam 
+    <!--Rotterdam
   <section name="AHRS" prefix="AHRS_">
     <define name="PROPAGATE_FREQUENCY" value="512"/>
     <define name="H_X" value=" 0.3913233"/>
@@ -198,14 +198,14 @@ AP_MODE_NAV
     <define name="H_Z" value=" 0.9202531"/>
   </section>
        -->
-    <!--Antwerpen -->  
+    <!--Antwerpen -->
   <section name="AHRS" prefix="AHRS_">
     <define name="PROPAGATE_FREQUENCY" value="512"/>
     <define name="H_X" value=" 0.4006406"/>
     <define name="H_Y" value=" 0.0008547"/>
     <define name="H_Z" value=" 0.9162349"/>
   </section>
-        
+
   <section name="INS" prefix="INS_">
     <define name="BARO_SENS" value="10." integer="16"/>
     <define name="UNTILT_ACCEL" value="1"/>
@@ -255,7 +255,7 @@ AP_MODE_NAV
  <modules main_freq="60">
    <load name="gps_ubx_ucenter.xml"/>
  </modules>
-<!-- 
+<!--
  <modules main_freq="512">
    <load name="vehicle_interface_overo_link.xml"/>
  </modules>

@@ -48,7 +48,7 @@ uint8_t to_atmega48[ATMEGA_TX_SIZE];
 uint8_t from_atmega48[ATMEGA_RX_SIZE];
 
 
-void atmega48_init(void) 
+void atmega48_init(void)
 {
   from_atmega48[0] = 10;
   from_atmega48[1] = 20;
@@ -59,13 +59,13 @@ void atmega48_init(void)
 }
 
 
-void atmega48_periodic( void ) 
+void atmega48_periodic( void )
 {
   from_atmega48[10] = to_atmega48[0];
   from_atmega48[11] = to_atmega48[1];
   RunOnceEvery(6,DOWNLINK_SEND_PAYLOAD(DefaultChannel, ATMEGA_RX_SIZE, from_atmega48));
 }
 
-void atmega48_event( void ) 
+void atmega48_event( void )
 {
 }

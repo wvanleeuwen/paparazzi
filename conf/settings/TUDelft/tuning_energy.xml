@@ -13,14 +13,14 @@
 
         <dl_setting  MIN="0" MAX="100" STEP="1" VAR="v_ctl_pot_energy_bounds" shortname="E_pot_max" param="20"/>
         <dl_setting  MIN="0" MAX="20" STEP="0.5" VAR="v_ctl_kin_energy_bounds" shortname="E_pot_max" param="20"/>
-     
+
         <dl_setting  MIN="-1.5" MAX="0." STEP="0.01" VAR="v_ctl_pitch_min" shortname="ThetaMin" param="20"/>
         <dl_setting  MIN="0." MAX="1.5" STEP="0.01" VAR="v_ctl_pitch_max" shortname="ThetaMax" param="20"/>
 
         <dl_setting  MIN="0." MAX="1." STEP="0.01" VAR="v_ctl_throttle_min" shortname="ThMin" param="20"/>
         <dl_setting  MIN="0." MAX="1." STEP="0.01" VAR="v_ctl_throttle_max" shortname="ThMax" param="20"/>
       </dl_settings>
-       
+
 
       <dl_settings name="setpoints">
         <dl_setting  MIN="1" MAX="60" STEP="0.25" VAR="v_ctl_auto_airspeed_setpoint" shortname="Airspeed" param="12">
@@ -30,7 +30,7 @@
         </dl_setting>
         <dl_setting  MIN="1" MAX="300" STEP="0.5" VAR="v_ctl_altitude_setpoint" shortname="Altitude" param="70"/>
       </dl_settings>
-       
+
 
       <dl_settings name="total energy">
         <dl_setting MAX="1." MIN="0." STEP="0.0001" VAR="v_ctl_energy_tot_i" shortname="Ki Etot" param="15"/>

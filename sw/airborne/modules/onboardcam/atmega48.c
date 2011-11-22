@@ -55,18 +55,18 @@ uint8_t to_atmega48[ATMEGA_TX_SIZE];
 uint8_t from_atmega48[ATMEGA_RX_SIZE];
 
 
-void atmega48_init(void) 
+void atmega48_init(void)
 {
   atmega48_trans.status = I2CTransDone;
 }
 
 
-void atmega48_periodic( void ) 
+void atmega48_periodic( void )
 {
   int i;
 /*
   static uint8_t tel = 0;
-  
+
   tel++;
   if (tel > 3)
   {
@@ -81,10 +81,10 @@ void atmega48_periodic( void )
   I2CTransceive(ATMEGA48_I2C_DEV, atmega48_trans, ATMEGA48_SLAVE_ADDR, ATMEGA_TX_SIZE, ATMEGA_RX_SIZE);
 }
 
-void atmega48_event( void ) 
+void atmega48_event( void )
 {
   int i;
-  if (atmega48_trans.status == I2CTransSuccess) 
+  if (atmega48_trans.status == I2CTransSuccess)
   {
     for (i=0;i<ATMEGA_RX_SIZE;i++)
     {

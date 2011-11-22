@@ -2,7 +2,7 @@
 * $Id: compass.ml 3941 2009-08-15 10:18:18Z hecto $
 *
 * Compass display for a manned vehicle
-*  
+*
 * Copyright (C) 2004-2009 ENAC, Pascal Brisset, Antoine Drouin
 *
 * This file is part of paparazzi.
@@ -20,7 +20,7 @@
 * You should have received a copy of the GNU General Public License
 * along with paparazzi; see the file COPYING.  If not, write to
 * the Free Software Foundation, 59 Temple Place - Suite 330,
-* Boston, MA 02111-1307, USA. 
+* Boston, MA 02111-1307, USA.
 *
 *)
 
@@ -42,7 +42,7 @@ let get_array_length = fun value ->
   | Pprz.Array x ->
       Array.length x
   | _ -> invalid_arg "Pprz.int_assoc"
-      
+
 
 let int_of_value = fun value ->
   match value with
@@ -61,7 +61,7 @@ let get_pprz_element = fun value nr ->
             x.(nr)
   | _ -> invalid_arg "Vision.getelement"
 
-      
+
 
 let draw = fun (da_object:Gtk_tools.pixmap_in_drawin_area) payload ->
   let nrofcolums = get_array_length payload in
@@ -84,7 +84,7 @@ let draw = fun (da_object:Gtk_tools.pixmap_in_drawin_area) payload ->
     let dy = height - v in
     i := !i +1;
     dr#rectangle ~x:pos ~y:dy ~width:30 ~height:v ~filled:true ())
-    data;  
+    data;
   *)
 
   for i = 0 to (nrofcolums-1) do (
@@ -119,9 +119,9 @@ let _ =
 
   let da = new Gtk_tools.pixmap_in_drawin_area ~width ~height ~packing:window#add () in
   da#drawing_area#misc#realize ();
-  
+
   (* Empty Screen *)
-  
+
 
   (* Listening messages *)
   let get_payload = fun _ values ->
@@ -134,5 +134,5 @@ let _ =
 
   (** Start the main loop *)
   window#show ();
-  GMain.main () 
-  
+  GMain.main ()
+

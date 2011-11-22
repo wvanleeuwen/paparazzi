@@ -22,8 +22,8 @@
       <dl_setting MAX="2" MIN="0" STEP="1" VAR="gps_reset" module="gps_ubx" handler="Reset" shortname="GPS reset"/>
 
       <dl_setting MAX="200" MIN="-200" STEP="10" VAR="nav_radius" module="subsystems/nav" handler="SetNavRadius">
-        <strip_button icon="circle-right.png" name="Circle right" value="1"/>        
-        <strip_button icon="circle-left.png" name="Circle left" value="-1"/>        
+        <strip_button icon="circle-right.png" name="Circle right" value="1"/>
+        <strip_button icon="circle-left.png" name="Circle left" value="-1"/>
 	<key_press key="greater" value="1"/>
 	<key_press key="less" value="-1"/>
       </dl_setting>
@@ -59,12 +59,12 @@
 00410 inline static void h_ctl_pitch_loop( void )
 h_ctl_pitch_loop_setpoint = h_ctl_pitch_setpoint - h_ctl_elevator_of_roll / h_ctl_pitch_pgain * fabs(estimator_phi);
 err = estimator_theta - h_ctl_pitch_loop_setpoint
-h_ctl_elevator_setpoint = h_ctl_pitch_pgain * (err + h_ctl_pitch_dgain * d_err) 
+h_ctl_elevator_setpoint = h_ctl_pitch_pgain * (err + h_ctl_pitch_dgain * d_err)
 -->
         <dl_setting MAX="5000" MIN="0" STEP="100" VAR="h_ctl_elevator_of_roll" shortname="elevator_of_roll" param="H_CTL_ELEVATOR_OF_ROLL"/>
         <dl_setting MAX="000" MIN="-25000" STEP="250" VAR="h_ctl_pitch_pgain" shortname="pitch_pgain" param="H_CTL_PITCH_PGAIN"/>
         <dl_setting MAX="0" MIN="-50000" STEP="10" VAR="h_ctl_pitch_dgain" shortname="pitch_dgain"  param="H_CTL_PITCH_DGAIN"/>
-        
+
 
 <!--
 00307 #ifdef H_CTL_ROLL_ATTITUDE_GAIN
@@ -90,7 +90,7 @@ h_ctl_aileron_setpoint = - h_ctl_roll_attitude_gain * err - h_ctl_roll_rate_gain
       <dl_settings name="nav">
 <!--
 err = estimator_hspeed_dir - h_ctl_course_setpoint
-  speed_depend_nav = estimator_hspeed_mod/NOMINAL_AIRSPEED; 
+  speed_depend_nav = estimator_hspeed_mod/NOMINAL_AIRSPEED;
   cmd = h_ctl_course_pgain * speed_depend_nav * (err + d_err * h_ctl_course_dgain);
 roll_setpoint = cmd + h_ctl_course_pre_bank_correction * h_ctl_course_pre_bank;
  h_ctl_course_pre_bank = nav_in_circle ? circle_bank : 0
@@ -99,7 +99,7 @@ roll_setpoint = cmd + h_ctl_course_pre_bank_correction * h_ctl_course_pre_bank;
         <dl_setting MAX="2" MIN="0" STEP="0.1" VAR="h_ctl_course_dgain" shortname="course dgain"
 param="H_CTL_COURSE_DGAIN"/>
         <dl_setting MAX="2" MIN="0.1" STEP="0.05" VAR="h_ctl_course_pre_bank_correction" shortname="pre bank cor" param="H_CTL_COURSE_PRE_BANK_CORRECTION"/>
-        <dl_setting MAX="200" MIN="-200" STEP="10" VAR="nav_radius" shortname="circle radius" param="DEFAULT_CIRCLE_RADIUS"/> 
+        <dl_setting MAX="200" MIN="-200" STEP="10" VAR="nav_radius" shortname="circle radius" param="DEFAULT_CIRCLE_RADIUS"/>
         <dl_setting MAX="2" MIN="1" STEP="1" VAR="nav_mode"/> <!--nac.c mode_1 h_ctl_roll_setpoint mode_2 h_ctl_course_setpoint-->
         <dl_setting MAX="50" MIN="-50" STEP="5" VAR="nav_shift" module="subsystems/nav" handler="IncreaseShift" shortname="inc. shift"/>
 
@@ -254,7 +254,7 @@ nav_ratio = AGR_CLIMB_NAV_RATIO + (1 - AGR_CLIMB_NAV_RATIO) * (1 - (fabs(v_ctl_a
           <dl_setting MAX="1.0" MIN="0." STEP="0.1" VAR="agr_climb_nav_ratio" shortname="climb_nav_ratio" module="guidance/guidance_v" param="AGR_CLIMB_NAV_RATIO"/>
           <dl_setting MAX="1.0" MIN="0." STEP="0.05" VAR="agr_descent_throttle" shortname="descent_throttle" module="guidance/guidance_v" param="AGR_DESCENT_THROTTLE"/>
           <dl_setting MAX="0.1" MIN="-0.5" STEP="0.05" VAR="agr_descent_pitch" shortname="descent_ptich" module="guidance/guidance_v" param="AGR_DESCENT_PITCH"/>
-          <dl_setting MAX="1.0" MIN="0." STEP="0.1" VAR="agr_descent_nav_ratio" shortname="descent_nav_ratio" module="guidance/guidance_v" param="AGR_DESCENT_NAV_RATIO"/> 
+          <dl_setting MAX="1.0" MIN="0." STEP="0.1" VAR="agr_descent_nav_ratio" shortname="descent_nav_ratio" module="guidance/guidance_v" param="AGR_DESCENT_NAV_RATIO"/>
        </dl_settings>
 
 

@@ -54,13 +54,13 @@ void periodic_onboardcam(void) {
 //   float pan_diff = 0;
 
 //       pan_diff = adc_onboardcama;
-//       pan_diff /=512.0f; 
-//       pan_diff -=1.0f; 
+//       pan_diff /=512.0f;
+//       pan_diff -=1.0f;
 
-//         cam_pan = MAX_PPRZ * (pan_diff / (RadOfDeg(CAM_PAN_MAX - CAM_PAN_NEUTRAL))); 
+//         cam_pan = MAX_PPRZ * (pan_diff / (RadOfDeg(CAM_PAN_MAX - CAM_PAN_NEUTRAL)));
 
 //        cam_pan = TRIM_PPRZ(cam_pan);
-  
+
 //        #ifdef COMMAND_CAM_PAN
 //          ap_state->commands[COMMAND_CAM_PAN] = cam_pan;
 //        #endif

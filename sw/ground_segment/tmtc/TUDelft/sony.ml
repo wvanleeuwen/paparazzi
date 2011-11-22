@@ -2,7 +2,7 @@
  * $Id: settings.ml 6184 2010-10-19 15:43:01Z gautier $
  *
  * Multi aircraft settings handler
- *  
+ *
  * Copyright (C) 2007 ENAC, Pascal Brisset, Antoine Drouin
  *
  * This file is part of paparazzi.
@@ -20,7 +20,7 @@
  * You should have received a copy of the GNU General Public License
  * along with paparazzi; see the file COPYING.  If not, write to
  * the Free Software Foundation, 59 Temple Place - Suite 330,
- * Boston, MA 02111-1307, USA. 
+ * Boston, MA 02111-1307, USA.
  *
  *)
 
@@ -58,7 +58,7 @@ let _ =
   (** Open the window container with its notebook*)
   let icon = GdkPixbuf.from_file Env.icon_file in
   let window = GWindow.window ~icon ~width:125 ~height:220 ~allow_shrink:true ~title:"PayLoad" () in
-(*  ignore (window#gdk_window_set_back_pixmap icon); 
+(*  ignore (window#gdk_window_set_back_pixmap icon);
   ignore (window#gtk_window_set_title "SONY");
   let img = GImage ~icon ~width:20 ~height:20 ~packing:window#pack () in *)
 
@@ -67,22 +67,22 @@ let _ =
   (** Callback Function **)
 
   let send_command = fun code ->
-    DL.message_send my_id "PAYLOAD_COMMAND" 
+    DL.message_send my_id "PAYLOAD_COMMAND"
       ["ac_id", Pprz.String !ac_id; "command", Pprz.Int code] in
 
 (*
 
-DL.message_send my_id "BLOCK" 
+DL.message_send my_id "BLOCK"
       ["block_id", Pprz.Int code; "ac_id", Pprz.Int 22] in
 
-    DL.message_send my_id "PAYLOAD_COMMAND" 
+    DL.message_send my_id "PAYLOAD_COMMAND"
       ["ac_id", Pprz.String ac_id; "command", Pprz.Int code] in
 *)
 (*    Datalink_Pprz.message_send my_id "JUMP_TO_BLOCK" [ "ac_id", Pprz.String "22"; "block_id", Pprz.Int code  ];
 *)
 
 
-  (** Make Buttons **)  
+  (** Make Buttons **)
   let vbox = GPack.vbox ~packing:window#add () in
 
   let hbox = GPack.hbox ~packing:vbox#pack () in

@@ -1,6 +1,6 @@
 /*
  * $Id: fw_v_ctl.c 4304 2009-10-31 04:13:12Z vassilis $
- *  
+ *
  * Copyright (C) 2006  Pascal Brisset, Antoine Drouin, Michel Gorraz
  *
  * This file is part of paparazzi.
@@ -18,11 +18,11 @@
  * You should have received a copy of the GNU General Public License
  * along with paparazzi; see the file COPYING.  If not, write to
  * the Free Software Foundation, 59 Temple Place - Suite 330,
- * Boston, MA 02111-1307, USA. 
+ * Boston, MA 02111-1307, USA.
  *
  */
 
-/** 
+/**
  *  \file v_ctl_ctl
  *  \brief Vertical control for fixed wing vehicles.
  *
@@ -83,7 +83,7 @@ pprz_t v_ctl_throttle_slewed;
 float v_ctl_auto_throttle_sum_err;
 
 
-void v_ctl_init( void ) 
+void v_ctl_init( void )
 {
   /* flight envelope */
   v_ctl_pot_energy_bounds = 20.;
@@ -122,19 +122,19 @@ void v_ctl_init( void )
   v_ctl_throttle_setpoint = 0;
 }
 
-/** 
+/**
  * outer loop
- * \brief Computes v_ctl_climb_setpoint and sets v_ctl_auto_throttle_submode 
+ * \brief Computes v_ctl_climb_setpoint and sets v_ctl_auto_throttle_submode
  */
 
 float v_ctl_altitude_pgain = 0.05;
 float v_ctl_speed_pgain = 0.18;
 
-void v_ctl_altitude_loop( void ) 
+void v_ctl_altitude_loop( void )
 {
 }
 
-void v_ctl_climb_loop ( void ) 
+void v_ctl_climb_loop ( void )
 {
   // Integrators
   static float v_ctl_throttle_trim = 0;
@@ -165,7 +165,7 @@ void v_ctl_climb_loop ( void )
   v_ctl_climb_setpoint = v_ctl_altitude_pgain * v_ctl_altitude_error
                        + v_ctl_altitude_pre_climb;
   BoundAbs(v_ctl_climb_setpoint, V_CTL_ALTITUDE_MAX_CLIMB);
-  
+
   // Commanded Flight Path
   if (speed > 1) {
     v_ctl_gamma_setpoint = v_ctl_climb_setpoint / speed;
@@ -173,7 +173,7 @@ void v_ctl_climb_loop ( void )
     v_ctl_gamma_setpoint = v_ctl_climb_setpoint;
   }
   BoundAbs(v_ctl_gamma_error, 0.7);
-  
+
   // Actual Flight Path
   if (speed > 1) {
     v_ctl_gamma = estimator_z_dot / speed;
@@ -187,7 +187,7 @@ void v_ctl_climb_loop ( void )
 
   // Speed Error
   v_ctl_speed_error = v_ctl_auto_airspeed_setpoint - speed;
-  
+
   // Acceleration Command
   v_ctl_acceleration_setpoint = v_ctl_speed_error * v_ctl_speed_pgain;
 
@@ -251,10 +251,10 @@ void v_ctl_climb_loop ( void )
 
   v_ctl_throttle_setpoint = TRIM_PPRZ(throttle * MAX_PPRZ);
 
-  DOWNLINK_SEND_VERTICAL_ENERGY(DefaultChannel, 
-    &v_ctl_gamma_setpoint, &v_ctl_acceleration_setpoint, 
-    &throttle, &nav_pitch, 
-    &throttle, &nav_pitch, 
+  DOWNLINK_SEND_VERTICAL_ENERGY(DefaultChannel,
+    &v_ctl_gamma_setpoint, &v_ctl_acceleration_setpoint,
+    &throttle, &nav_pitch,
+    &throttle, &nav_pitch,
     &v_ctl_auto_airspeed_setpoint);
 
 }

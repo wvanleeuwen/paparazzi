@@ -68,7 +68,7 @@
     <define name="MAG_XZ_SENS" value="0.0" integer="16"/>
     <define name="MAG_YZ_SENS" value="0.0" integer="16"/>
 
-    
+
     <define name="BODY_TO_IMU_PHI"   value="RadOfDeg(   0. )"/>
     <define name="BODY_TO_IMU_THETA" value="RadOfDeg(   0. )"/>
     <define name="BODY_TO_IMU_PSI"   value="RadOfDeg(  315. )"/>
@@ -216,7 +216,7 @@
    <define name="SENSORS_PARAMS" value="&quot;nps_sensors_params_booz2_a1.h&quot;"/>
  </section>
 
-<!-- 
+<!--
  <modules main_freq="512">
    <load name="vehicle_interface_overo_link.xml"/>
  </modules>

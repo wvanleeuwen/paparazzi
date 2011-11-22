@@ -7,7 +7,7 @@
 -->
 
 <airframe name="Delta Wing">
- 
+
   <modules>
     <load name="light.xml">
       <define name="LIGHT_LED_STROBE" value="5"/>

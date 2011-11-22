@@ -60,7 +60,7 @@
 
   <command_laws>
     <let var="aileron" value="@ROLL  * AILEVON_AILERON_RATE"/>
-    <let var="elevator" value="@PITCH * AILEVON_ELEVATOR_RATE"/>  
+    <let var="elevator" value="@PITCH * AILEVON_ELEVATOR_RATE"/>
     <let var="yaw" value="@YAW   * MOTOR_YAW_RATE"/>
     <set servo="MOTOR_LEFT" value="@THROTTLE - $yaw"/>
     <set servo="MOTOR_RIGHT" value="@THROTTLE + $yaw"/>
@@ -117,7 +117,7 @@
     <define name="MILLIAMP_AT_FULL_THROTTLE" value="5000"/>
     <define name="CATASTROPHIC_BAT_LEVEL" value="9.3" unit="V"/>
   </section>
- 
+
   <section name="MISC">
 <!--    <define name="MINIMUM_AIRSPEED" value="8." unit="m/s"/>-->
     <define name="NOMINAL_AIRSPEED" value="15." unit="m/s"/>
@@ -200,7 +200,7 @@
     <define name="BLEND_START" value="20"/>
     <define name="BLEND_END" value="10"/>
     <define name="CLIMB_PITCH" value="0.20000000298"/>
-<!-- not used in AIRSPEED mode tuned with v_CTL_AUTO_AGR_CLIMB_GAIN IN fw_v_ctl.c 
+<!-- not used in AIRSPEED mode tuned with v_CTL_AUTO_AGR_CLIMB_GAIN IN fw_v_ctl.c
 rest is used in DMEASURE_AIRSPEED mode!!!!!
     <define name="CLIMB_THROTTLE" value="0.600000023842"/>
     <define name="DESCENT_THROTTLE" value="0.10000000149"/>
@@ -284,9 +284,9 @@ rest is used in DMEASURE_AIRSPEED mode!!!!!
 #DMEASURE_AIRSPEED  activate the "auto_throttle" and deactivate "airspeed" in the TuneTUDelftTwinjetAirspeed.xml
 
 #JSBSIM simulation
-#include $(PAPARAZZI_SRC)/conf/autopilot/sitl_jsbsim.makefile 
-#jsbsim.CFLAGS += -/opt/jsbsim/include/JSBSim 
-#jsbsim.LDFLAGS += -/opt/jsbsim/lib/ 
+#include $(PAPARAZZI_SRC)/conf/autopilot/sitl_jsbsim.makefile
+#jsbsim.CFLAGS += -/opt/jsbsim/include/JSBSim
+#jsbsim.LDFLAGS += -/opt/jsbsim/lib/
 #jsbsim.CFLAGS += -DBOARD_CONFIG=\"tiny.h\" -DAGR_CLIMB -DLOITER_TRIM -DALT_KALMAN jsbsim.srcs += $(SIMDIR)/sim_ac_fw.c
   </makefile>
 </airframe>

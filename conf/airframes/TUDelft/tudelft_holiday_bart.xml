@@ -6,7 +6,7 @@
      * Radio PPM encoder
      * XBee Type 1 2.4Mhz
      * Paparazzi GPS1.3 v0.90 uBlox LEA6H Block GPS antenna
- 
+
      Hardware info
      * Board ID: 026
      * Connect ESC to S1
@@ -50,12 +50,12 @@ http://paparazzi.enac.fr/w/index.php?title=Theory_of_Operation
     <subsystem name="ahrs" type="float_dcm"/>
     <subsystem name="gps" 		type="ublox">
       <configure name="GPS_PORT"        value="UART1"/>
-      <configure name="GPS_BAUD"        value="B38400"/>      
+      <configure name="GPS_BAUD"        value="B38400"/>
     </subsystem>
     <subsystem name="navigation" type="extra"/>
   </firmware>
 
-<!-- ******************* MODULES ********************************** --> 
+<!-- ******************* MODULES ********************************** -->
  <modules main_freq="60">
    <load name="gps_ubx_ucenter.xml"/>
  </modules>
@@ -136,7 +136,7 @@ http://paparazzi.enac.fr/w/index.php?title=Theory_of_Operation
     <axis name="PITCH" failsafe_value="0"/>
   </commands>
 
-  <rc_commands>    
+  <rc_commands>
     <set command="THROTTLE" value="@THROTTLE"/>
     <set command="ROLL" value="@ROLL"/>
     <set command="PITCH" value="@PITCH"/>
@@ -181,7 +181,7 @@ http://paparazzi.enac.fr/w/index.php?title=Theory_of_Operation
 If not set before when you would enter home mode you had to flip a bit via the GCS to get out. -->
     <define name="UNLOCKED_HOME_MODE" value="TRUE"/>
 <!-- RC_LOST_MODE means that if your RC Transmitter signal is not received anymore in the autopilot, e.g. you switch it off
-     or  fly a long range mission you define the wanted mode behaviour here. 
+     or  fly a long range mission you define the wanted mode behaviour here.
      If you do not define it, it defaults to flying to the flightplan HOME
     <define name="RC_LOST_MODE" value="PPRZ_MODE_AUTO1"/> -->
 
@@ -193,7 +193,7 @@ If not set before when you would enter home mode you had to flip a bit via the G
 
   </section>
 
-<!-- ******************* VERTICAL CONTROL ********************************** --> 
+<!-- ******************* VERTICAL CONTROL ********************************** -->
   <section name="VERTICAL CONTROL" prefix="V_CTL_">
     <define name="POWER_CTL_BAT_NOMINAL" value="11.1" unit="volts"/>
     <!-- outer loop proportional gain -->
@@ -223,7 +223,7 @@ If not set before when you would enter home mode you had to flip a bit via the G
     <define name="THROTTLE_SLEW" value="0.5" unit="s"/>
   </section>
 
-<!-- ******************* HORIZONTAL CONTROL ******************************** --> 
+<!-- ******************* HORIZONTAL CONTROL ******************************** -->
 
   <section name="HORIZONTAL CONTROL" prefix="H_CTL_">
     <define name="COURSE_PGAIN" value="-1.0"/>

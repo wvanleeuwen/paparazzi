@@ -102,7 +102,7 @@
 -->
     <set servo="VTAIL_LEFT" value="(-$rudder - $elevator)"/>
     <set servo="VTAIL_RIGHT" value="(-$rudder + $elevator)"/>
-    
+
     <set servo="CAM_PAN" value="@CAM_PAN"/>
     <set servo="CAM_TILT" value="@CAM_TILT"/>
 
@@ -118,7 +118,7 @@
     <define name="IR2" value="ADC_2"/>
     <define name="IR_TOP" value="ADC_0"/>
     <define name="IR_NB_SAMPLES" value="16"/>
-    <define name="CURRENT" value="7"/>  
+    <define name="CURRENT" value="7"/>
   </section>
 
   <section name="INFRARED" prefix="IR_">
@@ -156,7 +156,7 @@
     <define name="VoltageOfAdc(adc)" value="((adc) * 3.3f * 9.265f / 1024.0f)"/>
     <define name="MilliAmpereOfAdc(adc)" value="((adc)-505) * 125.0f"/>
   </section>
- 
+
   <section name="MISC">
     <define name="MINIMUM_AIRSPEED" value="7." unit="m/s"/>
     <define name="NOMINAL_AIRSPEED" value="9." unit="m/s"/>
@@ -173,7 +173,7 @@
     <define name="DEFAULT_CIRCLE_RADIUS" value="90."/>
     <define name="MIN_CIRCLE_RADIUS" value="60."/>
   </section>
- 
+
 <!--
  <section name="DATALINK" prefix="DATALINK_">
     <define name="DEVICE_TYPE" value="XBEE"/>

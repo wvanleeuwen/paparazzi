@@ -47,11 +47,11 @@ uint8_t vision_data[VISION_DATA_SIZE] = { 10, 30, 20, 40,
                                         };
 
 
-void vision_periodic( void ) 
+void vision_periodic( void )
 {
   static uint8_t nr = 0;
-  vision_data[nr] ++; 
-  nr ++; 
+  vision_data[nr] ++;
+  nr ++;
   if (nr >= VISION_DATA_SIZE)
     nr = 0;
 

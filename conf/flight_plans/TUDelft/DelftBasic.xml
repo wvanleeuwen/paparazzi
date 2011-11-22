@@ -47,7 +47,7 @@
       <call fun="nav_line(WP_1, WP_2, nav_radius)"/>
       <call fun="nav_line(WP_2, WP_1, nav_radius)"/>
  <go wp="1"/>
- <go wp="2"/> 
+ <go wp="2"/>
  <go wp="S1"/> -->
 <go from="1" wp="2" hmode="route" approaching_time="3"/>
 <go from="2" wp="1" hmode="route" approaching_time="0"/>

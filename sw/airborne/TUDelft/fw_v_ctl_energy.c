@@ -1,6 +1,6 @@
 /*
  * $Id: fw_v_ctl.c 4304 2009-10-31 04:13:12Z vassilis $
- *  
+ *
  * Copyright (C) 2006  Pascal Brisset, Antoine Drouin, Michel Gorraz
  *
  * This file is part of paparazzi.
@@ -18,11 +18,11 @@
  * You should have received a copy of the GNU General Public License
  * along with paparazzi; see the file COPYING.  If not, write to
  * the Free Software Foundation, 59 Temple Place - Suite 330,
- * Boston, MA 02111-1307, USA. 
+ * Boston, MA 02111-1307, USA.
  *
  */
 
-/** 
+/**
  *  \file v_ctl_ctl
  *  \brief Vertical control for fixed wing vehicles.
  *
@@ -83,7 +83,7 @@ pprz_t v_ctl_throttle_slewed;
 float v_ctl_auto_throttle_sum_err;
 
 
-void v_ctl_init( void ) 
+void v_ctl_init( void )
 {
   /* flight envelope */
   v_ctl_pot_energy_bounds = 20.;
@@ -122,18 +122,18 @@ void v_ctl_init( void )
   v_ctl_throttle_setpoint = 0;
 }
 
-/** 
+/**
  * outer loop
- * \brief Computes v_ctl_climb_setpoint and sets v_ctl_auto_throttle_submode 
+ * \brief Computes v_ctl_climb_setpoint and sets v_ctl_auto_throttle_submode
  */
 
 float v_ctl_altitude_pgain = 0.1;
 
-void v_ctl_altitude_loop( void ) 
+void v_ctl_altitude_loop( void )
 {
 }
 
-void v_ctl_climb_loop ( void ) 
+void v_ctl_climb_loop ( void )
 {
   // Integrators
   static float v_ctl_throttle_trim = 0;
@@ -165,7 +165,7 @@ void v_ctl_climb_loop ( void )
   v_ctl_climb_setpoint = v_ctl_altitude_pgain * v_ctl_altitude_error
     + v_ctl_altitude_pre_climb;
   BoundAbs(v_ctl_climb_setpoint, V_CTL_ALTITUDE_MAX_CLIMB);
-  
+
   // Actual Climb Rate
   v_ctl_vz_error = v_ctl_climb_setpoint + estimator_z_dot;
   BoundAbs(v_ctl_vz_error, V_CTL_ALTITUDE_MAX_CLIMB);
@@ -173,10 +173,10 @@ void v_ctl_climb_loop ( void )
   // Commanded Flight Path
   v_ctl_gamma_error = atan2(v_ctl_vz_error, estimator_hspeed_mod);
   BoundAbs(v_ctl_gamma_error, 0.5);
-  
+
   // Massless Energy
   v_ctl_energy_error_pot = (v_ctl_altitude_error * 9.81) / 1000.;
-  v_ctl_energy_error_kin = (v_ctl_auto_airspeed_setpoint * v_ctl_auto_airspeed_setpoint/2. 
+  v_ctl_energy_error_kin = (v_ctl_auto_airspeed_setpoint * v_ctl_auto_airspeed_setpoint/2.
                          - estimator_hspeed_mod * estimator_hspeed_mod/2.) / 1000.;
 
   BoundAbs( v_ctl_energy_error_pot, v_ctl_pot_energy_bounds * 9.81);
@@ -205,7 +205,7 @@ void v_ctl_climb_loop ( void )
   }
 
   // proportional
-  throttle  = v_ctl_throttle_trim + v_ctl_energy_error_tot * v_ctl_energy_tot_p 
+  throttle  = v_ctl_throttle_trim + v_ctl_energy_error_tot * v_ctl_energy_tot_p
                                   - v_ctl_energy_rate_tot * v_ctl_energy_tot_d;
   nav_pitch = v_ctl_pitch_trim    + v_ctl_energy_error_dis * v_ctl_energy_dis_p
                                   - v_ctl_energy_rate_dis * v_ctl_energy_dis_d;

@@ -5,10 +5,10 @@
       <dl_settings name="onboardcam">
         <dl_setting MAX="1" MIN="0" STEP="1" VAR="onboardcam_mode" shortname="ir/cam" />
         <dl_setting MAX="1024" MIN="0" STEP="5" VAR="adc_onboardcama" shortname="ADCRoll" param="ADC_CHANNEL_ONBOARDCAMA"/>
-        <dl_setting MAX="1024" MIN="0" STEP="5" VAR="adc_onboardcamb" shortname="ADCPitch" param="ADC_CHANNEL_ONBOARDCAMB"/> 
+        <dl_setting MAX="1024" MIN="0" STEP="5" VAR="adc_onboardcamb" shortname="ADCPitch" param="ADC_CHANNEL_ONBOARDCAMB"/>
         <dl_setting MAX="255" MIN="0" STEP="1" VAR="blackfin_mode" shortname="blackfin" />
       </dl_settings>
     </dl_settings>
 </settings>
 
- 
+
