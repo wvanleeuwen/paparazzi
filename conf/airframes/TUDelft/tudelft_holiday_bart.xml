@@ -151,7 +151,7 @@ http://paparazzi.enac.fr/w/index.php?title=Theory_of_Operation
 <!-- Do not set MAX_ROLL, MAX_PITCH to small of a value, otherwise one can NOT control the plane very well manually -->
 <!-- If you have dual rate swith it of with same swtch as mode switch thus auto1 means dualrate is switched off also -->
   <section name="AUTO1" prefix="AUTO1_">
-    <define name="MAX_ROLL" value="0.8" unit="rad"/>
+    <define name="MAX_ROLL" value="1.2" unit="rad"/>
     <define name="MAX_PITCH" value="0.8" unit="rad"/>
   </section>
 
@@ -163,7 +163,7 @@ http://paparazzi.enac.fr/w/index.php?title=Theory_of_Operation
     <define name="LOW_BAT_LEVEL" value="7.5" unit="V"/>
     <define name="MAX_BAT_LEVEL" value="8.4" unit="V"/> <!-- 2S lipo 4.2*2 -->
   </section>
-
+t
 <!-- ******************************* MISC ********************************** -->
   <section name="MISC">
     <define name="MINIMUM_AIRSPEED" value="10.0" unit="m/s"/>
