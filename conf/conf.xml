@@ -171,7 +171,7 @@
   />
   <aircraft
    name="Logger"
-   ac_id="26"
+   ac_id="27"
    airframe="airframes/mm/extra/logger_sd_adc.xml"
    radio="radios/cockpitSX.xml"
    telemetry="telemetry/default.xml"
