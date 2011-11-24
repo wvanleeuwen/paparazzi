@@ -174,13 +174,6 @@
     <define name="MIN_CIRCLE_RADIUS" value="60."/>
   </section>
 
-<!--
- <section name="DATALINK" prefix="DATALINK_">
-    <define name="DEVICE_TYPE" value="XBEE"/>
-    <define name="DEVICE_ADDRESS" value="...."/>
-  </section>
- -->
-
   <section name="VERTICAL CONTROL" prefix="V_CTL_">
 
     <define name="POWER_CTL_BAT_NOMINAL" value="22.2" unit="volt"/>

@@ -267,12 +267,6 @@ If not set before when you would enter home mode you had to flip a bit via the G
     <define name="HOME_RADIUS" value="100" unit="m"/>
   </section>
 
-<!-- ****************************** DATALINK ******************************* -->
-  <section name="DATALINK" prefix="DATALINK_">
-    <define name="DEVICE_TYPE" value="PPRZ"/>
-    <define name="DEVICE_ADDRESS" value="...."/>
-  </section>
-
 <!-- ******************************** SIMU ********************************* -->
   <section name="SIMU">
     <define name="YAW_RESPONSE_FACTOR" value="0.5"/> <!-- a to low of a value gives bad simulation results -->
