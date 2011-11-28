@@ -69,7 +69,7 @@ http://paparazzi.enac.fr/w/index.php?title=Theory_of_Operation
       <define name="GYRO_R_CHAN" value="2"/>
 -->
       <define name="GYRO_P_SIGN" value="1"/>
-      <define name="GYRO_Q_SIGN" value="1"/>
+      <define name="GYRO_Q_SIGN" value="-1"/>
       <define name="GYRO_R_SIGN" value="1"/>
 
 	<define name="GYRO_P_NEUTRAL" value="-31"/>
@@ -84,7 +84,7 @@ http://paparazzi.enac.fr/w/index.php?title=Theory_of_Operation
       <define name="ACCEL_Z_CHAN" value="6"/>
 -->
       <define name="ACCEL_X_SIGN" value="1"/>
-      <define name="ACCEL_Y_SIGN" value="1"/>
+      <define name="ACCEL_Y_SIGN" value="-1"/>
       <define name="ACCEL_Z_SIGN" value="1"/>
 
 	<define name="ACCEL_X_NEUTRAL" value="10"/>
@@ -113,7 +113,7 @@ http://paparazzi.enac.fr/w/index.php?title=Theory_of_Operation
 
     <define name="BODY_TO_IMU_PHI"   value="RadOfDeg(  0.)"/>
     <define name="BODY_TO_IMU_THETA" value="RadOfDeg(  0.)"/>
-    <define name="BODY_TO_IMU_PSI"   value="RadOfDeg(  -90.)"/>
+    <define name="BODY_TO_IMU_PSI"   value="RadOfDeg(  0.)"/>
 
   </section>
 
@@ -163,7 +163,7 @@ http://paparazzi.enac.fr/w/index.php?title=Theory_of_Operation
     <define name="LOW_BAT_LEVEL" value="7.5" unit="V"/>
     <define name="MAX_BAT_LEVEL" value="8.4" unit="V"/> <!-- 2S lipo 4.2*2 -->
   </section>
-t
+
 <!-- ******************************* MISC ********************************** -->
   <section name="MISC">
     <define name="MINIMUM_AIRSPEED" value="10.0" unit="m/s"/>
