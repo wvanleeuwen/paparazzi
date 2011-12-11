@@ -53,52 +53,46 @@
     <define name="PITCH_COEF"  value="{ -256, 256,   256, -256 }"/>
     <define name="YAW_COEF"    value="{  256, 256,  -256, -256 }"/>
     <define name="THRUST_COEF" value="{  256,  256,  256,  256 }"/>-->
+    <!-- @FIXME: as the distance between the props on the 'top' is smaller than the distance on the 'bottom', two numbers should be 128 insted of 256 here -->
     <define name="ROLL_COEF"   value="{ -256, +256, -256, +256 }"/>
     <define name="PITCH_COEF"  value="{ +256, +256, -256, -256 }"/>
-    <define name="YAW_COEF"    value="{ +256, -256, -256, +256 }"/>
+    <define name="YAW_COEF"    value="{ 0,0,0,0 }"/>   <!-- YAW temporary disabled due to incorectly calibrated magneto -->
+<!--    <define name="YAW_COEF"    value="{ -256, +256, +256, -256 }"/> -->
     <define name="THRUST_COEF" value="{ +256, +256, +256, +256 }"/>
 
   </section>
 
   <section name="IMU" prefix="IMU_">
- <!-- Calibration Neutral -->
-    <define name="GYRO_P_NEUTRAL" value="0"/>
-    <define name="GYRO_Q_NEUTRAL" value="0"/>
-    <define name="GYRO_R_NEUTRAL" value="0"/>
+<define name="ACCEL_X_NEUTRAL" value="6"/>
+	<define name="GYRO_P_NEUTRAL" value="37"/>
+	<define name="GYRO_Q_NEUTRAL" value="-19"/>
+	<define name="GYRO_R_NEUTRAL" value="63"/>
+	<define name="GYRO_P_SENS" value="4.412" integer="16"/>
+	<define name="GYRO_Q_SENS" value="4.412" integer="16"/>
+	<define name="GYRO_R_SENS" value="4.412" integer="16"/>
+    <define name="GYRO_PQ_SENS" value="0.0" integer="16"/>
+    <define name="GYRO_PR_SENS" value="0.0" integer="16"/>
+    <define name="GYRO_QR_SENS" value="0.0" integer="16"/>
 
-    <!-- ITG3200: SENS = 14.375 LSB/(deg/sec) * 57.6 deg/rad = 828 LSB/rad/sec / 12bit FRAC: 4096 / 828 -->
-    <!-- IMU3000: SENS = 16.4 LSB/(deg/sec) * 57.6 deg/rad = 828 LSB/rad/sec / 12bit FRAC: 4096 / 828 -->
-    <define name="GYRO_P_SENS" value="4.336" integer="16"/>
-    <define name="GYRO_Q_SENS" value="4.336" integer="16"/>
-    <define name="GYRO_R_SENS" value="4.336" integer="16"/>
-
-    <define name="GYRO_P_Q" value="0."/>
-    <define name="GYRO_P_R" value="0"/>
-    <define name="GYRO_Q_P" value="0."/>
-    <define name="GYRO_Q_R" value="0."/>
-    <define name="GYRO_R_P" value="0."/>
-    <define name="GYRO_R_Q" value="0."/>
-
-    <define name="ACCEL_X_NEUTRAL" value="-12"/>
-    <define name="ACCEL_Y_NEUTRAL" value="+3"/>
-    <define name="ACCEL_Z_NEUTRAL" value="-30"/>
-
-    <!-- SENS = 256 LSB/g @ 2.5V [X&Y: 265 LSB/g @ 3.3V] / 9.81 ms2/g = 26.095 LSB/ms2 / 10bit FRAC: 1024 / 26.095 for z and 1024 / 27.01 for X&Y -->
-    <define name="ACCEL_X_SENS" value="37.9" integer="16"/>
-    <define name="ACCEL_Y_SENS" value="37.9" integer="16"/>
-    <define name="ACCEL_Z_SENS" value="39.24" integer="16"/>
+	<define name="ACCEL_X_NEUTRAL" value="6"/>
+<define name="ACCEL_Y_NEUTRAL" value="-8863"/>
+<define name="ACCEL_Z_NEUTRAL" value="-23"/>
+<define name="ACCEL_X_SENS" value="9.0042832468" integer="16"/>
+<define name="ACCEL_Y_SENS" value="1.09938007043" integer="16"/>
+<define name="ACCEL_Z_SENS" value="8.91979851095" integer="16"/>
 
 
-    <define name="MAG_X_NEUTRAL" value="0"/>
-    <define name="MAG_Y_NEUTRAL" value="0"/>
-    <define name="MAG_Z_NEUTRAL" value="0"/>
+	
+<define name="MAG_X_NEUTRAL" value="-68"/>
+<define name="MAG_Y_NEUTRAL" value="6"/>
+<define name="MAG_Z_NEUTRAL" value="84"/>
+<define name="MAG_X_SENS" value="4.13092138682" integer="16"/>
+<define name="MAG_Y_SENS" value="4.34481407726" integer="16"/>
+<define name="MAG_Z_SENS" value="4.32335171246" integer="16"/>
 
-    <define name="MAG_X_SENS" value="1" integer="16"/>
-    <define name="MAG_Y_SENS" value="1" integer="16"/>
-    <define name="MAG_Z_SENS" value="1" integer="16"/>
 
     <define name="BODY_TO_IMU_PHI"   value="RadOfDeg(  0.0 )"/>
-    <define name="BODY_TO_IMU_THETA" value="RadOfDeg(  -90.0 )"/>
+    <define name="BODY_TO_IMU_THETA" value="RadOfDeg(  270.0 )"/>
     <define name="BODY_TO_IMU_PSI"   value="RadOfDeg(  0.0 )"/>
   </section>
 
