@@ -51,17 +51,10 @@
 
   <command_laws>
     <!--************* different mixing strategies - probably don't edit this ****************-->
-    <!-- direct ailerons -->
-    <let var="aileron_direct_left"  value="-@RC_ROLL * (9600 + @RC_THRUST)/9600"/>
-    <let var="aileron_direct_right" value="-@RC_ROLL * (9600 + @RC_THRUST)/9600"/> 
-
-    <!-- direct elevators -->
-    <let var="elevator_direct_left"  value="-@RC_PITCH * (9600 + @RC_THRUST)/9600"/>
-    <let var="elevator_direct_right" value="+@RC_PITCH * (9600 + @RC_THRUST)/9600"/>
 
     <!-- aileron feedback -->
-    <let var="aileron_feedback_left"  value="-@ROLL * (9600 + @RC_THRUST)/9600"/>
-    <let var="aileron_feedback_right" value="-@ROLL * (9600 + @RC_THRUST)/9600"/>
+    <let var="aileron_feedback_left"  value="@ROLL * (9600 + @RC_THRUST)/9600"/>
+    <let var="aileron_feedback_right" value="@ROLL * (9600 + @RC_THRUST)/9600"/>
 
     <!-- elevator feedback -->
     <let var="elevator_feedback_left"  value="-@PITCH * (9600 + @RC_THRUST)/9600"/>
@@ -219,18 +212,6 @@
     <define name="PHI_DGAIN"  value="-600"/>
     <define name="PHI_IGAIN"  value="-10"/> 
    
-<!-- <define name="PSI_PGAIN"  value="-600"/>
-    <define name="PSI_DGAIN"  value="0"/>
-    <define name="PSI_IGAIN"  value="0"/>
-
-    <define name="THETA_PGAIN"  value="-600"/>
-    <define name="THETA_DGAIN"  value="0"/>
-    <define name="THETA_IGAIN"  value="0"/>
-
-    <define name="PHI_PGAIN"  value="-600"/>
-    <define name="PHI_DGAIN"  value="0"/>
-    <define name="PHI_IGAIN"  value="0"/> -->
-
     <!-- feedforward -->
     <define name="PHI_DDGAIN"   value="0"/>
     <define name="THETA_DDGAIN" value="0"/>
@@ -279,7 +260,7 @@
    <define name="SENSORS_PARAMS" value="&quot;nps_sensors_params_booz2_a1.h&quot;"/>
  </section>
 
- <include href="conf/airframes/esden/toytronics/gains/QS4_inner_8x4_5.xml"/>
+ <include href="conf/airframes/TU_Delft/gains/QS4_inner_8x4_5_tud.xml"/>
  <include href="conf/airframes/esden/toytronics/setpoint/QS4_setpoint.xml"/>
  <include href="conf/airframes/esden/camera_mount.xml"/>
 
