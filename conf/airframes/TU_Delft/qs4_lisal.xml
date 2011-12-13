@@ -90,7 +90,7 @@
    <set servo="AILEVON_RIGHT"   value="0" />-->
    <set servo="CAMERA_MOUNT"   value="@CAMERA"/>
   </command_laws>
-  
+
   <!-- for the sim -->
   <section name="ACTUATORS_MKK" prefix="ACTUATORS_MKK_">
     <define name="NB" value="4"/>
@@ -110,7 +110,7 @@
     <define name="NB_MOTOR" value="4"/>
     <define name="SCALE" value="256"/>
     <define name="PITCH_COEF"  value="{ -256, -256,  256,  256 }"/>
-    <define name="ROLL_COEF"   value="{  256, -256, -128,  128 }"/> 
+    <define name="ROLL_COEF"   value="{  256, -256, -128,  128 }"/>
    <!--<define name="ROLL_COEF"   value="{  -256, +256, +128,  -128 }"/>   -->
     <define name="YAW_COEF"    value="{  +256, -256,  +256, -256 }"/>
     <define name="THRUST_COEF" value="{  256,  256,  256,  256 }"/>
@@ -140,8 +140,8 @@
     <define name="GYRO_PR_SENS" value="0.0" integer="16"/>
     <define name="GYRO_QR_SENS" value="0.0" integer="16"/>
 
-    <define name="MAG_X_NEUTRAL" value="-69"/> 
-    <define name="MAG_Y_NEUTRAL" value="104"/> 
+    <define name="MAG_X_NEUTRAL" value="-69"/>
+    <define name="MAG_Y_NEUTRAL" value="104"/>
     <define name="MAG_Z_NEUTRAL" value="-75"/>
     <define name="MAG_X_SENS" value="3.68345281413" integer="16"/>
     <define name="MAG_Y_SENS" value="4.48501640509" integer="16"/>
@@ -210,8 +210,8 @@
 
     <define name="PHI_PGAIN"  value="-4000"/>
     <define name="PHI_DGAIN"  value="-600"/>
-    <define name="PHI_IGAIN"  value="-10"/> 
-   
+    <define name="PHI_IGAIN"  value="-10"/>
+
     <!-- feedforward -->
     <define name="PHI_DDGAIN"   value="0"/>
     <define name="THETA_DDGAIN" value="0"/>
