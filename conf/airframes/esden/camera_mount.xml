@@ -3,5 +3,7 @@
   <define name="HOVER" value="3740"/>
   <define name="FORWARD" value="-6700"/>
   <define name="GAIN" value="1.85" integer="16"/>
+
+  <define name="CAMERA_RADIO_CHANNEL" value="RADIO_AUX3"/>
 </section>
 </airframe>
