@@ -43,7 +43,7 @@ bool_t   autopilot_motors_on;
 
 bool_t   autopilot_rc_unkilled_startup; //toytronics: keep track of Tx on motor unkill @ vehicle power up
 bool_t   autopilot_first_boot; //toytronics: determine first power up for ahrs time delay
-bool_t   autopilot_mode1_kill; //toytronics: keep track of whether motor shutoff occurred in mode 1 
+bool_t   autopilot_mode1_kill; //toytronics: keep track of whether motor shutoff occurred in mode 1
 int32_t  autopilot_lobatt_wing_waggle_interval; //interval at which wing waggle series occurs if batt is low
 
 bool_t   autopilot_in_flight;
@@ -283,7 +283,7 @@ static inline int ahrs_is_aligned(void) {
 
 #ifdef AUTOPILOT_INSTANT_START_WITH_SAFETIES
 static inline void autopilot_check_motors_on( void ) {
-	if (radio_control.values[RADIO_KILL_SWITCH]>0 && !ahrs_is_aligned())	
+	if (radio_control.values[RADIO_KILL_SWITCH]>0 && !ahrs_is_aligned())
 		autopilot_rc_unkilled_startup = TRUE;
 	if (autopilot_rc_unkilled_startup == TRUE)
 		if (radio_control.values[RADIO_KILL_SWITCH]<0 && ahrs_is_aligned())
@@ -295,7 +295,7 @@ static inline void autopilot_check_motors_on( void ) {
 		else
 		  autopilot_motors_on=radio_control.values[RADIO_KILL_SWITCH]>0 && radio_control.values[RADIO_MODE] < 0 && THROTTLE_STICK_DOWN() && YAW_STICK_CENTERED() && PITCH_STICK_CENTERED() && ROLL_STICK_CENTERED() && ahrs_is_aligned();
 		}
-	else{ 
+	else{
 		autopilot_motors_on=radio_control.values[RADIO_KILL_SWITCH]>0 && ahrs_is_aligned() && autopilot_rc_unkilled_startup == FALSE;
 		if(autopilot_motors_on == TRUE)
 		  autopilot_mode1_kill = radio_control.values[RADIO_MODE]<0;
