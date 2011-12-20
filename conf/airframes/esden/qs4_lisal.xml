@@ -250,7 +250,7 @@
       <subsystem name="radio_control" type="spektrum"/>
       <subsystem name="actuators"     type="pwm_supervision"/>
       <subsystem name="telemetry"     type="xbee_api">
-        <configure name="MODEM_BAUD"    value="B9600"/>
+        <configure name="MODEM_BAUD"    value="B57600"/>
         <configure name="MODEM_PORT"    value="UART2"/>
       </subsystem>
       <define name="SERVO_HZ" value="400"/>
