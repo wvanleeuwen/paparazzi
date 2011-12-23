@@ -197,7 +197,7 @@
   </section>
 
   <section name="INS" prefix="INS_">
-    <define name="BARO_SENS" value="20" integer="16"/>
+    <define name="BARO_SENS" value="22" integer="16"/>
   </section>
 
  <section name="GUIDANCE_V" prefix="GUIDANCE_V_">
@@ -210,15 +210,15 @@
    <define name="REF_MAX_ZDD"  value=" 0.5*9.81"/>
    <define name="REF_MIN_ZD"   value="-1.5"/>
    <define name="REF_MAX_ZD"   value=" 1.5"/>
-   <define name="HOVER_KP"    value="-540"/>
-   <define name="HOVER_KD"    value="-520"/>
-   <define name="HOVER_KI"    value="-60"/>
+   <define name="HOVER_KP"    value="-580"/>
+   <define name="HOVER_KD"    value="-540"/>
+   <define name="HOVER_KI"    value="-30"/>
    <!-- 1.5m/s for full stick : BOOZ_SPEED_I_OF_F(1.5) / (MAX_PPRZ/2) -->
    <define name="RC_CLIMB_COEF" value ="163"/>
    <!-- BOOZ_SPEED_I_OF_F(1.5) * 20% -->
    <define name="RC_CLIMB_DEAD_BAND" value ="160000"/>
    <!--<define name="INV_M" value ="0.21"/>-->
-   <define name="INV_M" value ="0.17"/>
+   <define name="INV_M" value ="0.2"/>
   </section>
 
   <section name="AHRS" prefix="AHRS_">
@@ -280,7 +280,11 @@
     </target>
 
     <subsystem name="imu"           type="aspirin"/>
-    <subsystem name="gps"           type="ublox"/>
+    <subsystem name="gps"               type="ublox">
+      <configure name="GPS_PORT"                value="UART3"/>
+      <configure name="GPS_BAUD"                value="B38400"/>
+    </subsystem>
+
     <subsystem name="ahrs"          type="int_cmpl_quat"/>
     <subsystem name="stabilization" type="quaternion"/>
     <subsystem name="toytronics"    type="default"/>
@@ -288,14 +292,14 @@
   </firmware>
 
 
-  <firmware name="lisa_m_test_progs">
-    <target name="test_led"			board="lisa_m_1.0"/>
-    <target name="test_uart_lisam"			board="lisa_m_1.0"/>
-    <target name="test_servos"			board="lisa_m_1.0"/>
-    <target name="test_telemetry"		board="lisa_m_1.0"/>
-    <target name="test_imu_aspirin"			board="lisa_m_1.0"/>
-    <target name="test_rc_spektrum"		board="lisa_m_1.0"/>
-    <target name="test_baro"			board="lisa_m_1.0"/>
+  <firmware name="lisa_l_test_progs">
+    <target name="test_led"			board="lisa_l_1.0"/>
+    <target name="test_uart_lisal"			board="lisa_l_1.0"/>
+    <target name="test_servos"			board="lisa_l_1.0"/>
+    <target name="test_telemetry"		board="lisa_l_1.0"/>
+    <target name="test_imu_aspirin"			board="lisa_l_1.0"/>
+    <target name="test_rc_spektrum"		board="lisa_l_1.0"/>
+    <target name="test_baro"			board="lisa_l_1.0"/>
     <!--<target name="test_imu"			board="lisa_m_1.0"/>
     <target name="test_rc_ppm"			board="lisa_m_1.0"/>
     <target name="test_adc"			board="lisa_m_1.0"/>
@@ -306,5 +310,11 @@
     <target name="test_esc_asctecv1_simple"	board="lisa_m_1.0"/>
     <target name="test_actuators_mkk"		board="lisa_m_1.0"/>
     <target name="test_actuators_asctecv1"	board="lisa_m_1.0"/-->
+    <target name="tunnel_sw"                board="lisa_l_1.0">
+    </target>
+    <target name="tunnel_hw"                board="lisa_l_1.0">
+        <configure name="UART3_BAUD"                value="B38400"/>	
+    </target>
   </firmware>
+
 </airframe>
