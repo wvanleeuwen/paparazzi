@@ -38,7 +38,7 @@
 #define GUIDANCE_H_MODE_TOYTRONICS_HOVER_FORWARD 6
 #define GUIDANCE_H_MODE_TOYTRONICS_FORWARD       7
 #define GUIDANCE_H_MODE_TOYTRONICS_AEROBATIC     8
-
+#define GUIDANCE_H_MODE_TUDELFT_QUADSHOT_NAV     9
 extern uint8_t guidance_h_mode;
 
 /* horizontal setpoint in NED */

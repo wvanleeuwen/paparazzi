@@ -694,6 +694,9 @@ toytronics_mode_enter(int new_mode)
     set_stabilization_gains(&toytronics_aerobatic_gains);
     break;
 
+  case GUIDANCE_H_MODE_TUDELFT_QUADSHOT_NAV:
+    //todo
+    break;
   default:
     break;
   }

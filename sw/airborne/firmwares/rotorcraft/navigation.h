@@ -76,9 +76,13 @@ bool_t nav_detect_ground(void);
 
 void nav_home(void);
 
-#define NavKillThrottle() ({ if (autopilot_mode == AP_MODE_NAV) { autopilot_set_motors_on(FALSE); } FALSE; })
-#define NavResurrect() ({ if (autopilot_mode == AP_MODE_NAV) { autopilot_set_motors_on(TRUE); } FALSE; })
-
+//#ifdef AUTOPILOT_INSTANT_START_WITH_SAFETIES
+#define NavKillThrottle() ({ if (autopilot_mode == AP_MODE_NAV) { autopilot_motors_on = FALSE; } FALSE; })
+#define NavResurrect() ({ if (autopilot_mode == AP_MODE_NAV) { autopilot_motors_on = TRUE; } FALSE; })
+//#else
+//#define NavKillThrottle() ({ if (autopilot_mode == AP_MODE_NAV) { autopilot_set_motors_on(FALSE); } FALSE; })
+//#define NavResurrect() ({ if (autopilot_mode == AP_MODE_NAV) { autopilot_set_motors_on(TRUE); } FALSE; })
+//#endif
 
 #define NavSetGroundReferenceHere() ({ nav_reset_reference(); FALSE; })
 #define NavSetAltitudeReferenceHere() ({ nav_reset_alt(); FALSE; })

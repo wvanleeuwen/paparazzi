@@ -147,6 +147,10 @@ void guidance_h_mode_changed(uint8_t new_mode) {
     toytronics_mode_enter(new_mode);
     stabilization_attitude_enter();
     break;
+  case GUIDANCE_H_MODE_TUDELFT_QUADSHOT_NAV:
+    toytronics_mode_enter(new_mode);
+    guidance_h_nav_enter();
+    break;
 #endif
 
   default:
