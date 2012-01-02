@@ -313,7 +313,17 @@ static inline void autopilot_check_motors_on( void ) {
 static inline void autopilot_check_motors_on( void ) {
 	autopilot_motors_on=radio_control.values[RADIO_KILL_SWITCH]>0 && ahrs_is_aligned();
 	}
+
 #else
+/** Set motors ON or OFF and change the status of the check_motors state machine
+ */
+void autopilot_set_motors_on(bool_t motors_on) {
+  autopilot_motors_on = motors_on;
+  kill_throttle = ! autopilot_motors_on;
+  if (autopilot_motors_on) autopilot_check_motor_status = STATUS_MOTORS_ON;
+  else autopilot_check_motor_status = STATUS_MOTORS_OFF;
+}
+
 /**
  * State machine to check if motors should be turned ON or OFF
  * The motors start/stop when pushing the yaw stick without throttle during a given time
@@ -366,14 +376,6 @@ static inline void autopilot_check_motors_on( void ) {
 }
 #endif
 
-/** Set motors ON or OFF and change the status of the check_motors state machine
- */
-void autopilot_set_motors_on(bool_t motors_on) {
-  autopilot_motors_on = motors_on;
-  kill_throttle = ! autopilot_motors_on;
-  if (autopilot_motors_on) autopilot_check_motor_status = STATUS_MOTORS_ON;
-  else autopilot_check_motor_status = STATUS_MOTORS_OFF;
-}
 
 void autopilot_on_rc_frame(void) {
 
