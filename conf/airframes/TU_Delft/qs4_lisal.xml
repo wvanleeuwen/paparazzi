@@ -2,7 +2,6 @@
 <!-- Copyright (C) 2011, Pranay Sinha, the Quadshot Project -->
 
 <airframe name="qs4_lisam">
-
   <servos min="0" neutral="0" max="0xff">
     <servo name="A1"            no="0" min="1000" neutral="1000" max="2000"/>
     <servo name="A2"            no="1" min="1000" neutral="1000" max="2000"/>
@@ -33,7 +32,7 @@
     <!-- <define name="MODE_AUTO1" value="AP_MODE_TOYTRONICS_AEROBATIC"/> -->
     <!--<define name="MODE_AUTO2"  value="AP_MODE_TOYTRONICS_AEROBATIC"/>-->
     <define name="AUTOPILOT_KILL_WITHOUT_AHRS"  value="TRUE"/>
-    <define name="AUTOPILOT_INSTANT_START_WITH_SAFETIES"  value="TRUE"/>
+    <define name="AUTOPILOT_INSTANT_START_WITH_SAFETIES"  value="TRUE"/> 
     <!--This is to enable a wing waggle at specified low battery voltage. The interval is in cycle counts, not seconds-->
     <define name="AUTOPILOT_LOBATT_WING_WAGGLE"  value="TRUE"/>
     <define name="AUTOPILOT_LOBATT_WING_WAGGLE_INTERVAL"  value="5120"/>
@@ -253,6 +252,7 @@
 
  <modules main_freq="512">
    <load name="battery_buzzer.xml"/>
+   <load name="quadshot_nav_mode_change.xml"/>
  </modules>
 
   <firmware name="rotorcraft">
@@ -277,6 +277,8 @@
       <subsystem name="fdm"           type="nps"/>
       <subsystem name="radio_control" type="ppm"/>
       <subsystem name="actuators"     type="mkk"/>
+      <subsystem name="imu"           type="b2_v1.0"/>
+      <define name="RADIO_KILL_SWITCH" value="RADIO_FLAPS"/>
     </target>
 
     <subsystem name="imu"           type="aspirin"/>
@@ -317,4 +319,7 @@
     </target>
   </firmware>
 
+  <makefile>
+sim.srcs += firmwares/rotorcraft/toytronics/toytronics_interface.c firmwares/rotorcraft/toytronics/toytronics_setpoint.c 
+  </makefile>
 </airframe>
