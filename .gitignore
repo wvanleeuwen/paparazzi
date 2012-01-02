@@ -154,3 +154,10 @@
 /sw/airborne/test/test_algebra
 /sw/airborne/test/test_matrix
 /sw/airborne/test/test_att
+
+# Eclipse IDE project files
+/.cproject
+/.project
+/.externalToolBuilders
+/build.properties
+/META-INF
