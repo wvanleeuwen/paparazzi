@@ -25,14 +25,15 @@
 //parameters for the 2nd order low-pass filter
 //calculated in MATLAB using
 //     [num,den] = butter(2,(cutoff_freq/(sample_freq/2)))*
-#define ACCEL_BUTTER_NUM_1 = +0.00014802198653
-#define ACCEL_BUTTER_NUM_2 = +0.00029604397306
-#define ACCEL_BUTTER_NUM_3 = +0.14802198653185
+#define ACCEL_BUTTER_NUM_1 +0.00014802198653
+#define ACCEL_BUTTER_NUM_2 +0.00029604397306
+#define ACCEL_BUTTER_NUM_3 +0.14802198653185
 //warning, ACCEL_BUTTER_DEN_1 is always one for this filter, so it is omitted here.
-#define ACCEL_BUTTER_DEN_2 = -1.96529337262269
-#define ACCEL_BUTTER_DEN_3 = +0.96588546056881
+#define ACCEL_BUTTER_DEN_2 -1.96529337262269
+#define ACCEL_BUTTER_DEN_3 +0.96588546056881
 
 #define FILTER_IC_ACCEL
+#define USE_GPS
 
 #include "subsystems/ahrs.h"
 #include "std.h"
@@ -57,14 +58,7 @@ extern struct AhrsIntCmpl ahrs_impl;
 #include "subsystems/gps.h"
 #endif
 
-struct Int32Rates omega;
 
-#ifdef FILTER_IC_ACCEL
-struct FloatVect3 accel_float_prev = {0,0,0};
-struct FloatVect3 accel_float_prev_prev = {0,0,0};
-struct FloatVect3 accel_filter_val_prev = {0,0,0};
-struct FloatVect3 accel_filter_val_prev_prev = {0,0,0};
-#endif
 
 #ifdef AHRS_UPDATE_FW_ESTIMATOR
 // TODO copy ahrs to state instead of estimator

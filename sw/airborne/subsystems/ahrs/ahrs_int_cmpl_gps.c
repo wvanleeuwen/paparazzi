@@ -78,6 +78,16 @@ struct AhrsIntCmpl ahrs_impl;
 struct Int32Vect3 accel_bfp_filtered = {0,0,0};
 struct FloatVect3 accel_float = {0,0,0};
 
+#ifdef FILTER_IC_ACCEL
+struct FloatVect3 accel_float_prev = {0,0,0};
+struct FloatVect3 accel_float_prev_prev = {0,0,0};
+struct FloatVect3 accel_filter_val_prev = {0,0,0};
+struct FloatVect3 accel_filter_val_prev_prev = {0,0,0};
+#endif
+
+struct Int32Rates omega;
+
+
 static inline void compute_imu_quat_and_rmat_from_euler(void);
 static inline void compute_imu_euler_and_rmat_from_quat(void);
 static inline void compute_body_orientation(void);
@@ -182,22 +192,6 @@ void ahrs_update_accel(void) {
 		             - ACCEL_BUTTER_DEN_2*accel_filter_val_prev.z
 		             - ACCEL_BUTTER_DEN_3*accel_filter_val_prev_prev.z;
 
-	/*accel_float =  { ACCEL_BUTTER_NUM_1*accel_float.x
-	                 + ACCEL_BUTTER_NUM_2*accel_float_prev.x
-	                 + ACCEL_BUTTER_NUM_3*accel_float_prev_prev.x
-	                 - ACCEL_BUTTER_DEN_2*accel_filter_val_prev.x
-	                 - ACCEL_BUTTER_DEN_3*accel_filter_val_prev_prev.x ,
-	                 ACCEL_BUTTER_NUM_1*accel_float.y
-		             + ACCEL_BUTTER_NUM_2*accel_float_prev.y
-		             + ACCEL_BUTTER_NUM_3*accel_float_prev_prev.y
-		             - ACCEL_BUTTER_DEN_2*accel_filter_val_prev.y
-		             - ACCEL_BUTTER_DEN_3*accel_filter_val_prev_prev.y,
-	                 ACCEL_BUTTER_NUM_1*accel_float.z
-		             + ACCEL_BUTTER_NUM_2*accel_float_prev.z
-		             + ACCEL_BUTTER_NUM_3*accel_float_prev_prev.z
-		             - ACCEL_BUTTER_DEN_2*accel_filter_val_prev.z
-		             - ACCEL_BUTTER_DEN_3*accel_filter_val_prev_prev.z };*/
-
 	accel_float_prev_prev 		= accel_float_prev;
 	accel_float_prev 			= accel_float;
 	accel_filter_val_prev_prev	= accel_filter_val_prev;
@@ -231,12 +225,12 @@ void ahrs_update_accel(void) {
 
 
 #ifdef USE_GPS
-  struct FloatRates3 omega_float;
+  struct FloatRates omega_float;
   RATES_FLOAT_OF_BFP(omega_float, omega);
   ACCELS_FLOAT_OF_BFP(accel_float, residual);
   if (gps.fix == GPS_FIX_3D) {    //Remove centrifugal acceleration.
-    accel_float.y += gps.speed_3d/100. * omega_floats.r;  // Centrifugal force on Acc_y = GPS_speed*GyroR
-    accel_float.z -= gps.speed_3d/100. * omega_floats.q;  // Centrifugal force on Acc_z = GPS_speed*GyroQ
+    accel_float.y += gps.speed_3d/100. * omega_float.r;  // Centrifugal force on Acc_y = GPS_speed*GyroR
+    accel_float.z -= gps.speed_3d/100. * omega_float.q;  // Centrifugal force on Acc_z = GPS_speed*GyroQ
   }
   ACCELS_BFP_OF_REAL(residual,accel_float);
 #endif

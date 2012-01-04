@@ -252,7 +252,7 @@
 
  <modules main_freq="512">
    <load name="battery_buzzer.xml"/>
-   <load name="quadshot_nav_mode_change.xml"/>
+   <!-- <load name="quadshot_nav_mode_change.xml"/> -->
  </modules>
 
   <firmware name="rotorcraft">
