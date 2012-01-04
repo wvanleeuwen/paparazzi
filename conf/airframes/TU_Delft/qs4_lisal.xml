@@ -287,7 +287,7 @@
       <configure name="GPS_BAUD"                value="B38400"/>
     </subsystem>
 
-    <subsystem name="ahrs"          type="int_cmpl_quat"/>
+    <subsystem name="ahrs"          type="int_cmpl_quat_gps"/>
     <subsystem name="stabilization" type="quaternion"/>
     <subsystem name="toytronics"    type="default"/>
     <subsystem name="camera_mount"  type="default"/>
@@ -296,10 +296,10 @@
 
   <firmware name="lisa_l_test_progs">
     <target name="test_led"			board="lisa_l_1.0"/>
-    <target name="test_uart_lisal"			board="lisa_l_1.0"/>
+    <target name="test_uart_lisal"		board="lisa_l_1.0"/>
     <target name="test_servos"			board="lisa_l_1.0"/>
     <target name="test_telemetry"		board="lisa_l_1.0"/>
-    <target name="test_imu_aspirin"			board="lisa_l_1.0"/>
+    <target name="test_imu_aspirin"		board="lisa_l_1.0"/>
     <target name="test_rc_spektrum"		board="lisa_l_1.0"/>
     <target name="test_baro"			board="lisa_l_1.0"/>
     <!--<target name="test_imu"			board="lisa_m_1.0"/>

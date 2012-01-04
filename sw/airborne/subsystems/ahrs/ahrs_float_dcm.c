@@ -62,7 +62,6 @@ float ins_pitch_neutral = INS_PITCH_NEUTRAL_DEFAULT;
 // DCM Working variables
 const float G_Dt = 1. / ((float) AHRS_PROPAGATE_FREQUENCY );
 
-struct FloatVect3 accel_float = {0,0,0};
 
 float Omega_Vector[3]= {0,0,0}; //Corrected Gyro_Vector data
 float Omega_P[3]= {0,0,0};		//Omega Proportional correction
