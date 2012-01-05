@@ -27,7 +27,7 @@
 //     [num,den] = butter(2,(cutoff_freq/(sample_freq/2)))*
 #define ACCEL_BUTTER_NUM_1 +0.00014802198653
 #define ACCEL_BUTTER_NUM_2 +0.00029604397306
-#define ACCEL_BUTTER_NUM_3 +0.14802198653185
+#define ACCEL_BUTTER_NUM_3 +0.00014802198653185
 //warning, ACCEL_BUTTER_DEN_1 is always one for this filter, so it is omitted here.
 #define ACCEL_BUTTER_DEN_2 -1.96529337262269
 #define ACCEL_BUTTER_DEN_3 +0.96588546056881
