@@ -288,6 +288,8 @@ static inline int ahrs_is_aligned(void) {
 #endif
 
 #ifdef AUTOPILOT_INSTANT_START_WITH_SAFETIES
+#warning WARNING AUTOPILOT_INSTANT_START_WITH_SAFETIES is only tested with the Quadshot!
+#warning NAV mode might not work proplerly when AUTOPILOT_INSTANT_START_WITH_SAFETIES is used!
 static inline void autopilot_check_motors_on( void ) {
 	if (radio_control.values[RADIO_KILL_SWITCH]>0 && !ahrs_is_aligned())
 		autopilot_rc_unkilled_startup = TRUE;
@@ -308,6 +310,8 @@ static inline void autopilot_check_motors_on( void ) {
 		}
 	}
 #elif defined AUTOPILOT_INSTANT_START
+#warning WARNING AUTOPILOT_INSTANT_START is only tested with the Quadshot!
+#warning NAV mode might not work proplerly when AUTOPILOT_INSTANT_START_WITH_SAFETIES is used!
 static inline void autopilot_check_motors_on( void ) {
 	autopilot_motors_on=radio_control.values[RADIO_KILL_SWITCH]>0 && ahrs_is_aligned();
 	}
