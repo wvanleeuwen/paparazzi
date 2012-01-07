@@ -287,8 +287,7 @@
       <configure name="GPS_BAUD"                value="B38400"/>
     </subsystem>
 
-    <define name="FILTER_IC_ACCEL" value="1"/>
-    <subsystem name="ahrs"          type="int_cmpl_quat_gps"/>
+    <subsystem name="ahrs"          type="int_cmpl_quat"/>
     <subsystem name="stabilization" type="quaternion"/>
     <subsystem name="toytronics"    type="default"/>
     <subsystem name="camera_mount"  type="default"/>
