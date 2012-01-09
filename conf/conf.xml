@@ -309,4 +309,24 @@
    settings=" settings/TUDelft/tuning_xsens.xml settings/light.xml"
    gui_color="blue"
   />
+  <aircraft
+   name="tudelftquadshot"
+   ac_id="40"
+   airframe="airframes/TU_Delft/qs4_lisal.xml"
+   radio="radios/R6107SP_7ch_xyz.xml"
+   telemetry="telemetry/telemetry_quadshot_tud.xml"
+   flight_plan="flight_plans/dummy.xml"
+   settings=" settings/settings_booz2_qs4m.xml"
+   gui_color="blue"
+  />
+  <aircraft
+   name="tudelftquadshot_sim"
+   ac_id="42"
+   airframe="airframes/TU_Delft/qs4_lisal.xml"
+   radio="radios/R6107SP_7ch_xyz.xml"
+   telemetry="telemetry/booz_minimal.xml"
+   flight_plan="flight_plans/TU_Delft/quadshot-test.xml"
+   settings=" settings/settings_booz2.xml"
+   gui_color="blue"
+  />
 </conf>

@@ -67,7 +67,8 @@ void baro_periodic(void) {
 
 
 void baro_board_send_config_abs(void) {
-  baro_board_write_to_register(BARO_ABS_ADDR, 0x01, 0x84, 0x83);
+  //config register should be 0x84 in low countries, or 0x86 in normal countries
+  baro_board_write_to_register(BARO_ABS_ADDR, 0x01, 0x84, 0x83); 
 }
 
 void baro_board_send_config_diff(void) {

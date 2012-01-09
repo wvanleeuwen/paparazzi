@@ -41,9 +41,7 @@
 /paparazzi
 
 # /conf/
-/conf/conf.xml
 /conf/conf.xml.20*
-/conf/control_panel.xml
 /conf/%gconf.xml
 /conf/srtm_data/*
 /conf/maps_data/*
@@ -89,6 +87,7 @@
 /sw/ground_segment/tmtc/ivy_serial_bridge
 /sw/ground_segment/tmtc/GSM/SMS_GS
 /sw/ground_segment/tmtc/gpsd2ivy
+#/sw/ground_segment/tmtc/TUDelft
 
 # /sw/ground_segment/joystick
 /sw/ground_segment/joystick/input2ivy
@@ -157,3 +156,10 @@
 /sw/airborne/test/test_algebra
 /sw/airborne/test/test_matrix
 /sw/airborne/test/test_att
+
+# Eclipse IDE project files
+/.cproject
+/.project
+/.externalToolBuilders
+/build.properties
+/META-INF
