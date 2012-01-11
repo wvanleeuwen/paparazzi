@@ -124,7 +124,8 @@
     <define name="THRUST_COEF" value="{  256,  256,  256,  256 }"/>
   </section>
 
-  <include href="conf/airframes/esden/calib/imu_lisam_033.xml"/>
+  <include href="conf/airframes/TU_Delft/calib/imu_lisam_033_quadshot.xml"/>
+  <!--<include href="conf/airframes/esden/calib/imu_lisam_033.xml"/>-->
 
   <section name="IMU" prefix="IMU_">
 
@@ -258,6 +259,10 @@
  <modules main_freq="512">
    <load name="battery_buzzer.xml"/>
    <!-- <load name="quadshot_nav_mode_change.xml"/> -->
+   <load name="adc_generic.xml">
+      <configure name="ADC_CHANNEL_GENERIC1" value="1"/>
+      <configure name="ADC_CHANNEL_GENERIC2" value="0"/>
+   </load>
  </modules>
 
   <firmware name="rotorcraft">

@@ -19,9 +19,9 @@
       <!--<message name="BOOZ2_CAM"         period="1."/>-->
       <message name="GPS_INT"         period=".25"/>
       <message name="INS"          period=".25"/>
-      <message name="TOYTRONICS_SETPOINT" period=".25"/>
+      <!--<message name="TOYTRONICS_SETPOINT" period=".25"/>
       <message name="TOYTRONICS_COMMANDS" period=".25"/>
-      <message name="BOOZ2_AHRS_QUAT"   period=".25"/>
+      <message name="BOOZ2_AHRS_QUAT"   period=".25"/>	-->
     </mode>
 
     <mode name="ppm">
