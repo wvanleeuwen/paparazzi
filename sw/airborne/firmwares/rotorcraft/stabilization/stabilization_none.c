@@ -23,6 +23,7 @@
  */
 
 #include "firmwares/rotorcraft/stabilization.h"
+#include "firmwares/rotorcraft/stabilization/stabilization_none.h"
 
 #include "subsystems/radio_control.h"
 #include "generated/airframe.h"
