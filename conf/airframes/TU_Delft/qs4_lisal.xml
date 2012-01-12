@@ -330,7 +330,4 @@
     </target>
   </firmware>
 
-  <makefile>
-sim.srcs += firmwares/rotorcraft/toytronics/toytronics_interface.c firmwares/rotorcraft/toytronics/toytronics_setpoint.c 
-  </makefile>
 </airframe>
