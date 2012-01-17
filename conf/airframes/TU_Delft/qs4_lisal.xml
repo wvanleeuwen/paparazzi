@@ -4,7 +4,7 @@
 <airframe name="qs4_lisam">
   <servos min="0" neutral="0" max="0xff">
     <servo name="A1"            no="0" min="1000" neutral="1000" max="2000"/>
-    <servo name="A2"            no="1" min="1000" neutral="1000" max="2000"/>
+    <servo name="A2"            no="1" min="1100" neutral="1100" max="2100"/>
     <servo name="B1"            no="2" min="1000" neutral="1000" max="2000"/>
     <servo name="B2"            no="3" min="1000" neutral="1000" max="2000"/>
     <servo name="AILEVON_LEFT"  no="4" min="1000" neutral="1500" max="2000"/>
@@ -28,7 +28,12 @@
     <!-- <define name="MODE_MANUAL" value="AP_MODE_TOYTRONICS_HOVER"/> -->
     <define name="MODE_MANUAL" value="AP_MODE_TOYTRONICS_HOVER_FORWARD"/>
     <define name="MODE_AUTO1"  value="AP_MODE_TOYTRONICS_FORWARD"/>
+    
+    <!-- voor test buiten -->
     <define name="MODE_AUTO2"  value="AP_MODE_TUDELFT_QUADSHOT_HOVER_FORWARD_Z_HOLD"/>
+    <!--<define name="MODE_AUTO2"  value="AP_MODE_TOYTRONICS_AEROBATIC"/>-->
+    
+
     <!-- <define name="MODE_AUTO1" value="AP_MODE_TOYTRONICS_AEROBATIC"/> -->
     <!--<define name="MODE_AUTO2"  value="AP_MODE_TOYTRONICS_AEROBATIC"/>-->
     <define name="AUTOPILOT_KILL_WITHOUT_AHRS"  value="TRUE"/>
@@ -119,7 +124,8 @@
     <define name="THRUST_COEF" value="{  256,  256,  256,  256 }"/>
   </section>
 
-  <include href="conf/airframes/esden/calib/imu_lisam_033.xml"/>
+  <include href="conf/airframes/TU_Delft/calib/imu_lisam_033_quadshot.xml"/>
+  <!--<include href="conf/airframes/esden/calib/imu_lisam_033.xml"/>-->
 
   <section name="IMU" prefix="IMU_">
 
@@ -253,6 +259,10 @@
  <modules main_freq="512">
    <load name="battery_buzzer.xml"/>
    <!-- <load name="quadshot_nav_mode_change.xml"/> -->
+   <load name="adc_generic.xml">
+      <configure name="ADC_CHANNEL_GENERIC1" value="1"/>
+      <configure name="ADC_CHANNEL_GENERIC2" value="0"/>
+   </load>
  </modules>
 
   <firmware name="rotorcraft">
@@ -287,6 +297,7 @@
       <configure name="GPS_BAUD"                value="B38400"/>
     </subsystem>
 
+    <define name="FILTER_IC_ACCEL" value="1"/>
     <subsystem name="ahrs"          type="int_cmpl_quat"/>
     <subsystem name="stabilization" type="quaternion"/>
     <subsystem name="toytronics"    type="default"/>
@@ -319,7 +330,4 @@
     </target>
   </firmware>
 
-  <makefile>
-sim.srcs += firmwares/rotorcraft/toytronics/toytronics_interface.c firmwares/rotorcraft/toytronics/toytronics_setpoint.c 
-  </makefile>
 </airframe>

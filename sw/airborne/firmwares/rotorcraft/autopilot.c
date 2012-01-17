@@ -309,6 +309,12 @@ static inline void autopilot_check_motors_on( void ) {
 		  autopilot_mode1_kill = radio_control.values[RADIO_MODE]<0;
 		}
 	}
+void autopilot_set_motors_on(bool_t motors_on) {
+        autopilot_motors_on = motors_on;
+        kill_throttle = ! autopilot_motors_on;
+        autopilot_check_motors_on();
+}
+
 #elif defined AUTOPILOT_INSTANT_START
 #warning WARNING AUTOPILOT_INSTANT_START is only tested with the Quadshot!
 #warning NAV mode might not work proplerly when AUTOPILOT_INSTANT_START is used!

@@ -37,12 +37,18 @@
     </block>
     <block name="go_from_home_closeby">
       <go from="HOME" hmode="route" wp="CLOSEBY"/>
-      <call fun="setHoverForward()"/>
+      <!--<call fun="setHoverForward()"/>-->
       <deroute block="stay_closeby"/>
     </block>
     <block name="go_from_home_faraway">
       <go from="HOME" hmode="route" wp="FARAWAY"/>
-      <call fun="setForward()"/>
+      <attitude roll="30" alt="ground_alt+20"/>
+      <!--<call fun="setForward()"/>-->
+      <deroute block="stay_faraway"/>
+    </block>
+    <block name="fly_line_and_back">
+      <go from="HOME" hmode="route" wp="FARAWAY"/>
+      <!--<call fun="setForward()"/>-->
       <deroute block="stay_faraway"/>
     </block>
   </blocks>
