@@ -8,14 +8,14 @@
 
 static inline void ahrs_int_get_euler_from_accel_mag(struct Int32Eulers* e, struct Int32Vect3* accel, struct Int32Vect3* mag) {
   //  DISPLAY_INT32_VECT3("# accel", (*accel));
-  const float fphi = atan2f(-accel->y, -accel->z);
+  const float fphi = M_PI_2 + atan2f(-accel->y, accel->x);
   //  printf("# atan float %f\n", DegOfRad(fphi));
   e->phi = ANGLE_BFP_OF_REAL(fphi);
 
   int32_t cphi;
   PPRZ_ITRIG_COS(cphi, e->phi);
   int32_t cphi_ax = -INT_MULT_RSHIFT(cphi, accel->x, INT32_TRIG_FRAC);
-  const float ftheta = atan2f(-cphi_ax, -accel->z);
+  const float ftheta =  M_PI_2 + atan2f(-cphi_ax, accel->x);
   e->theta = ANGLE_BFP_OF_REAL(ftheta);
 
   int32_t sphi;
