@@ -1,4 +1,15 @@
-<!-- this is a newly designed removable arms quadcopter airframe equiped with  Lisa/L and MKK ESC controllers -->
+<!DOCTYPE airframe SYSTEM "../airframe.dtd">
+<!-- The newly designed removable Arms Quadcopter airframe
+     * Lisa L  (http://paparazzi.enac.fr/wiki/index.php/)
+     * 2x Microcopter BL Ctrl v1.2 ESC
+     * 2x Microcopter BL Ctrl v2.0 ESC
+     * XBee 2.4Ghz
+     * uBlox LEA5H and Sarantel helix GPS antenna
+
+     Near Future 
+     * uBlox LEA-5H and Sarantel helix GPS antenna
+
+     Notes:
 
 <airframe name="NoArmsLisaLQuad">
   <!-- Actuator assignment -->
@@ -31,10 +42,10 @@
     <define name="TRIM_R" value="0"/>
     <define name="NB_MOTOR" value="4"/>
     <define name="SCALE" value="256"/>
-    <define name="ROLL_COEF"   value="{ -256, 256,  -256,  256 }"/>
-    <define name="PITCH_COEF"  value="{ -256, 256,   256, -256 }"/>
-    <define name="YAW_COEF"    value="{  256, 256,  -256, -256 }"/>
-    <define name="THRUST_COEF" value="{  256,  256,  256,  256 }"/>
+    <define name="ROLL_COEF"   value="{ -256,  256,  -256,  256 }"/>
+    <define name="PITCH_COEF"  value="{  256, -256,  -256,  256 }"/>
+    <define name="YAW_COEF"    value="{  256,  256,  -256, -256 }"/>
+    <define name="THRUST_COEF" value="{  256,  256,   256,  256 }"/>
   </section>
 
   <section name="IMU" prefix="IMU_">
@@ -284,6 +295,5 @@
       <subsystem name="imu" type="b2_v1.1"/>
     </target>
  </firmware>
-
 
 </airframe>
