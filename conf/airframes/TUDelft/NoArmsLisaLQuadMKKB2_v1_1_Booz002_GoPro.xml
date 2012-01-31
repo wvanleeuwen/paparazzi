@@ -40,7 +40,7 @@
     <define name="SCALE" value="256"/>
     <define name="ROLL_COEF"   value="{ -256,  256, -256,  256 }"/>
     <define name="PITCH_COEF"  value="{  256, -256, -256,  256 }"/>
-    <define name="YAW_COEF"    value="{  256,  256, -256, -256 }"/>
+    <define name="YAW_COEF"    value="{ -256, -256,  256,  256 }"/>
     <define name="THRUST_COEF" value="{  256,  256,  256,  256 }"/>
   </section>
 
@@ -104,8 +104,10 @@
 
   <section name="AUTOPILOT">
     <define name="MODE_MANUAL" value="AP_MODE_ATTITUDE_DIRECT"/>
-    <define name="MODE_AUTO1"  value="AP_MODE_HOVER_Z_HOLD"/>
+    <!--<define name="MODE_AUTO1"  value="AP_MODE_HOVER_Z_HOLD"/>-->
+    <define name="MODE_AUTO1"  value="AP_MODE_ATTITUDE_RC_CLIMB"/>
     <define name="MODE_AUTO2"  value="AP_MODE_NAV"/>
+    <define name="AUTOPILOT_INSTANT_START_WITH_SAFETIES"  value="TRUE"/>
   </section>
 
 <!--
@@ -156,22 +158,22 @@
     <define name="REF_MAX_RDOT" value="RadOfDeg(1800.)"/>
 
     <!-- feedback -->
-    <define name="PHI_PGAIN"  value="-1400"/>
-    <define name="PHI_DGAIN"  value="-190"/>
+    <define name="PHI_PGAIN"  value="-1800"/>
+    <define name="PHI_DGAIN"  value="-220"/>
     <define name="PHI_IGAIN"  value="-200"/>
 
-    <define name="THETA_PGAIN"  value="-1400"/>
-    <define name="THETA_DGAIN"  value="-190"/>
+    <define name="THETA_PGAIN"  value="-1800"/>
+    <define name="THETA_DGAIN"  value="-220"/>
     <define name="THETA_IGAIN"  value="-200"/>
 
-    <define name="PSI_PGAIN"  value="-1000"/>
-    <define name="PSI_DGAIN"  value="-150"/>
-    <define name="PSI_IGAIN"  value="-5"/>
+    <define name="PSI_PGAIN"  value="-900"/>
+    <define name="PSI_DGAIN"  value="-500"/>
+    <define name="PSI_IGAIN"  value="-55"/>
 
     <!-- feedforward -->
-    <define name="PHI_DDGAIN"   value=" 300"/>
-    <define name="THETA_DDGAIN" value=" 300"/>
-    <define name="PSI_DDGAIN"   value=" 300"/>
+    <define name="PHI_DDGAIN"   value="300"/>
+    <define name="THETA_DDGAIN" value="300"/>
+    <define name="PSI_DDGAIN"   value="300"/>
   </section>
 
   <section name="INS" prefix="INS_">
@@ -191,15 +193,15 @@
     <define name="HOVER_KD"    value="-200"/>
     <define name="HOVER_KI"    value="0"/>
 -->
-    <define name="HOVER_KP"     value="-150"/>
-    <define name="HOVER_KD"     value="-80"/>
-    <define name="HOVER_KI"     value="0"/>
+    <define name="HOVER_KP"     value="-550"/>
+    <define name="HOVER_KD"     value="-300"/>
+    <define name="HOVER_KI"     value="-10"/>
 
     <!-- 1.5m/s for full stick : BOOZ_SPEED_I_OF_F(1.5) / (MAX_PPRZ/2) -->
     <define name="RC_CLIMB_COEF" value ="163"/>
     <!-- BOOZ_SPEED_I_OF_F(1.5) * 20% -->
     <define name="RC_CLIMB_DEAD_BAND" value ="160000"/>
-    <!-- <define name="INV_M" value ="0.2"/> -->
+    <define name="INV_M" value ="0.2"/> 
   </section>
 
   <section name="GUIDANCE_H" prefix="GUIDANCE_H_">
@@ -235,6 +237,7 @@
     <define name="USE_ADAPT_HOVER"/>
     <define name="FAILSAFE_GROUND_DETECT"/>
     <define name="USE_GPS_ACC4R"/>
+    <define name="RADIO_KILL_SWITCH" value="RADIO_FLAPS"/>
     <target name="ap" board="lisa_l_1.1">
       <subsystem name="radio_control" type="ppm"/>
       <subsystem name="actuators"     type="mkk"/>
