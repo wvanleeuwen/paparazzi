@@ -6,27 +6,25 @@
 
 #include "subsystems/ahrs/ahrs_magnetic_field_model.h"
 
+#include "mcu_periph/uart.h"
+#include "messages.h"
+#include "downlink.h"
+
+
 static inline void ahrs_int_get_euler_from_accel_mag(struct Int32Eulers* e, struct Int32Vect3* accel, struct Int32Vect3* mag) {
   //  DISPLAY_INT32_VECT3("# accel", (*accel));
   
-#ifdef TOYTRONICS
   const float fphi = atan2f(-accel->y, -accel->z);
-#else
-  const float fphi = M_PI_2 + atan2f(-accel->y, accel->x);
-#endif
 
   //  printf("# atan float %f\n", DegOfRad(fphi));
   e->phi = ANGLE_BFP_OF_REAL(fphi);
 
   int32_t cphi;
   PPRZ_ITRIG_COS(cphi, e->phi);
-  int32_t cphi_ax = -INT_MULT_RSHIFT(cphi, accel->x, INT32_TRIG_FRAC);
+  
 
-#ifdef TOYTRONICS
+  int32_t cphi_ax = -INT_MULT_RSHIFT(cphi, accel->x, INT32_TRIG_FRAC);
   const float ftheta = atan2f(-cphi_ax, -accel->z);
-#else
-  const float ftheta =  M_PI_2 + atan2f(-cphi_ax, accel->x);
-#endif
 
   e->theta = ANGLE_BFP_OF_REAL(ftheta);
 
@@ -42,6 +40,7 @@ static inline void ahrs_int_get_euler_from_accel_mag(struct Int32Eulers* e, stru
   //int32_t sphi_ctheta = (sphi*ctheta)>>INT32_TRIG_FRAC;
   //int32_t cphi_ctheta = (cphi*ctheta)>>INT32_TRIG_FRAC;
 
+
   const int32_t mn = ctheta * mag->x + sphi_stheta * mag->y + cphi_stheta * mag->z;
   const int32_t me = 0      * mag->x + cphi        * mag->y - sphi        * mag->z;
   //const int32_t md =
@@ -51,8 +50,11 @@ static inline void ahrs_int_get_euler_from_accel_mag(struct Int32Eulers* e, stru
   //  float m_psi = -atan2(me, mn);
   const float mag_dec = atan2(-AHRS_H_Y, AHRS_H_X);
   const float fpsi = atan2f(-me, mn) - mag_dec;
+
   e->psi = ANGLE_BFP_OF_REAL(fpsi);
   INT32_ANGLE_NORMALIZE(e->psi);
+
+  DOWNLINK_SEND_AHRS_INIT_DBG(DefaultChannel, &fphi, &fpsi, &cphi, &cphi_ax, &ftheta,&accel->x,&accel->y,&accel->z);
 
 }
 

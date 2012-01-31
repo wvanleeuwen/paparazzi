@@ -1800,8 +1800,21 @@
     <field name="diff"         type="int32"/>
   </message>
 
- <!--222 is free -->
- <!--223 is free -->
+  <message name="AHRS_INIT_DBG" id="222">
+    <field name="fphi"		type="float" unit="rad"  alt_unit="deg" alt_unit_coef="57.2957795"/>
+    <field name="fpsi"          type="float" unit="rad"  alt_unit="deg" alt_unit_coef="57.2957795"/>
+    <field name="cphi"          type="int32" unit="BFP"  alt_unit="real" alt_unit_coef="0.0000610351562"/>
+    <field name="cphi_az"       type="int32" unit="BFP"  alt_unit="real" alt_unit_coef="0.0000610351562"/>
+    <field name="ftheta"          type="float" unit="rad"  alt_unit="deg" alt_unit_coef="57.2957795"/>
+    <field name="acc_x"          type="int32"/>
+    <field name="acc_y"       type="int32"/>
+    <field name="acc_z"          type="int32"/>
+ </message>
+
+
+ 
+
+<!--223 is free -->
  <!--224 is free -->
  <!--225 is free -->
  <!--226 is free -->
