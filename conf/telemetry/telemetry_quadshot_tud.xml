@@ -21,7 +21,8 @@
       <!--<message name="TOYTRONICS_SETPOINT" period=".25"/>
       <message name="TOYTRONICS_COMMANDS" period=".25"/>
       <message name="BOOZ2_AHRS_QUAT"   period=".25"/>	-->
-      <message name="AHRS_REF_QUAT" period="0.05"/>
+      <message name="AHRS_REF_QUAT" period="0.5"/>
+      <message name="BOOZ2_AHRS_EULER"  period=".1"/>
       
       <!--<message name="BOOZ2_AHRS_QUAT"        period=".4"/>
       <message name="IMU_GYRO_SCALED"        period=".2"/>
