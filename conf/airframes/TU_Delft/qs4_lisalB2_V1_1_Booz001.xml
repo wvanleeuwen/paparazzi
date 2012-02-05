@@ -124,14 +124,65 @@
     <define name="THRUST_COEF" value="{  256,  256,  256,  256 }"/>
   </section>
 
-  <include href="conf/airframes/TU_Delft/calib/imu_lisam_033_quadshot.xml"/>
-  <!--<include href="conf/airframes/esden/calib/imu_lisam_033.xml"/>-->
+  <!--  <include href="conf/airframes/TU_Delft/calib/imu_lisam_033_quadshot.xml"/>
+<include href="conf/airframes/esden/calib/imu_lisam_033.xml"/>-->
 
   <section name="IMU" prefix="IMU_">
+<!--
+      <define name="GYRO_P_CHAN" value="1"/>
+      <define name="GYRO_Q_CHAN" value="0"/>
+      <define name="GYRO_R_CHAN" value="2"/>
+-->
+      <define name="GYRO_P_SIGN" value="1"/>
+      <define name="GYRO_Q_SIGN" value="-1"/>
+      <define name="GYRO_R_SIGN" value="-1"/>
+
+    <define name="GYRO_P_NEUTRAL" value="33330"/>
+    <define name="GYRO_Q_NEUTRAL" value="33100"/>
+    <define name="GYRO_R_NEUTRAL" value="31400"/>
+
+    <define name="GYRO_P_SENS" value=" 1.101357422" integer="16"/>
+    <define name="GYRO_Q_SENS" value=" 1.122670898" integer="16"/>
+    <define name="GYRO_R_SENS" value=" 1.104890137" integer="16"/>
+<!--
+      <define name="ACCEL_X_CHAN" value="3"/>
+      <define name="ACCEL_Y_CHAN" value="5"/>
+      <define name="ACCEL_Z_CHAN" value="6"/>
+-->
+      <define name="ACCEL_X_SIGN" value="-1"/>
+      <define name="ACCEL_Y_SIGN" value="-1"/>
+      <define name="ACCEL_Z_SIGN" value="-1"/>
+
+<define name="ACCEL_X_SENS" value="2.5518688889" integer="16"/>
+<define name="ACCEL_Y_SENS" value="2.54239768247" integer="16"/>
+<define name="ACCEL_Z_SENS" value="2.54900395804" integer="16"/>
+
+<define name="ACCEL_X_NEUTRAL" value="32828"/>
+<define name="ACCEL_Y_NEUTRAL" value="32559"/>
+<define name="ACCEL_Z_NEUTRAL" value="32554"/>
+<!--
+      <define name="MAG_X_CHAN" value="4"/>
+      <define name="MAG_Y_CHAN" value="0"/>
+      <define name="MAG_Z_CHAN" value="2"/>
+
+      <define name="MAG_45_HACK" value="1"/>
+-->
+      <define name="MAG_X_SIGN" value=" 1"/>
+      <define name="MAG_Y_SIGN" value=" -1"/>
+      <define name="MAG_Z_SIGN" value=" -1"/>
+
+<define name="MAG_X_NEUTRAL" value="-37"/>
+<define name="MAG_Y_NEUTRAL" value="-10"/>
+<define name="MAG_Z_NEUTRAL" value="-45"/>
+
+<define name="MAG_X_SENS" value="6.0" integer="16"/>
+<define name="MAG_Y_SENS" value="6.0" integer="16"/>
+<define name="MAG_Z_SENS" value="3.5" integer="16"/>
+
 
     <define name="BODY_TO_IMU_PHI"   value="RadOfDeg(   0. )"/>
-    <define name="BODY_TO_IMU_THETA" value="RadOfDeg( 185. )"/>  <!-- +5 deg more away from you -->
-    <define name="BODY_TO_IMU_PSI"   value="RadOfDeg(   -2. )"/> <!-- +5 deg more to the right in hover --> 
+    <define name="BODY_TO_IMU_THETA" value="RadOfDeg( 180. )"/>
+    <define name="BODY_TO_IMU_PSI"   value="RadOfDeg(   0. )"/>
 
   </section>
 
@@ -291,7 +342,7 @@
       <define name="RADIO_KILL_SWITCH" value="RADIO_FLAPS"/>
     </target>
 
-    <subsystem name="imu"           type="aspirin_v1.5"/>
+    <subsystem name="imu"           type="b2_v1.1"/>
     <subsystem name="gps"               type="ublox">
       <configure name="GPS_PORT"                value="UART3"/>
       <configure name="GPS_BAUD"                value="B38400"/>

@@ -291,20 +291,20 @@ static inline int ahrs_is_aligned(void) {
 #warning WARNING AUTOPILOT_INSTANT_START_WITH_SAFETIES is only tested with the Quadshot!
 #warning NAV mode might not work proplerly when AUTOPILOT_INSTANT_START_WITH_SAFETIES is used!
 static inline void autopilot_check_motors_on( void ) {
-	if (radio_control.values[RADIO_KILL_SWITCH]>0 && !ahrs_is_aligned())
+	if (radio_control.values[RADIO_KILL_SWITCH]<0 && !ahrs_is_aligned())
 		autopilot_rc_unkilled_startup = TRUE;
 	if (autopilot_rc_unkilled_startup == TRUE)
-		if (radio_control.values[RADIO_KILL_SWITCH]<0 && ahrs_is_aligned())
+		if (radio_control.values[RADIO_KILL_SWITCH]>0 && ahrs_is_aligned())
 			autopilot_rc_unkilled_startup = FALSE;
 	if (autopilot_motors_on == FALSE && autopilot_rc_unkilled_startup == FALSE && autopilot_mode1_kill == TRUE){
 		if (autopilot_first_boot == TRUE){
 		  RunOnceEvery(256,{autopilot_first_boot = FALSE;})
 		  }
 		else
-		  autopilot_motors_on=radio_control.values[RADIO_KILL_SWITCH]>0 && radio_control.values[RADIO_MODE] < 0 && THROTTLE_STICK_DOWN() && YAW_STICK_CENTERED() && PITCH_STICK_CENTERED() && ROLL_STICK_CENTERED() && ahrs_is_aligned();
+		  autopilot_motors_on=radio_control.values[RADIO_KILL_SWITCH]<0 && radio_control.values[RADIO_MODE] < 0 && THROTTLE_STICK_DOWN() && YAW_STICK_CENTERED() && PITCH_STICK_CENTERED() && ROLL_STICK_CENTERED() && ahrs_is_aligned();
 		}
 	else{
-		autopilot_motors_on=radio_control.values[RADIO_KILL_SWITCH]>0 && ahrs_is_aligned() && autopilot_rc_unkilled_startup == FALSE;
+		autopilot_motors_on=radio_control.values[RADIO_KILL_SWITCH]<0 && ahrs_is_aligned() && autopilot_rc_unkilled_startup == FALSE;
 		if(autopilot_motors_on == TRUE)
 		  autopilot_mode1_kill = radio_control.values[RADIO_MODE]<0;
 		}
@@ -319,7 +319,7 @@ void autopilot_set_motors_on(bool_t motors_on) {
 #warning WARNING AUTOPILOT_INSTANT_START is only tested with the Quadshot!
 #warning NAV mode might not work proplerly when AUTOPILOT_INSTANT_START is used!
 static inline void autopilot_check_motors_on( void ) {
-	autopilot_motors_on=radio_control.values[RADIO_KILL_SWITCH]>0 && ahrs_is_aligned();
+	autopilot_motors_on=radio_control.values[RADIO_KILL_SWITCH]<0 && ahrs_is_aligned();
 	}
 #else
 /** Set motors ON or OFF and change the status of the check_motors state machine
@@ -393,7 +393,7 @@ void autopilot_on_rc_frame(void) {
   autopilot_set_mode(new_autopilot_mode);
 
 #ifdef RADIO_KILL_SWITCH
-  if (radio_control.values[RADIO_KILL_SWITCH] < 0)
+  if (radio_control.values[RADIO_KILL_SWITCH] > 0)
     autopilot_set_mode(AP_MODE_KILL);
 #endif
 
