@@ -240,7 +240,7 @@ setpoint_smooth_transition_reset()
   const quat_t * q_n2b = get_q_n2b();
   const euler_t * e_n2b = get_e_n2b();
   smooth_transition_angle = get_full_range_pitch(q_n2b, e_n2b);
-  smooth_transition_angle -= absolute_forward_pitch_trim_deg*M_PI/180.0;
+  smooth_transition_angle += absolute_forward_pitch_trim_deg*M_PI/180.0;
 }
 
 static void
