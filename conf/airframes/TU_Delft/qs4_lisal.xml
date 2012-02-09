@@ -40,8 +40,8 @@
     <define name="AUTOPILOT_KILL_WITHOUT_AHRS"  value="TRUE"/>
     <define name="AUTOPILOT_INSTANT_START_WITH_SAFETIES"  value="TRUE"/> 
     <!--This is to enable a wing waggle at specified low battery voltage. The interval is in cycle counts, not seconds-->
-    <define name="AUTOPILOT_LOBATT_WING_WAGGLE"  value="TRUE"/>
-    <define name="AUTOPILOT_LOBATT_WING_WAGGLE_INTERVAL"  value="5120"/>
+    <!--<define name="AUTOPILOT_LOBATT_WING_WAGGLE"  value="TRUE"/>
+    <define name="AUTOPILOT_LOBATT_WING_WAGGLE_INTERVAL"  value="5120"/>-->
     <define name="TOYTRONICS" value="TRUE"/>
   </section>
 
@@ -132,7 +132,7 @@
 
     <define name="BODY_TO_IMU_PHI"   value="RadOfDeg(   0. )"/>
     <define name="BODY_TO_IMU_THETA" value="RadOfDeg( 189. )"/>  <!-- +5 deg more away from you -->
-    <define name="BODY_TO_IMU_PSI"   value="RadOfDeg(   2. )"/> <!-- +5 deg more to the right in hover --> 
+    <define name="BODY_TO_IMU_PSI"   value="RadOfDeg(   0. )"/> <!-- +5 deg more to the right in hover --> 
 
   </section>
 
@@ -203,7 +203,7 @@
   </section>
 
   <section name="INS" prefix="INS_">
-    <define name="BARO_SENS" value="14" integer="16"/>
+    <define name="BARO_SENS" value="16" integer="16"/>
   </section>
 
  <section name="GUIDANCE_V" prefix="GUIDANCE_V_">
@@ -254,7 +254,7 @@
  </section>
 
  <include href="conf/airframes/esden/toytronics/gains/QS4_inner_8x4_5.xml"/>
- <include href="conf/airframes/esden/toytronics/setpoint/QS4_setpoint.xml"/>
+ <include href="conf/airframes/TU_Delft/QS4_setpoint.xml"/>
  <include href="conf/airframes/esden/camera_mount.xml"/>
 
  <modules main_freq="512">
