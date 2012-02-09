@@ -30,6 +30,7 @@ void toytronics_mode_exit(int old_mode __attribute__((unused))) {};
 
 // settings
 extern double hover_pitch_trim_deg;
+extern double hover_roll_trim_deg;
 extern double roll_to_yaw_rate_ff_factor;
 extern double aerobatic_accel_tc_gain;
 extern double hover_forward_accel_tc_gain;
