@@ -256,10 +256,10 @@ static inline void on_gps_event(void) {
 
 static inline void on_mag_event(void) {
   ImuScaleMag(imu);
-//#ifndef TOYTRONICS
+#ifndef TOYTRONICS
   if (ahrs.status == AHRS_RUNNING)
     ahrs_update_mag();
-//#endif
+#endif
 #ifdef USE_VEHICLE_INTERFACE
   vi_notify_mag_available();
 #endif
