@@ -29,6 +29,10 @@
 /* let's start butchery now and use the actuators_pwm arch functions */
 #include "firmwares/rotorcraft/actuators/actuators_pwm.h"
 
+#ifdef USE_TOYTRONICS
+#include "firmwares/rotorcraft/autopilot.h" // for the mode-dependent command laws
+#endif
+
 #include "generated/airframe.h"
 
 #define actuators actuators_pwm_values
@@ -44,7 +48,10 @@ void actuators_init(void)
 }
 
 #define PWM_GAIN_SCALE 2
+
+#ifndef PWM_OFF
 #define PWM_OFF 1000
+#endif
 
 void actuators_set(bool_t motors_on) {
   int32_t pwm_commands[COMMANDS_NB];
@@ -60,8 +67,15 @@ void actuators_set(bool_t motors_on) {
   pwm_commands_pprz[COMMAND_PITCH] = commands[COMMAND_PITCH] * (MAX_PPRZ / 100);
   pwm_commands_pprz[COMMAND_YAW] = commands[COMMAND_YAW] * (MAX_PPRZ / 100);
 
+#ifdef USE_CAMERA_MOUNT
+  pwm_commands_pprz[COMMAND_CAMERA] = commands[COMMAND_CAMERA];
+#endif
+
   supervision_run(motors_on, FALSE, pwm_commands);
 
+#ifdef USE_TOYTRONICS
+  SetCommandsFromRC(pwm_commands_pprz, radio_control.values);
+#endif
   SetActuatorsFromCommands(pwm_commands_pprz);
 
   if (motors_on) {

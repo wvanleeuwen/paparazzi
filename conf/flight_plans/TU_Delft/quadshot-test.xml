@@ -1,0 +1,55 @@
+<!DOCTYPE flight_plan SYSTEM "../flight_plan.dtd">
+<flight_plan alt="4" ground_alt="0" lat0="32.099794" lon0="-110.773230" max_dist_from_home="1000" name="Quadshot_Test" security_height="3">
+  <waypoints>
+    <waypoint name="HOME" x="0.0" y="0.0"/>
+    <waypoint name="CLIMB" x="0.0" y="0.0"/>
+    <waypoint name="CLOSEBY" x="0.0" y="1.0"/>
+    <waypoint name="FARAWAY" x="6.0" y="8.0"/>
+  </waypoints>
+  <blocks>
+    <block name="Wait GPS">
+      <call fun="NavKillThrottle()"/>
+      <while cond="!GpsFixValid()"/>
+    </block>
+    <block name="Geo init">
+      <while cond="LessThan(NavBlockTime(), 10)"/>
+      <call fun="NavSetGroundReferenceHere()"/>
+    </block>
+    <block name="Holding point">
+      <call fun="NavKillThrottle()"/>
+      <attitude pitch="0" roll="0" throttle="0" vmode="throttle" until="FALSE"/>
+    </block>
+    <block name="Takeoff" strip_button="Takeoff" strip_icon="takeoff.png">
+      <exception cond="ins_enu_pos.z > POS_BFP_OF_REAL(2.)" deroute="Standby"/>
+      <call fun="NavSetWaypointHere(WP_CLIMB)"/>
+      <call fun="NavResurrect()"/>
+      <while cond="LessThan(NavBlockTime(), 3)"/>
+      <stay height="4.0" vmode="alt" wp="CLIMB"/>
+    </block>
+    <block name="Standby" strip_button="Standby" strip_icon="home.png">
+      <stay height="4.0" vmode="alt" wp="HOME"/>
+    </block>
+    <block name="stay_closeby">
+      <stay wp="CLOSEBY"/>
+    </block>
+    <block name="stay_faraway">
+      <stay wp="FARAWAY"/>
+    </block>
+    <block name="go_from_home_closeby">
+      <go from="HOME" hmode="route" wp="CLOSEBY"/>
+      <!--<call fun="setHoverForward()"/>-->
+      <deroute block="stay_closeby"/>
+    </block>
+    <block name="go_from_home_faraway">
+      <go from="HOME" hmode="route" wp="FARAWAY"/>
+      <attitude roll="30" alt="ground_alt+20"/>
+      <!--<call fun="setForward()"/>-->
+      <deroute block="stay_faraway"/>
+    </block>
+    <block name="fly_line_and_back">
+      <go from="HOME" hmode="route" wp="FARAWAY"/>
+      <!--<call fun="setForward()"/>-->
+      <deroute block="stay_faraway"/>
+    </block>
+  </blocks>
+</flight_plan>
