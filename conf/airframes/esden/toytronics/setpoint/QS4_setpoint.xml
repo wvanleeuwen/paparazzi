@@ -6,8 +6,8 @@
     <define name="BOUND_ERROR_HEADING_DEG"             value="60.0"/>
     <define name="MODE_1_2_TRANSITION_DEGREES_PER_SEC" value="45.0"/>
 
-    <define name="HOVER_PITCH_TRIM_DEG"             value="-5.652"/>
-    <define name="HOVER_ROLL_TRIM_DEG"             value="0.0"/>
+    <define name="HOVER_PITCH_TRIM_DEG"             value="-16.7"/>
+    <define name="HOVER_ROLL_TRIM_DEG"             value="-2.4"/>
     <define name="ABSOLUTE_FORWARD_PITCH_TRIM_DEG"  value="8.0"/>
 
     <define name="TC_FADING_UPPER_DEG"  value="60.0"/>
