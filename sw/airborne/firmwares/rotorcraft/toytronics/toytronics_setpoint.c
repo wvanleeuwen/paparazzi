@@ -21,6 +21,7 @@ xyz_t setpoint_aerobatic_decay_time = {0.3, 0.3, 0.3};
 
 double setpoint_absolute_heading_bound_deg = SETPOINT_BOUND_ERROR_HEADING_DEG;
 double hover_pitch_trim_deg = SETPOINT_HOVER_PITCH_TRIM_DEG;
+double hover_roll_trim_deg = SETPOINT_HOVER_ROLL_TRIM_DEG;
 
 double tc_fading_upper_deg = SETPOINT_TC_FADING_UPPER_DEG;
 double tc_fading_lower_deg = SETPOINT_TC_FADING_LOWER_DEG;
@@ -240,7 +241,7 @@ setpoint_smooth_transition_reset()
   const quat_t * q_n2b = get_q_n2b();
   const euler_t * e_n2b = get_e_n2b();
   smooth_transition_angle = get_full_range_pitch(q_n2b, e_n2b);
-  smooth_transition_angle -= absolute_forward_pitch_trim_deg*M_PI/180.0;
+  smooth_transition_angle += absolute_forward_pitch_trim_deg*M_PI/180.0;
 }
 
 static void
@@ -398,7 +399,7 @@ toytronics_set_sp_hover_forward_from_rc()
     else{
       roll_body   = rcr * SETPOINT_MAX_STICK_ANGLE_DEG*M_PI/180.0;}
   #else
-    roll_body   = rcr * SETPOINT_MAX_STICK_ANGLE_DEG*M_PI/180.0;
+    roll_body   = (rcr * SETPOINT_MAX_STICK_ANGLE_DEG + hover_roll_trim_deg)*M_PI/180.0;
   #endif
 
   // integrate stick to get setpoint heading

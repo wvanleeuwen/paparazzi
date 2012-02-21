@@ -48,7 +48,10 @@ void actuators_init(void)
 }
 
 #define PWM_GAIN_SCALE 2
+
+#ifndef PWM_OFF
 #define PWM_OFF 1000
+#endif
 
 void actuators_set(bool_t motors_on) {
   int32_t pwm_commands[COMMANDS_NB];

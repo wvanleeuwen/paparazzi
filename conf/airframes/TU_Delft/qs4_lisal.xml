@@ -2,11 +2,12 @@
 <!-- Copyright (C) 2011, Pranay Sinha, the Quadshot Project -->
 
 <airframe name="qs4_lisam">
+  
   <servos min="0" neutral="0" max="0xff">
-    <servo name="A1"            no="0" min="1000" neutral="1000" max="2000"/>
-    <servo name="A2"            no="1" min="1100" neutral="1100" max="2100"/>
-    <servo name="B1"            no="2" min="1000" neutral="1000" max="2000"/>
-    <servo name="B2"            no="3" min="1000" neutral="1000" max="2000"/>
+    <servo name="A1"            no="0" min="880" neutral="880" max="2300"/>
+    <servo name="A2"            no="1" min="880" neutral="880" max="2300"/>
+    <servo name="B1"            no="2" min="880" neutral="880" max="2300"/>
+    <servo name="B2"            no="3" min="880" neutral="880" max="2300"/>
     <servo name="AILEVON_LEFT"  no="4" min="1000" neutral="1500" max="2000"/>
     <servo name="AILEVON_RIGHT" no="5" min="1000" neutral="1500" max="2000"/>
     <servo name="CAMERA_MOUNT"  no="6" min="2000" neutral="1500" max="1000"/>
@@ -39,8 +40,8 @@
     <define name="AUTOPILOT_KILL_WITHOUT_AHRS"  value="TRUE"/>
     <define name="AUTOPILOT_INSTANT_START_WITH_SAFETIES"  value="TRUE"/> 
     <!--This is to enable a wing waggle at specified low battery voltage. The interval is in cycle counts, not seconds-->
-    <define name="AUTOPILOT_LOBATT_WING_WAGGLE"  value="TRUE"/>
-    <define name="AUTOPILOT_LOBATT_WING_WAGGLE_INTERVAL"  value="5120"/>
+    <!--<define name="AUTOPILOT_LOBATT_WING_WAGGLE"  value="TRUE"/>
+    <define name="AUTOPILOT_LOBATT_WING_WAGGLE_INTERVAL"  value="5120"/>-->
     <define name="TOYTRONICS" value="TRUE"/>
   </section>
 
@@ -111,8 +112,8 @@
     <define name="COMMANDS_YAW_ALWAYS_ENABLED" value="TRUE"/>
  </section>
   <section name="SUPERVISION" prefix="SUPERVISION_">
-    <define name="MIN_MOTOR" value="1100"/>
-    <define name="MAX_MOTOR" value="2000"/>
+    <define name="MIN_MOTOR" value="950"/>
+    <define name="MAX_MOTOR" value="2300"/>
     <define name="TRIM_A" value="0"/>
     <define name="TRIM_E" value="0"/>
     <define name="TRIM_R" value="0"/>
@@ -130,8 +131,8 @@
   <section name="IMU" prefix="IMU_">
 
     <define name="BODY_TO_IMU_PHI"   value="RadOfDeg(   0. )"/>
-    <define name="BODY_TO_IMU_THETA" value="RadOfDeg( 185. )"/>  <!-- +5 deg more away from you -->
-    <define name="BODY_TO_IMU_PSI"   value="RadOfDeg(   -2. )"/> <!-- +5 deg more to the right in hover --> 
+    <define name="BODY_TO_IMU_THETA" value="RadOfDeg( 189. )"/>  <!-- +5 deg more away from you -->
+    <define name="BODY_TO_IMU_PSI"   value="RadOfDeg(   0. )"/> <!-- +5 deg more to the right in hover --> 
 
   </section>
 
@@ -202,7 +203,7 @@
   </section>
 
   <section name="INS" prefix="INS_">
-    <define name="BARO_SENS" value="14" integer="16"/>
+    <define name="BARO_SENS" value="16" integer="16"/>
   </section>
 
  <section name="GUIDANCE_V" prefix="GUIDANCE_V_">
@@ -253,7 +254,7 @@
  </section>
 
  <include href="conf/airframes/esden/toytronics/gains/QS4_inner_8x4_5.xml"/>
- <include href="conf/airframes/esden/toytronics/setpoint/QS4_setpoint.xml"/>
+ <include href="conf/airframes/TU_Delft/QS4_setpoint.xml"/>
  <include href="conf/airframes/esden/camera_mount.xml"/>
 
  <modules main_freq="512">
@@ -263,6 +264,7 @@
       <configure name="ADC_CHANNEL_GENERIC1" value="1"/>
       <configure name="ADC_CHANNEL_GENERIC2" value="0"/>
    </load>
+   <!--<load name="opticflow_ADNS3080.xml"/>-->
  </modules>
 
   <firmware name="rotorcraft">
@@ -274,6 +276,7 @@
         <configure name="MODEM_BAUD"    value="B57600"/>
         <configure name="MODEM_PORT"    value="UART2"/>
       </subsystem>
+      <define name="PWM_OFF"  value="800"/>
       <define name="SERVO_HZ" value="400"/>
       <define name="SERVO_HZ_SECONDARY" value="40"/>
 <!--      <define name="RADIO_MODE" value="RADIO_FLAP"/>-->

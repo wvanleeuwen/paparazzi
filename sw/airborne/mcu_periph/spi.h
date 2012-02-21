@@ -23,7 +23,7 @@
  */
 
 /** \file mcu_periph/spi.h
- * \brief arch independant SPI (Serial Peripheral Interface) API */
+ * \brief arch independent SPI (Serial Peripheral Interface) API */
 
 
 #ifndef SPI_H
@@ -32,7 +32,24 @@
 #ifdef USE_SPI
 
 #include "std.h"
+
+enum SPITransactionStatus {
+  SPITransPending,
+  SPITransRunning,
+  SPITransSuccess,
+  SPITransFailed
+};
+
+struct spi_transaction {
+  volatile uint8_t* mosi_buf;
+  volatile uint8_t* miso_buf;
+  volatile uint8_t* ready;
+  uint8_t length;
+  volatile enum SPITransactionStatus status;
+};
+
 #include "mcu_periph/spi_arch.h"
+
 
 extern uint8_t* spi_buffer_input;
 extern uint8_t* spi_buffer_output;
