@@ -8,8 +8,8 @@
 
   <servos>
     <servo name="THROTTLE" no="2" min="1000" neutral="1000" max="2000"/>
-    <servo name="AILEVON_LEFT" no="1" min="1000" neutral="1500" max="2000"/>
-    <servo name="AILEVON_RIGHT" no="0" min="2000" neutral="1500" max="1000"/>
+    <servo name="AILEVON_LEFT" no="1" min="1200" neutral="1500" max="1800"/>
+    <servo name="AILEVON_RIGHT" no="0" min="1800" neutral="1500" max="1200"/>
     <servo name="ELEVATOR" no="3" min="2000" neutral="1500" max="1000"/>
     <servo name="RUDDER" no="4" min="1100" neutral="1500" max="1900"/>
   </servos>
@@ -29,8 +29,8 @@
   </rc_commands>
 
   <command_laws>
-    <set servo="AILEVON_LEFT" value="@ROLL + @PITCH"/>
-    <set servo="AILEVON_RIGHT" value="@ROLL - @PITCH"/>
+    <set servo="AILEVON_LEFT" value="-@ROLL + @PITCH"/>
+    <set servo="AILEVON_RIGHT" value="@ROLL + @PITCH"/>
     <set servo="THROTTLE" value="@THROTTLE"/>
     <set servo="ELEVATOR" value="@PITCH"/>
   </command_laws>
