@@ -76,7 +76,7 @@
     <set servo="AILEVON_LEFT"   value="(@RC_MODE == AP_MODE_TOYTRONICS_HOVER_FORWARD || @RC_MODE == AP_MODE_TUDELFT_QUADSHOT_HOVER_FORWARD_Z_HOLD) ? $hover_forward_left  :  $forward_left" />
     <set servo="AILEVON_RIGHT"   value="(@RC_MODE == AP_MODE_TOYTRONICS_HOVER_FORWARD || @RC_MODE == AP_MODE_TUDELFT_QUADSHOT_HOVER_FORWARD_Z_HOLD) ? $hover_forward_right  : $forward_right" />
     <!-- ****** Not yet defined ***** -->
-    <!-- <set servo="RUDDER"   value=""/>
+    <!-- <set servo="RUDDER"   value=""/> -->
   </command_laws>
 
   <!-- for the sim -->
