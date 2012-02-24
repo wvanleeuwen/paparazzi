@@ -7,13 +7,13 @@
   <servos min="0" neutral="0" max="0xff">
     <!-- Plus configuration, similar to the convention shown in http://paparazzi.enac.fr/wiki/Rotorcraft_Configuration -->
     <!-- Direction of rotation is opposite to that of the convention for engines HB and WL -->
-    <servo name="HB"            no="0" min="880" neutral="880" max="2300"/>	<!-- Hover prop bottom -->
-    <servo name="HT"            no="1" min="880" neutral="880" max="2300"/>	<!-- Hover prop top -->
-    <servo name="WL"            no="2" min="880" neutral="880" max="2300"/>	<!-- Wingtip prop left -->
-    <servo name="WR"            no="3" min="880" neutral="880" max="2300"/>	<!-- Wingtip prop right --> 
+    <servo name="HB"            no="0" min="1100" neutral="1100" max="2300"/>	<!-- Hover prop bottom -->
+    <servo name="HT"            no="1" min="1100" neutral="1100" max="2300"/>	<!-- Hover prop top -->
+    <servo name="WL"            no="2" min="1100" neutral="1100" max="2300"/>	<!-- Wingtip prop left -->
+    <servo name="WR"            no="3" min="1100" neutral="1100" max="2300"/>	<!-- Wingtip prop right --> 
 
-    <servo name="AILEVON_LEFT"  no="4" min="1000" neutral="1500" max="2000"/>
-    <servo name="AILEVON_RIGHT" no="6" min="1000" neutral="1500" max="2000"/>
+    <servo name="AILEVON_LEFT"  no="4" min="1250" neutral="1600" max="1950"/>
+    <servo name="AILEVON_RIGHT" no="6" min="1100" neutral="1450" max="1800"/>
     <servo name="RUDDER"  	no="7" min="2000" neutral="1500" max="1000"/>
   </servos>
 
@@ -56,12 +56,21 @@
   <command_laws>
     <!--************* different mixing strategies - probably don't edit this ****************-->
     <!-- aileron feedback -->
-    <let var="aileron_feedback_left"  value="+@ROLL * (9600 + @RC_THRUST)/9600"/>
-    <let var="aileron_feedback_right" value="+@ROLL * (9600 + @RC_THRUST)/9600"/>
+    <let var="aileron_feedback_left"  value="0"/>
+    <let var="aileron_feedback_right" value="0"/>
 
     <!-- elevator feedback -->
     <let var="elevator_feedback_left"  value="-@PITCH * (9600 + @RC_THRUST)/9600"/>
     <let var="elevator_feedback_right" value="+@PITCH * (9600 + @RC_THRUST)/9600"/>
+	
+    <!-- 
+    <let var="aileron_feedback_left"  value="+@ROLL * (9600 + @RC_THRUST)/9600"/>
+    <let var="aileron_feedback_right" value="+@ROLL * (9600 + @RC_THRUST)/9600"/>
+
+     
+    <let var="elevator_feedback_left"  value="-@PITCH * (9600 + @RC_THRUST)/9600"/>
+    <let var="elevator_feedback_right" value="+@PITCH * (9600 + @RC_THRUST)/9600"/>
+	-->
 
     <!--************* which mode uses which mixing strategy - edit this for configuration ****************-->
     <!-- mode hover_forward -->
@@ -70,7 +79,7 @@
 
     <!-- mode forward -->
     <let var="forward_left"  	   value="0.8 * (3 * $aileron_feedback_left  + 2 * $elevator_feedback_left)"/>
-    <let var="forward_right" 	   value="0.8 * (3 * $aileron_feedback_right + 2 * $elevator_feedback_right"/>
+    <let var="forward_right" 	   value="0.8 * (3 * $aileron_feedback_right + 2 * $elevator_feedback_right)"/>
 
     <!--************ Map laws to correct modes - probably don't edit this ****************-->
     <set servo="AILEVON_LEFT"   value="(@RC_MODE == AP_MODE_TOYTRONICS_HOVER_FORWARD || @RC_MODE == AP_MODE_TUDELFT_QUADSHOT_HOVER_FORWARD_Z_HOLD) ? $hover_forward_left  :  $forward_left" />
@@ -91,7 +100,7 @@
  </section>
 
   <section name="SUPERVISION" prefix="SUPERVISION_">
-    <define name="MIN_MOTOR" value="950"/>
+    <define name="MIN_MOTOR" value="1180"/>
     <define name="MAX_MOTOR" value="2300"/>
     <define name="TRIM_A" value="0"/>
     <define name="TRIM_E" value="0"/>
@@ -106,13 +115,12 @@
     <define name="THRUST_COEF" value="{  256,  256,  256,  256 }"/>
   </section>
 
-  <include href="conf/airframes/TU_Delft/calib/imu_lisam_033_quadshot.xml"/>
-  <!--<include href="conf/airframes/esden/calib/imu_lisam_033.xml"/>-->
+  <include href="conf/airframes/TU_Delft/calib/imu_lisam_033_atmov1.xml"/>
 
   <section name="IMU" prefix="IMU_">
     <define name="BODY_TO_IMU_PHI"   value="RadOfDeg(   0. )"/>
-    <define name="BODY_TO_IMU_THETA" value="RadOfDeg( 189. )"/>  <!-- +5 deg more away from you -->
-    <define name="BODY_TO_IMU_PSI"   value="RadOfDeg(   0. )"/> <!-- +5 deg more to the right in hover --> 
+    <define name="BODY_TO_IMU_THETA" value="RadOfDeg( 180. )"/>  <!-- +5 deg more away from you -->
+    <define name="BODY_TO_IMU_PSI"   value="RadOfDeg( 180. )"/> <!-- +5 deg more to the right in hover --> 
   </section>
 
  <section name="BAT">
@@ -250,7 +258,9 @@
     <target name="ap" board="lisa_m_2.0">
 <!--      <define name="BOOZ_START_DELAY" value="1"/> -->
       <subsystem name="radio_control" type="ppm"/>
-      <subsystem name="actuators"     type="pwm_supervision"/>
+      <subsystem name="actuators"     type="pwm_supervision">
+      	<!-- <define name="USE_SERVOS_7AND8" value="TRUE" />-->
+      </subsystem>
       <subsystem name="telemetry"     type="xbee_api">
         <configure name="MODEM_BAUD"    value="B57600"/>
         <configure name="MODEM_PORT"    value="UART2"/>
@@ -284,7 +294,6 @@
     <subsystem name="ahrs"          type="int_cmpl_quat"/>
     <subsystem name="stabilization" type="quaternion"/>
     <subsystem name="toytronics"    type="default"/>
-    <subsystem name="camera_mount"  type="default"/>
   </firmware>
 
 
