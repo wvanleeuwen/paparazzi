@@ -13,8 +13,8 @@
     <servo name="WR"            no="3" min="880" neutral="880" max="2300"/>	<!-- Wingtip prop right --> 
 
     <servo name="AILEVON_LEFT"  no="4" min="1000" neutral="1500" max="2000"/>
-    <servo name="AILEVON_RIGHT" no="5" min="1000" neutral="1500" max="2000"/>
-    <servo name="RUDDER"  	no="6" min="2000" neutral="1500" max="1000"/>
+    <servo name="AILEVON_RIGHT" no="6" min="1000" neutral="1500" max="2000"/>
+    <servo name="RUDDER"  	no="7" min="2000" neutral="1500" max="1000"/>
   </servos>
 
   <commands>
