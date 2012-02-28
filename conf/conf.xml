@@ -1,6 +1,6 @@
 <conf>
   <aircraft
-   name="AntennaTracker"
+   name="AntennaTrackers"
    ac_id="10"
    airframe="airframes/TUDelft/antenna_tracker.xml"
    radio="radios/cockpitSX.xml"
