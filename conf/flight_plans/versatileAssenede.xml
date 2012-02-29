@@ -3,6 +3,12 @@
 <!--<flight_plan alt="75" ground_alt="0" lat0="43.4622" lon0="1.2729" max_dist_from_home="1500" name="Versatile" qfu="270" security_height="25">-->
   <header>
 #include "datalink.h"
+#ifdef DC_AUTOSHOOT_QUARTERSEC_PERIOD
+#include "modules/digital_cam/dc.h"
+//#define LINE_START_FUNCTION dc_autoshoot = DC_AUTOSHOOT_PERIODIC;
+#define LINE_START_FUNCTION dc_Survey(dc_gps_dist);
+#define LINE_STOP_FUNCTION dc_autoshoot = DC_AUTOSHOOT_STOP;
+#endif
 </header>
   <waypoints>
     <waypoint name="HOME" x="0" y="0"/>
