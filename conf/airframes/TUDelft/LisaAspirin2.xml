@@ -81,7 +81,7 @@
   </section>
 
   <section name="AUTO1" prefix="AUTO1_">
-    <define name="MAX_ROLL" value="0.7"/>
+    <define name="MAX_ROLL" value="0.8"/>
     <define name="MAX_PITCH" value="0.7"/>
   </section>
 
@@ -94,16 +94,16 @@
   </section>
 
   <section name="MISC">
-    <define name="NOMINAL_AIRSPEED" value="16." unit="m/s"/>
+    <define name="NOMINAL_AIRSPEED" value="22." unit="m/s"/>
     <define name="CARROT" value="5." unit="s"/>
     <define name="CONTROL_RATE" value="60" unit="Hz"/>
     <define name="XBEE_INIT" value="&quot;ATPL2\rATRN5\rATTT80\r&quot;"/>
 <!--    <define name="NO_XBEE_API_INIT" value="TRUE"/> -->
     <define name="ALT_KALMAN_ENABLED" value="TRUE"/>
 
-    <define name="DEFAULT_CIRCLE_RADIUS" value="80."/>
+    <define name="DEFAULT_CIRCLE_RADIUS" value="105."/>
 
-    <define name="GLIDE_AIRSPEED" value="15"/>
+    <define name="GLIDE_AIRSPEED" value="19"/>
     <define name="GLIDE_VSPEED" value="3."/>
     <define name="GLIDE_PITCH" value="5" unit="deg"/>
     <define name="GLIDE_PITCH_TRIM" value="0" unit="deg"/>
@@ -117,17 +117,17 @@
     <define name="ALTITUDE_MAX_CLIMB" value="3."/>
 
     <!-- auto throttle inner loop -->
-    <define name="AUTO_THROTTLE_NOMINAL_CRUISE_THROTTLE" value="0.649999976158"/>
-    <define name="AUTO_THROTTLE_MIN_CRUISE_THROTTLE" value="0.25"/>
-    <define name="AUTO_THROTTLE_MAX_CRUISE_THROTTLE" value="0.65"/>
+    <define name="AUTO_THROTTLE_NOMINAL_CRUISE_THROTTLE" value="0.7"/>
+    <define name="AUTO_THROTTLE_MIN_CRUISE_THROTTLE" value="0.45"/>
+    <define name="AUTO_THROTTLE_MAX_CRUISE_THROTTLE" value="0.95"/>
     <define name="AUTO_THROTTLE_LOITER_TRIM" value="1500"/>
     <define name="AUTO_THROTTLE_DASH_TRIM" value="-4000"/>
-    <define name="AUTO_THROTTLE_CLIMB_THROTTLE_INCREMENT" value="0.10" unit="%/(m/s)"/>
+    <define name="AUTO_THROTTLE_CLIMB_THROTTLE_INCREMENT" value="0.15" unit="%/(m/s)"/>
     <define name="AUTO_THROTTLE_PGAIN" value="0."/>
     <define name="AUTO_THROTTLE_IGAIN" value="0."/>
-    <define name="AUTO_THROTTLE_PITCH_OF_VZ_PGAIN" value="0.10"/>
+    <define name="AUTO_THROTTLE_PITCH_OF_VZ_PGAIN" value="0.15"/>
 
-    <define name="THROTTLE_SLEW_LIMITER" value="2" unit="s"/>
+    <define name="THROTTLE_SLEW_LIMITER" value="0.1" unit="s"/>
   </section>
 
   <section name="HORIZONTAL CONTROL" prefix="H_CTL_">
@@ -135,18 +135,18 @@
     <define name="COURSE_DGAIN" value="0.35"/>
     <define name="COURSE_PRE_BANK_CORRECTION" value="0.856999993324"/>
 
-    <define name="ROLL_MAX_SETPOINT" value="0.75" unit="radians"/>
+    <define name="ROLL_MAX_SETPOINT" value="0.60" unit="radians"/>
     <define name="PITCH_MAX_SETPOINT" value="0.5" unit="radians"/>
     <define name="PITCH_MIN_SETPOINT" value="-0.5" unit="radians"/>
 
-    <define name="PITCH_PGAIN" value="-9774.43554688"/>
+    <define name="PITCH_PGAIN" value="-9000."/>
     <define name="PITCH_DGAIN" value="1.5"/>
 
     <define name="ELEVATOR_OF_ROLL" value="1200."/>
 
     <define name="ROLL_SLEW" value="10."/>
 
-    <define name="ROLL_ATTITUDE_GAIN" value="-10488.7216797"/>
+    <define name="ROLL_ATTITUDE_GAIN" value="-10400."/>
     <define name="ROLL_RATE_GAIN" value="-250."/>
   </section>
 
@@ -155,10 +155,10 @@
     <define name="BLEND_END" value="10"/><!-- Altitude Error to Blend Aggressive to Regular Climb Modes  CANNOT BE ZERO!!-->
     <define name="CLIMB_THROTTLE" value="1.00"/><!-- Gaz for Aggressive Climb -->
     <define name="CLIMB_PITCH" value="0.3"/><!-- Pitch for Aggressive Climb -->
-    <define name="DESCENT_THROTTLE" value="0.510999977589"/><!-- Gaz for Aggressive Decent -->
+    <define name="DESCENT_THROTTLE" value="0.5"/><!-- Gaz for Aggressive Decent -->
     <define name="DESCENT_PITCH" value="-0.25"/><!-- Pitch for Aggressive Decent -->
     <define name="CLIMB_NAV_RATIO" value="0.8"/><!-- Percent Navigation for Altitude Error Equal to Start Altitude -->
-    <define name="DESCENT_NAV_RATIO" value="1.0"/>
+    <define name="DESCENT_NAV_RATIO" value="0.9"/>
   </section>
 
   <section name="FAILSAFE" prefix="FAILSAFE_">
@@ -168,7 +168,7 @@
 
     <define name="HOME_RADIUS" value="DEFAULT_CIRCLE_RADIUS" unit="m"/>
     <define name="KILL_MODE_DISTANCE" value="(MAX_DIST_FROM_HOME*1.5)"/>
-    <define name="DELAY_WITHOUT_GPS" value="3" unit="s"/>
+    <define name="DELAY_WITHOUT_GPS" value="4" unit="s"/>
   </section>
 
   <section name="DIGITAL_CAMERA" prefix="DC_">
