@@ -100,6 +100,8 @@
    <define name="MODE_MANUAL" value="AP_MODE_ATTITUDE_DIRECT"/>
    <define name="MODE_AUTO1" value="AP_MODE_HOVER_Z_HOLD"/>
    <define name="MODE_AUTO2" value="AP_MODE_NAV"/>
+    <define name="AUTOPILOT_KILL_WITHOUT_AHRS"  value="TRUE"/>
+    <define name="AUTOPILOT_INSTANT_START_WITH_SAFETIES"  value="TRUE"/> 
  </section>
 
 <!--
@@ -271,6 +273,7 @@ AP_MODE_NAV
      <target name="ap" board="lisa_l_1.1">
       <subsystem name="radio_control" type="ppm"/>
       <subsystem name="actuators" type="asctec_v2"/>
+      <define name="RADIO_KILL_SWITCH" value="RADIO_FLAPS"/>
     </target>
     <target name="sim" board="pc">
       <subsystem name="fdm" type="nps"/>
@@ -281,7 +284,9 @@ AP_MODE_NAV
     <subsystem name="gps" type="ublox">
       <configure name="GPS_PORT" value="UART3"/>
     </subsystem>
-    <subsystem name="ahrs" type="int_cmpl_euler"/>
+    <!--<subsystem name="ahrs" type="int_cmpl_euler"/>
+    <subsystem name="stabilization" type="euler"/>-->
+    <subsystem name="ahrs"          type="int_cmpl_quat"/>
     <subsystem name="stabilization" type="euler"/>
     <!--<subsystem name="ahrs"          type="ic"/>
     <subsystem name="ins"           type="hff"/>-->
