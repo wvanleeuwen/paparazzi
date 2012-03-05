@@ -259,6 +259,7 @@ http://ngdc.noaa.gov/geomag/magfield.shtml
      <define name="USE_ADAPT_HOVER"/>
      <define name="FAILSAFE_GROUND_DETECT"/>
      <define name="USE_GPS_ACC4R"/>
+     <define name="USE_SERVOS_7AND8" />
 <!--     <define name="GPS_CONFIGURE"/>
      <define name="USER_GPS_CONFIGURE"	value="\\\"modules/gps_i2c/runtime_configure.h\\\"" />
      <define name="USER_GPS_CONFIGURE"	value=\"modules/gps_i2c/runtime_configure.h\"/>
