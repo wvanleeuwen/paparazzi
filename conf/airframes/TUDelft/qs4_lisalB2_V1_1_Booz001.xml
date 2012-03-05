@@ -28,16 +28,16 @@
     <!-- <define name="MODE_MANUAL" value="AP_MODE_TOYTRONICS_HOVER"/> -->
     <define name="MODE_MANUAL" value="AP_MODE_TOYTRONICS_HOVER_FORWARD"/>
     <define name="MODE_AUTO1"  value="AP_MODE_TOYTRONICS_FORWARD"/>
-    
+
     <!-- voor test buiten -->
     <define name="MODE_AUTO2"  value="AP_MODE_TUDELFT_QUADSHOT_HOVER_FORWARD_Z_HOLD"/>
     <!--<define name="MODE_AUTO2"  value="AP_MODE_TOYTRONICS_AEROBATIC"/>-->
-    
+
 
     <!-- <define name="MODE_AUTO1" value="AP_MODE_TOYTRONICS_AEROBATIC"/> -->
     <!--<define name="MODE_AUTO2"  value="AP_MODE_TOYTRONICS_AEROBATIC"/>-->
     <define name="AUTOPILOT_KILL_WITHOUT_AHRS"  value="TRUE"/>
-    <define name="AUTOPILOT_INSTANT_START_WITH_SAFETIES"  value="TRUE"/> 
+    <define name="AUTOPILOT_INSTANT_START_WITH_SAFETIES"  value="TRUE"/>
     <!--This is to enable a wing waggle at specified low battery voltage. The interval is in cycle counts, not seconds-->
     <define name="AUTOPILOT_LOBATT_WING_WAGGLE"  value="TRUE"/>
     <define name="AUTOPILOT_LOBATT_WING_WAGGLE_INTERVAL"  value="5120"/>
@@ -377,7 +377,7 @@
     <target name="tunnel_sw"                board="lisa_l_1.0">
     </target>
     <target name="tunnel_hw"                board="lisa_l_1.0">
-        <configure name="UART3_BAUD"                value="B38400"/>	
+        <configure name="UART3_BAUD"                value="B38400"/>
     </target>
   </firmware>
 

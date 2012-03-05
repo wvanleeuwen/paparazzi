@@ -38,7 +38,7 @@
     <define name="H_Z" value=" 0.9202531"/>
   </section>
        -->
-    <!--Antwerpen 
+    <!--Antwerpen
   <section name="AHRS" prefix="AHRS_">
     <define name="PROPAGATE_FREQUENCY" value="512"/>
     <define name="H_X" value=" 0.4006406"/>

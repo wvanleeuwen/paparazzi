@@ -201,8 +201,8 @@ AP_MODE_NAV
     <define name="H_Y" value=" 0.0005934"/>
     <define name="H_Z" value=" 0.9202531"/>
   </section>
-       
-    <!--Antwerpen 
+
+    <!--Antwerpen
   <section name="AHRS" prefix="AHRS_">
     <define name="PROPAGATE_FREQUENCY" value="512"/>
     <define name="H_X" value=" 0.4006406"/>
@@ -267,7 +267,7 @@ AP_MODE_NAV
 
   <firmware name="rotorcraft">
 <!--     <define name="USE_PERSISTENT_SETTINGS"/> -->
-<!--     <define name="USE_INS_NAV_INIT"/> 
+<!--     <define name="USE_INS_NAV_INIT"/>
      <define name= "NO_RC_THRUST_LIMIT"/>-->
      <define name="USE_ADAPT_HOVER"/>
      <define name="FAILSAFE_GROUND_DETECT"/>
