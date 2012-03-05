@@ -1,4 +1,4 @@
-<!DOCTYPE flight_plan SYSTEM "flight_plan.dtd">
+<!DOCTYPE flight_plan SYSTEM "../flight_plan.dtd">
 
 <flight_plan alt="152" ground_alt="147" lat0="51.990" lon0="4.390" max_dist_from_home="2500" name="Booz Test Enac" security_height="2">
   <header>

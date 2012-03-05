@@ -117,9 +117,8 @@ AP_MODE_NAV
   </section>
 
  <section name="BAT">
-   <define name="MILLIAMP_PER_PERCENT" value="0.86"/>
+   <define name="MILLIAMP_AT_FULL_THROTTLE" value="12000"/>
    <define name="CATASTROPHIC_BAT_LEVEL" value="9.3" unit="V"/>
-   <define name="BATTERY_SENS" value="0.48" integer="16"/>
  </section>
 
 
@@ -249,9 +248,9 @@ AP_MODE_NAV
       <subsystem name="actuators" type="mkk"/>
     </target>
 
-    <subsystem name="imu" type="aspirin"/>
+    <subsystem name="imu" type="aspirin_v1.5"/>
     <subsystem name="gps" type="ublox"/>
-    <subsystem name="ahrs" type="cmpl"/>
+    <subsystem name="ahrs" type="int_cmpl_euler"/>
     <subsystem name="stabilization" type="euler"/>
 
   </firmware>
