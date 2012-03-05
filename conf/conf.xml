@@ -13,7 +13,7 @@ T<conf>
    name="Asctec"
    ac_id="23"
    airframe="airframes/TUDelft/LisaQuadAsctecB2_v1_1_Booz001.xml"
-   radio="radios/wk2801.xml"
+   radio="radios/TUDelft/wk2801.xml"
    telemetry="telemetry/telemetry_booz2.xml"
    flight_plan="flight_plans/TUDelft/rotorcraft_basic_delft.xml"
    settings=" settings/settings_booz2.xml settings/settings_booz2_asctec.xml"
