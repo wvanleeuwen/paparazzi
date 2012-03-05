@@ -27,6 +27,8 @@ chmod +x ./rm.sh
 rm ./rm.sh
 rm -rf ./sw/airborne/modules/onboardcam
 rm -rf ./sw/airborne/modules/opticflow
+rm -rf ./conf/conf.xml
+rm -rf ./conf/controlpanel.xml
 #rm -rf ./sw/airborne/boards/tiny_sense.h
 #rm -rf ./sw/airborne/booz/aerovinci
 #rm -rf ./conf/joysticks
