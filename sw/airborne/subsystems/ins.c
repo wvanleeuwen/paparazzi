@@ -277,13 +277,3 @@ void ins_update_sonar() {
   }
 #endif
 }
-
-void ins_update_sonar_new() {
-#if defined USE_SONAR && defined USE_VFF
-  /* update baro_qfe assuming a flat ground */
-  if (ins_update_on_agl && baro.status == BS_RUNNING) {
-    int32_t d_sonar = (((uint32_t)sonar_alt_cm_bfp);
-    ins_qfe = baro.absolute + (d_sonar * (INS_BARO_SENS_DEN))/INS_BARO_SENS_NUM;
-  }
-#endif
-}
