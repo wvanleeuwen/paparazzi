@@ -196,19 +196,16 @@
 
  <!--    <load name="ins_ppzuavimu.xml" /> -->
 
-<!--
+
     <load name="digital_cam.xml" >
       <define name="DC_SHUTTER_LED" value="3"/>
     </load>
-    -->
+    
   </modules>
 
   <firmware name="fixedwing">
 
     <target name="ap" board="lisa_m_1.0">
-      <define name="STRONG_WIND"/>
-      <define name="WIND_INFO"/>
-      <define name="WIND_INFO_RET"/>
       <define name="LISA_M_LONGITUDINAL_X"/>
 
       <configure name="PERIODIC_FREQUENCY" value="120"/>
@@ -224,7 +221,10 @@
     <define name="AGR_CLIMB"/>
     <define name="LOITER_TRIM"/>
     <define name="ALT_KALMAN"/>
-
+    <define name="TUNE_AGRESSIVE_CLIMB"/>
+    <define name="STRONG_WIND"/>
+    <define name="WIND_INFO"/>
+    <define name="WIND_INFO_RET"/>
     <!-- Sensors -->
     <!--
     <subsystem name="ahrs" type="int_cmpl_quat">
@@ -248,7 +248,7 @@
     <!-- Actuators -->
     <subsystem name="control"/>
     <!-- Sensors -->
-    <subsystem name="navigation"/>
+    <subsystem name="navigation" type="extra"/>
     <subsystem name="gps" type="ublox">
       <configure name="GPS_PORT" value="UART1"/>
     </subsystem>
