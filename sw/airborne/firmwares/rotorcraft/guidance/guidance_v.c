@@ -137,7 +137,6 @@ void guidance_v_mode_changed(uint8_t new_mode) {
   case GUIDANCE_V_MODE_CLIMB:
   case GUIDANCE_V_MODE_HOVER:
   case GUIDANCE_V_MODE_NAV:
-  case GUIDANCE_V_MODE_TUDELFT_QUADSHOT_NAV:
     guidance_v_z_sum_err = 0;
     GuidanceVSetRef(ins_ltp_pos.z, ins_ltp_speed.z, 0);
     break;
@@ -232,9 +231,6 @@ void guidance_v_run(bool_t in_flight) {
         stabilization_cmd[COMMAND_THRUST] = guidance_v_delta_t;
       break;
     }
-  case GUIDANCE_V_MODE_TUDELFT_QUADSHOT_NAV:
-    //todo
-    break;
   default:
     break;
   }

@@ -115,14 +115,14 @@ class Visualization:
     separation = 0.7
     chord = 0.35
     thickness = 0.08
-    strutcount = 3
+    strutcount = 5
     discradius = 0.45
     discseparation = 0.01
    
     #wings
     glColor3f(0.1, 0.1, 0.9)
     glPushMatrix()
-    glTranslate(0, 0, 0.05)
+    glTranslate(0, 0, separation)
     self.DrawBox(wingspan, chord, thickness)
     glColor3f(0.0, 0.0, 0.0)
     glTranslate(-wingspan, -0.2, thickness + 0.01)
@@ -131,7 +131,7 @@ class Visualization:
     glPopMatrix()
 
     glPushMatrix()
-    glTranslate(0, 0, -0.05)
+    glTranslate(0, 0, -separation)
     glColor3f(0.6, 0.6, 0.2)
     self.DrawBox(wingspan, chord, thickness)
     glColor3f(0.0, 0.0, 0.0)
@@ -147,26 +147,22 @@ class Visualization:
       # struts
       glColor3f(0.4, 0.4, 0.4)
       glPushMatrix()
-      glTranslate(-wingspan/2, 0, separation/2)
+      glTranslate(-wingspan, 0, 0)
       glRotate(90, 0, 1, 0)
-      for x in range (0, strutcount-1):
-        self.DrawBox(separation/2, chord - .01, thickness)
-        glTranslate(0, 0, wingspan)
-      glTranslate(separation, 0, -5*wingspan/2)
-      for x in range (0, strutcount-1):
-        self.DrawBox(separation/2, chord - .01, thickness)
-        glTranslate(0, 0, 2*wingspan)
+      for x in range (0, strutcount):
+        self.DrawBox(separation, chord - .01, thickness)
+        glTranslate(0, 0, 2 * wingspan/(strutcount - 1))
       glPopMatrix()
 
       #rotors
       glColor3f(0.9, 0.1, 0.1)
       glPushMatrix()
       glRotate(90, 1, 0, 0)
-      glTranslate(-wingspan/2, separation, -(chord + .01))
+      glTranslate(-wingspan, separation, -(chord + .01))
       for x in range (0, strutcount):
         if (x != strutcount/2):
           self.DrawCircle(discradius)
-        glTranslate(2 * wingspan/(strutcount + 1), 0, 0)
+        glTranslate(2 * wingspan/(strutcount - 1), 0, 0)
       glPopMatrix()
 
       glPushMatrix()
@@ -220,12 +216,15 @@ class Visualization:
     for telemetry_quat in self.quats:
       glPushMatrix()
       try: 
-        scaled_quat = [telemetry_quat.qi * telemetry_quat.scale, telemetry_quat.qx * telemetry_quat.scale, telemetry_quat.qy * telemetry_quat.scale, telemetry_quat.qz * telemetry_quat.scale]
-        glRotate(360 * math.acos(scaled_quat[0] ) / math.pi, scaled_quat[2], -scaled_quat[3], -scaled_quat[1])
+        telemetry_quat.qi = telemetry_quat.qi * telemetry_quat.scale
+        telemetry_quat.qx = telemetry_quat.qx * telemetry_quat.scale
+        telemetry_quat.qy = telemetry_quat.qy * telemetry_quat.scale
+        telemetry_quat.qz = telemetry_quat.qz * telemetry_quat.scale
+        glRotate(360 * math.acos(telemetry_quat.qi ) / math.pi, telemetry_quat.qy, -telemetry_quat.qz, -telemetry_quat.qx)
         glRotate(-90, 1, 0, 0)
         self.DrawVehicle(telemetry_quat.name)
       except Exception:
-        raise Exception
+        pass
       finally:
         glPopMatrix()
         glTranslate(0,  2 * height / (len(self.quats)), 0)
@@ -313,7 +312,7 @@ def init():
 def run():
   global VEHICLE_QUATS, BAR_VALUES
   VEHICLE_QUATS = [ ["AHRS_REF_QUAT", 6, "Estimate", True], ["AHRS_REF_QUAT", 2, "Reference", True]]
-  BAR_VALUES = [ ["BOOZ2_RADIO_CONTROL", 5, "Throttle (%%) %i", 0, 100, 100] ]
+  BAR_VALUES = [ ["BOOZ2_RADIO_CONTROL", 5, "Throttle (%%) %i", 9600, 96 * 2, 100] ]
   window_title = "Attitude_Viz"
   try:
     opts, args = getopt.getopt(sys.argv[1:], "t:", ["title"])
@@ -330,22 +329,17 @@ def run():
   #resize(*SCREEN_SIZE)
   init()
   visualizer = Visualizer()
-
-  try:
-    while True:
-      for event in pygame.event.get():
-        if event.type == pygame.QUIT:
-          visualizer.OnClose()
-          return
-        if event.type == pygame.KEYUP and event.key == pygame.K_ESCAPE:
-          visualizer.OnClose()
-          return
-      visualizer.Draw()
-      pygame.display.flip()
-      time.sleep(.02)
-  except KeyboardInterrupt:
-    visualizer.OnClose()
-    return
+  while True:
+    for event in pygame.event.get():
+      if event.type == pygame.QUIT:
+        visualizer.OnClose()
+        return
+      if event.type == pygame.KEYUP and event.key == pygame.K_ESCAPE:
+        visualizer.OnClose()
+        return
+    visualizer.Draw()
+    pygame.display.flip()
+    time.sleep(.02)
 
 if __name__ == "__main__":
   run()

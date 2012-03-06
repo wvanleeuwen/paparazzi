@@ -12,10 +12,10 @@
   <aircraft
    name="Asctec"
    ac_id="23"
-   airframe="airframes/TU_Delft/LisaQuadAsctecB2_v1_1_Booz001.xml"
+   airframe="airframes/TUDelft/LisaQuadAsctecB2_v1_1_Booz001.xml"
    radio="radios/R6107SP_7ch.xml"
    telemetry="telemetry/telemetry_booz2.xml"
-   flight_plan="flight_plans/rotorcraft_basic.xml"
+   flight_plan="flight_plans/TUDelft/rotorcraft_basic_delft.xml"
    settings=" settings/settings_booz2.xml settings/settings_booz2_asctec.xml"
    gui_color="blue"
   />
@@ -40,29 +40,9 @@
    gui_color="red"
   />
   <aircraft
-   name="CDW_LISA_HELI"
-   ac_id="77"
-   airframe="airframes/TUDelft/cdw_lisa_heli.xml"
-   radio="radios/TUDelft/mc22.xml"
-   telemetry="telemetry/default.xml"
-   flight_plan="flight_plans/dummy.xml"
-   settings=" settings/settings_booz2.xml"
-   gui_color="blue"
-  />
-  <aircraft
-   name="CHNI"
-   ac_id="7"
-   airframe="airframes/example_twog_analogimu.xml"
-   radio="radios/cockpitMM.xml"
-   telemetry="telemetry/default.xml"
-   flight_plan="flight_plans/versatile.xml"
-   settings=" settings/tuning_ins.xml"
-   gui_color="blue"
-  />
-  <aircraft
    name="EasyStarCHIMU_PT"
    ac_id="22"
-   airframe="airframes/TU_Delft/EasyStartPanTiltCHIMU_SPI.xml"
+   airframe="airframes/TUDelft/EasyStartPanTiltCHIMU_SPI.xml"
    radio="radios/R6107SP_7ch.xml"
    telemetry="telemetry/default.xml"
    flight_plan="flight_plans/versatile.xml"
@@ -80,33 +60,13 @@
    gui_color="blue"
   />
   <aircraft
-   name="Easystar_Pieter"
-   ac_id="44"
-   airframe="airframes/TUDelft/EasystarHeering.xml"
-   radio="radios/TUDelft/t12fg_5channel.xml"
-   telemetry="telemetry/default.xml"
-   flight_plan="flight_plans/TUDelft/versatile_delft.xml"
-   settings=" settings/basic.xml"
-   gui_color="#1084f3ce294a"
-  />
-  <aircraft
    name="FireSwarm"
    ac_id="28"
    airframe="airframes/TUDelft/LisaAspirin2.xml"
    radio="radios/R6107SP_7ch.xml"
    telemetry="telemetry/default_fixedwing_imu_9k6.xml"
-   flight_plan="flight_plans/versatileAssenede.xml"
+   flight_plan="flight_plans/TUDelft/versatileAssenede.xml"
    settings=" settings/tuning_ins.xml settings/tune_agr_climb.xml settings/dc.xml"
-   gui_color="blue"
-  />
-  <aircraft
-   name="HITL"
-   ac_id="17"
-   airframe="airframes/osam_xsens_twog.xml"
-   radio="radios/cockpitSX.xml"
-   telemetry="telemetry/hitl.xml"
-   flight_plan="flight_plans/basic.xml"
-   settings=" settings/basic.xml"
    gui_color="blue"
   />
   <aircraft
@@ -120,16 +80,6 @@
    gui_color="#b7874619f818"
   />
   <aircraft
-   name="Holiday50"
-   ac_id="2"
-   airframe="airframes/TU_Delft/holiday50.xml"
-   radio="radios/TUDelft/mc22.xml"
-   telemetry="telemetry/aerocomm.xml"
-   flight_plan="flight_plans/TUDelft/EMAV2010.xml"
-   settings=" settings/TUDelft/TuneHoliday.xml"
-   gui_color="#f6f611111111"
-  />
-  <aircraft
    name="HolidayBart"
    ac_id="26"
    airframe="airframes/TUDelft/holiday_LisaM_Aspirin1_5_fixeW.xml"
@@ -140,42 +90,22 @@
    gui_color="#fedcc7058e38"
   />
   <aircraft
-   name="LISA"
-   ac_id="6"
-   airframe="airframes/Poine/booz2_a7.xml"
-   radio="radios/cockpitSX.xml"
-   telemetry="telemetry/telemetry_booz2.xml"
-   flight_plan="flight_plans/dummy.xml"
-   settings=" settings/settings_booz2.xml"
-   gui_color="white"
-  />
-  <aircraft
    name="LISA_BOOZ_BART"
    ac_id="21"
    airframe="airframes/TUDelft/booz2_a7_bart_aspirin45.xml"
    radio="radios/TUDelft/wk2801.xml"
    telemetry="telemetry/telemetry_booz2.xml"
-   flight_plan="flight_plans/rotorcraft_basic.xml"
+   flight_plan="flight_plans/TUDelft/rotorcraft_basic_delft.xml"
    settings=" settings/settings_booz2_ahrs_cmpl.xml settings/settings_booz2.xml"
-   gui_color="blue"
-  />
-  <aircraft
-   name="LISA_FW"
-   ac_id="18"
-   airframe="airframes/TU_Delft/lisamFixedwimg.xml"
-   radio="radios/cockpitSX.xml"
-   telemetry="telemetry/default_fixedwing_imu_9k6.xml"
-   flight_plan="flight_plans/basic.xml"
-   settings=" settings/tuning_ins.xml"
    gui_color="blue"
   />
   <aircraft
    name="LISA_HELI_BART"
    ac_id="64"
-   airframe="airframes/TUDelft/Lisam_heli.xml"
+   airframe="airframes/example_heli_lisam.xml"
    radio="radios/R6107SP_7ch.xml"
    telemetry="telemetry/telemetry_booz2.xml"
-   flight_plan="flight_plans/rotorcraft_basic.xml"
+   flight_plan="flight_plans/TUDelft/rotorcraft_basic_delft.xml"
    settings=" settings/settings_booz2_ahrs_cmpl.xml settings/settings_booz2.xml"
    gui_color="blue"
   />
@@ -190,29 +120,19 @@
    gui_color="blue"
   />
   <aircraft
-   name="MJ5"
-   ac_id="5"
-   airframe="airframes/delta_wing_minimal_example.xml"
-   radio="radios/cockpitMM.xml"
-   telemetry="telemetry/default.xml"
-   flight_plan="flight_plans/basic.xml"
-   settings=" settings/basic.xml"
-   gui_color="#6293ba"
-  />
-  <aircraft
    name="Mentor"
    ac_id="29"
    airframe="airframes/TUDelft/Mentor.xml"
    radio="radios/R6107SP_7ch.xml"
    telemetry="telemetry/default_fixedwing_imu_9k6.xml"
-   flight_plan="flight_plans/versatileAssenede.xml"
+   flight_plan="flight_plans/versatile.xml"
    settings=" settings/tuning_ins.xml"
    gui_color="blue"
   />
   <aircraft
    name="MicrojetBR"
    ac_id="3"
-   airframe="airframes/TU_Delft/MicrojetBR.xml"
+   airframe="airframes/TUDelft/MicrojetBR.xml"
    radio="radios/R6107SP_7ch.xml"
    telemetry="telemetry/default.xml"
    flight_plan="flight_plans/versatile.xml"
@@ -222,7 +142,7 @@
   <aircraft
    name="MicrojetBRimu"
    ac_id="16"
-   airframe="airframes/TU_Delft/MicrojetBRimu.xml"
+   airframe="airframes/TUDelft/MicrojetBRimu.xml"
    radio="radios/R6107SP_7ch.xml"
    telemetry="telemetry/default_fixedwing_imu.xml"
    flight_plan="flight_plans/versatile.xml"
@@ -232,7 +152,7 @@
   <aircraft
    name="MicrojetCDW"
    ac_id="4"
-   airframe="airframes/TU_Delft/MicrojetCDW.xml"
+   airframe="airframes/TUDelft/MicrojetCDW.xml"
    radio="radios/TUDelft/t12fg_5channel.xml"
    telemetry="telemetry/default_fixedwing_imu.xml"
    flight_plan="flight_plans/versatile.xml"
@@ -242,20 +162,20 @@
   <aircraft
    name="SkyWalker"
    ac_id="8"
-   airframe="airframes/TU_Delft/skywalker.xml"
+   airframe="airframes/TUDelft/skywalker.xml"
    radio="radios/R6107SP_7ch.xml"
    telemetry="telemetry/default_fixedwing_imu_9k6.xml"
-   flight_plan="flight_plans/versatile_flaps.xml"
+   flight_plan="flight_plans/TUDelft/versatile_flaps.xml"
    settings=" settings/tune_agr_climb.xml settings/tuning_ins.xml"
    gui_color="blue"
   />
   <aircraft
    name="SkyWalkerGlass"
    ac_id="24"
-   airframe="airframes/TU_Delft/skywalkerfiber.xml"
+   airframe="airframes/TUDelft/skywalkerfiber.xml"
    radio="radios/R6107SP_7ch.xml"
    telemetry="telemetry/default_fixedwing_imu_9k6.xml"
-   flight_plan="flight_plans/versatile_flaps.xml"
+   flight_plan="flight_plans/TUDelft/versatile_flaps.xml"
    settings=" settings/tuning_ins.xml settings/tune_agr_climb.xml"
    gui_color="blue"
   />
@@ -280,26 +200,6 @@
    gui_color="#ececabab1818"
   />
   <aircraft
-   name="Trip50A"
-   ac_id="14"
-   airframe="airframes/TU_Delft/Trip50A.xml"
-   radio="radios/TUDelft/mc22.xml"
-   telemetry="telemetry/default.xml"
-   flight_plan="flight_plans/TUDelft/versatile_delft.xml"
-   settings=" settings/tuning.xml"
-   gui_color="blue"
-  />
-  <aircraft
-   name="Trip50B"
-   ac_id="15"
-   airframe="airframes/TU_Delft/Trip50B.xml"
-   radio="radios/TUDelft/mc22.xml"
-   telemetry="telemetry/default.xml"
-   flight_plan="flight_plans/TUDelft/versatile_delft.xml"
-   settings=" settings/cam_pitch.xml settings/tuning.xml"
-   gui_color="#ffffb9b9aeae"
-  />
-  <aircraft
    name="TwinJetAspirin"
    ac_id="12"
    airframe="airframes/TUDelft/TwinjetAspirinI2C.xml"
@@ -320,21 +220,11 @@
    gui_color="blue"
   />
   <aircraft
-   name="YAPA"
-   ac_id="11"
-   airframe="airframes/TU_Delft/yapa_xsens.xml"
-   radio="radios/TUDelft/fasst_tx_graupner.xml"
-   telemetry="telemetry/default.xml"
-   flight_plan="flight_plans/versatile.xml"
-   settings=" settings/TUDelft/tuning_xsens.xml settings/light.xml"
-   gui_color="blue"
-  />
-  <aircraft
    name="tudelftquadshot"
    ac_id="40"
-   airframe="airframes/TU_Delft/qs4_lisal.xml"
+   airframe="airframes/TUDelft/qs4_lisal.xml"
    radio="radios/R6107SP_7ch_xyz.xml"
-   telemetry="telemetry/telemetry_quadshot_tud.xml"
+   telemetry="telemetry/TUDelft/telemetry_quadshot_tud.xml"
    flight_plan="flight_plans/dummy.xml"
    settings=" settings/settings_booz2_qs4m.xml"
    gui_color="blue"
@@ -342,10 +232,10 @@
   <aircraft
    name="tudelftquadshot_sim"
    ac_id="42"
-   airframe="airframes/TU_Delft/qs4_lisal.xml"
+   airframe="airframes/TUDelft/qs4_lisal.xml"
    radio="radios/R6107SP_7ch_xyz.xml"
    telemetry="telemetry/telemetry_jtm.xml"
-   flight_plan="flight_plans/TU_Delft/quadshot-test.xml"
+   flight_plan="flight_plans/TUDelft/quadshot-test.xml"
    settings=" settings/settings_booz2.xml"
    gui_color="blue"
   />

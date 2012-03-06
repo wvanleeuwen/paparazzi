@@ -29,17 +29,12 @@
 
 #include "firmwares/rotorcraft/guidance/guidance_h_ref.h"
 
-#define GUIDANCE_H_MODE_KILL      		 0
-#define GUIDANCE_H_MODE_RATE      		 1
-#define GUIDANCE_H_MODE_ATTITUDE  		 2
-#define GUIDANCE_H_MODE_HOVER     		 3
-#define GUIDANCE_H_MODE_NAV       		 4
-#define GUIDANCE_H_MODE_RC_DIRECT 		 5
-#define GUIDANCE_H_MODE_TOYTRONICS_HOVER         6
-#define GUIDANCE_H_MODE_TOYTRONICS_HOVER_FORWARD 7
-#define GUIDANCE_H_MODE_TOYTRONICS_FORWARD       8
-#define GUIDANCE_H_MODE_TOYTRONICS_AEROBATIC     9
-#define GUIDANCE_H_MODE_TUDELFT_QUADSHOT_NAV     10
+#define GUIDANCE_H_MODE_KILL      0
+#define GUIDANCE_H_MODE_RATE      1
+#define GUIDANCE_H_MODE_ATTITUDE  2
+#define GUIDANCE_H_MODE_HOVER     3
+#define GUIDANCE_H_MODE_NAV       4
+
 
 extern uint8_t guidance_h_mode;
 

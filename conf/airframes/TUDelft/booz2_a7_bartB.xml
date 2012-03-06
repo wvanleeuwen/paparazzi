@@ -195,6 +195,7 @@ comment everything that is 2 lines back when you stop simulaton-->
 
   <firmware name="rotorcraft">
     <target name="ap" board="lisa_l_1.1"/>
+    <define name="BARO_LOW_GAIN" /> <!-- The Netherlands: caution, this affects calibration -->
     <subsystem name="radio_control" type="ppm"/>
     <subsystem name="actuators"     type="mkk"/>
     <subsystem name="imu"           type="b2_v1.1"/>

@@ -130,6 +130,7 @@
 /sw/logalizer/ivy_example
 /sw/logalizer/motor_bench
 /sw/logalizer/tmclient
+/sw/logalizer/openlog2tlm
 
 # /sw/simulator/
 /sw/simulator/gaia
@@ -166,10 +167,3 @@
 /sw/airborne/test/test_algebra
 /sw/airborne/test/test_matrix
 /sw/airborne/test/test_att
-
-# Eclipse IDE project files
-/.cproject
-/.project
-/.externalToolBuilders
-/build.properties
-/META-INF

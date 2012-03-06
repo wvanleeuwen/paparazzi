@@ -1,11 +1,11 @@
 <!-- The newly designed removable Arms Quadcopter airframe
-     * Lisa L Autopilot board 
+     * Lisa L Autopilot board
      * 2x Microcopter BL Ctrl v1.2 ESC
      * 2x Microcopter BL Ctrl v2.0 ESC
      * XBee Pro Sseries 1 2.4Ghz
      * uBlox LEA5H and Sarantel helix GPS antenna
 
-     Near Future 
+     Near Future
      * uBlox LEA-5H and Sarantel helix GPS antenna
 -->
 
@@ -201,7 +201,7 @@
     <define name="RC_CLIMB_COEF" value ="163"/>
     <!-- BOOZ_SPEED_I_OF_F(1.5) * 20% -->
     <define name="RC_CLIMB_DEAD_BAND" value ="160000"/>
-    <define name="INV_M" value ="0.2"/> 
+    <define name="INV_M" value ="0.2"/>
   </section>
 
   <section name="GUIDANCE_H" prefix="GUIDANCE_H_">
@@ -232,7 +232,7 @@
 
   <firmware name="rotorcraft">
 <!--     <define name="USE_PERSISTENT_SETTINGS"/> -->
-<!--     <define name="USE_INS_NAV_INIT"/> 
+<!--     <define name="USE_INS_NAV_INIT"/>
     <define name= "NO_RC_THRUST_LIMIT"/>-->
     <define name="USE_ADAPT_HOVER"/>
     <define name="FAILSAFE_GROUND_DETECT"/>
@@ -241,7 +241,7 @@
     <target name="ap" board="lisa_l_1.1">
       <subsystem name="radio_control" type="ppm"/>
       <subsystem name="actuators"     type="mkk"/>
-    </target>    
+    </target>
     <target name="sim" board="pc">
       <subsystem name="fdm"           type="nps"/>
       <subsystem name="actuators"     type="mkk"/>
