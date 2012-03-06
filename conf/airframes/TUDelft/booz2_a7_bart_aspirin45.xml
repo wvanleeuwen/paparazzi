@@ -110,7 +110,7 @@ AP_MODE_RATE_Z_HOLD		AP_MODE_ATTITUDE_Z_HOLD			AP_MODE_HOVER_Z_HOLD
 AP_MODE_NAV
 -->
  <section name="BAT">
-   <define name="MILLIAMP_PER_PERCENT" value="0.86"/>
+   <define name="MILLIAMP_AT_FULL_THROTTLE" value="12000"/>
    <define name="CATASTROPHIC_BAT_LEVEL" value="9.3" unit="V"/>
  </section>
 
@@ -243,6 +243,7 @@ http://ngdc.noaa.gov/geomag/magfield.shtml
 
 
   <firmware name="rotorcraft">
+     <define name="BARO_LOW_GAIN" /> <!-- The Netherlands: caution, this affects calibration -->
      <define name="USE_ADAPT_HOVER"/>
      <define name="FAILSAFE_GROUND_DETECT"/>
      <define name="USE_GPS_ACC4R"/>

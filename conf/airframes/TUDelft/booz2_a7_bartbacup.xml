@@ -236,6 +236,7 @@ http://ngdc.noaa.gov/geomag/magfield.shtml
 
 
   <firmware name="rotorcraft">
+     <define name="BARO_LOW_GAIN" /> <!-- The Netherlands: caution, this affects calibration -->
      <define name="USE_ADAPT_HOVER"/>
      <define name="FAILSAFE_GROUND_DETECT"/>
      <define name="USE_GPS_ACC4R"/>

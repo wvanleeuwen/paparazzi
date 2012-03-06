@@ -262,6 +262,7 @@ AP_MODE_NAV
 -->
 
   <firmware name="rotorcraft">
+     <define name="BARO_LOW_GAIN" /> <!-- The Netherlands: caution, this affects calibration -->
 <!--     <define name="USE_PERSISTENT_SETTINGS"/> -->
 <!--     <define name="USE_INS_NAV_INIT"/>
      <define name= "NO_RC_THRUST_LIMIT"/>-->
