@@ -80,16 +80,6 @@
    gui_color="#b7874619f818"
   />
   <aircraft
-   name="Holiday50"
-   ac_id="2"
-   airframe="airframes/TUDelft/holiday50.xml"
-   radio="radios/TUDelft/mc22.xml"
-   telemetry="telemetry/aerocomm.xml"
-   flight_plan="flight_plans/TUDelft/EMAV2010.xml"
-   settings=" settings/TUDelft/TuneHoliday.xml"
-   gui_color="#f6f611111111"
-  />
-  <aircraft
    name="HolidayBart"
    ac_id="26"
    airframe="airframes/TUDelft/holiday_LisaM_Aspirin1_5_fixeW.xml"

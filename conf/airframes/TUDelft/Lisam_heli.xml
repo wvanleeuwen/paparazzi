@@ -242,12 +242,13 @@ AP_MODE_NAV
       <define name="USE_SERVOS_7AND8"/>
       <define name="ROTORCRAFT_COMMANDS_YAW_ALWAYS_ENABLED"/>
     </target>
+<!--
     <target name="sim" board="pc">
       <subsystem name="fdm" type="nps"/>
       <subsystem name="radio_control" type="ppm"/>
       <subsystem name="actuators" type="mkk"/>
     </target>
-
+-->
     <subsystem name="imu" type="aspirin_v1.5"/>
     <subsystem name="gps" type="ublox"/>
     <subsystem name="ahrs" type="int_cmpl_euler"/>
