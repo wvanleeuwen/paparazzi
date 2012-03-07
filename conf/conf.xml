@@ -214,19 +214,9 @@
    ac_id="9"
    airframe="airframes/TUDelft/TwinStarXSens.xml"
    radio="radios/TUDelft/t12fg_5channel.xml"
-   telemetry="telemetry/default.xml"
-   flight_plan="flight_plans/TUDelft/Heering_testPieter.xml"
-   settings=" settings/TUDelft/photogrammetry.xml settings/TUDelft/tuning_xsens.xml"
-   gui_color="blue"
-  />
-  <aircraft
-   name="tudelftquadshot_sim"
-   ac_id="42"
-   airframe="airframes/TUDelft/qs4_lisal.xml"
-   radio="radios/R6107SP_7ch_xyz.xml"
-   telemetry="telemetry/telemetry_jtm.xml"
-   flight_plan="flight_plans/TUDelft/quadshot-test.xml"
-   settings=" settings/settings_booz2.xml"
+   telemetry="telemetry/default_fixedwing_imu_9k6.xml"
+   flight_plan="flight_plans/versatile.xml"
+   settings=" settings/TUDelft/photogrammetry.xml settings/tuning_ins.xml"
    gui_color="blue"
   />
 </conf>

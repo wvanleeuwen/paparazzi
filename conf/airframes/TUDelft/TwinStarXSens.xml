@@ -171,12 +171,14 @@
     </target>
 
     <subsystem name="telemetry" type="xbee_api">
-      <configure name="MODEM_UART_NR" value="0"/>
+      <configure name="MODEM_PORT" value="0"/>
       <configure name="MODEM_BAUD" value="B9600"/>
     </subsystem>
     <subsystem name="control"/>
     <subsystem name="navigation" type="extra"/>
-    <subsystem name="gps" type="xsens"/>
+    <subsystem name="ins" type="xsens">
+      <configure name="XSENS_UART_NR" value="1"/>
+    </subsystem>
 
 
   </firmware>
@@ -191,9 +193,6 @@
   </firmware>
 
   <modules>
-    <load name="ins_xsens_MTiG_fixedwing.xml">
-      <configure name="XSENS_UART_NR" value="1"/>
-    </load>
     <load name="digital_cam.xml">
       <define name="DC_SHUTTER_LED" value="6"/>
    </load>
