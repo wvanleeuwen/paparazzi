@@ -81,7 +81,7 @@ void nav_catapult_highrate_module(void)
     {
       // Five consecutive measurements > 1.5
 #ifndef SITL
-      if (ACCEL_FLOAT_OF_BFP(imu.accel.x)  < 1.5f)
+      if (ACCEL_FLOAT_OF_BFP(imu.accel.x)  < (1.5f * 9.1))
 #else
       if (launch != 1)
 #endif
