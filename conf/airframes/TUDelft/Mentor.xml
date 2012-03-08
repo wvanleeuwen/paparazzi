@@ -119,7 +119,7 @@
     <define name="ALTITUDE_PGAIN" value="-0.104999996722"/>
     <!-- outer loop saturation -->
     <define name="ALTITUDE_MAX_CLIMB" value="3."/>
-    <define name="ALTITUDE_PRE_CLIMB_CORRECTION" value="0."/>
+    <define name="ALTITUDE_PRE_CLIMB_CORRECTION" value="0.0960000008345"/>
 <!--
     <define name="AUTO_PITCH_PGAIN" value="-0.00"/>
     <define name="AUTO_PITCH_IGAIN" value="-0.00"/>
@@ -127,11 +127,11 @@
 
     <!-- auto throttle inner loop -->
     <define name="AUTO_THROTTLE_NOMINAL_CRUISE_THROTTLE" value="0.5"/>
-    <define name="AUTO_THROTTLE_MIN_CRUISE_THROTTLE" value="0.10"/>
-    <define name="AUTO_THROTTLE_MAX_CRUISE_THROTTLE" value="0.75"/>
+    <define name="AUTO_THROTTLE_MIN_CRUISE_THROTTLE" value="0.36700001359"/>
+    <define name="AUTO_THROTTLE_MAX_CRUISE_THROTTLE" value="0.626999974251"/>
     <define name="AUTO_THROTTLE_LOITER_TRIM" value="1500"/>
     <define name="AUTO_THROTTLE_DASH_TRIM" value="-4000"/>
-    <define name="AUTO_THROTTLE_CLIMB_THROTTLE_INCREMENT" value="0.536000013351" unit="%/(m/s)"/>
+    <define name="AUTO_THROTTLE_CLIMB_THROTTLE_INCREMENT" value="0.518000006676" unit="%/(m/s)"/>
     <define name="AUTO_THROTTLE_PGAIN" value="-0.00"/>
     <define name="AUTO_THROTTLE_IGAIN" value="0."/>
     <define name="AUTO_THROTTLE_PITCH_OF_VZ_PGAIN" value="0.307000011206"/>
@@ -141,7 +141,7 @@
 
   <section name="HORIZONTAL CONTROL" prefix="H_CTL_">
     <define name="COURSE_PGAIN" value="-1.16600000858"/>
-    <define name="COURSE_DGAIN" value="0.349000006914"/>
+    <define name="COURSE_DGAIN" value="0.324999988079"/>
     <define name="COURSE_PRE_BANK_CORRECTION" value="0.889999985695"/>
 
     <define name="ROLL_MAX_SETPOINT" value="0.586000025272" unit="radians"/>
@@ -166,7 +166,7 @@
     <define name="CLIMB_THROTTLE" value="0.949999988079"/>
     <define name="CLIMB_PITCH" value="0.352999985218"/>
     <define name="DESCENT_THROTTLE" value="0."/>
-    <define name="DESCENT_PITCH" value="-0.300000011921"/>
+    <define name="DESCENT_PITCH" value="-0.252000004053"/>
     <define name="CLIMB_NAV_RATIO" value="0.8"/>
     <define name="DESCENT_NAV_RATIO" value="1.0"/>
   </section>
