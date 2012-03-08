@@ -53,6 +53,7 @@
     <block name="Arm Catapult" strip_button="Takeoff (wp CLIMB)" strip_icon="bungee_launch.png">
       <exception cond="estimator_z > ground_alt+25" deroute="Takeoff"/>
       <set value="0" var="kill_throttle"/>
+      <call fun="nav_catapult_init()" />
       <call fun="nav_catapult(WP_CLIMB)"/>
     </block>
     <block name="Takeoff" strip_button="Takeoff (wp CLIMB)" strip_icon="takeoff.png">

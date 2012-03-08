@@ -57,10 +57,10 @@ static uint16_t nav_catapult_launch = 0;
 #endif
 
 #ifndef NAV_CATAPULT_MOTOR_DELAY
-#define NAV_CATAPULT_MOTOR_DELAY  80		// Main Control Loops
+#define NAV_CATAPULT_MOTOR_DELAY  20		// Main Control Loops
 #endif
 
-#define NAV_CATAPULT_HEADING_DELAY (60 * 2)
+#define NAV_CATAPULT_HEADING_DELAY (60 * 3)
 
 static float nav_catapult_x = 0;
 static float nav_catapult_y = 0;
@@ -93,8 +93,13 @@ void nav_catapult_highrate_module(void)
     else if (nav_catapult_launch == NAV_CATAPULT_MOTOR_DELAY)
     {
       // Turn on Motor
-      NavVerticalThrottleMode(9600*(0));
+      NavVerticalThrottleMode(9600*(1));
+      launch = 1;
     }
+  }
+  else
+  {
+    nav_catapult_launch = 0;
   }
 }
 
