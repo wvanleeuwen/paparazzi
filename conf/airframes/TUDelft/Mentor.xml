@@ -126,7 +126,7 @@
 -->
 
     <!-- auto throttle inner loop -->
-    <define name="AUTO_THROTTLE_NOMINAL_CRUISE_THROTTLE" value="0.458000004292"/>
+    <define name="AUTO_THROTTLE_NOMINAL_CRUISE_THROTTLE" value="0.5"/>
     <define name="AUTO_THROTTLE_MIN_CRUISE_THROTTLE" value="0.10"/>
     <define name="AUTO_THROTTLE_MAX_CRUISE_THROTTLE" value="0.75"/>
     <define name="AUTO_THROTTLE_LOITER_TRIM" value="1500"/>
