@@ -95,8 +95,8 @@
 	<define name="MAG_Y_SENS" value="4.59820229976" integer="16"/>
 	<define name="MAG_Z_SENS" value="4.3085068988" integer="16"/>
 
-    <define name="BODY_TO_IMU_PHI"   value="RadOfDeg(  0.)"/>
-    <define name="BODY_TO_IMU_THETA" value="RadOfDeg(  0.)"/>
+    <define name="BODY_TO_IMU_PHI"   value="RadOfDeg(  5.)"/>
+    <define name="BODY_TO_IMU_THETA" value="RadOfDeg(  7.)"/>
     <define name="BODY_TO_IMU_PSI"   value="RadOfDeg(  0.)"/>
 
   </section>
