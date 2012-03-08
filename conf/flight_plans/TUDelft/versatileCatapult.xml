@@ -50,6 +50,11 @@
       <set value="1" var="kill_throttle"/>
       <attitude roll="0" throttle="0" vmode="throttle"/>
     </block>
+    <block name="Arm Catapult" strip_button="Takeoff (wp CLIMB)" strip_icon="bungee_launch.png">
+      <exception cond="estimator_z > ground_alt+25" deroute="Takeoff"/>
+      <set value="0" var="kill_throttle"/>
+      <call fun="nav_catapult(WP_CLIMB)"/>
+    </block>
     <block name="Takeoff" strip_button="Takeoff (wp CLIMB)" strip_icon="takeoff.png">
       <exception cond="estimator_z > ground_alt+35" deroute="Standby"/>
       <set value="0" var="kill_throttle"/>
