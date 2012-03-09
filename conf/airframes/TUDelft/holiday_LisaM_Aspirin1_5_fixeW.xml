@@ -7,7 +7,7 @@
   <servos>
     <servo name="THROTTLE"      no="0" min="1100" neutral="1100" max="1900"/>
     <servo name="AILERON"       no="1" min="1100" neutral="1550" max="1900"/>
-    <servo name="ELEVATOR"      no="2" min="1750" neutral="1500" max="1270"/>
+    <servo name="ELEVATOR"      no="2" min="1750" neutral="1530" max="1270"/>
   </servos>
 
 <!-- commands section -->
@@ -95,7 +95,7 @@
 	<define name="MAG_Y_SENS" value="4.59820229976" integer="16"/>
 	<define name="MAG_Z_SENS" value="4.3085068988" integer="16"/>
 
-    <define name="BODY_TO_IMU_PHI"   value="RadOfDeg(  5.)"/>
+    <define name="BODY_TO_IMU_PHI"   value="RadOfDeg(  5.5)"/>
     <define name="BODY_TO_IMU_THETA" value="RadOfDeg(  7.)"/>
     <define name="BODY_TO_IMU_PSI"   value="RadOfDeg(  0.)"/>
 
@@ -113,7 +113,7 @@
 
   <section name="BAT">
     <define name="MILLIAMP_AT_FULL_THROTTLE" value="25000"/>
-    <define name="CATASTROPHIC_BAT_LEVEL" value="9.3" unit="V"/>
+    <define name="CATASTROPHIC_BAT_LEVEL" value="6.4" unit="V"/>
   </section>
 
   <section name="MISC">
