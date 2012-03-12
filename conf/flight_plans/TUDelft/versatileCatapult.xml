@@ -35,6 +35,7 @@
     <waypoint name="P3" x="-214.2" y="522.5"/>
     <waypoint name="P4" x="241.7" y="519.9"/>
     <waypoint name="CLIMB" x="-504.8" y="149.5"/>
+    <waypoint name="TO" x="-241.7" y="519.9"/>
   </waypoints>
   <exceptions/>
   <blocks>
@@ -46,7 +47,10 @@
       <while cond="LessThan(NavBlockTime(), 10)"/>
       <call fun="NavSetGroundReferenceHere()"/>
     </block>
-    <block name="Holding point">
+    <block name="Select Touchdown Point" >
+      <call fun="nav_select_touch_down(WP_TD)"/>
+    </block>
+    <block name="Holding point" strip_button="Landing Point" strip_icon="target.png">
       <set value="1" var="kill_throttle"/>
       <attitude roll="0" throttle="0" vmode="throttle"/>
     </block>
@@ -54,7 +58,7 @@
       <exception cond="estimator_z > ground_alt+25" deroute="Takeoff"/>
       <set value="0" var="kill_throttle"/>
       <call fun="nav_catapult_init()" />
-      <call fun="nav_catapult(WP_CLIMB)"/>
+      <call fun="nav_catapult(WP_TO, WP_CLIMB)"/>
     </block>
     <block name="Takeoff" strip_button="Takeoff (wp CLIMB)" strip_icon="takeoff.png">
       <exception cond="estimator_z > ground_alt+35" deroute="Standby"/>
@@ -68,11 +72,52 @@
       <call fun="InitializePolygonSurvey(WP_P1, 4, 40, 90)"/>
       <call fun="PolygonSurvey()"/>
     </block>
-    <block name="Figure 8 around wp 1" strip_button="Figure 8 (wp 1-2)" strip_icon="eight.png">
-      <eight center="1" radius="nav_radius" turn_around="2"/>
-    </block>
     <block name="Oval 1-2" strip_button="Oval (wp 1-2)" strip_icon="oval.png">
       <oval p1="1" p2="2" radius="nav_radius"/>
+    </block>
+    <block name="Land Right AF-TD" strip_button="Land right (wp AF-TD)" strip_icon="land-right.png">
+      <set value="DEFAULT_CIRCLE_RADIUS" var="nav_radius"/>
+      <deroute block="land"/>
+    </block>
+    <block name="Land Left AF-TD" strip_button="Land left (wp AF-TD)" strip_icon="land-left.png">
+      <set value="-DEFAULT_CIRCLE_RADIUS" var="nav_radius"/>
+      <deroute block="land"/>
+    </block>
+    <block name="land">
+      <call fun="nav_compute_baseleg(WP_AF, WP_TD, WP__BASELEG, nav_radius)"/>
+      <circle radius="nav_radius" until="NavCircleCount() > 0.25" wp="_BASELEG"/>
+      <circle radius="nav_radius" until="NavQdrCloseTo(DegOfRad(baseleg_out_qdr)-(nav_radius/fabs(nav_radius))*10) && 10 > fabs(estimator_z - WaypointAlt(WP__BASELEG))" wp="_BASELEG"/>
+    </block>
+    <block name="final">
+      <exception cond="ground_alt + 10 > estimator_z" deroute="flare"/>
+      <go from="AF" hmode="route" vmode="glide" wp="TD"/>
+    </block>
+
+    <block name="flare">
+<!--      <exception cond="FALSE" deroute="Ground"/> -->
+      <go from="AF" hmode="route" throttle="0.0" vmode="throttle" wp="TD"  approaching_time="5"/>
+    </block>
+
+    <block name="Ground" strip_button="Kill After Land" strip_icon="kill.png">
+      <set value="1" var="kill_throttle"/>
+      <attitude roll="0.0" throttle="0.0" until="FALSE" vmode="throttle"/>
+    </block>
+
+   <block name="land_gls">
+     <call fun="gls_init(WP_AF, WP_TOD, WP_TD)"/>	
+     <call fun="nav_compute_baseleg(WP_AF, WP_TD, WP__BASELEG, nav_radius)"/>
+     <circle radius="nav_radius" until="NavCircleCount() > 0.5" wp="_BASELEG"/>
+     <circle radius="nav_radius" until="And(NavQdrCloseTo(DegOfRad(baseleg_out_qdr)-(nav_radius/fabs(nav_radius))*10), 
+       10 > fabs(estimator_z - WaypointAlt(WP__BASELEG)))" wp="_BASELEG"/>
+   </block>
+
+   <block name="final_gls">
+     <exception cond="ground_alt + 5 > estimator_z" deroute="flare"/>
+     <call fun="gls(WP_AF, WP_TOD, WP_TD)"/>
+   </block>
+
+    <block name="Figure 8 around wp 1" strip_button="Figure 8 (wp 1-2)" strip_icon="eight.png">
+      <eight center="1" radius="nav_radius" turn_around="2"/>
     </block>
     <block name="MOB" strip_button="Turn around here" strip_icon="mob.png">
       <call fun="NavSetWaypointHere(WP_MOB)"/>
@@ -124,40 +169,6 @@
     <block name="Survey S1-S2" strip_button="Survey (wp S1-S2)" strip_icon="survey.png">
       <survey_rectangle grid="150" wp1="S1" wp2="S2"/>
     </block>
-    <block name="Land Right AF-TD" strip_button="Land right (wp AF-TD)" strip_icon="land-right.png">
-      <set value="DEFAULT_CIRCLE_RADIUS" var="nav_radius"/>
-      <deroute block="land"/>
-    </block>
-    <block name="Land Left AF-TD" strip_button="Land left (wp AF-TD)" strip_icon="land-left.png">
-      <set value="-DEFAULT_CIRCLE_RADIUS" var="nav_radius"/>
-      <deroute block="land"/>
-    </block>
-    <block name="land">
-      <call fun="nav_compute_baseleg(WP_AF, WP_TD, WP__BASELEG, nav_radius)"/>
-      <circle radius="nav_radius" until="NavCircleCount() > 0.25" wp="_BASELEG"/>
-      <circle radius="nav_radius" until="NavQdrCloseTo(DegOfRad(baseleg_out_qdr)-(nav_radius/fabs(nav_radius))*10) && 10 > fabs(estimator_z - WaypointAlt(WP__BASELEG))" wp="_BASELEG"/>
-    </block>
-    <block name="final">
-      <exception cond="ground_alt + 10 > estimator_z" deroute="flare"/>
-      <go from="AF" hmode="route" vmode="glide" wp="TD"/>
-    </block>
-    <block name="flare">
-      <go approaching_time="-10" from="AF" hmode="route" throttle="0.0" vmode="throttle" wp="TD"/>
-      <attitude roll="0.0" throttle="0.0" until="FALSE" vmode="throttle"/>
-    </block>
-
-   <block name="land_gls">
-     <call fun="gls_init(WP_AF, WP_TOD, WP_TD)"/>	
-     <call fun="nav_compute_baseleg(WP_AF, WP_TD, WP__BASELEG, nav_radius)"/>
-     <circle radius="nav_radius" until="NavCircleCount() > 0.5" wp="_BASELEG"/>
-     <circle radius="nav_radius" until="And(NavQdrCloseTo(DegOfRad(baseleg_out_qdr)-(nav_radius/fabs(nav_radius))*10), 
-       10 > fabs(estimator_z - WaypointAlt(WP__BASELEG)))" wp="_BASELEG"/>
-   </block>
-
-   <block name="final_gls">
-     <exception cond="ground_alt + 5 > estimator_z" deroute="flare"/>
-     <call fun="gls(WP_AF, WP_TOD, WP_TD)"/>
-   </block>
 
     <block name="Steps roll -10, +10">
       <while cond="TRUE">
