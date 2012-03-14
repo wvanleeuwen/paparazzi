@@ -190,6 +190,10 @@
   <modules>
     <load name="gps_ubx_ucenter.xml"/>
     <load name="airspeed_ets.xml"/>
+    <load name="adc_generic.xml">
+      <configure name="ADC_CHANNEL_GENERIC1" value="ADC3" />
+      <configure name="ADC_CHANNEL_GENERIC2" value="ADC2" />
+    </load>
 <!--
     <load name="light.xml">
       <define name="LIGHT_LED_STROBE" value="2"/>
@@ -222,6 +226,8 @@
        <define name="AHRS_TRIGGERED_ATTITUDE_LOOP"/>
        <define name="AIRSPEED_ETS_I2C_DEV" value="i2c2"/>
        <define name="USE_I2C2"/>
+       <define name="USE_ADC_1"/>
+       <define name="USE_ADC_2"/>
 
       <configure name="AHRS_ALIGNER_LED" value="1"/>
       <configure name="CPU_LED" value="1"/>
