@@ -112,7 +112,7 @@
   <aircraft
    name="Logger"
    ac_id="27"
-   airframe="airframes/logger_sd.xml"
+   airframe="airframes/TUDelft/logger_sd_xbee_9k6.xml"
    radio="radios/cockpitSX.xml"
    telemetry="telemetry/default.xml"
    flight_plan="flight_plans/basic.xml"
