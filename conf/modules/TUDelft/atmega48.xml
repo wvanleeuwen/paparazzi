@@ -1,0 +1,18 @@
+<!DOCTYPE module SYSTEM "../module.dtd">
+
+<module name="atmega48" dir="onboardcam">
+  <header>
+    <file name="atmega48.h"/>
+  </header>
+  <init fun="atmega48_init()"/>
+  <periodic fun="atmega48_periodic()"  autorun="TRUE"/>
+  <event fun="atmega48_event()"/>
+  <datalink message="PAYLOAD_COMMAND" fun="ParsePayloadCommand()" />
+  <makefile target="ap">
+    <file name="atmega48.c"/>
+  </makefile>
+  <makefile target="sim">
+    <file name="sim_atmega48.c"/>
+  </makefile>
+</module>
+

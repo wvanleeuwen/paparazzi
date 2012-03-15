@@ -1,0 +1,22 @@
+cd ..
+git clone git://github.com/paparazzi/paparazzi.git readonlypprz
+cd ./readonlypprz
+git pull origin
+cd ..
+cp -fR ./readonlypprz/*  ./ppz2svn/
+
+
+
+mkdir gitsvnpprz 
+cd gitsvnpprz
+git-svn init https://svn.lr.tudelft.nl/asti/SmartUAV/Software/paparazzi3
+git-svn fetch -r5775
+git-svn rebase
+
+git-svn dcommit
+
+
+
+git-stach
+git-stach apply
+git-stach clear
