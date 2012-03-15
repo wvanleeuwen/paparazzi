@@ -1,0 +1,74 @@
+<!DOCTYPE flight_plan SYSTEM "../flight_plan.dtd">
+
+<flight_plan alt="100" ground_alt="54" lat0="52.3825204" lon0="5.897420" max_dist_from_home="1500" name="EMAV09" security_height="25">
+  <header>
+#include "datalink.h"
+</header>
+  <waypoints>
+    <waypoint lat="52.38050" lon="5.89706" name="E1"/>
+    <waypoint lat="52.38232" lon="5.89032" name="E2"/>
+    <waypoint lat="52.38141" lon="5.89869" name="EL"/>
+    <waypoint lat="52.38223" lon="5.90064" name="ARCH"/>
+    <waypoint lat="52.38191" lon="5.90048" name="MLBZ"/>
+    <waypoint lat="52.38242" lon="5.90074" name="RZ"/>
+    <waypoint name="HOME" x="0" y="0"/>
+    <waypoint name="STDBY" x="96.2" y="-36.2"/>
+    <waypoint alt="120.0" name="1" x="-21.7" y="-238.5"/>
+    <waypoint alt="120.0" name="2" x="-488.6" y="-56.3"/>
+    <waypoint alt="120.0" name="3" x="-8.2" y="-209.7"/>
+    <waypoint alt="120.0" name="4" x="-476.1" y="-27.9"/>
+    <waypoint alt="120.0" name="5" x="44.0" y="-261.0"/>
+    <waypoint name="MOB" x="418.5" y="208.7"/>
+    <waypoint alt="104.0" name="CLIMB" x="-0.2" y="-97.2"/>
+  </waypoints>
+  <includes>
+    <include name="Safety" procedure="EMAV2009_safety.xml"/>
+    <include name="L" procedure="landing.xml"/>
+  </includes>
+  <exceptions/>
+  <blocks>
+    <block name="Holding point">
+      <set value="1" var="kill_throttle"/>
+      <attitude roll="0" throttle="0" vmode="throttle"/>
+    </block>
+    <block name="Takeoff" strip_button="Takeoff (wp CLIMB)" strip_icon="takeoff.png">
+      <exception cond="estimator_z > ground_alt+25" deroute="Standby"/>
+      <set value="0" var="kill_throttle"/>
+      <set value="0" var="estimator_flight_time"/>
+      <go from="HOME" pitch="15" throttle="1.0" vmode="throttle" wp="CLIMB"/>
+    </block>
+    <block name="Standby" pre_call="if (kill_throttle) kill_throttle=FALSE;" strip_button="Standby" strip_icon="home.png">
+      <circle radius="nav_radius" wp="STDBY"/>
+    </block>
+    <block name="L21">
+      <go from="1" hmode="route" wp="1" approaching_time="0" />
+      <deroute block="L21"/>
+    </block>
+    <block name="Figure 8 around wp 1" strip_button="Figure 8 (wp 1-2)" strip_icon="eight.png">
+      <eight center="1" radius="nav_radius" turn_around="2"/>
+    </block>
+    <block name="MOB" strip_button="Turn around here" strip_icon="mob.png">
+      <call fun="NavSetWaypointHere(WP_MOB)"/>
+      <set value="DEFAULT_CIRCLE_RADIUS" var="nav_radius"/>
+      <circle radius="nav_radius" wp="MOB"/>
+    </block>
+    <block name="StartMission">
+      <go hmode="route" wp="5"/>
+    </block>
+    <block name="LAP">
+      <go approaching_time="0" from="3" hmode="route" wp="2"/>
+      <attitude alt="120" roll="45.0" until=" stage_time > 6" vmode="alt"/>
+      <go approaching_time="0" from="4" hmode="route" wp="1"/>
+      <attitude alt="120" roll="-45.0" until=" stage_time > 6" vmode="alt"/>
+      <deroute block="LAP"/>
+    </block>
+    <block name="Bomb" strip_button="Bomb">
+      <go approaching_time="-2" from="1" hmode="route" wp="EL"/>
+      <deroute block="Shoot"/>
+    </block>
+    <block name="Shoot">
+      <set value="-0.5" var="cam_tilt_c"/>
+      <deroute block="StartMission"/>
+    </block>
+  </blocks>
+</flight_plan>

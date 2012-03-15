@@ -1,0 +1,17 @@
+<joystick>
+  <input>
+    <axis index="0" name="roll"/>
+    <axis index="1" name="pitch"/>
+    <button index="0" name="shoot"/>
+    <button index="1" name="down"/>
+  </input>
+
+  <messages period="0.1">
+    <message class="ground" name="JUMP_TO_BLOCK" on_event="shoot">
+      <field name="block_id" value="4"/>
+    </message>
+    <message class="ground" name="JUMP_TO_BLOCK" on_event="down">
+      <field name="block_id" value="5"/>
+    </message>
+  </messages>
+</joystick>

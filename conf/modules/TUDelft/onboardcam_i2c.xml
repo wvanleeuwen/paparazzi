@@ -1,0 +1,28 @@
+<!DOCTYPE module SYSTEM "../module.dtd">
+
+<module name="onboardcam_i2c" dir="onboardcam">
+  <header>
+    <file name="atmega48.h"/>
+    <file name="onboardcam.h"/>
+  </header>
+
+  <init fun="init_onboardcam()"/>
+  <periodic fun="periodic_onboardcam()" start="start_onboardcam()" stop="stop_onboardcam()" autorun="TRUE"/>
+  <event fun="atmega48_event()"/>
+
+  <datalink message="PAYLOAD_COMMAND" fun="ParsePayloadCommand()" />
+
+  <makefile target="ap">
+    <file name="onboardcam_i2c.c"/>
+    <file name="atmega48.c"/>
+      <define name="ATMEGA48_I2C_DEV" value="i2c0"/>
+      <define name="USE_I2C0" value="1"/>
+
+  </makefile>
+  <makefile target="sim">
+    <file name="sim_onboardcam.c"/>
+    <file name="sim_atmega48.c"/>
+  </makefile>
+</module>
+
+

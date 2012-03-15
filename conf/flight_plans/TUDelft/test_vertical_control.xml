@@ -1,0 +1,83 @@
+<!DOCTYPE flight_plan SYSTEM "../flight_plan.dtd">
+
+<flight_plan alt="50" ground_alt="-1" lat0="51.979506" lon0="4.390265" max_dist_from_home="2500" name="DelftVersatile" qfu="90" security_height="50">
+  <header>
+#include "datalink.h"
+#include "subsystems/navigation/nav_line.h"
+#include "fw_v_ctl_energy.h"
+</header>
+  <waypoints>
+    <waypoint name="HOME" x="16.9" y="-0.4"/>
+    <waypoint alt="70.0" name="STDBY" x="-29.2" y="16.8"/>
+    <waypoint alt="150.0" name="1" x="190.0" y="-100.0"/>
+    <waypoint alt="60.0" name="2" x="-190.0" y="-100.0"/>
+    <waypoint alt="60.0" name="23" x="-220.0" y="-50.0"/>
+    <waypoint alt="60.0" name="3" x="-190.0" y="0.0"/>
+    <waypoint alt="150.0" name="4" x="190.0" y="0.0"/>
+    <waypoint alt="150.0" name="41" x="220.0" y="-50.0"/>
+    <waypoint alt="70.0" name="CLIMB" x="211.3" y="7.7"/>
+  </waypoints>
+  <sectors/>
+  <exceptions>
+    <exception cond="datalink_time > 60" deroute="Standby"/>
+  </exceptions>
+  <blocks>
+    <block name="Wait GPS">
+      <set value="1" var="kill_throttle"/>
+      <while cond="!GpsFixValid()"/>
+    </block>
+    <block name="Holding point">
+      <set value="1" var="kill_throttle"/>
+      <attitude roll="0" throttle="0" vmode="throttle"/>
+    </block>
+    <block name="Takeoff" strip_button="Takeoff (wp CLIMB)" strip_icon="takeoff.png">
+      <exception cond="estimator_z > ground_alt+40" deroute="SlowLow"/>
+      <set value="0" var="kill_throttle"/>
+      <go wp="CLIMB"/>
+    </block>
+    <block name="SlowLow">
+      <set value="11" var="v_ctl_auto_airspeed_setpoint"/>
+      <circle alt="WaypointAlt(WP_STDBY)" radius="nav_radius" until="NavCircleCount() > 1" wp="STDBY"/>
+    </block>
+    <block name="SlowClimb" strip_button="SlowClimb" strip_icon="up.png">
+      <set value="11" var="v_ctl_auto_airspeed_setpoint"/>
+      <circle alt="WaypointAlt(WP_STDBY)+70" radius="nav_radius" until="NavCircleCount() > 1" wp="STDBY"/>
+    </block>
+    <block name="SlowDescend" strip_button="SlowDescend" strip_icon="down.png">
+      <set value="11" var="v_ctl_auto_airspeed_setpoint"/>
+      <circle alt="WaypointAlt(WP_STDBY)" radius="nav_radius" until="NavCircleCount() > 1" wp="STDBY"/>
+    </block>
+    <block name="FastLow" strip_button="FastLow" strip_icon="downdown.png">
+      <set value="18" var="v_ctl_auto_airspeed_setpoint"/>
+      <circle alt="WaypointAlt(WP_STDBY)" radius="nav_radius" until="NavCircleCount() > 1.5" wp="STDBY"/>
+    </block>
+    <block name="FastClimb" strip_button="FastClimb" strip_icon="upup.png">
+      <set value="18" var="v_ctl_auto_airspeed_setpoint"/>
+      <circle alt="WaypointAlt(WP_STDBY)+70" radius="nav_radius" until="NavCircleCount() > 1.5" wp="STDBY"/>
+    </block>
+    <block name="FastDescend">
+      <set value="18" var="v_ctl_auto_airspeed_setpoint"/>
+      <circle alt="WaypointAlt(WP_STDBY)" radius="nav_radius" until="NavCircleCount() > 1.5" wp="STDBY"/>
+    </block>
+    <block name="StallTest" strip_button="Stall" strip_icon="kill.png">
+      <circle until="NavCircleCount() > 0.5" radius="nav_radius" wp="STDBY"/>
+      <set value="1" var="kill_throttle" />
+      <circle until="NavCircleCount() > 0.25" radius="nav_radius" wp="STDBY"/>
+      <set value="0" var="kill_throttle" />
+      <circle until="NavCircleCount() > 0.5" radius="nav_radius" wp="STDBY"/>
+      <deroute block="Oval"/>
+    </block>
+    <block name="Oval" strip_button="Oval" strip_icon="oval.png">
+      <set value="(27-v_ctl_auto_airspeed_setpoint)" var="v_ctl_auto_airspeed_setpoint" />
+      <circle radius="50.0" until="NavQdrCloseTo(180)" wp="41"/>
+      <go from="1" hmode="route" vmode="glide" wp="2"/>
+      <circle radius="50.0" until="NavQdrCloseTo(0)" wp="23"/>
+      <go from="3" hmode="route" vmode="glide" wp="4"/>
+      <deroute block="Oval"/>
+    </block>
+    <block name="Standby" strip_button="Standby" strip_icon="home.png">
+      <set value="12" var="v_ctl_auto_airspeed_setpoint"/>
+      <circle alt="WaypointAlt(WP_STDBY)" radius="nav_radius" wp="STDBY"/>
+    </block>
+  </blocks>
+</flight_plan>

@@ -1,0 +1,242 @@
+<!DOCTYPE flight_plan SYSTEM "../flight_plan.dtd">
+<!--
+lat0="51.979506" lon0="4.390265"delft
+lat0="51.396289" lon0="4.477575"kalthout
+lat0="51.221714" lon0="4.366303"linkeroever
+lat0="51.279986" lon0="4.415209"Thuis
+lat0="51.291555" lon0="4.432079"Ekeren
+lat0="51.068563" lon0="2.641651" veurne
+lat0="50.913711" lon0="1.726351" cap blach nez
+lat0="50.169683" lon0="1.549265" vakantie frankrijk 2010
+lat0="52.165877" lon0="4.420753" Valkenburg
+lat0="51.923097" lon0="4.796176" Ammerstol
+lat0="52.265039" lon0="9.994458" IMAV2010 oevenveld
+lat0="52.523886" lon0="10.463764" IMAV2010
+lat0="51.341192" lon0="3.242396" knokke heist
+lat0="49.870106" lon0="4.983287" gros fays
+lat0="50.800944" lon0="4.663181" de kluis-->
+<flight_plan alt="50" ground_alt="-1" lat0="50.800944" lon0="4.663181" max_dist_from_home="2500" name="DelftVersatile" qfu="90" security_height="125">
+  <header>
+#include "datalink.h"
+#include "subsystems/navigation/nav_line.h"
+#include "subsystems/navigation/OSAMNav.h"
+</header>
+  <waypoints>
+    <waypoint name="FLOW" x="30" y="10.4" alt="30"/>
+    <waypoint name="HOME" x="16.9" y="-0.4"/>
+    <waypoint alt="70.0" name="STDBY" x="-29.2" y="16.8"/>
+    <waypoint alt="55.0" name="1" x="57.9" y="41.6"/>
+    <waypoint alt="55.0" name="2" x="-233.0" y="-38.5"/>
+    <waypoint name="MOB" x="-201.4" y="71.2"/>
+    <waypoint name="S1" x="-45.2" y="-72.5"/>
+    <waypoint name="S2" x="-359.7" y="-350.8"/>
+    <waypoint alt="30.0" name="AF" x="66.4" y="17.3"/>
+    <waypoint alt="0.0" name="TD" x="-112.7" y="17.2"/>
+    <waypoint alt="30.0" name="BASELEG" x="62.3" y="-80.5"/>
+    <waypoint alt="70.0" name="CLIMB" x="211.3" y="7.7"/>
+    <waypoint alt="60.0" name="farm" x="164.2" y="-489.3"/>
+    <waypoint alt="210.0" name="aerospace" x="-1040.4" y="1139.4"/>
+    <waypoint alt="250.0" name="BOUWKUNDE" x="-895.6" y="1888.1"/>
+    <waypoint alt="250.0" name="KORVEZEE" x="-1336.4" y="1917.3"/>
+    <waypoint alt="250.0" name="DECIS" x="-456.8" y="1914.1"/>
+    <waypoint alt="60.0" name="garage" x="-407.1" y="-493.3"/>
+    <waypoint alt="60.0" name="sloop" x="-497.4" y="-7.5"/>
+    <waypoint alt="210.0" name="ASTI" x="-1176.7" y="1179.9"/>
+    <waypoint alt="160.0" name="SPOOR1" x="-1147.4" y="-510.7"/>
+    <waypoint alt="160.0" name="SPOOR2" x="-1352.3" y="75.8"/>
+    <waypoint alt="80.0" name="KANAAL1" x="-312.3" y="-682.8"/>
+    <waypoint alt="80.0" name="KANAAL2" x="-591.4" y="-125.5"/>
+    <waypoint alt="80.0" name="KANAAL3" x="-837.5" y="328.4"/>
+    <waypoint alt="200.0" name="TOMATOS" x="2155.7" y="513.8"/>
+    <waypoint alt="30.0" name="START" x="-160.2" y="-14.2"/>
+    <waypoint alt="10.0" name="TARGET" x="-0.4" y="-0.5"/>
+    <waypoint name="RELEASE" x="-58.1" y="-184.5"/>
+    <waypoint alt="100" name="P1" x="-146.2" y="197.4"/>
+    <waypoint alt="100" name="P2" x="-129.8" y="144.1"/>
+    <waypoint alt="100" name="P3" x="230.5" y="235.5"/>
+    <waypoint alt="100" name="P4" x="123.0" y="-136.7"/>
+    <waypoint alt="100" name="P5" x="-185.9" y="-155.7"/>
+  </waypoints>
+
+ <sectors>
+   <sector name="PolySector">
+     <corner name="P1"/>
+     <corner name="P2"/>
+     <corner name="P3"/>
+     <corner name="P4"/>
+     <corner name="P5"/>
+   </sector>
+ </sectors>
+
+  <exceptions>
+    <exception cond="datalink_time > 60" deroute="Standby"/>
+  </exceptions>
+
+  <blocks>
+    <block name="Wait GPS">
+      <set value="1" var="kill_throttle"/>
+      <while cond="!GpsFixValid()"/>
+    </block>
+    <block name="Geo init">
+      <while cond="LessThan(NavBlockTime(), 10)"/>
+      <call fun="NavSetGroundReferenceHere()"/>
+    </block>
+    <block name="Holding point">
+      <set value="1" var="kill_throttle"/>
+      <attitude roll="0" throttle="0" vmode="throttle"/>
+    </block>
+    <block name="Takeoff" strip_button="Takeoff (wp CLIMB)" strip_icon="takeoff.png">
+      <exception cond="estimator_z > ground_alt+40" deroute="Standby"/>
+      <set value="0" var="kill_throttle"/>
+      <go wp="CLIMB"/>
+    </block>
+    <block name="Standby" strip_button="Standby" strip_icon="home.png">
+      <circle alt="WaypointAlt(WP_STDBY)" radius="nav_radius" wp="STDBY"/>
+    </block>
+    <block name="OpticFlowStart">
+      <call fun="opticflow_setup(WP_AF,WP_FLOW)" />
+      <set value="DEFAULT_CIRCLE_RADIUS" var="nav_radius"/>
+      <set value="0" var="opticflow_status"/>
+      <call fun="nav_compute_baseleg(WP_AF, WP_FLOW, WP_BASELEG, nav_radius)"/>
+      <circle radius="nav_radius" until="NavQdrCloseTo(DegOfRad(baseleg_out_qdr)-10) && 10 > fabs(estimator_z - WaypointAlt(WP_BASELEG))" wp="BASELEG"/>
+    </block>
+    <block name="OpticFlow">
+      <set value="1" var="opticflow_status"/>
+      <go approaching_time="0" from="AF" hmode="route" wp="FLOW"/>
+    </block>
+    <block name="Figure 8 around wp 1" strip_button="Figure 8 (wp 1-2)" strip_icon="eight.png">
+      <eight center="1" radius="nav_radius" turn_around="2"/>
+    </block>
+    <block name="Oval 1-2" strip_button="Oval (wp 1-2)" strip_icon="oval.png">
+      <oval p1="1" p2="2" radius="nav_radius"/>
+    </block>
+    <block name="MOB" strip_button="Turn around here" strip_icon="mob.png">
+      <call fun="NavSetWaypointHere(WP_MOB)"/>
+      <circle radius="100" wp="MOB"/>
+    </block>
+    <block name="Line 1-2" strip_button="Line (wp 1-2)" strip_icon="line.png">
+      <exception cond="datalink_time > 22" deroute="Standby"/>
+      <call fun="nav_line_init()"/>
+      <call fun="nav_line(WP_1, WP_2, nav_radius)"/>
+    </block>
+    <block name="Glide 1-2">
+      <go from="1" hmode="route" vmode="glide" wp="2"/>
+      <deroute block="Standby"/>
+    </block>
+    <block name="Survey S1-S2" strip_button="Survey (wp S1-S2)" strip_icon="survey.png">
+      <survey_rectangle grid="150" wp1="S1" wp2="S2"/>
+    </block>
+    <block name="Land Right AF-TD" strip_button="Land right (wp AF-TD)" strip_icon="land-right.png">
+      <set value="DEFAULT_CIRCLE_RADIUS" var="nav_radius"/>
+      <deroute block="land"/>
+    </block>
+    <block name="Land Left AF-TD" strip_button="Land left (wp AF-TD)" strip_icon="land-left.png">
+      <set value="-DEFAULT_CIRCLE_RADIUS" var="nav_radius"/>
+      <deroute block="land"/>
+    </block>
+    <block name="land">
+      <call fun="nav_compute_baseleg(WP_AF, WP_TD, WP_BASELEG, nav_radius)"/>
+      <circle radius="nav_radius" until="NavQdrCloseTo(DegOfRad(baseleg_out_qdr)-10) && 10 > fabs(estimator_z - WaypointAlt(WP_BASELEG))" wp="BASELEG"/>
+    </block>
+    <block name="final">
+      <exception cond="ground_alt + 10 > estimator_z" deroute="flare"/>
+      <go from="AF" hmode="route" throttle="0.0" vmode="throttle" wp="TD"/>
+    </block>
+    <block name="flare">
+      <go approaching_time="0" from="AF" hmode="route" throttle="0.0" vmode="throttle" wp="TD"/>
+      <attitude roll="0.0" throttle="0.0" until="FALSE" vmode="throttle"/>
+    </block>
+    <block name="Test datalink (go to wp 2)">
+      <exception cond="datalink_time > 22" deroute="Standby"/>
+      <go from="STDBY" hmode="route" wp="2"/>
+      <go from="2" hmode="route" wp="STDBY"/>
+    </block>
+    <block name="Visit Garage">
+      <go approaching_time="-3" from="farm" hmode="route" wp="garage"/>
+      <go approaching_time="-3" from="garage" hmode="route" wp="sloop"/>
+      <deroute block="Standby"/>
+    </block>
+    <block name="Stratosfeer 1.5 km 40secnodata">
+      <exception cond="datalink_time > 60" deroute="Standby"/>
+      <circle alt="1500" radius="150" until="15 > fabs(estimator_z - 1500)" wp="STDBY"/>
+      <deroute block="Standby"/>
+    </block>
+     <block name="Stratosfeer 3.0 km 60secnodata">
+      <exception cond="datalink_time > 60" deroute="Standby"/>
+      <circle alt="3000" radius="200" until="15 > fabs(estimator_z - 3000)" wp="STDBY"/>
+      <deroute block="Standby"/>
+    </block>
+     <block name="Stratosfeer 7.0 km 120secnodata">
+      <exception cond="datalink_time > 80" deroute="Standby"/>
+      <circle alt="7000" radius="300" until="15 > fabs(estimator_z - 7000)" wp="STDBY"/>
+      <deroute block="Standby"/>
+    </block>
+     <block name="Stratosfeer DOWN">
+      <circle alt="7000" radius="100" until="fabs(estimator_z - WaypointAlt(WP_STDBY)) > 15" wp="STDBY"/>
+      <deroute block="Standby"/>
+    </block>
+    <block name="Circle LR">
+      <exception cond="datalink_time > 25" deroute="Standby"/>
+      <circle alt="WaypointAlt(WP_aerospace)" radius="nav_radius" until="15 > fabs(estimator_z - WaypointAlt(WP_aerospace))" wp="STDBY"/>
+      <go alt="WaypointAlt(WP_aerospace)" approaching_time="-15" from="STDBY" hmode="route" wp="aerospace"/>
+      <circle radius="nav_radius" until="NavCircleCount() > 0.7" wp="aerospace"/>
+      <go alt="WaypointAlt(WP_aerospace)" approaching_time="-15" from="aerospace" hmode="route" wp="STDBY"/>
+      <deroute block="Standby"/>
+    </block>
+    <block name="Circle BOUWKUNDE">
+      <exception cond="datalink_time > 25" deroute="Standby"/>
+      <circle alt="WaypointAlt(WP_BOUWKUNDE)" radius="nav_radius" until="15 > fabs(estimator_z - WaypointAlt(WP_BOUWKUNDE))" wp="STDBY"/>
+      <go alt="WaypointAlt(WP_BOUWKUNDE)" approaching_time="-15" from="STDBY" hmode="route" wp="BOUWKUNDE"/>
+      <circle radius="nav_radius" until="NavCircleCount() > 0.7" wp="BOUWKUNDE"/>
+      <go alt="WaypointAlt(WP_BOUWKUNDE)" approaching_time="-15" from="BOUWKUNDE" hmode="route" wp="STDBY"/>
+      <deroute block="Standby"/>
+    </block>
+    <block name="Survey Kanaal">
+      <exception cond="datalink_time > 25" deroute="Standby"/>
+      <go approaching_time="-15" from="STDBY" hmode="route" wp="KANAAL1"/>
+      <go approaching_time="-12" from="KANAAL1" hmode="route" wp="KANAAL2"/>
+      <go approaching_time="-15" from="KANAAL2" hmode="route" wp="KANAAL3"/>
+      <go approaching_time="-20" from="KANAAL3" hmode="route" wp="STDBY"/>
+      <deroute block="Standby"/>
+    </block>
+    <block name="Survey Railroal">
+      <exception cond="datalink_time > 25" deroute="Standby"/>
+      <circle alt="WaypointAlt(WP_SPOOR1)" radius="nav_radius" until="15 > fabs(estimator_z - WaypointAlt(WP_SPOOR1))" wp="STDBY"/>
+      <go approaching_time="-10" from="STDBY" hmode="route" wp="SPOOR1"/>
+      <go approaching_time="-10" from="SPOOR1" hmode="route" wp="SPOOR2"/>
+      <go approaching_time="-20" from="SPOOR2" hmode="route" wp="STDBY"/>
+      <deroute block="Standby"/>
+    </block>
+    <block name="Inspect Tomatos">
+      <exception cond="datalink_time > 22" deroute="Standby"/>
+      <circle alt="WaypointAlt(WP_TOMATOS)" radius="nav_radius" until="15 > fabs(estimator_z - WaypointAlt(WP_TOMATOS))" wp="STDBY"/>
+      <go from="STDBY" hmode="route" wp="TOMATOS"/>
+      <go alt="WaypointAlt(WP_TOMATOS)" from="TOMATOS" hmode="route" wp="STDBY"/>
+    </block>
+    <block name="Bomb Right">
+      <set value="DEFAULT_CIRCLE_RADIUS" var="nav_radius"/>
+      <deroute block="bomb"/>
+    </block>
+    <block name="Bomb Left">
+      <set value="-DEFAULT_CIRCLE_RADIUS" var="nav_radius"/>
+      <deroute block="bomb"/>
+    </block>
+    <block name="bomb" strip_button="Bomb">
+<!--      <set value="BombComputeApproach(WP_TARGET, WP_START, nav_radius)" var="unit"/>
+      <circle radius="nav_radius" until="NavQdrCloseTo(DegOfRad(bomb_start_qdr)-10)" wp="BASELEG"/>
+-->    </block>
+    <block name="align">
+<!--      <exception cond="BombUpdateRelease(WP_TARGET)" deroute="Standby"/>
+      <go approaching_time="bomb_trigger_delay" from="START" hmode="route" wp="RELEASE"/>
+-->    </block>
+    <block name="shoot">
+<!--  <set var="cam_tilt_c" value="0.5"/> -->
+      <go from="RELEASE" hmode="route" wp="CLIMB"/>
+      <deroute block="Takeoff"/>
+    </block>
+   <block name="Poly Survey">
+     <call fun="InitializePolygonSurvey(WP_P1, 5, 40, 10)"/>
+     <call fun="PolygonSurvey()"/>
+   </block>
+  </blocks>
+</flight_plan>
