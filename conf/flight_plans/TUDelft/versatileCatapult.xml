@@ -3,7 +3,7 @@
 <!--  - lat0="51.233165" lon0="3.78287" -->
  <flight_plan alt="75" ground_alt="0" lat0="51.990" lon0="4.390" max_dist_from_home="1500" name="Basic" security_height="25">
   <header>
-#include "datalink.h"
+#include "subsystems/datalink/datalink.h"
 #include "subsystems/navigation/gls.h"
 #include "subsystems/navigation/OSAMNav.h"
 #ifdef DC_AUTOSHOOT_QUARTERSEC_PERIOD
