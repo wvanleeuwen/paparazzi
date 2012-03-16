@@ -157,7 +157,7 @@
     <define name="AUTO_THROTTLE_PITCH_OF_VZ_DGAIN" value="0."/>
 
     <!-- auto pitch inner loop -->
-    <define name="AUTO_PITCH_PGAIN" value="-0.0399999991059"/>
+    <define name="AUTO_PITCH_PGAIN" value="0.0399999991059"/>
     <define name="AUTO_PITCH_IGAIN" value="0.0520000010729"/>
     <define name="AUTO_PITCH_MAX_PITCH" value="0.35"/>
     <define name="AUTO_PITCH_MIN_PITCH" value="-0.35"/>
@@ -176,15 +176,15 @@
   <section name="HORIZONTAL CONTROL" prefix="H_CTL_">
 
     <define name="ELEVATOR_OF_ROLL" value="2500."/>
-    <define name="PITCH_PGAIN" value="-10000."/>
+    <define name="PITCH_PGAIN" value="10000."/>
     <define name="PITCH_DGAIN" value="1.5"/>
 
     <define name="ROLL_MAX_SETPOINT" value="0.537000000477" unit="radians"/>
-    <define name="ROLL_ATTITUDE_GAIN" value="-4840.90917969"/>
-    <define name="ROLL_RATE_GAIN" value="-1500."/>
+    <define name="ROLL_ATTITUDE_GAIN" value="4840.90917969"/>
+    <define name="ROLL_RATE_GAIN" value="1500."/>
     <define name="AILERON_OF_THROTTLE" value="0."/>
 
-    <define name="COURSE_PGAIN" value="-0.684000015259"/>
+    <define name="COURSE_PGAIN" value="0.684000015259"/>
     <define name="COURSE_DGAIN" value="0.675000011921"/>
     <define name="COURSE_PRE_BANK_CORRECTION" value="0.10000000149"/>
 
@@ -261,8 +261,8 @@
     <!-- Actuators -->
     <subsystem name="control"/>
     <!-- Sensors -->
-    <subsystem name="attitude" 		type="infrared"/>
-    <subsystem name="gps" 		type="ublox_lea5h"/>
+    <subsystem name="ahrs" 		type="infrared"/>
+    <subsystem name="gps" 		type="ublox"/>
     <subsystem name="navigation"        type="extra"/><!--this includes OSAMNav, nav, discsurvey and nav_cube as well-->
   </firmware>
   <!-- Carefull: add the location after!! -->

@@ -71,8 +71,8 @@
   </section>
 
   <section name="TRIM" prefix="COMMAND_">
-    <define name="ROLL_TRIM" value="-7."/>
-    <define name="PITCH_TRIM" value="-1."/>
+    <define name="ROLL_TRIM" value="0."/>
+    <define name="PITCH_TRIM" value="0."/>
   </section>
 
   <section name="INS" prefix="INS_">
@@ -112,7 +112,7 @@
   <section name="VERTICAL CONTROL" prefix="V_CTL_">
     <define name="POWER_CTL_BAT_NOMINAL" value="11.1" unit="volt"/>
     <!-- outer loop proportional gain -->
-    <define name="ALTITUDE_PGAIN" value="-0.10"/>
+    <define name="ALTITUDE_PGAIN" value="0.10"/>
     <!-- outer loop saturation -->
     <define name="ALTITUDE_MAX_CLIMB" value="3."/>
 
@@ -131,7 +131,7 @@
   </section>
 
   <section name="HORIZONTAL CONTROL" prefix="H_CTL_">
-    <define name="COURSE_PGAIN" value="-1.17299997807"/>
+    <define name="COURSE_PGAIN" value="1.17299997807"/>
     <define name="COURSE_DGAIN" value="0.35"/>
     <define name="COURSE_PRE_BANK_CORRECTION" value="0.856999993324"/>
 
@@ -139,15 +139,15 @@
     <define name="PITCH_MAX_SETPOINT" value="0.5" unit="radians"/>
     <define name="PITCH_MIN_SETPOINT" value="-0.5" unit="radians"/>
 
-    <define name="PITCH_PGAIN" value="-9000."/>
+    <define name="PITCH_PGAIN" value="9000."/>
     <define name="PITCH_DGAIN" value="1.5"/>
 
     <define name="ELEVATOR_OF_ROLL" value="1200."/>
 
     <define name="ROLL_SLEW" value="10."/>
 
-    <define name="ROLL_ATTITUDE_GAIN" value="-10400."/>
-    <define name="ROLL_RATE_GAIN" value="-250."/>
+    <define name="ROLL_ATTITUDE_GAIN" value="10400."/>
+    <define name="ROLL_RATE_GAIN" value="250."/>
   </section>
 
   <section name="AGGRESSIVE" prefix="AGR_">
@@ -179,6 +179,7 @@
 
   <modules>
     <load name="gps_ubx_ucenter.xml"/>
+    <load name="nav_catapult.xml" />
 <!--
     <load name="light.xml">
       <define name="LIGHT_LED_STROBE" value="2"/>

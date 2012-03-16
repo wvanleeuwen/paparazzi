@@ -113,9 +113,8 @@ AP_MODE_NAV
 -->
 
  <section name="BAT">
-   <define name="MILLIAMP_PER_PERCENT" value="0.86"/>
+   <define name="MILLIAMP_AT_FULL_THROTTLE" value="6000"/>
    <define name="CATASTROPHIC_BAT_LEVEL" value="9.3" unit="V"/>
-   <define name="BATTERY_SENS" value="0.48" integer="16"/>
  </section>
 
 
@@ -174,22 +173,22 @@ AP_MODE_NAV
   -->
 
     <!-- feedback -->
-    <define name="PHI_PGAIN" value="-1000"/>
-    <define name="PHI_DGAIN" value="-230"/>
-    <define name="PHI_IGAIN" value="-200"/>
+    <define name="PHI_PGAIN" value="1000"/>
+    <define name="PHI_DGAIN" value="230"/>
+    <define name="PHI_IGAIN" value="200"/>
 
-    <define name="THETA_PGAIN" value="-1000"/>
-    <define name="THETA_DGAIN" value="-230"/>
-    <define name="THETA_IGAIN" value="-200"/>
+    <define name="THETA_PGAIN" value="1000"/>
+    <define name="THETA_DGAIN" value="230"/>
+    <define name="THETA_IGAIN" value="200"/>
 
-    <define name="PSI_PGAIN" value="-2000"/>
-    <define name="PSI_DGAIN" value="-400"/>
-    <define name="PSI_IGAIN" value="-10"/>
+    <define name="PSI_PGAIN" value="2000"/>
+    <define name="PSI_DGAIN" value="400"/>
+    <define name="PSI_IGAIN" value="10"/>
 
     <!-- feedforward -->
-    <define name="PHI_DDGAIN" value=" 300"/>
-    <define name="THETA_DDGAIN" value=" 300"/>
-    <define name="PSI_DDGAIN" value=" 300"/>
+    <define name="PHI_DDGAIN"   value="300"/>
+    <define name="THETA_DDGAIN" value="300"/>
+    <define name="PSI_DDGAIN"   value="300"/>
 
   </section>
     <!--Rotterdam
@@ -221,12 +220,12 @@ AP_MODE_NAV
    <define name="MAX_SUM_ERR" value="2000000"/>
 
 
-   <define name="HOVER_KP" value="-600"/>
-   <define name="HOVER_KD" value="-350"/>
-   <define name="HOVER_KI" value=" -10"/>
+   <define name="HOVER_KP" value="600"/>
+   <define name="HOVER_KD" value="350"/>
+   <define name="HOVER_KI" value=" 10"/>
 <!--
-   <define name="HOVER_KP"     value="-150"/>
-   <define name="HOVER_KD"     value="-80"/>
+   <define name="HOVER_KP"     value="150"/>
+   <define name="HOVER_KD"     value="80"/>
    <define name="HOVER_KI"     value="0"/>
 -->
    <!-- 1.5m/s for full stick : BOOZ_SPEED_I_OF_F(1.5) / (MAX_PPRZ/2) -->
@@ -238,10 +237,10 @@ AP_MODE_NAV
 
 
  <section name="GUIDANCE_H" prefix="GUIDANCE_H_">
-   <define name="PGAIN" value="-10.8"/>
-   <define name="DGAIN" value="-12.4"/>
-   <define name="IGAIN" value="-1"/>
-   <define name="NGAIN" value="-0"/>
+   <define name="PGAIN" value="11"/>
+   <define name="DGAIN" value="12"/>
+   <define name="IGAIN" value="1"/>
+   <define name="NGAIN" value="0"/>
  </section>
 
  <section name="MISC">
@@ -288,7 +287,7 @@ AP_MODE_NAV
     <!--<subsystem name="ahrs" type="int_cmpl_euler"/>
     <subsystem name="stabilization" type="euler"/>-->
     <subsystem name="ahrs"          type="int_cmpl_quat"/>
-    <subsystem name="stabilization" type="euler"/>
+    <subsystem name="stabilization" type="int_quat"/>
     <!--<subsystem name="ahrs"          type="ic"/>
     <subsystem name="ins"           type="hff"/>-->
     <define name="MAG_UPDATE_YAW_ONLY" value="1"/>

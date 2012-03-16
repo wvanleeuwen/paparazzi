@@ -94,7 +94,7 @@
   <section name="VERTICAL CONTROL" prefix="V_CTL_">
     <define name="POWER_CTL_BAT_NOMINAL" value="11.1" unit="volt"/>
     <!-- outer loop proportional gain -->
-    <define name="ALTITUDE_PGAIN" value="-0.03"/>
+    <define name="ALTITUDE_PGAIN" value="0.03"/>
     <!-- outer loop saturation -->
     <define name="ALTITUDE_MAX_CLIMB" value="2."/>
 
@@ -105,7 +105,7 @@
     <define name="AUTO_THROTTLE_LOITER_TRIM" value="1500"/>
     <define name="AUTO_THROTTLE_DASH_TRIM" value="-4000"/>
     <define name="AUTO_THROTTLE_CLIMB_THROTTLE_INCREMENT" value="0.15" unit="%/(m/s)"/>
-    <define name="AUTO_THROTTLE_PGAIN" value="-0.01"/>
+    <define name="AUTO_THROTTLE_PGAIN" value="0.01"/>
     <define name="AUTO_THROTTLE_IGAIN" value="0.1"/>
     <define name="AUTO_THROTTLE_PITCH_OF_VZ_PGAIN" value="0.05"/>
 
@@ -113,7 +113,7 @@
   </section>
 
   <section name="HORIZONTAL CONTROL" prefix="H_CTL_">
-    <define name="COURSE_PGAIN" value="-1.20000004768"/>
+    <define name="COURSE_PGAIN" value="1.20000004768"/>
     <define name="COURSE_DGAIN" value="0.3"/>
     <define name="COURSE_PRE_BANK_CORRECTION" value="0.2"/>
 
@@ -121,13 +121,13 @@
     <define name="PITCH_MAX_SETPOINT" value="0.5" unit="radians"/>
     <define name="PITCH_MIN_SETPOINT" value="-0.5" unit="radians"/>
 
-    <define name="PITCH_PGAIN" value="-12000."/>
+    <define name="PITCH_PGAIN" value="12000."/>
     <define name="PITCH_DGAIN" value="0"/>
 
     <define name="ELEVATOR_OF_ROLL" value="1000."/>
 
-    <define name="ROLL_ATTITUDE_GAIN" value="-11500"/>
-    <define name="ROLL_RATE_GAIN" value="-600."/>
+    <define name="ROLL_ATTITUDE_GAIN" value="11500"/>
+    <define name="ROLL_RATE_GAIN" value="600."/>
   </section>
 
   <section name="AGGRESSIVE" prefix="AGR_">
@@ -168,13 +168,15 @@
   </modules>
 
   <firmware name="fixedwing">
+
+    <define name="STRONG_WIND"/>
+    <define name="WIND_INFO"/>
+    <define name="WIND_INFO_RET"/>
+    <define name="LOITER_TRIM"/>
+    <define name="ALT_KALMAN"/>
+    <define name="POINT_CAM_PITCH_ROLL" />
+
     <target name="ap" board="tiny_2.11">
-      <define name="STRONG_WIND"/>
-      <define name="WIND_INFO"/>
-      <define name="WIND_INFO_RET"/>
-      <define name="LOITER_TRIM"/>
-      <define name="ALT_KALMAN"/>
-      <define name="POINT_CAM_PITCH_ROLL" />
     </target>
     <target name="sim" board="pc"/>
 
@@ -191,7 +193,6 @@
     <subsystem name="control"/>
     <!-- Sensors -->
     <subsystem name="navigation"/>
-<!--    <subsystem name="gps"    type="ublox_lea5h"/> -->
 
     <subsystem name="spi_slave_hs"/>
 

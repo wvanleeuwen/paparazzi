@@ -131,7 +131,7 @@
   <section name="VERTICAL CONTROL" prefix="V_CTL_">
     <define name="POWER_CTL_BAT_NOMINAL" value="11.1" unit="volt"/>
     <!-- outer loop proportional gain -->
-    <define name="ALTITUDE_PGAIN" value="-0.01"/>
+    <define name="ALTITUDE_PGAIN" value="0.01"/>
     <!-- outer loop saturation -->
     <define name="ALTITUDE_MAX_CLIMB" value="4."/>
 
@@ -149,19 +149,19 @@
   </section>
 
   <section name="HORIZONTAL CONTROL" prefix="H_CTL_">
-    <define name="COURSE_PGAIN" value="-1.39999997616"/>
+    <define name="COURSE_PGAIN" value="1.39999997616"/>
 
     <define name="ROLL_MAX_SETPOINT" value="0.703999996185" unit="radians"/>
     <define name="PITCH_MAX_SETPOINT" value="0.4" unit="radians"/>
     <define name="PITCH_MIN_SETPOINT" value="-0.4" unit="radians"/>
 
-    <define name="PITCH_PGAIN" value="-6000."/>
+    <define name="PITCH_PGAIN" value="6000."/>
     <define name="PITCH_DGAIN" value="0."/>
 
     <define name="ELEVATOR_OF_ROLL" value="1200."/>
 
-    <define name="ROLL_ATTITUDE_GAIN" value="-6000."/>
-    <define name="ROLL_RATE_GAIN" value="-600."/>
+    <define name="ROLL_ATTITUDE_GAIN" value="6000."/>
+    <define name="ROLL_RATE_GAIN" value="600."/>
 
     <define name="ROLL_SLEW" value="0.02"/> <!-- Maximal roll angle change per 1/60 of second: 0.02 rad/loop * 180/pi * 60 loop/sec = 60 deg/sec -->
   </section>
@@ -208,7 +208,7 @@
     <subsystem name="control"/>
 
     <!-- Sensors -->
-    <subsystem name="imu" type="booz"/>
+    <subsystem name="imu" type="yai"/>
     <subsystem name="ahrs" type="float_dcm"/>
     <subsystem name="gps" type="ublox_utm"/>
     <subsystem name="navigation"/>
