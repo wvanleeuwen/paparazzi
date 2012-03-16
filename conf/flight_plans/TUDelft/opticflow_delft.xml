@@ -17,7 +17,7 @@ lat0="49.870106" lon0="4.983287" gros fays
 lat0="50.800944" lon0="4.663181" de kluis-->
 <flight_plan alt="50" ground_alt="-1" lat0="50.800944" lon0="4.663181" max_dist_from_home="2500" name="DelftVersatile" qfu="90" security_height="125">
   <header>
-#include "datalink.h"
+#include "subsystems/datalink/datalink.h"
 #include "subsystems/navigation/nav_line.h"
 #include "subsystems/navigation/OSAMNav.h"
 </header>

@@ -285,7 +285,7 @@ inline static void h_ctl_roll_loop( void ) {
     <subsystem name="i2c"/>
     <!-- Sensors -->
 <!--    <subsystem name="attitude" 		type="infrared"/>-->
-    <subsystem name="gps" type="ublox_lea5h"/>
+    <subsystem name="gps" type="ublox"/>
     <subsystem name="navigation" type="extra"/><!--this includes OSAMNav, nav, discsurvey and nav_cube as well-->
   </firmware>
   <!-- Carefull: add the location after!! -->
