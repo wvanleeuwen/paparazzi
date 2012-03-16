@@ -9,7 +9,7 @@
 #endif
 #include "mcu_periph/uart.h"
 #include "messages.h"
-#include "downlink.h"
+#include "subsystems/datalink/downlink.h"
 #include "estimator.h"
 
 #include BOARD_CONFIG
@@ -108,7 +108,7 @@ if ((estimator_phi > RadOfDeg(max_opticflow_phi)) | (estimator_theta > RadOfDeg(
     }
   }
 
-  RunOnceEvery(5,DOWNLINK_SEND_OPTICFLOW(DefaultChannel, &adc_opticflow, &opticflow_ref_alt));
+  RunOnceEvery(5,DOWNLINK_SEND_OPTICFLOW(DefaultChannel, DefaultDevice, &adc_opticflow, &opticflow_ref_alt));
 }
 
 void start_opticflow(void)

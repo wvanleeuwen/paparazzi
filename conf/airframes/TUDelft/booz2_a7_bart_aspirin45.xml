@@ -256,9 +256,10 @@ http://ngdc.noaa.gov/geomag/magfield.shtml
      <define name="AHRS_PROPAGATE_LOW_PASS_RATES"/>
      <define name="AHRS_MAG_UPDATE_YAW_ONLY "/>-->
     <target name="ap" board="lisa_l_1.1"/>
-    <target name="sim" board="pc">
+<!--    <target name="sim" board="pc">
       <subsystem name="fdm"           type="nps"/>
     </target>
+-->
     <subsystem name="telemetry"     type="xbee_api"/>
     <subsystem name="radio_control" type="ppm"/>
     <subsystem name="actuators"     type="mkk"/>
