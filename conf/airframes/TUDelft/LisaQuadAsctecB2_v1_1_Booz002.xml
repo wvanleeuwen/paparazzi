@@ -85,9 +85,9 @@
     <define name="MAG_Y_SENS" value="4.54132316969" integer="16"/>
     <define name="MAG_Z_SENS" value="2.69730737452" integer="16"/>
 
-    <define name="MAG_X_NEUTRAL" value="80"/>
-    <define name="MAG_Y_NEUTRAL" value="20"/>
-    <define name="MAG_Z_NEUTRAL" value="13"/>
+    <define name="MAG_X_NEUTRAL" value="-59.5"/>
+    <define name="MAG_Y_NEUTRAL" value="21"/>
+    <define name="MAG_Z_NEUTRAL" value="-36.5"/>
 
     <define name="BODY_TO_IMU_PHI" value="RadOfDeg(  2.50 )"/>
     <define name="BODY_TO_IMU_THETA" value="RadOfDeg(  -2.50 )"/>
