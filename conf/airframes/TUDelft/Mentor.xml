@@ -29,11 +29,11 @@
   </rc_commands>
 
   <command_laws>
-    <set servo="AILEVON_LEFT" value="-@ROLL"/>
-    <set servo="AILEVON_RIGHT" value="@ROLL"/>
+    <set servo="AILEVON_LEFT" value="@ROLL"/>
+    <set servo="AILEVON_RIGHT" value="-@ROLL"/>
     <set servo="THROTTLE" value="@THROTTLE"/>
     <set servo="ELEVATOR" value="@PITCH"/>
-    <set servo="RUDDER" value="-@YAW"/>
+    <set servo="RUDDER" value="@YAW"/>
   </command_laws>
 
   <!-- Local magnetic field -->
