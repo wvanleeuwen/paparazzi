@@ -121,8 +121,8 @@
     <define name="GLIDE_VSPEED" value="3."/>
     <define name="GLIDE_PITCH" value="45" unit="deg"/>
 
-    <define name="COMMAND_ROLL_TRIM" value="180" />
-    <define name="COMMAND_PITCH_TRIM" value="-280" />
+    <define name="COMMAND_ROLL_TRIM" value="180"/>
+    <define name="COMMAND_PITCH_TRIM" value="-280"/>
   </section>
 
   <section name="VERTICAL CONTROL" prefix="V_CTL_">
@@ -133,15 +133,15 @@
     <define name="ALTITUDE_MAX_CLIMB" value="2."/>
 
     <!-- auto throttle inner loop -->
-    <define name="AUTO_THROTTLE_NOMINAL_CRUISE_THROTTLE" value="0.312000006437"/>
+    <define name="AUTO_THROTTLE_NOMINAL_CRUISE_THROTTLE" value="0.43599998951"/>
     <define name="AUTO_THROTTLE_MIN_CRUISE_THROTTLE" value="0.25"/>
-    <define name="AUTO_THROTTLE_MAX_CRUISE_THROTTLE" value="0.65"/>
+    <define name="AUTO_THROTTLE_MAX_CRUISE_THROTTLE" value="0.549000024796"/>
     <define name="AUTO_THROTTLE_LOITER_TRIM" value="1500"/>
     <define name="AUTO_THROTTLE_DASH_TRIM" value="-4000"/>
-    <define name="AUTO_THROTTLE_CLIMB_THROTTLE_INCREMENT" value="0.250999987125" unit="%/(m/s)"/>
-    <define name="AUTO_THROTTLE_PGAIN" value="0.00700000021607"/>
-    <define name="AUTO_THROTTLE_IGAIN" value="0.0309999994934"/>
-    <define name="AUTO_THROTTLE_PITCH_OF_VZ_PGAIN" value="0.171000003815"/>
+    <define name="AUTO_THROTTLE_CLIMB_THROTTLE_INCREMENT" value="0.158000007272" unit="%/(m/s)"/>
+    <define name="AUTO_THROTTLE_PGAIN" value="0."/>
+    <define name="AUTO_THROTTLE_IGAIN" value="0."/>
+    <define name="AUTO_THROTTLE_PITCH_OF_VZ_PGAIN" value="0.361000001431"/>
 
     <define name="THROTTLE_SLEW_LIMITER" value="2" unit="s"/>
   </section>
@@ -155,7 +155,7 @@
     <define name="PITCH_MAX_SETPOINT" value="0.5" unit="radians"/>
     <define name="PITCH_MIN_SETPOINT" value="-0.5" unit="radians"/>
 
-    <define name="PITCH_PGAIN" value="15429.6865234"/>
+    <define name="PITCH_PGAIN" value="16917.2929688"/>
     <define name="PITCH_DGAIN" value="7.73400020599"/>
 
     <define name="ELEVATOR_OF_ROLL" value="3007.81298828"/>
@@ -213,7 +213,7 @@
 
   <firmware name="fixedwing">
 
-    <target name="ap" board="tiny_2.11" />
+    <target name="ap" board="tiny_2.11"/>
     <target name="sim" board="pc"/>
 
       <define name="STRONG_WIND"/>
@@ -235,7 +235,7 @@
     <!-- Sensors -->
     <subsystem name="navigation"/>
     <subsystem name="ins" type="xsens">
-      <configure name="XSENS_UART_NR" value="0" />
+      <configure name="XSENS_UART_NR" value="0"/>
     </subsystem>
 
 

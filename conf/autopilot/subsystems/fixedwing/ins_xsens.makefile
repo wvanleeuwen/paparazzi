@@ -31,7 +31,7 @@ ifeq ($(TARGET), ap)
 #  </makefile>
 
 # ImuEvent -> XSensEvent
-ap.CFLAGS += -DUSE_AHRS
+ap.CFLAGS += -DUSE_AHRS -DUSE_IMU
 ap.CFLAGS += -DIMU_TYPE_H=\"modules/ins/ins_xsens.h\"
 
 # AHRS Results
