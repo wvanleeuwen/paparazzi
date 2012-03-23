@@ -1,26 +1,25 @@
 <!DOCTYPE flight_plan SYSTEM "../flight_plan.dtd">
 
-<flight_plan alt="75" ground_alt="0" lat0="51.4480" lon0="4.3361" max_dist_from_home="1500" name="Versatile" qfu="250" security_height="100">
+<flight_plan alt="75" ground_alt="0" lat0="51.4444719" lon0="4.333919" max_dist_from_home="1500" name="Versatile" qfu="270" security_height="25">
   <header>
 #include "subsystems/datalink/datalink.h"
 </header>
   <waypoints>
-    <waypoint name="HOME" x="0" y="0"/>
-    <waypoint name="STDBY" x="20" y="80"/>
-    <waypoint name="1" x="44.8" y="102.2"/>
-    <waypoint name="2" x="-63.5" y="122.9"/>
-    <waypoint name="MOB" x="-11.5" y="-21.2"/>
+    <waypoint name="HOME" x="274.8" y="287.8"/>
+    <waypoint name="STDBY" x="382.9" y="432.3"/>
+    <waypoint name="1" x="716.0" y="348.4"/>
+    <waypoint name="2" x="434.1" y="287.3"/>
+    <waypoint name="MOB" x="620.8" y="-39.4"/>
     <waypoint name="S1" x="-151.6" y="80.4"/>
     <waypoint name="S2" x="180.1" y="214.9"/>
     <waypoint alt="30" name="AF" x="200" y="-10"/>
-    <waypoint alt="0" name="TD" x="80.0" y="20.0"/>
-    <waypoint name="BASELEG" x="26.9" y="-23.0"/>
+    <waypoint alt="0.0" name="TD" x="218.4" y="301.9"/>
+    <waypoint name="BASELEG" x="621.5" y="7.0"/>
     <waypoint name="_1" x="-100" y="0"/>
     <waypoint name="_2" x="-100" y="200"/>
     <waypoint name="_3" x="100" y="200"/>
     <waypoint name="_4" x="100" y="0"/>
-    <waypoint name="CLIMB" x="-122.5" y="35.4"/>
-    <waypoint name="EBHN" lat="51.3068" lon="4.3874"/>
+    <waypoint name="CLIMB" x="-193.3" y="175.5"/>
   </waypoints>
   <sectors>
     <sector name="Square">
@@ -44,7 +43,7 @@
       <set value="1" var="kill_throttle"/>
       <attitude roll="0" throttle="0" vmode="throttle"/>
     </block>
-    <block name="Takeoff" strip_icon="takeoff.png" strip_button="Takeoff (wp CLIMB)">
+    <block name="Takeoff" strip_button="Takeoff (wp CLIMB)" strip_icon="takeoff.png">
       <exception cond="estimator_z > ground_alt+25" deroute="Standby"/>
       <set value="0" var="ap_state->commands[COMMAND_BRAKE]"/>
       <set value="0" var="kill_throttle"/>
@@ -79,18 +78,14 @@
     <block name="Climb nav_climb m/s">
       <circle climb="nav_climb" radius="nav_radius" until="(10 > PowerVoltage()) || (estimator_z > ground_alt+ 1350)" vmode="climb" wp="1"/>
     </block>
-
     <block name="Circle 0% throttle">
       <circle pitch="fp_pitch" radius="nav_radius" throttle="0.0" until="ground_alt+50 > estimator_z" vmode="throttle" wp="1"/>
       <deroute block="Standby"/>
     </block>
-
     <block name="Oval 0% throttle">
       <oval p1="1" p2="2" pitch="fp_pitch" radius="nav_radius" throttle="0.0" until="ground_alt+50 > estimator_z" vmode="throttle"/>
       <deroute block="Standby"/>
     </block>
-
-
     <block name="Route 1-2">
       <go approaching_time="0" from="1" hmode="route" wp="2"/>
     </block>
@@ -152,7 +147,7 @@
     </block>
     <block name="For loop (circles wp 1)">
       <for from="0" to="3" var="i">
-        <circle radius="DEFAULT_CIRCLE_RADIUS+ $i*10" wp="1" until="NavCircleCount() > 1"/>
+        <circle radius="DEFAULT_CIRCLE_RADIUS+ $i*10" until="NavCircleCount() > 1" wp="1"/>
       </for>
       <deroute block="Standby"/>
     </block>

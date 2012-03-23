@@ -64,7 +64,7 @@ static uint16_t nav_catapult_launch = 0;
 #endif
 
 #ifndef NAV_CATAPULT_MOTOR_DELAY
-#define NAV_CATAPULT_MOTOR_DELAY  45		// Main Control Loops
+#define NAV_CATAPULT_MOTOR_DELAY  55		// Main Control Loops
 #endif
 
 #define NAV_CATAPULT_HEADING_DELAY (60 * 3)
@@ -166,14 +166,14 @@ bool_t nav_catapult(uint8_t _to, uint8_t _climb)
   else if (nav_catapult_launch < NAV_CATAPULT_HEADING_DELAY)
   {
     NavAttitude(RadOfDeg(0));
-    NavVerticalAutoThrottleMode(RadOfDeg(15));
+    NavVerticalAutoThrottleMode(0.3);
     NavVerticalThrottleMode(9600*(1.0));
   }
   // Heading Lock
   else if (nav_catapult_launch == 0xffff)
   {
     NavVerticalAltitudeMode(alt, 0);	// vertical mode (folow glideslope)
-    NavVerticalAutoThrottleMode(RadOfDeg(15));		// throttle mode
+    NavVerticalAutoThrottleMode(0.3);		// throttle mode
     NavGotoWaypoint(_climb);				// horizontal mode (stay on localiser)
   }
   else
