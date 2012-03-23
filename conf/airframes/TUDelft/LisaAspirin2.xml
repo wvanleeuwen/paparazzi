@@ -25,8 +25,8 @@
   </rc_commands>
 
   <command_laws>
-    <set servo="AILEVON_LEFT" value="-(@ROLL * 0.6f) + @PITCH"/>
-    <set servo="AILEVON_RIGHT" value="(@ROLL * 0.6f) + @PITCH"/>
+    <set servo="AILEVON_LEFT" value="(@ROLL * 0.6f) + @PITCH"/>
+    <set servo="AILEVON_RIGHT" value="-(@ROLL * 0.6f) + @PITCH"/>
     <set servo="THROTTLE" value="@THROTTLE"/>
   </command_laws>
 
@@ -38,10 +38,6 @@
   </section>
 
   <section name="IMU" prefix="IMU_">
-    <!-- Calibration Neutral -->
-    <define name="GYRO_P_NEUTRAL" value="0"/>
-    <define name="GYRO_Q_NEUTRAL" value="0"/>
-    <define name="GYRO_R_NEUTRAL" value="0"/>
 
     <!-- SENS = 16.4 LSB/(deg/sec) * 57.6 deg/rad = 939.650 LSB/rad/sec / 12bit FRAC: 4096 / 939.65 -->
     <define name="GYRO_P_SENS" value="4.359" integer="16"/>
@@ -222,7 +218,7 @@
     <define name="WIND_INFO"/>
     <define name="WIND_INFO_RET"/>
 
-    <!-- Sensors -->
+    <!-- Attitude -->
     <!--
     <subsystem name="ahrs" type="int_cmpl_quat">
       <define name="AHRS_GRAVITY_UPDATE_COORDINATED_TURN" />
@@ -234,18 +230,19 @@
     </subsystem>
 
 
-    <subsystem name="radio_control" type="ppm"/>
 
     <!-- Communication -->
+    <subsystem name="radio_control" type="ppm"/>
     <subsystem name="telemetry" type="xbee_api">
       <configure name="MODEM_BAUD" value="B9600"/>
       <configure name="MODEM_PORT" value="UART2"/>
     </subsystem>
 
-    <!-- Actuators -->
+    <!-- Autopilot -->
     <subsystem name="control"/>
-    <!-- Sensors -->
     <subsystem name="navigation" type="extra"/>
+
+    <!-- Position -->
     <subsystem name="gps" type="ublox">
       <configure name="GPS_PORT" value="UART1"/>
     </subsystem>
