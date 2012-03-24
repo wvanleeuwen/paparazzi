@@ -527,6 +527,40 @@ int main(void)
   }
 #endif
 
+
+#ifdef _DEBUG_BOARD_
+  while(1)
+  {
+    if (IO0PIN & (1 << LOG_STOP_KEY))
+    {
+      LED_ON(LED_YELLOW);
+    }
+    else
+    {
+      LED_OFF(LED_YELLOW);
+    }
+
+    if (IO1PIN & (1 << CARD_DETECT_PIN))
+    {
+      LED_OFF(LED_GREEN);
+    }
+    else
+    {
+      LED_ON(LED_GREEN);
+    }
+
+    if (IO0PIN & (1 << POWER_DETECT_PIN))
+//    if (IO0PIN & (1 << VBUS_PIN))
+    {
+      LED_ON(LED_RED);
+    }
+    else
+    {
+      LED_OFF(LED_RED);
+    }
+  }
+#endif
+
   // Direct SD Reader Mode
   if ((IO0PIN & _BV(VBUS_PIN))>>VBUS_PIN)
   {
