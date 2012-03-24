@@ -138,7 +138,7 @@ Reset_Handler:
     			ldr   r2, =BOOT_PIN /* get boot pin */
     			and   r1, r1, r2    /* clear all other bits */
     			cmp   r1, r2        /* compare bits */ 
-    			bneq   Bootloader    /* beq */
+    			bne   Bootloader    /* beq */
     			ldr   PC, AppS_Addr
 #endif
 #else
