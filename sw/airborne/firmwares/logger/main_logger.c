@@ -326,7 +326,7 @@ void log_xbee(unsigned char c, unsigned char source)
 #ifndef USE_MAX11040
     log_payload(xbeel_payload_len-XBEE_RFDATA_OFFSET, source, xbeel_timestamp);
 #endif
-    LED_TOGGLE(3);
+    LED_TOGGLE(LED_GREEN);
     goto restart;
   }
   return;
@@ -380,7 +380,7 @@ void log_pprz(unsigned char c, unsigned char source)
 #ifndef USE_MAX11040
     log_payload(pprzl_payload_len, source, pprzl_timestamp);
 #endif
-    LED_TOGGLE(3);
+    LED_TOGGLE(LED_GREEN);
     goto restart;
   }
   return;
@@ -422,7 +422,7 @@ int do_log(void)
 #ifdef USE_MAX11040
       if ((max11040_data == MAX11040_DATA_AVAILABLE) &&
           (max11040_buf_in != max11040_buf_out)) {
-//        LED_TOGGLE(3);
+//        LED_TOGGLE(LED_GREEN);
         int i;
 
         max11040_data = MAX11040_IDLE;
@@ -450,7 +450,7 @@ int do_log(void)
         temp = 0;
         while (Uart0ChAvailable() && (temp++ < 128))
         {
-//			LED_TOGGLE(3);
+//			LED_TOGGLE(LED_GREEN);
 			inc = Uart0Getch();
 #ifdef LOG_XBEE
             log_xbee(inc, LOG_SOURCE_UART0);
@@ -467,7 +467,7 @@ int do_log(void)
         temp = 0;
         while (Uart1ChAvailable() && (temp++ < 128))
         {
-//			LED_TOGGLE(3);
+//			LED_TOGGLE(LED_GREEN);
 			inc = Uart1Getch();
 #ifdef LOG_XBEE
             log_xbee(inc, LOG_SOURCE_UART1);
@@ -481,7 +481,7 @@ int do_log(void)
         }
 #endif
     }
-    LED_OFF(3);
+    LED_OFF(LED_GREEN);
 
     file_fclose( &filew );
     fs_umount( &efs.myFs ) ;
@@ -527,12 +527,19 @@ int main(void)
   }
 #endif
 
+  // Direct SD Reader Mode
+  if ((IO0PIN & _BV(VBUS_PIN))>>VBUS_PIN)
+  {
+    LED_OFF(LED_YELLOW);
+    LED_ON(LED_RED);
+    main_mass_storage();
+  }
 
   while(1)
   {
-    LED_ON(2);
+    LED_ON(LED_YELLOW);
     do_log();
-    LED_OFF(2);
+    LED_OFF(LED_YELLOW);
 
     waitloop = 0;
     ledcount = 0;
@@ -544,9 +551,9 @@ int main(void)
       {
         if (ledcount++ > 9) {
           ledcount=0;
-          LED_ON(2);
+          LED_ON(LED_YELLOW);
         } else {
-          LED_OFF(2);
+          LED_OFF(LED_YELLOW);
         }
         if (((IO0PIN & _BV(LOG_STOP_KEY))>>LOG_STOP_KEY) == 1) {
           waitloop=0;
@@ -557,12 +564,12 @@ int main(void)
 
       if ((IO0PIN & _BV(VBUS_PIN))>>VBUS_PIN)
       {
-        LED_OFF(2);
-        LED_ON(1);
+        LED_OFF(LED_YELLOW);
+        LED_ON(LED_RED);
         main_mass_storage();
       }
     }
-    LED_ON(2);
+    LED_ON(LED_YELLOW);
     while (((IO0PIN & _BV(LOG_STOP_KEY))>>LOG_STOP_KEY) == 0);
   }
 
