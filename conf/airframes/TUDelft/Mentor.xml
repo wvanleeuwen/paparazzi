@@ -113,6 +113,20 @@
     <define name="NAV_GLIDE_PITCH_TRIM" value="0."/>
   </section>
 
+  <section name="CATAPULT" prefix="NAV_CATAPULT_" >
+    <define name="MOTOR_DELAY" value="45" />
+    <define name="HEADING_DELAY" value="(60*3)" />
+    <define name="ACCELERATION_THRESHOLD" value="1.75" />
+    <define name="INITIAL_PITCH" value="(15.0/57.0)" />
+    <define name="INITIAL_THROTTLE" value="1.0" />
+  </section>
+
+  <section name="GLS_APPROACH" prefix="APP_" >
+    <define name="ANGLE" value="5" />
+    <define name="INTERCEPT_AF_TOD" value="10" />
+    <define name="TARGET_SPEED" value="13" />
+  </section>
+
   <section name="VERTICAL CONTROL" prefix="V_CTL_">
     <define name="POWER_CTL_BAT_NOMINAL" value="11.1" unit="volt"/>
     <!-- outer loop proportional gain -->
@@ -210,7 +224,7 @@
     <load name="digital_cam.xml">
       <define name="DC_SHUTTER_LED" value="3"/>
     </load>
-    
+
     <load name="nav_catapult.xml"/>
 
   </modules>

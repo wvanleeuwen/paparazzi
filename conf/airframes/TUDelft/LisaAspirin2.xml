@@ -25,8 +25,8 @@
   </rc_commands>
 
   <command_laws>
-    <set servo="AILEVON_LEFT" value="-(@ROLL * 0.6f) + @PITCH"/>
-    <set servo="AILEVON_RIGHT" value="(@ROLL * 0.6f) + @PITCH"/>
+    <set servo="AILEVON_LEFT" value="(@ROLL * 0.6f) + @PITCH"/>
+    <set servo="AILEVON_RIGHT" value="-(@ROLL * 0.6f) + @PITCH"/>
     <set servo="THROTTLE" value="@THROTTLE"/>
   </command_laws>
 
@@ -38,10 +38,6 @@
   </section>
 
   <section name="IMU" prefix="IMU_">
-    <!-- Calibration Neutral -->
-    <define name="GYRO_P_NEUTRAL" value="0"/>
-    <define name="GYRO_Q_NEUTRAL" value="0"/>
-    <define name="GYRO_R_NEUTRAL" value="0"/>
 
     <!-- SENS = 16.4 LSB/(deg/sec) * 57.6 deg/rad = 939.650 LSB/rad/sec / 12bit FRAC: 4096 / 939.65 -->
     <define name="GYRO_P_SENS" value="4.359" integer="16"/>
@@ -109,6 +105,14 @@
     <define name="GLIDE_PITCH_TRIM" value="0" unit="deg"/>
   </section>
 
+  <section name="CATAPULT" prefix="NAV_CATAPULT_" >
+    <define name="MOTOR_DELAY" value="45" />
+    <define name="HEADING_DELAY" value="160" />
+    <define name="ACCELERATION_THRESHOLD" value="1.75" />
+    <define name="INITIAL_PITCH" value="0.3" />
+    <define name="INITIAL_THROTTLE" value="1.0" />
+  </section>
+
   <section name="VERTICAL CONTROL" prefix="V_CTL_">
     <define name="POWER_CTL_BAT_NOMINAL" value="11.1" unit="volt"/>
     <!-- outer loop proportional gain -->
@@ -171,15 +175,40 @@
     <define name="DELAY_WITHOUT_GPS" value="4" unit="s"/>
   </section>
 
+  <section name="GLS_APPROACH" prefix="APP_" >
+    <define name="ANGLE" value="4" />
+    <define name="INTERCEPT_AF_TOD" value="15" />
+    <define name="TARGET_SPEED" value="(65.0/3.6)" />
+  </section>
+
   <section name="DIGITAL_CAMERA" prefix="DC_">
     <define name="AUTOSHOOT_QUARTERSEC_PERIOD" value="6" unit="quarter_second"/>
     <define name="AUTOSHOOT_METER_GRID" value="50" unit="meter"/>
+  </section>
+
+  <section name="Photogrammetry" prefix="PHOTOGRAMMETRY_">
+    <!-- Camera Parameters -->
+    <define name="FOCAL_LENGTH" value="8.3" unit="mm"/>
+    <define name="SENSOR_WIDTH" value="6.66" unit="mm"/>                <!-- In direction of the plane's wings -->
+    <define name="SENSOR_HEIGHT" value="5.32" unit="mm"/>               <!-- In direction of the plane's nose -->
+    <define name="PIXELS_WIDTH" value="1280" unit=""/>
+
+    <!-- Photogrammetry Parameters : defined per flightplan -->
+    <define name="OVERLAP" value="0.5" unit="PROCENT"/>
+    <define name="SIDELAP" value="0.5" unit="PROCENT"/>
+    <define name="RESOLUTION" value="50" unit="mm pixel projection"/>
+
+    <!-- Flight Safety Parameters -->
+    <define name="HEIGHT_MIN" value="40" unit="m"/>
+    <define name="HEIGHT_MAX" value="500" unit="m"/>
+    <define name="RADIUS_MIN" value="70" unit="m"/>
   </section>
 
 
   <modules>
     <load name="gps_ubx_ucenter.xml"/>
     <load name="nav_catapult.xml" />
+    <load name="photogrammetry_calculator.xml" />
 <!--
     <load name="light.xml">
       <define name="LIGHT_LED_STROBE" value="2"/>
@@ -222,7 +251,7 @@
     <define name="WIND_INFO"/>
     <define name="WIND_INFO_RET"/>
 
-    <!-- Sensors -->
+    <!-- Attitude -->
     <!--
     <subsystem name="ahrs" type="int_cmpl_quat">
       <define name="AHRS_GRAVITY_UPDATE_COORDINATED_TURN" />
@@ -234,18 +263,19 @@
     </subsystem>
 
 
-    <subsystem name="radio_control" type="ppm"/>
 
     <!-- Communication -->
+    <subsystem name="radio_control" type="ppm"/>
     <subsystem name="telemetry" type="xbee_api">
       <configure name="MODEM_BAUD" value="B9600"/>
       <configure name="MODEM_PORT" value="UART2"/>
     </subsystem>
 
-    <!-- Actuators -->
+    <!-- Autopilot -->
     <subsystem name="control"/>
-    <!-- Sensors -->
     <subsystem name="navigation" type="extra"/>
+
+    <!-- Position -->
     <subsystem name="gps" type="ublox">
       <configure name="GPS_PORT" value="UART1"/>
     </subsystem>

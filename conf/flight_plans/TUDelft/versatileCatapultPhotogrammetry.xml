@@ -21,6 +21,8 @@
     <waypoint name="STDBY" x="20" y="80"/>
     <waypoint name="1" x="100.0" y="100.0"/>
     <waypoint name="2" x="-100.0" y="100.0"/>
+    <waypoint name="3" x="-100.0" y="-100.0"/>
+    <waypoint name="4" x="100.0" y="-100.0"/>
     <waypoint name="MOB" x="308.5" y="-229.5"/>
     <waypoint name="S1" x="-237.7" y="-507.4"/>
     <waypoint name="S2" x="227.7" y="699.6"/>
@@ -115,6 +117,19 @@
      <exception cond="ground_alt + 5 > estimator_z" deroute="flare"/>
      <call fun="gls(WP_AF, WP__TOD, WP_TD)"/>
    </block>
+
+    <block group="survey" name="Survey N-S Rect" strip_button="Survey (wp S1-S2)" strip_icon="survey.png">
+      <survey_rectangle grid="150" wp1="S1" wp2="S2"/>
+    </block>
+    <block group="survey" name="Initialize Poly Survey 1234" strip_button="Survey1234" strip_icon="survey.png">
+      <call fun="PhotogrammetryCalculatorPolygonSurvey(WP_1, 4)"/>
+      <call fun="PolygonSurvey()"/>
+    </block>
+    <block group="survey" name="Initialize ADV Poly 1234 Survey" strip_button="SurveyADV" strip_icon="survey.png">
+      <call fun="PhotogrammetryCalculatorPolygonSurveyADV(WP_1, 4)"/>
+      <call fun="poly_survey_adv()"/>
+    </block>
+
 
     <block name="Figure 8 around wp 1" strip_button="Figure 8 (wp 1-2)" strip_icon="eight.png">
       <eight center="1" radius="nav_radius" turn_around="2"/>
