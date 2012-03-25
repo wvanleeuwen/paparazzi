@@ -12,12 +12,6 @@
 <!-- commands section -->
   <servos>
     <servo name="MOTOR" no="0" min="1000" neutral="1000" max="2000"/>
-<!--
-    <servo name="AILERON_LEFT_OUT" no="2" min="1800" neutral="1450" max="1100"/>
-    <servo name="AILERON_LEFT_IN" no="6" min="1100" neutral="1450" max="1800"/>
-    <servo name="AILERON_RIGHT_IN" no="7" min="1100" neutral="1450" max="1800"/>
-    <servo name="AILERON_RIGHT_OUT" no="3" min="1800" neutral="1450" max="1100"/>
--->
     <servo name="AILERON_LEFT_OUT" no="2" min="1910" neutral="1570" max="1230"/>
     <servo name="AILERON_LEFT_IN" no="6" min="1200" neutral="1510" max="1820"/>
     <servo name="AILERON_RIGHT_IN" no="7" min="1700" neutral="1400" max="1100"/>
@@ -291,30 +285,23 @@
   </section>
 
   <firmware name="fixedwing">
-    <target name="sim" board="pc">
-      <define name="AGR_CLIMB"/>
-      <define name="LOITER_TRIM"/>
-      <define name="ALT_KALMAN"/>
-      <define name="WIND_INFO"/>
-      <define name="DWIND_INFO_RET"/>
-    </target>
     <target name="ap" board="tiny_1.1">
-      <configure name="FLASH_MODE" value="IAP"/>
-      <define name="AGR_CLIMB"/>
-      <define name="LOITER_TRIM"/>
-      <define name="ALT_KALMAN"/>
-      <define name="WIND_INFO"/>
-      <define name="DWIND_INFO_RET"/>
-
       <define name="LED_6_BANK" value="1"/>
       <define name="LED_6_PIN" value="21"/>
     </target>
 
+    <target name="sim" board="pc"/>
+
+      <define name="AGR_CLIMB"/>
+      <define name="LOITER_TRIM"/>
+      <define name="ALT_KALMAN"/>
+      <define name="WIND_INFO"/>
+      <define name="DWIND_INFO_RET"/>
 
     <!-- Communication -->
     <subsystem name="radio_control" type="ppm"/>
     <subsystem name="telemetry" type="xbee_api">
-      <configure name="MODEM_UART_NR" value="1"/>
+      <configure name="MODEM_PORT" value="UART1"/>
       <configure name="MODEM_BAUD" value="B9600"/>
     </subsystem>
 
@@ -323,9 +310,9 @@
     <subsystem name="navigation" type="extra"/>
 
     <!-- Sensors -->
-    <subsystem name="attitude" type="infrared"/>
-    <subsystem name="gps" type="ublox_lea4p">
-      <configure name="GPS_UART_NR" value="0"/>
+    <subsystem name="ahrs" type="infrared"/>
+    <subsystem name="gps" type="ublox">
+      <configure name="GPS_PORT" value="UART0"/>
     </subsystem>
 
   </firmware>

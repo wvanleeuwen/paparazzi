@@ -104,6 +104,31 @@
 #define LOG_STOP_KEY 7
 #endif
 
+/*
+#ifndef POWER_DETECT_PIN
+// Pin 0.10
+#define POWER_DETECT_PIN 6
+#endif
+
+#ifndef CARD_DETECT_PIN
+// Pin 1.20
+#define CARD_DETECT_PIN 20
+#endif
+*/
+
+#ifndef LED_GREEN
+#define LED_GREEN	3
+#endif
+
+#ifndef LED_YELLOW
+#define LED_YELLOW	2
+#endif
+
+#ifndef LED_RED
+#define LED_RED		1
+#endif
+
+
 /* USB Vbus (= P0.23) */
 #define VBUS_PIN 23
 
@@ -301,7 +326,7 @@ void log_xbee(unsigned char c, unsigned char source)
 #ifndef USE_MAX11040
     log_payload(xbeel_payload_len-XBEE_RFDATA_OFFSET, source, xbeel_timestamp);
 #endif
-    LED_TOGGLE(3);
+    LED_TOGGLE(LED_GREEN);
     goto restart;
   }
   return;
@@ -355,7 +380,7 @@ void log_pprz(unsigned char c, unsigned char source)
 #ifndef USE_MAX11040
     log_payload(pprzl_payload_len, source, pprzl_timestamp);
 #endif
-    LED_TOGGLE(3);
+    LED_TOGGLE(LED_GREEN);
     goto restart;
   }
   return;
@@ -391,13 +416,13 @@ int do_log(void)
     }
 
     /* write to SD until key is pressed */
-    while ((IO0PIN & _BV(LOG_STOP_KEY))>>LOG_STOP_KEY)
+    while ((IO0PIN & (1<<LOG_STOP_KEY))>>LOG_STOP_KEY)
     {
 
 #ifdef USE_MAX11040
       if ((max11040_data == MAX11040_DATA_AVAILABLE) &&
           (max11040_buf_in != max11040_buf_out)) {
-//        LED_TOGGLE(3);
+//        LED_TOGGLE(LED_GREEN);
         int i;
 
         max11040_data = MAX11040_IDLE;
@@ -425,7 +450,7 @@ int do_log(void)
         temp = 0;
         while (Uart0ChAvailable() && (temp++ < 128))
         {
-//			LED_TOGGLE(3);
+//			LED_TOGGLE(LED_GREEN);
 			inc = Uart0Getch();
 #ifdef LOG_XBEE
             log_xbee(inc, LOG_SOURCE_UART0);
@@ -442,7 +467,7 @@ int do_log(void)
         temp = 0;
         while (Uart1ChAvailable() && (temp++ < 128))
         {
-//			LED_TOGGLE(3);
+//			LED_TOGGLE(LED_GREEN);
 			inc = Uart1Getch();
 #ifdef LOG_XBEE
             log_xbee(inc, LOG_SOURCE_UART1);
@@ -456,7 +481,7 @@ int do_log(void)
         }
 #endif
     }
-    LED_OFF(3);
+    LED_OFF(LED_GREEN);
 
     file_fclose( &filew );
     fs_umount( &efs.myFs ) ;
@@ -469,11 +494,86 @@ int main(void)
   int waitloop, ledcount;
   main_init();
 
+#ifdef _DEBUG_BOARD_
   while(1)
   {
-    LED_ON(2);
+    if (IO0PIN & (1 << LOG_STOP_KEY))
+    {
+      LED_ON(LED_YELLOW);
+    }
+    else
+    {
+      LED_OFF(LED_YELLOW);
+    }
+
+    if (IO1PIN & (1 << CARD_DETECT_PIN))
+    {
+      LED_OFF(LED_GREEN);
+    }
+    else
+    {
+      LED_ON(LED_GREEN);
+    }
+
+    if (IO0PIN & (1 << POWER_DETECT_PIN))
+//    if (IO0PIN & (1 << VBUS_PIN))
+    {
+      LED_ON(LED_RED);
+    }
+    else
+    {
+      LED_OFF(LED_RED);
+    }
+  }
+#endif
+
+
+#ifdef _DEBUG_BOARD_
+  while(1)
+  {
+    if (IO0PIN & (1 << LOG_STOP_KEY))
+    {
+      LED_ON(LED_YELLOW);
+    }
+    else
+    {
+      LED_OFF(LED_YELLOW);
+    }
+
+    if (IO1PIN & (1 << CARD_DETECT_PIN))
+    {
+      LED_OFF(LED_GREEN);
+    }
+    else
+    {
+      LED_ON(LED_GREEN);
+    }
+
+    if (IO0PIN & (1 << POWER_DETECT_PIN))
+//    if (IO0PIN & (1 << VBUS_PIN))
+    {
+      LED_ON(LED_RED);
+    }
+    else
+    {
+      LED_OFF(LED_RED);
+    }
+  }
+#endif
+
+  // Direct SD Reader Mode
+  if ((IO0PIN & _BV(VBUS_PIN))>>VBUS_PIN)
+  {
+    LED_OFF(LED_YELLOW);
+    LED_ON(LED_RED);
+    main_mass_storage();
+  }
+
+  while(1)
+  {
+    LED_ON(LED_YELLOW);
     do_log();
-    LED_OFF(2);
+    LED_OFF(LED_YELLOW);
 
     waitloop = 0;
     ledcount = 0;
@@ -485,9 +585,9 @@ int main(void)
       {
         if (ledcount++ > 9) {
           ledcount=0;
-          LED_ON(2);
+          LED_ON(LED_YELLOW);
         } else {
-          LED_OFF(2);
+          LED_OFF(LED_YELLOW);
         }
         if (((IO0PIN & _BV(LOG_STOP_KEY))>>LOG_STOP_KEY) == 1) {
           waitloop=0;
@@ -498,12 +598,12 @@ int main(void)
 
       if ((IO0PIN & _BV(VBUS_PIN))>>VBUS_PIN)
       {
-        LED_OFF(2);
-        LED_ON(1);
+        LED_OFF(LED_YELLOW);
+        LED_ON(LED_RED);
         main_mass_storage();
       }
     }
-    LED_ON(2);
+    LED_ON(LED_YELLOW);
     while (((IO0PIN & _BV(LOG_STOP_KEY))>>LOG_STOP_KEY) == 0);
   }
 
