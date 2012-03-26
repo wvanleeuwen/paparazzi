@@ -104,7 +104,7 @@
 
   <section name="INS" prefix="INS_">
     <define name="ROLL_NEUTRAL_DEFAULT" value="0.0" unit="rad"/>
-    <define name="PITCH_NEUTRAL_DEFAULT" value="-0.09" unit="rad"/>
+    <define name="PITCH_NEUTRAL_DEFAULT" value="-0.0885749980807" unit="rad"/>
   </section>
 
   <section name="MISC">
@@ -122,7 +122,7 @@
     <define name="GLIDE_PITCH" value="45" unit="deg"/>
 
     <define name="COMMAND_ROLL_TRIM" value="180"/>
-    <define name="COMMAND_PITCH_TRIM" value="-280"/>
+    <define name="COMMAND_PITCH_TRIM" value="-194."/>
   </section>
 
   <section name="VERTICAL CONTROL" prefix="V_CTL_">
@@ -147,7 +147,7 @@
   </section>
 
   <section name="HORIZONTAL CONTROL" prefix="H_CTL_">
-    <define name="COURSE_PGAIN" value="1.16799998283"/>
+    <define name="COURSE_PGAIN" value="0.972000002861"/>
     <define name="COURSE_DGAIN" value="0.280999988317"/>
     <define name="COURSE_PRE_BANK_CORRECTION" value="1.0039999485"/>
 
