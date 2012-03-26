@@ -209,21 +209,21 @@
     <load name="gps_ubx_ucenter.xml"/>
     <load name="nav_catapult.xml" />
     <load name="photogrammetry_calculator.xml" />
-<!--
+
     <load name="light.xml">
-      <define name="LIGHT_LED_STROBE" value="2"/>
-      <define name="LIGHT_LED_NAV" value="3"/>
+      <define name="LIGHT_LED_STROBE" value="4"/>
+      <define name="LIGHT_LED_NAV" value="5"/>
       <define name="STROBE_LIGHT_MODE_DEFAULT" value="6"/>
       <define name="NAV_LIGHT_MODE_DEFAULT" value="4"/>
     </load>
 
-        <load name="digital_cam_i2c.xml"/>  -->
+<!--       <load name="digital_cam_i2c.xml"/>  -->
 
  <!--    <load name="ins_ppzuavimu.xml" /> -->
 
 <!--  -->
     <load name="digital_cam.xml">
-      <define name="DC_SHUTTER_LED" value="3"/>
+      <define name="DC_SHUTTER_LED" value="1"/>
     </load>
 
   </modules>
@@ -238,8 +238,8 @@
       <configure name="AHRS_CORRECT_FREQUENCY" value="100"/>
        <define name="AHRS_TRIGGERED_ATTITUDE_LOOP"/>
 
-      <configure name="AHRS_ALIGNER_LED" value="1"/>
-      <configure name="CPU_LED" value="1"/>
+      <configure name="AHRS_ALIGNER_LED" value="3"/>
+      <configure name="CPU_LED" value="3"/>
     </target>
     <target name="sim" board="pc"/>
 
