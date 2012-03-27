@@ -24,6 +24,7 @@
  */
 
 #include "firmwares/rotorcraft/stabilization.h"
+#include "firmwares/rotorcraft/stabilization/stabilization_attitude_rc_setpoint.h"
 
 #if USE_SETPOINTS_WITH_TRANSITIONS
 #include "firmwares/rotorcraft/stabilization/quat_setpoint_int.h"
@@ -62,10 +63,10 @@ int32_t stabilization_att_fb_cmd[COMMANDS_NB];
 int32_t stabilization_att_ff_cmd[COMMANDS_NB];
 
 #define IERROR_SCALE 1024
-#define GAIN_PRESCALER_FF 1
-#define GAIN_PRESCALER_P 1
-#define GAIN_PRESCALER_D 1
-#define GAIN_PRESCALER_I 1
+#define GAIN_PRESCALER_FF 48
+#define GAIN_PRESCALER_P 48
+#define GAIN_PRESCALER_D 48
+#define GAIN_PRESCALER_I 48
 
 void stabilization_attitude_init(void) {
 
@@ -95,9 +96,9 @@ static void attitude_run_ff(int32_t ff_commands[], struct Int32AttitudeGains *ga
 {
   /* Compute feedforward based on reference acceleration */
 
-  ff_commands[COMMAND_ROLL]          = GAIN_PRESCALER_FF * gains->dd.x * RATE_FLOAT_OF_BFP(ref_accel->p) / (1 << 7);
-  ff_commands[COMMAND_PITCH]         = GAIN_PRESCALER_FF * gains->dd.y * RATE_FLOAT_OF_BFP(ref_accel->q) / (1 << 7);
-  ff_commands[COMMAND_YAW]           = GAIN_PRESCALER_FF * gains->dd.z * RATE_FLOAT_OF_BFP(ref_accel->r) / (1 << 7);
+  ff_commands[COMMAND_ROLL]  = GAIN_PRESCALER_FF * gains->dd.x * RATE_FLOAT_OF_BFP(ref_accel->p) / (1 << 7);
+  ff_commands[COMMAND_PITCH] = GAIN_PRESCALER_FF * gains->dd.y * RATE_FLOAT_OF_BFP(ref_accel->q) / (1 << 7);
+  ff_commands[COMMAND_YAW]   = GAIN_PRESCALER_FF * gains->dd.z * RATE_FLOAT_OF_BFP(ref_accel->r) / (1 << 7);
 }
 
 static void attitude_run_fb(int32_t fb_commands[], struct Int32AttitudeGains *gains, struct Int32Quat *att_err,
@@ -173,9 +174,9 @@ void stabilization_attitude_run(bool_t enable_integrator) {
   stabilization_cmd[COMMAND_YAW] = stabilization_att_fb_cmd[COMMAND_YAW] + stabilization_att_ff_cmd[COMMAND_YAW];
 
   /* bound the result */
-  Bound(stabilization_cmd[COMMAND_ROLL], -200, 200);
-  Bound(stabilization_cmd[COMMAND_PITCH], -200, 200);
-  Bound(stabilization_cmd[COMMAND_YAW], -200, 200);
+  BoundAbs(stabilization_cmd[COMMAND_ROLL], MAX_PPRZ);
+  BoundAbs(stabilization_cmd[COMMAND_PITCH], MAX_PPRZ);
+  BoundAbs(stabilization_cmd[COMMAND_YAW], MAX_PPRZ);
 }
 
 void stabilization_attitude_read_rc(bool_t in_flight) {
@@ -183,7 +184,10 @@ void stabilization_attitude_read_rc(bool_t in_flight) {
 #if USE_SETPOINTS_WITH_TRANSITIONS
   stabilization_attitude_read_rc_absolute(in_flight);
 #else
-  stabilization_attitude_read_rc_setpoint(in_flight);
+  stabilization_attitude_read_rc_setpoint_eulers(&stab_att_sp_euler, in_flight);
+  /* update quaternion setpoint from euler setpoint */
+  INT32_QUAT_OF_EULERS(stab_att_sp_quat, stab_att_sp_euler);
+  INT32_QUAT_WRAP_SHORTEST(stab_att_sp_quat);
 #endif
 
 }

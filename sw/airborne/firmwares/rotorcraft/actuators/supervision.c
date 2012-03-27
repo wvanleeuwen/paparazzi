@@ -58,6 +58,14 @@
 */
 #endif
 
+/** total supervision command scale.
+ * scales a command input [-MAX_PPRZ,MAX_PPRZ]
+ * to the final supervision motor command with range of
+ * [SUPERVISION_MIN_MOTOR,SUPERVISION_MAX_MOTOR]
+ * or sets it to SUPERVISION_STOP_MOTOR
+ */
+#define SUPERVISION_CMD_SCALE (SUPERVISION_MAX_MOTOR - SUPERVISION_MIN_MOTOR) / (MAX_PPRZ * SUPERVISION_SCALE)
+
 static const int32_t roll_coef[SUPERVISION_NB_MOTOR]   = SUPERVISION_ROLL_COEF;
 static const int32_t pitch_coef[SUPERVISION_NB_MOTOR]  = SUPERVISION_PITCH_COEF;
 static const int32_t yaw_coef[SUPERVISION_NB_MOTOR]    = SUPERVISION_YAW_COEF;
@@ -145,12 +153,12 @@ void supervision_run(bool_t motors_on, bool_t override_on, int32_t in_cmd[] ) {
     int32_t min_cmd = INT32_MAX;
     int32_t max_cmd = INT32_MIN;
     for (i=0; i<SUPERVISION_NB_MOTOR; i++) {
-      supervision.commands[i] =
+      supervision.commands[i] = SUPERVISION_MIN_MOTOR +
         (thrust_coef[i] * in_cmd[COMMAND_THRUST] +
          roll_coef[i]   * in_cmd[COMMAND_ROLL]   +
          pitch_coef[i]  * in_cmd[COMMAND_PITCH]  +
          yaw_coef[i]    * in_cmd[COMMAND_YAW]    +
-         supervision.trim[i]) / SUPERVISION_SCALE;
+         supervision.trim[i]) * SUPERVISION_CMD_SCALE;
       if (supervision.commands[i] < min_cmd)
         min_cmd = supervision.commands[i];
       if (supervision.commands[i] > max_cmd)
@@ -166,8 +174,8 @@ void supervision_run(bool_t motors_on, bool_t override_on, int32_t in_cmd[] ) {
     /* For testing motor failure */
     if (motors_on && override_on) {
       for (i = 0; i < SUPERVISION_NB_MOTOR; i++) {
-	if (supervision.override_enabled[i])
-	  supervision.commands[i] = supervision.override_value[i];
+        if (supervision.override_enabled[i])
+          supervision.commands[i] = supervision.override_value[i];
       }
     }
     bound_commands();
