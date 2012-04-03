@@ -106,7 +106,7 @@
   </section>
 
   <section name="CATAPULT" prefix="NAV_CATAPULT_" >
-    <define name="MOTOR_DELAY" value="45" />
+    <define name="MOTOR_DELAY" value="23" />
     <define name="HEADING_DELAY" value="160" />
     <define name="ACCELERATION_THRESHOLD" value="1.75" />
     <define name="INITIAL_PITCH" value="0.3" />
