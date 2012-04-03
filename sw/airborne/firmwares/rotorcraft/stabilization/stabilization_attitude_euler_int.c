@@ -23,7 +23,7 @@
 #include "subsystems/ahrs.h"
 #include "subsystems/radio_control.h"
 
-
+#include "firmwares/rotorcraft/stabilization/stabilization_attitude_rc_setpoint.h"
 
 #include "generated/airframe.h"
 
@@ -80,14 +80,15 @@ void stabilization_attitude_init(void) {
 
 void stabilization_attitude_read_rc(bool_t in_flight) {
 
-  stabilization_attitude_read_rc_ref(&stab_att_sp_euler, in_flight);
+  stabilization_attitude_read_rc_setpoint_eulers(&stab_att_sp_euler, in_flight);
 
 }
 
 
 void stabilization_attitude_enter(void) {
 
-  STABILIZATION_ATTITUDE_RESET_PSI_REF(  stab_att_sp_euler );
+  stab_att_sp_euler.psi = ahrs.ltp_to_body_euler.psi;
+  reset_psi_ref_from_body();
   INT_EULERS_ZERO( stabilization_att_sum_err );
 
 }
@@ -156,11 +157,11 @@ void stabilization_attitude_run(bool_t  in_flight) {
     OFFSET_AND_ROUND2((stabilization_gains.i.z  * stabilization_att_sum_err.psi), 10);
 
 
-#ifdef USE_HELI
-#define CMD_SHIFT 12
-#else
-#define CMD_SHIFT 16
-#endif
+  /* with P gain of 100, att_err of 180deg (3.14 rad)
+   * fb cmd: 100 * 3.14 * 2^12 / 2^CMD_SHIFT = 628
+   * max possible command is 9600
+   */
+#define CMD_SHIFT 11
 
   /* sum feedforward and feedback */
   stabilization_cmd[COMMAND_ROLL] =
@@ -171,5 +172,10 @@ void stabilization_attitude_run(bool_t  in_flight) {
 
   stabilization_cmd[COMMAND_YAW] =
     OFFSET_AND_ROUND((stabilization_att_fb_cmd[COMMAND_YAW]+stabilization_att_ff_cmd[COMMAND_YAW]), CMD_SHIFT);
+
+  /* bound the result */
+  BoundAbs(stabilization_cmd[COMMAND_ROLL], MAX_PPRZ);
+  BoundAbs(stabilization_cmd[COMMAND_PITCH], MAX_PPRZ);
+  BoundAbs(stabilization_cmd[COMMAND_YAW], MAX_PPRZ);
 
 }

@@ -47,33 +47,6 @@ static inline void ahrs_update_mag_2d(void);
 #warning "AHRS_MAG_UPDATE_YAW_ONLY is deprecated, please remove it. This is the default behaviour. Define AHRS_MAG_UPDATE_ALL_AXES to use mag for all axes and not only yaw."
 #endif
 
-/* in place quaternion first order integration with constante rotational velocity */
-/*  */
-#define INT32_QUAT_INTEGRATE_FI(_q, _hr, _omega, _f) {              \
-    _hr.qi += -_omega.p*_q.qx - _omega.q*_q.qy - _omega.r*_q.qz;    \
-    _hr.qx +=  _omega.p*_q.qi + _omega.r*_q.qy - _omega.q*_q.qz;    \
-    _hr.qy +=  _omega.q*_q.qi - _omega.r*_q.qx + _omega.p*_q.qz;    \
-    _hr.qz +=  _omega.r*_q.qi + _omega.q*_q.qx - _omega.p*_q.qy;    \
-                                                                    \
-    ldiv_t _div = ldiv(_hr.qi, ((1<<INT32_RATE_FRAC)*_f*2));        \
-    _q.qi+= _div.quot;                                              \
-    _hr.qi = _div.rem;                                              \
-                                                                    \
-    _div = ldiv(_hr.qx, ((1<<INT32_RATE_FRAC)*_f*2));               \
-    _q.qx+= _div.quot;                                              \
-    _hr.qx = _div.rem;                                              \
-                                                                    \
-    _div = ldiv(_hr.qy, ((1<<INT32_RATE_FRAC)*_f*2));               \
-    _q.qy+= _div.quot;                                              \
-    _hr.qy = _div.rem;                                              \
-                                                                    \
-    _div = ldiv(_hr.qz, ((1<<INT32_RATE_FRAC)*_f*2));               \
-    _q.qz+= _div.quot;                                              \
-    _hr.qz = _div.rem;                                              \
-                                                                    \
-  }
-
-
 
 struct AhrsIntCmpl ahrs_impl;
 
@@ -325,7 +298,8 @@ void ahrs_update_gps(void) {
   if(gps.fix == GPS_FIX_3D && gps.gspeed>= 500) {
     // gps.course is in rad * 1e7, we need it in rad * 2^INT32_ANGLE_FRAC
     int32_t course = gps.course * ((1<<INT32_ANGLE_FRAC) / 1e7);
-    ahrs_update_course(course);
+    /* the assumption here is that there is no side-slip, so heading=course */
+    ahrs_update_heading(course);
   }
 #endif
 }
@@ -365,14 +339,26 @@ void ahrs_update_heading(int32_t heading) {
   ahrs_impl.rate_correction.q += residual_imu.y/4;
   ahrs_impl.rate_correction.r += residual_imu.z/4;
 
-  // residual_ltp FRAC = 2 * TRIG_FRAC = 28
-  // high_rez_bias = RATE_FRAC+28 = 40
-  // 2^40 / 2^28 * 2.5e-4 = 1
-  ahrs_impl.high_rez_bias.p -= residual_imu.x*(1<<INT32_ANGLE_FRAC);
-  ahrs_impl.high_rez_bias.q -= residual_imu.y*(1<<INT32_ANGLE_FRAC);
-  ahrs_impl.high_rez_bias.r -= residual_imu.z*(1<<INT32_ANGLE_FRAC);
 
-  INT_RATES_RSHIFT(ahrs_impl.gyro_bias, ahrs_impl.high_rez_bias, 28);
+  /* crude attempt to only update bias if deviation is small
+   * e.g. needed when you only have gps providing heading
+   * and the inital heading is totally different from
+   * the gps course information you get once you have a gps fix.
+   * Otherwise the bias will be falsely "corrected".
+   */
+  int32_t sin_max_angle_deviation;
+  PPRZ_ITRIG_SIN(sin_max_angle_deviation, TRIG_BFP_OF_REAL(RadOfDeg(5.)));
+  if (ABS(residual_ltp.z) < sin_max_angle_deviation)
+  {
+    // residual_ltp FRAC = 2 * TRIG_FRAC = 28
+    // high_rez_bias = RATE_FRAC+28 = 40
+    // 2^40 / 2^28 * 2.5e-4 = 1
+    ahrs_impl.high_rez_bias.p -= residual_imu.x*(1<<INT32_ANGLE_FRAC);
+    ahrs_impl.high_rez_bias.q -= residual_imu.y*(1<<INT32_ANGLE_FRAC);
+    ahrs_impl.high_rez_bias.r -= residual_imu.z*(1<<INT32_ANGLE_FRAC);
+
+    INT_RATES_RSHIFT(ahrs_impl.gyro_bias, ahrs_impl.high_rez_bias, 28);
+  }
 }
 
 
