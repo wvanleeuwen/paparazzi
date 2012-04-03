@@ -271,7 +271,7 @@ void h_ctl_course_loop ( void ) {
   float speed_depend_nav = estimator_hspeed_mod/NOMINAL_AIRSPEED;
   Bound(speed_depend_nav, 0.66, 1.5);
 
-  float cmd = -h_ctl_course_pgain * speed_depend_nav * (err + d_err * h_ctl_course_dgain);
+  float cmd = h_ctl_course_pgain * speed_depend_nav * (err + d_err * h_ctl_course_dgain);
 
 
 
