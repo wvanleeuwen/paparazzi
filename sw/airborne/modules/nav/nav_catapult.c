@@ -64,7 +64,7 @@ static uint16_t nav_catapult_launch = 0;
 #endif
 
 #ifndef NAV_CATAPULT_MOTOR_DELAY
-#define NAV_CATAPULT_MOTOR_DELAY  55		// Main Control Loops
+#define NAV_CATAPULT_MOTOR_DELAY  23		// Main Control Loops
 #endif
 
 #define NAV_CATAPULT_HEADING_DELAY (60 * 3)
