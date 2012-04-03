@@ -182,7 +182,7 @@
   </section>
 
   <section name="DIGITAL_CAMERA" prefix="DC_">
-    <define name="AUTOSHOOT_QUARTERSEC_PERIOD" value="6" unit="quarter_second"/>
+    <define name="AUTOSHOOT_QUARTERSEC_PERIOD" value="12" unit="quarter_second"/>
     <define name="AUTOSHOOT_METER_GRID" value="50" unit="meter"/>
   </section>
 
@@ -211,8 +211,8 @@
     <load name="photogrammetry_calculator.xml" />
 
     <load name="light.xml">
-      <define name="LIGHT_LED_STROBE" value="4"/>
-      <define name="LIGHT_LED_NAV" value="5"/>
+      <define name="LIGHT_LED_STROBE" value="5"/>
+      <define name="LIGHT_LED_NAV" value="1"/>
       <define name="STROBE_LIGHT_MODE_DEFAULT" value="6"/>
       <define name="NAV_LIGHT_MODE_DEFAULT" value="4"/>
     </load>
@@ -227,7 +227,7 @@
 
 <!--  -->
     <load name="digital_cam.xml">
-      <define name="DC_SHUTTER_LED" value="1"/>
+      <define name="DC_SHUTTER_LED" value="4"/>
     </load>
 
   </modules>
