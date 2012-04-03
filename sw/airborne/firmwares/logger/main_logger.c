@@ -92,6 +92,9 @@
 #include "max11040.h"
 #endif
 
+#include "LPC21xx.h"
+
+
 #ifndef FALSE
 #define FALSE 0
 #endif
@@ -615,12 +618,15 @@ static inline void main_init( void ) {
   sys_time_init();
   led_init();
 
+
 #ifdef USE_MAX11040
   max11040_init_ssp();
   max11040_init();
 #endif
 
   mcu_int_enable();
+
+  PINSEL2 = ~ (0x0c);
 }
 
 static inline void main_periodic_task( void ) {
