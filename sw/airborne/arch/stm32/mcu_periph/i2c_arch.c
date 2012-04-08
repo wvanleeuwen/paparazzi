@@ -41,13 +41,16 @@ static I2C_InitTypeDef  I2C1_InitStruct = {
 #endif
 
 #ifdef USE_I2C2
+#ifndef I2C2_BITRATE
+#define I2C2_BITRATE 300000
+#endif
 static I2C_InitTypeDef  I2C2_InitStruct = {
       .I2C_Mode = I2C_Mode_I2C,
       .I2C_DutyCycle = I2C_DutyCycle_2,
       .I2C_OwnAddress1 = 0x00,
       .I2C_Ack = I2C_Ack_Enable,
       .I2C_AcknowledgedAddress = I2C_AcknowledgedAddress_7bit,
-      .I2C_ClockSpeed = 300000
+      .I2C_ClockSpeed = I2C2_BITRATE
 };
 #endif
 
