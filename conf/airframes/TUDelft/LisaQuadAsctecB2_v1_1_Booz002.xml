@@ -97,8 +97,8 @@
 
  <section name="AUTOPILOT">
    <define name="MODE_MANUAL" value="AP_MODE_ATTITUDE_DIRECT"/>
-   <define name="MODE_AUTO1" value="AP_MODE_ATTITUDE_RC_CLIMB"/>
-   <define name="MODE_AUTO2" value="AP_MODE_ATTITUDE_Z_HOLD"/>
+   <define name="MODE_AUTO1" value="AP_MODE_HOVER_DIRECT"/>
+   <define name="MODE_AUTO2" value="AP_MODE_HOVER_Z_HOLD"/>
 <!--    <define name="AUTOPILOT_KILL_WITHOUT_AHRS"  value="TRUE"/>
     <define name="AUTOPILOT_INSTANT_START_WITH_SAFETIES"  value="TRUE"/> -->
  </section>
@@ -219,9 +219,9 @@ AP_MODE_NAV
    <define name="MAX_SUM_ERR" value="2000000"/>
 
 
-   <define name="HOVER_KP" value="125"/>
-   <define name="HOVER_KD" value="73"/>
-   <define name="HOVER_KI" value="0"/>
+   <define name="HOVER_KP" value="400"/>
+   <define name="HOVER_KD" value="200"/>
+   <define name="HOVER_KI" value="10"/>
 <!--
    <define name="HOVER_KP"     value="150"/>
    <define name="HOVER_KD"     value="80"/>
