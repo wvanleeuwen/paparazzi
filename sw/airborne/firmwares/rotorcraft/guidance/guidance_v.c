@@ -122,10 +122,15 @@ void guidance_v_mode_changed(uint8_t new_mode) {
     return;
 
   switch (new_mode) {
+  case GUIDANCE_V_MODE_HOVER:
+    guidance_v_z_sp = ins_ltp_pos.z; // set current altitude as setpoint
+    guidance_v_z_sum_err = 0;
+    GuidanceVSetRef(ins_ltp_pos.z, 0, 0);
+    break;
 
   case GUIDANCE_V_MODE_RC_CLIMB:
   case GUIDANCE_V_MODE_CLIMB:
-  case GUIDANCE_V_MODE_HOVER:
+    guidance_v_zd_sp = 0;
   case GUIDANCE_V_MODE_NAV:
     guidance_v_z_sum_err = 0;
     GuidanceVSetRef(ins_ltp_pos.z, ins_ltp_speed.z, 0);
@@ -159,8 +164,7 @@ void guidance_v_run(bool_t in_flight) {
   switch (guidance_v_mode) {
 
   case GUIDANCE_V_MODE_RC_DIRECT:
-    guidance_v_z_sp = ins_ltp_pos.z;  // not sure why we do that
-    GuidanceVSetRef(ins_ltp_pos.z, 0, 0); // or that - mode enter should take care of it ?
+    guidance_v_z_sp = ins_ltp_pos.z; // for display only
     stabilization_cmd[COMMAND_THRUST] = guidance_v_rc_delta_t;
     break;
 
@@ -262,7 +266,7 @@ __attribute__ ((always_inline)) static inline void run_hover_loop(bool_t in_flig
 
   /* our nominal command : (g + zdd)*m   */
 #ifdef GUIDANCE_V_INV_M
-  const int32_t inv_m = BFP_OF_REAL(GUIDANCE_V_INV_M, GV_ADAPT_X_FRAC);
+  const int32_t inv_m = BFP_OF_REAL(GUIDANCE_V_INV_M, FF_CMD_FRAC);
 #else
   const int32_t inv_m =  gv_adapt_X>>(GV_ADAPT_X_FRAC - FF_CMD_FRAC);
 #endif
