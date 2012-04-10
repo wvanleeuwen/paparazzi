@@ -129,6 +129,7 @@ void guidance_v_mode_changed(uint8_t new_mode) {
   case GUIDANCE_V_MODE_NAV:
     guidance_v_z_sum_err = 0;
     GuidanceVSetRef(ins_ltp_pos.z, ins_ltp_speed.z, 0);
+    guidance_v_z_sp = ins_ltp_pos.z;  // When switching from RC climb to hover Z Setpoint neet to be set also
     break;
 
   default:
