@@ -256,10 +256,8 @@
     <subsystem name="gps"           type="ublox">
       <configure name="GPS_PORT"    value="UART3"/>
     </subsystem>
-    <subsystem name="ahrs" type="int_cmpl_euler"/>
-    <subsystem name="stabilization"   type="euler"/>
-    <!--<subsystem name="ahrs"          type="ic"/>
-    <subsystem name="ins"           type="hff"/>-->
+    <subsystem name="ahrs"          type="int_cmpl_quat"/>
+    <subsystem name="stabilization" type="int_quat"/>
     <define name="MAG_UPDATE_YAW_ONLY" value="1"/>
   </firmware>
 
