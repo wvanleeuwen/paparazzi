@@ -237,9 +237,9 @@ AP_MODE_NAV
 
 
  <section name="GUIDANCE_H" prefix="GUIDANCE_H_">
-   <define name="PGAIN" value="17"/>
-   <define name="DGAIN" value="31"/>
-   <define name="IGAIN" value="3"/>
+   <define name="PGAIN" value="18"/>
+   <define name="DGAIN" value="60"/>
+   <define name="IGAIN" value="4"/>
    <define name="AGAIN" value="0"/>
  </section>
 
