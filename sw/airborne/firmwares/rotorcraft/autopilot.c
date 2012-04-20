@@ -57,9 +57,9 @@ static inline int ahrs_is_aligned(void) {
 }
 #endif
 
-#ifdef AUTOPILOT_ARMING_KILL_SWITCH
+#if USE_KILL_SWITCH_FOR_MOTOR_ARMING
 #include "autopilot_arming_switch.h"
-#elif defined AUTOPILOT_ARMING_THROTTLE
+#elif USE_THROTTLE_FOR_MOTOR_ARMING
 #include "autopilot_arming_throttle.h"
 #else
 #include "autopilot_arming_yaw.h"
@@ -223,7 +223,7 @@ static inline void autopilot_check_in_flight( bool_t motors_on ) {
 
 
 void autopilot_set_motors_on(bool_t motors_on) {
-  if (ahrs_is_aligned && motors_on)
+  if (ahrs_is_aligned() && motors_on)
     autopilot_motors_on = TRUE;
   else
     autopilot_motors_on = FALSE;
