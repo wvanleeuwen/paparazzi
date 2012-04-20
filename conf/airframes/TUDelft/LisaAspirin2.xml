@@ -148,8 +148,6 @@
 
     <define name="ELEVATOR_OF_ROLL" value="1200."/>
 
-    <define name="ROLL_SLEW" value="10."/>
-
     <define name="ROLL_ATTITUDE_GAIN" value="10400."/>
     <define name="ROLL_RATE_GAIN" value="250."/>
   </section>
@@ -217,10 +215,11 @@
       <define name="NAV_LIGHT_MODE_DEFAULT" value="4"/>
     </load>
 
+<!--
     <load name="adc_generic.xml">
-      <configure name="ADC_CHANNEL_GENERIC1" value="3" />
+      <configure name="ADC_CHANNEL_GENERIC1" value="ADC3" />
     </load>
-
+-->
 <!--       <load name="digital_cam_i2c.xml"/>  -->
 
  <!--    <load name="ins_ppzuavimu.xml" /> -->
@@ -251,7 +250,7 @@
     <define name="LOITER_TRIM"/>
     <define name="ALT_KALMAN"/>
     <define name="TUNE_AGRESSIVE_CLIMB"/>
-    <define name="STRONG_WIND"/>
+<!--    <define name="STRONG_WIND"/> -->
     <define name="WIND_INFO"/>
     <define name="WIND_INFO_RET"/>
 
