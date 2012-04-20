@@ -209,24 +209,24 @@
     <load name="photogrammetry_calculator.xml" />
 
     <load name="light.xml">
-      <define name="LIGHT_LED_STROBE" value="5"/>
+      <define name="LIGHT_LED_STROBE" value="4"/>
       <define name="LIGHT_LED_NAV" value="1"/>
       <define name="STROBE_LIGHT_MODE_DEFAULT" value="6"/>
       <define name="NAV_LIGHT_MODE_DEFAULT" value="4"/>
     </load>
 
-<!--
+
     <load name="adc_generic.xml">
-      <configure name="ADC_CHANNEL_GENERIC1" value="ADC3" />
+      <configure name="ADC_CHANNEL_GENERIC1" value="ADC_3" />
     </load>
--->
+
 <!--       <load name="digital_cam_i2c.xml"/>  -->
 
  <!--    <load name="ins_ppzuavimu.xml" /> -->
 
 <!--  -->
     <load name="digital_cam.xml">
-      <define name="DC_SHUTTER_LED" value="4"/>
+      <define name="DC_SHUTTER_LED" value="5"/>
     </load>
 
   </modules>
