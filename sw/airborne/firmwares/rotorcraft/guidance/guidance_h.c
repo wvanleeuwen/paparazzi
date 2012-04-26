@@ -36,9 +36,9 @@
 
 #include "generated/airframe.h"
 
-#ifdef LIFT_GENERATION_NR_OF_LIFT_DEVICES
+//#ifdef LIFT_GENERATION_NR_OF_LIFT_DEVICES
 #include "firmwares/rotorcraft/force_allocation_laws.h"
-#endif
+//#endif
 
 uint8_t guidance_h_mode;
 

@@ -59,8 +59,15 @@ struct PprzLiftDevice lift_devices[LIFT_GENERATION_NR_OF_LIFT_DEVICES] =
     ROTOR_LIFTING_DEVICE,
     100,
     0,
-    0, 0, 0, 0
+    {0, 0, 0, 0}
+  },
+  {
+    WING_LIFTING_DEVICE,
+    100,
+    0,
+    {0, 0, 0, 0}
   }
+  
 };
 
 
@@ -68,14 +75,15 @@ __attribute__ ((always_inline)) static inline void Force_Allocation_Laws(void)
 {
   stabilization_cmd[COMMAND_ROLL]   = 0; // actuator 0 - MAX_PPRZ
   stabilization_cmd[COMMAND_PITCH]  = 0; // command: linear angle
-  stabilization_cmd[COMMAND_THRUST] = 0; // command
+  //stabilization_cmd[COMMAND_THRUST] = 0; // command
   stabilization_cmd[COMMAND_YAW]    = 0; // abolute psi
   
-
+/*
   for (int i=0; i < LIFT_GENERATION_NR_OF_LIFT_DEVICES; i++)
   {
-    struct PprzLiftDevice *wing = &(lift_devices[i]);
-
+    */
+    struct PprzLiftDevice *wing = &(lift_devices[0]);
+/*
     if (wing->lift_type == ROTOR_LIFTING_DEVICE)
     {
       // Rotorcraft Mode
@@ -91,6 +99,7 @@ __attribute__ ((always_inline)) static inline void Force_Allocation_Laws(void)
       wing->commands[COMMAND_YAW]    = stab_att_sp_euler.psi;
     }
     else
+      */
     {
       // Plane Mode
       // ----------
@@ -100,12 +109,12 @@ __attribute__ ((always_inline)) static inline void Force_Allocation_Laws(void)
       // heading ANGLE -> integrated
     
       const float MAX_CLIMB = 3.0f; // m/s
-      const float PITCH_OF_VZ = 0.1f;
+      const float PITCH_OF_VZ = 0.3f;
       const float THROTTLE_INCREMENT = 0.1f;
-      const float CRUISE_THROTTLE = 0.5f;
+      const float CRUISE_THROTTLE = 0.1f;
       const float PITCH_TRIM = 0.0f;
     
-      int32_t climb_speed = ((stabilization_cmd[COMMAND_THRUST] - (MAX_PPRZ / 2)) * 2 * MAX_CLIMB);  // FRAC_COMMAND
+      float climb_speed = ((stabilization_cmd[COMMAND_THRUST] - (MAX_PPRZ / 2)) * 2 * MAX_CLIMB);  // FRAC_COMMAND
     
       // Lateral Motion
       wing->commands[COMMAND_ROLL]    = stab_att_sp_euler.phi;
@@ -113,8 +122,8 @@ __attribute__ ((always_inline)) static inline void Force_Allocation_Laws(void)
       // Vertical Motion
       wing->commands[COMMAND_THRUST]  = (CRUISE_THROTTLE * MAX_PPRZ)
                                       + climb_speed * THROTTLE_INCREMENT
-                                      + (stab_att_sp_euler.theta * MAX_PPRZ); // FRAC_COMMAND
-      wing->commands[COMMAND_PITCH]   = PITCH_TRIM + climb_speed * PITCH_OF_VZ;
+                                      + (ANGLE_FLOAT_OF_BFP(stab_att_sp_euler.theta) * MAX_PPRZ / 2.0f  ); // FRAC_COMMAND
+      wing->commands[COMMAND_PITCH]   = ANGLE_BFP_OF_REAL(PITCH_TRIM + climb_speed * PITCH_OF_VZ / MAX_PPRZ);
       
       // Longitudinal Motion
       
@@ -123,18 +132,29 @@ __attribute__ ((always_inline)) static inline void Force_Allocation_Laws(void)
       const int loop_rate = 512;
       wing->commands[COMMAND_YAW]    += wing->commands[COMMAND_ROLL] * function_of_speed / loop_rate;
     }
+ /*   
+    stabilization_cmd[COMMAND_THRUST]  = wing->commands[COMMAND_THRUST];// * wing->activation / 100;
+    stabilization_cmd[COMMAND_ROLL]    = wing->commands[COMMAND_ROLL]  ;// * wing->activation / 100;
+    stabilization_cmd[COMMAND_PITCH]   = wing->commands[COMMAND_PITCH] ;// * wing->activation / 100;
+    stabilization_cmd[COMMAND_YAW]     = wing->commands[COMMAND_ROLL]  ;// * wing->activation / 100;
     
-    stabilization_cmd[COMMAND_THRUST]  += wing->commands[COMMAND_THRUST] * wing->activation / 100;
-    stabilization_cmd[COMMAND_ROLL]    += wing->commands[COMMAND_ROLL]   * wing->activation / 100;
-    stabilization_cmd[COMMAND_PITCH]   += wing->commands[COMMAND_PITCH]  * wing->activation / 100;
-    stabilization_cmd[COMMAND_YAW]     += wing->commands[COMMAND_ROLL]   * wing->activation / 100;
     
   }
+
 
   stabilization_cmd[COMMAND_ROLL] /= LIFT_GENERATION_NR_OF_LIFT_DEVICES;
   stabilization_cmd[COMMAND_PITCH] /= LIFT_GENERATION_NR_OF_LIFT_DEVICES;
   stabilization_cmd[COMMAND_THRUST] /= LIFT_GENERATION_NR_OF_LIFT_DEVICES;
   stabilization_cmd[COMMAND_YAW] /= LIFT_GENERATION_NR_OF_LIFT_DEVICES;
+  */
+ 
+  stab_att_sp_euler.phi   = wing->commands[COMMAND_ROLL]; //stabilization_cmd[COMMAND_ROLL];
+  stab_att_sp_euler.theta = wing->commands[COMMAND_PITCH];  // stabilization_cmd[COMMAND_PITCH];
+  //stab_att_sp_euler.psi   = wing->commands[COMMAND_YAW]; //stab_att_sp_euler.psi;//stabilization_cmd[COMMAND_YAW];
+  stab_att_sp_euler.psi = ahrs.ltp_to_body_euler.psi;
+  
+  INT32_QUAT_OF_EULERS(stab_att_sp_quat, stab_att_sp_euler);
+  INT32_QUAT_WRAP_SHORTEST(stab_att_sp_quat);
   
   
 }
