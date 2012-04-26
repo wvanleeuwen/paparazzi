@@ -33,7 +33,7 @@
 -->
 
   <section name="LIFT_GENERATION" prefix="LIFT_GENERATION_">
-		<define name="NR_OF_LIFT_DEVICES" value="2" /> 
+    <define name="NR_OF_LIFT_DEVICES" value="2" /> 
     
     <define name="ROTOR" />
     <define name="BODY2ROTOR_PITCH" value="0" />
@@ -41,6 +41,22 @@
     <define name="WING" />
     <define name="BODY2WING_PITCH" value="-90" />
   </section>
+
+  <lift_devices>
+
+    <lift_device type="ROTOR">
+      <define name="BODY_TO_ROTOR_PHI"   value="0." unit="deg" />
+      <define name="BODY_TO_ROTOR_THETA" value="0." unit="deg" />
+      <define name="BODY_TO_ROTOR_PSI"   value="0." unit="deg" />
+    </lift_device>
+    
+    <lift_device type="WING">
+      <define name="BODY_TO_ROTOR_PHI"   value="0." unit="deg" />
+      <define name="BODY_TO_ROTOR_THETA" value="-90." unit="deg" />
+      <define name="BODY_TO_ROTOR_PSI"   value="0." unit="deg" />
+    </lift_device>
+
+  </lift_devices>
 
 
   <section name="AUTOPILOT">
