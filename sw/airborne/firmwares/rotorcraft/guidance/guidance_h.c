@@ -36,6 +36,10 @@
 
 #include "generated/airframe.h"
 
+#ifdef LIFT_GENERATION_NR_OF_LIFT_DEVICES
+#include "firmwares/rotorcraft/force_allocation_laws.h"
+#endif
+
 uint8_t guidance_h_mode;
 
 struct Int32Vect2 guidance_h_pos_sp;
@@ -190,12 +194,22 @@ void guidance_h_run(bool_t  in_flight) {
     break;
 
   case GUIDANCE_H_MODE_ATTITUDE:
+
+#ifdef LIFT_GENERATION_NR_OF_LIFT_DEVICES
+      Force_Allocation_Laws();
+#endif
+
     stabilization_attitude_run(in_flight);
     break;
 
   case GUIDANCE_H_MODE_HOVER:
     guidance_h_update_reference(FALSE);
     guidance_h_traj_run(in_flight);
+
+#ifdef LIFT_GENERATION_NR_OF_LIFT_DEVICES
+      Force_Allocation_Laws();
+#endif
+    
     stabilization_attitude_run(in_flight);
     break;
 
@@ -219,6 +233,11 @@ void guidance_h_run(bool_t  in_flight) {
         guidance_h_psi_sp = nav_heading;
         guidance_h_traj_run(in_flight);
       }
+
+#ifdef LIFT_GENERATION_NR_OF_LIFT_DEVICES
+      Force_Allocation_Laws();
+#endif
+
       stabilization_attitude_run(in_flight);
       break;
     }
