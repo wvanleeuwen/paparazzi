@@ -92,7 +92,7 @@ __attribute__ ((always_inline)) static inline void Force_Allocation_Laws(void)
   int32_t cmd_pitch  = 0;
   int32_t cmd_roll   = 0;
   int32_t cmd_yaw    = 0;
-  int32_t cmd_trim   = 0;
+  float cmd_trim   = 0;
 
   // struct int32Vect3 axis = {0, 1, 0}; // Y-axis for a pitch trim
 
@@ -142,7 +142,7 @@ __attribute__ ((always_inline)) static inline void Force_Allocation_Laws(void)
       const float MAX_CLIMB = 3.0f; // m/s
       const float PITCH_OF_VZ = 0.1f;
       const float THROTTLE_INCREMENT = 0.1f;
-      const float CRUISE_THROTTLE = 0.1f;
+      float CRUISE_THROTTLE = guidance_v_nominal_throttle;
       const float PITCH_TRIM = 0.0f;
 
       float climb_speed = ((stabilization_cmd[COMMAND_THRUST] - (MAX_PPRZ / 2)) * 2 * MAX_CLIMB);  // FRAC_COMMAND
@@ -151,7 +151,7 @@ __attribute__ ((always_inline)) static inline void Force_Allocation_Laws(void)
       wing->commands[COMMAND_ROLL]    = stab_att_sp_euler.phi;
 
       // Vertical Motion
-      wing->commands[COMMAND_THRUST]  = (CRUISE_THROTTLE * MAX_PPRZ)
+      wing->commands[COMMAND_THRUST]  = (CRUISE_THROTTLE)
                                       + climb_speed * THROTTLE_INCREMENT
                                       + (stab_att_sp_euler.theta / 10  ); // FRAC_COMMAND
 
@@ -169,7 +169,7 @@ __attribute__ ((always_inline)) static inline void Force_Allocation_Laws(void)
     cmd_roll   += wing->commands[COMMAND_ROLL] * percent;
     cmd_pitch  += wing->commands[COMMAND_PITCH] * percent;
     cmd_yaw    += wing->commands[COMMAND_YAW] * percent;     // Hmmm this would benefit from some more thinking...
-    cmd_trim   += RadOfDeg(wing->trim_pitch)  * percent;
+    cmd_trim   += RadOfDeg((float)wing->trim_pitch)  * percent;
 
   }
 
@@ -179,10 +179,19 @@ __attribute__ ((always_inline)) static inline void Force_Allocation_Laws(void)
   //stab_att_sp_euler.psi   = wing->commands[COMMAND_YAW]; //stab_att_sp_euler.psi;//stabilization_cmd[COMMAND_YAW];
   stab_att_sp_euler.psi = ahrs.ltp_to_body_euler.psi;
 
-  INT32_QUAT_OF_EULERS(stab_att_sp_quat, stab_att_sp_euler);
-  INT32_QUAT_WRAP_SHORTEST(stab_att_sp_quat);
+  struct Int32Quat command_att;
+  INT32_QUAT_OF_EULERS(command_att, stab_att_sp_euler);
+  INT32_QUAT_WRAP_SHORTEST(command_att);
 
   // Post Multiply with the pitch trim...
-  // INT32_QUAT_OF_AXIS_ANGLE(q, axis, cmd_trim)
+  struct Int32Quat trim_quat;
+  QUAT_ASSIGN(trim_quat,
+	QUAT1_BFP_OF_REAL(1),
+	QUAT1_BFP_OF_REAL(0),
+	QUAT1_BFP_OF_REAL(cmd_trim) / 2,
+	QUAT1_BFP_OF_REAL(0) );
+  INT32_QUAT_NORMALIZE(trim_quat);
 
+  // INT32_QUAT_OF_AXIS_ANGLE(trim_quat, axis, cmd_trim)
+  INT32_QUAT_COMP(stab_att_sp_quat, command_att, trim_quat);
 }
