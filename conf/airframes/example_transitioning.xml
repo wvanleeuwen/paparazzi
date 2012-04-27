@@ -6,7 +6,7 @@
 
     <target name="ap" board="lisa_m_1.0">
       <!--      <configure name="USE_NEW_I2C_DRIVER" value="1" /> -->
-      
+
       <subsystem name="radio_control" type="ppm"/>
 
       <subsystem name="actuators"     type="pwm_supervision">
