@@ -75,6 +75,16 @@ struct PprzLiftDevice lift_devices[LIFT_GENERATION_NR_OF_LIFT_DEVICES] =
 
 };
 
+__attribute__ ((always_inline)) static inline int percent_from_rc(int channel)
+{
+  int per = (MAX_PPRZ + (int32_t)radio_control.values[channel]) * 50 / MAX_PPRZ;
+  if (per < 0)
+    per = 0;
+  else if (per > 100)
+    per = 100;
+  return per;
+}
+
 
 __attribute__ ((always_inline)) static inline void Force_Allocation_Laws(void)
 {
@@ -89,8 +99,8 @@ __attribute__ ((always_inline)) static inline void Force_Allocation_Laws(void)
   /////////////////////////////////////////////////////
   // Hard Configure (should come from airframe file
 // TODO
-  lift_devices[0].activation = 0;
-  lift_devices[1].activation = 100;
+  lift_devices[0].activation = percent_from_rc(RADIO_EXTRA1);
+  lift_devices[1].activation = 100 - percent_from_rc(RADIO_EXTRA1);
 
   lift_devices[0].lift_type = ROTOR_LIFTING_DEVICE;
   lift_devices[1].lift_type = WING_LIFTING_DEVICE;
@@ -143,7 +153,7 @@ __attribute__ ((always_inline)) static inline void Force_Allocation_Laws(void)
       // Vertical Motion
       wing->commands[COMMAND_THRUST]  = (CRUISE_THROTTLE * MAX_PPRZ)
                                       + climb_speed * THROTTLE_INCREMENT
-                                      + (ANGLE_FLOAT_OF_BFP(stab_att_sp_euler.theta) * MAX_PPRZ / 2.0f  ); // FRAC_COMMAND
+                                      + (stab_att_sp_euler.theta / 10  ); // FRAC_COMMAND
 
       wing->commands[COMMAND_PITCH]   = ANGLE_BFP_OF_REAL(PITCH_TRIM + climb_speed * PITCH_OF_VZ / MAX_PPRZ);
 
@@ -159,7 +169,7 @@ __attribute__ ((always_inline)) static inline void Force_Allocation_Laws(void)
     cmd_roll   += wing->commands[COMMAND_ROLL] * percent;
     cmd_pitch  += wing->commands[COMMAND_PITCH] * percent;
     cmd_yaw    += wing->commands[COMMAND_YAW] * percent;     // Hmmm this would benefit from some more thinking...
-    cmd_trim   += RAD2DEG(wing->trim_pitch)  * percent;
+    cmd_trim   += RadOfDeg(wing->trim_pitch)  * percent;
 
   }
 
