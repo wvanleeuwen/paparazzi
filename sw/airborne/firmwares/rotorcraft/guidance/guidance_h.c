@@ -209,7 +209,7 @@ void guidance_h_run(bool_t  in_flight) {
 #ifdef LIFT_GENERATION_NR_OF_LIFT_DEVICES
       Force_Allocation_Laws();
 #endif
-    
+
     stabilization_attitude_run(in_flight);
     break;
 

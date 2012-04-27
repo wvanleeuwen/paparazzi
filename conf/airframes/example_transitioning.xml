@@ -6,7 +6,7 @@
 
     <target name="ap" board="lisa_m_1.0">
       <subsystem name="radio_control" type="ppm"/>
-      
+
       <subsystem name="actuators"     type="pwm_supervision">
         <configure name="USE_SERVOS_7AND8"    value="TRUE"/>
       </subsystem>
@@ -33,8 +33,8 @@
 -->
 
   <section name="LIFT_GENERATION" prefix="LIFT_GENERATION_">
-    <define name="NR_OF_LIFT_DEVICES" value="2" /> 
-    
+    <define name="NR_OF_LIFT_DEVICES" value="2" />
+
     <define name="ROTOR" />
     <define name="BODY2ROTOR_PITCH" value="0" />
 
@@ -49,7 +49,7 @@
       <define name="BODY_TO_ROTOR_THETA" value="0." unit="deg" />
       <define name="BODY_TO_ROTOR_PSI"   value="0." unit="deg" />
     </lift_device>
-    
+
     <lift_device type="WING">
       <define name="BODY_TO_ROTOR_PHI"   value="0." unit="deg" />
       <define name="BODY_TO_ROTOR_THETA" value="-90." unit="deg" />
@@ -63,7 +63,7 @@
     <define name="MODE_MANUAL" value="AP_MODE_RC_DIRECT"/>
     <define name="MODE_AUTO1"  value="AP_MODE_ATTITUDE_DIRECT"/>
     <define name="MODE_AUTO2"  value="AP_MODE_NAV"/>
-    
+
     <define name="AUTOPILOT_KILL_WITHOUT_AHRS"  value="TRUE"/>
 
     <!-- for kill switch: -->
@@ -86,7 +86,7 @@
     <servo name="RUDDER"        no="3" min="1100" neutral="1500" max="1900"/>
     <servo name="AILERON_RIGHT" no="4" min="1800" neutral="1500" max="1200"/>
   </servos>
-  
+
   <command_laws>
     <set servo="ELEVATOR"   value="@PITCH" />
     <set servo="AILERON_LEFT"  value="@ROLL" />
@@ -99,19 +99,19 @@
   </section>
 
   <section name="SUPERVISION" prefix="SUPERVISION_">
-    <define name="MIN_MOTOR" 		value="1100"/>
-    <define name="MAX_MOTOR" 		value="1900"/>
-    <define name="TRIM_A" 		value="0"/>
-    <define name="TRIM_E" 		value="0"/>
-    <define name="TRIM_R" 		value="0"/>
-    <define name="NB_MOTOR" 		value="1"/>
-    <define name="SCALE" 		    value="256"/>
-    <define name="STOP_MOTOR"    	value="1100"/> <!-- send 1ms pulses on kill -->
-    
-    <define name="PITCH_COEF"  	value="{     0  }"/>
-    <define name="ROLL_COEF"   	value="{     0  }"/>
+    <define name="MIN_MOTOR"            value="1100"/>
+    <define name="MAX_MOTOR"            value="1900"/>
+    <define name="TRIM_A"               value="0"/>
+    <define name="TRIM_E"               value="0"/>
+    <define name="TRIM_R"               value="0"/>
+    <define name="NB_MOTOR"             value="1"/>
+    <define name="SCALE"                    value="256"/>
+    <define name="STOP_MOTOR"           value="1100"/> <!-- send 1ms pulses on kill -->
+
+    <define name="PITCH_COEF"   value="{     0  }"/>
+    <define name="ROLL_COEF"    value="{     0  }"/>
     <define name="YAW_COEF"     value="{     0  }"/>
-    <define name="THRUST_COEF" 	value="{   256  }"/>
+    <define name="THRUST_COEF"  value="{   256  }"/>
   </section>
 
   <section name="IMU" prefix="IMU_">

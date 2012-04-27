@@ -42,9 +42,9 @@ struct PprzLiftDevice {
   // Type and Activation
   enum lift_type_enum {ROTOR_LIFTING_DEVICE = 0, WING_LIFTING_DEVICE = 1} lift_type;
   int activation;   // 0 to 100 percent
-  
+
   int trim_pitch;
-  
+
   // Output
   int32_t commands[COMMANDS_NB];
 };
@@ -56,9 +56,9 @@ struct PprzLiftDevice {
 //#error Please Define a WING_LIFTING_DEVICE or ROTOR_LIFTING_DEVICE in your airframe file
 #endif
 
-#define LIFT_GENERATION_NR_OF_LIFT_DEVICES 2 
+#define LIFT_GENERATION_NR_OF_LIFT_DEVICES 2
 
-struct PprzLiftDevice lift_devices[LIFT_GENERATION_NR_OF_LIFT_DEVICES] = 
+struct PprzLiftDevice lift_devices[LIFT_GENERATION_NR_OF_LIFT_DEVICES] =
 {
   {
     ROTOR_LIFTING_DEVICE,
@@ -72,18 +72,18 @@ struct PprzLiftDevice lift_devices[LIFT_GENERATION_NR_OF_LIFT_DEVICES] =
     0,
     {0, 0, 0, 0}
   }
-  
+
 };
 
 
-__attribute__ ((always_inline)) static inline void Force_Allocation_Laws(void) 
+__attribute__ ((always_inline)) static inline void Force_Allocation_Laws(void)
 {
   int32_t cmd_thrust = 0;
   int32_t cmd_pitch  = 0;
   int32_t cmd_roll   = 0;
   int32_t cmd_yaw    = 0;
   int32_t cmd_trim   = 0;
-  
+
   // struct int32Vect3 axis = {0, 1, 0}; // Y-axis for a pitch trim
 
   /////////////////////////////////////////////////////
@@ -91,10 +91,10 @@ __attribute__ ((always_inline)) static inline void Force_Allocation_Laws(void)
 // TODO
   lift_devices[0].activation = 0;
   lift_devices[1].activation = 100;
-  
+
   lift_devices[0].lift_type = ROTOR_LIFTING_DEVICE;
   lift_devices[1].lift_type = WING_LIFTING_DEVICE;
-  
+
   lift_devices[0].trim_pitch = 0;
   lift_devices[1].trim_pitch = -90;
   /////////////////////////////////////////////////////
@@ -102,7 +102,7 @@ __attribute__ ((always_inline)) static inline void Force_Allocation_Laws(void)
 
   for (int i=0; i < LIFT_GENERATION_NR_OF_LIFT_DEVICES; i++)
   {
-    
+
     struct PprzLiftDevice *wing = &(lift_devices[i]);
     float percent = ((float)wing->activation) / 100.0f;
 
@@ -114,7 +114,7 @@ __attribute__ ((always_inline)) static inline void Force_Allocation_Laws(void)
       // forward acceleration (command) -> pitch
       // lateral acceleration (command) -> roll
       // heading ANGLE -> yaw
-      
+
       wing->commands[COMMAND_THRUST] = stabilization_cmd[COMMAND_THRUST];
       wing->commands[COMMAND_ROLL]   = stab_att_sp_euler.phi;
       wing->commands[COMMAND_PITCH]  = stab_att_sp_euler.theta;
@@ -128,15 +128,15 @@ __attribute__ ((always_inline)) static inline void Force_Allocation_Laws(void)
       // forward acceleration (neglected)
       // lateral acceleration (command) -> roll
       // heading ANGLE -> integrated
-    
+
       const float MAX_CLIMB = 3.0f; // m/s
       const float PITCH_OF_VZ = 0.1f;
       const float THROTTLE_INCREMENT = 0.1f;
       const float CRUISE_THROTTLE = 0.1f;
       const float PITCH_TRIM = 0.0f;
-    
+
       float climb_speed = ((stabilization_cmd[COMMAND_THRUST] - (MAX_PPRZ / 2)) * 2 * MAX_CLIMB);  // FRAC_COMMAND
-    
+
       // Lateral Motion
       wing->commands[COMMAND_ROLL]    = stab_att_sp_euler.phi;
 
@@ -146,33 +146,33 @@ __attribute__ ((always_inline)) static inline void Force_Allocation_Laws(void)
                                       + (ANGLE_FLOAT_OF_BFP(stab_att_sp_euler.theta) * MAX_PPRZ / 2.0f  ); // FRAC_COMMAND
 
       wing->commands[COMMAND_PITCH]   = ANGLE_BFP_OF_REAL(PITCH_TRIM + climb_speed * PITCH_OF_VZ / MAX_PPRZ);
-      
+
       // Longitudinal Motion
-      
+
       // Coordinated Turn
       const float function_of_speed = 1.0f;
       const int loop_rate = 512;
       wing->commands[COMMAND_YAW]    += wing->commands[COMMAND_ROLL] * function_of_speed / loop_rate;
     }
-    
+
     cmd_thrust += wing->commands[COMMAND_THRUST] * percent;
     cmd_roll   += wing->commands[COMMAND_ROLL] * percent;
     cmd_pitch  += wing->commands[COMMAND_PITCH] * percent;
     cmd_yaw    += wing->commands[COMMAND_YAW] * percent;     // Hmmm this would benefit from some more thinking...
     cmd_trim   += RAD2DEG(wing->trim_pitch)  * percent;
-        
+
   }
- 
+
   stabilization_cmd[COMMAND_THRUST] = cmd_thrust;
   stab_att_sp_euler.phi   = cmd_roll;
   stab_att_sp_euler.theta = cmd_pitch;
   //stab_att_sp_euler.psi   = wing->commands[COMMAND_YAW]; //stab_att_sp_euler.psi;//stabilization_cmd[COMMAND_YAW];
   stab_att_sp_euler.psi = ahrs.ltp_to_body_euler.psi;
-  
+
   INT32_QUAT_OF_EULERS(stab_att_sp_quat, stab_att_sp_euler);
   INT32_QUAT_WRAP_SHORTEST(stab_att_sp_quat);
 
   // Post Multiply with the pitch trim...
   // INT32_QUAT_OF_AXIS_ANGLE(q, axis, cmd_trim)
-  
+
 }
