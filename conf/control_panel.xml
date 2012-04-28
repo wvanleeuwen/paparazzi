@@ -1,0 +1,230 @@
+<control_panel name="paparazzi control panel">
+  <section name="variables">
+    <variable name="default_gcs" value="./TUDelft/gcsMavlab.xml"/>
+    <variable name="downlink_serial_port" value="/dev/ttyUSB0"/>
+    <variable name="fbw_serial_port" value="/dev/ttyS1"/>
+    <variable name="ap_serial_port" value="/dev/ttyS0"/>
+    <variable name="ivy_bus" value="127:2010"/>
+    <variable name="map" value="muret_UTM.xml"/>
+    <variable name="flight_plan" value="flight_plans/muret1.xml"/>
+  </section>
+  <section name="programs">
+    <program name="Server" command="sw/ground_segment/tmtc/server">
+      <arg flag="-b" variable="ivy_bus"/>
+    </program>
+    <program name="Data Link" command="sw/ground_segment/tmtc/link">
+      <arg flag="-b" variable="ivy_bus"/>
+    </program>
+    <program name="Joystick" command="sw/ground_segment/joystick/input2ivy">
+      <arg flag="-ac" variable="TINY_FW"/>
+      <arg flag="-" variable="sw/ground_segment/joystick/mavlab.xml"/>
+    </program>
+    <program name="Ivy2Udp" command="sw/ground_segment/tmtc/ivy2udp">
+      <arg flag="-b" variable="ivy_bus"/>
+      <arg flag="-h" constant="192.168.153.1"/>
+      <arg flag="-p" constant="5000"/>
+    </program>
+    <program name="IvySerialBridge" command="sw/ground_segment/tmtc/ivy_serial_bridge"/>
+    <program name="GCS" command="sw/ground_segment/cockpit/gcs">
+      <arg flag="-b" variable="ivy_bus"/>
+      <arg flag="-layout" constant="./TUDelft/papgetsBart.xml"/>
+      <arg flag="-speech" constant=""/>
+    </program>
+    <program name="Messages" command="sw/ground_segment/tmtc/messages">
+      <arg flag="-b" variable="ivy_bus"/>
+    </program>
+    <program name="Settings" command="sw/ground_segment/tmtc/settings">
+      <arg flag="-b" variable="ivy_bus"/>
+    </program>
+    <program name="Sony" command="sw/ground_segment/tmtc/TUDelft/sony">
+      <arg flag="-b" variable="ivy_bus"/>
+    </program>
+    <program name="Vision" command="sw/ground_segment/tmtc/TUDelft/visionresult">
+      <arg flag="-b" variable="ivy_bus"/>
+    </program>
+    <program name="Log Plotter" command="sw/logalizer/plot"/>
+    <program name="Real-time Plotter" command="sw/logalizer/plotter"/>
+    <program name="Log File Player" command="sw/logalizer/play">
+      <arg flag="-b" variable="ivy_bus"/>
+    </program>
+    <program name="Simulator" command="sw/simulator/launchsitl">
+      <arg flag="-b" variable="ivy_bus"/>
+    </program>
+    <program name="Hardware in the Loop" command="sw/simulator/simhitl">
+      <arg flag="-fbw" variable="fbw_serial_port"/>
+      <arg flag="-ap" variable="ap_serial_port"/>
+    </program>
+    <program name="Environment Simulator" command="sw/simulator/gaia">
+      <arg flag="-b" variable="ivy_bus"/>
+    </program>
+    <program name="Http Server" command="sw/ground_segment/tmtc/boa"/>
+  </section>
+  <section name="sessions">
+    <session name="USB: BlueTooth @ 57600">
+      <program name="Data Link">
+        <arg flag="-d" constant="/dev/rfcomm0"/>
+        <arg flag="-uplink"/>
+        <arg flag="-s" constant="57600"/>
+      </program>
+      <program name="Server"/>
+      <program name="GCS">
+        <arg flag="-speech"/>
+        <arg flag="-layout" constant="./TUDelft/gcsHeering.xml"/>
+      </program>
+      <program name="Messages">
+        <arg flag="-c" constant="telemetry"/>
+      </program>
+    </session>
+    <session name="Forward C172 to SkyWalker over ttyUSB1">
+      <program name="IvySerialBridge">
+        <arg flag="25" constant="/dev/ttyUSB1"/>
+        <arg flag="4" constant=""/>
+      </program>
+    </session>
+    <session name="Forward AC via UDP">
+      <program name="Ivy2Udp">
+        <arg flag="-b" constant="127:2010"/>
+        <arg flag="-h" constant="192.168.78.1"/>
+        <arg flag="-p" constant="4242"/>
+        <arg flag="-dp" constant="4243"/>
+        <arg flag="-id" constant="16"/>
+      </program>
+    </session>
+    <session name="Debug Graphs">
+      <program name="Real-time Plotter">
+        <arg flag="-t" constant="phi"/>
+        <arg flag="-u" constant="0.1"/>
+        <arg flag="-c" constant="'*:telemetry:ATTITUDE:phi'"/>
+        <arg flag="-c" constant="'*:telemetry:DESIRED:roll'"/>
+      </program>
+      <program name="Real-time Plotter">
+        <arg flag="-t" constant="theta"/>
+        <arg flag="-u" constant="0.1"/>
+        <arg flag="-c" constant="'*:telemetry:ATTITUDE:theta'"/>
+        <arg flag="-c" constant="'*:telemetry:DESIRED:pitch'"/>
+      </program>
+      <program name="Real-time Plotter">
+        <arg flag="-t" constant="speed"/>
+        <arg flag="-u" constant="0.1"/>
+        <arg flag="-c" constant="'*:telemetry:AIRSPEED:airspeed'"/>
+        <arg flag="-c" constant="'*:telemetry:AIRSPEED:airspeed_sp'"/>
+      </program>
+      <program name="Real-time Plotter">
+        <arg flag="-t" constant="altitude"/>
+        <arg flag="-u" constant="0.1"/>
+        <arg flag="-c" constant="'*:telemetry:ESTIMATOR:z'"/>
+        <arg flag="-c" constant="'*:telemetry:DESIRED:altitude'"/>
+      </program>
+    </session>
+    <session name="Video">
+  <program name="GCS">
+        <arg flag="-layout" constant="./TUDelft/video.xml"/>
+        <arg flag="-mplayer" constant="tv:// -tv device=/dev/video0:input=1:norm=ntsc"/>
+        <arg flag="-fullscreen"/>
+        <arg flag="-srtm"/>
+        <arg flag="-track_size" constant="200"/>
+      </program>
+    </session>
+    <session name="USB1: XBee API @57600">
+      <program name="Data Link">
+        <arg flag="-d" constant="/dev/ttyUSB1"/>
+        <arg flag="-transport" constant="xbee"/>
+        <arg flag="-uplink" constant=""/>
+        <arg flag="-s" constant="57600"/>
+      </program>
+      <program name="Server"/>
+      <program name="GCS">
+        <arg flag="-speech" constant=""/>
+        <arg flag="-layout" constant="./TUDelft/gcsHeering.xml"/>
+      </program>
+      <program name="Messages"/>
+    </session>
+    <session name="USB0: XBee API @57600">
+      <program name="Data Link">
+        <arg flag="-d" constant="/dev/ttyUSB0"/>
+        <arg flag="-transport" constant="xbee"/>
+        <arg flag="-uplink"/>
+        <arg flag="-s" constant="57600"/>
+      </program>
+      <program name="GCS">
+        <arg flag="-speech"/>
+        <arg flag="-layout" constant="./TUDelft/gcsHeering.xml"/>
+      </program>
+      <program name="Server"/>
+      <program name="Messages"/>
+    </session>
+    <session name="USB: Transparant @ 57600">
+      <program name="Data Link">
+        <arg flag="-d" constant="/dev/ttyUSB0"/>
+        <arg flag="-uplink" constant=""/>
+        <arg flag="-s" constant="57600"/>
+      </program>
+      <program name="Server"/>
+      <program name="GCS">
+        <arg flag="-speech" constant=""/>
+        <arg flag="-layout" constant="./TUDelft/gcsHeering.xml"/>
+      </program>
+      <program name="Messages">
+        <arg flag="-c" constant="telemetry"/>
+      </program>
+    </session>
+    <session name="Sony Control">
+      <program name="Sony">
+        <arg flag="-id" constant="22"/>
+      </program>
+    </session>
+    <session name="TUdelftTwinjet Simulator">
+      <program name="GCS">
+        <arg flag="-layout" constant="./TUDelft/gcsHeering.xml"/>
+      </program>
+      <program name="Server">
+        <arg flag="-n"/>
+      </program>
+      <program name="Simulator">
+        <arg flag="-a" constant="TUdelftTwinjet"/>
+        <arg flag="-boot"/>
+        <arg flag="-norc"/>
+      </program>
+    </session>
+    <session name="Forward Skywalker to C172 over ttyUSB1">
+      <program name="IvySerialBridge">
+        <arg flag="8" constant="/dev/ttyUSB1"/>
+      </program>
+    </session>
+    <session name="Vision Results">
+      <program name="Vision"/>
+    </session>
+    <session name="USB: 868MHz Transparant @ 9600">
+      <program name="Data Link">
+        <arg flag="-d" constant="/dev/ttyUSB0"/>
+        <arg flag="-uplink"/>
+        <arg flag="-s" constant="9600"/>
+      </program>
+      <program name="Server"/>
+      <program name="GCS">
+        <arg flag="-layout" constant="./TUDelft/gcsHeering.xml"/>
+      </program>
+      <program name="Messages">
+        <arg flag="-c" constant="telemetry"/>
+      </program>
+    </session>
+    <session name="cessna">
+      <program name="GCS">
+        <arg flag="-layout" constant="./TUDelft/cessna.xml"/>
+        <arg flag="-m" constant="./TUDelft/ehwo_gm.xml"/>
+        <arg flag="-zoom" constant="0.03"/>
+      </program>
+      <program name="Data Link">
+        <arg flag="-s" constant="57600"/>
+        <arg flag="-transport" constant="xbee"/>
+        <arg flag="-d" constant="/dev/ttyUSB0"/>
+      </program>
+      <program name="Messages"/>
+      <program name="Server"/>
+      <program name="IvySerialBridge">
+        <arg flag="25" constant="/dev/ttyUSB1"/>
+        <arg flag="4"/>
+      </program>
+    </session>
+  </section>
+</control_panel>
