@@ -380,6 +380,11 @@ static bool_t gps_ubx_ucenter_configure(uint8_t nr)
     break;
   case 11:
     gps_ubx_ucenter_enable_msg(UBX_NAV_ID, UBX_NAV_SOL_ID, 1);
+//#ifdef FIXEDWING
+//    gps_ubx_ucenter_enable_msg(UBX_NAV_ID, UBX_NAV_SOL_ID, 8);
+//#else
+    gps_ubx_ucenter_enable_msg(UBX_NAV_ID, UBX_NAV_SOL_ID, 1);
+//#endif
     break;
   case 12:
     // Disable UTM on old Lea4P
