@@ -209,6 +209,11 @@ ap.srcs += $(SRC_FIRMWARE)/guidance/guidance_v.c
 
 ap.srcs += $(SRC_SUBSYSTEMS)/ins.c
 
+
+# force allocation laws
+ap.srcs += $(SRC_FIRMWARE)/force_allocation_laws.c
+
+
 #
 # INS choice
 #
