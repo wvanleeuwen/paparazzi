@@ -16,7 +16,7 @@
    radio="radios/R6107SP_7ch_xyz.xml"
    telemetry="telemetry/ATMOS/testing.xml"
    flight_plan="flight_plans/TUDelft/rotorcraft_basic_delft.xml"
-   settings=" settings/ATMOS/base.xml"
+   settings=" settings/ATMOS/base.xml settings/ATMOS/killHoverProps.xml settings/ATMOS/transition.xml settings/ATMOS/killOnGroundDetect.xml settings/ATMOS/multiGain.xml"
    gui_color="green"
   />
 </conf>

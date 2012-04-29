@@ -205,57 +205,73 @@
      <configure name="ADC_CHANNEL_GENERIC1" value="ADC_1"/>
     </load>
    
+   <load name="ATMOS/hoverPropsOff.xml">
+	<define name="TRANSVEH_HOVER_PROPS_OFF_NB1" value="TRUE"/>
+	<define name="TRANSVEH_HOVER_PROPS_OFF_NB2" value="TRUE"/>
+   </load>
+
+   <load name="ATMOS/transition.xml">
+        <!-- MATLAB: ([ 200 200 256 256 ] ./ [256 256 230 230 ]) - 1 -->
+	<!--<define name="TRANSVEH_PREP_THRUST_COEF_SCALING" value="{ -0.2188, -0.2188, 0.1130, 0.1130 }"/>-->
+   </load>
+
+   <load name="ATMOS/killOnGroundDetect.xml"/>
+
+
    <!-- ATMOV sensors -->
    <!--<load name="opticflow_ADNS3080.xml"/>-->
    <!--<load name="sonar_maxbotix_MB12XX.xml"/>-->
    
-   <!--<load name="transveh_set_sp_by_mode.xml">
-	<define name="SETPOINT_MANUAL_PHI" value="0"/>
-	<define name="SETPOINT_MANUAL_THETA" value="0"/>
-	<define name="SETPOINT_MANUAL_PSI" value="0"/>
-
-	<define name="SETPOINT_AUTO1_PHI" value="40"/>
-	<define name="SETPOINT_AUTO1_THETA" value="90"/>
-	<define name="SETPOINT_AUTO1_PSI" value="0"/>
-
-	<define name="SETPOINT_AUTO2_PHI" value="0"/>
-	<define name="SETPOINT_AUTO2_THETA" value="0"/>
-	<define name="SETPOINT_AUTO2_PSI" value="0"/>
-   </load>-->
-<!--
-   
-   <load name="TUDelft/hover_props_off.xml">
-	<define name="TRANSVEH_HOVER_PROPS_OFF_NB1" value="TRUE"/>
-	<define name="TRANSVEH_HOVER_PROPS_OFF_NB2" value="TRUE"/>
-   </load>
-   <load name="TUDelft/killOnGroundDetect.xml"/>
-
-   <load name="ATMOV/multiGains.xml">
+   <load name="ATMOS/multiGain.xml">
 	<define name="STABILIZATION_ATTITUDE_A_PHI_PGAIN"  		value="2485"/>
 	<define name="STABILIZATION_ATTITUDE_A_PHI_DGAIN"  		value="1236"/>
 	<define name="STABILIZATION_ATTITUDE_A_PHI_IGAIN"  		value="5"/>
+	<define name="STABILIZATION_ATTITUDE_A_PHI_DDGAIN"  		value="100"/>
 
 	<define name="STABILIZATION_ATTITUDE_A_THETA_PGAIN"	  	value="308"/>
 	<define name="STABILIZATION_ATTITUDE_A_THETA_DGAIN"  		value="208"/>
 	<define name="STABILIZATION_ATTITUDE_A_THETA_IGAIN"	  	value="5"/>
+	<define name="STABILIZATION_ATTITUDE_A_THETA_DDGAIN"  		value="200"/>
 
 	<define name="STABILIZATION_ATTITUDE_A_PSI_PGAIN"  		value="3225"/>
 	<define name="STABILIZATION_ATTITUDE_A_PSI_DGAIN"  		value="2124"/>
 	<define name="STABILIZATION_ATTITUDE_A_PSI_IGAIN"  		value="6"/>
+	<define name="STABILIZATION_ATTITUDE_A_PSI_DDGAIN"  		value="100"/>
 
 	<define name="STABILIZATION_ATTITUDE_B_PHI_PGAIN"  		value="2485"/>
 	<define name="STABILIZATION_ATTITUDE_B_PHI_DGAIN"  		value="1236"/>
 	<define name="STABILIZATION_ATTITUDE_B_PHI_IGAIN"  		value="5"/>
+	<define name="STABILIZATION_ATTITUDE_B_PHI_DDGAIN"  		value="100"/>
 
 	<define name="STABILIZATION_ATTITUDE_B_THETA_PGAIN"	  	value="308"/>
 	<define name="STABILIZATION_ATTITUDE_B_THETA_DGAIN"  		value="208"/>
 	<define name="STABILIZATION_ATTITUDE_B_THETA_IGAIN"	  	value="5"/>
+	<define name="STABILIZATION_ATTITUDE_B_THETA_DDGAIN"  		value="200"/>
 
 	<define name="STABILIZATION_ATTITUDE_B_PSI_PGAIN"  		value="3225"/>
 	<define name="STABILIZATION_ATTITUDE_B_PSI_DGAIN"  		value="2124"/>
 	<define name="STABILIZATION_ATTITUDE_B_PSI_IGAIN"  		value="6"/>
+	<define name="STABILIZATION_ATTITUDE_B_PSI_DDGAIN"  		value="100"/>
+
+	<define name="STABILIZATION_ATTITUDE_C_PHI_PGAIN"  		value="2485"/>
+	<define name="STABILIZATION_ATTITUDE_C_PHI_DGAIN"  		value="1236"/>
+	<define name="STABILIZATION_ATTITUDE_C_PHI_IGAIN"  		value="5"/>
+	<define name="STABILIZATION_ATTITUDE_C_PHI_DDGAIN"  		value="100"/>
+
+	<define name="STABILIZATION_ATTITUDE_C_THETA_PGAIN"	  	value="308"/>
+	<define name="STABILIZATION_ATTITUDE_C_THETA_DGAIN"  		value="208"/>
+	<define name="STABILIZATION_ATTITUDE_C_THETA_IGAIN"	  	value="5"/>
+	<define name="STABILIZATION_ATTITUDE_C_THETA_DDGAIN"  		value="200"/>
+
+	<define name="STABILIZATION_ATTITUDE_C_PSI_PGAIN"  		value="3225"/>
+	<define name="STABILIZATION_ATTITUDE_C_PSI_DGAIN"  		value="2124"/>
+	<define name="STABILIZATION_ATTITUDE_C_PSI_IGAIN"  		value="6"/>
+	<define name="STABILIZATION_ATTITUDE_C_PSI_DDGAIN"  		value="100"/>
+
    </load>
--->
+
+
+
 
   <!-- <load name="TUDelft/transition.xml">
 	<define name="TRANSVEH_PREP_THRUST_COEF_SCALING" value="{   0.6f, 0.6f,    1.4f,    1.4f  }"/>

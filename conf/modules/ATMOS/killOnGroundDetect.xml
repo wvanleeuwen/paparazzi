@@ -1,0 +1,12 @@
+<!DOCTYPE module SYSTEM "../module.dtd">
+<module name="killOnGroundDetect" dir="ATMOS">
+  <header>
+    <file name="killOnGroundDetect.h"/>
+  </header>
+  <init fun="atmov_killOnGroundDetect_init()"/>
+  <periodic fun="atmov_killOnGroundDetect_periodic()" freq="20"/>
+  <makefile target="ap">
+    <file name="killOnGroundDetect.c"/>
+  </makefile>
+</module>
+

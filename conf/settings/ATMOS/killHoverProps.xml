@@ -1,0 +1,13 @@
+<!DOCTYPE settings SYSTEM "../settings.dtd">
+
+<settings>
+  <dl_settings>
+    <dl_settings NAME="ATMOS">
+      <dl_setting var="killHoverProps" min="0" step="1" max="1" module="modules/ATMOS/hoverPropsOff" shortname="hprops_off" values="OFF|ON">
+	<strip_button name="HOVERPR_ON" icon="hoverpr_on.png" value="0"/>
+	<strip_button name="HOVERPR_OFF" icon="hoverpr_off.png" value="1"/>
+      </dl_setting>
+    </dl_settings>
+  </dl_settings>
+</settings>
+

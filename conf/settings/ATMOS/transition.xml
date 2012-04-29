@@ -1,0 +1,14 @@
+<!DOCTYPE settings SYSTEM "../settings.dtd">
+
+<settings>
+  <dl_settings>
+    <dl_settings NAME="ATMOS">
+      <dl_setting var="transition_setting" min="0" step="1" max="2" module="modules/ATMOS/newTransition" shortname="req_tr_state" values="HOVER|FORWARD|!!MAYDAY HOVER NOW!!" handler="doTransition">
+	<strip_button name="TR_FW" icon="transition_forward.png" value="1"/>
+	<strip_button name="TR_HO" icon="transition_hover.png" value="0"/>
+	<strip_button name="TR_HOE" icon="transition_hover_emerg.png" value="2"/>
+      </dl_setting>
+    </dl_settings>
+  </dl_settings>
+</settings>
+

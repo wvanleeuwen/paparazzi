@@ -37,6 +37,7 @@ struct Supervision {
   bool_t override_enabled[SUPERVISION_NB_MOTOR];
   int32_t override_value[SUPERVISION_NB_MOTOR];
   uint32_t nb_failure;
+  bool_t override_by_module;
 };
 
 extern struct Supervision supervision;
@@ -44,5 +45,7 @@ extern struct Supervision supervision;
 extern void supervision_init(void);
 extern void supervision_run(bool_t motors_on, bool_t override_on, int32_t in_cmd[]);
 extern void supervision_run_spinup(uint32_t counter, uint32_t max_counter);
+
+extern int32_t thrust_coef[SUPERVISION_NB_MOTOR];
 
 #endif /* SUPERVISION_H */

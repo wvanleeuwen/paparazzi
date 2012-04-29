@@ -1,0 +1,12 @@
+<!DOCTYPE module SYSTEM "../module.dtd">
+<module name="newTransition" dir="ATMOS">
+  <header>
+    <file name="newTransition.h"/>
+  </header>
+  <init fun="transveh_transition_init()"/>
+  <periodic fun="transveh_transition_periodic()" freq="7"/>
+  <makefile target="ap">
+    <file name="newTransition.c"/>
+  </makefile>
+</module>
+

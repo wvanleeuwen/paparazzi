@@ -1,0 +1,12 @@
+<!DOCTYPE module SYSTEM "../module.dtd">
+<module name="hoverPropsOff" dir="ATMOS">
+  <header>
+    <file name="hoverPropsOff.h"/>
+  </header>
+  <init fun="transveh_hover_props_off_init()"/>
+  <periodic fun="transveh_hover_props_off_periodic()" freq="5"/>
+  <makefile target="ap">
+    <file name="hoverPropsOff.c"/>
+  </makefile>
+</module>
+

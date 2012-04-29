@@ -1,0 +1,12 @@
+<!DOCTYPE module SYSTEM "module.dtd">
+<module name="atmov_autoheading" dir="ATMOV">
+  <header>
+    <file name="autoHeading.h"/>
+  </header>
+  <init fun="atmov_autoHeading_init()"/>
+  <periodic fun="atmov_autoHeading_periodic()" freq="5"/>
+  <makefile target="ap">
+    <file name="autoHeading.c"/>
+  </makefile>
+</module>
+

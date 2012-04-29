@@ -1,0 +1,11 @@
+<!DOCTYPE module SYSTEM "../module.dtd">
+<module name="multiGain" dir="ATMOS">
+  <header>
+    <file name="multiGain.h"/>
+  </header>
+  <init fun="transveh_multigain_init()"/>
+  <makefile target="ap">
+    <file name="multiGain.c"/>
+  </makefile>
+</module>
+

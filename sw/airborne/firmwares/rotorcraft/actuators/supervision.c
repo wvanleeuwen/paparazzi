@@ -61,11 +61,15 @@
 static const int32_t roll_coef[SUPERVISION_NB_MOTOR]   = SUPERVISION_ROLL_COEF;
 static const int32_t pitch_coef[SUPERVISION_NB_MOTOR]  = SUPERVISION_PITCH_COEF;
 static const int32_t yaw_coef[SUPERVISION_NB_MOTOR]    = SUPERVISION_YAW_COEF;
-static const int32_t thrust_coef[SUPERVISION_NB_MOTOR] = SUPERVISION_THRUST_COEF;
+//static const int32_t thrust_coef[SUPERVISION_NB_MOTOR] = SUPERVISION_THRUST_COEF;
+int32_t thrust_coef[SUPERVISION_NB_MOTOR] = SUPERVISION_THRUST_COEF;
+
+
 
 struct Supervision supervision;
 
 void supervision_init(void) {
+  supervision.override_by_module = FALSE;
   uint8_t i;
   for (i=0; i<SUPERVISION_NB_MOTOR; i++) {
     supervision.commands[i] = 0;
@@ -165,15 +169,17 @@ void supervision_run(bool_t motors_on, bool_t override_on, int32_t in_cmd[] ) {
     if (max_cmd > SUPERVISION_MAX_MOTOR)
       offset_commands(-(max_cmd - SUPERVISION_MAX_MOTOR));
 
-    /* For testing motor failure */
-    if (motors_on && override_on) {
+    /* For testing motor failure or override by module*/
+    if (motors_on && (override_on || supervision.override_by_module)) {
       for (i = 0; i < SUPERVISION_NB_MOTOR; i++) {
         if (supervision.override_enabled[i])
           supervision.commands[i] = supervision.override_value[i];
       }
     }
-    bound_commands();
-    bound_commands_step();
+    if (!supervision.override_by_module) {
+      bound_commands();
+      bound_commands_step();
+    }
   }
   else {
     for (i=0; i<SUPERVISION_NB_MOTOR; i++) {

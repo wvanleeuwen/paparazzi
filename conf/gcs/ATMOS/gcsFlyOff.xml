@@ -1,0 +1,35 @@
+<layout width="1360" height="768">
+  <columns>
+    <rows SIZE="600">
+      <widget NAME="strips" SIZE="240"/>
+      <widget NAME="aircraft" SIZE="390"/>
+      <widget NAME="alarms"/>
+    </rows>
+    <rows>
+    <widget NAME="map2d" SIZE="450">
+      <papget type="goto_block" display="button" x="10" y="330">
+        <property name="block_name" value="Takeoff"/>
+        <property name="locked" value="true"/>
+        <property name="icon" value="takeoff.png"/>
+      </papget>
+      <papget type="message_field" display="text" x="656" y="11">
+        <property name="field" value="ESTIMATOR:z_dot"/>
+        <property name="scale" value="1"/>
+        <property name="format" value="Climb:%.1fm/s"/>
+        <property name="size" value="20."/>
+        <property name="color" value="pink"/>
+      </papget>
+      <papget type="message_field" display="ruler" x="803" y="316">
+        <property name="field" value="ESTIMATOR:z"/>
+        <property name="scale" value="1"/>
+        <property name="height" value="200."/>
+        <property name="index_of_right" value="false"/>
+        <property name="scale" value="1."/>
+        <property name="width" value="32."/>
+        <property name="scale" value="10"/>
+      </papget>
+    </widget>
+    <widget name="plugin"/>
+    </rows>
+  </columns>
+</layout>
