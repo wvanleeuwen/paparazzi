@@ -192,6 +192,23 @@
         <arg flag="-c" constant="telemetry"/>
       </program>
     </session>
+    <session name="ATMOS FlyOff USB1 nonFS">
+      <program name="Data Link">
+        <arg flag="-d" constant="/dev/ttyUSB1"/>
+        <arg flag="-transport" constant="xbee"/>
+        <arg flag="-uplink"/>
+        <arg flag="-s" constant="57600"/>
+      </program>
+      <program name="Server"/>
+      <program name="GCS">
+        <arg flag="-speech"/>
+        <arg flag="-layout" constant="./ATMOS/gcsFlyOff.xml"/>
+        <arg flag="-mplayer" constant="tv:// -tv device=/dev/video0:input=1:norm=ntsc"/>
+        <arg flag="-srtm"/>
+        <arg flag="-track_size" constant="200"/>
+      </program>
+      <program name="Messages"/>
+    </session>
     <session name="USB: 868MHz Transparant @ 9600">
       <program name="Data Link">
         <arg flag="-d" constant="/dev/ttyUSB0"/>

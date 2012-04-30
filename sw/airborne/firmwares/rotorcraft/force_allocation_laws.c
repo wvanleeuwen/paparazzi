@@ -157,8 +157,8 @@ void Force_Allocation_Laws(void)
   stab_att_sp_euler.phi   = cmd_roll;
   stab_att_sp_euler.theta = cmd_pitch;
   //stab_att_sp_euler.psi   = wing->commands[COMMAND_YAW]; //stab_att_sp_euler.psi;//stabilization_cmd[COMMAND_YAW];
-  stab_att_sp_euler.psi = ahrs.ltp_to_body_euler.psi;
-  //stab_att_sp_euler.psi   = cmd_yaw;
+  //stab_att_sp_euler.psi = ahrs.ltp_to_body_euler.psi;
+  stab_att_sp_euler.psi   = cmd_yaw;
 
   struct Int32Quat command_att;
   INT32_QUAT_OF_EULERS(command_att, stab_att_sp_euler);

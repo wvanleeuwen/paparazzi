@@ -27,6 +27,7 @@
 #include "firmwares/rotorcraft/actuators.h"
 #include "firmwares/rotorcraft/commands.h"
 #include "subsystems/radio_control.h"
+#include "modules/ATMOS/newTransition.h"
 
 /* warn if SUPERVISION_STOP_MOTOR is not define in the airframe file */
 #ifndef SUPERVISION_STOP_MOTOR

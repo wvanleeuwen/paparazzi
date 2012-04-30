@@ -51,7 +51,7 @@ static inline bool_t rc_attitude_sticks_centered(void) {
 
 #ifdef RADIO_KILL_SWITCH
 static inline bool_t kill_switch_is_on(void) {
-  if (radio_control.values[RADIO_KILL_SWITCH] < 0)
+  if (radio_control.values[RADIO_KILL_SWITCH] > 0)
     return TRUE;
   else
     return FALSE;

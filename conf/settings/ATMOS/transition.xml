@@ -7,6 +7,7 @@
 	<strip_button name="TR_FW" icon="transition_forward.png" value="1"/>
 	<strip_button name="TR_HO" icon="transition_hover.png" value="0"/>
 	<strip_button name="TR_HOE" icon="transition_hover_emerg.png" value="2"/>
+	<strip_button name="TR_HALF" value="3"/>
       </dl_setting>
     </dl_settings>
   </dl_settings>

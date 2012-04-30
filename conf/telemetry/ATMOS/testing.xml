@@ -56,9 +56,11 @@
       <message name="IMU_MAG_SCALED"         period=".2"/>
       <message name="FILTER_ALIGNER"          period="1."/>
       <message name="FILTER"                 period=".1"/>
+      <message name="ALIVE"             	period="2.1"/>
     </mode>
 
     <mode name="ppm">
+      <message name="ALIVE"             	period="2.1"/>
       <message name="ROTORCRAFT_CMD"           period=".1"/>
       <message name="PPM"                 period="0.5"/>
       <message name="RC"                  period="0.5"/>
@@ -77,9 +79,11 @@
       <message name="IMU_GYRO_RAW"      period=".05"/>
       <message name="IMU_MAG_RAW"       period=".05"/>
       <message name="BARO_RAW"          period=".1"/>
+      <message name="ALIVE"             	period="2.1"/>
     </mode>
 
     <mode name="scaled_sensors">
+      <message name="ALIVE"             	period="2.1"/>
       <message name="ROTORCRAFT_STATUS"       period="1.2"/>
       <message name="DL_VALUE"          period="0.5"/>
       <message name="ALIVE"             period="2.1"/>

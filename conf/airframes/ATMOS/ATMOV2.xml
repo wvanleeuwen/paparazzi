@@ -36,7 +36,8 @@
     <define name="AUTOPILOT_KILL_WITHOUT_AHRS"  value="TRUE"/>
 
     <!-- for kill switch: -->
-    <define name="AUTOPILOT_ARMING_KILL_SWITCH"/>
+    <!--<define name="AUTOPILOT_ARMING_KILL_SWITCH"/>-->
+    <define name="AUTOPILOT_ARMING_THROTTLE"/>
   </section>
 
   <rc_commands>
@@ -49,8 +50,8 @@
 
 
   <command_laws>
-    <set servo="AILEVON_LEFT"   value="@YAW" />
-    <set servo="AILEVON_RIGHT"  value="@YAW" />
+    <set servo="AILEVON_LEFT"   value="@YAW+(atmos_pitch_factor*@PITCH)" />
+    <set servo="AILEVON_RIGHT"  value="@YAW-(atmos_pitch_factor*@PITCH)" />
     <!--<set servo="ALWAYSDOWN"     value="ahrs.ltp_to_body_euler.theta/ANGLE_BFP_OF_REAL(M_PI)*9600" />-->
     <set servo="RUDDER"         value="@YAW"/>
   </command_laws>
@@ -132,8 +133,8 @@
     <define name="REF_MAX_PDOT" 	value="RadOfDeg(1800.)"/>
 
     <!-- feedback -->
-    <define name="PHI_PGAIN"  		value="1744"/>
-    <define name="PHI_DGAIN"  		value="1185"/>
+    <define name="PHI_PGAIN"  		value="1433"/>
+    <define name="PHI_DGAIN"  		value="972"/>
     <define name="PHI_IGAIN"  		value="5"/>
 
     <define name="THETA_PGAIN"  	value="308"/>
@@ -164,20 +165,21 @@
    <define name="REF_MAX_ZDD"  			value=" 0.5*9.81"/>
    <define name="REF_MIN_ZD"   			value="-1.5"/>
    <define name="REF_MAX_ZD"   			value=" 1.5"/>
-   <define name="HOVER_KP"    			value="-1067"/>
-   <define name="HOVER_KD"    			value="-600"/>
-   <define name="HOVER_KI"    			value="-55"/>
+   <define name="HOVER_KP"    			value="314"/>
+   <define name="HOVER_KD"    			value="90"/>
+   <define name="HOVER_KI"    			value="0"/>
    <!-- 1.5m/s for full stick : BOOZ_SPEED_I_OF_F(1.5) / (MAX_PPRZ/2) -->
    <define name="RC_CLIMB_COEF" 		value ="163"/>
    <!-- BOOZ_SPEED_I_OF_F(1.5) * 20% -->
    <define name="RC_CLIMB_DEAD_BAND"  		value ="160000"/>
-   <define name="NOMINAL_HOVER_THROTTLE" value ="0.36"/>
+   <!--<define name="NOMINAL_HOVER_THROTTLE" value ="0.36"/>-->
+
   </section>
 
   <section name="AHRS" prefix="AHRS_">
     <define name="PROPAGATE_FREQUENCY" 		value="512"/>
     <define name="CORRECT_FREQUENCY" 	value="512"/>
-    <define name="AHRS_TRIGGERED_ATTITUDE_LOOP" value="TRUE"/>
+
     <!-- magnetic field for Santa cruz from http://www.ngdc.noaa.gov/geomagmodels/IGRFWMM.jsp -->
     <!--<define name="H_X" value=" 0.47577"/>
     <define name="H_Y" value=" 0.11811"/>
@@ -190,8 +192,8 @@
   </section>
 
  <section name="GUIDANCE_H" prefix="GUIDANCE_H_">
-   <define name="PGAIN" 		value="-14"/>
-   <define name="DGAIN" 		value="-8"/>
+   <define name="PGAIN" 		value="14"/>
+   <define name="DGAIN" 		value="30"/>
    <define name="IGAIN" 		value="0"/>
    <define name="MAX_BANK"      value="RadOfDeg(30)"/>
  </section>
@@ -221,7 +223,7 @@
    <!-- ATMOV sensors -->
    <!--<load name="opticflow_ADNS3080.xml"/>-->
    <!--<load name="sonar_maxbotix_MB12XX.xml"/>-->
-   
+   <!--
    <load name="ATMOS/multiGain.xml">
 	<define name="STABILIZATION_ATTITUDE_A_PHI_PGAIN"  		value="2485"/>
 	<define name="STABILIZATION_ATTITUDE_A_PHI_DGAIN"  		value="1236"/>
@@ -269,7 +271,7 @@
 	<define name="STABILIZATION_ATTITUDE_C_PSI_DDGAIN"  		value="100"/>
 
    </load>
-
+-->
 
 
 
@@ -279,6 +281,7 @@
  </modules>
 
   <firmware name="rotorcraft">
+    <define name="USE_ADAPT_HOVER" value="TRUE"/>
     <define name="USE_KILL_SWITCH_FOR_MOTOR_ARMING" value="TRUE"/>
 <!--   <define name="ADC_CHANNEL_CURRENT" value="ADC_1"/>
    <define name="MilliAmpereOfAdc(adc)" value="((adc)*0.021826172)"/>-->

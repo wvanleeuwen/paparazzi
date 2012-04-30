@@ -91,7 +91,7 @@ extern uint16_t autopilot_flight_time;
   }
 
 #define autopilot_KillThrottle(_v) { \
-    autopilot_set_motors_on(_v);     \
+    autopilot_set_motors_on(!(_v));     \
   }
 
 #ifdef POWER_SWITCH_LED

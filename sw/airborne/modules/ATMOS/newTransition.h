@@ -15,7 +15,8 @@ enum TransitionState { HOVER,
                        PREP_FOR_TRANSITION_HOVER_PROPS_OFF,
                        PREP_FOR_TRANSITION_HOVER_PROPS_ON,
                        FORWARD,
-                       HOVER_NOW};
+                       HOVER_NOW,
+                       SEMIFORWARD};
 
 extern enum TransitionState transition_state;
 extern enum TransitionState required_transition_state;
@@ -23,8 +24,12 @@ extern enum TransitionState required_transition_state;
 #define TRANSITION_HOVER 0
 #define TRANSITION_FORWARD 1
 #define TRANSITION_HOVER_EMERGENCY 2
+#define TRANSITION_FORWARD_HALF 3
 
 extern int transition_setting;
+
+extern float atmos_pitch_factor;
+extern float atmos_yaw_factor;
 
 extern void transveh_transition_init(void);
 extern void transveh_transition_periodic(void);

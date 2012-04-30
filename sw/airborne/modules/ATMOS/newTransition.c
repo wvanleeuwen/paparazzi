@@ -12,12 +12,17 @@
 int32_t transveh_orig_thrust_coef[SUPERVISION_NB_MOTOR] = SUPERVISION_THRUST_COEF;
 //float transveh_prep_thrust_coef_scaling[SUPERVISION_NB_MOTOR] = TRANSVEH_PREP_THRUST_COEF_SCALING;
 int8_t transveh_prep_thrust_coef_scaling[SUPERVISION_NB_MOTOR] = { -22, -22, 11, 11 };
+//int8_t transveh_prep_thrust_coef_scaling[SUPERVISION_NB_MOTOR] = { -22, -22, 44, 44 };
 enum TransitionState transition_state;
 enum TransitionState required_transition_state;
 uint8_t transitionProgress;
 int transition_setting;
+float atmos_pitch_factor;
+float atmos_yaw_factor;
 
 void transveh_transition_init(void) {
+  atmos_pitch_factor = 0;
+  atmos_yaw_factor = 1;
   transition_state = HOVER;
   transitionProgress = 100;
   transition_percentage = 100;
@@ -34,18 +39,33 @@ void transveh_transition_periodic(void) {
     PrepForTransitionToHover();
     transitionProgress = 100;
     transition_percentage = 100;
+    atmos_pitch_factor = 0;
   }
   else if (required_transition_state == FORWARD && transitionProgress > 0) {
-    if (pctIsBetween(transitionProgress,80,40))   //rotated 0.9*(100-80)=18 degrees, start moving thrust to forward props
-      PrepForTransitionToForwardSmoothly((80-transitionProgress)*(100/41));
+    if (pctIsBetween(transitionProgress,10,80))
+      atmos_pitch_factor = ((float)(79-transitionProgress))/69;
+
+    if (pctIsBetween(transitionProgress,40,80))   //rotated 0.9*(100-80)=18 degrees, start moving thrust to forward props
+      PrepForTransitionToForwardSmoothly((79-transitionProgress)*(100/39));
     else if (transitionProgress == 10)   //rotated 0.9*90=81 degrees, kill hover props
       HoverPropsOff();
     transitionProgress--;
     transition_percentage = transitionProgress;
   }
+  else if (required_transition_state == SEMIFORWARD && transitionProgress > 60) {
+    if (pctIsBetween(transitionProgress,60,80))
+      atmos_pitch_factor = ((float)(79-transitionProgress))/19;
+
+   if (pctIsBetween(transitionProgress,60,90))
+     PrepForTransitionToForwardSmoothly((89-transitionProgress)*(100/29));
+   transitionProgress--;
+    transition_percentage = transitionProgress;
+  }
   else if (required_transition_state == HOVER && transitionProgress < 100) {
     if (transitionProgress == 10)   //rotated 0.9*10=9 degrees AOA, unkill hover props
       HoverPropsOn();
+    if (transitionProgress == 20)
+      atmos_pitch_factor = 0;
     else if (transitionProgress == 50)   //rotated 9 till 0.9*50=45 degrees, more thrust on hover props
       PrepForTransitionToHover();
 
@@ -64,6 +84,8 @@ void newTransition_doTransition(uint8_t val) {
     required_transition_state = HOVER;
   else if (val == TRANSITION_HOVER_EMERGENCY)
     required_transition_state = HOVER_NOW;
+  else if (val == TRANSITION_FORWARD_HALF)
+      required_transition_state = SEMIFORWARD;
   else
     required_transition_state = FORWARD;
 }
@@ -89,6 +111,7 @@ void transveh_transition_smooth_transition(int32_t desired, int32_t *actual) {
 void PrepForTransitionToForwardSmoothly(uint8_t amount) {
   for (uint8_t i = 0; i < SUPERVISION_NB_MOTOR; i++) {
     int32_t new_thrust_coef = transveh_orig_thrust_coef[i] + (float)transveh_orig_thrust_coef[i]*(transveh_prep_thrust_coef_scaling[i]*(amount/10000));
+    //int32_t new_thrust_coef = 256;
     if (new_thrust_coef < -SUPERVISION_SCALE) {
       thrust_coef[i] = -SUPERVISION_SCALE;
     }

@@ -2,11 +2,21 @@
   <aircraft
    name="ATMOV1"
    ac_id="181"
-   airframe="airframes/TUDelft/ATMOV1_lisam.xml"
+   airframe="airframes/ATMOS/ATMOV1.xml"
    radio="radios/R6107SP_7ch_xyz.xml"
-   telemetry="telemetry/TUDelft/telemetry_atmov4.xml"
+   telemetry="telemetry/ATMOS/testing.xml"
    flight_plan="flight_plans/dummy.xml"
-   settings=" settings/TUDelft/settings_atmov.xml"
+   settings=" settings/ATMOS/base.xml"
+   gui_color="blue"
+  />
+  <aircraft
+   name="ATMOV1new"
+   ac_id="1"
+   airframe="airframes/ATMOS/ATMOV1.xml"
+   radio="radios/R6107SP_7ch_xyz.xml"
+   telemetry="telemetry/ATMOS/testing.xml"
+   flight_plan="flight_plans/TUDelft/rotorcraft_basic_delft.xml"
+   settings=" settings/ATMOS/base.xml settings/ATMOS/killHoverProps.xml settings/ATMOS/killOnGroundDetect.xml settings/ATMOS/multiGain.xml settings/ATMOS/transition.xml"
    gui_color="blue"
   />
   <aircraft
@@ -16,7 +26,7 @@
    radio="radios/R6107SP_7ch_xyz.xml"
    telemetry="telemetry/ATMOS/testing.xml"
    flight_plan="flight_plans/TUDelft/rotorcraft_basic_delft.xml"
-   settings=" settings/ATMOS/base.xml settings/ATMOS/killHoverProps.xml settings/ATMOS/transition.xml settings/ATMOS/killOnGroundDetect.xml settings/ATMOS/multiGain.xml"
+   settings=" settings/ATMOS/base.xml settings/ATMOS/killHoverProps.xml settings/ATMOS/transition.xml settings/ATMOS/killOnGroundDetect.xml"
    gui_color="green"
   />
 </conf>
