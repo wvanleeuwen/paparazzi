@@ -31,9 +31,9 @@
 #include "firmwares/rotorcraft/stabilization.h"
 #include "firmwares/rotorcraft/camera_mount.h"
 #include "led.h"
-
-#ifdef AUTOPILOT_LOBATT_WING_WAGGLE
   #include "subsystems/electrical.h"
+#ifdef AUTOPILOT_LOBATT_WING_WAGGLE
+
   #include "firmwares/rotorcraft/toytronics/toytronics_setpoint.h"
 #endif
 
@@ -129,6 +129,19 @@ void autopilot_periodic(void) {
   if (electrical.vsupply < (MIN_BAT_LEVEL * 10)){
     RunOnceEvery(autopilot_lobatt_wing_waggle_interval,{setpoint_lobatt_wing_waggle_num=0;})
   }
+#endif
+#ifdef AHRS_ALIGNER_LED
+#ifdef AUTOPILOT_LOBATT_BLINK
+  if (electrical.vsupply < (MIN_BAT_LEVEL * 10)){
+    RunOnceEvery(30, {LED_TOGGLE(AHRS_ALIGNER_LED);});
+    }
+  else if (electrical.vsupply < ((MIN_BAT_LEVEL + 0.5) * 10)){
+    RunOnceEvery(60, {LED_TOGGLE(AHRS_ALIGNER_LED);});
+    }
+  else if (!autopilot_first_boot){
+    LED_ON(AHRS_ALIGNER_LED);
+    }
+#endif
 #endif
 #ifdef USE_CAMERA_MOUNT
   camera_mount_run();
