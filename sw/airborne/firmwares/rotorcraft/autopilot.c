@@ -309,8 +309,11 @@ static inline void autopilot_check_motors_on( void ) {
 		if (radio_control.values[RADIO_KILL_SWITCH]<0 && ahrs_is_aligned())
 			autopilot_rc_unkilled_startup = FALSE;
 	if (autopilot_motors_on == FALSE && autopilot_rc_unkilled_startup == FALSE && autopilot_mode1_kill == TRUE){
-		if (autopilot_first_boot == TRUE){
-		  RunOnceEvery(1024,{autopilot_first_boot = FALSE;})
+		if (autopilot_first_boot == TRUE && ahrs_is_aligned()){
+		  #ifdef AHRS_ALIGNER_LED
+  		      RunOnceEvery(2, {LED_TOGGLE(AHRS_ALIGNER_LED);});
+		  #endif
+		  RunOnceEvery(512,{autopilot_first_boot = FALSE; LED_ON(AHRS_ALIGNER_LED);})
 		  }
 		else
 		  autopilot_motors_on=radio_control.values[RADIO_KILL_SWITCH]>0 && radio_control.values[RADIO_MODE] < 0 && THROTTLE_STICK_DOWN() && YAW_STICK_CENTERED() && PITCH_STICK_CENTERED() && ROLL_STICK_CENTERED() && ahrs_is_aligned();
@@ -329,8 +332,11 @@ static inline void autopilot_check_motors_on( void ) {
 		if (THROTTLE_STICK_DOWN() && ahrs_is_aligned())
 			autopilot_rc_unkilled_startup = FALSE;
 	if (autopilot_motors_on == FALSE && autopilot_rc_unkilled_startup == FALSE && autopilot_mode1_kill == TRUE){
-		if (autopilot_first_boot == TRUE){
-		  RunOnceEvery(1024,{autopilot_first_boot = FALSE;})
+		if (autopilot_first_boot == TRUE && ahrs_is_aligned()){
+		  #ifdef AHRS_ALIGNER_LED
+  		      RunOnceEvery(2, {LED_TOGGLE(AHRS_ALIGNER_LED);});
+		  #endif
+		  RunOnceEvery(512,{autopilot_first_boot = FALSE; LED_ON(AHRS_ALIGNER_LED);})
 		  }
 		else
 		  autopilot_motors_on=!THROTTLE_STICK_DOWN() && radio_control.values[RADIO_MODE] < 0 && YAW_STICK_CENTERED() && PITCH_STICK_CENTERED() && ROLL_STICK_CENTERED() && ahrs_is_aligned();
