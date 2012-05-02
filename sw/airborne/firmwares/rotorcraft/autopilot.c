@@ -28,6 +28,10 @@
 #include "firmwares/rotorcraft/stabilization.h"
 #include "led.h"
 
+#include "modules/ATMOS/hoverPropsOff.h"
+#include "modules/ATMOS/newTransition.h"
+
+
 uint8_t  autopilot_mode;
 uint8_t  autopilot_mode_auto2;
 
@@ -147,6 +151,7 @@ void autopilot_set_mode(uint8_t new_autopilot_mode) {
     case AP_MODE_ATTITUDE_CLIMB:
     case AP_MODE_ATTITUDE_Z_HOLD:
       guidance_h_mode_changed(GUIDANCE_H_MODE_ATTITUDE);
+      newTransition_doTransition(TRANSITION_HOVER_EMERGENCY);
       break;
     case AP_MODE_HOVER_DIRECT:
     case AP_MODE_HOVER_CLIMB:

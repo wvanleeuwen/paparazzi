@@ -131,10 +131,12 @@ void Force_Allocation_Laws(void)
       wing->commands[COMMAND_ROLL]    = stab_att_sp_euler.phi;
 
       // Vertical Motion
-      wing->commands[COMMAND_THRUST]  = (CRUISE_THROTTLE)
-                                      + climb_speed * THROTTLE_INCREMENT
-                                      + (stab_att_sp_euler.theta / 10  ); // FRAC_COMMAND
+      /*wing->commands[COMMAND_THRUST]  = (CRUISE_THROTTLE)
+                                      + climb_speed * THROTTLE_INCREMENT;
+                                      + (stab_att_sp_euler.theta * 2  ); */ // MAX_PPRZ
+      wing->commands[COMMAND_THRUST] = (stab_att_sp_euler.theta * 2  );
 
+//      wing->commands[COMMAND_PITCH]   = (stab_att_sp_euler.theta ) + ANGLE_BFP_OF_REAL(PITCH_TRIM + climb_speed * PITCH_OF_VZ / MAX_PPRZ);
       wing->commands[COMMAND_PITCH]   = ANGLE_BFP_OF_REAL(PITCH_TRIM + climb_speed * PITCH_OF_VZ / MAX_PPRZ);
 
       // Longitudinal Motion
@@ -142,7 +144,7 @@ void Force_Allocation_Laws(void)
       // Coordinated Turn
       const float function_of_speed = 1.0f;
       const int loop_rate = 512;
-      wing->commands[COMMAND_YAW]    += wing->commands[COMMAND_ROLL] * function_of_speed / loop_rate;
+      //wing->commands[COMMAND_YAW]    += wing->commands[COMMAND_ROLL] * function_of_speed / loop_rate;
     }
 
     cmd_thrust += wing->commands[COMMAND_THRUST] * percent;
@@ -155,6 +157,7 @@ void Force_Allocation_Laws(void)
 
   stabilization_cmd[COMMAND_THRUST] = cmd_thrust;
   stab_att_sp_euler.phi   = cmd_roll;
+  //stab_att_sp_euler.phi   = ahrs.ltp_to_body_euler.phi;
   stab_att_sp_euler.theta = cmd_pitch;
   //stab_att_sp_euler.psi   = wing->commands[COMMAND_YAW]; //stab_att_sp_euler.psi;//stabilization_cmd[COMMAND_YAW];
   //stab_att_sp_euler.psi = ahrs.ltp_to_body_euler.psi;

@@ -6,7 +6,7 @@
    radio="radios/R6107SP_7ch_xyz.xml"
    telemetry="telemetry/ATMOS/testing.xml"
    flight_plan="flight_plans/dummy.xml"
-   settings=" settings/ATMOS/base.xml"
+   settings=" settings/ATMOS/base.xml settings/ATMOS/transition.xml settings/ATMOS/killHoverProps.xml"
    gui_color="blue"
   />
   <aircraft
@@ -25,8 +25,18 @@
    airframe="airframes/ATMOS/ATMOV2.xml"
    radio="radios/R6107SP_7ch_xyz.xml"
    telemetry="telemetry/ATMOS/testing.xml"
-   flight_plan="flight_plans/TUDelft/rotorcraft_basic_delft.xml"
-   settings=" settings/ATMOS/base.xml settings/ATMOS/killHoverProps.xml settings/ATMOS/transition.xml settings/ATMOS/killOnGroundDetect.xml"
+   flight_plan="flight_plans/ATMOS/test_veldje.xml"
+   settings=" settings/ATMOS/base.xml settings/ATMOS/killHoverProps.xml settings/ATMOS/transition.xml settings/ATMOS/multiGain.xml"
    gui_color="green"
+  />
+  <aircraft
+   name="SIM"
+   ac_id="2"
+   airframe="airframes/ATMOS/booz2_a7_sim.xml"
+   radio="radios/cockpitSX.xml"
+   telemetry="telemetry/default_rotorcraft.xml"
+   flight_plan="flight_plans/ATMOS/test_veldje.xml"
+   settings=" settings/settings_booz2.xml settings/settings_booz2_sim.xml"
+   gui_color="blue"
   />
 </conf>

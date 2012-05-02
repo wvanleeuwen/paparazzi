@@ -31,7 +31,7 @@
   <section name="AUTOPILOT">
     <define name="MODE_MANUAL" value="AP_MODE_ATTITUDE_DIRECT"/>
     <define name="MODE_AUTO1"  value="AP_MODE_ATTITUDE_DIRECT"/>
-    <define name="MODE_AUTO2"  value="AP_MODE_RC_DIRECT"/>
+    <define name="MODE_AUTO2"  value="AP_MODE_HOVER_DIRECT"/>
     
     <define name="AUTOPILOT_KILL_WITHOUT_AHRS"  value="TRUE"/>
 
@@ -50,8 +50,8 @@
 
 
   <command_laws>
-    <set servo="AILEVON_LEFT"   value="@YAW+(atmos_pitch_factor*@PITCH*6)" />
-    <set servo="AILEVON_RIGHT"  value="@YAW-(atmos_pitch_factor*@PITCH*6)" />
+    <set servo="AILEVON_LEFT"   value="@YAW+(atmos_pitch_factor*@PITCH)" />
+    <set servo="AILEVON_RIGHT"  value="@YAW-(atmos_pitch_factor*@PITCH)" />
     <!--<set servo="ALWAYSDOWN"     value="ahrs.ltp_to_body_euler.theta/ANGLE_BFP_OF_REAL(M_PI)*9600" />-->
     <set servo="RUDDER"         value="@YAW"/>
   </command_laws>
@@ -133,8 +133,8 @@
     <define name="REF_MAX_PDOT" 	value="RadOfDeg(1800.)"/>
 
     <!-- feedback -->
-    <define name="PHI_PGAIN"  		value="1433"/>
-    <define name="PHI_DGAIN"  		value="972"/>
+    <define name="PHI_PGAIN"  		value="1133"/>
+    <define name="PHI_DGAIN"  		value="872"/>
     <define name="PHI_IGAIN"  		value="5"/>
 
     <define name="THETA_PGAIN"  	value="308"/>
@@ -165,9 +165,12 @@
    <define name="REF_MAX_ZDD"  			value=" 0.5*9.81"/>
    <define name="REF_MIN_ZD"   			value="-1.5"/>
    <define name="REF_MAX_ZD"   			value=" 1.5"/>
-   <define name="HOVER_KP"    			value="442"/>
-   <define name="HOVER_KD"    			value="335"/>
-   <define name="HOVER_KI"    			value="9"/>
+<!--   <define name="HOVER_KP"    			value="448"/>
+   <define name="HOVER_KD"    			value="328"/>
+   <define name="HOVER_KI"    			value="8"/>-->
+   <define name="HOVER_KP"    			value="395"/>
+   <define name="HOVER_KD"    			value="300"/>
+   <define name="HOVER_KI"    			value="8"/>
    <!-- 1.5m/s for full stick : BOOZ_SPEED_I_OF_F(1.5) / (MAX_PPRZ/2) -->
    <define name="RC_CLIMB_COEF" 		value ="163"/>
    <!-- BOOZ_SPEED_I_OF_F(1.5) * 20% -->
@@ -192,10 +195,10 @@
   </section>
 
  <section name="GUIDANCE_H" prefix="GUIDANCE_H_">
-   <define name="PGAIN" 		value="36"/>
-   <define name="DGAIN" 		value="175"/>
-   <define name="IGAIN" 		value="1"/>
-   <define name="AGAIN" 		value="50"/>
+   <define name="PGAIN" 		value="32"/>
+   <define name="DGAIN" 		value="105"/>
+   <define name="IGAIN" 		value="0"/>
+   <define name="AGAIN" 		value="5"/>
    <define name="MAX_BANK"      value="RadOfDeg(30)"/>
  </section>
 
@@ -224,56 +227,55 @@
    <!-- ATMOV sensors -->
    <!--<load name="opticflow_ADNS3080.xml"/>-->
    <!--<load name="sonar_maxbotix_MB12XX.xml"/>-->
-   
+   <!--
    <load name="ATMOS/multiGain.xml">
-	<!-- feedback -->
-	<define name="STABILIZATION_ATTITUDE_A_PHI_PGAIN"  		value="1433"/>
-	<define name="STABILIZATION_ATTITUDE_A_PHI_DGAIN"  		value="972"/>
-	<define name="STABILIZATION_ATTITUDE_A_PHI_DDGAIN"  		value="100"/>
+	<define name="STABILIZATION_ATTITUDE_A_PHI_PGAIN"  		value="2485"/>
+	<define name="STABILIZATION_ATTITUDE_A_PHI_DGAIN"  		value="1236"/>
 	<define name="STABILIZATION_ATTITUDE_A_PHI_IGAIN"  		value="5"/>
+	<define name="STABILIZATION_ATTITUDE_A_PHI_DDGAIN"  		value="100"/>
 
-	<define name="STABILIZATION_ATTITUDE_A_THETA_PGAIN"  		value="308"/>
-	<define name="STABILIZATION_ATTITUDE_A_THETA_DGAIN" 	 	value="214"/>
-	<define name="STABILIZATION_ATTITUDE_A_THETA_DDGAIN" 	 	value="200"/>
-	<define name="STABILIZATION_ATTITUDE_A_THETA_IGAIN" 	 	value="5"/>
+	<define name="STABILIZATION_ATTITUDE_A_THETA_PGAIN"	  	value="308"/>
+	<define name="STABILIZATION_ATTITUDE_A_THETA_DGAIN"  		value="208"/>
+	<define name="STABILIZATION_ATTITUDE_A_THETA_IGAIN"	  	value="5"/>
+	<define name="STABILIZATION_ATTITUDE_A_THETA_DDGAIN"  		value="200"/>
 
-	<define name="STABILIZATION_ATTITUDE_A_PSI_PGAIN"  		value="2800"/>
-	<define name="STABILIZATION_ATTITUDE_A_PSI_DGAIN"  		value="1950"/>
+	<define name="STABILIZATION_ATTITUDE_A_PSI_PGAIN"  		value="3225"/>
+	<define name="STABILIZATION_ATTITUDE_A_PSI_DGAIN"  		value="2124"/>
 	<define name="STABILIZATION_ATTITUDE_A_PSI_IGAIN"  		value="6"/>
 	<define name="STABILIZATION_ATTITUDE_A_PSI_DDGAIN"  		value="100"/>
 
-	<define name="STABILIZATION_ATTITUDE_B_PHI_PGAIN"  		value="1433"/>
-	<define name="STABILIZATION_ATTITUDE_B_PHI_DGAIN"  		value="972"/>
+	<define name="STABILIZATION_ATTITUDE_B_PHI_PGAIN"  		value="2485"/>
+	<define name="STABILIZATION_ATTITUDE_B_PHI_DGAIN"  		value="1236"/>
 	<define name="STABILIZATION_ATTITUDE_B_PHI_IGAIN"  		value="5"/>
 	<define name="STABILIZATION_ATTITUDE_B_PHI_DDGAIN"  		value="100"/>
 
-	<define name="STABILIZATION_ATTITUDE_B_THETA_PGAIN"  		value="308"/>
-	<define name="STABILIZATION_ATTITUDE_B_THETA_DGAIN"  		value="214"/>
-	<define name="STABILIZATION_ATTITUDE_B_THETA_IGAIN"  		value="5"/>
+	<define name="STABILIZATION_ATTITUDE_B_THETA_PGAIN"	  	value="308"/>
+	<define name="STABILIZATION_ATTITUDE_B_THETA_DGAIN"  		value="208"/>
+	<define name="STABILIZATION_ATTITUDE_B_THETA_IGAIN"	  	value="5"/>
 	<define name="STABILIZATION_ATTITUDE_B_THETA_DDGAIN"  		value="200"/>
 
-	<define name="STABILIZATION_ATTITUDE_B_PSI_PGAIN"  		value="2800"/>
-	<define name="STABILIZATION_ATTITUDE_B_PSI_DGAIN"  		value="1950"/>
+	<define name="STABILIZATION_ATTITUDE_B_PSI_PGAIN"  		value="3225"/>
+	<define name="STABILIZATION_ATTITUDE_B_PSI_DGAIN"  		value="2124"/>
 	<define name="STABILIZATION_ATTITUDE_B_PSI_IGAIN"  		value="6"/>
 	<define name="STABILIZATION_ATTITUDE_B_PSI_DDGAIN"  		value="100"/>
 
-	<define name="STABILIZATION_ATTITUDE_C_PHI_PGAIN"  		value="0"/>
-	<define name="STABILIZATION_ATTITUDE_C_PHI_DGAIN"  		value="0"/>
-	<define name="STABILIZATION_ATTITUDE_C_PHI_IGAIN"  		value="0"/>
-	<define name="STABILIZATION_ATTITUDE_C_PHI_DDGAIN"  		value="0"/>
+	<define name="STABILIZATION_ATTITUDE_C_PHI_PGAIN"  		value="2485"/>
+	<define name="STABILIZATION_ATTITUDE_C_PHI_DGAIN"  		value="1236"/>
+	<define name="STABILIZATION_ATTITUDE_C_PHI_IGAIN"  		value="5"/>
+	<define name="STABILIZATION_ATTITUDE_C_PHI_DDGAIN"  		value="100"/>
 
-	<define name="STABILIZATION_ATTITUDE_C_THETA_PGAIN"	  	value="0"/>
-	<define name="STABILIZATION_ATTITUDE_C_THETA_DGAIN"  		value="0"/>
-	<define name="STABILIZATION_ATTITUDE_C_THETA_IGAIN"	  	value="0"/>
-	<define name="STABILIZATION_ATTITUDE_C_THETA_DDGAIN"  		value="0"/>
+	<define name="STABILIZATION_ATTITUDE_C_THETA_PGAIN"	  	value="308"/>
+	<define name="STABILIZATION_ATTITUDE_C_THETA_DGAIN"  		value="208"/>
+	<define name="STABILIZATION_ATTITUDE_C_THETA_IGAIN"	  	value="5"/>
+	<define name="STABILIZATION_ATTITUDE_C_THETA_DDGAIN"  		value="200"/>
 
-	<define name="STABILIZATION_ATTITUDE_C_PSI_PGAIN"  		value="0"/>
-	<define name="STABILIZATION_ATTITUDE_C_PSI_DGAIN"  		value="0"/>
-	<define name="STABILIZATION_ATTITUDE_C_PSI_IGAIN"  		value="0"/>
-	<define name="STABILIZATION_ATTITUDE_C_PSI_DDGAIN"  		value="0"/>
+	<define name="STABILIZATION_ATTITUDE_C_PSI_PGAIN"  		value="3225"/>
+	<define name="STABILIZATION_ATTITUDE_C_PSI_DGAIN"  		value="2124"/>
+	<define name="STABILIZATION_ATTITUDE_C_PSI_IGAIN"  		value="6"/>
+	<define name="STABILIZATION_ATTITUDE_C_PSI_DDGAIN"  		value="100"/>
 
    </load>
-
+-->
 
 
 
@@ -283,7 +285,6 @@
  </modules>
 
   <firmware name="rotorcraft">
-    <define name="ATMOS_RCD" value="TRUE"/>
     <define name="RC_LOST_MODE" value="PPRZ_MODE_AUTO2"/>
     <define name="USE_ADAPT_HOVER" value="TRUE"/>
     <define name="USE_KILL_SWITCH_FOR_MOTOR_ARMING" value="TRUE"/>

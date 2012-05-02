@@ -19,7 +19,7 @@
         <property name="size" value="20."/>
         <property name="color" value="pink"/>
       </papget>
-      <papget type="message_field" display="ruler" x="803" y="316">
+      <papget type="message_field" display="ruler" x="600" y="316">
         <property name="field" value="ESTIMATOR:z"/>
         <property name="scale" value="1"/>
         <property name="height" value="200."/>
