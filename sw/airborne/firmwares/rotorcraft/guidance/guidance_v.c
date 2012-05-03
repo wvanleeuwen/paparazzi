@@ -40,6 +40,7 @@
 
 #include "generated/airframe.h"
 
+#include "firmwares/rotorcraft/force_allocation_laws.h"
 
 /* warn if some gains are still negative */
 #if (GUIDANCE_V_HOVER_KP < 0) ||                   \
