@@ -58,7 +58,9 @@ extern struct Int32RefModel stab_att_ref_model;
 
 
 static inline void reset_psi_ref_from_body(void) {
-  stab_att_ref_euler.psi = ahrs.ltp_to_body_euler.psi << (REF_ANGLE_FRAC - INT32_ANGLE_FRAC);
+  int32_t sinTheta;
+  PPRZ_ITRIG_SIN(sinTheta, ahrs.ltp_to_body_euler.theta); //in ANG_FRAC
+  stab_att_ref_euler.psi = (ahrs.ltp_to_body_euler.psi - ((sinTheta*ahrs.ltp_to_body_euler.phi)>>INT32_TRIG_FRAC)) << (REF_ANGLE_FRAC - INT32_ANGLE_FRAC);
   stab_att_ref_rate.r = 0;
   stab_att_ref_accel.r = 0;
 }

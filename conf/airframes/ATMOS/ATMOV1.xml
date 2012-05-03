@@ -30,14 +30,14 @@
 
   <section name="AUTOPILOT">
     <define name="MODE_MANUAL" value="AP_MODE_ATTITUDE_DIRECT"/>
-    <define name="MODE_AUTO1"  value="AP_MODE_RC_DIRECT"/>
-    <define name="MODE_AUTO2"  value="AP_MODE_ATTITUDE_DIRECT"/>
+    <define name="MODE_AUTO1"  value="AP_MODE_ATTITUDE_DIRECT"/>
+    <define name="MODE_AUTO2"  value="AP_MODE_RC_DIRECT"/>
     
     <define name="AUTOPILOT_KILL_WITHOUT_AHRS"  value="TRUE"/>
 
     <!-- for kill switch: -->
-    <!--<define name="AUTOPILOT_ARMING_KILL_SWITCH"/>-->
-    <define name="AUTOPILOT_ARMING_THROTTLE"/>
+    <define name="AUTOPILOT_ARMING_KILL_SWITCH"/>
+    <!--<define name="AUTOPILOT_ARMING_THROTTLE"/>-->
   </section>
 
   <rc_commands>
@@ -101,15 +101,15 @@
     <define name="SP_MAX_Q" 		value="10000"/>
     <define name="SP_MAX_R" 		value="10000"/>
 
-    <define name="GAIN_P" 		value="-400"/>
-    <define name="GAIN_Q" 		value="-400"/>
-    <define name="GAIN_R" 		value="-350"/>
+    <define name="GAIN_P" 		value="400"/>
+    <define name="GAIN_Q" 		value="400"/>
+    <define name="GAIN_R" 		value="350"/>
   </section>
 
   <section name="STABILIZATION_ATTITUDE" prefix="STABILIZATION_ATTITUDE_">
     <!-- setpoints -->
     <define name="SP_MAX_PHI"     	value="RadOfDeg(45.)"/>
-    <define name="SP_MAX_THETA"   	value="RadOfDeg(100.)"/> <!-- for plane mode -->
+    <define name="SP_MAX_THETA"   	value="RadOfDeg(120.)"/> <!-- for plane mode -->
     <define name="SP_MAX_PSI"     	value="RadOfDeg(45.)"/>
     <define name="SP_MAX_R"       	value="RadOfDeg(90.)"/>
     <define name="SP_MAX_P"       	value="RadOfDeg(90.)"/>
@@ -191,8 +191,8 @@
   </section>
 
  <section name="GUIDANCE_H" prefix="GUIDANCE_H_">
-   <define name="PGAIN" 		value="-14"/>
-   <define name="DGAIN" 		value="-8"/>
+   <define name="PGAIN" 		value="14"/>
+   <define name="DGAIN" 		value="8"/>
    <define name="IGAIN" 		value="0"/>
    <define name="MAX_BANK"      value="RadOfDeg(30)"/>
  </section>
@@ -222,7 +222,7 @@
    <!-- ATMOV sensors -->
    <!--<load name="opticflow_ADNS3080.xml"/>-->
    <!--<load name="sonar_maxbotix_MB12XX.xml"/>-->
-   <!--
+  
    <load name="ATMOS/multiGain.xml">
 	<define name="STABILIZATION_ATTITUDE_A_PHI_PGAIN"  		value="2317"/>
 	<define name="STABILIZATION_ATTITUDE_A_PHI_DGAIN"  		value="1158"/>
@@ -239,20 +239,20 @@
 	<define name="STABILIZATION_ATTITUDE_A_PSI_IGAIN"  		value="10"/>
 	<define name="STABILIZATION_ATTITUDE_A_PSI_DDGAIN"  		value="105"/>
 
-	<define name="STABILIZATION_ATTITUDE_B_PHI_PGAIN"  		value="2317"/>
-	<define name="STABILIZATION_ATTITUDE_B_PHI_DGAIN"  		value="1158"/>
-	<define name="STABILIZATION_ATTITUDE_B_PHI_IGAIN"  		value="5"/>
+	<define name="STABILIZATION_ATTITUDE_B_PHI_PGAIN"  		value="700"/>
+	<define name="STABILIZATION_ATTITUDE_B_PHI_DGAIN"  		value="400"/>
+	<define name="STABILIZATION_ATTITUDE_B_PHI_IGAIN"  		value="0"/>
 	<define name="STABILIZATION_ATTITUDE_B_PHI_DDGAIN"  		value="100"/>
 
-	<define name="STABILIZATION_ATTITUDE_B_THETA_PGAIN"	  	value="405"/>
-	<define name="STABILIZATION_ATTITUDE_B_THETA_DGAIN"  		value="370"/>
-	<define name="STABILIZATION_ATTITUDE_B_THETA_IGAIN"	  	value="3"/>
-	<define name="STABILIZATION_ATTITUDE_B_THETA_DDGAIN"  		value="190"/>
+	<define name="STABILIZATION_ATTITUDE_B_THETA_PGAIN"	  	value="200"/>
+	<define name="STABILIZATION_ATTITUDE_B_THETA_DGAIN"  		value="200"/>
+	<define name="STABILIZATION_ATTITUDE_B_THETA_IGAIN"	  	value="0"/>
+	<define name="STABILIZATION_ATTITUDE_B_THETA_DDGAIN"  		value="100"/>
 
-	<define name="STABILIZATION_ATTITUDE_B_PSI_PGAIN"  		value="2936"/>
-	<define name="STABILIZATION_ATTITUDE_B_PSI_DGAIN"  		value="2020"/>
-	<define name="STABILIZATION_ATTITUDE_B_PSI_IGAIN"  		value="10"/>
-	<define name="STABILIZATION_ATTITUDE_B_PSI_DDGAIN"  		value="105"/>
+	<define name="STABILIZATION_ATTITUDE_B_PSI_PGAIN"  		value="1000"/>
+	<define name="STABILIZATION_ATTITUDE_B_PSI_DGAIN"  		value="670"/>
+	<define name="STABILIZATION_ATTITUDE_B_PSI_IGAIN"  		value="0"/>
+	<define name="STABILIZATION_ATTITUDE_B_PSI_DDGAIN"  		value="100"/>
 
 	<define name="STABILIZATION_ATTITUDE_C_PHI_PGAIN"  		value="2317"/>
 	<define name="STABILIZATION_ATTITUDE_C_PHI_DGAIN"  		value="1158"/>
@@ -270,7 +270,6 @@
 	<define name="STABILIZATION_ATTITUDE_C_PSI_DDGAIN"  		value="105"/>
 
    </load>
--->
 
 
 

@@ -55,7 +55,10 @@ static inline void stabilization_attitude_read_rc_setpoint_eulers(struct Int32Eu
     }
   }
   else { /* if not flying, use current yaw as setpoint */
-    sp->psi = ahrs.ltp_to_body_euler.psi;
+    //sp->psi = ahrs.ltp_to_body_euler.psi;
+    int32_t sinTheta;
+    PPRZ_ITRIG_SIN(sinTheta, ahrs.ltp_to_body_euler.theta); //in ANG_FRAC
+    sp->psi = (ahrs.ltp_to_body_euler.psi - ((sinTheta*ahrs.ltp_to_body_euler.phi)>>INT32_TRIG_FRAC));// << (REF_ANGLE_FRAC - INT32_ANGLE_FRAC);
   }
 
 }

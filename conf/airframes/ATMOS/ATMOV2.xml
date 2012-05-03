@@ -109,10 +109,9 @@
   <section name="STABILIZATION_ATTITUDE" prefix="STABILIZATION_ATTITUDE_">
     <!-- setpoints -->
     <define name="SP_MAX_PHI"     	value="RadOfDeg(45.)"/>
-    <define name="SP_MAX_THETA"   	value="RadOfDeg(70.)"/> <!-- for plane mode -->
+    <define name="SP_MAX_THETA"   	value="RadOfDeg(120.)"/> <!-- for plane mode -->
     <define name="SP_MAX_PSI"     	value="RadOfDeg(45.)"/>
     <define name="SP_MAX_R"       	value="RadOfDeg(90.)"/>
-    <define name="SP_MAX_Q"       	value="RadOfDeg(50.)"/>
     <define name="SP_MAX_P"       	value="RadOfDeg(90.)"/>
     <define name="DEADBAND_R"     	value="20"/>
     <define name="DEADBAND_A"     	value="20"/>
@@ -173,7 +172,7 @@
    <define name="RC_CLIMB_COEF" 		value ="163"/>
    <!-- BOOZ_SPEED_I_OF_F(1.5) * 20% -->
    <define name="RC_CLIMB_DEAD_BAND"  		value ="160000"/>
-   <!--<define name="NOMINAL_HOVER_THROTTLE" value ="0.36"/>-->
+   <define name="NOMINAL_HOVER_THROTTLE" value ="0.36"/>
 
   </section>
 
