@@ -29,7 +29,7 @@
 #include "generated/airframe.h"
 
 extern uint8_t transition_percentage;
-
+extern int32_t outerloop_throttle_command;
 
 struct PprzLiftDevice {
   // Type and Activation

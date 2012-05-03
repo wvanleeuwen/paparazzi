@@ -174,14 +174,14 @@ void guidance_v_run(bool_t in_flight) {
 
   case GUIDANCE_V_MODE_RC_DIRECT:
     guidance_v_z_sp = ins_ltp_pos.z; // for display only
-    stabilization_cmd[COMMAND_THRUST] = guidance_v_rc_delta_t;
+    outerloop_throttle_command = guidance_v_rc_delta_t;
     break;
 
   case GUIDANCE_V_MODE_RC_CLIMB:
     guidance_v_zd_sp = guidance_v_rc_zd_sp;
     gv_update_ref_from_zd_sp(guidance_v_zd_sp);
     run_hover_loop(in_flight);
-    stabilization_cmd[COMMAND_THRUST] = guidance_v_delta_t;
+    outerloop_throttle_command = guidance_v_delta_t;
     break;
 
   case GUIDANCE_V_MODE_CLIMB:
@@ -193,10 +193,10 @@ void guidance_v_run(bool_t in_flight) {
     gv_update_ref_from_zd_sp(guidance_v_zd_sp);
     run_hover_loop(in_flight);
 #if NO_RC_THRUST_LIMIT
-    stabilization_cmd[COMMAND_THRUST] = guidance_v_delta_t;
+    outerloop_throttle_command = guidance_v_delta_t;
 #else
     // saturate max authority with RC stick
-    stabilization_cmd[COMMAND_THRUST] = Min(guidance_v_rc_delta_t, guidance_v_delta_t);
+    outerloop_throttle_command = Min(guidance_v_rc_delta_t, guidance_v_delta_t);
 #endif
     break;
 
@@ -208,10 +208,10 @@ void guidance_v_run(bool_t in_flight) {
     gv_update_ref_from_z_sp(guidance_v_z_sp);
     run_hover_loop(in_flight);
 #if NO_RC_THRUST_LIMIT
-    stabilization_cmd[COMMAND_THRUST] = guidance_v_delta_t;
+    outerloop_throttle_command = guidance_v_delta_t;
 #else
     // saturate max authority with RC stick
-    stabilization_cmd[COMMAND_THRUST] = Min(guidance_v_rc_delta_t, guidance_v_delta_t);
+    outerloop_throttle_command = Min(guidance_v_rc_delta_t, guidance_v_delta_t);
 #endif
     break;
 
@@ -233,13 +233,13 @@ void guidance_v_run(bool_t in_flight) {
         guidance_v_delta_t = nav_throttle;
       }
 #if NO_RC_THRUST_LIMIT
-      stabilization_cmd[COMMAND_THRUST] = guidance_v_delta_t;
+      outerloop_throttle_command = guidance_v_delta_t;
 #else
       /* use rc limitation if available */
       if (radio_control.status == RC_OK)
-        stabilization_cmd[COMMAND_THRUST] = Min(guidance_v_rc_delta_t, guidance_v_delta_t);
+        outerloop_throttle_command = Min(guidance_v_rc_delta_t, guidance_v_delta_t);
       else
-        stabilization_cmd[COMMAND_THRUST] = guidance_v_delta_t;
+        outerloop_throttle_command = guidance_v_delta_t;
 #endif
       break;
     }
