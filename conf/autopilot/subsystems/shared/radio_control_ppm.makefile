@@ -22,6 +22,6 @@ ifeq ($(NORADIO), False)
   $(TARGET).srcs 	+= $(SRC_ARCH)/subsystems/radio_control/ppm_arch.c
 
   ifeq ($(ARCH),stm32)
-    ap.CFLAGS += -DUSE_TIM2_IRQ
+    ap.CFLAGS += -DUSE_TIM1_IRQ
   endif
 endif
