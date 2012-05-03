@@ -74,6 +74,8 @@ uint8_t percent_from_rc(int channel)
  *    @param output = stab_att_sp_quat
  */
 
+int32_t outerloop_throttle_command = 0;
+
 void Force_Allocation_Laws(void)
 {
   // Blended Output Commands
@@ -132,7 +134,7 @@ void Force_Allocation_Laws(void)
       // lateral acceleration (command) -> roll
       // heading ANGLE -> yaw
 
-      wing->commands[COMMAND_THRUST] = stabilization_cmd[COMMAND_THRUST];
+      wing->commands[COMMAND_THRUST] = outerloop_throttle_command;
       wing->commands[COMMAND_ROLL]   = stab_att_sp_euler.phi;
       wing->commands[COMMAND_PITCH]  = stab_att_sp_euler.theta;
       wing->commands[COMMAND_YAW]    = stab_att_sp_euler.psi;
@@ -152,7 +154,7 @@ void Force_Allocation_Laws(void)
       float CRUISE_THROTTLE = guidance_v_nominal_throttle;
       const float PITCH_TRIM = 0.0f;
 
-      float climb_speed = ((stabilization_cmd[COMMAND_THRUST] - (MAX_PPRZ / 2)) * 2 * MAX_CLIMB);  // MAX_PPRZ
+      float climb_speed = ((outerloop_throttle_command - (MAX_PPRZ / 2)) * 2 * MAX_CLIMB);  // MAX_PPRZ
 
       // Lateral Plane Motion
       wing->commands[COMMAND_ROLL]    = stab_att_sp_euler.phi;
