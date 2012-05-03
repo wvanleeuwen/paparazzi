@@ -165,15 +165,14 @@
    <define name="REF_MAX_ZDD"  			value=" 0.5*9.81"/>
    <define name="REF_MIN_ZD"   			value="-1.5"/>
    <define name="REF_MAX_ZD"   			value=" 1.5"/>
-   <define name="HOVER_KP"    			value="-1067"/>
-   <define name="HOVER_KD"    			value="-600"/>
-   <define name="HOVER_KI"    			value="-55"/>
+   <define name="HOVER_KP"    			value="442"/>
+   <define name="HOVER_KD"    			value="335"/>
+   <define name="HOVER_KI"    			value="9"/>
    <!-- 1.5m/s for full stick : BOOZ_SPEED_I_OF_F(1.5) / (MAX_PPRZ/2) -->
    <define name="RC_CLIMB_COEF" 		value ="163"/>
    <!-- BOOZ_SPEED_I_OF_F(1.5) * 20% -->
    <define name="RC_CLIMB_DEAD_BAND"  		value ="160000"/>
-   <!--<define name="NOMINAL_HOVER_THROTTLE" value ="0.36"/>-->
-
+   <define name="NOMINAL_HOVER_THROTTLE" value ="0.36"/>
   </section>
 
   <section name="AHRS" prefix="AHRS_">
@@ -280,7 +279,7 @@
 
   <firmware name="rotorcraft">
     <define name="ATMOS_RCD" value="TRUE"/>
-    <define name="USE_ADAPT_HOVER" value="TRUE"/>
+    <!--<define name="USE_ADAPT_HOVER" value="TRUE"/>-->
     <define name="USE_KILL_SWITCH_FOR_MOTOR_ARMING" value="TRUE"/>
 <!--   <define name="ADC_CHANNEL_CURRENT" value="ADC_1"/>
    <define name="MilliAmpereOfAdc(adc)" value="((adc)*0.021826172)"/>-->

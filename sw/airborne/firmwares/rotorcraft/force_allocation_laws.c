@@ -149,7 +149,6 @@ void Force_Allocation_Laws(void)
       const float MAX_CLIMB = 3.0f; // m/s
       const float PITCH_OF_VZ = 0.1f;
       const float THROTTLE_INCREMENT = 0.1f;
-      
       float CRUISE_THROTTLE = guidance_v_nominal_throttle;
       const float PITCH_TRIM = 0.0f;
 
@@ -162,6 +161,7 @@ void Force_Allocation_Laws(void)
       wing->commands[COMMAND_THRUST]  = (CRUISE_THROTTLE)
                                       + climb_speed * THROTTLE_INCREMENT
                                       + (-(stab_att_sp_euler.theta * MAX_PPRZ) >> INT32_ANGLE_FRAC ); // MAX_PPRZ
+                                      //+ ((stab_att_sp_euler.theta * MAX_PPRZ) >> INT32_ANGLE_FRAC ); // MAX_PPRZ
 
       wing->commands[COMMAND_PITCH]   = ANGLE_BFP_OF_REAL(PITCH_TRIM + climb_speed * PITCH_OF_VZ / MAX_PPRZ);
 
