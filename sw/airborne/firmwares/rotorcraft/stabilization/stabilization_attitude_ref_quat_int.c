@@ -29,6 +29,7 @@
 #include "subsystems/ahrs.h"
 
 #include "stabilization_attitude_ref_int.h"
+//#include "quat_setpoint_int.c"
 
 #if USE_SETPOINTS_WITH_TRANSITIONS
 #include "firmwares/rotorcraft/stabilization/quat_setpoint_int.h"

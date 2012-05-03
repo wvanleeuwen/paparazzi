@@ -134,7 +134,11 @@ void Force_Allocation_Laws(void)
       /*wing->commands[COMMAND_THRUST]  = (CRUISE_THROTTLE)
                                       + climb_speed * THROTTLE_INCREMENT;
                                       + (stab_att_sp_euler.theta * 2  ); */ // MAX_PPRZ
-      wing->commands[COMMAND_THRUST] = (stab_att_sp_euler.theta * 2  );
+      //wing->commands[COMMAND_THRUST] = (stab_att_sp_euler.theta * 2  );
+
+      wing->commands[COMMAND_THRUST]  = (CRUISE_THROTTLE)
+                                        + climb_speed * THROTTLE_INCREMENT;
+                                        + (stab_att_sp_euler.theta * 2 );
 
 //      wing->commands[COMMAND_PITCH]   = (stab_att_sp_euler.theta ) + ANGLE_BFP_OF_REAL(PITCH_TRIM + climb_speed * PITCH_OF_VZ / MAX_PPRZ);
       wing->commands[COMMAND_PITCH]   = ANGLE_BFP_OF_REAL(PITCH_TRIM + climb_speed * PITCH_OF_VZ / MAX_PPRZ);
@@ -178,5 +182,6 @@ void Force_Allocation_Laws(void)
 
   // INT32_QUAT_OF_AXIS_ANGLE(trim_quat, axis, cmd_trim)
   INT32_QUAT_COMP(stab_att_sp_quat, command_att, trim_quat);
+  //INT32_QUAT_COMP(stab_att_sp_quat, trim_quat, command_att);
 }
 

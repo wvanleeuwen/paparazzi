@@ -1744,8 +1744,17 @@
     <field name="rc_status"       type="uint8" values="OK|LOST|REALLY_LOST"/>
   </message>
 
- <!--213 is free -->
- <!--214 is free -->
+  <message name="DEBUG_FORCE_ALLOCATION" id="213">
+    <field name="dbg1Signed"    type="int32"/>
+    <field name="dbg2Unsigned"  type="uint32"/>
+    <field name="dbg3Unsigned"  type="uint32" />
+    <field name="dbg4Signed"    type="int32"/>
+    <field name="wingCommands" type="int32[]"/>
+  </message>
+
+ 
+
+<!--214 is free -->
  <!--215 is free -->
  <!--216 is free -->
  <!--217 is free -->

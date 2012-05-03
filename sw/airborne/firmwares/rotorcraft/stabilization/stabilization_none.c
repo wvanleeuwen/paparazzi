@@ -43,10 +43,11 @@ void stabilization_none_init(void) {
 }
 
 void stabilization_none_read_rc( void ) {
+    HoverPropsOff();
     #ifdef ATMOS_RCD
     stabilization_none_rc_cmd.p = (int32_t)radio_control.values[RADIO_YAW]/8;
-    stabilization_none_rc_cmd.q = -(int32_t)radio_control.values[RADIO_PITCH]/8;
-    stabilization_none_rc_cmd.r = (int32_t)radio_control.values[RADIO_ROLL]/4;
+    stabilization_none_rc_cmd.q = (int32_t)radio_control.values[RADIO_PITCH]/2;
+    stabilization_none_rc_cmd.r = -(int32_t)radio_control.values[RADIO_ROLL]/6;
     #else
     stabilization_none_rc_cmd.p = (int32_t)radio_control.values[RADIO_ROLL];
     stabilization_none_rc_cmd.q = (int32_t)radio_control.values[RADIO_PITCH];
@@ -56,6 +57,7 @@ void stabilization_none_read_rc( void ) {
 
 void stabilization_none_enter(void) {
   INT_RATES_ZERO(stabilization_none_rc_cmd);
+  HoverPropsOff();
 }
 
 void stabilization_none_run(bool_t in_flight __attribute__ ((unused))) {

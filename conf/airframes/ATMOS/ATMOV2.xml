@@ -30,8 +30,8 @@
 
   <section name="AUTOPILOT">
     <define name="MODE_MANUAL" value="AP_MODE_ATTITUDE_DIRECT"/>
-    <define name="MODE_AUTO1"  value="AP_MODE_ATTITUDE_DIRECT"/>
-    <define name="MODE_AUTO2"  value="AP_MODE_RC_DIRECT"/>
+    <define name="MODE_AUTO1"  value="AP_MODE_RC_DIRECT"/>
+    <define name="MODE_AUTO2"  value="AP_MODE_RATE_DIRECT"/>
     
     <define name="AUTOPILOT_KILL_WITHOUT_AHRS"  value="TRUE"/>
 
@@ -101,17 +101,18 @@
     <define name="SP_MAX_Q" 		value="10000"/>
     <define name="SP_MAX_R" 		value="10000"/>
 
-    <define name="GAIN_P" 		value="-400"/>
-    <define name="GAIN_Q" 		value="-400"/>
-    <define name="GAIN_R" 		value="-350"/>
+    <define name="GAIN_P" 		value="200"/>
+    <define name="GAIN_Q" 		value="200"/>
+    <define name="GAIN_R" 		value="200"/>
   </section>
 
   <section name="STABILIZATION_ATTITUDE" prefix="STABILIZATION_ATTITUDE_">
     <!-- setpoints -->
     <define name="SP_MAX_PHI"     	value="RadOfDeg(45.)"/>
-    <define name="SP_MAX_THETA"   	value="RadOfDeg(100.)"/> <!-- for plane mode -->
+    <define name="SP_MAX_THETA"   	value="RadOfDeg(70.)"/> <!-- for plane mode -->
     <define name="SP_MAX_PSI"     	value="RadOfDeg(45.)"/>
     <define name="SP_MAX_R"       	value="RadOfDeg(90.)"/>
+    <define name="SP_MAX_Q"       	value="RadOfDeg(50.)"/>
     <define name="SP_MAX_P"       	value="RadOfDeg(90.)"/>
     <define name="DEADBAND_R"     	value="20"/>
     <define name="DEADBAND_A"     	value="20"/>
@@ -133,16 +134,16 @@
     <define name="REF_MAX_PDOT" 	value="RadOfDeg(1800.)"/>
 
     <!-- feedback -->
-    <define name="PHI_PGAIN"  		value="1433"/>
-    <define name="PHI_DGAIN"  		value="972"/>
-    <define name="PHI_IGAIN"  		value="5"/>
+    <define name="PHI_PGAIN"  		value="1304"/>
+    <define name="PHI_DGAIN"  		value="1062"/>
+    <define name="PHI_IGAIN"  		value="0"/>
 
-    <define name="THETA_PGAIN"  	value="308"/>
-    <define name="THETA_DGAIN"  	value="214"/>
-    <define name="THETA_IGAIN"  	value="5"/>
+    <define name="THETA_PGAIN"  	value="243"/>
+    <define name="THETA_DGAIN"  	value="180"/>
+    <define name="THETA_IGAIN"  	value="0"/>
 
-    <define name="PSI_PGAIN"  		value="2800"/>
-    <define name="PSI_DGAIN"  		value="1950"/>
+    <define name="PSI_PGAIN"  		value="2520"/>
+    <define name="PSI_DGAIN"  		value="1722"/>
     <define name="PSI_IGAIN"  		value="6"/>
 
     <!-- feedforward -->
@@ -283,6 +284,7 @@
  </modules>
 
   <firmware name="rotorcraft">
+<!--    <define name="USE_SETPOINTS_WITH_TRANSITIONS" value="TRUE"/>-->
     <define name="ATMOS_RCD" value="TRUE"/>
     <define name="RC_LOST_MODE" value="PPRZ_MODE_AUTO2"/>
     <define name="USE_ADAPT_HOVER" value="TRUE"/>
