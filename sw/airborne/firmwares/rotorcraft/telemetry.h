@@ -115,6 +115,7 @@ extern uint8_t telemetry_mode_Main_DefaultChannel;
 				      &radio_control.values[RADIO_YAW],	            \
 				      &radio_control.values[RADIO_THROTTLE],        \
 				      &radio_control.values[RADIO_MODE],            \
+				      &radio_control.values[RADIO_AUX3],            \
 				      _kill_switch,                                        \
 				      &radio_control.status);}
 #else /* ! RADIO_CONTROL */
