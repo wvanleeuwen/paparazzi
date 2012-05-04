@@ -39,7 +39,7 @@ void transveh_transition_periodic(void) {
     PrepForTransitionToHover();
     transitionProgress = 100;
     transition_percentage = 100;
-    atmos_pitch_factor = 0;
+    //atmos_pitch_factor = 0;
   }
   else if (required_transition_state == FORWARD && transitionProgress > 0) {
     if (pctIsBetween(transitionProgress,10,80))

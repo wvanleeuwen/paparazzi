@@ -43,7 +43,7 @@ void stabilization_none_init(void) {
 }
 
 void stabilization_none_read_rc( void ) {
-    HoverPropsOff();
+    //HoverPropsOff();
     #ifdef ATMOS_RCD
     stabilization_none_rc_cmd.p = (int32_t)radio_control.values[RADIO_YAW]/8;
     stabilization_none_rc_cmd.q = (int32_t)radio_control.values[RADIO_PITCH]/2;
@@ -57,7 +57,7 @@ void stabilization_none_read_rc( void ) {
 
 void stabilization_none_enter(void) {
   INT_RATES_ZERO(stabilization_none_rc_cmd);
-  HoverPropsOff();
+  //HoverPropsOff();
 }
 
 void stabilization_none_run(bool_t in_flight __attribute__ ((unused))) {
@@ -65,6 +65,6 @@ void stabilization_none_run(bool_t in_flight __attribute__ ((unused))) {
   stabilization_cmd[COMMAND_ROLL]  = stabilization_none_rc_cmd.p;
   stabilization_cmd[COMMAND_PITCH] = stabilization_none_rc_cmd.q;
   stabilization_cmd[COMMAND_YAW]   = stabilization_none_rc_cmd.r;
-  HoverPropsOff();
+  //HoverPropsOff();
   atmos_pitch_factor = 1;
 }

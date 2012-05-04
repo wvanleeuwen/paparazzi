@@ -149,7 +149,7 @@ void Force_Allocation_Laws(void)
       // heading ANGLE -> integrated
 
       const float MAX_CLIMB = 3.0f; // m/s
-      const float PITCH_OF_VZ = 0.1f;
+      const float PITCH_OF_VZ = 0.4f;
       const float THROTTLE_INCREMENT = 0.1f;
       float CRUISE_THROTTLE = guidance_v_nominal_throttle;
       const float PITCH_TRIM = 0.0f;

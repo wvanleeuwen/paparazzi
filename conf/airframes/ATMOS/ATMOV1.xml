@@ -50,8 +50,8 @@
 
 
   <command_laws>
-    <set servo="AILEVON_LEFT"   value="@YAW+(atmos_pitch_factor*@PITCH)" />
-    <set servo="AILEVON_RIGHT"  value="@YAW-(atmos_pitch_factor*@PITCH)" />
+    <set servo="AILEVON_LEFT"   value="@YAW+(atmos_pitch_factor*2*@PITCH)" />
+    <set servo="AILEVON_RIGHT"  value="@YAW-(atmos_pitch_factor*2*@PITCH)" />
     <!--<set servo="ALWAYSDOWN"     value="ahrs.ltp_to_body_euler.theta/ANGLE_BFP_OF_REAL(M_PI)*9600" />-->
     <set servo="RUDDER"         value="@YAW"/>
   </command_laws>
