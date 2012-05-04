@@ -306,7 +306,7 @@ static inline void autopilot_check_motors_on( void ) {
 	if (radio_control.values[RADIO_KILL_SWITCH]>0 && (!ahrs_is_aligned() || autopilot_first_boot))	
 		autopilot_rc_unkilled_startup = TRUE;
 	if (autopilot_rc_unkilled_startup == TRUE)
-		if (radio_control.values[RADIO_KILL_SWITCH]<0 && ahrs_is_aligned() && !autopilot_first_boot && radio_control.values[RADIO_MODE] < -200)
+		if (radio_control.values[RADIO_KILL_SWITCH]<0 && ahrs_is_aligned() && !autopilot_first_boot && radio_control.values[RADIO_MODE] < -4000)
 			autopilot_rc_unkilled_startup = FALSE;
 	if (autopilot_first_boot && ahrs_is_aligned()){
 		#ifdef AHRS_ALIGNER_LED
@@ -315,7 +315,7 @@ static inline void autopilot_check_motors_on( void ) {
 		RunOnceEvery(512,{autopilot_first_boot = FALSE; LED_ON(AHRS_ALIGNER_LED);})
 		}
 	if (!autopilot_motors_on && !autopilot_first_boot && autopilot_mode1_kill){
-		autopilot_motors_on=radio_control.values[RADIO_KILL_SWITCH]>0 && radio_control.values[RADIO_MODE] < -200 && THROTTLE_STICK_DOWN() && YAW_STICK_CENTERED() && PITCH_STICK_CENTERED() && ROLL_STICK_CENTERED() && ahrs_is_aligned() && !autopilot_rc_unkilled_startup;
+		autopilot_motors_on=radio_control.values[RADIO_KILL_SWITCH]>0 && radio_control.values[RADIO_MODE] < -4000 && THROTTLE_STICK_DOWN() && YAW_STICK_CENTERED() && PITCH_STICK_CENTERED() && ROLL_STICK_CENTERED() && ahrs_is_aligned() && !autopilot_rc_unkilled_startup;
 		  if (!autopilot_motors_on && radio_control.values[RADIO_KILL_SWITCH]>0){
 		    #ifdef AHRS_ALIGNER_LED
   		      RunOnceEvery(2, {LED_TOGGLE(AHRS_ALIGNER_LED);});
@@ -325,7 +325,7 @@ static inline void autopilot_check_motors_on( void ) {
 	else{ 
 		autopilot_motors_on=radio_control.values[RADIO_KILL_SWITCH]>0 && ahrs_is_aligned() && !autopilot_rc_unkilled_startup;
 		if(autopilot_motors_on)
-		  autopilot_mode1_kill = radio_control.values[RADIO_MODE]<-200;
+		  autopilot_mode1_kill = radio_control.values[RADIO_MODE]<-4000;
 		}
 	}
 #elif defined AUTOPILOT_THROTTLE_INSTANT_START_WITH_SAFETIES
@@ -333,7 +333,7 @@ static inline void autopilot_check_motors_on( void ) {
 	if (!THROTTLE_STICK_DOWN() && (!ahrs_is_aligned() || autopilot_first_boot))	
 		autopilot_rc_unkilled_startup = TRUE;
 	if (autopilot_rc_unkilled_startup)
-		if (THROTTLE_STICK_DOWN() && ahrs_is_aligned() && !autopilot_first_boot && radio_control.values[RADIO_MODE] < -200)
+		if (THROTTLE_STICK_DOWN() && ahrs_is_aligned() && !autopilot_first_boot && radio_control.values[RADIO_MODE] < -4000)
 			autopilot_rc_unkilled_startup = FALSE;
 	if (autopilot_first_boot && ahrs_is_aligned()){
 		#ifdef AHRS_ALIGNER_LED
@@ -342,8 +342,8 @@ static inline void autopilot_check_motors_on( void ) {
 		RunOnceEvery(512,{autopilot_first_boot = FALSE; LED_ON(AHRS_ALIGNER_LED);})
 		}	
 	if (!autopilot_motors_on && !autopilot_first_boot && autopilot_mode1_kill){
-		autopilot_motors_on=!THROTTLE_STICK_DOWN() && radio_control.values[RADIO_MODE] < -200 && YAW_STICK_CENTERED() && PITCH_STICK_CENTERED() && ROLL_STICK_CENTERED() && ahrs_is_aligned() && !autopilot_rc_unkilled_startup;
-		  if (!autopilot_motors_on && ahrs_is_aligned() && (radio_control.values[RADIO_MODE] > -200 || !YAW_STICK_CENTERED() || !PITCH_STICK_CENTERED() || !ROLL_STICK_CENTERED() || autopilot_rc_unkilled_startup)){
+		autopilot_motors_on=!THROTTLE_STICK_DOWN() && radio_control.values[RADIO_MODE] < -4000 && YAW_STICK_CENTERED() && PITCH_STICK_CENTERED() && ROLL_STICK_CENTERED() && ahrs_is_aligned() && !autopilot_rc_unkilled_startup;
+		  if (!autopilot_motors_on && ahrs_is_aligned() && (radio_control.values[RADIO_MODE] > -4000 || !YAW_STICK_CENTERED() || !PITCH_STICK_CENTERED() || !ROLL_STICK_CENTERED() || autopilot_rc_unkilled_startup)){
 		    #ifdef AHRS_ALIGNER_LED
   		      RunOnceEvery(2, {LED_TOGGLE(AHRS_ALIGNER_LED);});
 		    #endif
@@ -355,7 +355,7 @@ static inline void autopilot_check_motors_on( void ) {
 	else{ 
 		autopilot_motors_on=!THROTTLE_STICK_DOWN() && ahrs_is_aligned() && !autopilot_rc_unkilled_startup;
 		if(autopilot_motors_on)
-		  autopilot_mode1_kill = radio_control.values[RADIO_MODE]<-200;
+		  autopilot_mode1_kill = radio_control.values[RADIO_MODE]<-4000;
 		}
 	}
 #elif defined AUTOPILOT_INSTANT_START
