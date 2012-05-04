@@ -28,6 +28,7 @@ uint8_t activeGainSet;
 
 void transveh_multigain_init(void) {
   activeGainSet = 1;
+  SetGainSetA();
   //transveh_multigain_setGainSet(&stabilization_gains,&stabilization_gainsA);
 }
 
@@ -91,7 +92,7 @@ void SetGainSetC(void) {
   //stabilization_gains = stabilization_gainsC;
 }
 
-void multiGain_SetGainSetHandler(uint8_t v) {
+void multiGain_SetGainSetHandler(int8_t v) {
   activeGainSet = v;
   if (activeGainSet == 3) {
     SetGainSetC();

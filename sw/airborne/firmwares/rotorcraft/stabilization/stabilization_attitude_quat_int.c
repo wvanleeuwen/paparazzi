@@ -43,7 +43,7 @@ struct Int32AttitudeGains stabilization_gains_dummy = {
   {STABILIZATION_ATTITUDE_PHI_IGAIN, STABILIZATION_ATTITUDE_THETA_IGAIN, STABILIZATION_ATTITUDE_PSI_IGAIN }
 };
 
-struct Int32AttitudeGains* stabilization_gains = &stabilization_gains_dummy;
+volatile struct Int32AttitudeGains* stabilization_gains = &stabilization_gains_dummy;
 
 /* warn if some gains are still negative */
 #if (STABILIZATION_ATTITUDE_PHI_PGAIN < 0) ||   \
