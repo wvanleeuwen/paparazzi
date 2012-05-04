@@ -106,7 +106,7 @@ void Force_Allocation_Laws(void)
   if (transition_percentage < 30) {
     //fixedwing
     atmos_pitch_factor = 1;
-    SetGainSetA();
+    SetGainSetB();
   }
   else if (transition_percentage >= 30 && transition_percentage < 60) {
     //fixedwing+rotor

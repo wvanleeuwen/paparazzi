@@ -21,5 +21,6 @@ extern void SetGainSetA(void);
 extern void SetGainSetB(void);
 extern void SetGainSetC(void);
 extern void multiGain_SetGainSetHandler(int8_t v);
+extern void transveh_multigain_setGainSet(struct Int32AttitudeGains * gainSet);
 
 #endif  /* TRANSVEH_MULTIGAIN_H */
