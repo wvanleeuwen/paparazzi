@@ -26,6 +26,7 @@
 #define __MISC_MATH_H__
 
 #include <math.h>
+#include <stdint.h>
 
 #define BOUND(x, min, max) {                    \
     if ((x) > (max)) (x) = (max);               \
