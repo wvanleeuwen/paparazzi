@@ -393,11 +393,12 @@ toytronics_set_sp_hover_forward_from_rc()
   double rcp = rc->pitch;
   double rcr = rc->roll;
   double rcy = apply_deadband(rc->yaw, SETPOINT_DEADBAND);
+  int8_t rcx = rc->aux3 + 2;
 
   //****************rc sticks sensitivity adjustment****************
-  rc_sensitizer(&rcr, setpoint_rc_sensitivity.x);
-  rc_sensitizer(&rcp, setpoint_rc_sensitivity.y);
-  rc_sensitizer(&rcy, setpoint_rc_sensitivity.z);
+  rc_sensitizer(&rcr, rcx);//setpoint_rc_sensitivity.x);
+  rc_sensitizer(&rcp, rcx);//setpoint_rc_sensitivity.y);
+  rc_sensitizer(&rcy, rcx);//setpoint_rc_sensitivity.z);
   //****************rc sticks sensitivity adjustment****************
 
 
@@ -514,11 +515,12 @@ toytronics_set_sp_absolute_forward_from_rc()
   double rcp = rc->pitch;
   double rcr = apply_deadband(rc->roll, SETPOINT_DEADBAND);
   double rcy = apply_deadband(rc->yaw, SETPOINT_DEADBAND);
+  int8_t rcx = rc->aux3 + 2;
 
   //****************rc sticks sensitivity adjustment****************
-  rc_sensitizer(&rcr, setpoint_rc_sensitivity.x);
-  rc_sensitizer(&rcp, setpoint_rc_sensitivity.y);
-  rc_sensitizer(&rcy, setpoint_rc_sensitivity.z);
+  rc_sensitizer(&rcr, rcx);//setpoint_rc_sensitivity.x);
+  rc_sensitizer(&rcp, rcx);//setpoint_rc_sensitivity.y);
+  rc_sensitizer(&rcy, rcx);//setpoint_rc_sensitivity.z);
   //****************rc sticks sensitivity adjustment****************
 
   #ifdef AUTOPILOT_LOBATT_WING_WAGGLE
@@ -589,11 +591,12 @@ toytronics_set_sp_incremental_from_rc()
   double rcp = apply_deadband(rc->pitch, SETPOINT_DEADBAND);
   double rcr = apply_deadband(rc->roll, SETPOINT_DEADBAND);
   double rcy = apply_deadband(rc->yaw, SETPOINT_DEADBAND);
+  int8_t rcx = rc->aux3 + 2;
 
   //****************rc sticks sensitivity adjustment****************
-  rc_sensitizer(&rcr, setpoint_rc_sensitivity.x);
-  rc_sensitizer(&rcp, setpoint_rc_sensitivity.y);
-  rc_sensitizer(&rcy, setpoint_rc_sensitivity.z);
+  rc_sensitizer(&rcr, rcx);//setpoint_rc_sensitivity.x);
+  rc_sensitizer(&rcp, rcx);//setpoint_rc_sensitivity.y);
+  rc_sensitizer(&rcy, rcx);//setpoint_rc_sensitivity.z);
   //****************rc sticks sensitivity adjustment****************
 
   #ifdef AUTOPILOT_LOBATT_WING_WAGGLE
