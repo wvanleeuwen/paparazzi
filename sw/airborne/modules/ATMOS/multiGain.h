@@ -20,6 +20,6 @@ extern void transveh_multigain_periodic(void);
 extern void SetGainSetA(void);
 extern void SetGainSetB(void);
 extern void SetGainSetC(void);
-extern void multiGain_SetGainSetHandler(uint8_t v);
+extern void multiGain_SetGainSetHandler(int8_t v);
 
 #endif  /* TRANSVEH_MULTIGAIN_H */

@@ -96,7 +96,7 @@ void stabilization_attitude_enter(void) {
 #define OFFSET_AND_ROUND(_a, _b) (((_a)+(1<<((_b)-1)))>>(_b))
 #define OFFSET_AND_ROUND2(_a, _b) (((_a)+(1<<((_b)-1))-((_a)<0?1:0))>>(_b))
 
-static void attitude_run_ff(int32_t ff_commands[], struct Int32AttitudeGains *gains, struct Int32Rates *ref_accel)
+static void attitude_run_ff(int32_t ff_commands[], volatile struct Int32AttitudeGains *gains, struct Int32Rates *ref_accel)
 {
   /* Compute feedforward based on reference acceleration */
 
@@ -105,7 +105,7 @@ static void attitude_run_ff(int32_t ff_commands[], struct Int32AttitudeGains *ga
   ff_commands[COMMAND_YAW]   = GAIN_PRESCALER_FF * gains->dd.z * RATE_FLOAT_OF_BFP(ref_accel->r) / (1 << 7);
 }
 
-static void attitude_run_fb(int32_t fb_commands[], struct Int32AttitudeGains *gains, struct Int32Quat *att_err,
+static void attitude_run_fb(int32_t fb_commands[], volatile struct Int32AttitudeGains *gains, struct Int32Quat *att_err,
     struct Int32Rates *rate_err, struct Int32Quat *sum_err)
 {
   /*  PID feedback */
