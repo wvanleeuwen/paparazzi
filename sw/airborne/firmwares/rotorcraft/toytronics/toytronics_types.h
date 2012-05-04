@@ -24,6 +24,8 @@ typedef struct rc_t {
   double pitch;
   double roll;
   double yaw;
+  int8_t aux3;
+  int8_t mode;
   /* uint8_t gear; */
   /* uint8_t enable; */
   /* uint8_t aux2; */

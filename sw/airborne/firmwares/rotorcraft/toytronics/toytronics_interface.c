@@ -45,12 +45,14 @@ const euler_t * get_e_n2b(void){
 }
 
 const rc_t * get_rc(void){
-  static rc_t rc = {0,0,0,0};
+  static rc_t rc = {0,0,0,0,0,0};
 
   rc.roll  = ((double)radio_control.values[RADIO_ROLL])/MAX_PPRZ;
   rc.pitch = ((double)radio_control.values[RADIO_PITCH])/MAX_PPRZ;
   rc.yaw   = ((double)radio_control.values[RADIO_YAW])/MAX_PPRZ;
-
+  rc.throttle   = ((double)radio_control.values[RADIO_THROTTLE])/MAX_PPRZ;
+  rc.mode   = (int8_t)(radio_control.values[RADIO_MODE]/MAX_PPRZ);
+  rc.aux3   = (int8_t)(radio_control.values[RADIO_AUX3]/MAX_PPRZ);
   return &rc;
 }
 
