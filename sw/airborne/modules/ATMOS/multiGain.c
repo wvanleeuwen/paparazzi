@@ -37,6 +37,8 @@ void transveh_multigain_periodic(void) {
 
 //void transveh_multigain_setGainSet(struct Int32Vect3 target, struct Int32Vect3 * gainSet) {
 void transveh_multigain_setGainSet(struct Int32AttitudeGains * gainSet) {
+  stabilization_gains = gainSet;
+
   //struct Int32AttitudeGains* stabilization_gains_ptr;
   //stabilization_gains_ptr = &stabilization_gains;
   //*stabilization_gains_ptr = *gainSet;
@@ -48,6 +50,7 @@ void transveh_multigain_setGainSet(struct Int32AttitudeGains * gainSet) {
   stabilization_gains.i = gainSet->i;
   stabilization_gains.d = gainSet->d;
   stabilization_gains.dd = gainSet->dd;*/
+/*
   VECT3_ASSIGN(stabilization_gains.p,
                  gainSet.p.x,
                  gainSet.p.y,
@@ -67,7 +70,7 @@ void transveh_multigain_setGainSet(struct Int32AttitudeGains * gainSet) {
                  gainSet.dd.x,
                  gainSet.dd.y,
                  gainSet.dd.z);
-
+*/
 }
 
 void SetGainSetA(void) {

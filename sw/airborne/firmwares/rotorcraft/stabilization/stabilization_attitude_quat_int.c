@@ -36,12 +36,14 @@
 #include "subsystems/ahrs.h"
 #include "generated/airframe.h"
 
-struct Int32AttitudeGains stabilization_gains = {
+struct Int32AttitudeGains stabilization_gains_dummy = {
   {STABILIZATION_ATTITUDE_PHI_PGAIN, STABILIZATION_ATTITUDE_THETA_PGAIN, STABILIZATION_ATTITUDE_PSI_PGAIN },
   {STABILIZATION_ATTITUDE_PHI_DGAIN, STABILIZATION_ATTITUDE_THETA_DGAIN, STABILIZATION_ATTITUDE_PSI_DGAIN },
   {STABILIZATION_ATTITUDE_PHI_DDGAIN, STABILIZATION_ATTITUDE_THETA_DDGAIN, STABILIZATION_ATTITUDE_PSI_DDGAIN },
   {STABILIZATION_ATTITUDE_PHI_IGAIN, STABILIZATION_ATTITUDE_THETA_IGAIN, STABILIZATION_ATTITUDE_PSI_IGAIN }
 };
+
+struct Int32AttitudeGains* stabilization_gains = &stabilization_gains_dummy;
 
 /* warn if some gains are still negative */
 #if (STABILIZATION_ATTITUDE_PHI_PGAIN < 0) ||   \
@@ -67,6 +69,8 @@ int32_t stabilization_att_ff_cmd[COMMANDS_NB];
 #define GAIN_PRESCALER_P 48
 #define GAIN_PRESCALER_D 48
 #define GAIN_PRESCALER_I 48
+
+
 
 void stabilization_attitude_init(void) {
 
@@ -163,10 +167,10 @@ void stabilization_attitude_run(bool_t enable_integrator) {
   }
 
   /* compute the feed forward command */
-  attitude_run_ff(stabilization_att_ff_cmd, &stabilization_gains, &stab_att_ref_accel);
+  attitude_run_ff(stabilization_att_ff_cmd, stabilization_gains, &stab_att_ref_accel);
 
   /* compute the feed back command */
-  attitude_run_fb(stabilization_att_fb_cmd, &stabilization_gains, &att_err, &rate_err, &stabilization_att_sum_err_quat);
+  attitude_run_fb(stabilization_att_fb_cmd, stabilization_gains, &att_err, &rate_err, &stabilization_att_sum_err_quat);
 
   /* sum feedforward and feedback */
   stabilization_cmd[COMMAND_ROLL] = stabilization_att_fb_cmd[COMMAND_ROLL] + stabilization_att_ff_cmd[COMMAND_ROLL];

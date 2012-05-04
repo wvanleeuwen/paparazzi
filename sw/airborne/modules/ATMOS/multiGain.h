@@ -4,7 +4,7 @@
 #include "std.h"
 
 #define multiGain_SetKiPhi(_val) { \
-    stabilization_gains.i.x = _val;             \
+    stabilization_gains->i.x = _val;             \
     stabilization_att_sum_err.phi = 0;          \
   }
 

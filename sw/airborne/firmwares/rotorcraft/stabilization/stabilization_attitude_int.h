@@ -35,7 +35,7 @@ struct Int32AttitudeGains {
   struct Int32Vect3  i;
 };
 
-extern struct Int32AttitudeGains  stabilization_gains;
+extern struct Int32AttitudeGains*  stabilization_gains;
 extern struct Int32Eulers stabilization_att_sum_err;
 
 extern int32_t stabilization_att_fb_cmd[COMMANDS_NB];
