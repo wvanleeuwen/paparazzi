@@ -44,9 +44,9 @@ Note: a command may be reversed by exchanging min and max values
 <!DOCTYPE radio SYSTEM "radio.dtd">
 <radio name="FlySky FS-CT6B" data_min="700" data_max="2300" sync_min="4000" sync_max="15000" pulse_type="NEGATIVE">
   <channel ctl="A" function="ROLL" min="1200" neutral="1500" max="1800" average="0"/>     <!-- right stick left/right -->
-  <channel ctl="B" function="PITCH" min="1200" neutral="1500" max="1800" average="0"/>    <!-- left stick up/down -->
+  <channel ctl="B" function="PITCH" min="1800" neutral="1500" max="1200" average="0"/>    <!-- left stick up/down -->
   <channel ctl="C" function="THROTTLE" min="1200" neutral="1200" max="1800" average="0"/>	<!-- right stick up/down -->
-  <channel ctl="D" function="YAW" min="1800" neutral="1500" max="1200" average="0"/>	<!-- left stick left/right-->
-  <channel ctl="E" function="AUX3" min="1200" neutral="1500" max="1800" average="0"/>     <!-- right switch -->
-  <channel ctl="F" function="MODE" min="1200" neutral="1500" max="1800" average="0"/>     <!-- left switch -->
+  <channel ctl="D" function="YAW" min="1200" neutral="1500" max="1800" average="0"/>	<!-- left stick left/right-->
+  <channel ctl="E" function="AUX3" min="1800" neutral="1500" max="1200" average="0"/>     <!-- right switch -->
+  <channel ctl="F" function="MODE" min="1800" neutral="1500" max="1200" average="0"/>     <!-- left switch -->
 </radio>
