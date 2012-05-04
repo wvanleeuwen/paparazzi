@@ -126,7 +126,7 @@ void autopilot_periodic(void) {
         autopilot_in_flight, autopilot_motors_on);
   }
 #ifdef AUTOPILOT_LOBATT_WING_WAGGLE
-  if (electrical.vsupply < (MIN_BAT_LEVEL * 10)){
+  if (electrical.vsupply < (MIN_BAT_LEVEL * 10) && electrical.vsupply > (5 * 10)){
     RunOnceEvery(autopilot_lobatt_wing_waggle_interval,{setpoint_lobatt_wing_waggle_num=0;})
   }
 #endif
