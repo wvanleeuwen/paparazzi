@@ -39,60 +39,59 @@ void transveh_multigain_periodic(void) {
 
 }
 
-//void transveh_multigain_setGainSet(struct Int32Vect3 target, struct Int32Vect3 * gainSet) {
+struct Int32AttitudeGains stabilization_blended;
+
+void SetGainPercentage(uint32_t percent)  // percent in INT32_PERCENTAGE_FRAC
+{
+ struct Int32AttitudeGains* ga, gb, gblend;
+  int ratio;
+
+  gblend = &stabilization_blended;
+
+  if (percent < ((1<<INT32_PERCENTAGE_FRAC)/2))
+  {
+    ga = &stabilization_gainsA;
+    ratio = percent * 2;
+  }
+  else
+  {
+    ga = &stabilization_gainsC;
+    ratio = ((1<<INT32_PERCENTAGE_FRAC) - percent) * 2;
+  }
+  gb = &stabilization_gainsB;
+
+  int64_t g1, g2, gbl; 
+
+  for (int i=0; i < (sizeof(struct Int32AttitudeGains)/sizeof(int32_t)); i++)
+  {
+    g1 = *(((int32_t*) ga) + i);
+    g1 *= (1<<INT32_PERCENTAGE_FRAC) - ratio;
+    g2 = *(((int32_t*) gb) + i);
+    g2 *= ratio;
+
+    gbl = (g1 + g2) >> INT32_PERCENTAGE_FRACs;
+    
+    *(((int32_t*) gblend) + i) = (int32_t) gbl;
+  }
+
+  stabilization_gains = gblend;
+  
+}
+
 void transveh_multigain_setGainSet(struct Int32AttitudeGains * gainSet) {
   stabilization_gains = gainSet;
-
-  //struct Int32AttitudeGains* stabilization_gains_ptr;
-  //stabilization_gains_ptr = &stabilization_gains;
-  //*stabilization_gains_ptr = *gainSet;
-  //&stabilization_gains.d = &gainSet->d;
-  //target->d = &gainSet->d;
-  //target->d = &gainSetd;
-  //target = gainSet;
-  /*stabilization_gains.p = gainSet->p;
-  stabilization_gains.i = gainSet->i;
-  stabilization_gains.d = gainSet->d;
-  stabilization_gains.dd = gainSet->dd;*/
-/*
-  VECT3_ASSIGN(stabilization_gains.p,
-                 gainSet.p.x,
-                 gainSet.p.y,
-                 gainSet.p.z);
-
-  VECT3_ASSIGN(stabilization_gains.d,
-                 gainSet.d.x,
-                 gainSet.d.y,
-                 gainSet.d.z);
-
-  VECT3_ASSIGN(stabilization_gains.i,
-                 gainSet.i.x,
-                 gainSet.i.y,
-                 gainSet.i.z);
-
-  VECT3_ASSIGN(stabilization_gains.dd,
-                 gainSet.dd.x,
-                 gainSet.dd.y,
-                 gainSet.dd.z);
-*/
 }
 
 void SetGainSetA(void) {
   transveh_multigain_setGainSet(&stabilization_gainsA);
-  //stabilization_gains.d = &(stabilization_gainsA.d);
-  //stabilization_gains = stabilization_gainsA;
 }
 
 void SetGainSetB(void) {
   transveh_multigain_setGainSet(&stabilization_gainsB);
-  //transveh_multigain_setGainSet(&stabilization_gains,&stabilization_gainsB);
-  //stabilization_gains = stabilization_gainsB;
 }
 
 void SetGainSetC(void) {
   transveh_multigain_setGainSet(&stabilization_gainsC);
-  //transveh_multigain_setGainSet(&stabilization_gainsC);
-  //stabilization_gains = stabilization_gainsC;
 }
 
 void multiGain_SetGainSetHandler(int8_t v) {

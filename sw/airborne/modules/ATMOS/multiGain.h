@@ -20,6 +20,9 @@ extern void transveh_multigain_periodic(void);
 extern void SetGainSetA(void);
 extern void SetGainSetB(void);
 extern void SetGainSetC(void);
+
+extern void SetGainPercentage(uint8_t percent);
+
 extern void multiGain_SetGainSetHandler(int8_t v);
 extern void transveh_multigain_setGainSet(struct Int32AttitudeGains * gainSet);
 
