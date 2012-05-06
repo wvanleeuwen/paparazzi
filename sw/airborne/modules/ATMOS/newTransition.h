@@ -28,6 +28,8 @@ extern enum TransitionState required_transition_state;
 
 extern int transition_setting;
 
+extern int32_t thrustActivationRatio;
+
 extern float atmos_pitch_factor;
 extern float atmos_yaw_factor;
 

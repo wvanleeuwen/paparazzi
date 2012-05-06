@@ -9,9 +9,13 @@
 #include "firmwares/rotorcraft/force_allocation_laws.h"
 #include "generated/airframe.h"
 
+int32_t thrustActivationRatio = 0;
 int32_t transveh_orig_thrust_coef[SUPERVISION_NB_MOTOR] = SUPERVISION_THRUST_COEF;
 //float transveh_prep_thrust_coef_scaling[SUPERVISION_NB_MOTOR] = TRANSVEH_PREP_THRUST_COEF_SCALING;
 int8_t transveh_prep_thrust_coef_scaling[SUPERVISION_NB_MOTOR] = { -22, -22, 11, 11 };
+
+int8_t transveh_propIsForwardThruster[SUPERVISION_NB_MOTOR] = { 0 , 0 , 1 , 1 };
+
 //int8_t transveh_prep_thrust_coef_scaling[SUPERVISION_NB_MOTOR] = { -22, -22, 44, 44 };
 enum TransitionState transition_state;
 enum TransitionState required_transition_state;
@@ -110,7 +114,9 @@ void transveh_transition_smooth_transition(int32_t desired, int32_t *actual) {
 // amount between 0 and 100
 void PrepForTransitionToForwardSmoothly(uint8_t amount) {
   for (uint8_t i = 0; i < SUPERVISION_NB_MOTOR; i++) {
-    int32_t new_thrust_coef = transveh_orig_thrust_coef[i] + (float)transveh_orig_thrust_coef[i]*(transveh_prep_thrust_coef_scaling[i]*(amount/10000));
+    int32_t new_thrust_coef =   transveh_orig_thrust_coef[i]
+                + (float)transveh_orig_thrust_coef[i]*(transveh_prep_thrust_coef_scaling[i]*(amount/10000));
+
     //int32_t new_thrust_coef = 256;
     if (new_thrust_coef < -SUPERVISION_SCALE) {
       thrust_coef[i] = -SUPERVISION_SCALE;
@@ -128,5 +134,36 @@ void PrepForTransitionToForwardSmoothly(uint8_t amount) {
 void PrepForTransitionToHover(void) {
   for (uint8_t i = 0; i < SUPERVISION_NB_MOTOR; i++) {
     thrust_coef[i] = transveh_orig_thrust_coef[i];
+  }
+}
+
+
+//amount in PERCENTAGE frac
+void newTransition_ThrustActivationRatioSet(uint32_t amount) {
+  /* ONLY CORRECT FOR POSITIVE THRUST COEFFICIENTS !!! */
+  for (uint8_t i = 0; i < SUPERVISION_NB_MOTOR; i++) {
+    int32_t new_thrust_coef;
+    if (transveh_propIsForwardThruster[i]) {
+      new_thrust_coef = transveh_orig_thrust_coef[i]
+                        + (SUPERVISION_SCALE-transveh_orig_thrust_coef[i])*(amount/(1<<INT32_PERCENTAGE_FRAC));
+    }
+    else {
+      new_thrust_coef = transveh_orig_thrust_coef[i]
+                        - ((amount/(1<<INT32_PERCENTAGE_FRAC)) * transveh_orig_thrust_coef[i]);
+    }
+
+    //bounding stuff
+    if (new_thrust_coef > SUPERVISION_SCALE) {
+      thrust_coef[i] = SUPERVISION_SCALE;
+      HoverPropsOn();
+    }
+    else if (new_thrust_coef <= 0) {
+      thrust_coef[i] = 0;
+      HoverPropsOff();
+    }
+    else {
+      thrust_coef[i] = new_thrust_coef;
+      HoverPropsOn();
+    }
   }
 }
