@@ -140,6 +140,7 @@ void PrepForTransitionToHover(void) {
 
 //amount in PERCENTAGE frac
 void newTransition_ThrustActivationRatioSet(uint32_t amount) {
+  thrustActivationRatio = amount;
   /* ONLY CORRECT FOR POSITIVE THRUST COEFFICIENTS !!! */
   for (uint8_t i = 0; i < SUPERVISION_NB_MOTOR; i++) {
     int32_t new_thrust_coef;
