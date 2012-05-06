@@ -71,6 +71,13 @@
     <define name="THRUST_COEF" 	value="{   256,  256,  230,  230  }"/>
   </section>
 
+  <section name="FORCE_ALLOCATION" prefix="FORCE_ALLOCATION_">
+    <define name="MAX_CLIMB"   		value="3.0f"/>
+    <define name="PITCH_OF_VZ" 		value="0.4f"/>
+    <define name="THROTTLE_OF_VZ"   value="0.1f"/>
+    <define name="PITCH_TRIM"       value="-30.0f"/>
+  </section>
+  
   <!-- include magneto neutrals -->
   <include href="conf/airframes/ATMOS/calib/imu_lisam_033_atmov2.xml"/>
 
@@ -250,7 +257,7 @@
 	<define name="STABILIZATION_ATTITUDE_B_THETA_DGAIN" 	 	value="180"/>
 	<define name="STABILIZATION_ATTITUDE_B_THETA_DDGAIN" 	 	value="200"/>
 	<define name="STABILIZATION_ATTITUDE_B_THETA_IGAIN" 	 	value="0"/>
-	<define name="STABILIZATION_ATTITUDE_B_THETA_ACTGAIN"  		value="400"/>
+	<define name="STABILIZATION_ATTITUDE_B_THETA_ACTGAIN"  		value="256"/>
 
 	<define name="STABILIZATION_ATTITUDE_B_PSI_PGAIN"  		value="1000"/>
 	<define name="STABILIZATION_ATTITUDE_B_PSI_DGAIN"  		value="680"/>

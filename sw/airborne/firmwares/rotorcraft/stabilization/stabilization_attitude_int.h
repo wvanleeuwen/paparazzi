@@ -37,7 +37,7 @@ struct Int32AttitudeGains {
   struct Int32Vect3  aero_activation;   // in INT32_PERCENTAGE_FRAC (1024)
 };
 
-extern volatile struct Int32AttitudeGains*  stabilization_gains;
+extern struct Int32AttitudeGains*  stabilization_gains;
 extern struct Int32Eulers stabilization_att_sum_err;
 
 extern int32_t stabilization_att_fb_cmd[COMMANDS_NB];

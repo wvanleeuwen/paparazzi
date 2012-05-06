@@ -37,6 +37,11 @@
 
 uint8_t transition_percentage;
 
+float force_allocation_fixedwing_max_climb         = FORCE_ALLOCATION_MAX_CLIMB;           // m/s
+float force_allocation_fixedwing_pitch_of_vz       = FORCE_ALLOCATION_PITCH_OF_VZ;
+float force_allocation_fixedwing_throttle_of_vz    = FORCE_ALLOCATION_THROTTLE_OF_VZ;
+float force_allocation_fixedwing_pitch_trim        = FORCE_ALLOCATION_PITCH_TRIM;          // radians
+
 struct PprzLiftDevice lift_devices[LIFT_GENERATION_NR_OF_LIFT_DEVICES] =
 {
   {
@@ -148,24 +153,18 @@ void Force_Allocation_Laws(void)
       // lateral acceleration (command) -> roll
       // heading ANGLE -> integrated
 
-      const float MAX_CLIMB = 3.0f; // m/s
-      const float PITCH_OF_VZ = 0.4f;
-      const float THROTTLE_INCREMENT = 0.1f;
-      float CRUISE_THROTTLE = guidance_v_nominal_throttle;
-      const float PITCH_TRIM = 0.0f;
-
-      float climb_speed = ((outerloop_throttle_command - (MAX_PPRZ / 2)) * 2 * MAX_CLIMB);  // MAX_PPRZ
+      float climb_speed = ((outerloop_throttle_command - (MAX_PPRZ / 2)) * 2 * force_allocation_fixedwing_max_climb);  // MAX_PPRZ
 
       // Lateral Plane Motion
       wing->commands[COMMAND_ROLL]    = stab_att_sp_euler.phi;
 
       // Longitudinal Plane Motion
-      wing->commands[COMMAND_THRUST]  = (CRUISE_THROTTLE)
-                                      + climb_speed * THROTTLE_INCREMENT
+      wing->commands[COMMAND_THRUST]  = (guidance_v_nominal_throttle)
+                                      + climb_speed * force_allocation_fixedwing_throttle_of_vz
                                       + (-(stab_att_sp_euler.theta * MAX_PPRZ) >> INT32_ANGLE_FRAC ); // MAX_PPRZ
                                       //+ ((stab_att_sp_euler.theta * MAX_PPRZ) >> INT32_ANGLE_FRAC ); // MAX_PPRZ
 
-      wing->commands[COMMAND_PITCH]   = ANGLE_BFP_OF_REAL(PITCH_TRIM + climb_speed * PITCH_OF_VZ / MAX_PPRZ);
+      wing->commands[COMMAND_PITCH]   = ANGLE_BFP_OF_REAL(force_allocation_fixedwing_pitch_trim + climb_speed * force_allocation_fixedwing_pitch_of_vz / MAX_PPRZ);
 
       // Coordinated Turn
 #ifdef FREE_FLOATING_HEADING

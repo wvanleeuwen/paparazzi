@@ -44,7 +44,7 @@ struct Int32AttitudeGains stabilization_gains_dummy = {
   {STABILIZATION_ATTITUDE_PHI_ACTGAIN, STABILIZATION_ATTITUDE_THETA_ACTGAIN, STABILIZATION_ATTITUDE_PSI_ACTGAIN }
 };
 
-volatile struct Int32AttitudeGains* stabilization_gains = &stabilization_gains_dummy;
+struct Int32AttitudeGains* stabilization_gains = &stabilization_gains_dummy;
 
 /* warn if some gains are still negative */
 #if (STABILIZATION_ATTITUDE_PHI_PGAIN < 0) ||   \
@@ -97,7 +97,7 @@ void stabilization_attitude_enter(void) {
 #define OFFSET_AND_ROUND(_a, _b) (((_a)+(1<<((_b)-1)))>>(_b))
 #define OFFSET_AND_ROUND2(_a, _b) (((_a)+(1<<((_b)-1))-((_a)<0?1:0))>>(_b))
 
-static void attitude_run_ff(int32_t ff_commands[], volatile struct Int32AttitudeGains *gains, struct Int32Rates *ref_accel)
+static void attitude_run_ff(int32_t ff_commands[], struct Int32AttitudeGains *gains, struct Int32Rates *ref_accel)
 {
   int32_t x,y,z;
   /* Compute feedforward based on reference acceleration */
@@ -114,7 +114,7 @@ static void attitude_run_ff(int32_t ff_commands[], volatile struct Int32Attitude
   ff_commands[COMMAND_YAW_AERO] = (z * gains->aero_activation.z) >> INT32_PERCENTAGE_FRAC;
 }
 
-static void attitude_run_fb(int32_t fb_commands[], volatile struct Int32AttitudeGains *gains, struct Int32Quat *att_err,
+static void attitude_run_fb(int32_t fb_commands[], struct Int32AttitudeGains *gains, struct Int32Quat *att_err,
     struct Int32Rates *rate_err, struct Int32Quat *sum_err)
 {
   int32_t x,y,z;

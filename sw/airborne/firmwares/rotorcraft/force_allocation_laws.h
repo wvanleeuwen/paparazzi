@@ -31,6 +31,11 @@
 extern uint8_t transition_percentage;
 extern int32_t outerloop_throttle_command;
 
+extern float force_allocation_fixedwing_max_climb; // m/s
+extern float force_allocation_fixedwing_pitch_of_vz; // VZ = vertical speed
+extern float force_allocation_fixedwing_throttle_of_vz;
+extern float force_allocation_fixedwing_pitch_trim;
+
 struct PprzLiftDevice {
   // Type and Activation
   enum lift_type_enum {ROTOR_LIFTING_DEVICE = 0, WING_LIFTING_DEVICE = 1} lift_type;

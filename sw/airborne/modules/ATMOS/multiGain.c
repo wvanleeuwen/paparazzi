@@ -33,7 +33,6 @@ uint8_t activeGainSet;
 void transveh_multigain_init(void) {
   activeGainSet = 1;
   SetGainSetA();
-  //transveh_multigain_setGainSet(&stabilization_gains,&stabilization_gainsA);
 }
 
 void transveh_multigain_periodic(void) {
