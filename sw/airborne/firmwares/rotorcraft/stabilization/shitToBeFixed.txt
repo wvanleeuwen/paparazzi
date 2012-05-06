@@ -1,0 +1,2 @@
+- stabiliz_att_quat_int should not be in floats but in bfp-frac-things
+- ifdef for activationAerro
