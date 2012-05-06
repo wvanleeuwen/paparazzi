@@ -21,11 +21,11 @@
     <axis name="PITCH"    failsafe_value="0"/>
     <axis name="YAW"      failsafe_value="0"/>
     <axis name="THRUST"   failsafe_value="0"/>
-    <axis name="RC_MODE"  failsafe_value="0"/>
-    <axis name="RC_ROLL"  failsafe_value="0"/>
-    <axis name="RC_YAW"  failsafe_value="0"/>
-    <axis name="RC_PITCH" failsafe_value="0"/>
-    <axis name="RC_THRUST" failsafe_value="0"/>
+    
+    <axis name="ROLL_AERO"     failsafe_value="0"/>
+    <axis name="PITCH_AERO"    failsafe_value="0"/>
+    <axis name="YAW_AERO"      failsafe_value="0"/>
+    
   </commands>
 
   <section name="AUTOPILOT">
@@ -40,20 +40,11 @@
     <define name="AUTOPILOT_ARMING_THROTTLE"/>
   </section>
 
-  <rc_commands>
-    <set command="RC_MODE"  value="@MODE < -1500 ? MODE_MANUAL : (@MODE > 1500 ? MODE_AUTO2 : MODE_AUTO1) "/>
-    <set command="RC_YAW"  value="@YAW"/>
-    <set command="RC_ROLL"  value="@ROLL"/>
-    <set command="RC_PITCH" value="@PITCH"/>
-    <set command="RC_THRUST" value="@THROTTLE"/>
-  </rc_commands>
-
-
   <command_laws>
-    <set servo="AILEVON_LEFT"   value="@YAW+(atmos_pitch_factor*@PITCH*6)" />
-    <set servo="AILEVON_RIGHT"  value="@YAW-(atmos_pitch_factor*@PITCH*6)" />
+    <set servo="AILEVON_LEFT"   value="@YAW_AERO+@PITCH_AERO" />
+    <set servo="AILEVON_RIGHT"  value="@YAW_AERO-@PITCH_AERO" />
     <!--<set servo="ALWAYSDOWN"     value="ahrs.ltp_to_body_euler.theta/ANGLE_BFP_OF_REAL(M_PI)*9600" />-->
-    <set servo="RUDDER"         value="@YAW"/>
+    <set servo="RUDDER"         value="@YAW_AERO"/>
   </command_laws>
 
   <section name="ROTORCRAFT" prefix="ROTORCRAFT_">
@@ -133,17 +124,20 @@
     <define name="REF_MAX_PDOT" 	value="RadOfDeg(1800.)"/>
 
     <!-- feedback -->
-    <define name="PHI_PGAIN"  		value="1304"/>
-    <define name="PHI_DGAIN"  		value="1062"/>
+    <define name="PHI_PGAIN"  		value="0"/>
+    <define name="PHI_DGAIN"  		value="0"/>
     <define name="PHI_IGAIN"  		value="0"/>
+    <define name="PHI_ACTGAIN" 		value="0"/>
 
-    <define name="THETA_PGAIN"  	value="243"/>
-    <define name="THETA_DGAIN"  	value="180"/>
+    <define name="THETA_PGAIN"  	value="0"/>
+    <define name="THETA_DGAIN"  	value="0"/>
     <define name="THETA_IGAIN"  	value="0"/>
+    <define name="THETA_ACTGAIN"  	value="0"/>
 
-    <define name="PSI_PGAIN"  		value="2520"/>
-    <define name="PSI_DGAIN"  		value="1722"/>
-    <define name="PSI_IGAIN"  		value="6"/>
+    <define name="PSI_PGAIN"  		value="0"/>
+    <define name="PSI_DGAIN"  		value="0"/>
+    <define name="PSI_IGAIN"  		value="0"/>
+    <define name="PSI_ACTGAIN" 		value="0"/>
 
     <!-- feedforward -->
     <define name="PHI_DDGAIN"   	value="100"/>
@@ -231,47 +225,57 @@
 	<define name="STABILIZATION_ATTITUDE_A_PHI_DGAIN"  		value="1062"/>
 	<define name="STABILIZATION_ATTITUDE_A_PHI_DDGAIN"  		value="100"/>
 	<define name="STABILIZATION_ATTITUDE_A_PHI_IGAIN"  		value="0"/>
+	<define name="STABILIZATION_ATTITUDE_A_PHI_ACTGAIN"  		value="0"/>
 
 	<define name="STABILIZATION_ATTITUDE_A_THETA_PGAIN"  		value="340"/>
 	<define name="STABILIZATION_ATTITUDE_A_THETA_DGAIN" 	 	value="180"/>
 	<define name="STABILIZATION_ATTITUDE_A_THETA_DDGAIN" 	 	value="200"/>
 	<define name="STABILIZATION_ATTITUDE_A_THETA_IGAIN" 	 	value="0"/>
+	<define name="STABILIZATION_ATTITUDE_A_THETA_ACTGAIN"  		value="0"/>
 
 	<define name="STABILIZATION_ATTITUDE_A_PSI_PGAIN"  		value="2520"/>
 	<define name="STABILIZATION_ATTITUDE_A_PSI_DGAIN"  		value="1722"/>
 	<define name="STABILIZATION_ATTITUDE_A_PSI_IGAIN"  		value="6"/>
 	<define name="STABILIZATION_ATTITUDE_A_PSI_DDGAIN"  		value="100"/>
+	<define name="STABILIZATION_ATTITUDE_A_PSI_ACTGAIN"  		value="1024"/>
+
 
 	<define name="STABILIZATION_ATTITUDE_B_PHI_PGAIN"  		value="900"/>
 	<define name="STABILIZATION_ATTITUDE_B_PHI_DGAIN"  		value="800"/>
 	<define name="STABILIZATION_ATTITUDE_B_PHI_DDGAIN"  		value="100"/>
 	<define name="STABILIZATION_ATTITUDE_B_PHI_IGAIN"  		value="0"/>
+	<define name="STABILIZATION_ATTITUDE_B_PHI_ACTGAIN"  		value="0"/>
 
 	<define name="STABILIZATION_ATTITUDE_B_THETA_PGAIN"  		value="340"/>
 	<define name="STABILIZATION_ATTITUDE_B_THETA_DGAIN" 	 	value="180"/>
 	<define name="STABILIZATION_ATTITUDE_B_THETA_DDGAIN" 	 	value="200"/>
 	<define name="STABILIZATION_ATTITUDE_B_THETA_IGAIN" 	 	value="0"/>
+	<define name="STABILIZATION_ATTITUDE_B_THETA_ACTGAIN"  		value="400"/>
 
 	<define name="STABILIZATION_ATTITUDE_B_PSI_PGAIN"  		value="1000"/>
 	<define name="STABILIZATION_ATTITUDE_B_PSI_DGAIN"  		value="680"/>
 	<define name="STABILIZATION_ATTITUDE_B_PSI_IGAIN"  		value="2"/>
 	<define name="STABILIZATION_ATTITUDE_B_PSI_DDGAIN"  		value="100"/>
+	<define name="STABILIZATION_ATTITUDE_B_PSI_ACTGAIN"  		value="1024"/>
 
 
 	<define name="STABILIZATION_ATTITUDE_C_PHI_PGAIN"  		value="500"/>
 	<define name="STABILIZATION_ATTITUDE_C_PHI_DGAIN"  		value="300"/>
 	<define name="STABILIZATION_ATTITUDE_C_PHI_IGAIN"  		value="0"/>
 	<define name="STABILIZATION_ATTITUDE_C_PHI_DDGAIN"  		value="100"/>
+	<define name="STABILIZATION_ATTITUDE_C_PHI_ACTGAIN"  		value="0"/>
 
 	<define name="STABILIZATION_ATTITUDE_C_THETA_PGAIN"  		value="500"/>
 	<define name="STABILIZATION_ATTITUDE_C_THETA_DGAIN"  		value="300"/>
 	<define name="STABILIZATION_ATTITUDE_C_THETA_IGAIN"  		value="0"/>
 	<define name="STABILIZATION_ATTITUDE_C_THETA_DDGAIN"  		value="100"/>
+	<define name="STABILIZATION_ATTITUDE_C_THETA_ACTGAIN"  		value="512"/>
 
 	<define name="STABILIZATION_ATTITUDE_C_PSI_PGAIN"  		value="1000"/>
 	<define name="STABILIZATION_ATTITUDE_C_PSI_DGAIN"  		value="800"/>
 	<define name="STABILIZATION_ATTITUDE_C_PSI_IGAIN"  		value="0"/>
 	<define name="STABILIZATION_ATTITUDE_C_PSI_DDGAIN"  		value="100"/>
+    <define name="STABILIZATION_ATTITUDE_C_PSI_ACTGAIN"  		value="1024"/>
 
    </load>
 

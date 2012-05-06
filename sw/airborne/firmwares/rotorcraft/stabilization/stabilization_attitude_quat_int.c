@@ -40,7 +40,8 @@ struct Int32AttitudeGains stabilization_gains_dummy = {
   {STABILIZATION_ATTITUDE_PHI_PGAIN, STABILIZATION_ATTITUDE_THETA_PGAIN, STABILIZATION_ATTITUDE_PSI_PGAIN },
   {STABILIZATION_ATTITUDE_PHI_DGAIN, STABILIZATION_ATTITUDE_THETA_DGAIN, STABILIZATION_ATTITUDE_PSI_DGAIN },
   {STABILIZATION_ATTITUDE_PHI_DDGAIN, STABILIZATION_ATTITUDE_THETA_DDGAIN, STABILIZATION_ATTITUDE_PSI_DDGAIN },
-  {STABILIZATION_ATTITUDE_PHI_IGAIN, STABILIZATION_ATTITUDE_THETA_IGAIN, STABILIZATION_ATTITUDE_PSI_IGAIN }
+  {STABILIZATION_ATTITUDE_PHI_IGAIN, STABILIZATION_ATTITUDE_THETA_IGAIN, STABILIZATION_ATTITUDE_PSI_IGAIN },
+  {STABILIZATION_ATTITUDE_PHI_ACTGAIN, STABILIZATION_ATTITUDE_THETA_ACTGAIN, STABILIZATION_ATTITUDE_PSI_ACTGAIN }
 };
 
 volatile struct Int32AttitudeGains* stabilization_gains = &stabilization_gains_dummy;
@@ -98,32 +99,50 @@ void stabilization_attitude_enter(void) {
 
 static void attitude_run_ff(int32_t ff_commands[], volatile struct Int32AttitudeGains *gains, struct Int32Rates *ref_accel)
 {
+  int32_t x,y,z;
   /* Compute feedforward based on reference acceleration */
 
-  ff_commands[COMMAND_ROLL]  = GAIN_PRESCALER_FF * gains->dd.x * RATE_FLOAT_OF_BFP(ref_accel->p) / (1 << 7);
-  ff_commands[COMMAND_PITCH] = GAIN_PRESCALER_FF * gains->dd.y * RATE_FLOAT_OF_BFP(ref_accel->q) / (1 << 7);
-  ff_commands[COMMAND_YAW]   = GAIN_PRESCALER_FF * gains->dd.z * RATE_FLOAT_OF_BFP(ref_accel->r) / (1 << 7);
+  x = GAIN_PRESCALER_FF * gains->dd.x * RATE_FLOAT_OF_BFP(ref_accel->p) / (1 << 7);
+  y = GAIN_PRESCALER_FF * gains->dd.y * RATE_FLOAT_OF_BFP(ref_accel->q) / (1 << 7);
+  z = GAIN_PRESCALER_FF * gains->dd.z * RATE_FLOAT_OF_BFP(ref_accel->r) / (1 << 7);
+
+  ff_commands[COMMAND_ROLL] = (x * ((2<<INT32_PERCENTAGE_FRAC) - gains->aero_activation.x)) >> INT32_PERCENTAGE_FRAC;
+  ff_commands[COMMAND_ROLL_AERO] = (x * gains->aero_activation.x) >> INT32_PERCENTAGE_FRAC;
+  ff_commands[COMMAND_PITCH] = (y * ((2<<INT32_PERCENTAGE_FRAC) - gains->aero_activation.y)) >> INT32_PERCENTAGE_FRAC;
+  ff_commands[COMMAND_PITCH_AERO] = (y * gains->aero_activation.y) >> INT32_PERCENTAGE_FRAC;
+  ff_commands[COMMAND_YAW] = (z * ((2<<INT32_PERCENTAGE_FRAC) - gains->aero_activation.z)) >> INT32_PERCENTAGE_FRAC;
+  ff_commands[COMMAND_YAW_AERO] = (z * gains->aero_activation.z) >> INT32_PERCENTAGE_FRAC;
 }
 
 static void attitude_run_fb(int32_t fb_commands[], volatile struct Int32AttitudeGains *gains, struct Int32Quat *att_err,
     struct Int32Rates *rate_err, struct Int32Quat *sum_err)
 {
+  int32_t x,y,z;
   /*  PID feedback */
-  fb_commands[COMMAND_ROLL] =
+  x =
     GAIN_PRESCALER_P * gains->p.x  * QUAT1_FLOAT_OF_BFP(att_err->qx) / 4 +
     GAIN_PRESCALER_D * gains->d.x  * RATE_FLOAT_OF_BFP(rate_err->p) / 16 +
     GAIN_PRESCALER_I * gains->i.x  * QUAT1_FLOAT_OF_BFP(sum_err->qx) / 2;
 
-  fb_commands[COMMAND_PITCH] =
+  y =
     GAIN_PRESCALER_P * gains->p.y  * QUAT1_FLOAT_OF_BFP(att_err->qy) / 4 +
     GAIN_PRESCALER_D * gains->d.y  * RATE_FLOAT_OF_BFP(rate_err->q)  / 16 +
     GAIN_PRESCALER_I * gains->i.y  * QUAT1_FLOAT_OF_BFP(sum_err->qy) / 2;
 
-  fb_commands[COMMAND_YAW] =
+  z =
     GAIN_PRESCALER_P * gains->p.z  * QUAT1_FLOAT_OF_BFP(att_err->qz) / 4 +
     GAIN_PRESCALER_D * gains->d.z  * RATE_FLOAT_OF_BFP(rate_err->r)  / 16 +
     GAIN_PRESCALER_I * gains->i.z  * QUAT1_FLOAT_OF_BFP(sum_err->qz) / 2;
 
+
+  fb_commands[COMMAND_ROLL] =  (x * ((2<<INT32_PERCENTAGE_FRAC) - gains->aero_activation.x)) >> INT32_PERCENTAGE_FRAC;
+  fb_commands[COMMAND_ROLL_AERO] = (x * gains->aero_activation.x) >> INT32_PERCENTAGE_FRAC;
+
+  fb_commands[COMMAND_PITCH] =  (y * ((2<<INT32_PERCENTAGE_FRAC) - gains->aero_activation.y)) >> INT32_PERCENTAGE_FRAC;
+  fb_commands[COMMAND_PITCH_AERO] = (y * gains->aero_activation.y) >> INT32_PERCENTAGE_FRAC;
+
+  fb_commands[COMMAND_PITCH] =  (z * ((2<<INT32_PERCENTAGE_FRAC) - gains->aero_activation.z)) >> INT32_PERCENTAGE_FRAC;
+  fb_commands[COMMAND_PITCH_AERO] = (z * gains->aero_activation.z) >> INT32_PERCENTAGE_FRAC;
 }
 
 void stabilization_attitude_run(bool_t enable_integrator) {
@@ -177,10 +196,19 @@ void stabilization_attitude_run(bool_t enable_integrator) {
   stabilization_cmd[COMMAND_PITCH] = stabilization_att_fb_cmd[COMMAND_PITCH] + stabilization_att_ff_cmd[COMMAND_PITCH];
   stabilization_cmd[COMMAND_YAW] = stabilization_att_fb_cmd[COMMAND_YAW] + stabilization_att_ff_cmd[COMMAND_YAW];
 
+  stabilization_cmd[COMMAND_ROLL_AERO] = stabilization_att_fb_cmd[COMMAND_ROLL_AERO] + stabilization_att_ff_cmd[COMMAND_ROLL_AERO];
+  stabilization_cmd[COMMAND_PITCH_AERO] = stabilization_att_fb_cmd[COMMAND_PITCH_AERO] + stabilization_att_ff_cmd[COMMAND_PITCH_AERO];
+  stabilization_cmd[COMMAND_YAW_AERO] = stabilization_att_fb_cmd[COMMAND_YAW_AERO] + stabilization_att_ff_cmd[COMMAND_YAW_AERO];
+
+
   /* bound the result */
   BoundAbs(stabilization_cmd[COMMAND_ROLL], MAX_PPRZ);
   BoundAbs(stabilization_cmd[COMMAND_PITCH], MAX_PPRZ);
   BoundAbs(stabilization_cmd[COMMAND_YAW], MAX_PPRZ);
+
+  BoundAbs(stabilization_cmd[COMMAND_ROLL_AERO], MAX_PPRZ);
+  BoundAbs(stabilization_cmd[COMMAND_PITCH_AERO], MAX_PPRZ);
+  BoundAbs(stabilization_cmd[COMMAND_YAW_AERO], MAX_PPRZ);
 }
 
 void stabilization_attitude_read_rc(bool_t in_flight) {

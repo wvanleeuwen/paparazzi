@@ -62,9 +62,14 @@ void stabilization_none_enter(void) {
 
 void stabilization_none_run(bool_t in_flight __attribute__ ((unused))) {
   /* just directly pass rc commands through */
-  stabilization_cmd[COMMAND_ROLL]  = stabilization_none_rc_cmd.p;
-  stabilization_cmd[COMMAND_PITCH] = stabilization_none_rc_cmd.q;
-  stabilization_cmd[COMMAND_YAW]   = stabilization_none_rc_cmd.r;
-  //HoverPropsOff();
+  stabilization_cmd[COMMAND_ROLL] = stabilization_none_rc_cmd.p/4;
+  stabilization_cmd[COMMAND_PITCH] = 0;
+  stabilization_cmd[COMMAND_YAW] = 0;
+
+  stabilization_cmd[COMMAND_ROLL_AERO]  = stabilization_none_rc_cmd.p;
+  stabilization_cmd[COMMAND_PITCH_AERO] = stabilization_none_rc_cmd.q;
+  stabilization_cmd[COMMAND_YAW_AERO]   = stabilization_none_rc_cmd.r;
+
+ //HoverPropsOff();
   atmos_pitch_factor = 1;
 }

@@ -35,6 +35,9 @@ extern const int32_t commands_failsafe[COMMANDS_NB];
     commands[COMMAND_PITCH]  = _in_cmd[COMMAND_PITCH];		\
     commands[COMMAND_ROLL]   = _in_cmd[COMMAND_ROLL];		\
     commands[COMMAND_YAW]    = (_in_flight) ? _in_cmd[COMMAND_YAW] : 0; \
+    commands[COMMAND_PITCH_AERO]  = _in_cmd[COMMAND_PITCH_AERO];          \
+    commands[COMMAND_ROLL_AERO]   = _in_cmd[COMMAND_ROLL_AERO];           \
+    commands[COMMAND_YAW_AERO]    = (_in_flight) ? _in_cmd[COMMAND_YAW_AERO] : 0; \
     commands[COMMAND_THRUST] = (_motors_on) ? _in_cmd[COMMAND_THRUST] : 0; \
   }
 #else
@@ -42,6 +45,9 @@ extern const int32_t commands_failsafe[COMMANDS_NB];
     commands[COMMAND_PITCH]  = _in_cmd[COMMAND_PITCH];		\
     commands[COMMAND_ROLL]   = _in_cmd[COMMAND_ROLL];		\
     commands[COMMAND_YAW]    = _in_cmd[COMMAND_YAW]; \
+    commands[COMMAND_PITCH_AERO]  = _in_cmd[COMMAND_PITCH_AERO];          \
+    commands[COMMAND_ROLL_AERO]   = _in_cmd[COMMAND_ROLL_AERO];           \
+    commands[COMMAND_YAW_AERO]    = _in_cmd[COMMAND_YAW_AERO]; \
     commands[COMMAND_THRUST] = (_motors_on) ? _in_cmd[COMMAND_THRUST] : 0; \
   }
 #endif
