@@ -141,8 +141,8 @@ static void attitude_run_fb(int32_t fb_commands[], struct Int32AttitudeGains *ga
   fb_commands[COMMAND_PITCH] =  (y * ((2<<INT32_PERCENTAGE_FRAC) - gains->aero_activation.y)) >> INT32_PERCENTAGE_FRAC;
   fb_commands[COMMAND_PITCH_AERO] = (y * gains->aero_activation.y) >> INT32_PERCENTAGE_FRAC;
 
-  fb_commands[COMMAND_PITCH] =  (z * ((2<<INT32_PERCENTAGE_FRAC) - gains->aero_activation.z)) >> INT32_PERCENTAGE_FRAC;
-  fb_commands[COMMAND_PITCH_AERO] = (z * gains->aero_activation.z) >> INT32_PERCENTAGE_FRAC;
+  fb_commands[COMMAND_YAW] =  (z * ((2<<INT32_PERCENTAGE_FRAC) - gains->aero_activation.z)) >> INT32_PERCENTAGE_FRAC;
+  fb_commands[COMMAND_YAW_AERO] = (z * gains->aero_activation.z) >> INT32_PERCENTAGE_FRAC;
 }
 
 void stabilization_attitude_run(bool_t enable_integrator) {
