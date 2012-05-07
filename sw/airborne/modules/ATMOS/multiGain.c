@@ -43,7 +43,7 @@ struct Int32AttitudeGains stabilization_blended;
 
 void SetGainPercentage(uint32_t percent)  // percent in INT32_PERCENTAGE_FRAC
 {
- struct Int32AttitudeGains* ga, gb, gblend;
+ struct Int32AttitudeGains* ga, *gb, *gblend;
   int ratio;
 
   gblend = &stabilization_blended;
@@ -69,7 +69,7 @@ void SetGainPercentage(uint32_t percent)  // percent in INT32_PERCENTAGE_FRAC
     g2 = *(((int32_t*) gb) + i);
     g2 *= ratio;
 
-    gbl = (g1 + g2) >> INT32_PERCENTAGE_FRACs;
+    gbl = (g1 + g2) >> INT32_PERCENTAGE_FRAC;
     
     *(((int32_t*) gblend) + i) = (int32_t) gbl;
   }
