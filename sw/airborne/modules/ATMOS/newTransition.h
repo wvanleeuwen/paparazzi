@@ -39,6 +39,7 @@ extern void transveh_transition_periodic(void);
 extern bool_t pctIsBetween(uint8_t v,uint8_t l,uint8_t h);
 
 extern void newTransition_doTransition(uint8_t val);
+void newTransition_ThrustActivationRatioSet(uint32_t amount);
 
 void PrepForTransitionToForwardSmoothly(uint8_t amount);
 void PrepForTransitionToHover(void);
