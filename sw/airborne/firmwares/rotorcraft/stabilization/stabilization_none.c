@@ -70,6 +70,4 @@ void stabilization_none_run(bool_t in_flight __attribute__ ((unused))) {
   stabilization_cmd[COMMAND_PITCH_AERO] = stabilization_none_rc_cmd.q;
   stabilization_cmd[COMMAND_YAW_AERO]   = stabilization_none_rc_cmd.r;
 
- //HoverPropsOff();
-  atmos_pitch_factor = 1;
 }

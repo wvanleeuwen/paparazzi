@@ -41,7 +41,7 @@ struct PprzLiftDevice {
   enum lift_type_enum {ROTOR_LIFTING_DEVICE = 0, WING_LIFTING_DEVICE = 1} lift_type;
   int activation;   // 0 to 100 percent
 
-  int trim_pitch;
+  int orientation_pitch;
 
   // Output
   int32_t commands[COMMANDS_NB];

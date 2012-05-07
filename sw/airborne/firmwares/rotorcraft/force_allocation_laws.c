@@ -89,7 +89,7 @@ void Force_Allocation_Laws(void)
 
   INT_EULERS_ZERO(command_euler);
 
-  float cmd_trim   = 0;
+  float orientation_rotation   = 0;
 
   /////////////////////////////////////////////////////
   // Hard Configure (should come from airframe file
@@ -103,25 +103,22 @@ void Force_Allocation_Laws(void)
   lift_devices[0].lift_type = ROTOR_LIFTING_DEVICE;
   lift_devices[1].lift_type = WING_LIFTING_DEVICE;
 
-  lift_devices[0].trim_pitch = 0;
-  lift_devices[1].trim_pitch = -90;
+  lift_devices[0].orientation_pitch = 0;
+  lift_devices[1].orientation_pitch = -90;
   /////////////////////////////////////////////////////
 
 
   if (transition_percentage < 30) {
     //fixedwing
-    atmos_pitch_factor = 1;
     SetGainSetC();
   }
   else if (transition_percentage >= 30 && transition_percentage < 60) {
     //fixedwing+rotor
-    atmos_pitch_factor = 0.5;
     SetGainSetB();
   }
   else if (transition_percentage >= 60) {
     //rotor
     SetGainSetA();
-    atmos_pitch_factor = 0;
   }
 
   for (int i=0; i < LIFT_GENERATION_NR_OF_LIFT_DEVICES; i++)
@@ -181,7 +178,7 @@ void Force_Allocation_Laws(void)
     command_euler.phi    += wing->commands[COMMAND_ROLL]       * percent;
     command_euler.theta  += wing->commands[COMMAND_PITCH]      * percent;
     command_euler.psi    += wing->commands[COMMAND_YAW]        * percent;     // Hmmm this would benefit from some more thinking...
-    cmd_trim             += RadOfDeg((float)wing->trim_pitch)  * percent;
+    orientation_rotation += RadOfDeg((float)wing->orientation_pitch) * percent;
   }
 
   stabilization_cmd[COMMAND_THRUST] = cmd_thrust;
@@ -195,7 +192,7 @@ void Force_Allocation_Laws(void)
   QUAT_ASSIGN(trim_quat,
 	QUAT1_BFP_OF_REAL(1),
 	QUAT1_BFP_OF_REAL(0),
-	QUAT1_BFP_OF_REAL(cmd_trim) / 2,
+              QUAT1_BFP_OF_REAL(orientation_rotation) / 2,
 	QUAT1_BFP_OF_REAL(0) );
   INT32_QUAT_NORMALIZE(trim_quat);
 

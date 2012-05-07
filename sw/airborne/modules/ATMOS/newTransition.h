@@ -30,9 +30,6 @@ extern int transition_setting;
 
 extern int32_t thrustActivationRatio;
 
-extern float atmos_pitch_factor;
-extern float atmos_yaw_factor;
-
 extern void transveh_transition_init(void);
 extern void transveh_transition_periodic(void);
 

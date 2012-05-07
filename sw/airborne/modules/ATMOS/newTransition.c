@@ -21,12 +21,8 @@ enum TransitionState transition_state;
 enum TransitionState required_transition_state;
 uint8_t transitionProgress;
 int transition_setting;
-float atmos_pitch_factor;
-float atmos_yaw_factor;
 
 void transveh_transition_init(void) {
-  atmos_pitch_factor = 0;
-  atmos_yaw_factor = 1;
   transition_state = HOVER;
   transitionProgress = 100;
   transition_percentage = 100;
@@ -43,11 +39,8 @@ void transveh_transition_periodic(void) {
     PrepForTransitionToHover();
     transitionProgress = 100;
     transition_percentage = 100;
-    //atmos_pitch_factor = 0;
   }
   else if (required_transition_state == FORWARD && transitionProgress > 0) {
-    if (pctIsBetween(transitionProgress,10,80))
-      atmos_pitch_factor = ((float)(79-transitionProgress))/69;
 
     if (pctIsBetween(transitionProgress,40,80))   //rotated 0.9*(100-80)=18 degrees, start moving thrust to forward props
       PrepForTransitionToForwardSmoothly((79-transitionProgress)*(100/39));
@@ -57,9 +50,6 @@ void transveh_transition_periodic(void) {
     transition_percentage = transitionProgress;
   }
   else if (required_transition_state == SEMIFORWARD && transitionProgress > 60) {
-    if (pctIsBetween(transitionProgress,60,80))
-      atmos_pitch_factor = ((float)(79-transitionProgress))/19;
-
    if (pctIsBetween(transitionProgress,60,90))
      PrepForTransitionToForwardSmoothly((89-transitionProgress)*(100/29));
    transitionProgress--;
@@ -68,9 +58,7 @@ void transveh_transition_periodic(void) {
   else if (required_transition_state == HOVER && transitionProgress < 100) {
     if (transitionProgress == 10)   //rotated 0.9*10=9 degrees AOA, unkill hover props
       HoverPropsOn();
-    if (transitionProgress == 20)
-      atmos_pitch_factor = 0;
-    else if (transitionProgress == 50)   //rotated 9 till 0.9*50=45 degrees, more thrust on hover props
+    if (transitionProgress == 50)   //rotated 9 till 0.9*50=45 degrees, more thrust on hover props
       PrepForTransitionToHover();
 
     transitionProgress+=2;
