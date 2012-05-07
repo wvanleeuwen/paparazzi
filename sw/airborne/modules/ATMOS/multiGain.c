@@ -60,7 +60,7 @@ void SetGainPercentage(uint32_t percent)  // percent in INT32_PERCENTAGE_FRAC
   }
   gb = &stabilization_gainsB;
 
-  int64_t g1, g2, gbl; 
+  int64_t g1, g2, gbl;
 
   for (int i=0; i < (sizeof(struct Int32AttitudeGains)/sizeof(int32_t)); i++)
   {
@@ -70,12 +70,12 @@ void SetGainPercentage(uint32_t percent)  // percent in INT32_PERCENTAGE_FRAC
     g2 *= ratio;
 
     gbl = (g1 + g2) >> INT32_PERCENTAGE_FRAC;
-    
+
     *(((int32_t*) gblend) + i) = (int32_t) gbl;
   }
 
   stabilization_gains = gblend;
-  
+
 }
 
 void transveh_multigain_setGainSet(struct Int32AttitudeGains * gainSet) {

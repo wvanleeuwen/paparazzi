@@ -2,14 +2,14 @@
 <!-- equiped with Lisa/M. The vehicle is called ATMOV. -->
 <!-- Copyright (C) 2012, ATMOS -->
 
-<airframe name="ATMOV2"> 
+<airframe name="ATMOV2">
   <servos min="0" neutral="0" max="0xff">
     <!-- Plus configuration, similar to the convention shown in http://paparazzi.enac.fr/wiki/Rotorcraft_Configuration -->
     <!-- Direction of rotation is opposite to that of the convention for engines HB and WL -->
     <servo name="HB"            no="0" min="1100" neutral="1100" max="2100"/>	<!-- Hover prop bottom -->
     <servo name="HT"            no="1" min="1100" neutral="1100" max="2100"/>	<!-- Hover prop top -->
     <servo name="WL"            no="2" min="1100" neutral="1100" max="2100"/>	<!-- Wingtip prop left -->
-    <servo name="WR"            no="3" min="1100" neutral="1100" max="2100"/>	<!-- Wingtip prop right --> 
+    <servo name="WR"            no="3" min="1100" neutral="1100" max="2100"/>	<!-- Wingtip prop right -->
     <servo name="AILEVON_LEFT"  no="4" min="2000" neutral="1500" max="1000"/>
     <servo name="AILEVON_RIGHT" no="6" min="2000" neutral="1500" max="1000"/>
     <servo name="RUDDER"  	no="7" min="2000" neutral="1500" max="1000"/>
@@ -32,7 +32,7 @@
     <define name="MODE_MANUAL" value="AP_MODE_ATTITUDE_DIRECT"/>
     <define name="MODE_AUTO1"  value="AP_MODE_ATTITUDE_DIRECT"/>
     <define name="MODE_AUTO2"  value="AP_MODE_HOVER_DIRECT"/>
-    
+
     <define name="AUTOPILOT_KILL_WITHOUT_AHRS"  value="TRUE"/>
 
     <!-- for kill switch: -->
@@ -69,11 +69,11 @@
     <define name="NB_MOTOR" 		value="4"/>
     <define name="SCALE" 		value="256"/>
     <define name="STOP_MOTOR"    	value="1000"/> <!-- send 1ms pulses on kill -->
-    
+
     <!-- Plus configuration, similar to the convention shown in http://paparazzi.enac.fr/wiki/Rotorcraft_Configuration -->
     <!-- Direction of rotation is opposite to that of the convention for engines HB and WL -->
-    <!-- Axes are in normal rotorcraft conventions, i.e.: with the props horizontal, 
-         you can see the horizon in the PFD. --> 
+    <!-- Axes are in normal rotorcraft conventions, i.e.: with the props horizontal,
+         you can see the horizon in the PFD. -->
     <define name="PITCH_COEF"  	value="{   256, -256,    0,    0  }"/>
     <define name="ROLL_COEF"   	value="{     0,    0,  256, -256  }"/>
     <define name="YAW_COEF"     value="{    -0,    0,   -0,    0  }"/>
@@ -210,7 +210,7 @@
     <load name="adc_generic.xml">
      <configure name="ADC_CHANNEL_GENERIC1" value="ADC_1"/>
     </load>
-   
+
    <load name="ATMOS/hoverPropsOff.xml">
 	<define name="TRANSVEH_HOVER_PROPS_OFF_NB1" value="TRUE"/>
 	<define name="TRANSVEH_HOVER_PROPS_OFF_NB2" value="TRUE"/>

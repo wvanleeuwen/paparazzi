@@ -15,7 +15,7 @@
       <dl_setting var="stabilization_gainsA.i.x" min="0"  step="1" max="50"    module="modules/ATMOS/multiGain" shortname="igain phi" handler="SetKiPhi"/>
       <dl_setting var="stabilization_gainsA.dd.x" min="0"    step="1" max="500" module="modules/ATMOS/multiGain" shortname="ddgain p"/>
       <dl_setting var="stabilization_gainsA.aero_activation.x" min="0"    step="1" max="1024" module="modules/ATMOS/multiGain" shortname="p aeroAct"/>
-   
+
       <dl_setting var="stabilization_gainsA.p.y" min="0" step="1" max="6000"   module="modules/ATMOS/multiGain" shortname="pgain theta"/>
       <dl_setting var="stabilization_gainsA.d.y" min="0" step="1" max="6000"   module="modules/ATMOS/multiGain" shortname="dgain q"/>
       <dl_setting var="stabilization_gainsA.i.y" min="0"  step="1" max="60"    module="modules/ATMOS/multiGain" shortname="igain theta"/>
@@ -35,7 +35,7 @@
       <dl_setting var="stabilization_gainsB.i.x" min="0"  step="1" max="50"    module="modules/ATMOS/multiGain" shortname="igain phi" handler="SetKiPhi"/>
       <dl_setting var="stabilization_gainsB.dd.x" min="0"    step="1" max="500" module="modules/ATMOS/multiGain" shortname="ddgain p"/>
       <dl_setting var="stabilization_gainsB.aero_activation.x" min="0"    step="1" max="1024" module="modules/ATMOS/multiGain" shortname="p aeroAct"/>
-   
+
       <dl_setting var="stabilization_gainsB.p.y" min="0" step="1" max="6000"   module="modules/ATMOS/multiGain" shortname="pgain theta"/>
       <dl_setting var="stabilization_gainsB.d.y" min="0" step="1" max="6000"   module="modules/ATMOS/multiGain" shortname="dgain q"/>
       <dl_setting var="stabilization_gainsB.i.y" min="0"  step="1" max="60"    module="modules/ATMOS/multiGain" shortname="igain theta"/>
@@ -55,7 +55,7 @@
       <dl_setting var="stabilization_gainsC.i.x" min="0"  step="1" max="50"    module="modules/ATMOS/multiGain" shortname="igain phi" handler="SetKiPhi"/>
       <dl_setting var="stabilization_gainsC.dd.x" min="0"    step="1" max="500" module="modules/ATMOS/multiGain" shortname="ddgain p"/>
       <dl_setting var="stabilization_gainsC.aero_activation.x" min="0"    step="1" max="1024" module="modules/ATMOS/multiGain" shortname="p aeroAct"/>
-   
+
       <dl_setting var="stabilization_gainsC.p.y" min="0" step="1" max="6000"   module="modules/ATMOS/multiGain" shortname="pgain theta"/>
       <dl_setting var="stabilization_gainsC.d.y" min="0" step="1" max="6000"   module="modules/ATMOS/multiGain" shortname="dgain q"/>
       <dl_setting var="stabilization_gainsC.i.y" min="0"  step="1" max="60"    module="modules/ATMOS/multiGain" shortname="igain theta"/>

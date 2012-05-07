@@ -3,14 +3,14 @@
 <!-- Copyright (C) 2012, ATMOS -->
 
 <airframe name="ATMOV1_lisam">
-  
+
   <servos min="0" neutral="0" max="0xff">
     <!-- Plus configuration, similar to the convention shown in http://paparazzi.enac.fr/wiki/Rotorcraft_Configuration -->
     <!-- Direction of rotation is opposite to that of the convention for engines HB and WL -->
     <servo name="HB"            no="0" min="1050" neutral="1050" max="2300"/>	<!-- Hover prop bottom -->
     <servo name="HT"            no="1" min="1050" neutral="1050" max="2300"/>	<!-- Hover prop top -->
     <servo name="WL"            no="2" min="1050" neutral="1050" max="2300"/>	<!-- Wingtip prop left -->
-    <servo name="WR"            no="3" min="1050" neutral="1050" max="2300"/>	<!-- Wingtip prop right --> 
+    <servo name="WR"            no="3" min="1050" neutral="1050" max="2300"/>	<!-- Wingtip prop right -->
     <servo name="AILEVON_LEFT"  no="4" min="1000" neutral="1500" max="2000"/>
     <servo name="AILEVON_RIGHT" no="6" min="1000" neutral="1500" max="2000"/>
     <servo name="RUDDER"  	no="7" min="2000" neutral="1500" max="1000"/>
@@ -32,7 +32,7 @@
     <define name="MODE_MANUAL" value="AP_MODE_ATTITUDE_DIRECT"/>
     <define name="MODE_AUTO1"  value="AP_MODE_ATTITUDE_DIRECT"/>
     <define name="MODE_AUTO2"  value="AP_MODE_HOVER_DIRECT"/>
-    
+
     <define name="AUTOPILOT_KILL_WITHOUT_AHRS"  value="TRUE"/>
     <define name="AUTOPILOT_ARMING_KILL_SWITCH" value="TRUE"/>
   </section>
@@ -65,7 +65,7 @@
     <define name="NB_MOTOR" 	value="4"/>
     <define name="SCALE" 		value="256"/>
     <define name="STOP_MOTOR"    value="800"/>
-    
+
     <!-- Plus configuration, similar to the convention shown in http://paparazzi.enac.fr/wiki/Rotorcraft_Configuration -->
     <!-- Direction of rotation is opposite to that of the convention for engines HB and WL -->
     <define name="PITCH_COEF"  	value="{   256, -256,    0,    0  }"/>
@@ -79,7 +79,7 @@
   <section name="IMU" prefix="IMU_">
     <define name="BODY_TO_IMU_PHI"   value="RadOfDeg(   0. )"/>
     <define name="BODY_TO_IMU_THETA" value="RadOfDeg( 84. )"/>  <!-- +5 deg more away from you -->
-    <define name="BODY_TO_IMU_PSI"   value="RadOfDeg( 180. )"/> <!-- +5 deg more to the right in hover --> 
+    <define name="BODY_TO_IMU_PSI"   value="RadOfDeg( 180. )"/> <!-- +5 deg more to the right in hover -->
   </section>
 
  <section name="BAT">
@@ -164,7 +164,7 @@
    <define name="RC_CLIMB_COEF" 	value ="163"/>
    <!-- BOOZ_SPEED_I_OF_F(1.5) * 20% -->
    <define name="RC_CLIMB_DEAD_BAND"  value ="160000"/>
-   
+
    <define name="NOMINAL_HOVER_THROTTLE" value ="0.30"/>
   </section>
 
@@ -186,7 +186,7 @@
    <define name="DGAIN" 		value="31"/>
    <define name="IGAIN" 		value="3"/>
    <define name="MAX_BANK"      value="RadOfDeg(45)"/>
-   
+
  </section>
 
  <modules main_freq="512">

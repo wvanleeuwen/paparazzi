@@ -20,7 +20,7 @@
       <message name="ROTORCRAFT_AHRS_QUAT"   period=".25"/>	-->
       <message name="AHRS_REF_QUAT" 		period="0.8"/>
 <!--      <message name="ROTORCRAFT_AHRS_EULER"  period=".1"/>-->
-      
+
       <!--<message name="ROTORCRAFT_AHRS_QUAT"        period=".4"/>
       <message name="IMU_GYRO_SCALED"        period=".2"/>
       <message name="IMU_ACCEL_SCALED"       period=".2"/>
