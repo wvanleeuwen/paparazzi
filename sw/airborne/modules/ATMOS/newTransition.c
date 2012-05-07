@@ -136,11 +136,11 @@ void newTransition_ThrustActivationRatioSet(uint32_t amount) {
     int32_t new_thrust_coef;
     if (transveh_propIsForwardThruster[i]) {
       new_thrust_coef = transveh_orig_thrust_coef[i]
-                        + (SUPERVISION_SCALE-transveh_orig_thrust_coef[i])*(amount/(1<<INT32_PERCENTAGE_FRAC));
+                        + (((SUPERVISION_SCALE-transveh_orig_thrust_coef[i])*amount)>>INT32_PERCENTAGE_FRAC);
     }
     else {
       new_thrust_coef = transveh_orig_thrust_coef[i]
-                        - ((amount/(1<<INT32_PERCENTAGE_FRAC)) * transveh_orig_thrust_coef[i]);
+                        - ((amount*transveh_orig_thrust_coef[i])>>INT32_PERCENTAGE_FRAC);
     }
 
     //bounding stuff

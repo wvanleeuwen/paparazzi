@@ -7,5 +7,8 @@
   <makefile target="ap">
     <file name="multiGain.c"/>
   </makefile>
+  <makefile target="sim">
+    <file name="multiGain.c"/>
+  </makefile>
 </module>
 

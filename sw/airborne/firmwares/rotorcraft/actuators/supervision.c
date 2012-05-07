@@ -60,6 +60,7 @@
 
 static const int32_t roll_coef[SUPERVISION_NB_MOTOR]   = SUPERVISION_ROLL_COEF;
 static const int32_t pitch_coef[SUPERVISION_NB_MOTOR]  = SUPERVISION_PITCH_COEF;
+//static const int32_t pitch_coef[SUPERVISION_NB_MOTOR]  = {  0,    0  ,  256, -256};
 static const int32_t yaw_coef[SUPERVISION_NB_MOTOR]    = SUPERVISION_YAW_COEF;
 //static const int32_t thrust_coef[SUPERVISION_NB_MOTOR] = SUPERVISION_THRUST_COEF;
 int32_t thrust_coef[SUPERVISION_NB_MOTOR] = SUPERVISION_THRUST_COEF;
@@ -150,6 +151,9 @@ void supervision_run(bool_t motors_on, bool_t override_on, int32_t in_cmd[] ) {
     int32_t max_cmd = INT32_MIN;
     /* do the mixing in float to avoid overflows, implicitly casted back to int32_t */
     for (i=0; i<SUPERVISION_NB_MOTOR; i++) {
+      if ((supervision.override_by_module && supervision.override_enabled[i])) {
+        in_cmd[COMMAND_PITCH] = 0;
+      }
       supervision.commands[i] = SUPERVISION_MIN_MOTOR +
         (thrust_coef[i] * in_cmd[COMMAND_THRUST] +
          roll_coef[i]   * in_cmd[COMMAND_ROLL]   +
@@ -157,11 +161,13 @@ void supervision_run(bool_t motors_on, bool_t override_on, int32_t in_cmd[] ) {
          yaw_coef[i]    * in_cmd[COMMAND_YAW]    +
          supervision.trim[i]) / SUPERVISION_SCALE *
         (SUPERVISION_MAX_MOTOR - SUPERVISION_MIN_MOTOR) / MAX_PPRZ;
+
       if (supervision.commands[i] < min_cmd)
         min_cmd = supervision.commands[i];
       if (supervision.commands[i] > max_cmd)
         max_cmd = supervision.commands[i];
     }
+
     if (min_cmd < SUPERVISION_MIN_MOTOR && max_cmd > SUPERVISION_MAX_MOTOR)
       supervision.nb_failure++;
     if (min_cmd < SUPERVISION_MIN_MOTOR)

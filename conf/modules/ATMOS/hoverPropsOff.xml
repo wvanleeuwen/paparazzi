@@ -8,5 +8,8 @@
   <makefile target="ap">
     <file name="hoverPropsOff.c"/>
   </makefile>
+  <makefile target="sim">
+    <file name="hoverPropsOff.c"/>
+  </makefile>
 </module>
 

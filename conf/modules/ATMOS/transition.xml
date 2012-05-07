@@ -8,5 +8,8 @@
   <makefile target="ap">
     <file name="newTransition.c"/>
   </makefile>
+  <makefile target="sim">
+    <file name="newTransition.c"/>
+  </makefile>
 </module>
 
