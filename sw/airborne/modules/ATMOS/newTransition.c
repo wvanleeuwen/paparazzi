@@ -129,6 +129,7 @@ void PrepForTransitionToHover(void) {
 
 //amount in PERCENTAGE frac
 void newTransition_ThrustActivationRatioSet(uint32_t amount) {
+  bool_t haveToKillHover = FALSE;
   thrustActivationRatio = amount;
   /* ONLY CORRECT FOR POSITIVE THRUST COEFFICIENTS !!! */
   for (uint8_t i = 0; i < SUPERVISION_NB_MOTOR; i++) {
@@ -145,15 +146,14 @@ void newTransition_ThrustActivationRatioSet(uint32_t amount) {
     //bounding stuff
     if (new_thrust_coef > SUPERVISION_SCALE) {
       thrust_coef[i] = SUPERVISION_SCALE;
-      HoverPropsOn();
     }
     else if (new_thrust_coef <= 0) {
       thrust_coef[i] = 0;
-      HoverPropsOff();
+      haveToKillHover = TRUE;
     }
     else {
       thrust_coef[i] = new_thrust_coef;
-      HoverPropsOn();
     }
   }
+  transveh_hover_props_off_set(haveToKillHover);
 }
