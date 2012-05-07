@@ -34,6 +34,7 @@ void transveh_transition_init(void) {
 }
 
 void transveh_transition_periodic(void) {
+  return;
   if (required_transition_state == HOVER_NOW) {
     HoverPropsOn();
     PrepForTransitionToHover();
