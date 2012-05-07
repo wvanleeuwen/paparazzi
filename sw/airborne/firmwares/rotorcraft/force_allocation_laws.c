@@ -158,7 +158,7 @@ void Force_Allocation_Laws(void)
       // Longitudinal Plane Motion
       wing->commands[COMMAND_THRUST]  = (guidance_v_nominal_throttle)
                                       + climb_speed * force_allocation_fixedwing_throttle_of_vz
-                                      + (-(stab_att_sp_euler.theta * MAX_PPRZ) >> INT32_ANGLE_FRAC ); // MAX_PPRZ
+                                      + (-(stab_att_sp_euler.theta * MAX_PPRZ / 4) >> INT32_ANGLE_FRAC ); // MAX_PPRZ
                                       //+ ((stab_att_sp_euler.theta * MAX_PPRZ) >> INT32_ANGLE_FRAC ); // MAX_PPRZ
 
       wing->commands[COMMAND_PITCH]   = ANGLE_BFP_OF_REAL(force_allocation_fixedwing_pitch_trim + climb_speed * force_allocation_fixedwing_pitch_of_vz / MAX_PPRZ);
@@ -185,19 +185,19 @@ void Force_Allocation_Laws(void)
 
   struct Int32Quat command_att;
   INT32_QUAT_OF_EULERS(command_att, command_euler);
-  INT32_QUAT_WRAP_SHORTEST(command_att);
 
   // Post Multiply with the pitch trim...
   struct Int32Quat trim_quat;
   QUAT_ASSIGN(trim_quat,
-	QUAT1_BFP_OF_REAL(1),
-	QUAT1_BFP_OF_REAL(0),
-              QUAT1_BFP_OF_REAL(orientation_rotation) / 2,
-	QUAT1_BFP_OF_REAL(0) );
-  INT32_QUAT_NORMALIZE(trim_quat);
+      QUAT1_BFP_OF_REAL(1),
+      QUAT1_BFP_OF_REAL(0),
+      QUAT1_BFP_OF_REAL(orientation_rotation) / 2,
+      QUAT1_BFP_OF_REAL(0) );
 
-  // INT32_QUAT_OF_AXIS_ANGLE(trim_quat, axis, cmd_trim)
+  INT32_QUAT_NORMALIZE(trim_quat);
+  INT32_QUAT_WRAP_SHORTEST(trim_quat);
+
   INT32_QUAT_COMP(stab_att_sp_quat, command_att, trim_quat);
-  //INT32_QUAT_COMP(stab_att_sp_quat, trim_quat, command_att);
+//  INT32_QUAT_WRAP_SHORTEST(stab_att_sp_quat);
 }
 

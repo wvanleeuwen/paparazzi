@@ -73,9 +73,9 @@
 
   <section name="FORCE_ALLOCATION" prefix="FORCE_ALLOCATION_">
     <define name="MAX_CLIMB"   		value="3.0f"/>
-    <define name="PITCH_OF_VZ" 		value="0.4f"/>
-    <define name="THROTTLE_OF_VZ"   value="0.1f"/>
-    <define name="PITCH_TRIM"       value="-30.0f"/>
+    <define name="PITCH_OF_VZ" 		value="0.2f"/>
+    <define name="THROTTLE_OF_VZ"   value="0.2f"/>
+    <define name="PITCH_TRIM"       value="0.4f" />
   </section>
 
   <!-- include magneto neutrals -->
