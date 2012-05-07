@@ -26,6 +26,7 @@
 *.externalToolBuilders
 /build.properties
 /META-INF
+*.settings
 
 # Debian related files
 *.deb
