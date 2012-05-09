@@ -6,7 +6,7 @@
    radio="radios/R6107SP_7ch_xyz.xml"
    telemetry="telemetry/ATMOS/testing.xml"
    flight_plan="flight_plans/dummy.xml"
-   settings=" settings/ATMOS/base.xml settings/ATMOS/transition.xml settings/ATMOS/killHoverProps.xml settings/ATMOS/multiGain.xml"
+   settings=" settings/ATMOS/base.xml settings/ATMOS/transition.xml settings/ATMOS/multiGain.xml"
    gui_color="blue"
   />
   <aircraft
@@ -26,8 +26,18 @@
    radio="radios/R6107SP_7ch_xyz.xml"
    telemetry="telemetry/ATMOS/testing.xml"
    flight_plan="flight_plans/ATMOS/test_veldje.xml"
-   settings=" settings/ATMOS/base.xml settings/ATMOS/killHoverProps.xml settings/ATMOS/transition.xml settings/ATMOS/multiGain.xml settings/ATMOS/force_allocation.xml"
+   settings=" settings/ATMOS/base.xml settings/ATMOS/transition.xml settings/ATMOS/multiGain.xml"
    gui_color="green"
+  />
+  <aircraft
+   name="ATMOV3"
+   ac_id="183"
+   airframe="airframes/ATMOS/ATMOV3.xml"
+   radio="radios/R6107SP_7ch_xyz.xml"
+   telemetry="telemetry/ATMOS/testing.xml"
+   flight_plan="flight_plans/dummy.xml"
+   settings=" settings/ATMOS/base.xml settings/ATMOS/transition.xml settings/ATMOS/multiGain.xml"
+   gui_color="blue"
   />
   <aircraft
    name="SIM"

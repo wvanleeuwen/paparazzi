@@ -35,6 +35,7 @@
       <message name="HFF_GPS"           	period="1.3"/>
 <!--      <message name="SEND_POWER_INFO"           	period="2"/>-->
       <message name="ROTORCRAFT_TUNE_HOVER"        	period="1.2"/>
+      <message name="VERT_LOOP"         period="1.5"/>
     </mode>
 
 <!--   <mode name="hispeed_quat_att">
