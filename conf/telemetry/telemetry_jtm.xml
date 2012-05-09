@@ -19,6 +19,14 @@
       <message name="BOOZ2_CAM"         period="1."/>
       <message name="GPS_INT"         period=".25"/>
       <message name="INS"          period=".25"/>
+      <message name="VFF"               period=".1"/>
+      <message name="VERT_LOOP"         period=".1"/>
+      <message name="AHRS_REF_QUAT" period="0.05"/>
+      <message name="TOYTRONICS_COMMANDS" period="0.1"/>
+      <message name="BOOZ2_RADIO_CONTROL" period="0.1"/>
+      <message name="BARO_RAW"          period=".2"/>
+      <message name="IMU_GYRO_SCALED"        period=".1"/>
+      <message name="IMU_ACCEL_SCALED"       period=".1"/>
     </mode>
 
     <mode name="ppm">
