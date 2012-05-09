@@ -39,10 +39,12 @@ extern double absolute_forward_pitch_trim_deg;
 extern struct Int32AttitudeGains toytronics_hover_gains;
 extern struct Int32AttitudeGains toytronics_forward_gains;
 extern struct Int32AttitudeGains toytronics_aerobatic_gains;
+extern struct Int32AttitudeGains toytronics_holder_gains;
 extern xyz_t setpoint_aerobatic_decay_time;
 extern xyz_t setpoint_rc_sensitivity;
 extern double tc_fading_upper_deg;
 extern double tc_fading_lower_deg;
+extern double throttle_gain_parameter;
 
 #ifdef AUTOPILOT_LOBATT_WING_WAGGLE
   extern double lobatt_wing_waggle_deg;  //angle to which wings are waggled

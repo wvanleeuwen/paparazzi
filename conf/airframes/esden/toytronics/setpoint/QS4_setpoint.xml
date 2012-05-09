@@ -33,5 +33,7 @@
     <define name="RC_SENSITIVITY_X" value="1.0"/>
     <define name="RC_SENSITIVITY_Y" value="1.0"/>
     <define name="RC_SENSITIVITY_Z" value="1.0"/>
+
+    <define name="THROTTLE_GAIN_PARAMETER" value="0.0"/>
   </section>
 </airframe>
