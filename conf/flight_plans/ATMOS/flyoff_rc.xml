@@ -1,6 +1,6 @@
 <!DOCTYPE flight_plan SYSTEM "../flight_plan.dtd">
 
-<flight_plan alt="152" ground_alt="147" lat0="32.003810" lon0="-81.495930" max_dist_from_home="400" name="Atmov fly offf" security_height="2">
+<flight_plan alt="152" ground_alt="147" lat0="32.003810" lon0="-81.495930" max_dist_from_home="4000" name="Atmov fly offf" security_height="2">
   <header>
 #include "autopilot.h"
   </header>
@@ -14,10 +14,12 @@
     <waypoint name="p4" x="13.7" y="-40.7"/>
     <waypoint name="CAM" x="-20" y="-50" height="2."/>
     <waypoint name="TD" x="5.6" y="-10.9"/>
-    <waypoint name="WP1" lat="32.004650" lon="-81.495510"/>
-    <waypoint name="WP2" lat="32.005110" lon="-81.494790"/>
-    <waypoint name="WP3" lat="32.004510" lon="-81.494610"/>
-    <waypoint name="WP4" lat="32.003860" lon="-81.494780"/>        
+    <waypoint name="Pre-WP1" lat="32.004650" lon="-81.495510"/>
+    <waypoint name="Pre-WP2" lat="32.005110" lon="-81.494790"/>
+    <waypoint name="Pre-WP3" lat="32.004510" lon="-81.494610"/>
+    <waypoint name="Pre-WP4" lat="32.003860" lon="-81.494780"/>
+    <waypoint name="Base-launch" lat="31.591872" lon="-81.505414"/>
+    <waypoint name="Base-perch/stare" lat="32.004283" lon="-81.495029"/>        
   </waypoints>
   <blocks>
     <block name="Wait GPS">
