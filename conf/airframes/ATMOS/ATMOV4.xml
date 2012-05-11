@@ -6,10 +6,10 @@
   <servos min="0" neutral="0" max="0xff">
     <!-- Plus configuration, similar to the convention shown in http://paparazzi.enac.fr/wiki/Rotorcraft_Configuration -->
     <!-- Direction of rotation is opposite to that of the convention for engines HB and WL -->
-    <servo name="HB"            no="0" min="1220" neutral="1220" max="2030"/>	<!-- Hover prop bottom -->
-    <servo name="HT"            no="1" min="1220" neutral="1220" max="2030"/>	<!-- Hover prop top -->
-    <servo name="WL"            no="2" min="1220" neutral="1220" max="2030"/>	<!-- Wingtip prop left -->
-    <servo name="WR"            no="3" min="1220" neutral="1220" max="2030"/>	<!-- Wingtip prop right -->
+    <servo name="HB"            no="0" min="1100" neutral="1100" max="2100"/>	<!-- Hover prop bottom -->
+    <servo name="HT"            no="1" min="1100" neutral="1100" max="2100"/>	<!-- Hover prop top -->
+    <servo name="WL"            no="2" min="1100" neutral="1100" max="2100"/>	<!-- Wingtip prop left -->
+    <servo name="WR"            no="3" min="1100" neutral="1100" max="2100"/>	<!-- Wingtip prop right -->
     <servo name="AILEVON_LEFT"  no="4" min="2000" neutral="1500" max="1000"/>
     <servo name="AILEVON_RIGHT" no="6" min="2000" neutral="1500" max="1000"/>
     <servo name="RUDDER"  	no="7" min="2000" neutral="1500" max="1000"/>
@@ -52,8 +52,8 @@
  </section>
 
   <section name="SUPERVISION" prefix="SUPERVISION_">
-    <define name="MIN_MOTOR" 		value="1220"/>
-    <define name="MAX_MOTOR" 		value="2030"/>
+    <define name="MIN_MOTOR" 		value="1100"/>
+    <define name="MAX_MOTOR" 		value="2100"/>
     <define name="TRIM_A" 		value="0"/>
     <define name="TRIM_E" 		value="0"/>
     <define name="TRIM_R" 		value="0"/>

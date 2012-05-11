@@ -176,6 +176,10 @@ void ahrs_update_accel(void) {
 
     const struct Int32Vect3 vel_tangential_body = {ahrs_impl.ltp_vel_norm >> COMPUTATION_FRAC, 0, 0};
     struct Int32Vect3 acc_c_body;
+
+    struct Int32Vect3 vel_tangential_imu;
+    INT32_RMAT_VMULT(vel_tangential_imu, imu.body_to_imu_rmat, vel_tangential_body);
+
     VECT3_RATES_CROSS_VECT3(acc_c_body, ahrs.body_rate, vel_tangential_body);
     INT32_VECT3_RSHIFT(acc_c_body, acc_c_body, INT32_SPEED_FRAC+INT32_RATE_FRAC-INT32_ACCEL_FRAC-COMPUTATION_FRAC);
 

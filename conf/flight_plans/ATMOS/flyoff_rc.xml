@@ -1,18 +1,23 @@
 <!DOCTYPE flight_plan SYSTEM "../flight_plan.dtd">
 
-<flight_plan alt="25" ground_alt="0" lat0="32.010583333" lon0="-81.833138889" max_dist_from_home="500" name="ATMOS testing flight plan" security_height="15">
+<flight_plan alt="152" ground_alt="147" lat0="32.003810" lon0="-81.495930" max_dist_from_home="400" name="Atmov fly offf" security_height="2">
   <header>
 #include "autopilot.h"
-</header>
+  </header>
   <waypoints>
-    <waypoint name="HOME" x="0" y="0"/>
-    <waypoint name="CLIMB" x="1" y="1"/>
-    <waypoint name="STDBY" x="1" y="1"/>
-    <waypoint name="TD" x="-4" y="-4"/>
-    <waypoint name="p1" x="2" y="2"/>
-    <waypoint name="p2" x="25.8" y="-0.6"/>
-    <waypoint name="p3" x="50.6" y="23.0"/>
-    <waypoint name="p4" x="31.6" y="21.6"/>
+    <waypoint name="HOME" x="0.0" y="0.0"/>
+    <waypoint name="CLIMB" x="5.0" y="5.0"/>
+    <waypoint name="STDBY" x="-2.0" y="-5.0"/>
+    <waypoint name="p1" x="3.6" y="-13.9"/>
+    <waypoint name="p2" x="27.5" y="-48.2"/>
+    <waypoint name="p3" x="16.7" y="-19.6"/>
+    <waypoint name="p4" x="13.7" y="-40.7"/>
+    <waypoint name="CAM" x="-20" y="-50" height="2."/>
+    <waypoint name="TD" x="5.6" y="-10.9"/>
+    <waypoint name="WP1" lat="32.004650" lon="-81.495510"/>
+    <waypoint name="WP2" lat="32.005110" lon="-81.494790"/>
+    <waypoint name="WP3" lat="32.004510" lon="-81.494610"/>
+    <waypoint name="WP4" lat="32.003860" lon="-81.494780"/>        
   </waypoints>
   <blocks>
     <block name="Wait GPS">
@@ -22,25 +27,20 @@
     <block name="Geo init">
       <while cond="LessThan(NavBlockTime(), 10)"/>
       <call fun="NavSetGroundReferenceHere()"/>
+      <!--<call fun="NavSetAltitudeReferenceHere()"/>-->
     </block>
     <block name="Holding point">
       <call fun="NavKillThrottle()"/>
-      <attitude pitch="0" roll="0" throttle="0" until="FALSE" vmode="throttle"/>
+      <attitude pitch="0" roll="0" throttle="0" vmode="throttle" until="FALSE"/>
     </block>
     <block name="Start Engine">
       <call fun="NavResurrect()"/>
-      <attitude pitch="0" roll="0" throttle="0" until="FALSE" vmode="throttle"/>
+      <attitude pitch="0" roll="0" throttle="0" vmode="throttle" until="FALSE"/>
     </block>
     <block name="Takeoff" strip_button="Takeoff" strip_icon="takeoff.png">
-      <exception cond="ins_enu_pos.z > POS_BFP_OF_REAL(6.)" deroute="Standby"/>
+      <exception cond="ins_enu_pos.z > POS_BFP_OF_REAL(2.)" deroute="Standby"/>
       <call fun="NavSetWaypointHere(WP_CLIMB)"/>
-      <stay climb="0.5" vmode="climb" wp="CLIMB"/>
-    </block>
-    <block name="AtmovTakeoff" strip_button="AtmovTakeoff">
-      <exception cond="ins_enu_pos.z > POS_BFP_OF_REAL(15.)" deroute="Standby"/>
-      <attitude pitch="0" roll="0" throttle="0.8" until="ins_enu_pos.z > POS_BFP_OF_REAL(6.)" vmode="throttle"/>
-      <call fun="NavSetWaypointHere(WP_CLIMB)"/>
-      <stay climb="0.5" vmode="climb" wp="CLIMB"/>
+      <stay vmode="climb" climb="0.5" wp="CLIMB"/>
     </block>
     <block name="Standby" strip_button="Standby" strip_icon="home.png">
       <stay wp="STDBY"/>
@@ -54,7 +54,7 @@
     </block>
     <block name="line_p1_p2">
       <go from="p1" hmode="route" wp="p2"/>
-      <stay until="stage_time>10" wp="p2"/>
+      <stay wp="p2" until="stage_time>10"/>
       <go from="p2" hmode="route" wp="p1"/>
       <deroute block="stay_p1"/>
     </block>
