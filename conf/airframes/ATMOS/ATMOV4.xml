@@ -245,7 +245,7 @@
 	<define name="STABILIZATION_ATTITUDE_A_THETA_ACTGAIN"  		value="0"/>
 
 	<define name="STABILIZATION_ATTITUDE_A_PSI_PGAIN"  		value="2520"/>
-	<define name="STABILIZATION_ATTITUDE_A_PSI_DGAIN"  		value="1722"/>
+	<define name="STABILIZATION_ATTITUDE_A_PSI_DGAIN"  		value="300"/>
 	<define name="STABILIZATION_ATTITUDE_A_PSI_IGAIN"  		value="6"/>
 	<define name="STABILIZATION_ATTITUDE_A_PSI_DDGAIN"  		value="100"/>
 	<define name="STABILIZATION_ATTITUDE_A_PSI_ACTGAIN"  		value="1024"/>
