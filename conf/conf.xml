@@ -21,7 +21,7 @@
   />
   <aircraft
    name="ATMOV4"
-   ac_id="3"
+   ac_id="184"
    airframe="airframes/ATMOS/ATMOV4.xml"
    radio="radios/R6107SP_7ch_xyz.xml"
    telemetry="telemetry/ATMOS/testing.xml"
