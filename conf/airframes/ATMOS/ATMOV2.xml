@@ -76,6 +76,8 @@
     <define name="PITCH_OF_VZ" 		value="0.2f"/>
     <define name="THROTTLE_OF_VZ"   value="0.2f"/>
     <define name="PITCH_TRIM"       value="0.4f" />
+    <define name="THROTTLE_OF_XDD"	value="0.0f" />
+    <define name="YAWRATE_OF_YDD"   value="0.0f" />
   </section>
 
   <!-- include magneto neutrals -->

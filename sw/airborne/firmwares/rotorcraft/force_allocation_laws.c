@@ -28,6 +28,7 @@
 #include "firmwares/rotorcraft/guidance/guidance_v.h"
 #include "subsystems/radio_control.h"
 #include "firmwares/rotorcraft/stabilization.h"
+#include "firmwares/rotorcraft/navigation.h"
 #include "subsystems/ahrs.h"
 #include "subsystems/ins.h"
 #include "math/pprz_algebra_int.h"
@@ -41,6 +42,8 @@ float force_allocation_fixedwing_max_climb         = FORCE_ALLOCATION_MAX_CLIMB;
 float force_allocation_fixedwing_pitch_of_vz       = FORCE_ALLOCATION_PITCH_OF_VZ;
 float force_allocation_fixedwing_throttle_of_vz    = FORCE_ALLOCATION_THROTTLE_OF_VZ;
 float force_allocation_fixedwing_pitch_trim        = FORCE_ALLOCATION_PITCH_TRIM;          // radians
+float force_allocation_fixedwing_throttle_of_xdd   = FORCE_ALLOCATION_THROTTLE_OF_XDD;
+float force_allocation_fixedwing_yawrate_of_ydd    = FORCE_ALLOCATION_YAWRATE_OF_YDD;
 
 struct PprzLiftDevice lift_devices[LIFT_GENERATION_NR_OF_LIFT_DEVICES] =
 {
@@ -157,20 +160,21 @@ void Force_Allocation_Laws(void)
 
       // Longitudinal Plane Motion
       wing->commands[COMMAND_THRUST]  = (guidance_v_nominal_throttle)
-                                      + climb_speed * force_allocation_fixedwing_throttle_of_vz;
-                                      //+ (-(stab_att_sp_euler.theta * MAX_PPRZ / 4) >> INT32_ANGLE_FRAC ); // MAX_PPRZ
+                                      + climb_speed * force_allocation_fixedwing_throttle_of_vz
+                                      + (-(stab_att_sp_euler.theta * MAX_PPRZ / 2) >> INT32_ANGLE_FRAC ) * force_allocation_fixedwing_throttle_of_xdd; // MAX_PPRZ
                                       //+ ((stab_att_sp_euler.theta * MAX_PPRZ) >> INT32_ANGLE_FRAC ); // MAX_PPRZ
 
       wing->commands[COMMAND_PITCH]   = ANGLE_BFP_OF_REAL(force_allocation_fixedwing_pitch_trim + climb_speed * force_allocation_fixedwing_pitch_of_vz / MAX_PPRZ);
 
       // Coordinated Turn
-#ifdef FREE_FLOATING_HEADING
-      const float function_of_speed = 1.0f;
+#if !defined(FREE_FLOATING_HEADING)
+#pragma "message COORDINATED TURN"
       const int loop_rate = 512;
-      wing->commands[COMMAND_YAW]    += wing->commands[COMMAND_ROLL] * function_of_speed / loop_rate;
-#else
-      //wing->commands[COMMAND_YAW]    = ahrs.ltp_to_body_euler.psi;
+      wing->commands[COMMAND_YAW]    = stab_att_sp_euler.psi + wing->commands[COMMAND_ROLL] * force_allocation_fixedwing_yawrate_of_ydd / loop_rate;
+#elif defined(QUADROTOR_HEADING)
       wing->commands[COMMAND_YAW]    =  stab_att_sp_euler.psi;
+
+      wing->commands[COMMAND_YAW]    = ahrs.ltp_to_body_euler.psi;
 #endif
     }
 
@@ -180,6 +184,8 @@ void Force_Allocation_Laws(void)
     command_euler.psi    += wing->commands[COMMAND_YAW]        * percent;     // Hmmm this would benefit from some more thinking...
     orientation_rotation += RadOfDeg((float)wing->orientation_pitch) * percent;
   }
+
+  nav_heading = command_euler.psi;
 
   stabilization_cmd[COMMAND_THRUST] = cmd_thrust;
 

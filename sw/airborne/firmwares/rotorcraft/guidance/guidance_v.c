@@ -275,9 +275,11 @@ __attribute__ ((always_inline)) static inline void run_hover_loop(bool_t in_flig
     guidance_v_z_sum_err = 0;
 
   /* our nominal command : (g + zdd)*m   */
-#ifdef GUIDANCE_V_NOMINAL_HOVER_THROTTLE
+#if (defined(GUIDANCE_V_NOMINAL_HOVER_THROTTLE) && !USE_ADAPT_HOVER)
+#pragma message "NOT USING ADAPT HOVER"
   const int32_t inv_m = BFP_OF_REAL(9.81/guidance_v_nominal_throttle, FF_CMD_FRAC);
 #else
+#pragma message "USING ADAPT HOVER"
   const int32_t inv_m =  gv_adapt_X>>(GV_ADAPT_X_FRAC - FF_CMD_FRAC);
 #endif
   const int32_t g_m_zdd = (int32_t)BFP_OF_REAL(9.81, FF_CMD_FRAC) -

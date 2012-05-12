@@ -35,6 +35,8 @@ extern float force_allocation_fixedwing_max_climb; // m/s
 extern float force_allocation_fixedwing_pitch_of_vz; // VZ = vertical speed
 extern float force_allocation_fixedwing_throttle_of_vz;
 extern float force_allocation_fixedwing_pitch_trim;
+extern float force_allocation_fixedwing_throttle_of_xdd; // forward acceleration
+extern float force_allocation_fixedwing_yawrate_of_ydd;  // lateral acceleration
 
 struct PprzLiftDevice {
   // Type and Activation
