@@ -81,7 +81,7 @@
   </section>
 
   <!-- include magneto neutrals -->
-  <include href="conf/airframes/ATMOS/calib/imu_lisam_033_atmov3.xml"/>
+  <include href="conf/airframes/ATMOS/calib/imu_lisam_033_atmov4.xml"/>
 
   <section name="IMU" prefix="IMU_">
     <!-- IMU is placed with it's length perpendicular to the wing -->
@@ -191,7 +191,7 @@
     <!-- magnetic field for Rotterdam -->
     <!--<define name="H_X" value=" 0.39123"/>
     <define name="H_Y" value=" 0.00059"/>
-    <define name="H_Z" value=" 0.92025"/>--.
+    <define name="H_Z" value=" 0.92025"/>-->
     <!-- magnetic field for Georgia -->
     <define name="H_X" value="0.651996618"/>
     <define name="H_Y" value="0.013482692"/>

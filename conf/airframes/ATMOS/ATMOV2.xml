@@ -31,7 +31,7 @@
   <section name="AUTOPILOT">
     <define name="MODE_MANUAL" value="AP_MODE_ATTITUDE_DIRECT"/>
     <define name="MODE_AUTO1"  value="AP_MODE_ATTITUDE_Z_HOLD"/>
-    <define name="MODE_AUTO2"  value="AP_MODE_ATTITUDE_Z_HOLD"/>
+    <define name="MODE_AUTO2"  value="AP_MODE_NAV"/>
 
     <define name="AUTOPILOT_KILL_WITHOUT_AHRS"  value="TRUE"/>
 
@@ -73,11 +73,11 @@
 
   <section name="FORCE_ALLOCATION" prefix="FORCE_ALLOCATION_">
     <define name="MAX_CLIMB"   		value="3.0f"/>
-    <define name="PITCH_OF_VZ" 		value="0.2f"/>
-    <define name="THROTTLE_OF_VZ"   value="0.2f"/>
-    <define name="PITCH_TRIM"       value="0.4f" />
+    <define name="PITCH_OF_VZ" 		value="0.25f"/>
+    <define name="THROTTLE_OF_VZ"   value="0.05f"/>
+    <define name="PITCH_TRIM"       value="0.2f" />
     <define name="THROTTLE_OF_XDD"	value="0.0f" />
-    <define name="YAWRATE_OF_YDD"   value="0.0f" />
+    <define name="YAWRATE_OF_YDD"   value="1.0f" />
   </section>
 
   <!-- include magneto neutrals -->
@@ -86,7 +86,7 @@
   <section name="IMU" prefix="IMU_">
     <!-- IMU is placed with it's length perpendicular to the wing -->
     <define name="BODY_TO_IMU_PHI"   value="RadOfDeg(   0. )"/>
-    <define name="BODY_TO_IMU_THETA" value="RadOfDeg(  88. )"/>
+    <define name="BODY_TO_IMU_THETA" value="RadOfDeg(  90. )"/>
     <define name="BODY_TO_IMU_PSI"   value="RadOfDeg( 180. )"/>
   </section>
 
@@ -171,7 +171,7 @@
    <define name="RC_CLIMB_COEF" 		value ="163"/>
    <!-- BOOZ_SPEED_I_OF_F(1.5) * 20% -->
    <define name="RC_CLIMB_DEAD_BAND"  		value ="160000"/>
-<!--   <define name="NOMINAL_HOVER_THROTTLE" value ="0.45"/>-->
+   <define name="NOMINAL_HOVER_THROTTLE"        value ="0.40"/>
 
    <define name="REF_MIN_ZDD"			value="(-0.1*9.81)"/>
    <define name="REF_MAX_ZDD"			value="(0.1*9.81)"/>
@@ -189,9 +189,13 @@
     <define name="H_Y" value=" 0.11811"/>
     <define name="H_Z" value=" 0.87161"/>-->
     <!-- magnetic field for Rotterdam -->
-    <define name="H_X" value=" 0.39123"/>
+    <!--<define name="H_X" value=" 0.39123"/>
     <define name="H_Y" value=" 0.00059"/>
-    <define name="H_Z" value=" 0.92025"/>
+    <define name="H_Z" value=" 0.92025"/>-->
+    <!-- magnetic field for Georgia -->
+    <define name="H_X" value="0.651996618"/>
+    <define name="H_Y" value="0.013482692"/>
+    <define name="H_Z" value="0.758101109"/>
 
   </section>
 
@@ -223,7 +227,7 @@
 	<!--<define name="TRANSVEH_PREP_THRUST_COEF_SCALING" value="{ -0.2188, -0.2188, 0.1130, 0.1130 }"/>-->
    </load>
 
-   <!--<load name="ATMOS/killOnGroundDetect.xml"/>-->
+   <load name="ATMOS/killOnGroundDetect.xml"/>
 
 
    <!-- ATMOV sensors -->
@@ -278,9 +282,11 @@
 
 	<define name="STABILIZATION_ATTITUDE_C_THETA_PGAIN"  		value="700"/>
 	<define name="STABILIZATION_ATTITUDE_C_THETA_DGAIN"  		value="300"/>
+	<define name="STABILIZATION_ATTITUDE_C_THETA_PGAIN"  		value="1000"/>
+	<define name="STABILIZATION_ATTITUDE_C_THETA_DGAIN"  		value="500"/>
 	<define name="STABILIZATION_ATTITUDE_C_THETA_IGAIN"  		value="0"/>
 	<define name="STABILIZATION_ATTITUDE_C_THETA_DDGAIN"  		value="100"/>
-	<define name="STABILIZATION_ATTITUDE_C_THETA_ACTGAIN"  		value="620"/>
+	<define name="STABILIZATION_ATTITUDE_C_THETA_ACTGAIN"  		value="750"/>
 
 	<define name="STABILIZATION_ATTITUDE_C_PSI_PGAIN"  		value="600"/>
 	<define name="STABILIZATION_ATTITUDE_C_PSI_DGAIN"  		value="200"/>
@@ -317,8 +323,11 @@
        <configure name="USE_SERVOS_7AND8"    value="TRUE"/>
       </subsystem>
       <subsystem name="telemetry"     type="xbee_api">
-        <configure name="MODEM_BAUD"    value="B57600"/>
+<!--      <subsystem name="telemetry"     type="transparent">
+        <configure name="MODEM_BAUD"    value="B9600"/>-->
         <configure name="MODEM_PORT"    value="UART2"/>
+        <configure name="MODEM_BAUD"    value="B57600"/>
+<!--        <configure name="MODEM_PORT"    value="UART2"/> -->
       </subsystem>
       <define name="SERVO_HZ" value="400"/>
       <define name="SERVO_HZ_SECONDARY" value="40"/>
