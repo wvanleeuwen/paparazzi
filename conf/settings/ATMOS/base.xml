@@ -22,16 +22,12 @@
 	<strip_button name="ARM KOGD" value="1"/>
 	<strip_button name="DISARM KOGD" value="0"/>
       </dl_setting>-->
-    </dl_settings>
 
-    <dl_settings NAME="Rate Loop">
+
       <dl_setting var="stabilization_rate_gain.p" min="1" step="1" max="1000" module="stabilization/stabilization_rate" shortname="gain p"/>
       <dl_setting var="stabilization_rate_gain.q" min="1" step="1" max="1000" module="stabilization/stabilization_rate" shortname="gain q"/>
       <dl_setting var="stabilization_rate_gain.r" min="1" step="1" max="1000" module="stabilization/stabilization_rate" shortname="gain r"/>
-    </dl_settings>
 
-
-    <dl_settings NAME="Att Loop">
       <dl_setting var="stabilization_gains->p.x" min="0" step="1" max="6000"   module="stabilization/stabilization_attitude" shortname="pgain phi" />
       <dl_setting var="stabilization_gains->d.x" min="0" step="1" max="6000"   module="stabilization/stabilization_attitude" shortname="dgain p"/>
       <dl_setting var="stabilization_gains->i.x" min="0"  step="1" max="50"    module="stabilization/stabilization_attitude" shortname="igain phi" handler="SetKiPhi"/>

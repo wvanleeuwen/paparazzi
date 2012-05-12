@@ -16,7 +16,7 @@ void atmov_killOnGroundDetect_init(void) {
 
 void atmov_killOnGroundDetect_periodic(void) {
   bool_t pip = GPIO_ReadInputDataBit(GPIOC, GPIO_Pin_2);
-  DOWNLINK_SEND_BARO_RAW(DefaultChannel,DefaultDevice,0,&pip);
+  // DOWNLINK_SEND_BARO_RAW(DefaultChannel,DefaultDevice,0,&pip);
   if (!pip) {
     //low, so ground detected
     if (kill_on_ground_detect_enabled) {

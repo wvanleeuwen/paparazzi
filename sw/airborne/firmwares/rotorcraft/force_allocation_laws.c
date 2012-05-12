@@ -168,7 +168,7 @@ void Force_Allocation_Laws(void)
 
       // Coordinated Turn
 #if !defined(FREE_FLOATING_HEADING)
-#pragma "message COORDINATED TURN"
+#pragma message: COORDINATED TURN
       const int loop_rate = 512;
       wing->commands[COMMAND_YAW]    = stab_att_sp_euler.psi + wing->commands[COMMAND_ROLL] * force_allocation_fixedwing_yawrate_of_ydd / loop_rate;
 #elif defined(QUADROTOR_HEADING)
@@ -186,6 +186,7 @@ void Force_Allocation_Laws(void)
   }
 
   nav_heading = command_euler.psi;
+  stab_att_sp_euler.psi = command_euler.psi;
 
   stabilization_cmd[COMMAND_THRUST] = cmd_thrust;
 
