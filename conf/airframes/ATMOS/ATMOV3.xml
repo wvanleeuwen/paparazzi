@@ -30,7 +30,7 @@
 
   <section name="AUTOPILOT">
     <define name="MODE_MANUAL" value="AP_MODE_ATTITUDE_DIRECT"/>
-    <define name="MODE_AUTO1"  value="AP_MODE_ATTITUDE_RC_CLIMB"/>
+    <define name="MODE_AUTO1"  value="AP_MODE_ATTITUDE_Z_HOLD"/>
     <define name="MODE_AUTO2"  value="AP_MODE_ATTITUDE_Z_HOLD"/>
 
     <define name="AUTOPILOT_KILL_WITHOUT_AHRS"  value="TRUE"/>
@@ -68,7 +68,7 @@
     <define name="PITCH_COEF"  	value="{   256, -256,    0,    0  }"/>
     <define name="ROLL_COEF"   	value="{     0,    0,  256, -256  }"/>
     <define name="YAW_COEF"     value="{    -0,    0,   -0,    0  }"/>
-    <define name="THRUST_COEF" 	value="{   256,  256,  120,  120  }"/>
+    <define name="THRUST_COEF" 	value="{   256,  256,  140,  140  }"/>
   </section>
 
   <section name="FORCE_ALLOCATION" prefix="FORCE_ALLOCATION_">
@@ -76,6 +76,8 @@
     <define name="PITCH_OF_VZ" 		value="0.2f"/>
     <define name="THROTTLE_OF_VZ"   value="0.2f"/>
     <define name="PITCH_TRIM"       value="0.4f" />
+    <define name="THROTTLE_OF_XDD"	value="0.0f" />
+    <define name="YAWRATE_OF_YDD"   value="0.0f" />
   </section>
 
   <!-- include magneto neutrals -->
@@ -162,18 +164,19 @@
    <define name="MIN_ERR_ZD"  			value="SPEED_BFP_OF_REAL(-10.)"/>
    <define name="MAX_ERR_ZD"  			value="SPEED_BFP_OF_REAL( 10.)"/>
    <define name="MAX_SUM_ERR" 			value="2000000"/>
-   <define name="REF_MIN_ZDD"  			value="-1.5*9.81"/>
-   <define name="REF_MAX_ZDD"  			value=" 0.5*9.81"/>
-   <define name="REF_MIN_ZD"   			value="-1.5"/>
-   <define name="REF_MAX_ZD"   			value=" 1.5"/>
-   <define name="HOVER_KP"    			value="442"/>
-   <define name="HOVER_KD"    			value="335"/>
+   <define name="HOVER_KP"    			value="300"/>
+   <define name="HOVER_KD"    			value="200"/>
    <define name="HOVER_KI"    			value="9"/>
    <!-- 1.5m/s for full stick : BOOZ_SPEED_I_OF_F(1.5) / (MAX_PPRZ/2) -->
    <define name="RC_CLIMB_COEF" 		value ="163"/>
    <!-- BOOZ_SPEED_I_OF_F(1.5) * 20% -->
    <define name="RC_CLIMB_DEAD_BAND"  		value ="160000"/>
-   <define name="NOMINAL_HOVER_THROTTLE" value ="0.45"/>
+<!--   <define name="NOMINAL_HOVER_THROTTLE" value ="0.45"/>-->
+
+   <define name="REF_MIN_ZDD"			value="(-0.1*9.81)"/>
+   <define name="REF_MAX_ZDD"			value="(0.1*9.81)"/>
+   <define name="REF_MIN_ZD"			value="-0.75"/>
+   <define name="REF_MAX_ZD"			value="0.4"/>
 
   </section>
 
@@ -201,7 +204,8 @@
    <define name="DGAIN" 		value="175"/>
    <define name="IGAIN" 		value="1"/>
    <define name="AGAIN" 		value="50"/>
-   <define name="MAX_BANK"      value="RadOfDeg(30)"/>
+   <define name="REF_MAX_BANK"      	value="RadOfDeg(20)"/>
+   <define name="REF_MAX_SPEED"      	value="15"/>
  </section>
 
  <modules main_freq="512">
