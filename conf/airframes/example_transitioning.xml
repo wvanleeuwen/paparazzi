@@ -19,7 +19,7 @@
 <!--      <define name="AHRS_USE_GPS_HEADING" />
 <configure name="USE_MAGNETOMETER" value="1" /> -->
       <define name="RADIO_KILL_SWITCH" value="RADIO_FLAPS"/>
-      <define name="USE_INS_NAV_INIT"/> 
+      <define name="USE_INS_NAV_INIT"/>
     </target>
 
     <subsystem name="telemetry"     type="xbee_api">

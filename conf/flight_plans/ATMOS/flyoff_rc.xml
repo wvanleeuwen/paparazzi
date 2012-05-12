@@ -19,7 +19,7 @@
     <waypoint name="Pre-WP3" lat="32.004510" lon="-81.494610"/>
     <waypoint name="Pre-WP4" lat="32.003860" lon="-81.494780"/>
     <waypoint name="Base-launch" lat="31.591872" lon="-81.505414"/>
-    <waypoint name="Base-perch/stare" lat="32.004283" lon="-81.495029"/>        
+    <waypoint name="Base-perch/stare" lat="32.004283" lon="-81.495029"/>
   </waypoints>
   <blocks>
     <block name="Wait GPS">
