@@ -320,7 +320,7 @@
       <subsystem name="actuators"     type="pwm_supervision">
        <configure name="USE_SERVOS_7AND8"    value="TRUE"/>
       </subsystem>
-      <subsystem name="telemetry"     type="xbee_api"> 
+      <subsystem name="telemetry"     type="xbee_api">
 <!--      <subsystem name="telemetry"     type="transparent">
         <configure name="MODEM_BAUD"    value="B9600"/>-->
         <configure name="MODEM_PORT"    value="UART2"/>

@@ -242,14 +242,14 @@
 	<define name="STABILIZATION_ATTITUDE_A_PHI_IGAIN"  		value="0"/>
 	<define name="STABILIZATION_ATTITUDE_A_PHI_ACTGAIN"  		value="0"/>
 
-	<define name="STABILIZATION_ATTITUDE_A_THETA_PGAIN"  		value="340"/>
-	<define name="STABILIZATION_ATTITUDE_A_THETA_DGAIN" 	 	value="180"/>
+	<define name="STABILIZATION_ATTITUDE_A_THETA_PGAIN"  		value="360"/>
+	<define name="STABILIZATION_ATTITUDE_A_THETA_DGAIN" 	 	value="250"/>
 	<define name="STABILIZATION_ATTITUDE_A_THETA_DDGAIN" 	 	value="200"/>
 	<define name="STABILIZATION_ATTITUDE_A_THETA_IGAIN" 	 	value="0"/>
 	<define name="STABILIZATION_ATTITUDE_A_THETA_ACTGAIN"  		value="0"/>
 
 	<define name="STABILIZATION_ATTITUDE_A_PSI_PGAIN"  		value="2520"/>
-	<define name="STABILIZATION_ATTITUDE_A_PSI_DGAIN"  		value="1722"/>
+	<define name="STABILIZATION_ATTITUDE_A_PSI_DGAIN"  		value="300"/>
 	<define name="STABILIZATION_ATTITUDE_A_PSI_IGAIN"  		value="6"/>
 	<define name="STABILIZATION_ATTITUDE_A_PSI_DDGAIN"  		value="100"/>
 	<define name="STABILIZATION_ATTITUDE_A_PSI_ACTGAIN"  		value="1024"/>
@@ -280,8 +280,6 @@
 	<define name="STABILIZATION_ATTITUDE_C_PHI_DDGAIN"  		value="100"/>
 	<define name="STABILIZATION_ATTITUDE_C_PHI_ACTGAIN"  		value="0"/>
 
-	<define name="STABILIZATION_ATTITUDE_C_THETA_PGAIN"  		value="700"/>
-	<define name="STABILIZATION_ATTITUDE_C_THETA_DGAIN"  		value="300"/>
 	<define name="STABILIZATION_ATTITUDE_C_THETA_PGAIN"  		value="1000"/>
 	<define name="STABILIZATION_ATTITUDE_C_THETA_DGAIN"  		value="500"/>
 	<define name="STABILIZATION_ATTITUDE_C_THETA_IGAIN"  		value="0"/>
