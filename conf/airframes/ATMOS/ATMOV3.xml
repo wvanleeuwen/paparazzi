@@ -31,7 +31,7 @@
   <section name="AUTOPILOT">
     <define name="MODE_MANUAL" value="AP_MODE_ATTITUDE_DIRECT"/>
     <define name="MODE_AUTO1"  value="AP_MODE_ATTITUDE_Z_HOLD"/>
-    <define name="MODE_AUTO2"  value="AP_MODE_ATTITUDE_Z_HOLD"/>
+    <define name="MODE_AUTO2"  value="AP_MODE_NAV"/>
 
     <define name="AUTOPILOT_KILL_WITHOUT_AHRS"  value="TRUE"/>
 
@@ -73,9 +73,9 @@
 
   <section name="FORCE_ALLOCATION" prefix="FORCE_ALLOCATION_">
     <define name="MAX_CLIMB"   		value="3.0f"/>
-    <define name="PITCH_OF_VZ" 		value="0.2f"/>
-    <define name="THROTTLE_OF_VZ"   value="0.2f"/>
-    <define name="PITCH_TRIM"       value="0.4f" />
+    <define name="PITCH_OF_VZ" 		value="0.25f"/>
+    <define name="THROTTLE_OF_VZ"   value="0.05f"/>
+    <define name="PITCH_TRIM"       value="0.2f" />
     <define name="THROTTLE_OF_XDD"	value="0.0f" />
     <define name="YAWRATE_OF_YDD"   value="1.0f" />
   </section>
@@ -248,8 +248,8 @@
 	<define name="STABILIZATION_ATTITUDE_A_THETA_IGAIN" 	 	value="0"/>
 	<define name="STABILIZATION_ATTITUDE_A_THETA_ACTGAIN"  		value="0"/>
 
-	<define name="STABILIZATION_ATTITUDE_A_PSI_PGAIN"  		value="2800"/>
-	<define name="STABILIZATION_ATTITUDE_A_PSI_DGAIN"  		value="260"/>
+	<define name="STABILIZATION_ATTITUDE_A_PSI_PGAIN"  		value="2520"/>
+	<define name="STABILIZATION_ATTITUDE_A_PSI_DGAIN"  		value="300"/>
 	<define name="STABILIZATION_ATTITUDE_A_PSI_IGAIN"  		value="6"/>
 	<define name="STABILIZATION_ATTITUDE_A_PSI_DDGAIN"  		value="100"/>
 	<define name="STABILIZATION_ATTITUDE_A_PSI_ACTGAIN"  		value="1024"/>
@@ -321,8 +321,11 @@
        <configure name="USE_SERVOS_7AND8"    value="TRUE"/>
       </subsystem>
       <subsystem name="telemetry"     type="xbee_api">
-        <configure name="MODEM_BAUD"    value="B57600"/>
+<!--      <subsystem name="telemetry"     type="transparent">
+        <configure name="MODEM_BAUD"    value="B9600"/>-->
         <configure name="MODEM_PORT"    value="UART2"/>
+        <configure name="MODEM_BAUD"    value="B57600"/>
+<!--        <configure name="MODEM_PORT"    value="UART2"/> -->
       </subsystem>
       <define name="SERVO_HZ" value="400"/>
       <define name="SERVO_HZ_SECONDARY" value="40"/>
