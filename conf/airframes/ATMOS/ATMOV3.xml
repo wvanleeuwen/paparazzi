@@ -77,7 +77,7 @@
     <define name="THROTTLE_OF_VZ"   value="0.2f"/>
     <define name="PITCH_TRIM"       value="0.4f" />
     <define name="THROTTLE_OF_XDD"	value="0.0f" />
-    <define name="YAWRATE_OF_YDD"   value="0.0f" />
+    <define name="YAWRATE_OF_YDD"   value="1.0f" />
   </section>
 
   <!-- include magneto neutrals -->
@@ -171,7 +171,7 @@
    <define name="RC_CLIMB_COEF" 		value ="163"/>
    <!-- BOOZ_SPEED_I_OF_F(1.5) * 20% -->
    <define name="RC_CLIMB_DEAD_BAND"  		value ="160000"/>
-<!--   <define name="NOMINAL_HOVER_THROTTLE" value ="0.45"/>-->
+   <define name="NOMINAL_HOVER_THROTTLE" value ="0.40"/>
 
    <define name="REF_MIN_ZDD"			value="(-0.1*9.81)"/>
    <define name="REF_MAX_ZDD"			value="(0.1*9.81)"/>
@@ -280,11 +280,11 @@
 	<define name="STABILIZATION_ATTITUDE_C_PHI_DDGAIN"  		value="100"/>
 	<define name="STABILIZATION_ATTITUDE_C_PHI_ACTGAIN"  		value="0"/>
 
-	<define name="STABILIZATION_ATTITUDE_C_THETA_PGAIN"  		value="500"/>
-	<define name="STABILIZATION_ATTITUDE_C_THETA_DGAIN"  		value="300"/>
+	<define name="STABILIZATION_ATTITUDE_C_THETA_PGAIN"  		value="1000"/>
+	<define name="STABILIZATION_ATTITUDE_C_THETA_DGAIN"  		value="500"/>
 	<define name="STABILIZATION_ATTITUDE_C_THETA_IGAIN"  		value="0"/>
 	<define name="STABILIZATION_ATTITUDE_C_THETA_DDGAIN"  		value="100"/>
-	<define name="STABILIZATION_ATTITUDE_C_THETA_ACTGAIN"  		value="512"/>
+	<define name="STABILIZATION_ATTITUDE_C_THETA_ACTGAIN"  		value="750"/>
 
 	<define name="STABILIZATION_ATTITUDE_C_PSI_PGAIN"  		value="600"/>
 	<define name="STABILIZATION_ATTITUDE_C_PSI_DGAIN"  		value="200"/>
