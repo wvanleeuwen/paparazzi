@@ -223,7 +223,7 @@
 	<!--<define name="TRANSVEH_PREP_THRUST_COEF_SCALING" value="{ -0.2188, -0.2188, 0.1130, 0.1130 }"/>-->
    </load>
 
-   <!--<load name="ATMOS/killOnGroundDetect.xml"/>-->
+   <load name="ATMOS/killOnGroundDetect.xml"/>
 
 
    <!-- ATMOV sensors -->

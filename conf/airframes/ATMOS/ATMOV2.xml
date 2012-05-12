@@ -30,8 +30,8 @@
 
   <section name="AUTOPILOT">
     <define name="MODE_MANUAL" value="AP_MODE_ATTITUDE_DIRECT"/>
-    <define name="MODE_AUTO1"  value="AP_MODE_RC_DIRECT"/>
-    <define name="MODE_AUTO2"  value="AP_MODE_HOVER_Z_HOLD"/>
+    <define name="MODE_AUTO1"  value="AP_MODE_ATTITUDE_Z_HOLD"/>
+    <define name="MODE_AUTO2"  value="AP_MODE_ATTITUDE_Z_HOLD"/>
 
     <define name="AUTOPILOT_KILL_WITHOUT_AHRS"  value="TRUE"/>
 
@@ -162,18 +162,19 @@
    <define name="MIN_ERR_ZD"  			value="SPEED_BFP_OF_REAL(-10.)"/>
    <define name="MAX_ERR_ZD"  			value="SPEED_BFP_OF_REAL( 10.)"/>
    <define name="MAX_SUM_ERR" 			value="2000000"/>
-   <define name="REF_MIN_ZDD"  			value="-1.5*9.81"/>
-   <define name="REF_MAX_ZDD"  			value=" 0.5*9.81"/>
-   <define name="REF_MIN_ZD"   			value="-1.5"/>
-   <define name="REF_MAX_ZD"   			value=" 1.5"/>
-   <define name="HOVER_KP"    			value="442"/>
-   <define name="HOVER_KD"    			value="335"/>
+   <define name="HOVER_KP"    			value="300"/>
+   <define name="HOVER_KD"    			value="200"/>
    <define name="HOVER_KI"    			value="9"/>
    <!-- 1.5m/s for full stick : BOOZ_SPEED_I_OF_F(1.5) / (MAX_PPRZ/2) -->
    <define name="RC_CLIMB_COEF" 		value ="163"/>
    <!-- BOOZ_SPEED_I_OF_F(1.5) * 20% -->
    <define name="RC_CLIMB_DEAD_BAND"  		value ="160000"/>
-   <define name="NOMINAL_HOVER_THROTTLE" value ="0.45"/>
+<!--   <define name="NOMINAL_HOVER_THROTTLE" value ="0.45"/>-->
+
+   <define name="REF_MIN_ZDD"			value="(-0.1*9.81)"/>
+   <define name="REF_MAX_ZDD"			value="(0.1*9.81)"/>
+   <define name="REF_MIN_ZD"			value="-0.75"/>
+   <define name="REF_MAX_ZD"			value="0.4"/>
 
   </section>
 
@@ -197,7 +198,8 @@
    <define name="DGAIN" 		value="175"/>
    <define name="IGAIN" 		value="1"/>
    <define name="AGAIN" 		value="50"/>
-   <define name="MAX_BANK"      value="RadOfDeg(30)"/>
+   <define name="REF_MAX_BANK"      	value="RadOfDeg(20)"/>
+   <define name="REF_MAX_SPEED"      	value="15"/>
  </section>
 
  <modules main_freq="512">
@@ -272,11 +274,11 @@
 	<define name="STABILIZATION_ATTITUDE_C_PHI_DDGAIN"  		value="100"/>
 	<define name="STABILIZATION_ATTITUDE_C_PHI_ACTGAIN"  		value="0"/>
 
-	<define name="STABILIZATION_ATTITUDE_C_THETA_PGAIN"  		value="500"/>
+	<define name="STABILIZATION_ATTITUDE_C_THETA_PGAIN"  		value="700"/>
 	<define name="STABILIZATION_ATTITUDE_C_THETA_DGAIN"  		value="300"/>
 	<define name="STABILIZATION_ATTITUDE_C_THETA_IGAIN"  		value="0"/>
 	<define name="STABILIZATION_ATTITUDE_C_THETA_DDGAIN"  		value="100"/>
-	<define name="STABILIZATION_ATTITUDE_C_THETA_ACTGAIN"  		value="512"/>
+	<define name="STABILIZATION_ATTITUDE_C_THETA_ACTGAIN"  		value="620"/>
 
 	<define name="STABILIZATION_ATTITUDE_C_PSI_PGAIN"  		value="600"/>
 	<define name="STABILIZATION_ATTITUDE_C_PSI_DGAIN"  		value="200"/>
@@ -298,7 +300,7 @@
 <!--    <define name="USE_SETPOINTS_WITH_TRANSITIONS" value="TRUE"/>-->
     <define name="ATMOS_RCD" value="TRUE"/>
     <define name="RC_LOST_MODE" value="PPRZ_MODE_AUTO2"/>
-    <!--<define name="USE_ADAPT_HOVER" value="TRUE"/>-->
+    <define name="USE_ADAPT_HOVER" value="TRUE"/>
     <define name="USE_KILL_SWITCH_FOR_MOTOR_ARMING" value="TRUE"/>
 <!--   <define name="ADC_CHANNEL_CURRENT" value="ADC_1"/>
    <define name="MilliAmpereOfAdc(adc)" value="((adc)*0.021826172)"/>-->
@@ -312,8 +314,8 @@
       <subsystem name="actuators"     type="pwm_supervision">
        <configure name="USE_SERVOS_7AND8"    value="TRUE"/>
       </subsystem>
-      <subsystem name="telemetry"     type="transparent">
-        <configure name="MODEM_BAUD"    value="B9600"/>
+      <subsystem name="telemetry"     type="xbee_api">
+        <configure name="MODEM_BAUD"    value="B57600"/>
         <configure name="MODEM_PORT"    value="UART2"/>
       </subsystem>
       <define name="SERVO_HZ" value="400"/>

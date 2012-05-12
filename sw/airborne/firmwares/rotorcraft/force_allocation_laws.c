@@ -157,8 +157,8 @@ void Force_Allocation_Laws(void)
 
       // Longitudinal Plane Motion
       wing->commands[COMMAND_THRUST]  = (guidance_v_nominal_throttle)
-                                      + climb_speed * force_allocation_fixedwing_throttle_of_vz
-                                      + (-(stab_att_sp_euler.theta * MAX_PPRZ / 4) >> INT32_ANGLE_FRAC ); // MAX_PPRZ
+                                      + climb_speed * force_allocation_fixedwing_throttle_of_vz;
+                                      //+ (-(stab_att_sp_euler.theta * MAX_PPRZ / 4) >> INT32_ANGLE_FRAC ); // MAX_PPRZ
                                       //+ ((stab_att_sp_euler.theta * MAX_PPRZ) >> INT32_ANGLE_FRAC ); // MAX_PPRZ
 
       wing->commands[COMMAND_PITCH]   = ANGLE_BFP_OF_REAL(force_allocation_fixedwing_pitch_trim + climb_speed * force_allocation_fixedwing_pitch_of_vz / MAX_PPRZ);

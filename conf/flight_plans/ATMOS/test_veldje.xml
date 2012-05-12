@@ -1,16 +1,16 @@
 <!DOCTYPE flight_plan SYSTEM "../flight_plan.dtd">
 
-<flight_plan alt="25" ground_alt="0" lat0="32.010583333" lon0="-81.833138889" max_dist_from_home="500" name="ATMOS testing flight plan" security_height="15">
+<flight_plan alt="25" ground_alt="0" lat0="31.8455191" lon0="-81.392340" max_dist_from_home="500" name="ATMOS testing flight plan" security_height="15">
   <header>
 #include "autopilot.h"
 </header>
   <waypoints>
     <waypoint name="HOME" x="0" y="0"/>
-    <waypoint name="CLIMB" x="1" y="1"/>
-    <waypoint name="STDBY" x="1" y="1"/>
-    <waypoint name="TD" x="-4" y="-4"/>
-    <waypoint name="p1" x="2" y="2"/>
-    <waypoint name="p2" x="25.8" y="-0.6"/>
+    <waypoint name="CLIMB" x="63.2" y="-1.4"/>
+    <waypoint alt="45.0" name="STDBY" x="1.3" y="15.4"/>
+    <waypoint name="TD" x="18.6" y="25.5"/>
+    <waypoint alt="85.0" name="p1" x="-106.7" y="-100.0"/>
+    <waypoint name="p2" x="150.1" y="98.5"/>
     <waypoint name="p3" x="50.6" y="23.0"/>
     <waypoint name="p4" x="31.6" y="21.6"/>
   </waypoints>

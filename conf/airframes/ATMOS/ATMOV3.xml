@@ -68,7 +68,7 @@
     <define name="PITCH_COEF"  	value="{   256, -256,    0,    0  }"/>
     <define name="ROLL_COEF"   	value="{     0,    0,  256, -256  }"/>
     <define name="YAW_COEF"     value="{    -0,    0,   -0,    0  }"/>
-    <define name="THRUST_COEF" 	value="{   256,  256,  230,  230  }"/>
+    <define name="THRUST_COEF" 	value="{   256,  256,  120,  120  }"/>
   </section>
 
   <section name="FORCE_ALLOCATION" prefix="FORCE_ALLOCATION_">
@@ -223,7 +223,7 @@
 	<!--<define name="TRANSVEH_PREP_THRUST_COEF_SCALING" value="{ -0.2188, -0.2188, 0.1130, 0.1130 }"/>-->
    </load>
 
-   <!--<load name="ATMOS/killOnGroundDetect.xml"/>-->
+   <load name="ATMOS/killOnGroundDetect.xml"/>
 
 
    <!-- ATMOV sensors -->
@@ -244,8 +244,8 @@
 	<define name="STABILIZATION_ATTITUDE_A_THETA_IGAIN" 	 	value="0"/>
 	<define name="STABILIZATION_ATTITUDE_A_THETA_ACTGAIN"  		value="0"/>
 
-	<define name="STABILIZATION_ATTITUDE_A_PSI_PGAIN"  		value="2520"/>
-	<define name="STABILIZATION_ATTITUDE_A_PSI_DGAIN"  		value="1722"/>
+	<define name="STABILIZATION_ATTITUDE_A_PSI_PGAIN"  		value="2800"/>
+	<define name="STABILIZATION_ATTITUDE_A_PSI_DGAIN"  		value="260"/>
 	<define name="STABILIZATION_ATTITUDE_A_PSI_IGAIN"  		value="6"/>
 	<define name="STABILIZATION_ATTITUDE_A_PSI_DDGAIN"  		value="100"/>
 	<define name="STABILIZATION_ATTITUDE_A_PSI_ACTGAIN"  		value="1024"/>
