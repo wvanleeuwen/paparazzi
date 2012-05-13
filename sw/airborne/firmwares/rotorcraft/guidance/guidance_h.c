@@ -63,6 +63,9 @@ int32_t guidance_h_dgain;
 int32_t guidance_h_igain;
 int32_t guidance_h_again;
 
+float max_bank_auto = 0;;
+
+
 /* warn if some gains are still negative */
 #if (GUIDANCE_H_PGAIN < 0) || \
   (GUIDANCE_H_DGAIN < 0)   || \
@@ -278,7 +281,6 @@ static inline void guidance_h_update_reference(bool_t use_ref) {
 #define GH_GAIN_SCALE 2
 
 /** maximum bank angle: default 20 deg */
-#define TRAJ_MAX_BANK BFP_OF_REAL(GUIDANCE_H_MAX_BANK, INT32_ANGLE_FRAC)
 
 static inline void guidance_h_traj_run(bool_t in_flight) {
 
@@ -313,7 +315,11 @@ static inline void guidance_h_traj_run(bool_t in_flight) {
     guidance_h_igain * (guidance_h_pos_err_sum.y >> (12 + INT32_POS_FRAC - GH_GAIN_SCALE)) +
     guidance_h_again * (guidance_h_accel_ref.y >> 8); /* feedforward gain */
 
+  int32_t TRAJ_MAX_BANK = BFP_OF_REAL(RadOfDeg(max_bank_auto), INT32_ANGLE_FRAC);
+
   VECT2_STRIM(guidance_h_command_earth, -TRAJ_MAX_BANK, TRAJ_MAX_BANK);
+
+
 
   /* Rotate to body frame */
   int32_t s_psi, c_psi;
@@ -347,7 +353,7 @@ static inline void guidance_h_hover_enter(void) {
 
   VECT2_COPY(guidance_h_pos_sp, ins_ltp_pos);
 
-  guidance_h_rc_sp.psi = ahrs.ltp_to_lift_euler.psi;
+  guidance_h_rc_sp.psi = 0;
   reset_psi_ref_from_body();
 
   INT_VECT2_ZERO(guidance_h_pos_err_sum);
@@ -365,7 +371,6 @@ static inline void guidance_h_nav_enter(void) {
 
   /* reset psi reference, set psi setpoint to current psi */
   reset_psi_ref_from_body();
-  guidance_h_rc_sp.psi = ahrs.ltp_to_lift_euler.psi;
   guidance_h_psi_sp = ahrs.ltp_to_lift_euler.psi;
   nav_heading = guidance_h_psi_sp;
 

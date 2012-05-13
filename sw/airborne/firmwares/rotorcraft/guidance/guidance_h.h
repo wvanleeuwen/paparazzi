@@ -46,6 +46,9 @@ extern uint8_t guidance_h_mode;
  *  fixed point representation: Q23.8
  *  accuracy 0.0039, range 8388km
  */
+
+extern float max_bank_auto;
+
 extern struct Int32Vect2 guidance_h_pos_sp;
 
 extern int32_t           guidance_h_psi_sp;      ///< with #INT32_ANGLE_FRAC
