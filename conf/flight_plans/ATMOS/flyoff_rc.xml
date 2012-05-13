@@ -1,6 +1,6 @@
 <!DOCTYPE flight_plan SYSTEM "../flight_plan.dtd">
 
-<flight_plan alt="90" ground_alt="0" lat0="31.591872" lon0="-81.505414" max_dist_from_home="6000" name="Atmov fly offf" security_height="5">
+<flight_plan alt="90" ground_alt="0" lat0="31.591872" lon0="-81.505414" max_dist_from_home="6000" name="Atmov fly offf" security_height="100">
   <header>
 #include "autopilot.h"
   </header>
@@ -14,8 +14,8 @@
     <waypoint name="p4" x="13.7" y="-40.7"/>
     <waypoint name="CAM" x="-20" y="-50" height="2."/>
     <waypoint name="TD" x="5.6" y="-10.9"/>
-    <waypoint name="start" lat="31.591872" lon="-81.505414"/>
-    <waypoint name="target" lat="32.004283" lon="-81.495029"/>
+    <waypoint name="start" lat="31.591872" lon="-81.505414" alt="100"/>
+    <waypoint name="target" lat="32.004283" lon="-81.495029"  alt="100"/>
   </waypoints>
   <blocks>
     <block name="Wait GPS">
