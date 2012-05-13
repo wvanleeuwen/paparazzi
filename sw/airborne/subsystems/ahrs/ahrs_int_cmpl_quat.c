@@ -60,6 +60,7 @@ void ahrs_init(void) {
   ahrs_impl.heading_aligned = FALSE;
 
   /* set ltp_to_body to zero */
+  INT32_QUAT_ZERO(ahrs.lift_to_body_quat);
   INT32_QUAT_ZERO(ahrs.ltp_to_body_quat);
   INT32_RMAT_ZERO(ahrs.ltp_to_body_rmat);
   INT_RATES_ZERO(ahrs.body_rate);
@@ -455,6 +456,8 @@ __attribute__ ((always_inline)) static inline void compute_imu_euler_and_rmat_fr
    from the quaternion representation */
 __attribute__ ((always_inline)) static inline void compute_body_euler_and_rmat_from_quat(void) {
 
+  /* Compute LTP to LIFT quaternion */
+  INT32_QUAT_COMP_INV(ahrs.ltp_to_lift_quat, ahrs.ltp_to_body_quat, ahrs.lift_to_body_quat);
   /* Compute LTP to body euler */
   INT32_EULERS_OF_QUAT(ahrs.ltp_to_lift_euler, ahrs.ltp_to_lift_quat);
   /* Compute LTP to body rotation matrix */
