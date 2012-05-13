@@ -3,14 +3,15 @@
 <settings>
   <dl_settings>
     <dl_settings NAME="ATMOS">
-   	    <dl_setting var="transition_percentage" min="0" step="1" max="100" module="firmwares/rotorcraft/force_allocation_laws" shortname="Transition pct"/>
+   	    <dl_setting var="transition_percentage" min="0" step="1" max="100" module="firmwares/rotorcraft/force_allocation_laws" shortname="trans pct"/>
+	    <dl_setting var="transition_percentage_nav" min="0" step="1" max="100" module="firmwares/rotorcraft/force_allocation_laws" shortname="NAV trans pct"/>
 	    <dl_setting var="force_allocation_fixedwing_max_climb" min="0" step="0.5" max="10"  shortname="Max Climb"/>
 	    <dl_setting var="force_allocation_fixedwing_pitch_of_vz" min="0" step="0.02" max="1"  shortname="Pitch of VZ"/>
   	    <dl_setting var="force_allocation_fixedwing_throttle_of_vz" min="0" step="0.02" max="1" shortname="Throttle of VZ"/>
-   	    <dl_setting var="force_allocation_fixedwing_pitch_trim" min="-110" step="1" max="110"  shortname="Fixedwing pitch trim" unit="rad" alt_unit="deg"/>
-   	    <dl_setting var="force_allocation_fixedwing_throttle_of_xdd" min="-1.0" step="0.01" max="1.0"  shortname="Fixedwing Throttle of XDD" />
-   	    <dl_setting var="force_allocation_fixedwing_yawrate_of_ydd" min="-1.0" step="0.01" max="1.0"  shortname="Fixedwing Yawrate of ydd" />
-   	    <dl_setting var="guidance_v_nominal_throttle" min="0.1" step="0.01" max="0.9" module="guidance/guidance_v" shortname="Nominal Throttle" handler="SetNominalHoverThrottle" alt_unit="%" alt_unit_coef="0.000104167"/>
+   	    <dl_setting var="force_allocation_fixedwing_pitch_trim" min="-110" step="1" max="110"  shortname="FW:pitch trim" unit="rad" alt_unit="deg"/>
+   	    <dl_setting var="force_allocation_fixedwing_throttle_of_xdd" min="-1.0" step="0.01" max="1.0"  shortname="F:Gas of XDD" />
+   	    <dl_setting var="force_allocation_fixedwing_yawrate_of_ydd" min="-1.0" step="0.01" max="1.0"  shortname="F:r of ydd" />
+   	    <dl_setting var="guidance_v_nominal_throttle" min="0.1" step="0.01" max="0.9" module="guidance/guidance_v" shortname="Nomn gas" handler="SetNominalHoverThrottle" alt_unit="%" alt_unit_coef="0.000104167"/>
 
 
 

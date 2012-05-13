@@ -26,6 +26,7 @@
 #include "std.h"
 #include "generated/airframe.h"
 #include "firmwares/rotorcraft/guidance/guidance_v.h"
+#include "firmwares/rotorcraft/autopilot.h"
 #include "subsystems/radio_control.h"
 #include "firmwares/rotorcraft/stabilization.h"
 #include "firmwares/rotorcraft/navigation.h"
@@ -37,6 +38,7 @@
 #include "modules/ATMOS/newTransition.h"
 
 uint8_t transition_percentage;
+uint8_t transition_percentage_nav = 100;
 
 float force_allocation_fixedwing_max_climb         = FORCE_ALLOCATION_MAX_CLIMB;           // m/s
 float force_allocation_fixedwing_pitch_of_vz       = FORCE_ALLOCATION_PITCH_OF_VZ;
@@ -99,7 +101,13 @@ void Force_Allocation_Laws(void)
   // Hard Configure (should come from airframe file
   //transition_percentage=percent_from_rc(RADIO_EXTRA1);
 
-  transition_percentage=percent_from_rc(RADIO_EXTRA1);
+  if (autopilot_mode != AP_MODE_NAV) {
+	  transition_percentage=percent_from_rc(RADIO_EXTRA1);
+  }
+  else {
+	  transition_percentage = transition_percentage_nav;
+  }
+
 
   lift_devices[0].activation = transition_percentage;
   lift_devices[1].activation = 100-transition_percentage;

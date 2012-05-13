@@ -28,6 +28,8 @@
 
 #include "subsystems/navigation/common_flight_plan.h"
 
+#include "firmwares/rotorcraft/force_allocation_laws.h"
+
 #define NAV_FREQ 16
 // FIXME use periodic FREQ
 #define NAV_PRESCALER (512/NAV_FREQ)
@@ -168,6 +170,9 @@ bool_t nav_approaching_from(uint8_t wp_idx, uint8_t from_idx);
 
 #define NavStartDetectGround() ({ autopilot_detect_ground_once = TRUE; FALSE; })
 #define NavDetectGround() nav_detect_ground()
+
+#define NavSetTransitionPercentage(x) ({ transition_percentage_nav = x; })
+
 
 #define nav_IncreaseShift(x) {}
 

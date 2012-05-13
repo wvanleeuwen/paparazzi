@@ -28,7 +28,7 @@
 #include "std.h"
 #include "generated/airframe.h"
 
-extern uint8_t transition_percentage;
+extern uint8_t transition_percentage,transition_percentage_nav;
 extern int32_t outerloop_throttle_command;
 
 extern float force_allocation_fixedwing_max_climb; // m/s
