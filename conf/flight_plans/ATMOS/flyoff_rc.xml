@@ -1,6 +1,6 @@
 <!DOCTYPE flight_plan SYSTEM "../flight_plan.dtd">
 
-<flight_plan alt="90" ground_alt="0" lat0="32.003810" lon0="-81.495930" max_dist_from_home="4000" name="Atmov fly offf" security_height="5">
+<flight_plan alt="90" ground_alt="0" lat0="32.003810" lon0="-81.495930" max_dist_from_home="6000" name="Atmov fly offf" security_height="5">
   <header>
 #include "autopilot.h"
   </header>
@@ -37,6 +37,7 @@
     </block>
     <block name="Start Engine">
       <call fun="NavResurrect()"/>
+      <call fun="DisarmGroundDetectSwitch()"/>
       <attitude pitch="0" roll="0" throttle="0" vmode="throttle" until="FALSE"/>
     </block>
     <block name="Takeoff" strip_button="Takeoff" strip_icon="takeoff.png">
@@ -77,6 +78,7 @@
     </block>
     <block name="land here" strip_button="Land Here" strip_icon="land-right.png">
       <call fun="NavSetWaypointHere(WP_TD)"/>
+      <call fun="ArmGroundDetectSwitch()"/>
     </block>
     <block name="land">
       <go wp="TD"/>

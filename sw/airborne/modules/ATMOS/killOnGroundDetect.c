@@ -30,10 +30,12 @@ void atmov_killOnGroundDetect_periodic(void) {
   }
 }
 
-void ArmGroundDetectSwitch(void) {
+bool_t ArmGroundDetectSwitch(void) {
   kill_on_ground_detect_enabled = TRUE;
+  return FALSE;
 }
 
-void DisarmGroundDetectSwitch(void) {
+bool_t DisarmGroundDetectSwitch(void) {
   kill_on_ground_detect_enabled = FALSE;
+  return FALSE;
 }
