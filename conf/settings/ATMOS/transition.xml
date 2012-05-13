@@ -16,25 +16,25 @@
 
 
       <dl_setting var="killHoverProps" min="0" step="1" max="1" module="modules/ATMOS/hoverPropsOff" shortname="hprops_off" values="OFF|ON">
-	<strip_button name="HOVERPR_ON" icon="hoverpr_on.png" value="0"/>
-	<strip_button name="HOVERPR_OFF" icon="hoverpr_off.png" value="1"/>
+	<strip_button name="HOVERPR_ON" icon="hoverpr_on.png" value="0" group="ATMOS1"/>
+	<strip_button name="HOVERPR_OFF" icon="hoverpr_off.png" value="1" group="ATMOS1"/>
       </dl_setting>
 
-
+<!--
 
       <dl_setting var="transition_setting" min="0" step="1" max="2" module="modules/ATMOS/newTransition" shortname="req_tr_state" values="HOVER|FORWARD|!!MAYDAY HOVER NOW!!" handler="doTransition">
-		<strip_button name="TR_FW" icon="transition_forward.png" value="1"/>
+		<strip_button name="TR_FW" icon="transition_forward.png" value="1" group="ATMOS_props"/>
 		<strip_button name="TR_HO" icon="transition_hover.png" value="0"/>
 		<strip_button name="TR_HOE" icon="transition_hover_emerg.png" value="2"/>
 		<strip_button name="TR_HALF" value="3"/>
-      </dl_setting>
+      </dl_setting>-->
       <dl_setting var="thrustActivationRatio" min="0" step="1" max="1024" module="modules/ATMOS/newTransition" shortname="Thrust Ratio" handler="ThrustActivationRatioSet"/>
 
 
 
 	<dl_setting var="kill_on_ground_detect_enabled" min="0" step="1" max="1" module="modules/ATMOS/killOnGroundDetect" shortname="groundkill" values="DISARMED|ARMED">
-	<strip_button name="ARM KOGD" value="1" icon="kogd_arm.png"/>
-	<strip_button name="DISARM KOGD" value="0" icon="kogd_disarm.png"/>
+	<strip_button name="ARM KOGD" value="1" icon="kogd_arm.png" group="ATMOS1"/>
+	<strip_button name="DISARM KOGD" value="0" icon="kogd_disarm.png" group="ATMOS1"/>
 
 
 

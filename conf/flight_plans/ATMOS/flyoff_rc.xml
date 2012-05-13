@@ -1,6 +1,6 @@
 <!DOCTYPE flight_plan SYSTEM "../flight_plan.dtd">
 
-<flight_plan alt="152" ground_alt="147" lat0="32.003810" lon0="-81.495930" max_dist_from_home="4000" name="Atmov fly offf" security_height="2">
+<flight_plan alt="90" ground_alt="0" lat0="32.003810" lon0="-81.495930" max_dist_from_home="4000" name="Atmov fly offf" security_height="5">
   <header>
 #include "autopilot.h"
   </header>
@@ -43,6 +43,12 @@
       <exception cond="ins_enu_pos.z > POS_BFP_OF_REAL(2.)" deroute="Standby"/>
       <call fun="NavSetWaypointHere(WP_CLIMB)"/>
       <stay vmode="climb" climb="0.5" wp="CLIMB"/>
+    </block>
+    <block name="ThrottleTakeoff" strip_button="ThrottleTakeoff">
+      <exception cond="ins_enu_pos.z > POS_BFP_OF_REAL(15.)" deroute="Standby"/>
+      <attitude pitch="0" roll="0" throttle="0.8" until="ins_enu_pos.z > POS_BFP_OF_REAL(6.)" vmode="throttle"/>
+      <call fun="NavSetWaypointHere(WP_CLIMB)"/>
+      <stay climb="0.5" vmode="climb" wp="CLIMB"/>
     </block>
     <block name="Standby" strip_button="Standby" strip_icon="home.png">
       <stay wp="STDBY"/>
