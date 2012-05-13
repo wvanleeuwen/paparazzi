@@ -287,8 +287,8 @@ __attribute__ ((always_inline)) static inline void run_hover_loop(bool_t in_flig
 
   guidance_v_ff_cmd = g_m_zdd / inv_m;
   int32_t cphi,ctheta,cphitheta;
-  PPRZ_ITRIG_COS(cphi, ahrs.ltp_to_body_euler.phi);
-  PPRZ_ITRIG_COS(ctheta, ahrs.ltp_to_body_euler.theta);
+  PPRZ_ITRIG_COS(cphi, ahrs.ltp_to_lift_euler.phi);
+  PPRZ_ITRIG_COS(ctheta, ahrs.ltp_to_lift_euler.theta);
   cphitheta = (cphi * ctheta) >> INT32_TRIG_FRAC;
   if (cphitheta < MAX_BANK_COEF) cphitheta = MAX_BANK_COEF;
   /* feed forward command */

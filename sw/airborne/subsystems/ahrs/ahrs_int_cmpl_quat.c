@@ -60,10 +60,14 @@ void ahrs_init(void) {
   ahrs_impl.heading_aligned = FALSE;
 
   /* set ltp_to_body to zero */
-  INT_EULERS_ZERO(ahrs.ltp_to_body_euler);
   INT32_QUAT_ZERO(ahrs.ltp_to_body_quat);
   INT32_RMAT_ZERO(ahrs.ltp_to_body_rmat);
   INT_RATES_ZERO(ahrs.body_rate);
+
+  /* set ltp_to_body to zero */
+  INT_EULERS_ZERO(ahrs.ltp_to_lift_euler);
+  INT32_QUAT_ZERO(ahrs.ltp_to_lift_quat);
+  INT32_RMAT_ZERO(ahrs.ltp_to_lift_rmat);
 
   /* set ltp_to_imu so that body is zero */
   QUAT_COPY(ahrs.ltp_to_imu_quat, imu.body_to_imu_quat);
@@ -452,7 +456,7 @@ __attribute__ ((always_inline)) static inline void compute_imu_euler_and_rmat_fr
 __attribute__ ((always_inline)) static inline void compute_body_euler_and_rmat_from_quat(void) {
 
   /* Compute LTP to body euler */
-  INT32_EULERS_OF_QUAT(ahrs.ltp_to_body_euler, ahrs.ltp_to_body_quat);
+  INT32_EULERS_OF_QUAT(ahrs.ltp_to_lift_euler, ahrs.ltp_to_lift_quat);
   /* Compute LTP to body rotation matrix */
   INT32_RMAT_OF_QUAT(ahrs.ltp_to_body_rmat, ahrs.ltp_to_body_quat);
 
@@ -462,10 +466,14 @@ __attribute__ ((always_inline)) static inline void compute_body_orientation(void
 
   /* Compute LTP to BODY quaternion */
   INT32_QUAT_COMP_INV(ahrs.ltp_to_body_quat, ahrs.ltp_to_imu_quat, imu.body_to_imu_quat);
+  /* Compute LTP to LIFT quaternion */
+  INT32_QUAT_COMP_INV(ahrs.ltp_to_lift_quat, ahrs.ltp_to_body_quat, ahrs.lift_to_body_quat);
+  INT32_RMAT_OF_QUAT(ahrs.ltp_to_lift_rmat, ahrs.ltp_to_lift_quat);
+
   /* Compute LTP to BODY rotation matrix */
   INT32_RMAT_COMP_INV(ahrs.ltp_to_body_rmat, ahrs.ltp_to_imu_rmat, imu.body_to_imu_rmat);
   /* compute LTP to BODY eulers */
-  INT32_EULERS_OF_RMAT(ahrs.ltp_to_body_euler, ahrs.ltp_to_body_rmat);
+  INT32_EULERS_OF_RMAT(ahrs.ltp_to_lift_euler, ahrs.ltp_to_lift_rmat);
   /* compute body rates */
   INT32_RMAT_TRANSP_RATEMULT(ahrs.body_rate, imu.body_to_imu_rmat, ahrs.imu_rate);
 

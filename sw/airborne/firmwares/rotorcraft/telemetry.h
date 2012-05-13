@@ -216,9 +216,9 @@
                       &ahrs.body_rate.p,	\
                       &ahrs.body_rate.q,	\
                       &ahrs.body_rate.r,	\
-                      &ahrs.ltp_to_body_euler.phi, \
-                      &ahrs.ltp_to_body_euler.theta, \
-                      &ahrs.ltp_to_body_euler.psi, \
+                      &ahrs.ltp_to_lift_euler.phi, \
+                      &ahrs.ltp_to_lift_euler.theta, \
+                      &ahrs.ltp_to_lift_euler.psi, \
                       &stab_att_sp_euler.phi, \
                       &stab_att_sp_euler.theta, \
                       &stab_att_sp_euler.psi, \
@@ -260,9 +260,9 @@
                         &ahrs_float.body_rate.p,	\
                         &ahrs_float.body_rate.q,	\
                         &ahrs_float.body_rate.r,	\
-                        &ahrs_float.ltp_to_body_euler.phi, \
-                        &ahrs_float.ltp_to_body_euler.theta, \
-                        &ahrs_float.ltp_to_body_euler.psi, \
+                        &ahrs_float.ltp_to_lift_euler.phi, \
+                        &ahrs_float.ltp_to_lift_euler.theta, \
+                        &ahrs_float.ltp_to_lift_euler.psi, \
                         &stab_att_ref_euler.phi, \
                         &stab_att_ref_euler.theta, \
                         &stab_att_ref_euler.psi, \
@@ -446,9 +446,9 @@
                    &ahrs.ltp_to_imu_euler.phi,	\
                    &ahrs.ltp_to_imu_euler.theta,	\
                    &ahrs.ltp_to_imu_euler.psi,	\
-                   &ahrs.ltp_to_body_euler.phi,	\
-                   &ahrs.ltp_to_body_euler.theta,	\
-                   &ahrs.ltp_to_body_euler.psi);	\
+                   &ahrs.ltp_to_lift_euler.phi,	\
+                   &ahrs.ltp_to_lift_euler.theta,	\
+                   &ahrs.ltp_to_lift_euler.psi);	\
   }
 
 #define PERIODIC_SEND_AHRS_RMAT_INT(_trans, _dev) {      \
@@ -637,9 +637,9 @@
                 &ins_enu_speed.x,			\
                 &ins_enu_speed.y,			\
                 &ins_enu_speed.z,			\
-                &ahrs.ltp_to_body_euler.phi,		\
-                &ahrs.ltp_to_body_euler.theta,		\
-                &ahrs.ltp_to_body_euler.psi,		\
+                &ahrs.ltp_to_lift_euler.phi,		\
+                &ahrs.ltp_to_lift_euler.theta,		\
+                &ahrs.ltp_to_lift_euler.psi,		\
                 &guidance_h_pos_sp.y,			\
                 &guidance_h_pos_sp.x,			\
                 &carrot_up,					\
@@ -731,9 +731,9 @@
                                         &ahrs.ltp_to_imu_euler.phi,     \
                                         &ahrs.ltp_to_imu_euler.theta,   \
                                         &ahrs.ltp_to_imu_euler.psi,     \
-                                        &ahrs.ltp_to_body_euler.phi,    \
-                                        &ahrs.ltp_to_body_euler.theta,  \
-                                        &ahrs.ltp_to_body_euler.psi);   \
+                                        &ahrs.ltp_to_lift_euler.phi,    \
+                                        &ahrs.ltp_to_lift_euler.theta,  \
+                                        &ahrs.ltp_to_lift_euler.psi);   \
   }
 
 #ifdef USE_I2C1

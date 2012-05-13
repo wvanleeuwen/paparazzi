@@ -317,8 +317,8 @@ static inline void guidance_h_traj_run(bool_t in_flight) {
 
   /* Rotate to body frame */
   int32_t s_psi, c_psi;
-  PPRZ_ITRIG_SIN(s_psi, ahrs.ltp_to_body_euler.psi);
-  PPRZ_ITRIG_COS(c_psi, ahrs.ltp_to_body_euler.psi);
+  PPRZ_ITRIG_SIN(s_psi, ahrs.ltp_to_lift_euler.psi);
+  PPRZ_ITRIG_COS(c_psi, ahrs.ltp_to_lift_euler.psi);
 
   // Restore angle ref resolution after rotation
   guidance_h_command_body.phi =
@@ -347,7 +347,7 @@ static inline void guidance_h_hover_enter(void) {
 
   VECT2_COPY(guidance_h_pos_sp, ins_ltp_pos);
 
-  guidance_h_rc_sp.psi = ahrs.ltp_to_body_euler.psi;
+  guidance_h_rc_sp.psi = ahrs.ltp_to_lift_euler.psi;
   reset_psi_ref_from_body();
 
   INT_VECT2_ZERO(guidance_h_pos_err_sum);
@@ -365,8 +365,8 @@ static inline void guidance_h_nav_enter(void) {
 
   /* reset psi reference, set psi setpoint to current psi */
   reset_psi_ref_from_body();
-  guidance_h_rc_sp.psi = ahrs.ltp_to_body_euler.psi;
-  guidance_h_psi_sp = ahrs.ltp_to_body_euler.psi;
+  guidance_h_rc_sp.psi = ahrs.ltp_to_lift_euler.psi;
+  guidance_h_psi_sp = ahrs.ltp_to_lift_euler.psi;
   nav_heading = guidance_h_psi_sp;
 
   /* set RC heading setpoint to zero,

@@ -47,9 +47,15 @@ struct Ahrs {
   struct Int32Rates  imu_rate;         ///< Rotational velocity in IMU frame
 
   struct Int32Quat   ltp_to_body_quat;  ///< Rotation from LocalTangentPlane to body frame as unit quaternion
-  struct Int32Eulers ltp_to_body_euler; ///< Rotation from LocalTangentPlane to body frame as Euler angles
+//  struct Int32Eulers ltp_to_body_euler; ///< Rotation from LocalTangentPlane to body frame as Euler angles
   struct Int32RMat   ltp_to_body_rmat;  ///< Rotation from LocalTangentPlane to body frame as Rotation Matrix
   struct Int32Rates  body_rate;         ///< Rotational velocity in body frame
+
+  struct Int32Quat   lift_to_body_quat;  ///< Rotation from LocalTangentPlane to body frame as unit quaternion
+
+  struct Int32Quat   ltp_to_lift_quat;  ///< Rotation from LocalTangentPlane to body frame as unit quaternion
+  struct Int32Eulers ltp_to_lift_euler; ///< Rotation from LocalTangentPlane to body frame as Euler angles
+  struct Int32RMat   ltp_to_lift_rmat;  ///< Rotation from LocalTangentPlane to body frame as Rotation Matrix
 
   uint8_t status; ///< status of the AHRS, AHRS_UNINIT or AHRS_RUNNING
 };

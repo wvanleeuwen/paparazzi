@@ -83,11 +83,6 @@ void stabilization_attitude_init(void) {
 
 void stabilization_attitude_enter(void) {
 
-#if !USE_SETPOINTS_WITH_TRANSITIONS
-  /* reset psi setpoint to current psi angle */
-//  stab_att_sp_euler.psi = ahrs.ltp_to_body_euler.psi;
-#endif
-
   stabilization_attitude_ref_enter();
 
   INT32_QUAT_ZERO(stabilization_att_sum_err_quat);

@@ -45,6 +45,7 @@ float force_allocation_fixedwing_pitch_trim        = FORCE_ALLOCATION_PITCH_TRIM
 float force_allocation_fixedwing_throttle_of_xdd   = FORCE_ALLOCATION_THROTTLE_OF_XDD;
 float force_allocation_fixedwing_yawrate_of_ydd    = FORCE_ALLOCATION_YAWRATE_OF_YDD;
 
+
 struct PprzLiftDevice lift_devices[LIFT_GENERATION_NR_OF_LIFT_DEVICES] =
 {
   {
@@ -168,13 +169,13 @@ void Force_Allocation_Laws(void)
 
       // Coordinated Turn
 #if !defined(FREE_FLOATING_HEADING)
-#pragma message COORDINATED TURN
+#pragma message "COORDINATED TURN"
       const int loop_rate = 512;
       wing->commands[COMMAND_YAW]    = stab_att_sp_euler.psi + wing->commands[COMMAND_ROLL] * force_allocation_fixedwing_yawrate_of_ydd / loop_rate;
 #elif defined(QUADROTOR_HEADING)
       wing->commands[COMMAND_YAW]    =  stab_att_sp_euler.psi;
 
-      wing->commands[COMMAND_YAW]    = ahrs.ltp_to_body_euler.psi;
+      wing->commands[COMMAND_YAW]    = ahrs.ltp_to_lift_euler.psi;
 #endif
     }
 
@@ -194,17 +195,16 @@ void Force_Allocation_Laws(void)
   INT32_QUAT_OF_EULERS(command_att, command_euler);
 
   // Post Multiply with the pitch trim...
-  struct Int32Quat trim_quat;
-  QUAT_ASSIGN(trim_quat,
+  QUAT_ASSIGN(ahrs.lift_to_body_quat,
       QUAT1_BFP_OF_REAL(1),
       QUAT1_BFP_OF_REAL(0),
       QUAT1_BFP_OF_REAL(orientation_rotation) / 2,
       QUAT1_BFP_OF_REAL(0) );
 
-  INT32_QUAT_NORMALIZE(trim_quat);
-  INT32_QUAT_WRAP_SHORTEST(trim_quat);
+  INT32_QUAT_NORMALIZE(ahrs.lift_to_body_quat);
+  INT32_QUAT_WRAP_SHORTEST(ahrs.lift_to_body_quat);
 
-  INT32_QUAT_COMP(stab_att_sp_quat, command_att, trim_quat);
+  INT32_QUAT_COMP(stab_att_sp_quat, command_att, ahrs.lift_to_body_quat);
 //  INT32_QUAT_WRAP_SHORTEST(stab_att_sp_quat);
 }
 
