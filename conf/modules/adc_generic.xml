@@ -16,7 +16,7 @@
     <file name="adc_generic.h"/>
   </header>
   <init fun="adc_generic_init()"/>
-  <periodic fun="adc_generic_periodic()" freq="4"/>
+  <periodic fun="adc_generic_periodic()" freq="1"/>
   <makefile target="ap">
     <file name="adc_generic.c"/>
     <raw>
