@@ -63,7 +63,6 @@ int32_t guidance_h_dgain;
 int32_t guidance_h_igain;
 int32_t guidance_h_again;
 
-float max_bank_auto = 0;;
 
 
 /* warn if some gains are still negative */
@@ -85,6 +84,8 @@ float max_bank_auto = 0;;
 #ifndef GUIDANCE_H_MAX_BANK
 #define GUIDANCE_H_MAX_BANK RadOfDeg(20)
 #endif
+
+float max_bank_auto = GUIDANCE_H_MAX_BANK;
 
 static inline void guidance_h_update_reference(bool_t use_ref);
 static inline void guidance_h_traj_run(bool_t in_flight);

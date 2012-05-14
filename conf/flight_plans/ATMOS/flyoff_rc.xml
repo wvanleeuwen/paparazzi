@@ -57,6 +57,7 @@
       <stay wp="p1"/>
     </block>
     <block name="go">
+      <call fun="DisarmGroundDetectSwitch()"/>
       <go wp="target"/>
       <deroute block="landhere"/>
     </block>
