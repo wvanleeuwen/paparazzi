@@ -1,21 +1,24 @@
 <!DOCTYPE flight_plan SYSTEM "../flight_plan.dtd">
 
-<flight_plan alt="90" ground_alt="0" lat0="31.591872" lon0="-81.505414" max_dist_from_home="6000" name="Atmov fly offf" security_height="100">
+<flight_plan alt="90" ground_alt="0" lat0="31.591872" lon0="-81.505414" max_dist_from_home="7000" name="Atmov fly offf" security_height="100">
   <header>
 #include "autopilot.h"
+#include "subsystems/datalink/datalink.h"
   </header>
   <waypoints>
     <waypoint name="HOME" x="0.0" y="0.0"/>
-    <waypoint name="CLIMB" x="5.0" y="5.0"/>
-    <waypoint name="STDBY" x="-2.0" y="-5.0"/>
+    <waypoint name="CLIMB" x="5.0" y="200.0"/>
+    <waypoint name="STDBY" x="-2.0" y="-100.0"/>
     <waypoint name="p1" x="3.6" y="-13.9"/>
     <waypoint name="p2" x="27.5" y="-48.2"/>
     <waypoint name="p3" x="16.7" y="-19.6"/>
     <waypoint name="p4" x="13.7" y="-40.7"/>
     <waypoint name="CAM" x="-20" y="-50" height="2."/>
-    <waypoint name="TD" x="5.6" y="-10.9"/>
+    <waypoint name="TD" lat="32.010822" lon="-81.831986"  alt="0"/>
     <waypoint name="start" lat="31.591872" lon="-81.505414" alt="100"/>
-    <waypoint name="target" lat="32.004283" lon="-81.495029"  alt="100"/>
+    <waypoint name="target" lat="32.010822" lon="-81.831986"  alt="100"/>
+
+<!--32.010822	-81.831986 -->
   </waypoints>
   <blocks>
     <block name="Wait GPS">
@@ -28,16 +31,16 @@
       <!--<call fun="NavSetAltitudeReferenceHere()"/>-->
     </block>
     <block name="Holding point">
+      <exception cond="datalink_time > 1000" deroute="Start Engine"/>
       <call fun="NavKillThrottle()"/>
       <attitude pitch="0" roll="0" throttle="0" vmode="throttle" until="FALSE"/>
     </block>
     <block name="Start Engine">
-      <call fun="NavResurrect()"/>
       <call fun="DisarmGroundDetectSwitch()"/>
-      <attitude pitch="0" roll="0" throttle="0" vmode="throttle" until="FALSE"/>
+      <call fun="NavResurrect()"/>
     </block>
     <block name="Takeoff" strip_button="Takeoff" strip_icon="takeoff.png">
-      <exception cond="ins_enu_pos.z > POS_BFP_OF_REAL(2.)" deroute="Standby"/>
+      <exception cond="ins_enu_pos.z > POS_BFP_OF_REAL(40.)" deroute="Standby"/>
       <call fun="NavSetWaypointHere(WP_CLIMB)"/>
       <stay vmode="climb" climb="0.5" wp="CLIMB"/>
     </block>
@@ -48,7 +51,7 @@
       <stay climb="0.5" vmode="climb" wp="CLIMB"/>
     </block>
     <block name="Standby" strip_button="Standby" strip_icon="home.png">
-      <stay wp="STDBY"/>
+      <go wp="STDBY"/>
     </block>
     <block name="stay_p1">
       <stay wp="p1"/>
@@ -73,7 +76,6 @@
       <circle radius="nav_radius" wp="p1"/>
     </block>
     <block name="landhere" strip_button="Land Here" strip_icon="land-right.png">
-      <call fun="NavSetWaypointHere(WP_TD)"/>
       <call fun="ArmGroundDetectSwitch()"/>
     </block>
     <block name="flare">
