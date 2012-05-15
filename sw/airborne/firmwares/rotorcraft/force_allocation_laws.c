@@ -196,22 +196,20 @@ void Force_Allocation_Laws(void)
       }
       else
       {
-        INT32_ATAN2(destination, stab_att_sp_euler.phi, stab_att_sp_euler.theta);
+        INT32_ATAN2(destination, stab_att_sp_euler.theta, stab_att_sp_euler.phi);
+        //destination -= stab_att_sp_euler.psi;
         INT32_ANGLE_NORMALIZE(destination);
 
-        //dbg1 = stab_att_sp_euler.phi;
-        //dbg4 = stab_att_sp_euler.theta;
-
-        //DOWNLINK_SEND_DEBUG_FORCE_ALLOCATION(DefaultChannel,DefaultDevice,stab_att_sp_euler.phi, 0, 0, stab_att_sp_euler.theta, 0, 0);
-
-/*
-        int32_t TRAJ_MAX_BANK = BFP_OF_REAL(RadOfDeg(max_bank_auto), INT32_ANGLE_FRAC);
+ /*       int32_t TRAJ_MAX_BANK = BFP_OF_REAL(RadOfDeg(max_bank_auto), INT32_ANGLE_FRAC);
         if (destination > TRAJ_MAX_BANK)
           destination = TRAJ_MAX_BANK;
         if (destination < (-TRAJ_MAX_BANK))
           destination = -TRAJ_MAX_BANK;
+
+        wing->commands[COMMAND_ROLL] = destination;
 */
-        wing->commands[COMMAND_ROLL]    = 0; //destination;
+ dbg1 = destination;
+
       }
 
       // Longitudinal Plane Motion
@@ -232,7 +230,13 @@ void Force_Allocation_Laws(void)
 
       wing->commands[COMMAND_YAW]    = ahrs.ltp_to_lift_euler.psi;
 #endif
-      wing->commands[COMMAND_YAW] = destination;
+
+/*      int32_t dt = destination - ahrs.ltp_to_lift_euler.psi;
+      if (dt > 10)
+        dt = 10;
+      if (dt < -10)
+        dt = -10;
+  */    wing->commands[COMMAND_YAW] = destination; //ahrs.ltp_to_lift_euler.psi + dt;
     }
 
     cmd_thrust           += wing->commands[COMMAND_THRUST]     * percent;
