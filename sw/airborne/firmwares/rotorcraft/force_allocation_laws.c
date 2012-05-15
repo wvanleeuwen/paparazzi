@@ -23,8 +23,11 @@
  *  Distribute Outerloop Acceleration Commands To Lifting Surfaces
  *
  */
+
+
 #include "std.h"
 #include "generated/airframe.h"
+#include "firmwares/rotorcraft/guidance/guidance_h.h"
 #include "firmwares/rotorcraft/guidance/guidance_v.h"
 #include "firmwares/rotorcraft/autopilot.h"
 #include "subsystems/radio_control.h"
@@ -37,6 +40,8 @@
 #include "modules/ATMOS/multiGain.h"
 #include "modules/ATMOS/newTransition.h"
 
+
+
 uint8_t transition_percentage;
 uint8_t transition_percentage_nav = 100;
 
@@ -46,6 +51,11 @@ float force_allocation_fixedwing_throttle_of_vz    = FORCE_ALLOCATION_THROTTLE_O
 float force_allocation_fixedwing_pitch_trim        = FORCE_ALLOCATION_PITCH_TRIM;          // radians
 float force_allocation_fixedwing_throttle_of_xdd   = FORCE_ALLOCATION_THROTTLE_OF_XDD;
 float force_allocation_fixedwing_yawrate_of_ydd    = FORCE_ALLOCATION_YAWRATE_OF_YDD;
+
+int32_t dbg1 = 0;
+uint32_t dbg2 = 0;
+uint32_t dbg3 = 0;
+int32_t dbg4 = 0;
 
 
 struct PprzLiftDevice lift_devices[LIFT_GENERATION_NR_OF_LIFT_DEVICES] =
@@ -148,9 +158,23 @@ void Force_Allocation_Laws(void)
       // lateral acceleration (command) -> roll
       // heading ANGLE -> yaw
 
+      /* Rotate to body frame */
+      int32_t s_psi, c_psi;
+      PPRZ_ITRIG_SIN(s_psi, ahrs.ltp_to_lift_euler.psi);
+      PPRZ_ITRIG_COS(c_psi, ahrs.ltp_to_lift_euler.psi);
+
+      if (autopilot_mode < AP_MODE_HOVER_DIRECT) {
+        wing->commands[COMMAND_ROLL]    = stab_att_sp_euler.phi;
+        wing->commands[COMMAND_PITCH]    = stab_att_sp_euler.theta;
+      }
+      else
+      {
+        // Restore angle ref resolution after rotation
+        wing->commands[COMMAND_ROLL]   = ( - s_psi * stab_att_sp_euler.phi + c_psi * stab_att_sp_euler.theta) >> INT32_TRIG_FRAC;
+        wing->commands[COMMAND_PITCH]  = - ( c_psi * stab_att_sp_euler.phi + s_psi * stab_att_sp_euler.theta) >> INT32_TRIG_FRAC;;
+      }
+
       wing->commands[COMMAND_THRUST] = outerloop_throttle_command;
-      wing->commands[COMMAND_ROLL]   = stab_att_sp_euler.phi;
-      wing->commands[COMMAND_PITCH]  = stab_att_sp_euler.theta;
       wing->commands[COMMAND_YAW]    = stab_att_sp_euler.psi;
     }
     else
@@ -165,7 +189,30 @@ void Force_Allocation_Laws(void)
       float climb_speed = ((outerloop_throttle_command - (MAX_PPRZ / 2)) * 2 * force_allocation_fixedwing_max_climb);  // MAX_PPRZ
 
       // Lateral Plane Motion
-      wing->commands[COMMAND_ROLL]    = stab_att_sp_euler.phi;
+      int32_t destination = 0;
+      if (autopilot_mode < AP_MODE_HOVER_DIRECT) {
+        wing->commands[COMMAND_ROLL]    = stab_att_sp_euler.phi;
+        destination = stab_att_sp_euler.psi;
+      }
+      else
+      {
+        INT32_ATAN2(destination, stab_att_sp_euler.phi, stab_att_sp_euler.theta);
+        INT32_ANGLE_NORMALIZE(destination);
+
+        //dbg1 = stab_att_sp_euler.phi;
+        //dbg4 = stab_att_sp_euler.theta;
+
+        //DOWNLINK_SEND_DEBUG_FORCE_ALLOCATION(DefaultChannel,DefaultDevice,stab_att_sp_euler.phi, 0, 0, stab_att_sp_euler.theta, 0, 0);
+
+/*
+        int32_t TRAJ_MAX_BANK = BFP_OF_REAL(RadOfDeg(max_bank_auto), INT32_ANGLE_FRAC);
+        if (destination > TRAJ_MAX_BANK)
+          destination = TRAJ_MAX_BANK;
+        if (destination < (-TRAJ_MAX_BANK))
+          destination = -TRAJ_MAX_BANK;
+*/
+        wing->commands[COMMAND_ROLL]    = 0; //destination;
+      }
 
       // Longitudinal Plane Motion
       wing->commands[COMMAND_THRUST]  = (guidance_v_nominal_throttle)
@@ -185,6 +232,7 @@ void Force_Allocation_Laws(void)
 
       wing->commands[COMMAND_YAW]    = ahrs.ltp_to_lift_euler.psi;
 #endif
+      wing->commands[COMMAND_YAW] = destination;
     }
 
     cmd_thrust           += wing->commands[COMMAND_THRUST]     * percent;
