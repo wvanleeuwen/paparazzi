@@ -204,7 +204,7 @@
    <define name="DGAIN" 		value="175"/>
    <define name="IGAIN" 		value="1"/>
    <define name="AGAIN" 		value="50"/>
-   <define name="REF_MAX_BANK"      	value="RadOfDeg(20)"/>
+   <define name="REF_MAX_BANK"      	value="20"/>
    <define name="REF_MAX_SPEED"      	value="15"/>
  </section>
 

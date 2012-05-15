@@ -43,7 +43,7 @@
 
 
 uint8_t transition_percentage;
-uint8_t transition_percentage_nav = 100;
+uint8_t transition_percentage_nav = 0;
 
 float force_allocation_fixedwing_max_climb         = FORCE_ALLOCATION_MAX_CLIMB;           // m/s
 float force_allocation_fixedwing_pitch_of_vz       = FORCE_ALLOCATION_PITCH_OF_VZ;
@@ -208,10 +208,6 @@ void Force_Allocation_Laws(void)
 
         wing->commands[COMMAND_ROLL] = destination;
 
-        dbg1 = stab_att_sp_euler.phi; //destination;
-        dbg4 = stab_att_sp_euler.theta;
- 
-
       }
 
       // Longitudinal Plane Motion
@@ -233,13 +229,7 @@ void Force_Allocation_Laws(void)
       wing->commands[COMMAND_YAW]    = ahrs.ltp_to_lift_euler.psi;
 #endif
 
-/*      int32_t dt = destination - ahrs.ltp_to_lift_euler.psi;
-      if (dt > 10)
-        dt = 10;
-      if (dt < -10)
-        dt = -10;
-     wing->commands[COMMAND_YAW] = destination; //ahrs.ltp_to_lift_euler.psi + dt;
-*/     }
+    }
 
     cmd_thrust           += wing->commands[COMMAND_THRUST]     * percent;
     command_euler.phi    += wing->commands[COMMAND_ROLL]       * percent;
