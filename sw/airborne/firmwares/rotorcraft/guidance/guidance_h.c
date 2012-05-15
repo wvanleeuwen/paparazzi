@@ -372,7 +372,7 @@ static inline void guidance_h_nav_enter(void) {
 
   /* reset psi reference, set psi setpoint to current psi */
   reset_psi_ref_from_body();
-  guidance_h_psi_sp = ahrs.ltp_to_lift_euler.psi;
+  guidance_h_psi_sp = stab_att_ref_euler.psi;
   nav_heading = guidance_h_psi_sp;
 
   /* set RC heading setpoint to zero,
