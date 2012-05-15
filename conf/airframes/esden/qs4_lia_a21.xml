@@ -1,5 +1,5 @@
-<!-- this is a synerani vehicle equiped with Lisa/M and generic china pwm motor controllers -->
-<!-- Copyright (C) 2012, Pranay Sinha, the Quadshot Project -->
+<!-- this is a quadshot vehicle equiped with Lisa/M and generic china pwm motor controllers -->
+<!-- Copyright (C) 2012, Pranay Sinha, Piotr Esden-Tempski, Transition Robotics, Inc. -->
 
 <airframe name="qs4_lisam2">
 
@@ -33,9 +33,9 @@
     <define name="AUTOPILOT_THROTTLE_INSTANT_START_WITH_SAFETIES"  value="TRUE"/>
     <define name="AUTOPILOT_LOBATT_BLINK"  value="TRUE"/>
     <!--This is to enable a wing waggle at specified low battery voltage. The interval is in cycle counts, not seconds-->
-    <!--define name="AUTOPILOT_LOBATT_WING_WAGGLE"/>
-    <define name="AUTOPILOT_LOBATT_WING_WAGGLE_INTERVAL"  value="5120"/-->
+    <define name="LOBATT_WING_WAGGLE" value="TRUE"/>
     <define name="TOYTRONICS" value="TRUE"/>
+    <define name="KILL_AS_FAILSAFE" value="TRUE"/>
   </section>
 
   <rc_commands>
@@ -71,8 +71,8 @@
     <let var="hover_right" value="3*$aileron_feedback_right"/>
 
     <!-- mode hover_forward -->
-    <let var="hover_forward_left"  value="3*$aileron_feedback_left  + 2*$elevator_feedback_left"/>
-    <let var="hover_forward_right" value="3*$aileron_feedback_right + 2*$elevator_feedback_right"/>
+    <let var="hover_forward_left"  value="@RC_THRUST > 2200 ? (3*$aileron_feedback_left  + 2*$elevator_feedback_left) : 0"/>
+    <let var="hover_forward_right" value="@RC_THRUST > 2200 ? (3*$aileron_feedback_right + 2*$elevator_feedback_right) : 0"/>
 
     <!-- mode forward -->
     <let var="forward_left"  value="3*$aileron_feedback_left  + 2*$elevator_feedback_left"/>
@@ -125,7 +125,7 @@
  <section name="BAT">
    <define name="MILLIAMP_PER_PERCENT" value="0.86"/>
    <define name="CATASTROPHIC_BAT_LEVEL" value="9.3" unit="V"/>
-   <define name="MIN_BAT_LEVEL" value="10.2" units="V"/>
+   <define name="MIN_BAT_LEVEL" value="12.2" units="V"/>
    <define name="BATTERY_SENS"   value="0.48" integer="16"/>
  </section>
 
@@ -205,7 +205,7 @@
    <define name="RC_CLIMB_COEF" value ="163"/>
    <!-- BOOZ_SPEED_I_OF_F(1.5) * 20% -->
    <define name="RC_CLIMB_DEAD_BAND" value ="160000"/>
-   <define name="INV_M" value ="0.21"/>
+   <define name="INV_M" value ="0.9"/>
   </section>
 
   <section name="AHRS" prefix="AHRS_">
