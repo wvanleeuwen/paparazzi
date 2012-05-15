@@ -288,6 +288,11 @@ static inline void guidance_h_traj_run(bool_t in_flight) {
   /* compute position error    */
   VECT2_DIFF(guidance_h_pos_err, guidance_h_pos_ref, ins_ltp_pos);
 
+  dbg1 = guidance_h_pos_err.x;
+  dbg4 = guidance_h_pos_err.y;
+  dbg2 = guidance_h_pos_sp.x;
+  dbg3 = guidance_h_pos_sp.y;
+
   /* saturate it               */
   VECT2_STRIM(guidance_h_pos_err, -(1<<15), (1<<15));
 
@@ -300,10 +305,6 @@ static inline void guidance_h_traj_run(bool_t in_flight) {
     INT32_VECT2_SCALE_2(guidance_h_pos_err, guidance_h_pos_err, MAX_POS_ERR, guidance_pos_err_norm);
   }
 
-  dbg1 = guidance_h_pos_err.x;
-  dbg4 = guidance_h_pos_err.x;
-  dbg2 = 12345;
-  dbg3 = 54321;
 
 
 
