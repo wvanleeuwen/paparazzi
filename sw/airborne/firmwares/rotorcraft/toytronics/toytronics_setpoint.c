@@ -12,6 +12,19 @@
 
 #include "generated/airframe.h" // for aircraft constants
 
+//wing waggle related
+#ifdef LOBATT_WING_WAGGLE
+  #include "subsystems/electrical.h" //for v_sense info
+  bool_t wag_up=TRUE;
+  int wag_gap=11;
+  int wag_num=0;
+  int32_t wag_sep=1000;
+  int wag_set_gap=5;
+  int wag_set_num=10;
+  int32_t wag_set_sep=400;
+#endif
+///////////////////// 
+
 setpoint_t setpoint;
 
 xyz_t setpoint_incremental_bounds_deg = { SETPOINT_MODE_2_BOUND_QUAT_DEG_X,
@@ -29,16 +42,6 @@ double hover_pitch_trim_deg = SETPOINT_HOVER_PITCH_TRIM_DEG;
 
 double tc_fading_upper_deg = SETPOINT_TC_FADING_UPPER_DEG;
 double tc_fading_lower_deg = SETPOINT_TC_FADING_LOWER_DEG;
-double throttle_gain_parameter = SETPOINT_THROTTLE_GAIN_PARAMETER;
-
-#ifdef AUTOPILOT_LOBATT_WING_WAGGLE
-  double lobatt_wing_waggle_deg = SETPOINT_LOBATT_WING_WAGGLE_DEG; //angle to which wings are waggled
-  double lobatt_wing_waggle_max = SETPOINT_LOBATT_WING_WAGGLE_MAX; //max number of waggles in each block
-  double lobatt_wing_waggle_dt  = SETPOINT_LOBATT_WING_WAGGLE_DT;  //time multiplier for waggle spike
-  bool_t setpoint_lobatt_wing_waggle_left = TRUE; //keep track of whether last wing waggle was to the left or right
-  double setpoint_lobatt_wing_waggle_num = 1001; //keep track of number of waggles
-#endif
-double roll_body;
 
 /**************** gains for the 3 modes ******************/
 struct Int32AttitudeGains toytronics_holder_gains;
@@ -122,6 +125,43 @@ rc_sensitizer( double * state, const double sens )
 {
   *state = copysign(pow(*state,(int)sens),*state);
 }
+
+//wing waggler
+static void
+wing_waggler( double * state, const double wag_intensity)
+{
+#ifdef LOBATT_WING_WAGGLE
+    if (electrical.vsupply < (MIN_BAT_LEVEL * 10) && electrical.vsupply > ((MIN_BAT_LEVEL-5) * 10)){
+      if (wag_sep < wag_set_sep){
+        wag_sep++;}
+      else if (wag_up==TRUE && wag_num < wag_set_num && wag_gap >= wag_set_gap){      
+        *state += wag_intensity;
+        wag_num++;
+        wag_gap=0;
+        wag_up=FALSE;
+        }
+      else if (wag_up==FALSE && wag_num < wag_set_num && wag_gap >= wag_set_gap){      
+        *state -= wag_intensity;
+        wag_num++;
+        wag_gap=0;
+        wag_up=TRUE;
+        }
+      else if (wag_gap < wag_set_gap){      
+        wag_gap++;
+        }
+      else if (wag_num >= wag_set_num){      
+        wag_num=0;
+        wag_sep=0;
+        }
+      }
+    else{
+      *state += 0;
+      }
+#else 
+    *state += 0; 
+#endif
+}
+
 
 // get "heading" from attitude quat q_n2b:
 // first find the shortest path to vertical (q_n2h),
@@ -404,50 +444,23 @@ toytronics_set_sp_hover_forward_from_rc()
   rc_sensitizer(&rcy, rcx);//setpoint_rc_sensitivity.z);
   //****************rc sticks sensitivity adjustment****************
 
+  //****************low battery wing waggle****************
+  wing_waggler(&rcr, 0.5);
+  //****************low battery wing waggle****************
+
   //****************reset gains based on pitch angle****************
   if (fabs(rcp * SETPOINT_MAX_STICK_ANGLE_DEG) > 46){
     set_stabilization_gains(&toytronics_forward_gains);
-
-/*  //****************scale gains based on the throttle setting***********************
-  INT32_VECT3_SCALE_2(toytronics_holder_gains.p,toytronics_forward_gains.p,(1+throttle_gain_parameter*fabs(rct)),1);
-  INT32_VECT3_SCALE_2(toytronics_holder_gains.d,toytronics_forward_gains.d,(1+throttle_gain_parameter*fabs(rct)),1);
-  INT32_VECT3_SCALE_2(toytronics_holder_gains.dd,toytronics_forward_gains.dd,1,1);
-  INT32_VECT3_SCALE_2(toytronics_holder_gains.i,toytronics_forward_gains.i,(1+throttle_gain_parameter*fabs(rct)),1);
-  set_stabilization_gains(&toytronics_holder_gains); 
-  //****************scale gains based on the throttle setting***********************  */
-    
     }
   if (fabs(rcp * SETPOINT_MAX_STICK_ANGLE_DEG) < 44){
     set_stabilization_gains(&toytronics_hover_gains);  
-
-/*  //****************scale gains based on the throttle setting***********************
-  INT32_VECT3_SCALE_2(toytronics_holder_gains.p,toytronics_hover_gains.p,(1+throttle_gain_parameter*fabs(rct)),1);
-  INT32_VECT3_SCALE_2(toytronics_holder_gains.d,toytronics_hover_gains.d,(1+throttle_gain_parameter*fabs(rct)),1);
-  INT32_VECT3_SCALE_2(toytronics_holder_gains.dd,toytronics_hover_gains.dd,1,1);
-  INT32_VECT3_SCALE_2(toytronics_holder_gains.i,toytronics_hover_gains.i,(1+throttle_gain_parameter*fabs(rct)),1);
-  set_stabilization_gains(&toytronics_holder_gains); 
-  //****************scale gains based on the throttle setting***********************  */
-  
     }
   //****************reset gains based on pitch angle****************
 
   // set pitch/yaw from stick
   double pitch_body = (rcp * SETPOINT_MAX_STICK_ANGLE_DEG + hover_pitch_trim_deg + (fabs(rcr * SETPOINT_MAX_STICK_ANGLE_DEG)*(5/90) * fabs(rcp * SETPOINT_MAX_STICK_ANGLE_DEG)*(1/90)))*M_PI/180.0;
   
-  #ifdef AUTOPILOT_LOBATT_WING_WAGGLE
-    if (setpoint_lobatt_wing_waggle_num < lobatt_wing_waggle_max){
-      if (setpoint_lobatt_wing_waggle_left==TRUE){
-        if(roll_body < rcr * SETPOINT_MAX_STICK_ANGLE_DEG*M_PI/180.0 + lobatt_wing_waggle_deg*M_PI/180.0){roll_body += lobatt_wing_waggle_dt*dt*SETPOINT_MAX_STICK_DEG_PER_SEC*M_PI/180.0;}
-        else{roll_body = rcr * SETPOINT_MAX_STICK_ANGLE_DEG*M_PI/180.0; setpoint_lobatt_wing_waggle_left=FALSE;setpoint_lobatt_wing_waggle_num+=1;}}
-      else{
-        if(roll_body > rcr * SETPOINT_MAX_STICK_ANGLE_DEG*M_PI/180.0 - lobatt_wing_waggle_deg*M_PI/180.0){roll_body -= lobatt_wing_waggle_dt*dt*SETPOINT_MAX_STICK_DEG_PER_SEC*M_PI/180.0;}
-        else{roll_body = rcr * SETPOINT_MAX_STICK_ANGLE_DEG*M_PI/180.0; setpoint_lobatt_wing_waggle_left=TRUE;setpoint_lobatt_wing_waggle_num+=1;}}
-    }
-    else{
-      roll_body   = rcr * SETPOINT_MAX_STICK_ANGLE_DEG*M_PI/180.0;}
-  #else
-    roll_body   = rcr * SETPOINT_MAX_STICK_ANGLE_DEG*M_PI/180.0;
-  #endif
+  double roll_body   = rcr * SETPOINT_MAX_STICK_ANGLE_DEG*M_PI/180.0;
 
   // integrate stick to get setpoint heading
   setpoint.setpoint_heading += dt*SETPOINT_MAX_STICK_DEG_PER_SEC*M_PI/180.0*rcy;
@@ -553,35 +566,27 @@ toytronics_set_sp_absolute_forward_from_rc()
   rc_sensitizer(&rcy, rcx);//setpoint_rc_sensitivity.z);
   //****************rc sticks sensitivity adjustment****************
 
-  //****************scale gains based on the throttle setting***********************
-  INT32_VECT3_SCALE_2(toytronics_holder_gains.p,toytronics_forward_gains.p,(1+throttle_gain_parameter*fabs(rct)),1);
-  INT32_VECT3_SCALE_2(toytronics_holder_gains.d,toytronics_forward_gains.d,(1+throttle_gain_parameter*fabs(rct)),1);
-  INT32_VECT3_SCALE_2(toytronics_holder_gains.dd,toytronics_forward_gains.dd,1,1);
-  INT32_VECT3_SCALE_2(toytronics_holder_gains.i,toytronics_forward_gains.i,(1+throttle_gain_parameter*fabs(rct)),1);
-  set_stabilization_gains(&toytronics_holder_gains); 
-  //****************scale gains based on the throttle setting***********************
+  //****************low battery wing waggle****************
+  wing_waggler(&rcr, 0.5);
+  //****************low battery wing waggle****************
 
-  #ifdef AUTOPILOT_LOBATT_WING_WAGGLE
-    if (setpoint_lobatt_wing_waggle_num < lobatt_wing_waggle_max){
-      if (setpoint_lobatt_wing_waggle_left==TRUE){
-        if(roll_body < rcr * SETPOINT_MAX_STICK_ANGLE_DEG*M_PI/180.0 + 2*lobatt_wing_waggle_deg*M_PI/180.0){roll_body += lobatt_wing_waggle_dt*dt*SETPOINT_MAX_STICK_DEG_PER_SEC*M_PI/180.0;}
-        else{roll_body = rcr * SETPOINT_MAX_STICK_ANGLE_DEG*M_PI/180.0; setpoint_lobatt_wing_waggle_left=FALSE;setpoint_lobatt_wing_waggle_num+=1;}}
-      else{
-        if(roll_body > rcr * SETPOINT_MAX_STICK_ANGLE_DEG*M_PI/180.0 - 2*lobatt_wing_waggle_deg*M_PI/180.0){roll_body -= lobatt_wing_waggle_dt*dt*SETPOINT_MAX_STICK_DEG_PER_SEC*M_PI/180.0;}
-        else{roll_body = rcr * SETPOINT_MAX_STICK_ANGLE_DEG*M_PI/180.0; setpoint_lobatt_wing_waggle_left=TRUE;setpoint_lobatt_wing_waggle_num+=1;}}
-    }
-    else{
-      roll_body   = rcr * SETPOINT_MAX_STICK_ANGLE_DEG*M_PI/180.0;}
-  #else
-    roll_body   = rcr * SETPOINT_MAX_STICK_ANGLE_DEG*M_PI/180.0;
-  #endif
+  //****************scale gains based on the throttle setting***********************
+  VECT3_ASSIGN(toytronics_holder_gains.p,-158,-129,-315);
+  VECT3_ASSIGN(toytronics_holder_gains.d,-72,-62,-254);
+  VECT3_ASSIGN(toytronics_holder_gains.dd,470,500,0);
+  INT32_VECT3_SCALE_2(toytronics_holder_gains.i,toytronics_forward_gains.i,1,1);
+  if (rct>0.45) {
+    set_stabilization_gains(&toytronics_holder_gains); }
+  if (rct<0.40) {
+    set_stabilization_gains(&toytronics_forward_gains); }
+  //****************scale gains based on the throttle setting***********************
 
   euler_t e_n2sp;
   e_n2sp.pitch = (rcp * SETPOINT_MAX_STICK_ANGLE_DEG + absolute_forward_pitch_trim_deg+ fabs(rcr * SETPOINT_MAX_STICK_ANGLE_DEG)*(5/90))*M_PI/180.0;
-  e_n2sp.roll  = roll_body; //rcr * SETPOINT_MAX_STICK_ANGLE_DEG * M_PI/180.0;
+  e_n2sp.roll  = rcr * SETPOINT_MAX_STICK_ANGLE_DEG * M_PI/180.0;
 
   // integrate stick to get setpoint heading
-  setpoint.setpoint_heading += dt*SETPOINT_MAX_STICK_DEG_PER_SEC*M_PI/180.0*rcy;
+  setpoint.setpoint_heading += dt*SETPOINT_MAX_STICK_DEG_PER_SEC*M_PI/180.0*rcy/2;
   setpoint.setpoint_heading += dt*e_n2sp.roll*roll_to_yaw_rate_ff_factor;
   
   // accel turn coordination
@@ -630,6 +635,7 @@ toytronics_set_sp_incremental_from_rc()
   double rcr = apply_deadband(rc->roll, SETPOINT_DEADBAND);
   double rcy = apply_deadband(rc->yaw, SETPOINT_DEADBAND);
   int8_t rcx = rc->aux3 + 2;
+  double rct = rc->throttle;
 
   //****************rc sticks sensitivity adjustment****************
   rc_sensitizer(&rcr, rcx);//setpoint_rc_sensitivity.x);
@@ -637,31 +643,23 @@ toytronics_set_sp_incremental_from_rc()
   rc_sensitizer(&rcy, rcx);//setpoint_rc_sensitivity.z);
   //****************rc sticks sensitivity adjustment****************
 
-/*  //****************scale gains based on the throttle setting***********************
-  INT32_VECT3_SCALE_2(toytronics_holder_gains.p,toytronics_aerobatic_gains.p,(1+throttle_gain_parameter*fabs(rct)),1);
-  INT32_VECT3_SCALE_2(toytronics_holder_gains.d,toytronics_aerobatic_gains.d,(1+throttle_gain_parameter*fabs(rct)),1);
-  INT32_VECT3_SCALE_2(toytronics_holder_gains.dd,toytronics_aerobatic_gains.dd,1,1);
-  INT32_VECT3_SCALE_2(toytronics_holder_gains.i,toytronics_aerobatic_gains.i,(1+throttle_gain_parameter*fabs(rct)),1);
-  set_stabilization_gains(&toytronics_holder_gains); 
-  //****************scale gains based on the throttle setting***********************  */
+  //****************low battery wing waggle****************
+  wing_waggler(&rcr, 2.0);
+  //****************low battery wing waggle****************
 
-  #ifdef AUTOPILOT_LOBATT_WING_WAGGLE
-    if (setpoint_lobatt_wing_waggle_num < lobatt_wing_waggle_max){
-      if (setpoint_lobatt_wing_waggle_left==TRUE){
-        if(roll_body < rcr * SETPOINT_MAX_STICK_ANGLE_DEG*M_PI/180.0 + 2*lobatt_wing_waggle_deg*M_PI/180.0){roll_body += lobatt_wing_waggle_dt*dt*SETPOINT_MAX_STICK_DEG_PER_SEC*M_PI/180.0;}
-        else{roll_body = rcr * SETPOINT_MAX_STICK_ANGLE_DEG*M_PI/180.0; setpoint_lobatt_wing_waggle_left=FALSE;setpoint_lobatt_wing_waggle_num+=1;}}
-      else{
-        if(roll_body > rcr * SETPOINT_MAX_STICK_ANGLE_DEG*M_PI/180.0 - 2*lobatt_wing_waggle_deg*M_PI/180.0){roll_body -= lobatt_wing_waggle_dt*dt*SETPOINT_MAX_STICK_DEG_PER_SEC*M_PI/180.0;}
-        else{roll_body = rcr * SETPOINT_MAX_STICK_ANGLE_DEG*M_PI/180.0; setpoint_lobatt_wing_waggle_left=TRUE;setpoint_lobatt_wing_waggle_num+=1;}}
-    }
-    else{
-      roll_body   = rcr * SETPOINT_MAX_STICK_ANGLE_DEG*M_PI/180.0;}
-  #else
-    roll_body = rcr * SETPOINT_MAX_STICK_DEG_PER_SEC*M_PI/180.0*dt;
-  #endif
-  
-  // rotation vector in body frame
-  xyz_t w_dt_body = {roll_body,//rcr * SETPOINT_MAX_STICK_DEG_PER_SEC*M_PI/180.0*dt,
+  //****************scale gains based on the throttle setting***********************
+  VECT3_ASSIGN(toytronics_holder_gains.p,-158,-129,-315);
+  VECT3_ASSIGN(toytronics_holder_gains.d,-72,-62,-254);
+  VECT3_ASSIGN(toytronics_holder_gains.dd,470,500,0);
+  INT32_VECT3_SCALE_2(toytronics_holder_gains.i,toytronics_aerobatic_gains.i,1,1);
+  if (rct>0.45) {
+    set_stabilization_gains(&toytronics_holder_gains); }
+  if (rct<0.40) {
+    set_stabilization_gains(&toytronics_aerobatic_gains); }
+  //****************scale gains based on the throttle setting***********************
+
+   // rotation vector in body frame
+  xyz_t w_dt_body = {rcr * SETPOINT_MAX_STICK_DEG_PER_SEC*M_PI/180.0*dt,
                      rcp * SETPOINT_MAX_STICK_DEG_PER_SEC*M_PI/180.0*dt,
                      rcy * SETPOINT_MAX_STICK_DEG_PER_SEC*M_PI/180.0*dt};
 
