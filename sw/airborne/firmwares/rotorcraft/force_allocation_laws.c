@@ -194,8 +194,11 @@ void Force_Allocation_Laws(void)
     orientation_rotation += RadOfDeg((float)wing->orientation_pitch) * percent;
   }
 
+  INT32_ANGLE_NORMALIZE(command_euler.psi);
+
   nav_heading = command_euler.psi;
   stab_att_sp_euler.psi = command_euler.psi;
+
   //guidance_h_psi_sp = command_euler.psi;
 
   stabilization_cmd[COMMAND_THRUST] = cmd_thrust;
