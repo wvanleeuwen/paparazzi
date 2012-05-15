@@ -336,7 +336,7 @@ static inline void guidance_h_traj_run(bool_t in_flight) {
   guidance_h_command_body.psi = guidance_h_psi_sp;
 
   /* Add RC setpoint */
-  EULERS_ADD(guidance_h_command_body, guidance_h_rc_sp);
+  //EULERS_ADD(guidance_h_command_body, guidance_h_rc_sp);
 
   INT32_ANGLE_NORMALIZE(guidance_h_command_body.psi);
 
