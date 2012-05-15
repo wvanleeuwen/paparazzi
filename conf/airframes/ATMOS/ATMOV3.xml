@@ -320,11 +320,16 @@
       <subsystem name="actuators"     type="pwm_supervision">
        <configure name="USE_SERVOS_7AND8"    value="TRUE"/>
       </subsystem>
+      <subsystem name="telemetry"     type="xbee_api">
+        <configure name="MODEM_BAUD"    value="B57600"/>
+        <configure name="MODEM_PORT"    value="UART2"/>
+      </subsystem>
+<!--
       <subsystem name="telemetry"     type="transparent">
         <configure name="MODEM_BAUD"    value="B9600"/>
         <configure name="MODEM_PORT"    value="UART2"/>
       </subsystem>
-      <define name="SERVO_HZ" value="400"/>
+-->      <define name="SERVO_HZ" value="400"/>
       <define name="SERVO_HZ_SECONDARY" value="40"/>
       <define name="RADIO_KILL_SWITCH" value="RADIO_FLAPS"/>
     </target>

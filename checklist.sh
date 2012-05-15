@@ -1,5 +1,9 @@
 spd-say "Checklist, press enter to continue"
 read
+spd-say "Check UAV Forge is not scraming your frequencies."
+read
+spd-say "Negative: but that is OK: We will go autonomous anyway... bye bye..."
+read
 spd-say "Check Propellors attached"
 read
 spd-say "Check RC Receiver Present"

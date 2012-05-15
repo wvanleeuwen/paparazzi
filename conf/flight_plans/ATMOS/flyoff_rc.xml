@@ -43,7 +43,7 @@
       <stay vmode="climb" climb="0.5" wp="CLIMB"/>
     </block>
     <block name="ThrottleTakeoff" strip_button="ThrottleTakeoff">
-      <exception cond="ins_enu_pos.z > POS_BFP_OF_REAL(15.)" deroute="Standby"/>
+      <exception cond="ins_enu_pos.z > POS_BFP_OF_REAL(15.)" deroute="go"/>
       <attitude pitch="0" roll="0" throttle="0.8" until="ins_enu_pos.z > POS_BFP_OF_REAL(6.)" vmode="throttle"/>
       <call fun="NavSetWaypointHere(WP_CLIMB)"/>
       <stay climb="0.5" vmode="climb" wp="CLIMB"/>
