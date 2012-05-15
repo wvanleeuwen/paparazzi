@@ -1749,7 +1749,6 @@
     <field name="dbg2Unsigned"  type="uint32"/>
     <field name="dbg3Unsigned"  type="uint32" />
     <field name="dbg4Signed"    type="int32"/>
-    <field name="wingCommands" type="int32[]"/>
   </message>
 
 

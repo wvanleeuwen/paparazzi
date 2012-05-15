@@ -6,6 +6,7 @@
   <process name="Main">
 
     <mode name="default">
+      <message name="DEBUG_FORCE_ALLOCATION"    period="1.0"/>
       <message name="DL_VALUE"          	period="1.2"/>
       <message name="ROTORCRAFT_STATUS"       	period="1.2"/>
       <message name="ROTORCRAFT_FP"          	period="0.8"/>

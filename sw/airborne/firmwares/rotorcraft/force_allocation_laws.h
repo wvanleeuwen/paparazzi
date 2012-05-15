@@ -38,6 +38,12 @@ extern float force_allocation_fixedwing_pitch_trim;
 extern float force_allocation_fixedwing_throttle_of_xdd; // forward acceleration
 extern float force_allocation_fixedwing_yawrate_of_ydd;  // lateral acceleration
 
+extern int32_t dbg1;
+extern uint32_t dbg2;
+extern uint32_t dbg3;
+extern int32_t dbg4;
+
+
 struct PprzLiftDevice {
   // Type and Activation
   enum lift_type_enum {ROTOR_LIFTING_DEVICE = 0, WING_LIFTING_DEVICE = 1} lift_type;

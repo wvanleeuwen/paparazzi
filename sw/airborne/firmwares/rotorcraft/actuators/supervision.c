@@ -162,18 +162,22 @@ void supervision_run(bool_t motors_on, bool_t override_on, int32_t in_cmd[] ) {
          supervision.trim[i]) / SUPERVISION_SCALE *
         (SUPERVISION_MAX_MOTOR - SUPERVISION_MIN_MOTOR) / MAX_PPRZ;
 
-      if (supervision.commands[i] < min_cmd)
-        min_cmd = supervision.commands[i];
-      if (supervision.commands[i] > max_cmd)
-        max_cmd = supervision.commands[i];
+        if (supervision.commands[i] < SUPERVISION_MIN_MOTOR)
+          supervision.commands[i] = SUPERVISION_MIN_MOTOR;
+        if (supervision.commands[i] > SUPERVISION_MAX_MOTOR)
+          supervision.commands[i] = SUPERVISION_MAX_MOTOR;
     }
 
+/////// TODO TODO TODO TODO TODO TODO TODO IMPROTANT TODO HELP THIS IS NOT GOOD TODO DO NOT OVERLOOK THIS IMPORTANT ISSUE TODO THIS MIGHT LEAD TO CRASHED TODO
+
+/*
     if (min_cmd < SUPERVISION_MIN_MOTOR && max_cmd > SUPERVISION_MAX_MOTOR)
       supervision.nb_failure++;
     if (min_cmd < SUPERVISION_MIN_MOTOR)
       offset_commands(-(min_cmd - SUPERVISION_MIN_MOTOR));
     if (max_cmd > SUPERVISION_MAX_MOTOR)
       offset_commands(-(max_cmd - SUPERVISION_MAX_MOTOR));
+*/
 
     /* For testing motor failure or override by module*/
     if (motors_on && (override_on || supervision.override_by_module)) {

@@ -287,8 +287,26 @@ static inline void guidance_h_traj_run(bool_t in_flight) {
 
   /* compute position error    */
   VECT2_DIFF(guidance_h_pos_err, guidance_h_pos_ref, ins_ltp_pos);
+
+  dbg1 = guidance_h_pos_err.x;
+  dbg4 = guidance_h_pos_err.y;
+  dbg2 = guidance_h_pos_sp.x;
+  dbg3 = guidance_h_pos_sp.y;
+
   /* saturate it               */
-  VECT2_STRIM(guidance_h_pos_err, -MAX_POS_ERR, MAX_POS_ERR);
+  VECT2_STRIM(guidance_h_pos_err, -(1<<15), (1<<15));
+
+  /* diagonal capable long dist */
+  int32_t guidance_pos_err_norm = 0;
+  INT32_VECT2_NORM(guidance_pos_err_norm, guidance_h_pos_err);
+
+  if ((guidance_pos_err_norm > 0) && (guidance_pos_err_norm > MAX_POS_ERR))
+  {
+    INT32_VECT2_SCALE_2(guidance_h_pos_err, guidance_h_pos_err, MAX_POS_ERR, guidance_pos_err_norm);
+  }
+
+
+
 
   /* compute speed error    */
   VECT2_DIFF(guidance_h_speed_err, guidance_h_speed_ref, ins_ltp_speed);
@@ -316,23 +334,20 @@ static inline void guidance_h_traj_run(bool_t in_flight) {
     guidance_h_igain * (guidance_h_pos_err_sum.y >> (12 + INT32_POS_FRAC - GH_GAIN_SCALE)) +
     guidance_h_again * (guidance_h_accel_ref.y >> 8); /* feedforward gain */
 
+
+  int32_t command_earth_norm = 0;
+  INT32_VECT2_NORM(command_earth_norm, guidance_h_command_earth);
   int32_t TRAJ_MAX_BANK = BFP_OF_REAL(RadOfDeg(max_bank_auto), INT32_ANGLE_FRAC);
 
-  VECT2_STRIM(guidance_h_command_earth, -TRAJ_MAX_BANK, TRAJ_MAX_BANK);
+  if ((command_earth_norm > 0) && (command_earth_norm > TRAJ_MAX_BANK))
+  {
+    INT32_VECT2_SCALE_2(guidance_h_command_earth, guidance_h_command_earth, TRAJ_MAX_BANK, command_earth_norm);
+  }
 
-
-
-  /* Rotate to body frame */
-  int32_t s_psi, c_psi;
-  PPRZ_ITRIG_SIN(s_psi, ahrs.ltp_to_lift_euler.psi);
-  PPRZ_ITRIG_COS(c_psi, ahrs.ltp_to_lift_euler.psi);
 
   // Restore angle ref resolution after rotation
-  guidance_h_command_body.phi =
-      ( - s_psi * guidance_h_command_earth.x + c_psi * guidance_h_command_earth.y) >> INT32_TRIG_FRAC;
-  guidance_h_command_body.theta =
-    - ( c_psi * guidance_h_command_earth.x + s_psi * guidance_h_command_earth.y) >> INT32_TRIG_FRAC;
-
+  guidance_h_command_body.phi = guidance_h_command_earth.x; // + c_psi * guidance_h_command_earth.y) >> INT32_TRIG_FRAC;
+  guidance_h_command_body.theta = guidance_h_command_earth.y; // x + s_psi * guidance_h_command_earth.y) >> INT32_TRIG_FRAC;
   guidance_h_command_body.psi = guidance_h_psi_sp;
 
   /* Add RC setpoint */

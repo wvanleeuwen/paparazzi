@@ -53,6 +53,20 @@
 
 #define PERIODIC_SEND_ALIVE(_trans, _dev) DOWNLINK_SEND_ALIVE(_trans, _dev, 16, MD5SUM)
 
+#include "firmwares/rotorcraft/force_allocation_laws.h"
+
+#ifdef LIFT_GENERATION_NR_OF_LIFT_DEVICES
+#define PERIODIC_SEND_DEBUG_FORCE_ALLOCATION(_trans, _dev) {     \
+  DOWNLINK_SEND_DEBUG_FORCE_ALLOCATION(_trans, _dev,       \
+  &dbg1,      \
+  &dbg2,      \
+  &dbg3,    \
+  &dbg4     \
+  );          \
+}
+#endif
+
+
 #if USE_GPS
 #define PERIODIC_SEND_ROTORCRAFT_STATUS(_trans, _dev) {			\
     uint32_t imu_nb_err = 0;						\
