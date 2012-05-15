@@ -4,6 +4,7 @@
 #include <math.h>
 #include <string.h>
 #include <stdio.h>
+#include <stdint.h>
 
 #include "toytronics_setpoint.h"
 #include "toytronics_interface.h"
