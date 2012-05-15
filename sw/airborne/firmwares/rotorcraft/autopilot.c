@@ -31,11 +31,7 @@
 #include "firmwares/rotorcraft/stabilization.h"
 #include "firmwares/rotorcraft/camera_mount.h"
 #include "led.h"
-  #include "subsystems/electrical.h"
-#ifdef AUTOPILOT_LOBATT_WING_WAGGLE
-
-  #include "firmwares/rotorcraft/toytronics/toytronics_setpoint.h"
-#endif
+#include "subsystems/electrical.h"
 
 uint8_t  autopilot_mode;
 uint8_t  autopilot_mode_auto2;
@@ -45,7 +41,6 @@ bool_t   autopilot_rc_unkilled_startup; //toytronics: keep track of Tx on motor 
 bool_t   autopilot_first_boot; //toytronics: determine first power up for ahrs time delay
 bool_t   autopilot_mode1_kill; //toytronics: keep track of whether motor shutoff occurred in mode 1 
 bool_t   autopilot_safety_violation; //safety condition violated during startup attempt.
-int32_t  autopilot_lobatt_wing_waggle_interval; //interval at which wing waggle series occurs if batt is low
 
 bool_t   autopilot_in_flight;
 uint32_t autopilot_motors_on_counter;
@@ -98,9 +93,6 @@ void autopilot_init(void) {
   #ifdef USE_CAMERA_MOUNT
     camera_mount_init();
   #endif
-  #ifdef AUTOPILOT_LOBATT_WING_WAGGLE
-    autopilot_lobatt_wing_waggle_interval = AUTOPILOT_LOBATT_WING_WAGGLE_INTERVAL;
-  #endif
 }
 
 
@@ -127,11 +119,6 @@ void autopilot_periodic(void) {
     SetCommands(stabilization_cmd,
         autopilot_in_flight, autopilot_motors_on);
   }
-#ifdef AUTOPILOT_LOBATT_WING_WAGGLE
-  if (electrical.vsupply < (MIN_BAT_LEVEL * 10) && electrical.vsupply > (5 * 10)){
-    RunOnceEvery(autopilot_lobatt_wing_waggle_interval,{setpoint_lobatt_wing_waggle_num=0;})
-  }
-#endif
 #ifdef AHRS_ALIGNER_LED
 #ifdef AUTOPILOT_LOBATT_BLINK
   if (electrical.vsupply < (MIN_BAT_LEVEL * 10)){
@@ -206,7 +193,7 @@ void autopilot_set_mode(uint8_t new_autopilot_mode) {
     switch (new_autopilot_mode) {
     case AP_MODE_FAILSAFE:
 #ifndef KILL_AS_FAILSAFE
-      guidance_v_zd_sp = SPEED_BFP_OF_REAL(0.5);
+      guidance_v_zd_sp = SPEED_BFP_OF_REAL(0.0);
       guidance_v_mode_changed(GUIDANCE_V_MODE_CLIMB);
       break;
 #endif
