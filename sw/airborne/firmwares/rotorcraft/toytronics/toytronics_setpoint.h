@@ -44,14 +44,6 @@ extern xyz_t setpoint_aerobatic_decay_time;
 extern xyz_t setpoint_rc_sensitivity;
 extern double tc_fading_upper_deg;
 extern double tc_fading_lower_deg;
-extern double throttle_gain_parameter;
-
-#ifdef AUTOPILOT_LOBATT_WING_WAGGLE
-  extern double lobatt_wing_waggle_deg;  //angle to which wings are waggled
-  extern double lobatt_wing_waggle_max;  //max number of waggles in each block
-  extern double lobatt_wing_waggle_dt;
-  extern double setpoint_lobatt_wing_waggle_num; //keep track of number of waggles
-#endif
 
 // telemetry
 extern setpoint_t setpoint;
