@@ -27,6 +27,8 @@
 #include "math/pprz_algebra_int.h"
 
 #include "generated/airframe.h"
+#include "subsystems/ahrs.h"
+
 
 struct Int32AttitudeGains {
   struct Int32Vect3  p;
@@ -42,5 +44,12 @@ extern struct Int32Eulers stabilization_att_sum_err;
 
 extern int32_t stabilization_att_fb_cmd[COMMANDS_NB];
 extern int32_t stabilization_att_ff_cmd[COMMANDS_NB];
+
+static inline int32_t stabilization_get_heading(void)
+{
+  int32_t sinTheta;
+  PPRZ_ITRIG_SIN(sinTheta, ahrs.ltp_to_lift_euler.theta); //in ANG_FRAC
+  return (ahrs.ltp_to_lift_euler.psi - ((sinTheta*ahrs.ltp_to_lift_euler.phi)>>INT32_TRIG_FRAC));
+}
 
 #endif /* STABILIZATION_ATTITUDE_INT_H */

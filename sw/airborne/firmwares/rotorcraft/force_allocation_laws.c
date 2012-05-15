@@ -196,6 +196,7 @@ void Force_Allocation_Laws(void)
 
   nav_heading = command_euler.psi;
   stab_att_sp_euler.psi = command_euler.psi;
+  //guidance_h_psi_sp = command_euler.psi;
 
   stabilization_cmd[COMMAND_THRUST] = cmd_thrust;
 

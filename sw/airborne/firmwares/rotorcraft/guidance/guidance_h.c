@@ -56,7 +56,7 @@ struct Int32Vect2 guidance_h_nav_err;
 struct Int32Eulers guidance_h_rc_sp;
 struct Int32Vect2  guidance_h_command_earth;
 struct Int32Vect2  guidance_h_stick_earth_sp;
-struct Int32Eulers guidance_h_command_body;
+struct Int32Eulers guidance_h_command_body;   // Global just for telemetry pusposes
 
 int32_t guidance_h_pgain;
 int32_t guidance_h_dgain;
@@ -356,6 +356,7 @@ static inline void guidance_h_hover_enter(void) {
 
   guidance_h_rc_sp.psi = 0;
   reset_psi_ref_from_body();
+  guidance_h_psi_sp = stabilization_get_heading();
 
   INT_VECT2_ZERO(guidance_h_pos_err_sum);
 
@@ -372,7 +373,7 @@ static inline void guidance_h_nav_enter(void) {
 
   /* reset psi reference, set psi setpoint to current psi */
   reset_psi_ref_from_body();
-  guidance_h_psi_sp = stab_att_ref_euler.psi;
+  guidance_h_psi_sp = stabilization_get_heading();
   nav_heading = guidance_h_psi_sp;
 
   /* set RC heading setpoint to zero,
