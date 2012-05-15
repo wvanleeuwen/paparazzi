@@ -7,7 +7,7 @@
 bool_t kill_on_ground_detect_enabled;
 
 void atmov_killOnGroundDetect_init(void) {
-  kill_on_ground_detect_enabled = TRUE;
+  kill_on_ground_detect_enabled = FALSE;
   GPIO_InitTypeDef GPIO_InitStructure;
   GPIO_InitStructure.GPIO_Pin = GPIO_Pin_2;
   GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IPU; //pullup
