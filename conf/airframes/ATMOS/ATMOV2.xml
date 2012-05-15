@@ -75,9 +75,9 @@
     <define name="MAX_CLIMB"   		value="3.0f"/>
     <define name="PITCH_OF_VZ" 		value="0.25f"/>
     <define name="THROTTLE_OF_VZ"   value="0.05f"/>
-    <define name="PITCH_TRIM"       value="0.2f" />
+    <define name="PITCH_TRIM"       value="0.0f" />
     <define name="THROTTLE_OF_XDD"	value="0.0f" />
-    <define name="YAWRATE_OF_YDD"   value="1.0f" />
+    <define name="YAWRATE_OF_YDD"   value="0.8f" />
   </section>
 
   <!-- include magneto neutrals -->
@@ -164,14 +164,14 @@
    <define name="MIN_ERR_ZD"  			value="SPEED_BFP_OF_REAL(-10.)"/>
    <define name="MAX_ERR_ZD"  			value="SPEED_BFP_OF_REAL( 10.)"/>
    <define name="MAX_SUM_ERR" 			value="2000000"/>
-   <define name="HOVER_KP"    			value="300"/>
-   <define name="HOVER_KD"    			value="200"/>
+   <define name="HOVER_KP"    			value="80"/>
+   <define name="HOVER_KD"    			value="80"/>
    <define name="HOVER_KI"    			value="9"/>
    <!-- 1.5m/s for full stick : BOOZ_SPEED_I_OF_F(1.5) / (MAX_PPRZ/2) -->
    <define name="RC_CLIMB_COEF" 		value ="163"/>
    <!-- BOOZ_SPEED_I_OF_F(1.5) * 20% -->
    <define name="RC_CLIMB_DEAD_BAND"  		value ="160000"/>
-   <define name="NOMINAL_HOVER_THROTTLE"        value ="0.40"/>
+   <define name="NOMINAL_HOVER_THROTTLE"        value ="0.47"/>
 
    <define name="REF_MIN_ZDD"			value="(-0.1*9.81)"/>
    <define name="REF_MAX_ZDD"			value="(0.1*9.81)"/>
@@ -200,11 +200,12 @@
   </section>
 
  <section name="GUIDANCE_H" prefix="GUIDANCE_H_">
-   <define name="PGAIN" 		value="36"/>
-   <define name="DGAIN" 		value="175"/>
-   <define name="IGAIN" 		value="1"/>
-   <define name="AGAIN" 		value="50"/>
-   <define name="REF_MAX_BANK"      	value="20"/>
+   <define name="PGAIN" 		value="25"/>
+   <define name="DGAIN" 		value="16"/>
+   <define name="IGAIN" 		value="0"/>
+   <define name="AGAIN" 		value="0"/>
+   <define name="REF_MAX_BANK"      	value="25"/>
+   <define name="MAX_BANK"      	value="25"/>
    <define name="REF_MAX_SPEED"      	value="15"/>
  </section>
 
