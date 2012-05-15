@@ -197,18 +197,20 @@ void Force_Allocation_Laws(void)
       else
       {
         INT32_ATAN2(destination, stab_att_sp_euler.theta, stab_att_sp_euler.phi);
-        //destination -= stab_att_sp_euler.psi;
+        destination -= ahrs.ltp_to_lift_euler.psi;
         INT32_ANGLE_NORMALIZE(destination);
 
- /*       int32_t TRAJ_MAX_BANK = BFP_OF_REAL(RadOfDeg(max_bank_auto), INT32_ANGLE_FRAC);
+        int32_t TRAJ_MAX_BANK = BFP_OF_REAL(RadOfDeg(max_bank_auto), INT32_ANGLE_FRAC);
         if (destination > TRAJ_MAX_BANK)
           destination = TRAJ_MAX_BANK;
         if (destination < (-TRAJ_MAX_BANK))
           destination = -TRAJ_MAX_BANK;
 
         wing->commands[COMMAND_ROLL] = destination;
-*/
- dbg1 = destination;
+
+        dbg1 = stab_att_sp_euler.phi; //destination;
+        dbg4 = stab_att_sp_euler.theta;
+ 
 
       }
 
@@ -236,8 +238,8 @@ void Force_Allocation_Laws(void)
         dt = 10;
       if (dt < -10)
         dt = -10;
-  */    wing->commands[COMMAND_YAW] = destination; //ahrs.ltp_to_lift_euler.psi + dt;
-    }
+     wing->commands[COMMAND_YAW] = destination; //ahrs.ltp_to_lift_euler.psi + dt;
+*/     }
 
     cmd_thrust           += wing->commands[COMMAND_THRUST]     * percent;
     command_euler.phi    += wing->commands[COMMAND_ROLL]       * percent;
