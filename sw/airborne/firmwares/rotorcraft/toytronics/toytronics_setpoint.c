@@ -15,12 +15,8 @@
 //wing waggle related
 #ifdef LOBATT_WING_WAGGLE
   #include "subsystems/electrical.h" //for v_sense info
-  bool_t wag_up=TRUE;
-  int wag_gap=11;
-  int wag_num=0;
+  double wag_dt=0;
   int32_t wag_sep=1000;
-  int wag_set_gap=5;
-  int wag_set_num=10;
   int32_t wag_set_sep=400;
 #endif
 ///////////////////// 
@@ -134,31 +130,17 @@ wing_waggler( double * state, const double wag_intensity)
     if (electrical.vsupply < (MIN_BAT_LEVEL * 10) && electrical.vsupply > ((MIN_BAT_LEVEL-5) * 10)){
       if (wag_sep < wag_set_sep){
         wag_sep++;}
-      else if (wag_up==TRUE && wag_num < wag_set_num && wag_gap >= wag_set_gap){      
-        *state += wag_intensity;
-        wag_num++;
-        wag_gap=0;
-        wag_up=FALSE;
-        }
-      else if (wag_up==FALSE && wag_num < wag_set_num && wag_gap >= wag_set_gap){      
-        *state -= wag_intensity;
-        wag_num++;
-        wag_gap=0;
-        wag_up=TRUE;
-        }
-      else if (wag_gap < wag_set_gap){      
-        wag_gap++;
-        }
-      else if (wag_num >= wag_set_num){      
-        wag_num=0;
-        wag_sep=0;
-        }
-      }
-    else{
-      *state += 0;
+      else{
+	*state += wag_intensity*sin(wag_dt*M_PI);
+	wag_dt += 0.12;
+        if (wag_dt >= 10){
+	  wag_dt=0;
+	  wag_sep=0;
+	  }
+	}
       }
 #else 
-    *state += 0; 
+    *state; 
 #endif
 }
 
@@ -445,7 +427,7 @@ toytronics_set_sp_hover_forward_from_rc()
   //****************rc sticks sensitivity adjustment****************
 
   //****************low battery wing waggle****************
-  wing_waggler(&rcr, 0.5);
+  wing_waggler(&rcr, 0.3);
   //****************low battery wing waggle****************
 
   //****************reset gains based on pitch angle****************
@@ -644,7 +626,7 @@ toytronics_set_sp_incremental_from_rc()
   //****************rc sticks sensitivity adjustment****************
 
   //****************low battery wing waggle****************
-  wing_waggler(&rcr, 2.0);
+  wing_waggler(&rcr, 1.0);
   //****************low battery wing waggle****************
 
   //****************scale gains based on the throttle setting***********************
