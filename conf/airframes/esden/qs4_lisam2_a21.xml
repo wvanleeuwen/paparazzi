@@ -33,7 +33,7 @@
     <define name="AUTOPILOT_THROTTLE_INSTANT_START_WITH_SAFETIES"  value="TRUE"/>
     <define name="AUTOPILOT_LOBATT_BLINK"  value="TRUE"/>
     <!--This is to enable a wing waggle at specified low battery voltage. The interval is in cycle counts, not seconds-->
-    <!--define name="AUTOPILOT_LOBATT_WING_WAGGLE" value="TRUE"/-->
+    <define name="LOBATT_WING_WAGGLE" value="TRUE"/>
     <define name="TOYTRONICS" value="TRUE"/>
   </section>
 
