@@ -75,6 +75,11 @@ static inline void led_init ( void ) {
   LED_INIT(8);
   LED_OFF(8);
 #endif /* LED_8_BANK */
+
+#ifdef LED_BODY_BANK
+  LED_INIT(BODY);
+  LED_OFF(BODY);
+#endif /* LED_BODY_BANK */
 }
 
 #else /* USE_LED */
