@@ -164,9 +164,9 @@
    <define name="MIN_ERR_ZD"  			value="SPEED_BFP_OF_REAL(-10.)"/>
    <define name="MAX_ERR_ZD"  			value="SPEED_BFP_OF_REAL( 10.)"/>
    <define name="MAX_SUM_ERR" 			value="2000000"/>
-   <define name="HOVER_KP"    			value="80"/>
+   <define name="HOVER_KP"    			value="88"/>
    <define name="HOVER_KD"    			value="80"/>
-   <define name="HOVER_KI"    			value="9"/>
+   <define name="HOVER_KI"    			value="12"/>
    <!-- 1.5m/s for full stick : BOOZ_SPEED_I_OF_F(1.5) / (MAX_PPRZ/2) -->
    <define name="RC_CLIMB_COEF" 		value ="163"/>
    <!-- BOOZ_SPEED_I_OF_F(1.5) * 20% -->
@@ -193,9 +193,12 @@
     <define name="H_Y" value=" 0.00059"/>
     <define name="H_Z" value=" 0.92025"/>-->
     <!-- magnetic field for Georgia -->
-    <define name="H_X" value="0.651996618"/>
+  <!--  <define name="H_X" value="0.651996618"/>
     <define name="H_Y" value="0.013482692"/>
-    <define name="H_Z" value="0.758101109"/>
+    <define name="H_Z" value="0.758101109"/>-->
+    <define name="H_X" value="0.46702270888"/>
+    <define name="H_Y" value="-0.05198270497"/>
+    <define name="H_Z" value="0.88271554722"/>
 
   </section>
 

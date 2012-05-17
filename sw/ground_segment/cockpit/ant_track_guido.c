@@ -50,7 +50,7 @@
 #define SET_SERVO_CENTER_COMMAND       0x22
 
 
-#define SERIAL_BUFFER_SIZE 256
+#define SERIAL_BUFFER_SIZE 20
 
 #define MANUAL 0
 #define AUTO 1
@@ -790,7 +790,7 @@ void ubxSend(unsigned int cls, unsigned int id, struct pprz_servo_msg_struct * s
 	}
 	else
 	{
-		//printf("Object larger than buffer\n");
+		printf("Object larger than buffer\n");
 		return;
 	}
 }

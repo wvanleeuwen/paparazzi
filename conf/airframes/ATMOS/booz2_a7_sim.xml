@@ -224,10 +224,6 @@
       <subsystem name="fdm"           type="nps"/>
       <subsystem name="radio_control" type="ppm"/>
       <subsystem name="actuators"     type="mkk"/>
- <makefile location="after">
-   jsbsim.CFLAGS += -I/usr/local/include/JSBSim
-   jsbsim.LDFLAGS += -L/usr/local/lib
- </makefile>
     </target>
     <subsystem name="telemetry"     type="transparent"/>
     <subsystem name="imu"           type="b2_v1.1"/>
@@ -277,8 +273,8 @@
  </firmware>
 
  <makefile location="after">
-   jsbsim.CFLAGS += -I/usr/local/include/JSBSim
-   jsbsim.LDFLAGS += -L/usr/local/lib
+   sim.CFLAGS += -I/usr/local/include/JSBSim
+   sim.LDFLAGS += -L/usr/local/lib
  </makefile>
 
 </airframe>

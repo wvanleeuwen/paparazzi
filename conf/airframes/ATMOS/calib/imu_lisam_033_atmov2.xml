@@ -1,8 +1,8 @@
 <airframe>
   <section name="IMU" prefix="IMU_">
-    <define name="MAG_X_NEUTRAL" value="-98"/>
-    <define name="MAG_Y_NEUTRAL" value="-23"/>
-    <define name="MAG_Z_NEUTRAL" value="54"/>
+    <define name="MAG_X_NEUTRAL" value="-106"/>
+    <define name="MAG_Y_NEUTRAL" value="-2"/>
+    <define name="MAG_Z_NEUTRAL" value="64"/>
     <define name="MAG_X_SENS" value="1" integer="16"/>
     <define name="MAG_Y_SENS" value="1" integer="16"/>
     <define name="MAG_Z_SENS" value="1" integer="16"/>
