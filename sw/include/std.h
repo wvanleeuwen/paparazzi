@@ -114,6 +114,29 @@ typedef uint8_t unit_t;
     }							\
   }
 
+#define RunXTimesEvery(_prescaler, _interval, _xtimes, _code) {		\
+    static uint16_t prescaler = 0;			\
+    static uint16_t xtimes = 0;		         	\
+    prescaler++;					\
+    if (prescaler >= _prescaler + _interval*xtimes && xtimes < _xtimes) {			\
+      _code;						\
+      xtimes++;						\
+      }							\
+    if (xtimes >= _xtimes) {				\
+      xtimes = 0;					\
+      prescaler = 0;					\
+      }							\
+  }
+
+#define RunOnceAfter(_prescaler, _code) {		\
+    static uint16_t prescaler = 0;			\
+    if (prescaler < _prescaler) {			\
+      prescaler++;					\
+      }                                                 \
+    else{                                               \
+      _code;						\
+      }                                                 \
+  }
 
 #define PeriodicPrescaleBy5( _code_0, _code_1, _code_2, _code_3, _code_4) { \
     static uint8_t _50hz = 0;						\
