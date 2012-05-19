@@ -1,0 +1,69 @@
+<!DOCTYPE flight_plan SYSTEM "../flight_plan.dtd">
+
+<flight_plan alt="90" ground_alt="0" lat0="32.007343" lon0="-81.839498" max_dist_from_home="7000" name="Atmov fly offf" security_height="100">
+  <header>
+#include "autopilot.h"
+#include "subsystems/datalink/datalink.h"
+</header>
+  <waypoints>
+    <waypoint name="HOME" lat="32.007343" lon="-81.839498"/>
+    <waypoint name="CLIMB" x="0" y="2"/>
+    <waypoint alt="80.0" name="STDBY" x="0" y="4"/>
+    <waypoint alt="80.0" lat="32.007343" lon="-81.839498" name="NWP1"/>
+    <waypoint alt="80.0" lat="32.009770" lon="-81.836419" name="NWP2"/>
+    <waypoint alt="30.0" lat="32.010942" lon="-81.833544" name="NWPto45"/>
+    <waypoint alt="10.0" lat="32.011419" lon="-81.832110" name="NWPto45bld"/>
+    <waypoint alt="-2" lat="32.011772" lon="-81.831060" name="NWPto90"/>
+    <waypoint lat="32.011841" lon="-81.830671" name="TD"/>
+    <waypoint alt="-2" lat="32.011818" lon="-81.830815" name="target"/>
+  </waypoints>
+  <blocks>
+    <block name="Wait GPS">
+      <set value="1" var="kill_throttle"/>
+      <while cond="!GpsFixValid()"/>
+    </block>
+    <block name="Geo init">
+      <while cond="LessThan(NavBlockTime(), 10)"/>
+      <call fun="NavSetGroundReferenceHere()"/>
+    </block>
+    <block name="Holding point">
+      <set value="1" var="kill_throttle"/>
+      <attitude roll="0" throttle="0" vmode="throttle"/>
+    </block>
+    <block name="Takeoff" strip_icon="takeoff.png" strip_button="Takeoff (wp CLIMB)">
+      <exception cond="estimator_z > ground_alt+25" deroute="Standby"/>
+      <set value="0" var="kill_throttle"/>
+      <go wp="CLIMB"/>
+    </block>
+    <block name="Standby" strip_button="Standby" strip_icon="home.png">
+      <circle radius="nav_radius" wp="STDBY"/>
+    </block>
+    <block name="goN1">
+      <go wp="NWP1"/>
+    </block>
+    <block name="goN2">
+      <go wp="NWP2"/>
+    </block>
+    <block name="goT45">
+      <go wp="NWPto45"/>
+    </block>
+    <block name="goT45bld">
+      <go wp="NWPto45bld"/>
+    </block>
+    <block name="goThover">
+      <go wp="NWPto90"/>
+    </block>
+    <block name="goNtarget">
+      <stay wp="target"/>
+      <deroute block="landhere"/>
+    </block>
+    <block name="landhere" strip_button="Land Here" strip_icon="land-right.png">
+
+    </block>
+    <block name="flare">
+      <go approaching_time="0" from="target" hmode="route" throttle="0.0" vmode="throttle" wp="TD"/>
+      <attitude roll="0.0" throttle="0.0" until="FALSE" vmode="throttle"/>
+      <stay climb="-0.4" vmode="climb" wp="TD"/>
+    </block>
+  </blocks>
+</flight_plan>

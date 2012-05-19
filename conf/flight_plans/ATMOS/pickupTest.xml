@@ -1,0 +1,88 @@
+<!DOCTYPE flight_plan SYSTEM "../flight_plan.dtd">
+
+<flight_plan alt="90" ground_alt="0" lat0="32.001138" lon0="-81.842444" max_dist_from_home="7000" name="Atmov helopad test" security_height="100">
+  <header>
+#include "autopilot.h"
+#include "subsystems/datalink/datalink.h"
+</header>
+  <waypoints>
+    <waypoint name="HOME" x="-1.2" y="-6.0"/>
+    <waypoint name="CLIMB" x="2.7" y="5.4"/>
+    <waypoint alt="80.0" name="STDBY" x="12.7" y="0.9"/>
+    <waypoint lat="32.000499" lon="-81.842406" name="TD"/>
+    <waypoint alt="50.0" lat="32.003058" lon="-81.840229" name="FWline1A"/>
+    <waypoint alt="50.0" lat="32.004656" lon="-81.838019" name="FWline1B"/>
+    <waypoint alt="50.0" lat="32.006835" lon="-81.835256" name="FWline1C"/>
+    <waypoint alt="50.0" lat="32.009267" lon="-81.831844" name="FWline1D"/>
+    <waypoint alt="40.0" lat="32.011758" lon="-81.829562" name="45A"/>
+    <waypoint alt="30.0" lat="32.012202" lon="-81.829292" name="45B"/>
+    <waypoint alt="20.0" lat="32.012668" lon="-81.828718" name="RCA"/>
+    <waypoint alt="20.0" lat="32.012668" lon="-81.828718" name="LAND"/>
+  </waypoints>
+  <blocks>
+    <block name="Wait GPS">
+      <call fun="NavKillThrottle()"/>
+      <while cond="!GpsFixValid()"/>
+    </block>
+    <block name="Geo init">
+      <while cond="LessThan(NavBlockTime(), 10)"/>
+      <call fun="NavSetGroundReferenceHere()"/>
+    </block>
+    <block name="Holding point">
+      <call fun="NavKillThrottle()"/>
+      <attitude pitch="0" roll="0" throttle="0" until="FALSE" vmode="throttle"/>
+    </block>
+    <block name="Start Engine">
+      <call fun="DisarmGroundDetectSwitch()"/>
+      <call fun="NavResurrect()"/>
+    </block>
+    <block name="Takeoff" strip_button="Takeoff" strip_icon="takeoff.png">
+      <exception cond="ins_enu_pos.z > POS_BFP_OF_REAL(40.)" deroute="Standby"/>
+      <call fun="NavSetWaypointHere(WP_CLIMB)"/>
+      <stay climb="0.5" vmode="climb" wp="CLIMB"/>
+    </block>
+    <block name="ThrottleTakeoff" strip_button="ThrottleTakeoff">
+      <call fun="DisarmGroundDetectSwitch()"/>
+      <exception cond="ins_enu_pos.z > POS_BFP_OF_REAL(15.)" deroute="ATMOVinit"/>
+      <attitude pitch="0" roll="0" throttle="0.8" until="ins_enu_pos.z > POS_BFP_OF_REAL(6.)" vmode="throttle"/>
+      <call fun="NavSetWaypointHere(WP_CLIMB)"/>
+      <stay climb="0.5" vmode="climb" wp="CLIMB"/>
+    </block>
+    <block name="Standby" strip_button="Standby" strip_icon="home.png">
+      <call fun="NavSetTransitionPercentage(100)"/>
+      <stay until="FALSE" wp="STDBY"/>
+    </block>
+    <block name="ATMOVinit">
+      <call fun="DisarmGroundDetectSwitch()"/>
+    </block>
+    <block name="FWline1A">
+      <call fun="NavSetTransitionPercentage(0)"/>
+      <go wp="FWline1A"/>
+    </block>
+    <block name="FWline1B">
+      <go wp="FWline1B"/>
+    </block>
+    <block name="FWline1C">
+      <go wp="FWline1C"/>
+    </block>
+    <block name="FWline1D">
+      <go wp="FWline1D"/>
+    </block>
+    <block name="Transition to 45 point A">
+      <call fun="NavSetTransitionPercentage(50)"/>
+      <go wp="45A"/>
+    </block>
+    <block name="Transition to 45 point B">
+      <call fun="NavSetTransitionPercentage(50)"/>
+      <go wp="45B"/>
+    </block>
+    <block name="hover">
+      <stay wp="RCA" until="FALSE"/>
+    </block>
+    <block name="autoLandHere">
+      <call fun="NavSetWaypointHere(WP_LAND)"/>
+      <call fun="ArmGroundDetectSwitch()"/>
+      <stay climb="-0.5" vmode="climb" wp="LAND"/>
+    </block>
+  </blocks>
+</flight_plan>

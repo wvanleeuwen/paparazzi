@@ -1,0 +1,179 @@
+<!DOCTYPE flight_plan SYSTEM "../flight_plan.dtd">
+
+<flight_plan alt="90" ground_alt="0" lat0="31.988423" lon0="-81.848358" max_dist_from_home="7000" name="Atmov fly offf" security_height="100">
+  <header>
+#include "autopilot.h"
+#include "subsystems/datalink/datalink.h"
+</header>
+  <waypoints>
+    <waypoint name="HOME" lat="31.988423" lon="-81.848358"/>
+    <waypoint name="CLIMB" lat="31.988423" lon="-81.848358"/>
+    <waypoint alt="80.0" name="STDBY" lat="31.988485" lon="-81.848421"/>
+    <waypoint name="Waypt1" lat="31.991513967757" lon="-81.84758782403911"  alt="80"/>
+    <waypoint name="Waypt2" lat="31.9950752209405" lon="-81.84631758131403"  alt="80"/>
+    <waypoint name="Waypt3" lat="31.99881459857815" lon="-81.84440908835603"  alt="80"/>
+    <waypoint name="Waypt4" lat="32.00309604782309" lon="-81.84179611652618"  alt="80"/>
+    <waypoint name="Waypt5" lat="32.00667214863728" lon="-81.83961285290476"  alt="80"/>
+    <waypoint name="Waypt6" lat="32.0092179776448" lon="-81.83641477904173"  alt="80"/>
+    <waypoint name="45trans" lat="32.01040443118768" lon="-81.83370003161309"  alt="60"/>
+    <waypoint name="GBwCLr" lat="32.01125268282365" lon="-81.831970833138"  alt="25"/>                   
+    <waypoint name="90trans" lat="32.01178441974989" lon="-81.83110639963621"  alt="-5"/>
+    <waypoint name="TD" lat="32.01184194109417" lon="-81.83092140458776" />
+  	
+    <waypoint name="TR1" lat="32.01090463420918" lon="-81.83285311900865"  alt="40"/>
+    <waypoint name="TR2" lat="32.00823734225416" lon="-81.83580716508177"  alt="80"/>
+    <waypoint name="TR3" lat="32.00439957345724" lon="-81.83852381891622"  alt="80"/>
+    <waypoint name="TR4" lat="32.00018245672839" lon="-81.84162943279391"  alt="80"/>
+    <waypoint name="TR5" lat="31.99631588215714" lon="-81.84487445591161"  alt="80"/>
+    <waypoint name="TR6" lat="31.99212370464539" lon="-81.84735036413727"  alt="80"/>
+    <waypoint name="TR7" lat="31.98831363527189" lon="-81.84877028166979"  alt="60"/>
+    
+    <waypoint name="B1" lat="32.00915998533729" lon="-81.83284716427856"  alt="80"/>
+    <waypoint name="B2" lat="32.00963817689291" lon="-81.82884301753772"  alt="80"/>
+    <waypoint name="B3" lat="32.01130286492847" lon="-81.8251808950849"  alt="80"/>
+    <waypoint name="B4" lat="32.01429345105774" lon="-81.82429267951727"  alt="80"/>
+    <waypoint name="B5" lat="32.01622194966603" lon="-81.82701007145687"  alt="80"/>
+    <waypoint name="B6" lat="32.01570685279938" lon="-81.8317863974362"  alt="80"/>
+    <waypoint name="B7" lat="32.01282983564459" lon="-81.8345153801915"  alt="80"/>
+  </waypoints>
+  <blocks>
+    <block name="Wait GPS">
+      <call fun="NavKillThrottle()"/>
+      <while cond="!GpsFixValid()"/>
+    </block>
+    <block name="Geo init">
+      <while cond="LessThan(NavBlockTime(), 10)"/>
+      <call fun="NavSetGroundReferenceHere()"/>
+    </block>
+    <block name="Holding point">
+      <call fun="NavKillThrottle()"/>
+      <attitude pitch="0" roll="0" throttle="0" until="FALSE" vmode="throttle"/>
+    </block>
+    <block name="Standby" strip_button="Standby" strip_icon="home.png">
+      <go wp="STDBY"/>
+    </block>
+    <block name="Start Engine">
+      <call fun="DisarmGroundDetectSwitch()"/>
+      <call fun="NavResurrect()"/>
+      <call fun="NavSetTransitionPercentage(100)"/>
+      <call fun="DisarmGroundDetectSwitch()"/>
+    </block>
+    <block name="ThrottleTakeoff" strip_button="ThrottleTakeoff">
+      <call fun="NavSetTransitionPercentage(100)"/>
+      <call fun="DisarmGroundDetectSwitch()"/>
+      <exception cond="ins_enu_pos.z > POS_BFP_OF_REAL(20.)" deroute="Tto45"/>
+      <attitude pitch="0" roll="0" throttle="0.75" until="ins_enu_pos.z > POS_BFP_OF_REAL(10.)" vmode="throttle"/>
+      <call fun="NavSetWaypointHere(WP_CLIMB)"/>
+      <deroute block="Tto45"/>
+    </block>
+    <block name="Tto45">
+      <call fun="DisarmGroundDetectSwitch()"/>
+      <exception cond="ins_enu_pos.z > POS_BFP_OF_REAL(50.)" deroute="Tto90"/>
+      <call fun="NavSetTransitionPercentage(50)"/>
+      <go wp="Waypt1"/>
+    </block>
+    <block name="Tto90">
+      <call fun="DisarmGroundDetectSwitch()"/>
+      <call fun="NavSetTransitionPercentage(0)"/>
+      <go wp="Waypt2"/>
+    </block>
+    <block name="Waypt3">
+      <call fun="DisarmGroundDetectSwitch()"/>
+      <call fun="NavSetTransitionPercentage(0)"/>
+      <go wp="Waypt3"/>
+    </block>
+    <block name="Waypt4">
+      <call fun="DisarmGroundDetectSwitch()"/>
+      <call fun="NavSetTransitionPercentage(0)"/>
+      <go wp="Waypt4"/>
+    </block>
+    <block name="Waypt5">
+      <call fun="DisarmGroundDetectSwitch()"/>
+      <call fun="NavSetTransitionPercentage(0)"/>
+      <go wp="Waypt5"/>
+    </block>
+    <block name="Waypt6">
+      <call fun="DisarmGroundDetectSwitch()"/>
+      <call fun="NavSetTransitionPercentage(0)"/>
+      <go wp="Waypt6"/>
+    </block>
+    <block name="Transition_1_50procent">
+     <go wp="45trans"/>
+     <call fun="NavSetTransitionPercentage(50)"/>
+    </block>
+    <block name="gbwclear">
+      <go wp="GBwCLr"/>
+    </block>
+    <block name="Transition_1_100procent">
+      <go wp="90trans"/>
+      <call fun="NavSetTransitionPercentage(100)"/>
+    </block>
+    <block name="Touchdown">
+      <stay wp="TD"/>
+      <call fun="ArmGroundDetectSwitch()"/>
+      <exception cond="NavDetectGround()" deroute="Wait"/>
+      <call fun="NavStartDetectGround()"/>
+      <call fun="NavSetWaypointHere(WP_TD)"/>
+      <stay climb="-0.4" vmode="climb" wp="TD"/>      
+    </block>
+    <block name="Wait">
+      <exception cond="datalink_time > 1000" deroute="Go_back_start_engine"/>      
+      <call fun="NavKillThrottle()"/>
+      <attitude pitch="0" roll="0" throttle="0" vmode="throttle" until="FALSE"/>
+    </block>
+    <block name="Go_back_start_engine">
+      <call fun="DisarmGroundDetectSwitch()"/>
+      <call fun="NavResurrect()"/>
+      <call fun="NavSetTransitionPercentage(100)"/>
+      <call fun="DisarmGroundDetectSwitch()"/>
+    </block>
+    <block name="Go_back_ThrottleTakeoff">
+      <call fun="NavSetTransitionPercentage(100)"/>
+      <call fun="DisarmGroundDetectSwitch()"/>
+      <exception cond="ins_enu_pos.z > POS_BFP_OF_REAL(20.)" deroute="Go_back_turnHeading"/>
+      <attitude pitch="0" roll="0" throttle="0.75" until="ins_enu_pos.z > POS_BFP_OF_REAL(10.)" vmode="throttle"/>
+      <call fun="NavSetWaypointHere(WP_CLIMB)"/>
+      <deroute block="Go_back_turnHeading"/>
+    </block>
+    <block name="Go_back_turnHeading">
+	<heading course="225" until="block_time > 20"/>
+    </block>
+    <block name="Go_back_Tto45">
+      <call fun="DisarmGroundDetectSwitch()"/>
+      <exception cond="ins_enu_pos.z > POS_BFP_OF_REAL(50.)" deroute="Go_back_Tto90"/>
+      <call fun="NavSetTransitionPercentage(50)"/>
+      <go wp="TR1"/>
+    </block>
+    <block name="Go_back_Tto90">
+      <call fun="DisarmGroundDetectSwitch()"/>
+      <call fun="NavSetTransitionPercentage(0)"/>
+      <go wp="TR2"/>
+    </block>
+
+    <block name="TR3">
+      <call fun="DisarmGroundDetectSwitch()"/>
+      <call fun="NavSetTransitionPercentage(0)"/>
+      <go wp="TR3"/>
+    </block>
+    <block name="TR4">
+      <call fun="DisarmGroundDetectSwitch()"/>
+      <call fun="NavSetTransitionPercentage(0)"/>
+      <go wp="TR4"/>
+    </block>
+    <block name="TR5">
+      <call fun="DisarmGroundDetectSwitch()"/>
+      <call fun="NavSetTransitionPercentage(0)"/>
+      <go wp="TR5"/>
+    </block>
+    <block name="TR6">
+      <call fun="DisarmGroundDetectSwitch()"/>
+      <call fun="NavSetTransitionPercentage(0)"/>
+      <go wp="TR6"/>
+    </block>
+    <block name="TR7">
+      <call fun="ArmGroundDetectSwitch()"/>
+      <call fun="NavSetTransitionPercentage(0)"/>
+      <go wp="TR7"/>
+    </block>
+  </blocks>
+</flight_plan>

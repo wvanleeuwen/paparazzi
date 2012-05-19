@@ -1,0 +1,107 @@
+<!DOCTYPE flight_plan SYSTEM "../flight_plan.dtd">
+
+<flight_plan alt="90" ground_alt="0" lat0="32.001138" lon0="-81.842444" max_dist_from_home="7000" name="Atmov helopad test" security_height="100">
+  <header>
+#include "autopilot.h"
+#include "subsystems/datalink/datalink.h"
+</header>
+  <waypoints>
+    <waypoint name="HOME" x="0.0" y="0.0"/>
+    <waypoint name="CLIMB" x="0.0" y="0.0"/>
+    <waypoint alt="80.0" name="STDBY" x="2" y="2"/>
+    <waypoint alt="100.0" lat="32.001916" lon="-81.841836" name="Waypt1"/>
+    <waypoint alt="110.0" lat="32.002577" lon="-81.840974" name="Waypt2"/>
+    <waypoint alt="120.0" lat="32.002590" lon="-81.839843" name="Waypt3"/>
+    <waypoint alt="120.0" lat="32.001797" lon="-81.839193" name="Waypt4"/>
+    <waypoint alt="100.0" lat="32.000546" lon="-81.839804" name="Waypt5"/>
+    <waypoint alt="110.0" lat="31.999969" lon="-81.841067" name="Waypt6"/>
+    <waypoint alt="100.0" lat="32.000100" lon="-81.842262" name="Waypt7"/>
+    <waypoint alt="80.0" lat="32.000707" lon="-81.842989" name="45trans"/>
+    <waypoint alt="95.0" lat="32.001830" lon="-81.842555" name="90trans"/>
+    <waypoint lat="32.000458" lon="-81.842742" name="TD"/>
+  </waypoints>
+  <blocks>
+    <block name="Wait GPS">
+      <call fun="NavKillThrottle()"/>
+      <while cond="!GpsFixValid()"/>
+    </block>
+    <block name="Geo init">
+      <while cond="LessThan(NavBlockTime(), 10)"/>
+      <call fun="NavSetGroundReferenceHere()"/>
+    </block>
+    <block name="Holding point">
+      <call fun="NavKillThrottle()"/>
+      <attitude pitch="0" roll="0" throttle="0" until="FALSE" vmode="throttle"/>
+    </block>
+    <block name="Standby" strip_button="Standby" strip_icon="home.png">
+      <go wp="STDBY"/>
+      <call fun="NavSetTransitionPercentage(100)"/>
+    </block>
+    <block name="Start Engine">
+      <call fun="DisarmGroundDetectSwitch()"/>
+      <call fun="NavResurrect()"/>
+      <call fun="NavSetTransitionPercentage(100)"/>
+      <call fun="DisarmGroundDetectSwitch()"/>
+    </block>
+    <block name="ThrottleTakeoff" strip_button="ThrottleTakeoff">
+      <call fun="NavSetTransitionPercentage(100)"/>
+      <call fun="DisarmGroundDetectSwitch()"/>
+      <exception cond="ins_enu_pos.z > POS_BFP_OF_REAL(20.)" deroute="Tto45"/>
+      <attitude pitch="0" roll="0" throttle="0.75" until="ins_enu_pos.z > POS_BFP_OF_REAL(10.)" vmode="throttle"/>
+      <call fun="NavSetWaypointHere(WP_CLIMB)"/>
+      <deroute block="Tto45"/>
+    </block>
+    <block name="Tto45">
+      <exception cond="ins_enu_pos.z > POS_BFP_OF_REAL(50.)" deroute="Tto90"/>
+      <call fun="NavSetTransitionPercentage(50)"/>
+      <go wp="Waypt1"/>
+    </block>
+    <block name="Tto90">
+      <call fun="NavSetTransitionPercentage(0)"/>
+      <go wp="Waypt2"/>
+    </block>
+    <block name="Waypt3">
+      <call fun="DisarmGroundDetectSwitch()"/>
+      <call fun="NavSetTransitionPercentage(0)"/>
+      <go wp="Waypt3"/>
+    </block>
+    <block name="Waypt4">
+      <call fun="DisarmGroundDetectSwitch()"/>
+      <call fun="NavSetTransitionPercentage(0)"/>
+      <go wp="Waypt4"/>
+    </block>
+    <block name="Waypt5">
+      <call fun="DisarmGroundDetectSwitch()"/>
+      <call fun="NavSetTransitionPercentage(0)"/>
+      <go wp="Waypt5"/>
+    </block>
+    <block name="Waypt6">
+      <call fun="DisarmGroundDetectSwitch()"/>
+      <call fun="NavSetTransitionPercentage(0)"/>
+      <go wp="Waypt6"/>
+    </block>
+    <block name="Waypt7">
+      <call fun="DisarmGroundDetectSwitch()"/>
+      <call fun="NavSetTransitionPercentage(0)"/>
+      <go wp="Waypt7"/>
+    </block>
+    <block name="45trans">
+      <go wp="45trans"/>
+      <call fun="NavSetTransitionPercentage(50)"/>
+    </block>
+    <block name="hoverTrans">
+      <go wp="90trans"/>
+      <call fun="NavSetTransitionPercentage(100)"/>
+    </block>
+    <block name="startTouchdown">
+      <stay wp="TD"/>
+      <deroute block="landhere"/>
+    </block>
+    <block name="landhere" strip_button="Land Here" strip_icon="land-right.png">
+      <call fun="ArmGroundDetectSwitch()"/>
+    </block>
+    <block name="flare">
+      <stay climb="-0.4" vmode="climb" wp="TD"/>
+    </block>
+  </blocks>
+</flight_plan>
