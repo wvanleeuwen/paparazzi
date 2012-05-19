@@ -58,7 +58,7 @@ int32_t nav_heading, nav_course;
 float nav_radius;
 
 #ifndef DEFAULT_CIRCLE_RADIUS
-#define DEFAULT_CIRCLE_RADIUS 0.
+#define DEFAULT_CIRCLE_RADIUS 30.
 #endif
 
 uint8_t vertical_mode;
@@ -68,9 +68,9 @@ float flight_altitude;
 
 static inline void nav_set_altitude( void );
 
-#define CLOSE_TO_WAYPOINT (30 << 8)
-#define ARRIVED_AT_WAYPOINT (4 << 8)
-#define CARROT_DIST (120 << 8)
+#define CLOSE_TO_WAYPOINT (120 << 8)
+#define ARRIVED_AT_WAYPOINT (30 << 8)
+#define CARROT_DIST (90 << 8)
 
 void nav_init(void) {
   // init int32 waypoints

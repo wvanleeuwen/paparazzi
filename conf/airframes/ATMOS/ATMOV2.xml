@@ -164,7 +164,7 @@
    <define name="MIN_ERR_ZD"  			value="SPEED_BFP_OF_REAL(-10.)"/>
    <define name="MAX_ERR_ZD"  			value="SPEED_BFP_OF_REAL( 10.)"/>
    <define name="MAX_SUM_ERR" 			value="2000000"/>
-   <define name="HOVER_KP"    			value="88"/>
+   <define name="HOVER_KP"    			value="95"/>
    <define name="HOVER_KD"    			value="80"/>
    <define name="HOVER_KI"    			value="12"/>
    <!-- 1.5m/s for full stick : BOOZ_SPEED_I_OF_F(1.5) / (MAX_PPRZ/2) -->
@@ -173,10 +173,10 @@
    <define name="RC_CLIMB_DEAD_BAND"  		value ="160000"/>
    <define name="NOMINAL_HOVER_THROTTLE"        value ="0.47"/>
 
-   <define name="REF_MIN_ZDD"			value="(-0.1*9.81)"/>
-   <define name="REF_MAX_ZDD"			value="(0.1*9.81)"/>
+   <define name="REF_MIN_ZDD"			value="(-0.2*9.81)"/>
+   <define name="REF_MAX_ZDD"			value="(0.2*9.81)"/>
    <define name="REF_MIN_ZD"			value="-0.75"/>
-   <define name="REF_MAX_ZD"			value="0.4"/>
+   <define name="REF_MAX_ZD"			value="0.8"/>
 
   </section>
 
@@ -340,6 +340,7 @@
     <subsystem name="gps"          type="ublox">
       <configure name="GPS_PORT"                value="UART3"/>
       <configure name="GPS_BAUD"                value="B38400"/>
+      <configure name="GPS_USE_LATLONG"                value="TRUE"/>
     </subsystem>
 
     <!--<define name="FILTER_IC_ACCEL"  value="1"/>-->
