@@ -42,11 +42,13 @@ void led_driver_init(void) {
 void led_driver_periodic(void) {
 #ifdef AHRS_ALIGNER_LED
 #ifdef AUTOPILOT_LOBATT_BLINK
-  if (radio_control.status == RC_REALLY_LOST){
-    RunXTimesEvery(300, 5, 9, {LED_TOGGLE(AHRS_ALIGNER_LED);});
+  if (radio_control.status == RC_LOST || radio_control.status == RC_REALLY_LOST){
+    //RunXTimesEvery(300, 5, 9, {LED_TOGGLE(AHRS_ALIGNER_LED);});
+    RunXTimesEvery(0, 60, 5, 7, {LED_TOGGLE(AHRS_ALIGNER_LED);});
+    RunXTimesEvery(130, 130, 10, 6, {LED_TOGGLE(AHRS_ALIGNER_LED);});
     }
   else if (autopilot_first_boot){
-    RunXTimesEvery(120, 5, 6, {LED_TOGGLE(AHRS_ALIGNER_LED);});
+    RunXTimesEvery(0, 120, 5, 4, {LED_TOGGLE(AHRS_ALIGNER_LED);});
     }
   else if (autopilot_safety_violation){
     RunOnceEvery(5, {LED_TOGGLE(AHRS_ALIGNER_LED);});
@@ -55,7 +57,7 @@ void led_driver_periodic(void) {
     RunOnceEvery(20, {LED_TOGGLE(AHRS_ALIGNER_LED);});
     }
   else if (electrical.vsupply < ((MIN_BAT_LEVEL + 0.5) * 10)){
-    RunXTimesEvery(300, 10, 10, {LED_TOGGLE(AHRS_ALIGNER_LED);});
+    RunXTimesEvery(0, 300, 10, 10, {LED_TOGGLE(AHRS_ALIGNER_LED);});
     }
   else {
     LED_ON(AHRS_ALIGNER_LED);
