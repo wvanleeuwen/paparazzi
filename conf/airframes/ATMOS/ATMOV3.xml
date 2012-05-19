@@ -68,14 +68,14 @@
     <define name="PITCH_COEF"  	value="{   256, -256,    0,    0  }"/>
     <define name="ROLL_COEF"   	value="{     0,    0,  256, -256  }"/>
     <define name="YAW_COEF"     value="{    -0,    0,   -0,    0  }"/>
-    <define name="THRUST_COEF" 	value="{   256,  256,  195,  195  }"/>
+    <define name="THRUST_COEF" 	value="{   256,  256,  185,  185  }"/>
   </section>
 
   <section name="FORCE_ALLOCATION" prefix="FORCE_ALLOCATION_">
-    <define name="MAX_CLIMB"   		value="3.0f"/>
+    <define name="MAX_CLIMB"   		value="3.2f"/>
     <define name="PITCH_OF_VZ" 		value="0.25f"/>
-    <define name="THROTTLE_OF_VZ"   value="0.05f"/>
-    <define name="PITCH_TRIM"       value="0.2f" />
+    <define name="THROTTLE_OF_VZ"   value="0.03"/>
+    <define name="PITCH_TRIM"       value="0.4f" />
     <define name="THROTTLE_OF_XDD"	value="0.0f" />
     <define name="YAWRATE_OF_YDD"   value="1.0f" />
   </section>
@@ -113,8 +113,8 @@
     <define name="SP_MAX_PSI"     	value="RadOfDeg(45.)"/>
     <define name="SP_MAX_R"       	value="RadOfDeg(90.)"/>
     <define name="SP_MAX_P"       	value="RadOfDeg(90.)"/>
-    <define name="DEADBAND_R"     	value="20"/>
-    <define name="DEADBAND_A"     	value="20"/>
+    <define name="DEADBAND_R"     	value="1000"/>
+    <define name="DEADBAND_A"     	value="200"/>
 
     <!-- reference -->
     <define name="REF_OMEGA_R"  	value="RadOfDeg(600)"/>
@@ -164,14 +164,14 @@
    <define name="MIN_ERR_ZD"  			value="SPEED_BFP_OF_REAL(-10.)"/>
    <define name="MAX_ERR_ZD"  			value="SPEED_BFP_OF_REAL( 10.)"/>
    <define name="MAX_SUM_ERR" 			value="2000000"/>
-   <define name="HOVER_KP"    			value="100"/>
-   <define name="HOVER_KD"    			value="100"/>
+   <define name="HOVER_KP"    			value="125"/>
+   <define name="HOVER_KD"    			value="95"/>
    <define name="HOVER_KI"    			value="9"/>
    <!-- 1.5m/s for full stick : BOOZ_SPEED_I_OF_F(1.5) / (MAX_PPRZ/2) -->
    <define name="RC_CLIMB_COEF" 		value ="163"/>
    <!-- BOOZ_SPEED_I_OF_F(1.5) * 20% -->
    <define name="RC_CLIMB_DEAD_BAND"  		value ="160000"/>
-   <define name="NOMINAL_HOVER_THROTTLE" value ="0.43"/>
+   <define name="NOMINAL_HOVER_THROTTLE"        value ="0.47"/>
 
    <define name="REF_MIN_ZDD"			value="(-0.1*9.81)"/>
    <define name="REF_MAX_ZDD"			value="(0.1*9.81)"/>
@@ -193,19 +193,23 @@
     <define name="H_Y" value=" 0.00059"/>
     <define name="H_Z" value=" 0.92025"/>-->
     <!-- magnetic field for Georgia -->
-    <define name="H_X" value="0.651996618"/>
+  <!--  <define name="H_X" value="0.651996618"/>
     <define name="H_Y" value="0.013482692"/>
-    <define name="H_Z" value="0.758101109"/>
+    <define name="H_Z" value="0.758101109"/>-->
+    <define name="H_X" value="0.46702270888"/>
+    <define name="H_Y" value="-0.05198270497"/>
+    <define name="H_Z" value="0.88271554722"/>
 
   </section>
 
  <section name="GUIDANCE_H" prefix="GUIDANCE_H_">
-   <define name="PGAIN" 		value="1"/>
-   <define name="DGAIN" 		value="3"/>
+   <define name="PGAIN" 		value="22"/>
+   <define name="DGAIN" 		value="16"/>
    <define name="IGAIN" 		value="0"/>
    <define name="AGAIN" 		value="0"/>
-   <define name="REF_MAX_BANK"      	value="RadOfDeg(10)"/>
-   <define name="REF_MAX_SPEED"      	value="25"/>
+   <define name="REF_MAX_BANK"      	value="30"/>
+   <define name="MAX_BANK"      	value="30"/>
+   <define name="REF_MAX_SPEED"      	value="18"/>
  </section>
 
  <modules main_freq="512">
@@ -237,7 +241,7 @@
    <load name="ATMOS/multiGain.xml">
 	<!-- feedback -->
 	<define name="STABILIZATION_ATTITUDE_A_PHI_PGAIN"  		value="1304"/>
-	<define name="STABILIZATION_ATTITUDE_A_PHI_DGAIN"  		value="1062"/>
+	<define name="STABILIZATION_ATTITUDE_A_PHI_DGAIN"  		value="1150"/>
 	<define name="STABILIZATION_ATTITUDE_A_PHI_DDGAIN"  		value="100"/>
 	<define name="STABILIZATION_ATTITUDE_A_PHI_IGAIN"  		value="0"/>
 	<define name="STABILIZATION_ATTITUDE_A_PHI_ACTGAIN"  		value="0"/>
@@ -248,7 +252,7 @@
 	<define name="STABILIZATION_ATTITUDE_A_THETA_IGAIN" 	 	value="0"/>
 	<define name="STABILIZATION_ATTITUDE_A_THETA_ACTGAIN"  		value="0"/>
 
-	<define name="STABILIZATION_ATTITUDE_A_PSI_PGAIN"  		value="2520"/>
+	<define name="STABILIZATION_ATTITUDE_A_PSI_PGAIN"  		value="2820"/>
 	<define name="STABILIZATION_ATTITUDE_A_PSI_DGAIN"  		value="1300"/>
 	<define name="STABILIZATION_ATTITUDE_A_PSI_IGAIN"  		value="6"/>
 	<define name="STABILIZATION_ATTITUDE_A_PSI_DDGAIN"  		value="100"/>
@@ -267,10 +271,10 @@
 	<define name="STABILIZATION_ATTITUDE_B_THETA_IGAIN" 	 	value="0"/>
 	<define name="STABILIZATION_ATTITUDE_B_THETA_ACTGAIN"  		value="256"/>
 
-	<define name="STABILIZATION_ATTITUDE_B_PSI_PGAIN"  		value="1000"/>
-	<define name="STABILIZATION_ATTITUDE_B_PSI_DGAIN"  		value="680"/>
-	<define name="STABILIZATION_ATTITUDE_B_PSI_IGAIN"  		value="2"/>
-	<define name="STABILIZATION_ATTITUDE_B_PSI_DDGAIN"  		value="100"/>
+	<define name="STABILIZATION_ATTITUDE_B_PSI_PGAIN"  		value="1500"/>
+	<define name="STABILIZATION_ATTITUDE_B_PSI_DGAIN"  		value="720"/>
+	<define name="STABILIZATION_ATTITUDE_B_PSI_IGAIN"  		value="1"/>
+	<define name="STABILIZATION_ATTITUDE_B_PSI_DDGAIN"  		value="200"/>
 	<define name="STABILIZATION_ATTITUDE_B_PSI_ACTGAIN"  		value="1024"/>
 
 
@@ -280,17 +284,17 @@
 	<define name="STABILIZATION_ATTITUDE_C_PHI_DDGAIN"  		value="100"/>
 	<define name="STABILIZATION_ATTITUDE_C_PHI_ACTGAIN"  		value="0"/>
 
-	<define name="STABILIZATION_ATTITUDE_C_THETA_PGAIN"  		value="1000"/>
-	<define name="STABILIZATION_ATTITUDE_C_THETA_DGAIN"  		value="500"/>
+	<define name="STABILIZATION_ATTITUDE_C_THETA_PGAIN"  		value="280"/>
+	<define name="STABILIZATION_ATTITUDE_C_THETA_DGAIN"  		value="120"/>
 	<define name="STABILIZATION_ATTITUDE_C_THETA_IGAIN"  		value="0"/>
 	<define name="STABILIZATION_ATTITUDE_C_THETA_DDGAIN"  		value="100"/>
 	<define name="STABILIZATION_ATTITUDE_C_THETA_ACTGAIN"  		value="750"/>
 
-	<define name="STABILIZATION_ATTITUDE_C_PSI_PGAIN"  		value="600"/>
+	<define name="STABILIZATION_ATTITUDE_C_PSI_PGAIN"  		value="400"/>
 	<define name="STABILIZATION_ATTITUDE_C_PSI_DGAIN"  		value="200"/>
 	<define name="STABILIZATION_ATTITUDE_C_PSI_IGAIN"  		value="0"/>
 	<define name="STABILIZATION_ATTITUDE_C_PSI_DDGAIN"  		value="80"/>
-    <define name="STABILIZATION_ATTITUDE_C_PSI_ACTGAIN"  		value="1024"/>
+        <define name="STABILIZATION_ATTITUDE_C_PSI_ACTGAIN"  		value="1024"/>
 
    </load>
 
@@ -320,11 +324,16 @@
       <subsystem name="actuators"     type="pwm_supervision">
        <configure name="USE_SERVOS_7AND8"    value="TRUE"/>
       </subsystem>
+      <subsystem name="telemetry"     type="xbee_api">
+        <configure name="MODEM_BAUD"    value="B57600"/>
+        <configure name="MODEM_PORT"    value="UART2"/>
+      </subsystem>
+<!--
       <subsystem name="telemetry"     type="transparent">
         <configure name="MODEM_BAUD"    value="B9600"/>
         <configure name="MODEM_PORT"    value="UART2"/>
       </subsystem>
-      <define name="SERVO_HZ" value="400"/>
+-->      <define name="SERVO_HZ" value="400"/>
       <define name="SERVO_HZ_SECONDARY" value="40"/>
       <define name="RADIO_KILL_SWITCH" value="RADIO_FLAPS"/>
     </target>

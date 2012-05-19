@@ -171,7 +171,7 @@ bool_t nav_approaching_from(uint8_t wp_idx, uint8_t from_idx);
 #define NavStartDetectGround() ({ autopilot_detect_ground_once = TRUE; FALSE; })
 #define NavDetectGround() nav_detect_ground()
 
-#define NavSetTransitionPercentage(x) ({ transition_percentage_nav = x; })
+#define NavSetTransitionPercentage(x) ({ transition_percentage_nav = x; FALSE; })
 
 
 #define nav_IncreaseShift(x) {}

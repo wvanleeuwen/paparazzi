@@ -317,6 +317,11 @@ static inline void guidance_h_traj_run(bool_t in_flight) {
     INT_VECT2_ZERO(guidance_h_pos_err_sum);
   }
 
+dbg1 = guidance_h_pos_err.x; //destination;
+dbg4 = guidance_h_pos_err.y;
+
+
+
   /* run PID */
   guidance_h_command_earth.x =
     guidance_h_pgain * (guidance_h_pos_err.x >> (INT32_POS_FRAC - GH_GAIN_SCALE)) +

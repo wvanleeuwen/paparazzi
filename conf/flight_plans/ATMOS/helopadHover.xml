@@ -1,21 +1,16 @@
 <!DOCTYPE flight_plan SYSTEM "../flight_plan.dtd">
 
-<flight_plan alt="90" ground_alt="0" lat0="31.988423" lon0="-81.848358" max_dist_from_home="7000" name="Atmov fly offf" security_height="100">
+<flight_plan alt="90" ground_alt="0" lat0="32.001138" lon0="-81.842444" max_dist_from_home="7000" name="Atmov helopad test" security_height="100">
   <header>
 #include "autopilot.h"
 #include "subsystems/datalink/datalink.h"
 </header>
   <waypoints>
-    <waypoint name="HOME" lat="31.988423" lon="-81.848358"/>
-    <waypoint name="CLIMB" lat="31.988423" lon="-81.848358"/>
-    <waypoint alt="80.0" name="STDBY" lat="31.988485" lon="-81.848421"/>
-    <waypoint alt="80.0" lat="32.007343" lon="-81.839498" name="NWP1"/>
-    <waypoint alt="80.0" lat="32.009770" lon="-81.836419" name="NWP2"/>
-    <waypoint alt="30.0" lat="32.010942" lon="-81.833544" name="NWPto45"/>
-    <waypoint alt="10.0" lat="32.011419" lon="-81.832110" name="NWPto45bld"/>
-    <waypoint alt="-2" lat="32.011772" lon="-81.831060" name="NWPto90"/>
-    <waypoint lat="32.011841" lon="-81.830671" name="TD"/>
-    <waypoint alt="-2" lat="32.011818" lon="-81.830815" name="target"/>
+    <waypoint name="HOME" x="-1.2" y="-6.0"/>
+    <waypoint name="CLIMB" x="2.7" y="5.4"/>
+    <waypoint alt="80.0" name="STDBY" x="12.7" y="0.9"/>
+    <!--<waypoint alt="80.0" lat="32.001630" lon="-81.841392" name="Waypt1"/>-->
+    <waypoint lat="32.000499" lon="-81.842406" name="TD"/>
   </waypoints>
   <blocks>
     <block name="Wait GPS">
@@ -40,35 +35,21 @@
       <stay climb="0.5" vmode="climb" wp="CLIMB"/>
     </block>
     <block name="ThrottleTakeoff" strip_button="ThrottleTakeoff">
-      <exception cond="ins_enu_pos.z > POS_BFP_OF_REAL(15.)" deroute="goN1"/>
+      <call fun="DisarmGroundDetectSwitch()"/>
+      <exception cond="ins_enu_pos.z > POS_BFP_OF_REAL(15.)" deroute="ATMOVinit"/>
       <attitude pitch="0" roll="0" throttle="0.8" until="ins_enu_pos.z > POS_BFP_OF_REAL(6.)" vmode="throttle"/>
       <call fun="NavSetWaypointHere(WP_CLIMB)"/>
       <stay climb="0.5" vmode="climb" wp="CLIMB"/>
     </block>
-    <block name="Standby" strip_button="Standby" strip_icon="home.png">
-      <go wp="STDBY"/>
-    </block>
-    <block name="goN1">
+    <block name="ATMOVinit">
       <call fun="DisarmGroundDetectSwitch()"/>
-      <call fun="NavSetTransitionPercentage(0)"/>
-      <go wp="NWP1"/>
     </block>
-    <block name="goN2">
-      <go wp="NWP2"/>
-    </block>
-    <block name="goT45">
-      <go wp="NWPto45"/>
-      <call fun="NavSetTransitionPercentage(50)"/>
-    </block>
-    <block name="goT45bld">
-      <go wp="NWPto45bld"/>
-    </block>
-    <block name="goThover">
-      <go wp="NWPto90"/>
+    <block name="Standby" strip_button="Standby" strip_icon="home.png">
       <call fun="NavSetTransitionPercentage(100)"/>
+      <stay wp="STDBY" until="FALSE"/>
     </block>
-    <block name="goNtarget">
-      <stay wp="target"/>
+    <block name="startTouchdown">
+      <stay wp="TD"/>
       <deroute block="landhere"/>
     </block>
     <block name="landhere" strip_button="Land Here" strip_icon="land-right.png">
