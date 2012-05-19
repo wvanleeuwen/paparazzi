@@ -6,6 +6,8 @@ spd-say "Check four Propellors attached"
 read
 spd-say "Check RC Receiver Present"
 read
+spd-say "Check GCS operator Present"
+read
 spd-say "Check XBee connected to longrange antenna"
 read
 spd-say "Check GPS is Present"
