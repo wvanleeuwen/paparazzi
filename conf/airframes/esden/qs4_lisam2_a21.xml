@@ -71,8 +71,8 @@
     <let var="hover_right" value="3*$aileron_feedback_right"/>
 
     <!-- mode hover_forward -->
-    <let var="hover_forward_left"  value="3*$aileron_feedback_left  + 2*$elevator_feedback_left"/>
-    <let var="hover_forward_right" value="3*$aileron_feedback_right + 2*$elevator_feedback_right"/>
+    <let var="hover_forward_left"  value="@RC_THRUST > 1800 ? (3*$aileron_feedback_left  + 2*$elevator_feedback_left) : (@RC_PITCH > 1600 ? (3*$aileron_feedback_left  + 2*$elevator_feedback_left) : (@RC_PITCH < -1800 ? (3*$aileron_feedback_left  + 2*$elevator_feedback_left) : 0))"/>
+    <let var="hover_forward_right" value="@RC_THRUST > 1800 ? (3*$aileron_feedback_right  + 2*$elevator_feedback_right) : (@RC_PITCH > 1600 ? (3*$aileron_feedback_right  + 2*$elevator_feedback_right) : (@RC_PITCH < -1800 ? (3*$aileron_feedback_right  + 2*$elevator_feedback_right) : 0))"/>
 
     <!-- mode forward -->
     <let var="forward_left"  value="3*$aileron_feedback_left  + 2*$elevator_feedback_left"/>
