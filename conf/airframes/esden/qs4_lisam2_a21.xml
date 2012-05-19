@@ -235,6 +235,7 @@
 
  <modules main_freq="512">
    <load name="battery_buzzer.xml"/>
+   <load name="led_driver.xml"/>
  </modules>
 
   <firmware name="rotorcraft">
