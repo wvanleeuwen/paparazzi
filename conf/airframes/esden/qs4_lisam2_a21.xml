@@ -32,9 +32,10 @@
     <define name="AUTOPILOT_KILL_WITHOUT_AHRS"  value="TRUE"/>
     <define name="AUTOPILOT_THROTTLE_INSTANT_START_WITH_SAFETIES"  value="TRUE"/>
     <define name="AUTOPILOT_LOBATT_BLINK"  value="TRUE"/>
-    <!--This is to enable a wing waggle at specified low battery voltage. The interval is in cycle counts, not seconds-->
+    <!--This is to enable a wing waggle at specified low battery voltage.-->
     <define name="LOBATT_WING_WAGGLE" value="TRUE"/>
     <define name="TOYTRONICS" value="TRUE"/>
+    <define name="KILL_AS_FAILSAFE" value="TRUE"/>
   </section>
 
   <rc_commands>
