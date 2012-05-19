@@ -114,8 +114,8 @@ typedef uint8_t unit_t;
     }							\
   }
 
-#define RunXTimesEvery(_prescaler, _interval, _xtimes, _code) {		\
-    static uint16_t prescaler = 0;			\
+#define RunXTimesEvery(_jumpstart, _prescaler, _interval, _xtimes, _code) {		\
+    static uint16_t prescaler = _jumpstart;			\
     static uint16_t xtimes = 0;		         	\
     prescaler++;					\
     if (prescaler >= _prescaler + _interval*xtimes && xtimes < _xtimes) {			\
