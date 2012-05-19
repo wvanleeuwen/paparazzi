@@ -17,7 +17,7 @@
   #include "subsystems/electrical.h" //for v_sense info
   double wag_dt=0;
   int32_t wag_sep=1000;
-  int32_t wag_set_sep=400;
+  int32_t wag_set_sep=340;
 #endif
 ///////////////////// 
 
@@ -427,7 +427,7 @@ toytronics_set_sp_hover_forward_from_rc()
   //****************rc sticks sensitivity adjustment****************
 
   //****************low battery wing waggle****************
-  wing_waggler(&rcr, 0.3);
+  wing_waggler(&rcr, 0.5);
   //****************low battery wing waggle****************
 
   //****************reset gains based on pitch angle****************
@@ -467,9 +467,11 @@ toytronics_set_sp_hover_forward_from_rc()
   double heading_error = setpoint.setpoint_heading - setpoint.estimated_heading;
   wrap_to_pi(&heading_error);
   BOUND(heading_error, -1.0, 1.0);
+
   //********heading error decay*****************
   discrete_exponential_decay( &heading_error, setpoint_aerobatic_decay_time.x, dt );
   //********************************************
+
   setpoint.setpoint_heading = setpoint.estimated_heading + heading_error;
   wrap_to_pi(&setpoint.setpoint_heading);
 
@@ -549,7 +551,7 @@ toytronics_set_sp_absolute_forward_from_rc()
   //****************rc sticks sensitivity adjustment****************
 
   //****************low battery wing waggle****************
-  wing_waggler(&rcr, 0.5);
+  wing_waggler(&rcr, 0.75);
   //****************low battery wing waggle****************
 
   //****************scale gains based on the throttle setting***********************
@@ -626,7 +628,7 @@ toytronics_set_sp_incremental_from_rc()
   //****************rc sticks sensitivity adjustment****************
 
   //****************low battery wing waggle****************
-  wing_waggler(&rcr, 1.0);
+  wing_waggler(&rcr, 2.0);
   //****************low battery wing waggle****************
 
   //****************scale gains based on the throttle setting***********************
