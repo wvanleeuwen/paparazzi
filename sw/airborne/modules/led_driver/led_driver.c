@@ -38,7 +38,7 @@ void led_driver_init(void) {
   led_driver_periodic();
 }
 
-/* sets GPIO pins */
+
 void led_driver_periodic(void) {
 #ifdef AHRS_ALIGNER_LED
 #ifdef AUTOPILOT_LOBATT_BLINK
