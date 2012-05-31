@@ -81,16 +81,13 @@
       <define name="MAG_Y_SIGN" value="-1"/>
       <define name="MAG_Z_SIGN" value="-1"/>
 
-
-
-
 <define name="MAG_X_SENS" value="4.68438721124" integer="16"/>
 <define name="MAG_Y_SENS" value="4.54132316969" integer="16"/>
 <define name="MAG_Z_SENS" value="2.69730737452" integer="16"/>
 
-<define name="MAG_X_NEUTRAL" value="80"/>
-<define name="MAG_Y_NEUTRAL" value="20"/>
-<define name="MAG_Z_NEUTRAL" value="13"/>
+    <define name="MAG_X_NEUTRAL" value="-59.5"/><!-- -59.5 -->
+    <define name="MAG_Y_NEUTRAL" value="21"/>
+    <define name="MAG_Z_NEUTRAL" value="-36.5"/><!-- -36.5 -->
 
 
     <define name="BODY_TO_IMU_PHI"   value="RadOfDeg(  0.0 )"/>
@@ -101,8 +98,8 @@
 
  <section name="AUTOPILOT">
    <define name="MODE_MANUAL" value="AP_MODE_ATTITUDE_DIRECT"/>
-   <define name="MODE_AUTO1"  value="AP_MODE_HOVER_Z_HOLD"/>
-   <define name="MODE_AUTO2"  value="AP_MODE_NAV"/>
+   <define name="MODE_AUTO1"  value="AP_MODE_ATTITUDE_Z_HOLD"/>
+   <define name="MODE_AUTO2"  value="AP_MODE_HOVER_Z_HOLD"/>
  </section>
 
 <!--
@@ -114,9 +111,8 @@ AP_MODE_NAV
 -->
 
  <section name="BAT">
-   <define name="MILLIAMP_PER_PERCENT" value="0.86"/>
+   <define name="MILLIAMP_AT_FULL_THROTTLE" value="6000"/>
    <define name="CATASTROPHIC_BAT_LEVEL" value="9.3" unit="V"/>
-   <define name="BATTERY_SENS"   value="0.48" integer="16"/>
  </section>
 
 
@@ -135,26 +131,26 @@ AP_MODE_NAV
   <section name="STABILIZATION_ATTITUDE" prefix="STABILIZATION_ATTITUDE_">
 
     <!-- setpoints -->
-    <define name="SP_MAX_PHI"     value="RadOfDeg(45.)"/>
-    <define name="SP_MAX_THETA"   value="RadOfDeg(45.)"/>
-    <define name="SP_MAX_R"       value="RadOfDeg(90.)"/>
-    <define name="DEADBAND_R"     value="250"/>
+    <define name="SP_MAX_PHI"   value="45."  unit="deg"/>
+    <define name="SP_MAX_THETA" value="45."  unit="deg"/>
+    <define name="SP_MAX_R"     value="90."  unit="deg"/>
+    <define name="DEADBAND_R"   value="250."/>
 
     <!-- reference -->
-    <define name="REF_OMEGA_P"  value="RadOfDeg(800)"/>
+    <define name="REF_OMEGA_P"  value="800"  unit="deg"/>
     <define name="REF_ZETA_P"   value="0.85"/>
-    <define name="REF_MAX_P"    value="RadOfDeg(300.)"/>
-    <define name="REF_MAX_PDOT" value="RadOfDeg(7000.)"/>
+    <define name="REF_MAX_P"    value="300."  unit="deg"/>
+    <define name="REF_MAX_PDOT" value="7000."  unit="deg"/>
 
-    <define name="REF_OMEGA_Q"  value="RadOfDeg(800)"/>
+    <define name="REF_OMEGA_Q"  value="800"  unit="deg"/>
     <define name="REF_ZETA_Q"   value="0.85"/>
-    <define name="REF_MAX_Q"    value="RadOfDeg(300.)"/>
-    <define name="REF_MAX_QDOT" value="RadOfDeg(7000.)"/>
+    <define name="REF_MAX_Q"    value="300."  unit="deg"/>
+    <define name="REF_MAX_QDOT" value="7000."  unit="deg"/>
 
-    <define name="REF_OMEGA_R"  value="RadOfDeg(500)"/>
+    <define name="REF_OMEGA_R"  value="500"  unit="deg"/>
     <define name="REF_ZETA_R"   value="0.85"/>
-    <define name="REF_MAX_R"    value="RadOfDeg(180.)"/>
-    <define name="REF_MAX_RDOT" value="RadOfDeg(1800.)"/>
+    <define name="REF_MAX_R"    value="180."  unit="deg"/>
+    <define name="REF_MAX_RDOT" value="1800."  unit="deg"/>
 
    <!--  gaui props
     <define name="PHI_PGAIN"  value="-900"/>
@@ -175,22 +171,22 @@ AP_MODE_NAV
   -->
 
     <!-- feedback -->
-    <define name="PHI_PGAIN"  value="-1400"/>
-    <define name="PHI_DGAIN"  value="-190"/>
-    <define name="PHI_IGAIN"  value="-200"/>
+    <define name="PHI_PGAIN" value="1000"/>
+    <define name="PHI_DGAIN" value="230"/>
+    <define name="PHI_IGAIN" value="200"/>
 
-    <define name="THETA_PGAIN"  value="-1400"/>
-    <define name="THETA_DGAIN"  value="-190"/>
-    <define name="THETA_IGAIN"  value="-200"/>
+    <define name="THETA_PGAIN" value="1000"/>
+    <define name="THETA_DGAIN" value="230"/>
+    <define name="THETA_IGAIN" value="200"/>
 
-    <define name="PSI_PGAIN"  value="-1000"/>
-    <define name="PSI_DGAIN"  value="-150"/>
-    <define name="PSI_IGAIN"  value="-5"/>
+    <define name="PSI_PGAIN" value="2000"/>
+    <define name="PSI_DGAIN" value="400"/>
+    <define name="PSI_IGAIN" value="10"/>
 
     <!-- feedforward -->
-    <define name="PHI_DDGAIN"   value=" 300"/>
-    <define name="THETA_DDGAIN" value=" 300"/>
-    <define name="PSI_DDGAIN"   value=" 300"/>
+    <define name="PHI_DDGAIN"   value="300"/>
+    <define name="THETA_DDGAIN" value="300"/>
+    <define name="PSI_DDGAIN"   value="300"/>
 
    </section>
     <!--Rotterdam
@@ -201,16 +197,16 @@ AP_MODE_NAV
     <define name="H_Z" value=" 0.9202531"/>
   </section>
        -->
-    <!--Antwerpen
+    <!--Antwerpen-->
   <section name="AHRS" prefix="AHRS_">
     <define name="PROPAGATE_FREQUENCY" value="512"/>
     <define name="H_X" value=" 0.4006406"/>
     <define name="H_Y" value=" 0.0008547"/>
     <define name="H_Z" value=" 0.9162349"/>
-  </section>-->
+  </section>
 
   <section name="INS" prefix="INS_">
-    <define name="BARO_SENS" value="10." integer="16"/>
+    <define name="BARO_SENS" value="20." integer="16"/> <!--<define name="BARO_LOW_GAIN" /> ACTIVE The Netherlands: caution, this affects calibration -->
     <define name="UNTILT_ACCEL" value="1"/>
   </section>
 
@@ -226,9 +222,9 @@ AP_MODE_NAV
    <define name="HOVER_KD"    value="-200"/>
    <define name="HOVER_KI"    value="0"/>
 -->
-   <define name="HOVER_KP"     value="-150"/>
-   <define name="HOVER_KD"     value="-80"/>
-   <define name="HOVER_KI"     value="0"/>
+   <define name="HOVER_KP" value="60"/>
+   <define name="HOVER_KD" value="102"/>
+   <define name="HOVER_KI" value="10"/>
 
    <!-- 1.5m/s for full stick : BOOZ_SPEED_I_OF_F(1.5) / (MAX_PPRZ/2) -->
    <define name="RC_CLIMB_COEF" value ="163"/>
@@ -239,10 +235,10 @@ AP_MODE_NAV
 
 
  <section name="GUIDANCE_H" prefix="GUIDANCE_H_">
-   <define name="PGAIN" value="-50"/>
-   <define name="DGAIN" value="-100"/>
-   <define name="IGAIN" value="-15"/>
-   <define name="NGAIN" value="-0"/>
+   <define name="PGAIN" value="18"/>
+   <define name="DGAIN" value="60"/>
+   <define name="IGAIN" value="4"/>
+   <define name="AGAIN" value="0"/>
  </section>
 
  <section name="MISC">
@@ -265,32 +261,37 @@ AP_MODE_NAV
 -->
 
   <firmware name="rotorcraft">
-     <define name="BARO_LOW_GAIN" /> <!-- The Netherlands: caution, this affects calibration -->
 <!--     <define name="USE_PERSISTENT_SETTINGS"/> -->
 <!--     <define name="USE_INS_NAV_INIT"/>
      <define name= "NO_RC_THRUST_LIMIT"/>-->
-     <define name="USE_ADAPT_HOVER"/>
+     <define name="BARO_LOW_GAIN" /> <!-- The Netherlands: caution, this affects calibration -->
      <define name="FAILSAFE_GROUND_DETECT"/>
      <define name="USE_GPS_ACC4R"/>
      <target name="ap" board="lisa_l_1.1">
       <subsystem name="radio_control" type="ppm"/>
-      <subsystem name="actuators"     type="asctec_v2"/>
+      <subsystem name="actuators" type="asctec_v2"/>
+        <define name="AUTOPILOT_ARMING_KILL_SWITCH"/>
+       <define name="RADIO_KILL_SWITCH" value="RADIO_FLAPS"/>
+        <define name="ACTUATORS_START_DELAY" value="3"/>
+        <define name="I2C1_BITRATE" value= "100000"/>
     </target>
     <target name="sim" board="pc">
-      <subsystem name="fdm"           type="nps"/>
-      <subsystem name="actuators"     type="mkk"/>
+      <subsystem name="fdm" type="nps"/>
+      <subsystem name="actuators" type="mkk"/>
     </target>
-    <subsystem name="telemetry"     type="xbee_api"/>
-    <subsystem name="imu"           type="b2_v1.1"/>
-    <subsystem name="gps"           type="ublox">
-      <configure name="GPS_PORT"    value="UART3"/>
+    <subsystem name="telemetry" type="xbee_api"/>
+    <subsystem name="imu" type="b2_v1.1"/>
+    <subsystem name="gps" type="ublox">
+      <configure name="GPS_PORT" value="UART3"/>
     </subsystem>
-    <subsystem name="ahrs" type="int_cmpl_euler"/>
-    <subsystem name="stabilization"   type="euler"/>
+    <!--<subsystem name="ahrs" type="int_cmpl_euler"/>
+    <subsystem name="stabilization" type="euler  int_quat"/>-->
+    <subsystem name="ahrs"          type="int_cmpl_quat"/>
+    <subsystem name="stabilization" type="int_quat"/>
     <!--<subsystem name="ahrs"          type="ic"/>
     <subsystem name="ins"           type="hff"/>-->
-    <define name="MAG_UPDATE_YAW_ONLY" value="1"/>
   </firmware>
+
 
   <firmware name="lisa_l_test_progs">
     <target name="test_led"                 board="lisa_l_1.0"/>
