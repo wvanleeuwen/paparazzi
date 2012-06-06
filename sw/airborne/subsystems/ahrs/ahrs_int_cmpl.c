@@ -72,6 +72,7 @@ static inline void ahrs_update_mag_2d(void);
 
 
 struct AhrsIntCmpl ahrs_impl;
+struct Int32Vect3 imu_accel_local;
 
 static inline void compute_imu_quat_and_rmat_from_euler(void);
 static inline void compute_imu_euler_and_rmat_from_quat(void);
@@ -96,6 +97,7 @@ void ahrs_init(void) {
   INT_RATES_ZERO(ahrs_impl.gyro_bias);
   INT_RATES_ZERO(ahrs_impl.rate_correction);
   INT_RATES_ZERO(ahrs_impl.high_rez_bias);
+  INT32_VECT3_ZERO(imu_accel_local);
 
 }
 
@@ -177,6 +179,22 @@ void ahrs_update_accel(void) {
   INT32_VECT3_CROSS_PRODUCT(residual, corrected_gravity, c2);
 #else
   INT32_VECT3_CROSS_PRODUCT(residual, imu.accel, c2);
+//***************************BEGIN HACK HERE********************************************************************
+  struct Int32Vect3 imu_accel_advance;
+  INT32_VECT3_SCALE_2(imu_accel_advance, imu.accel, 1, 10);
+  INT32_VECT3_SCALE_2(imu_accel_local, imu_accel_local, 9, 10);
+  INT32_VECT3_ADD(imu_accel_local,imu_accel_advance);
+  int32_t norm;
+  struct Int32Vect3 residual_copy;
+  INT32_VECT3_COPY(residual_copy, residual);
+  INT32_VECT3_NORM(norm, imu_accel_local);
+  if (norm > ACCEL_BFP_OF_REAL(12) && norm <= ACCEL_BFP_OF_REAL(20)){
+    INT32_VECT3_SCALE_2(residual, residual_copy, (ACCEL_BFP_OF_REAL(20)-norm),(ACCEL_BFP_OF_REAL(20)-ACCEL_BFP_OF_REAL(12)));
+    }
+  else if (norm > ACCEL_BFP_OF_REAL(20)){
+    INT32_VECT3_ZERO(residual);
+    }
+//***************************END HACK HERE***********************************************************************
 #endif
 
   // residual FRAC : ACCEL_FRAC + TRIG_FRAC = 10 + 14 = 24
