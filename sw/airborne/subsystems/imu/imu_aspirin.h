@@ -181,7 +181,12 @@ static inline void gyro_copy_i2c(void)
   int16_t gp = imu_aspirin.i2c_trans_gyro.buf[0]<<8 | imu_aspirin.i2c_trans_gyro.buf[1];
   int16_t gq = imu_aspirin.i2c_trans_gyro.buf[2]<<8 | imu_aspirin.i2c_trans_gyro.buf[3];
   int16_t gr = imu_aspirin.i2c_trans_gyro.buf[4]<<8 | imu_aspirin.i2c_trans_gyro.buf[5];
+  //RATES_ASSIGN(imu.gyro_unscaled, gp, gq, gr);
+#ifdef LISA_M_LONGITUDINAL_X
+  RATES_ASSIGN(imu.gyro_unscaled, gq, -gp, gr);
+#else
   RATES_ASSIGN(imu.gyro_unscaled, gp, gq, gr);
+#endif
 }
 
 static inline void accel_copy_spi(void)
@@ -189,8 +194,14 @@ static inline void accel_copy_spi(void)
   const int16_t ax = imu_aspirin.accel_rx_buf[1] | (imu_aspirin.accel_rx_buf[2]<<8);
   const int16_t ay = imu_aspirin.accel_rx_buf[3] | (imu_aspirin.accel_rx_buf[4]<<8);
   const int16_t az = imu_aspirin.accel_rx_buf[5] | (imu_aspirin.accel_rx_buf[6]<<8);
-  VECT3_ASSIGN(imu.accel_unscaled, ax, ay, az);
+  //VECT3_ASSIGN(imu.accel_unscaled, ax, ay, az);
+#ifdef LISA_M_LONGITUDINAL_X
+  VECT3_ASSIGN(imu.accel_unscaled, ay, -ax, az);
+#else
+   VECT3_ASSIGN(imu.accel_unscaled, ax, ay, az);
+#endif
 }
+
 
 
 static inline void imu_aspirin_event(void (* _gyro_handler)(void), void (* _accel_handler)(void), void (* _mag_handler)(void))
