@@ -1,0 +1,265 @@
+<!DOCTYPE settings SYSTEM "../settings.dtd">
+
+<!-- A conf to use to tune a new A/C -->
+
+<settings>
+  <dl_settings>
+    <dl_settings NAME="flight params">
+      <dl_setting MAX="1000" MIN="0" STEP="10" VAR="flight_altitude" shortname="altitude"/>
+      <dl_setting MAX="10" MIN="-10" STEP="0.5" VAR="wind_east"/>
+      <dl_setting MAX="10" MIN="-10" STEP="0.5" VAR="wind_north"/>
+    </dl_settings>
+
+    <dl_settings NAME="mode">
+      <dl_setting MAX="2" MIN="0" STEP="1" VAR="pprz_mode" module="autopilot"/>
+        <dl_setting MAX="1" MIN="0" STEP="1" VAR="alt_kalman_enabled" shortname="alt_kalman" module="estimator"/>
+      <dl_setting MAX="0" MIN="0" STEP="1" VAR="estimator_flight_time" shortname="flight time"/>
+      <dl_setting MAX="1000" MIN="0" STEP="1" VAR="stage_time"/>
+      <dl_setting MAX="1" MIN="0" STEP="1" VAR="launch"/>
+      <dl_setting MAX="1" MIN="0" STEP="1" VAR="kill_throttle">
+      </dl_setting>
+      <dl_setting MAX="2" MIN="0" STEP="1" VAR="telemetry_mode_Ap_DefaultChannel" shortname="tele_AP" module="downlink"/>
+      <dl_setting MAX="2" MIN="0" STEP="1" VAR="gps_reset" module="gps_ubx" handler="Reset" shortname="GPS reset"/>
+
+      <dl_setting MAX="200" MIN="-200" STEP="10" VAR="nav_radius" 	handler="SetNavRadius">
+        <strip_button icon="circle-right.png" name="Circle right" value="1"/>
+        <strip_button icon="circle-left.png" name="Circle left" value="-1"/>
+	<key_press key="greater" value="1"/>
+	<key_press key="less" value="-1"/>
+      </dl_setting>
+    </dl_settings>
+
+    <dl_settings NAME="control">
+
+      <dl_settings NAME="ir">
+        <dl_setting MAX="0.3" MIN="-0.3" STEP="0.01" VAR="infrared.roll_neutral" shortname="roll_neutral" param="IR_ROLL_NEUTRAL_DEFAULT" unit="rad"/>
+        <dl_setting MAX="0.5" MIN="-0.3" STEP="0.01" VAR="infrared.pitch_neutral" shortname="pitch_neutral" param="IR_PITCH_NEUTRAL_DEFAULT" unit="rad"/>
+
+  <dl_setting MAX="1.5" MIN="0." STEP="0.1" VAR="infrared.lateral_correction" shortname="360_lat_corr" module="subsystems/sensors/infrared" param="IR_LATERAL_CORRECTION"/>
+  <dl_setting MAX="1.5" MIN="0." STEP="0.1" VAR="infrared.longitudinal_correction" shortname="360_log_corr" param="IR_LONGITUDINAL_CORRECTION"/>
+  <dl_setting MAX="1.5" MIN="0.5" STEP="0.1" VAR="infrared.vertical_correction" shortname="360_vert_corr" param="IR_VERTICAL_CORRECTION"/>
+
+        <dl_setting MAX="1.5" MIN="0.5" STEP="0.1" VAR="infrared.correction_left" shortname="corr_left" param="IR_CORRECTION_LEFT"/>
+        <dl_setting MAX="1.5" MIN="0.5" STEP="0.1" VAR="infrared.correction_right" shortname="corr_right" param="IR_CORRECTION_RIGHT"/>
+        <dl_setting MAX="1.5" MIN="0.5" STEP="0.1" VAR="infrared.correction_up" shortname="corr_up" param="IR_CORRECTION_UP"/>
+        <dl_setting MAX="1.5" MIN="0.5" STEP="0.1" VAR="infrared.correction_down" shortname="corr_down" param="IR_CORRECTION_DOWN"/>
+      </dl_settings>
+
+
+
+
+
+
+
+
+
+      <dl_settings NAME="attitude">
+<!--
+00410 inline static void h_ctl_pitch_loop( void )
+h_ctl_pitch_loop_setpoint = h_ctl_pitch_setpoint - h_ctl_elevator_of_roll / h_ctl_pitch_pgain * fabs(estimator_phi);
+err = estimator_theta - h_ctl_pitch_loop_setpoint
+h_ctl_elevator_setpoint = h_ctl_pitch_pgain * (err + h_ctl_pitch_dgain * d_err)
+-->
+        <dl_setting MAX="5000" MIN="0" STEP="100" VAR="h_ctl_elevator_of_roll" shortname="elevator_of_roll" param="H_CTL_ELEVATOR_OF_ROLL"/>
+        <dl_setting MAX="000" MIN="-25000" STEP="250" VAR="h_ctl_pitch_pgain" shortname="pitch_pgain" param="H_CTL_PITCH_PGAIN"/>
+        <dl_setting MAX="0" MIN="-50000" STEP="10" VAR="h_ctl_pitch_dgain" shortname="pitch_dgain"  param="H_CTL_PITCH_DGAIN"/>
+
+
+<!--
+00307 #ifdef H_CTL_ROLL_ATTITUDE_GAIN
+BoundAbs(h_ctl_roll_setpoint, h_ctl_roll_max_setpoint)
+err = estimator_phi - h_ctl_roll_setpoint
+h_ctl_aileron_setpoint = - h_ctl_roll_attitude_gain * err - h_ctl_roll_rate_gain * estimator_p + v_ctl_throttle_setpoint * h_ctl_aileron_of_throttle;
+-->
+        <dl_setting MAX="1" MIN="0" STEP="0.05" VAR="h_ctl_roll_max_setpoint" shortname="max_roll" param="H_CTL_ROLL_MAX_SETPOINT"/>
+        <dl_setting MAX="0" MIN="-15000" STEP="250" VAR="h_ctl_roll_attitude_gain" shortname="roll attitude pgain" param="H_CTL_ROLL_ATTITUDE_GAIN"/>
+        <dl_setting MAX="0" MIN="-15000" STEP="250" VAR="h_ctl_roll_rate_gain" shortname="roll rate gain" param="H_CTL_ROLL_RATE_GAIN"/>
+        <dl_setting MAX="5000" MIN="0" STEP="100" VAR="h_ctl_aileron_of_throttle" shortname="aileron_of_throttle" param="H_CTL_AILERON_OF_THROTTLE"/>
+        <dl_setting MAX="25000" MIN="000" STEP="250" VAR="h_ctl_roll_pgain" shortname="roll_pgain" module="stabilization/stabilization_attitude"/> <!--Not used in airspeed but can not be removed ???-->
+      </dl_settings>
+
+
+
+
+
+
+
+
+
+      <dl_settings name="nav">
+<!--
+err = estimator_hspeed_dir - h_ctl_course_setpoint
+  speed_depend_nav = estimator_hspeed_mod/NOMINAL_AIRSPEED;
+  cmd = h_ctl_course_pgain * speed_depend_nav * (err + d_err * h_ctl_course_dgain);
+roll_setpoint = cmd + h_ctl_course_pre_bank_correction * h_ctl_course_pre_bank;
+ h_ctl_course_pre_bank = nav_in_circle ? circle_bank : 0
+-->
+        <dl_setting MAX="-0.1" MIN="-3" STEP="0.05" VAR="h_ctl_course_pgain" shortname="course pgain" param="H_CTL_COURSE_PGAIN"/>
+        <dl_setting MAX="2" MIN="0" STEP="0.1" VAR="h_ctl_course_dgain" shortname="course dgain"
+param="H_CTL_COURSE_DGAIN"/>
+        <dl_setting MAX="2" MIN="0.1" STEP="0.05" VAR="h_ctl_course_pre_bank_correction" shortname="pre bank cor" param="H_CTL_COURSE_PRE_BANK_CORRECTION"/>
+        <dl_setting MAX="200" MIN="-200" STEP="10" VAR="nav_radius" shortname="circle radius" param="DEFAULT_CIRCLE_RADIUS"/>
+        <dl_setting MAX="2" MIN="1" STEP="1" VAR="nav_mode"/> <!--nac.c mode_1 h_ctl_roll_setpoint mode_2 h_ctl_course_setpoint-->
+        <dl_setting MAX="50" MIN="-50" STEP="5" VAR="nav_shift" module="subsystems/nav" handler="IncreaseShift" shortname="inc. shift"/>
+
+<!--
+        <dl_setting MAX="1" MIN="0.0" STEP="0.05" VAR="nav_glide_pitch_trim" shortname="glide pitch trim" param="NAV_GLIDE_PITCH_TRIM"/>
+        <dl_setting MAX="1" MIN="0.02" STEP="0.01" VAR="h_ctl_roll_slew" shortname="roll slew"/>
+        <dl_setting MAX="359" MIN="0" STEP="5" VAR="nav_course"/>
+        <dl_setting MAX="5" MIN="-5" STEP="0.5" VAR="nav_climb"/>
+        <dl_setting MAX="15" MIN="-15" STEP="1" VAR="fp_pitch"/>
+	<dl_setting MAX="50" MIN="5" STEP="0.5" VAR="nav_ground_speed_setpoint" shortname="ground speed"/>
+	<dl_setting MAX="0." MIN="-0.2" STEP="0.01" VAR="nav_ground_speed_pgain" shortname="ground speed pgain"/>
+        <dl_setting MAX="500" MIN="50" STEP="5" VAR="nav_survey_shift"/>
+-->
+      </dl_settings>
+
+
+
+
+
+
+
+      <dl_settings name="alt">
+<!--
+ v_ctl_altitude_error = estimator_z - v_ctl_altitude_setpoint;
+ v_ctl_climb_setpoint = altitude_pgain_boost * v_ctl_altitude_pgain * v_ctl_altitude_error + v_ctl_altitude_pre_climb;
+-->
+        <dl_setting MAX="0" MIN="-0.2" STEP="0.01" VAR="v_ctl_altitude_pgain" shortname="alt_pgain" param="V_CTL_ALTITUDE_PGAIN"/>
+      </dl_settings>
+
+
+
+
+
+
+
+
+
+
+<!-- not used un airspeed      <dl_settings name="auto_throttle"> -->
+<!--
+err  = estimator_z_dot - v_ctl_climb_setpoint
+controlled_throttle = v_ctl_auto_throttle_cruise_throttle + v_ctl_auto_throttle_climb_throttle_increment * v_ctl_climb_setpoint + v_ctl_auto_throttle_pgain * (err + v_ctl_auto_throttle_igain * v_ctl_auto_throttle_sum_err + v_ctl_auto_throttle_dgain * d_err)
+-->
+<!-- not used un airspeed        <dl_setting MAX="1" MIN="0.0" STEP="0.05" VAR="v_ctl_auto_throttle_cruise_throttle" shortname="cruise throttle" module="fw_v_ctl" handler="SetCruiseThrottle" param="V_CTL_AUTO_THROTTLE_NOMINAL_CRUISE_THROTTLE">
+        <strip_button name="Dash" value="1"/>
+        <strip_button name="Loiter" value="0.1"/>
+        <strip_button name="Cruise" value="0"/>
+      </dl_setting>-->       <!--handler="SetCruiseThrottle" from witch file???????????-->
+<!-- doet volgens mij niks
+        <dl_setting MAX="1" MIN="0" STEP="0.01" VAR="v_ctl_auto_throttle_climb_throttle_increment" shortname="throttle_incr" param="V_CTL_AUTO_THROTTLE_CLIMB_THROTTLE_INCREMENT"/>
+        <dl_setting MAX="0.00" MIN="-0.05" STEP="0.005" VAR="v_ctl_auto_throttle_pgain" shortname="throttle_pgain" param="V_CTL_AUTO_THROTTLE_PGAIN"/>
+        <dl_setting MAX="1" MIN="0.0" STEP="0.05" VAR="v_ctl_auto_throttle_igain" shortname="throttle_igain" param="V_CTL_AUTO_THROTTLE_IGAIN"/>
+        <dl_setting MAX="2" MIN="0.0" STEP="0.1" VAR="v_ctl_auto_throttle_dgain" shortname="throttle_dgain" param="V_CTL_AUTO_THROTTLE_DGAIN"/>
+-->
+<!--
+00401 fw_h_ctl max_change = (v_ctl_auto_throttle_loiter_trim - v_ctl_auto_throttle_dash_trim) / 80.;
+Bound(elevator_trim, last_elevator_trim - max_change, last_elevator_trim + max_change);
+Where throtlle controled???????????????????
+-->
+<!-- not used un airspeed        <dl_setting MAX="0" MIN="-4000" STEP="100" VAR="v_ctl_auto_throttle_dash_trim" shortname="dash trim"
+param="AUTO_THROTTLE_DASH_TRIM"/>
+        <dl_setting MIN="0" MAX="3000" STEP="100" VAR="v_ctl_auto_throttle_loiter_trim" shortname="loiter trim" param="V_CTL_AUTO_THROTTLE_LOITER_TRIM"/>
+-->
+<!--
+v_ctl_pitch_of_vz = (v_ctl_climb_setpoint + d_err * v_ctl_auto_throttle_pitch_of_vz_dgain) * v_ctl_auto_throttle_pitch_of_vz_pgain
+nav_pitch += v_ctl_pitch_of_vz
+-->
+<!-- not used un airspeed        <dl_setting MAX="1" MIN="0" STEP="0.01" VAR="v_ctl_auto_throttle_pitch_of_vz_pgain" shortname="pitch_of_vz" param="V_CTL_AUTO_THROTTLE_PITCH_OF_VZ_PGAIN"/>
+        <dl_setting MAX="10" MIN="-10" STEP="0.1" VAR="v_ctl_auto_throttle_pitch_of_vz_dgain" shortname="pitch_of_vz (d)" param="V_CTL_AUTO_THROTTLE_PITCH_OF_VZ_DGAIN"/>
+      </dl_settings>
+-->
+
+
+
+
+
+
+
+      <dl_settings name="auto_pitch">
+<!--
+err  = estimator_z_dot - v_ctl_climb_setpoint
+v_ctl_pitch_of_vz = v_ctl_auto_pitch_pgain * (err + v_ctl_auto_pitch_igain * v_ctl_auto_pitch_sum_err)
+nav_pitch = v_ctl_pitch_of_vz
+-->
+        <dl_setting MAX="-0.01" MIN="-0.1" STEP="0.01" VAR="v_ctl_auto_pitch_pgain" shortname="pgain" param="V_CTL_AUTO_PITCH_PGAIN"/>
+        <dl_setting MAX="1" MIN="0" STEP="0.01" VAR="v_ctl_auto_pitch_igain" shortname="igain" param="V_CTL_AUTO_PITCH_IGAIN"/>
+      </dl_settings>
+
+
+
+
+
+
+<!--  AKTIVATE WHEN MESUARE_AIRAPEED IS DEACTIVATED-->
+      <dl_settings name="airspeed">
+
+<!--
+err_groundspeed = (v_ctl_auto_groundspeed_setpoint - estimator_hspeed_mod)
+v_ctl_auto_airspeed_controlled = (err_groundspeed + v_ctl_auto_groundspeed_sum_err * v_ctl_auto_groundspeed_igain) * v_ctl_auto_groundspeed_pgain;
+-->
+        <dl_setting MAX="35" MIN="4" STEP="0.1" VAR="v_ctl_auto_groundspeed_setpoint" shortname="grndspd_setpoint" param="V_CTL_AUTO_GROUNDSPEED_SETPOINT"/>
+        <dl_setting MAX="0.50" MIN="0" STEP="0.005" VAR="v_ctl_auto_groundspeed_pgain" shortname="grdspd_pgain" param="V_CTL_AUTO_GROUNDSPEED_PGAIN"/>
+        <dl_setting MAX="0.5" MIN="0" STEP="0.001" VAR="v_ctl_auto_groundspeed_igain" shortname="grndspd_igain" param="V_CTL_AUTO_GROUNDSPEED_IGAIN"/>
+
+<!--
+err_airspeed = (v_ctl_auto_airspeed_controlled - estimator_airspeed)
+controlled_throttle = (err_airspeed + v_ctl_auto_airspeed_sum_err * v_ctl_auto_airspeed_igain) * v_ctl_auto_airspeed_pgain
+-->
+        <dl_setting MAX="45" MIN="4" STEP="0.1" VAR="v_ctl_auto_airspeed_setpoint" shortname="airspd_setpoint" param="V_CTL_AUTO_AIRSPEED_SETPOINT" unit="m/s"/>
+        <dl_setting MAX="0.50" MIN="0" STEP="0.005" VAR="v_ctl_auto_airspeed_pgain" shortname="airspd_pgain" param="V_CTL_AUTO_AIRSPEED_PGAIN"/>
+        <dl_setting MAX="0.5" MIN="0." STEP="0.001" VAR="v_ctl_auto_airspeed_igain" shortname="airspd_igain" param="V_CTL_AUTO_AIRSPEED_IGAIN"/>
+      </dl_settings>
+
+
+
+
+
+
+
+
+
+
+<!--NOT used in Airspeed   tuned with v_CTL_AUTO_AGR_CLIMB_GAIN IN fw_v_ctl.c
+    <dl_settings NAME="agr"> -->
+<!--
+NAME="agr"
+if ( v_ctl_climb_mode == V_CTL_CLIMB_MODE_AUTO_THROTTLE) {  Do not know if in V_CTL_CLIMB_MODE_AUTO_THROTTLE or _AUTO_PITCH 00223 #ifdef V_CTL_AUTO_PITCH_PGAIN diefined in aircraft file.
+
+  float dist = fabs(v_ctl_altitude_error);
+  altitude_pgain_boost = 1.0 + (V_CTL_AUTO_AGR_CLIMB_GAIN-1.0)*(dist-AGR_BLEND_END)/(AGR_BLEND_START-AGR_BLEND_END)
+-->
+
+<!--NOT used in Airspeed          <dl_setting MAX="1.0" MIN="0." STEP="0.05" VAR="agr_climb_throttle" shortname="climb_throttle" module="fw_v_ctl" param="AGR_CLIMB_THROTTLE"/>
+          <dl_setting MAX="0.5" MIN="-0.1" STEP="0.05" VAR="agr_climb_pitch" shortname="climb_pitch" module="fw_v_ctl" param="AGR_CLIMB_PITCH"/>
+          <dl_setting MAX="1.0" MIN="0." STEP="0.1" VAR="agr_climb_nav_ratio" shortname="climb_nav_ratio" module="fw_v_ctl" param="AGR_CLIMB_NAV_RATIO"/>
+          <dl_setting MAX="1.0" MIN="0." STEP="0.05" VAR="agr_descent_throttle" shortname="descent_throttle" module="fw_v_ctl" param="AGR_DESCENT_THROTTLE"/>
+          <dl_setting MAX="0.1" MIN="-0.5" STEP="0.05" VAR="agr_descent_pitch" shortname="descent_ptich" module="fw_v_ctl" param="AGR_DESCENT_PITCH"/>
+          <dl_setting MAX="1.0" MIN="0." STEP="0.1" VAR="agr_descent_nav_ratio" shortname="descent_nav_ratio" module="fw_v_ctl" param="AGR_DESCENT_NAV_RATIO"/>
+       </dl_settings>
+-->
+
+
+
+
+
+
+
+    <dl_settings name="cam">
+      <dl_setting MAX="5" MIN="0" STEP="1" module="cam_control/cam" VAR="cam_mode">
+        <strip_button name="AC_TARGET" value="5"/>
+        <strip_button name="WP_TARGET" value="4"/>
+        <strip_button name="XY_TARGET" value="3"/>
+        <strip_button name="NADIR" value="2"/>
+        <strip_button name="ANGLES" value="1"/>
+        <strip_button name="OFF" value="0"/>
+      </dl_setting>
+      <dl_setting MAX="0.5" MIN="-0.5" STEP="0.1" module="cam_control/cam" VAR="cam_tilt_c" shortname="mode1_tilt"/>
+      <dl_setting MAX="0.5" MIN="-0.5" STEP="0.1" module="cam_control/cam" VAR="cam_pan_c" shortname="mode1_pan"/>
+      <dl_setting min="1" max="27" step="1" module="cam_control/cam" var="cam_target_wp" shortname="mode4_wp_nr"/>
+    </dl_settings>
+
+    </dl_settings>
+  </dl_settings>
+</settings>
