@@ -78,7 +78,7 @@
 #ifndef ADC_CHANNEL_VSUPPLY
 #define ADC_CHANNEL_VSUPPLY 2
 #endif
-#define DefaultVoltageOfAdc(adc) (0.00485*adc)
+#define DefaultVoltageOfAdc(adc) (0.00542*adc)
 
 /* Onboard ADCs */
 /*
