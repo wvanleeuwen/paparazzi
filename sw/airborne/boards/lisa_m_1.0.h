@@ -10,18 +10,24 @@
 #define LED_1_GPIO GPIOB
 #define LED_1_GPIO_CLK RCC_APB2Periph_GPIOB | RCC_APB2Periph_AFIO
 #define LED_1_GPIO_PIN GPIO_Pin_4
+#define LED_1_GPIO_ON BRR
+#define LED_1_GPIO_OFF BSRR
 #define LED_1_AFIO_REMAP GPIO_PinRemapConfig(GPIO_Remap_SWJ_NoJTRST, ENABLE)
 
 #define LED_2_BANK
 #define LED_2_GPIO GPIOC
 #define LED_2_GPIO_CLK RCC_APB2Periph_GPIOC
 #define LED_2_GPIO_PIN GPIO_Pin_5
+#define LED_2_GPIO_ON BRR
+#define LED_2_GPIO_OFF BSRR
 #define LED_2_AFIO_REMAP ((void)0)
 
 #define LED_3_BANK
 #define LED_3_GPIO GPIOC
 #define LED_3_GPIO_CLK RCC_APB2Periph_GPIOC
 #define LED_3_GPIO_PIN GPIO_Pin_2
+#define LED_3_GPIO_ON BRR
+#define LED_3_GPIO_OFF BSRR
 #define LED_3_AFIO_REMAP ((void)0)
 
 // GPIO pins
@@ -29,13 +35,39 @@
 #define LED_4_GPIO GPIOC
 #define LED_4_GPIO_CLK RCC_APB2Periph_GPIOC
 #define LED_4_GPIO_PIN GPIO_Pin_12
+#define LED_4_GPIO_ON BRR
+#define LED_4_GPIO_OFF BSRR
 #define LED_4_AFIO_REMAP ((void)0)
 
 #define LED_5_BANK
 #define LED_5_GPIO GPIOC
 #define LED_5_GPIO_CLK RCC_APB2Periph_GPIOC
 #define LED_5_GPIO_PIN GPIO_Pin_10
+#define LED_5_GPIO_ON BRR
+#define LED_5_GPIO_OFF BSRR
 #define LED_5_AFIO_REMAP ((void)0)
+
+/*
+ * not actual LEDS, used as GPIOs
+ */
+
+/* PB1, DRDY on EXT SPI connector*/
+#define LED_BODY_BANK
+#define LED_BODY_GPIO GPIOB
+#define LED_BODY_GPIO_CLK RCC_APB2Periph_GPIOB
+#define LED_BODY_GPIO_PIN GPIO_Pin_1
+#define LED_BODY_GPIO_ON BSRR
+#define LED_BODY_GPIO_OFF BRR
+#define LED_BODY_AFIO_REMAP ((void)0)
+
+/* PC12, on GPIO connector*/
+#define LED_12_BANK
+#define LED_12_GPIO GPIOC
+#define LED_12_GPIO_CLK RCC_APB2Periph_GPIOC
+#define LED_12_GPIO_PIN GPIO_Pin_12
+#define LED_12_GPIO_ON BRR
+#define LED_12_GPIO_OFF BSRR
+#define LED_12_AFIO_REMAP ((void)0)
 
 /* configuration for aspirin - and more generaly IMUs */
 #define IMU_ACC_DRDY_RCC_GPIO         RCC_APB2Periph_GPIOB
