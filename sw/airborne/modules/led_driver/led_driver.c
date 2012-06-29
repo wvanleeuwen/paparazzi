@@ -26,6 +26,8 @@
 #include "subsystems/radio_control.h"
 #include "autopilot.h"
 
+#include "led_driver.h"
+
 /*
  * simple module to blink LEDs when battery voltage drops below a certain 
  * level, as well as when AHRS is not aligned or when takeoff safety conditions

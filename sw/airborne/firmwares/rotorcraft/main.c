@@ -69,12 +69,19 @@ static inline void on_baro_abs_event( void );
 static inline void on_baro_dif_event( void );
 static inline void on_gps_event( void );
 static inline void on_mag_event( void );
+#ifndef NO_LUFTBOOT
 static inline void luftboot_init( void );
 static inline void luftboot_check( void );
+#endif
 
 #ifndef SITL
 int main( void ) {
+#ifndef NO_LUFTBOOT
+#pragma message "Using luftboot detection."
   luftboot_init();
+#else
+#pragma message "NOT using luftboot detection."
+#endif
   main_init();
 
   while(1) {
@@ -85,6 +92,7 @@ int main( void ) {
   return 0;
 }
 
+#ifndef NO_LUFTBOOT
 #include "stm32/gpio.h"
 #include "cmsis/stm32.h"
 STATIC_INLINE void luftboot_init( void ) {
@@ -112,6 +120,7 @@ STATIC_INLINE void luftboot_check( void ) {
     SCB->AIRCR  = (NVIC_AIRCR_VECTKEY | (SCB->AIRCR & (0x700)) | (1<<NVIC_VECTRESET));
   }
 }
+#endif /* NO_LUFTBOOT */
 #endif /* SITL */
 
 
@@ -208,7 +217,9 @@ STATIC_INLINE void main_periodic( void ) {
 #endif
 
   modules_periodic_task();
+#ifndef NO_LUFTBOOT
   luftboot_check();
+#endif
 
   if (autopilot_in_flight) {
     RunOnceEvery(512, { autopilot_flight_time++; datalink_time++; });

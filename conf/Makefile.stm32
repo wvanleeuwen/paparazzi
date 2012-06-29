@@ -153,6 +153,10 @@ CFLAGS += -Wmissing-declarations
 CFLAGS += -Wswitch-default
 CFLAGS += $(LIBOPENCM3_DEFS)
 
+ifdef NO_LUFTBOOT
+CFLAGS += -DNO_LUFTBOOT=$(NO_LUFTBOOT)
+endif
+
 CFLAGS += $($(TARGET).CFLAGS)
 
 AFLAGS  = -ahls -mapcs-32

@@ -92,19 +92,43 @@
    BATT PC4/ADC14
 */
 #define BOARD_ADC_CHANNEL_1 ADC_Channel_13
-#define BOARD_ADC_CHANNEL_2 ADC_Channel_0
+#define BOARD_ADC_CHANNEL_2 ADC_Channel_10
 // FIXME - removed for now and used for battery monitoring
 //#define BOARD_ADC_CHANNEL_3 ADC_Channel_10
-#define BOARD_ADC_CHANNEL_3 ADC_Channel_14
-#define BOARD_ADC_CHANNEL_4 ADC_Channel_11
+#define BOARD_ADC_CHANNEL_3 ADC_Channel_11
+#define BOARD_ADC_CHANNEL_4 ADC_Channel_14
 
-#define BOARD_HAS_BARO
+/* provide defines that can be used to access the ADC_x in the code or airframe file
+ * these directly map to the index number of the 4 adc channels defined above
+ * 4th (index 3) is used for bat monitoring by default
+ */
+#define ADC_1 0
+#define ADC_2 1
+#define ADC_3 2
 
-#define USE_OPENCM3
+/* allow to define ADC_CHANNEL_VSUPPLY in the airframe file*/
+#ifndef ADC_CHANNEL_VSUPPLY
+#define ADC_CHANNEL_VSUPPLY 3
+#endif
 
-#define HSE_TYPE_EXT_CLK
-#define STM32_RCC_MODE RCC_HSE_ON
-#define STM32_PLL_MULT RCC_PLLMul_6
+/* GPIO mapping for ADC1 pins, overwrites the default in arch/stm32/mcu_periph/adc_arch.c */
+// FIXME, this is not very nice, is also stm lib specific
+#ifdef USE_AD1
+#define ADC1_GPIO_INIT(gpio) {                                          \
+    (gpio).GPIO_Pin  = GPIO_Pin_3 | GPIO_Pin_0 | GPIO_Pin_1 | GPIO_Pin_4; \
+    (gpio).GPIO_Mode = GPIO_Mode_AIN;                                   \
+    GPIO_Init(GPIOC, (&gpio));                                          \
+  }
+#endif // USE_AD1
+
+#define BOARD_HAS_BARO 1
+
+#define USE_OPENCM3 1
+
+// not needed with USE_OPENCM3:
+//#define HSE_TYPE_EXT_CLK
+//#define STM32_RCC_MODE RCC_HSE_ON
+//#define STM32_PLL_MULT RCC_PLLMul_6
 
 #define PWM_5AND6_TIMER TIM5
 #define PWM_5AND6_RCC RCC_APB1Periph_TIM5
