@@ -4,8 +4,6 @@
 # SITL Simulator
 #
 
-SIM_TYPE = JSBSIM
-
 JSBSIM_ROOT = /opt/jsbsim
 JSBSIM_INC = $(JSBSIM_ROOT)/include/JSBSim
 JSBSIM_LIB = $(JSBSIM_ROOT)/lib
@@ -19,10 +17,14 @@ NPSDIR = $(SIMDIR)/nps
 
 nps.ARCHDIR = sim
 
+# include Makefile.nps instead of Makefile.sim
+nps.MAKEFILE = nps
+
 nps.CFLAGS  += -DSITL -DUSE_NPS
 nps.CFLAGS  += `pkg-config glib-2.0 --cflags`
 nps.LDFLAGS += `pkg-config glib-2.0 --libs` -lm -lglibivy -lgsl -lgslcblas
 nps.CFLAGS  += -I$(NPSDIR) -I$(SRC_FIRMWARE) -I$(SRC_BOARD) -I../simulator -I$(PAPARAZZI_HOME)/conf/simulator/nps
+nps.LDFLAGS += `sdl-config --libs`
 
 # use the paparazzi-jsbsim package if it is installed, otherwise look for JSBsim under /opt/jsbsim
 ifndef JSBSIM_PKG
