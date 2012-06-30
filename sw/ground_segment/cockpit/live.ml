@@ -322,7 +322,7 @@ let mark = fun (geomap:G.widget) ac_id track plugin_frame ->
 
 (** Light display of attributes in the flight plan. *)
 let attributes_pretty_printer = fun attribs ->
-  (* Remove the optional attributes *)
+  (* Remove the optional attributes\A0*)
   let valid = fun a ->
     let a = String.lowercase a in
     a <> "no" && a <> "strip_icon" && a <> "strip_button" && a <> "pre_call"
@@ -1191,9 +1191,9 @@ let listen_flight_params = fun geomap auto_center_new_ac alert alt_graph ->
       ac.strip#set_label "AP" (if label="MANUAL" then "MANU" else label);
       let color =
         match ap_mode with
-          "AUTO2" | "NAV" -> ok_color
-        | "AUTO1" | "R_RCC" | "A_RCC" | "ATT_C" | "R_ZH" | "A_ZH" | "HOVER" | "HOV_C" | "H_ZH" -> "#10F0E0"
-        | "MANUAL" | "RATE" | "ATT" -> warning_color
+          "AUTO2" | "NAV" | "T_AERO"-> ok_color
+        | "AUTO1" | "R_RCC" | "A_RCC" | "ATT_C" | "R_ZH" | "A_ZH" | "HOVER" | "HOV_C" | "H_ZH" | "T_FWD"-> "#10F0E0"
+        | "MANUAL" | "RATE" | "ATT" | "T_HFWD"-> warning_color
         | _ -> alert_color in
       ac.strip#set_color "AP" color;
     end;
