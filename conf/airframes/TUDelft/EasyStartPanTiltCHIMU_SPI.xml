@@ -178,7 +178,7 @@
 
     <target name="ap" board="tiny_2.11">
     </target>
-    <target name="sim" board="pc"/>
+<!--    <target name="sim" board="pc"/> -->
 
     <subsystem name="radio_control" type="ppm"/>
     <subsystem name="gps" type="ublox" />

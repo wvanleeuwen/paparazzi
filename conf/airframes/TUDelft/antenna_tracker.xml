@@ -44,6 +44,8 @@
   </section>
 
 
+  <firmware name="fixedwing"/>
+
  <makefile>
 CONFIG = \"tiny_2_1_1.h\"
 

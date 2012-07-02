@@ -1,4 +1,4 @@
-m<conf>
+<conf>
   <aircraft
    name="AntennaTrackers"
    ac_id="10"
@@ -6,7 +6,7 @@ m<conf>
    radio="radios/cockpitSX.xml"
    telemetry="telemetry/dummy.xml"
    flight_plan="flight_plans/basic.xml"
-   settings="settings/fixedwing_basic.xml"
+   settings=" settings/fixedwing_basic.xml"
    gui_color="blue"
   />
   <aircraft
@@ -36,7 +36,17 @@ m<conf>
    radio="radios/R6107SP_7ch.xml"
    telemetry="telemetry/default_fixedwing_imu_9k6.xml"
    flight_plan="flight_plans/versatile.xml"
-   settings="settings/fixedwing_basic.xml settings/control/ctl_basic.xml settings/estimation/ins_neutrals.xml settings/modules/cam.xml "
+   settings=" settings/fixedwing_basic.xml settings/control/ctl_basic.xml settings/estimation/ins_neutrals.xml settings/modules/cam.xml"
+   gui_color="blue"
+  />
+  <aircraft
+   name="EasyStarOrange"
+   ac_id="15"
+   airframe="airframes/TUDelft/tudelft_EasyStarOrange.xml"
+   radio="radios/R6107SP_7ch.xml"
+   telemetry="telemetry/default_fixedwing.xml"
+   flight_plan="flight_plans/basic.xml"
+   settings=" settings/fixedwing_basic.xml settings/control/ctl_basic.xml settings/estimation/infrared.xml"
    gui_color="blue"
   />
   <aircraft
@@ -46,7 +56,7 @@ m<conf>
    radio="radios/TUDelft/mc22.xml"
    telemetry="telemetry/default_fixedwing_imu_9k6.xml"
    flight_plan="flight_plans/TUDelft/opticflow_delft.xml"
-   settings="settings/fixedwing_basic.xml settings/control/ctl_basic.xml settings/estimation/ins_neutrals.xml settings/TUDelft/onboardcam.xml settings/modules/cam.xml settings/TUDelft/opticflow.xml"
+   settings=" settings/fixedwing_basic.xml settings/control/ctl_basic.xml settings/estimation/ins_neutrals.xml settings/TUDelft/onboardcam.xml settings/modules/cam.xml settings/TUDelft/opticflow.xml"
    gui_color="blue"
   />
   <aircraft
@@ -56,17 +66,7 @@ m<conf>
    radio="radios/cockpitSX.xml"
    telemetry="telemetry/default_fixedwing.xml"
    flight_plan="flight_plans/basic.xml"
-   settings=" settings/fixedwing_basic.xml settings/control/ctl_basic.xml settings/estimation/ins_neutrals.xml"
-   gui_color="blue"
-  />
-  <aircraft
-   name="EasyStarOrange"
-   ac_id="15"
-   airframe="airframes/examples/tudelft_EasyStarOrange.xml"
-   radio="radios/cockpitSX.xml"
-   telemetry="telemetry/default_fixedwing.xml"
-   flight_plan="flight_plans/basic.xml"
-   settings=" settings/fixedwing_basic.xml settings/control/ctl_basic.xml settings/estimation/ins_neutrals.xml"
+   settings=" settings/fixedwing_basic.xml settings/control/ctl_basic.xml settings/estimation/infrared.xml"
    gui_color="blue"
   />
   <aircraft
@@ -96,7 +96,7 @@ m<conf>
    radio="radios/R6107SP_7ch.xml"
    telemetry="telemetry/default_fixedwing_imu_9k6.xml"
    flight_plan="flight_plans/versatile.xml"
-   settings="settings/fixedwing_basic.xml settings/control/ctl_basic.xml settings/estimation/ins_neutrals.xml"
+   settings=" settings/fixedwing_basic.xml settings/control/ctl_basic.xml settings/estimation/ins_neutrals.xml"
    gui_color="#fedcc7058e38"
   />
   <aircraft
@@ -112,11 +112,11 @@ m<conf>
   <aircraft
    name="LISA_HELI_BART"
    ac_id="64"
-   airframe="airframes/example_heli_lisam.xml"
+   airframe="airframes/obsolete/example_heli_lisam.xml"
    radio="radios/R6107SP_7ch.xml"
    telemetry="telemetry/default_rotorcraft.xml"
    flight_plan="flight_plans/TUDelft/rotorcraft_basic_delft.xml"
-   settings=" settings/settings_booz2_ahrs_cmpl.xml settings/settings_booz2.xml"
+   settings=" settings/rotorcraft_basic.xml settings/control/rotorcraft_guidance.xml"
    gui_color="blue"
   />
   <aircraft
@@ -146,7 +146,7 @@ m<conf>
    radio="radios/R6107SP_7ch.xml"
    telemetry="telemetry/default_fixedwing_imu.xml"
    flight_plan="flight_plans/versatile.xml"
-   settings="settings/fixedwing_basic.xml settings/control/ctl_basic.xml settings/estimation/infrared_neutrals.xml"
+   settings=" settings/fixedwing_basic.xml settings/control/ctl_basic.xml settings/estimation/infrared.xml"
    gui_color="#f9f92d2d1515"
   />
   <aircraft
@@ -166,7 +166,7 @@ m<conf>
    radio="radios/TUDelft/t12fg_5channel.xml"
    telemetry="telemetry/default_fixedwing_imu_9k6.xml"
    flight_plan="flight_plans/versatile.xml"
-   settings="settings/fixedwing_basic.xml settings/control/ctl_basic.xml settings/estimation/ins_neutrals.xml"
+   settings=" settings/fixedwing_basic.xml settings/control/ctl_basic.xml settings/estimation/ins_neutrals.xml"
    gui_color="#ffffffffffff"
   />
   <aircraft
@@ -226,7 +226,7 @@ m<conf>
    radio="radios/TUDelft/wk2801.xml"
    telemetry="telemetry/default_fixedwing_imu_9k6.xml"
    flight_plan="flight_plans/versatile.xml"
-   settings=" settings/tuning_ins.xml"
+   settings=" settings/fixedwing_basic.xml settings/control/ctl_basic.xml settings/control/tune_agr_climb.xml settings/estimation/ins_neutrals.xml"
    gui_color="#ffffb9b9aeae"
   />
 </conf>

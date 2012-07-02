@@ -9,12 +9,14 @@
 -->
 
 <airframe name="TwinJet Tiny 2.11">
-  <modules>
+  <modules> 
+<!--
     <load name="TUDelft/opticflow.xml"/>
     <load name="cam_point.xml">
       <define name="POINT_CAM_YAW_PITCH" value="1"/>
       <define name="SHOW_CAM_COORDINATES" value="1"/>
     </load>
+-->
   </modules>
 
   <servos>
@@ -336,10 +338,6 @@
     <subsystem name="navigation" type="extra"/><!--this includes OSAMNav, nav, discsurvey and nav_cube as well-->
     <subsystem name="i2c"/>
   </firmware>
-  <!-- Carefull: add the location after!! -->
-  <makefile location="after">
-    # specific stuff that only you are needing... be aware that files might move, so USE the firmware-source variable
 
-  </makefile>
 
 </airframe>

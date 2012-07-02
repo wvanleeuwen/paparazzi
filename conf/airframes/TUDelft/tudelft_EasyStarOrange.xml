@@ -54,7 +54,12 @@ http://paparazzi.enac.fr/w/index.php?title=Theory_of_Operation
 
 <!-- ******************* MODULES ********************************** -->
   <modules main_freq="60">
-    <load name="infrared_adc.xml"/>
+    <load name="infrared_adc.xml">
+      <configure name="ADC_IR1" value="ADC_2" /> <!-- NOTE: IR1 and IR2 swapped since sensor is fastened upside down on body -->
+      <configure name="ADC_IR2" value="ADC_1" /> <!-- NOTE: IR1 and IR2 swapped since sensor is fastened upside down on body -->
+      <configure name="ADC_IR_TOP" value="ADC_0" />
+      <configure name="ADC_IR_NB_SAMPLES" value="16"/>
+    </load>
 <!-- Peek at value of new Release and Wind Code for performance or other issues -->
     <load name="sys_mon.xml"/>
   </modules>
@@ -63,7 +68,7 @@ http://paparazzi.enac.fr/w/index.php?title=Theory_of_Operation
   <servos>
     <servo name="MOTOR"     no="0" min="1000" neutral="1000" max="1900"/>
     <servo name="ELEVATOR"  no="6" min="1100" neutral="1500" max="1900"/>
-    <!-- this airframe has no real aileron, rudder is used as fake aileron instead>
+    <!-- this airframe has no real aileron, rudder is used as fake aileron instead> -->
     <servo name="AILERON"   no="7" min="1900" neutral="1500" max="1100"/>
     <servo name="HATCH"     no="4" min="1100" neutral="1110" max="1900"/>
   </servos>
@@ -108,13 +113,6 @@ http://paparazzi.enac.fr/w/index.php?title=Theory_of_Operation
 <!--    <define name="MAX_PITCH" value="RadOfDeg(45)"/> -->
 <!--    <define name="MAX_ROLL" value="45" unit="deg"/>/> -->
 <!--    <define name="MAX_PITCH" value="45" unit="deg"/> -->
-  </section>
-
-  <section name="adc" prefix="ADC_CHANNEL_">
-    <define name="IR1" value="ADC_2"/> <!-- NOTE: IR1 and IR2 swapped since sensor is fastened upside down on body -->
-    <define name="IR2" value="ADC_1"/> <!-- NOTE: IR1 and IR2 swapped since sensor is fastened upside down on body -->
-    <define name="IR_TOP" value="ADC_0"/>
-    <define name="IR_NB_SAMPLES" value="16"/>
   </section>
 
   <section name="INFRARED" prefix="IR_">
@@ -176,7 +174,6 @@ or tuning_via?_transmitter config.
     <!-- <define name="XBEE_INIT" value="&quot;ATCHC\rATID3332\rATPL4\rATRN1\rATTT80\rATBD3\rATWR\r&quot;"/> -->
     <!-- <define name="NO_XBEE_API_INIT" value="TRUE"/> -->  <!--un-comment after the XBee module is programmed-->
     <define name="ALT_KALMAN_ENABLED" value="TRUE"/>
-    <define name="DEFAULT_CIRCLE_RADIUS" value="70."/>
 
     <!--UNLOCKED_HOME_MODE if set to TRUE means that HOME mode does not get stuck.
 If not set before when you would enter home mode you had to flip a bit via the GCS to get out. -->
@@ -193,7 +190,7 @@ If not set before when you would enter home mode you had to flip a bit via the G
 
     <define name="ALT_KALMAN_ENABLED"    value="TRUE"/>
     <define name="TRIGGER_DELAY"         value="1.0" unit="s"/>
-    <define name="DEFAULT_CIRCLE_RADIUS" value="60.0" unit="m"/>
+    <define name="DEFAULT_CIRCLE_RADIUS" value="70.0" unit="m"/>
     <define name="MIN_CIRCLE_RADIUS"     value="40.0" unit="m"/>
 
     <define name="GLIDE_AIRSPEED" value="10.0" unit="m/s"/>
