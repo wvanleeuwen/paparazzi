@@ -31,6 +31,9 @@
     <set servo="AILEVON_LEFT" value="(@ROLL * 0.6f) + @PITCH"/>
     <set servo="AILEVON_RIGHT" value="-(@ROLL * 0.6f) + @PITCH"/>
     <set servo="THROTTLE" value="@THROTTLE"/>
+    <set servo="EXTRA1" value="@THROTTLE"/>
+    <set servo="EXTRA2" value="@THROTTLE"/>
+    <set servo="EXTRA3" value="@THROTTLE"/>
   </command_laws>
 
   <!-- Local magnetic field -->
@@ -213,7 +216,7 @@
 
     <load name="light.xml">
       <define name="LIGHT_LED_STROBE" value="4"/>
-      <define name="LIGHT_LED_NAV" value="1"/>
+      <define name="LIGHT_LED_NAV" value="5"/>
       <define name="STROBE_LIGHT_MODE_DEFAULT" value="6"/>
       <define name="NAV_LIGHT_MODE_DEFAULT" value="4"/>
     </load>
@@ -236,7 +239,7 @@
 
   <firmware name="fixedwing">
 
-    <target name="ap" board="lisa_m_1.0">
+    <target name="ap" board="TUDelft/fireswarm_1.0">
       <define name="LISA_M_LONGITUDINAL_X"/>
 
       <configure name="PERIODIC_FREQUENCY" value="120"/>
@@ -246,6 +249,7 @@
 
       <configure name="AHRS_ALIGNER_LED" value="3"/>
       <configure name="CPU_LED" value="3"/>
+      <configure name="SYS_TIME_LED" value="2"/>
     </target>
     <target name="sim" board="pc"/>
 
@@ -263,7 +267,7 @@
       <define name="AHRS_GRAVITY_UPDATE_COORDINATED_TURN" />
     </subsystem>
     -->
-    <subsystem name="imu" type="aspirin_v2.0"/>
+    <subsystem name="imu" type="aspirin_v2.1"/>
     <subsystem name="ahrs" type="float_dcm">
 <!--      <define name="USE_MAGNETOMETER" /> -->
     </subsystem>
@@ -273,8 +277,8 @@
     <!-- Communication -->
     <subsystem name="radio_control" type="ppm"/>
     <subsystem name="telemetry" type="xbee_api">
-      <configure name="MODEM_BAUD" value="B9600"/>
-      <configure name="MODEM_PORT" value="UART3"/>
+      <configure name="MODEM_BAUD" value="B57600"/>
+      <configure name="MODEM_PORT" value="UART2"/>
     </subsystem>
 
     <!-- Autopilot -->
