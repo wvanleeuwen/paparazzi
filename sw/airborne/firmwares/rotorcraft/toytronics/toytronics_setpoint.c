@@ -238,14 +238,6 @@ hover_forward_yaw_of_quat(const quat_t * const q)
 }
 
 static double
-hover_forward_roll_of_quat(const quat_t * const q)
-{
-  double r23 = 2*(q->q2*q->q3 + q->q0*q->q1);
-  BOUND(r23, -1, 1);
-  return asin(r23);
-}
-
-static double
 tc_fading(const quat_t * const q_n2b)
 {
   // linear interpolation - no dead band
