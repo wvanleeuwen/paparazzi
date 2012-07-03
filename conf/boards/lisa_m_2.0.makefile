@@ -1,5 +1,5 @@
 #
-# lisa_m_1.0.makefile
+# lisa_m_2.0.makefile
 #
 # http://paparazzi.enac.fr/wiki/User/LisaM
 #
@@ -17,8 +17,8 @@ $(TARGET).OOCD_INTERFACE=flossjtag
 # -----------------------------------------------------------------------
 
 ifndef FLASH_MODE
-#FLASH_MODE = DFU
-FLASH_MODE = JTAG
+FLASH_MODE = DFU
+#FLASH_MODE = JTAG
 #FLASH_MODE = SERIAL
 endif
 
