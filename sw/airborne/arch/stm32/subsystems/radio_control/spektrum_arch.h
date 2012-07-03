@@ -62,6 +62,9 @@
 #ifndef RADIO_MODE
 #define RADIO_MODE       RADIO_GEAR
 #endif
+#ifndef RADIO_EXPO
+#define RADIO_EXPO RADIO_AUX3
+#endif
 
 extern void RadioControlEventImp(void (*_received_frame_handler)(void));
 

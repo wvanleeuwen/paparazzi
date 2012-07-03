@@ -52,7 +52,7 @@ const rc_t * get_rc(void){
   rc.yaw   = ((double)radio_control.values[RADIO_YAW])/MAX_PPRZ;
   rc.throttle   = ((double)radio_control.values[RADIO_THROTTLE])/MAX_PPRZ;
   rc.mode   = (int8_t)(radio_control.values[RADIO_MODE]/MAX_PPRZ);
-  rc.aux3   = (int8_t)(radio_control.values[RADIO_AUX3]/MAX_PPRZ);
+  rc.expo   = (int8_t)(radio_control.values[RADIO_EXPO]/MAX_PPRZ);
   return &rc;
 }
 
