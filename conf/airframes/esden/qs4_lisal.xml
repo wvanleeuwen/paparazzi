@@ -50,14 +50,6 @@
 
   <command_laws>
     <!--************* different mixing strategies - probably don't edit this ****************-->
-    <!-- direct ailerons -->
-    <let var="aileron_direct_left"  value="-@RC_ROLL * (9600 + @RC_THRUST)/9600"/>
-    <let var="aileron_direct_right" value="-@RC_ROLL * (9600 + @RC_THRUST)/9600"/>
-
-    <!-- direct elevators -->
-    <let var="elevator_direct_left"  value="-@RC_PITCH * (9600 + @RC_THRUST)/9600"/>
-    <let var="elevator_direct_right" value="+@RC_PITCH * (9600 + @RC_THRUST)/9600"/>
-
     <!-- aileron feedback -->
     <let var="aileron_feedback_left"  value="-@ROLL * (9600 + @RC_THRUST)/9600"/>
     <let var="aileron_feedback_right" value="-@ROLL * (9600 + @RC_THRUST)/9600"/>
