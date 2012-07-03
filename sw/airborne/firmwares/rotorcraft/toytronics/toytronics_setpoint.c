@@ -420,15 +420,21 @@ toytronics_set_sp_hover_forward_from_rc()
   double rcy = apply_deadband(rc->yaw, SETPOINT_DEADBAND);
   int8_t rcx = rc->expo + 2;
   int8_t rcxy= 1;
-  rcx<-1?-1:-1;rcx>1?1:1;
-  if (rcx==1)
+  if (rcx<=1)
     {
+    rcx=1;
     rcxy=1;
     }
-  else
+  if (rcx==2)
     {
     rcxy=rcx-1;
     }
+  if (rcx>=3) 
+    {
+    rcx=3;
+    rcxy=rcx-1;
+    }
+
   //****************rc sticks sensitivity adjustment****************
   rc_sensitizer(&rcr, rcx);//setpoint_rc_sensitivity.x);
   rc_sensitizer(&rcp, rcx);//setpoint_rc_sensitivity.y);
@@ -552,13 +558,18 @@ toytronics_set_sp_absolute_forward_from_rc()
   double rcy = apply_deadband(rc->yaw, SETPOINT_DEADBAND);
   int8_t rcx = rc->expo + 2;
   int8_t rcxy= 1;
-  rcx<-1?-1:-1;rcx>1?1:1;
-  if (rcx==1)
+  if (rcx<=1)
     {
+    rcx=1;
     rcxy=1;
     }
-  else
+  if (rcx==2)
     {
+    rcxy=rcx-1;
+    }
+  if (rcx>=3) 
+    {
+    rcx=3;
     rcxy=rcx-1;
     }
   double rct = rc->throttle;
@@ -639,13 +650,18 @@ toytronics_set_sp_incremental_from_rc()
   double rcy = apply_deadband(rc->yaw, SETPOINT_DEADBAND);
   int8_t rcx = rc->expo + 2;
   int8_t rcxy= 1;
-  rcx<-1?-1:-1;rcx>1?1:1;
-  if (rcx==1)
+  if (rcx<=1)
     {
+    rcx=1;
     rcxy=1;
     }
-  else
+  if (rcx==2)
     {
+    rcxy=rcx-1;
+    }
+  if (rcx>=3) 
+    {
+    rcx=3;
     rcxy=rcx-1;
     }
   double rct = rc->throttle;
