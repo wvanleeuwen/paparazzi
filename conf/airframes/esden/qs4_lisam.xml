@@ -49,14 +49,6 @@
 
   <command_laws>
     <!--************* different mixing strategies - probably don't edit this ****************-->
-    <!-- direct ailerons -->
-    <let var="aileron_direct_left"  value="+@RC_ROLL * (9600 + @RC_THRUST)/9600"/>
-    <let var="aileron_direct_right" value="+@RC_ROLL * (9600 + @RC_THRUST)/9600"/>
-
-    <!-- direct elevators -->
-    <let var="elevator_direct_left"  value="-@RC_PITCH * (9600 + @RC_THRUST)/9600"/>
-    <let var="elevator_direct_right" value="+@RC_PITCH * (9600 + @RC_THRUST)/9600"/>
-
     <!-- aileron feedback -->
     <let var="aileron_feedback_left"  value="+@ROLL * (9600 + @RC_THRUST)/9600"/>
     <let var="aileron_feedback_right" value="+@ROLL * (9600 + @RC_THRUST)/9600"/>
@@ -123,10 +115,9 @@
   </section>
 
  <section name="BAT">
-   <define name="MILLIAMP_PER_PERCENT" value="0.86"/>
+   <define name="MILLIAMP_AT_FULL_THROTTLE" value="10000"/>
    <define name="CATASTROPHIC_BAT_LEVEL" value="9.3" unit="V"/>
    <define name="MIN_BAT_LEVEL" value="10.4" units="V"/>
-   <define name="BATTERY_SENS"   value="0.54" integer="16"/>
  </section>
 
 
