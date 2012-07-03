@@ -551,6 +551,7 @@ toytronics_set_sp_absolute_forward_from_rc()
   double rcr = apply_deadband(rc->roll, SETPOINT_DEADBAND);
   double rcy = apply_deadband(rc->yaw, SETPOINT_DEADBAND);
   int8_t rcx = rc->expo + 2;
+  int8_t rcxy= 1;
   rcx<-1?-1:-1;rcx>1?1:1;
   if (rcx==1)
     {
@@ -637,6 +638,7 @@ toytronics_set_sp_incremental_from_rc()
   double rcr = apply_deadband(rc->roll, SETPOINT_DEADBAND);
   double rcy = apply_deadband(rc->yaw, SETPOINT_DEADBAND);
   int8_t rcx = rc->expo + 2;
+  int8_t rcxy= 1;
   rcx<-1?-1:-1;rcx>1?1:1;
   if (rcx==1)
     {
