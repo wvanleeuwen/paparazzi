@@ -133,21 +133,12 @@
     <define name="ALTITUDE_PGAIN" value="0.104999996722"/>
     <!-- outer loop saturation -->
     <define name="ALTITUDE_MAX_CLIMB" value="3."/>
-    <define name="ALTITUDE_PRE_CLIMB_CORRECTION" value="0.0960000008345"/>
-<!--
-    <define name="AUTO_PITCH_PGAIN" value="-0.00"/>
-    <define name="AUTO_PITCH_IGAIN" value="-0.00"/>
--->
 
     <!-- auto throttle inner loop -->
     <define name="AUTO_THROTTLE_NOMINAL_CRUISE_THROTTLE" value="0.5"/>
     <define name="AUTO_THROTTLE_MIN_CRUISE_THROTTLE" value="0.36700001359"/>
     <define name="AUTO_THROTTLE_MAX_CRUISE_THROTTLE" value="0.626999974251"/>
-    <define name="AUTO_THROTTLE_LOITER_TRIM" value="1500"/>
-    <define name="AUTO_THROTTLE_DASH_TRIM" value="-4000"/>
     <define name="AUTO_THROTTLE_CLIMB_THROTTLE_INCREMENT" value="0.518000006676" unit="%/(m/s)"/>
-    <define name="AUTO_THROTTLE_PGAIN" value="0.00"/>
-    <define name="AUTO_THROTTLE_IGAIN" value="0."/>
     <define name="AUTO_THROTTLE_PITCH_OF_VZ_PGAIN" value="0.307000011206"/>
 
     <define name="THROTTLE_SLEW_LIMITER" value="1" unit="s"/>
@@ -245,9 +236,7 @@
     <target name="sim" board="pc"/>
 
     <define name="AGR_CLIMB"/>
-    <define name="LOITER_TRIM"/>
     <define name="ALT_KALMAN"/>
-    <define name="TUNE_AGRESSIVE_CLIMB"/>
     <define name="STRONG_WIND"/>
     <define name="WIND_INFO"/>
     <define name="WIND_INFO_RET"/>
@@ -267,14 +256,13 @@
     <subsystem name="radio_control" type="ppm"/>
 
     <!-- Communication -->
-    <subsystem name="telemetry" type="transparent">
-<!--  <subsystem name="telemetry" type="xbee_api"> -->
+    <subsystem name="telemetry" type="xbee_api">
       <configure name="MODEM_BAUD" value="B9600"/>
       <configure name="MODEM_PORT" value="UART2"/>
     </subsystem>
 
     <!-- Actuators -->
-    <subsystem name="control"/>
+    <subsystem name="control" type="energy"/>
     <!-- Sensors -->
     <subsystem name="navigation" type="extra"/>
     <subsystem name="gps" type="ublox">
