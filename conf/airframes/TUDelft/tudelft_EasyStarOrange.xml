@@ -151,8 +151,8 @@ then adjusted after testflight data is analyzed.
 Setting also can be adjusted realtime via tuning config
 or tuning_via?_transmitter config.
 -->
-    <define name="ROLL_NEUTRAL_DEFAULT" value="-8.20304762783e-07" unit="deg"/>
-    <define name="PITCH_NEUTRAL_DEFAULT" value="8.90117917152e-07" unit="deg"/>
+    <define name="ROLL_NEUTRAL_DEFAULT" value="-6" unit="deg"/>
+    <define name="PITCH_NEUTRAL_DEFAULT" value="7" unit="deg"/>
 
     <define name="CORRECTION_UP" value="1."/>
     <define name="CORRECTION_DOWN" value="1."/>
@@ -259,7 +259,7 @@ If not set before when you would enter home mode you had to flip a bit via the G
     <define name="BLEND_END" value="10"/><!-- Altitude Error to Blend Aggressive to Regular Climb Modes  CANNOT BE ZERO!!-->
     <define name="CLIMB_THROTTLE" value="1."/><!-- Gaz for Aggressive Climb -->
     <define name="CLIMB_PITCH" value="0.331000000238"/><!-- Pitch for Aggressive Climb -->
-    <define name="DESCENT_THROTTLE" value="0.1"/><!-- Gaz for Aggressive Decent -->
+    <define name="DESCENT_THROTTLE" value="0.0"/><!-- Gaz for Aggressive Decent -->
     <define name="DESCENT_PITCH" value="-0.261000007391"/><!-- Pitch for Aggressive Decent -->
     <define name="CLIMB_NAV_RATIO" value="0.8"/><!-- Percent Navigation for Altitude Error Equal to Start Altitude -->
     <define name="DESCENT_NAV_RATIO" value="0.834999978542"/>
