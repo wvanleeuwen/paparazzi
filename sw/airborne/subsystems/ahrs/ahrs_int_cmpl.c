@@ -188,10 +188,10 @@ void ahrs_update_accel(void) {
   struct Int32Vect3 residual_copy;
   INT32_VECT3_COPY(residual_copy, residual);
   INT32_VECT3_NORM(norm, imu_accel_local);
-  if (norm > ACCEL_BFP_OF_REAL(12) && norm <= ACCEL_BFP_OF_REAL(20) && (imu_accel_local.y >= ACCEL_BFP_OF_REAL(6) || imu_accel_local.y >= ACCEL_BFP_OF_REAL(-6))){
+  if (norm > ACCEL_BFP_OF_REAL(12) && norm <= ACCEL_BFP_OF_REAL(20) && (imu_accel_local.y >= ACCEL_BFP_OF_REAL(6) || imu_accel_local.y <= ACCEL_BFP_OF_REAL(-6))){
     INT32_VECT3_SCALE_2(residual, residual_copy, (ACCEL_BFP_OF_REAL(20)-norm),(ACCEL_BFP_OF_REAL(20)-ACCEL_BFP_OF_REAL(12)));
     }
-  else if (norm > ACCEL_BFP_OF_REAL(20) && (imu_accel_local.y >= ACCEL_BFP_OF_REAL(17) || imu_accel_local.y >= ACCEL_BFP_OF_REAL(-17))){
+  else if (norm > ACCEL_BFP_OF_REAL(20) && (imu_accel_local.y >= ACCEL_BFP_OF_REAL(17) || imu_accel_local.y <= ACCEL_BFP_OF_REAL(-17))){
     INT32_VECT3_ZERO(residual);
     }
 //***************************END HACK HERE***********************************************************************
