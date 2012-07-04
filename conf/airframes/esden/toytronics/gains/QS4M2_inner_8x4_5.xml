@@ -42,7 +42,7 @@
     <define name="AEROBATIC_Y_P"      value="-300"/>
     <define name="AEROBATIC_Y_I"      value="0"/>
     <define name="AEROBATIC_Y_D"      value="-104"/>
-    <define name="AEROBATIC_Y_DD"     value="0"/>
+    <define name="AEROBATIC_Y_DD"     value="300"/>
 
     <define name="AEROBATIC_Z_P"      value="-315"/>
     <define name="AEROBATIC_Z_I"      value="0"/>
