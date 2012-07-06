@@ -1,7 +1,7 @@
 <!DOCTYPE flight_plan SYSTEM "../flight_plan.dtd">
 
 <!--  - lat0="51.233165" lon0="3.78287" -->
- <flight_plan alt="75" ground_alt="0" lat0="51.990" lon0="4.390" max_dist_from_home="1500" name="Basic" security_height="25">
+ <flight_plan alt="75" ground_alt="0" lat0="51.990" lon0="4.390" max_dist_from_home="5500" name="Basic" security_height="225">
   <header>
 #include "subsystems/datalink/datalink.h"
 #include "subsystems/navigation/gls.h"
