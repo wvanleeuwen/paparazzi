@@ -22,6 +22,7 @@
 <module name="digital_cam">
   <doc>
     <description>Digital camera control (trigger using led)</description>
+    <define name="SENSOR_SYNC_SEND" value="1" />
   </doc>
 
   <header>
@@ -37,7 +38,6 @@
     <define name="DIGITAL_CAM" />
     <file name="led_cam_ctrl.c"/>
     <file name="dc.c"/>
-    <define name="SENSOR_SYNC_SEND" value="1" />
 
   </makefile>
 
