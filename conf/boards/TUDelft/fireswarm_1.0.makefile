@@ -25,6 +25,9 @@ FLASH_MODE = JTAG
 #FLASH_MODE = SERIAL
 endif
 
+
+ACTUATORS = actuators_direct
+
 #
 #
 # some default values shared between different firmwares
