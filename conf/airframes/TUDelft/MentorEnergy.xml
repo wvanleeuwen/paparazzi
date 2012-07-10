@@ -102,7 +102,11 @@
   </section>
 
   <section name="MISC">
-    <define name="NOMINAL_AIRSPEED" value="13." unit="m/s"/>
+    <define name="CLIMB_AIRSPEED" value="12." unit="m/s"/>
+    <define name="NOMINAL_AIRSPEED" value="14." unit="m/s"/>
+    <define name="GLIDE_AIRSPEED" value="11." unit="m/s"/>
+    <define name="RACE_AIRSPEED" value="17." unit="m/s"/>
+
     <define name="CARROT" value="5." unit="s"/>
     <define name="CONTROL_RATE" value="60" unit="Hz"/>
 
@@ -113,18 +117,18 @@
     <define name="NAV_GLIDE_PITCH_TRIM" value="0."/>
   </section>
 
-  <section name="CATAPULT" prefix="NAV_CATAPULT_" >
-    <define name="MOTOR_DELAY" value="45" />
-    <define name="HEADING_DELAY" value="(60*3)" />
-    <define name="ACCELERATION_THRESHOLD" value="1.75" />
-    <define name="INITIAL_PITCH" value="(15.0/57.0)" />
-    <define name="INITIAL_THROTTLE" value="1.0" />
+  <section name="CATAPULT" prefix="NAV_CATAPULT_">
+    <define name="MOTOR_DELAY" value="45"/>
+    <define name="HEADING_DELAY" value="(60*3)"/>
+    <define name="ACCELERATION_THRESHOLD" value="1.75"/>
+    <define name="INITIAL_PITCH" value="(15.0/57.0)"/>
+    <define name="INITIAL_THROTTLE" value="1.0"/>
   </section>
 
-  <section name="GLS_APPROACH" prefix="APP_" >
-    <define name="ANGLE" value="5" />
-    <define name="INTERCEPT_AF_TOD" value="10" />
-    <define name="TARGET_SPEED" value="13" />
+  <section name="GLS_APPROACH" prefix="APP_">
+    <define name="ANGLE" value="5"/>
+    <define name="INTERCEPT_AF_TOD" value="10"/>
+    <define name="TARGET_SPEED" value="13"/>
   </section>
 
   <section name="VERTICAL CONTROL" prefix="V_CTL_">
@@ -145,9 +149,9 @@
   </section>
 
   <section name="HORIZONTAL CONTROL" prefix="H_CTL_">
-    <define name="COURSE_PGAIN" value="1.16600000858"/>
-    <define name="COURSE_DGAIN" value="0.324999988079"/>
-    <define name="COURSE_PRE_BANK_CORRECTION" value="0.889999985695"/>
+    <define name="COURSE_PGAIN" value="0.89200001955"/>
+    <define name="COURSE_DGAIN" value="0.273000001907"/>
+    <define name="COURSE_PRE_BANK_CORRECTION" value="1.00800001621"/>
 
     <define name="ROLL_MAX_SETPOINT" value="0.586000025272" unit="radians"/>
     <define name="PITCH_MAX_SETPOINT" value="0.5" unit="radians"/>
@@ -196,8 +200,8 @@
     <load name="gps_ubx_ucenter.xml"/>
     <load name="airspeed_ets.xml"/>
     <load name="adc_generic.xml">
-      <configure name="ADC_CHANNEL_GENERIC1" value="0" />
-      <configure name="ADC_CHANNEL_GENERIC2" value="1" />
+      <configure name="ADC_CHANNEL_GENERIC1" value="0"/>
+      <configure name="ADC_CHANNEL_GENERIC2" value="1"/>
     </load>
 
     <load name="light.xml">
@@ -218,8 +222,11 @@
 
   <firmware name="fixedwing">
 
+    <define name="USE_AIRSPEED"/>
+
     <target name="ap" board="lisa_m_1.0">
       <define name="LISA_M_LONGITUDINAL_X"/>
+      <define name="SENSOR_SYNC_SEND"/>
 
       <configure name="PERIODIC_FREQUENCY" value="120"/>
       <configure name="AHRS_PROPAGATE_FREQUENCY" value="100"/>
@@ -240,7 +247,7 @@
     <define name="STRONG_WIND"/>
     <define name="WIND_INFO"/>
     <define name="WIND_INFO_RET"/>
-    <define name="SENSOR_SYNC_SEND" />
+    <define name="SENSOR_SYNC_SEND"/>
     <!-- Sensors -->
     <!--
     <subsystem name="ahrs" type="int_cmpl_quat">

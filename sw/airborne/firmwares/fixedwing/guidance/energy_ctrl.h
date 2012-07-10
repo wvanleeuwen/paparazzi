@@ -25,8 +25,8 @@
  *
  */
 
-#ifndef FW_V_CTL_H
-#define FW_V_CTL_H
+#ifndef FW_V_CTL_ENERGY_H
+#define FW_V_CTL_ENERGY_H
 
 #include <inttypes.h>
 #include "paparazzi.h"
@@ -53,6 +53,10 @@ extern float v_ctl_auto_throttle_sum_err;
 // Needed for course loop gain 
 extern float v_ctl_altitude_error;    ///< in meters, (setpoint - alt) -> positive = too low
 
+// Old airspeed code wants:
+extern float v_ctl_auto_airspeed_controlled;
+extern float v_ctl_auto_groundspeed_setpoint;
+
 /////// ACTUALLY USED STUFF //////
 
 /* outer loop */
@@ -60,7 +64,9 @@ extern float v_ctl_altitude_error;    ///< in meters, (setpoint - alt) -> positi
 extern float v_ctl_altitude_setpoint; ///< in meters above MSL
 extern float v_ctl_altitude_pre_climb; ///< Path Angle
 extern float v_ctl_altitude_pgain;
-//extern float v_ctl_altitude_max_climb;
+
+extern float v_ctl_auto_airspeed_setpoint; ///< in meters per second
+
 
 /* "auto throttle" inner loop parameters */
 extern float v_ctl_auto_throttle_nominal_cruise_throttle;
@@ -73,9 +79,6 @@ extern pprz_t v_ctl_throttle_slewed;
 extern void v_ctl_init( void );
 extern void v_ctl_altitude_loop( void );
 extern void v_ctl_climb_loop ( void );
-
-/* "airspeed" inner loop parameters */
-extern float v_ctl_auto_airspeed_setpoint;
 
 /** Computes throttle_slewed from throttle_setpoint */
 extern void v_ctl_throttle_slew( void );

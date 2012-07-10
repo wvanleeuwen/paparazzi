@@ -65,10 +65,14 @@ uint8_t v_ctl_mode = V_CTL_MODE_MANUAL;
 uint8_t v_ctl_climb_mode = V_CTL_CLIMB_MODE_AUTO_ENERGY;
 uint8_t v_ctl_auto_throttle_submode = V_CTL_CLIMB_MODE_AUTO_ENERGY;
 float v_ctl_auto_throttle_sum_err = 0;
+float v_ctl_auto_airspeed_controlled = 0;
+float v_ctl_auto_groundspeed_setpoint = 0;
 
 #ifdef LOITER_TRIM
 #error "Energy Controller can not accep Loiter Trim"
 #endif
+//#ifdef V_CTL_AUTO_THROTTLE_MIN_CRUISE_THROTTLE
+//#error
 
 /////// ACTUALLY USED STUFF //////
 
@@ -77,6 +81,8 @@ float v_ctl_altitude_setpoint;
 float v_ctl_altitude_pre_climb; ///< Path Angle
 float v_ctl_altitude_pgain;
 float v_ctl_altitude_error;    ///< in meters, (setpoint - alt) -> positive = too low
+
+float v_ctl_auto_airspeed_setpoint; ///< in meters per second
 
 /* inner loop */
 float v_ctl_climb_setpoint;
@@ -89,8 +95,6 @@ float v_ctl_auto_throttle_pitch_of_vz_pgain;
 pprz_t v_ctl_throttle_setpoint;
 pprz_t v_ctl_throttle_slewed;
 
-float v_ctl_auto_airspeed_setpoint;
-
 void v_ctl_init( void ) {
   /* mode */
   v_ctl_mode = V_CTL_MODE_MANUAL;
@@ -98,6 +102,7 @@ void v_ctl_init( void ) {
   /* outer loop */
   v_ctl_altitude_setpoint = 0.;
   v_ctl_altitude_pgain = V_CTL_ALTITUDE_PGAIN;
+  v_ctl_auto_airspeed_setpoint = NOMINAL_AIRSPEED;
 
   /* inner loops */
   v_ctl_climb_setpoint = 0.;
@@ -106,8 +111,6 @@ void v_ctl_init( void ) {
   v_ctl_auto_throttle_nominal_cruise_throttle = V_CTL_AUTO_THROTTLE_NOMINAL_CRUISE_THROTTLE;
   v_ctl_auto_throttle_climb_throttle_increment = V_CTL_AUTO_THROTTLE_CLIMB_THROTTLE_INCREMENT;
   v_ctl_auto_throttle_pitch_of_vz_pgain = V_CTL_AUTO_THROTTLE_PITCH_OF_VZ_PGAIN;
-
-  v_ctl_auto_airspeed_setpoint = NOMINAL_AIRSPEED;
 
   v_ctl_throttle_setpoint = 0;
 }
