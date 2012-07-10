@@ -73,6 +73,11 @@ extern float v_ctl_auto_throttle_nominal_cruise_throttle;
 extern float v_ctl_auto_throttle_climb_throttle_increment;
 extern float v_ctl_auto_throttle_pitch_of_vz_pgain;
 
+extern float v_ctl_auto_throttle_of_airspeed_pgain;
+extern float v_ctl_auto_throttle_of_airspeed_igain;
+extern float v_ctl_auto_pitch_of_airspeed_pgain;
+extern float v_ctl_auto_pitch_of_airspeed_igain;
+
 extern pprz_t v_ctl_throttle_setpoint;
 extern pprz_t v_ctl_throttle_slewed;
 

@@ -57,6 +57,7 @@
 #include "subsystems/nav.h"
 #include "generated/airframe.h"
 #include "firmwares/fixedwing/autopilot.h"
+#include "subsystems/ahrs.h"
 
 /////// DEFAULT GUIDANCE_V NECESSITIES //////
 
@@ -91,6 +92,11 @@ float v_ctl_climb_setpoint;
 float v_ctl_auto_throttle_nominal_cruise_throttle;
 float v_ctl_auto_throttle_climb_throttle_increment;
 float v_ctl_auto_throttle_pitch_of_vz_pgain;
+
+float v_ctl_auto_throttle_of_airspeed_pgain;
+float v_ctl_auto_throttle_of_airspeed_igain;
+float v_ctl_auto_pitch_of_airspeed_pgain;
+float v_ctl_auto_pitch_of_airspeed_igain;
 
 pprz_t v_ctl_throttle_setpoint;
 pprz_t v_ctl_throttle_slewed;
@@ -134,17 +140,27 @@ void v_ctl_altitude_loop( void )
 
 void v_ctl_climb_loop( void ) 
 {
-  static float last_err;
+  //static float last_err;
 
   float f_throttle = 0;
-  float err  = estimator_z_dot - v_ctl_climb_setpoint;
-  float d_err = err - last_err;
-  last_err = err;
+  //float err  = estimator_z_dot - v_ctl_climb_setpoint;
+  //float d_err = err - last_err;
+  //last_err = err;
+  float serr = v_ctl_auto_airspeed_setpoint - estimator_airspeed; 
+
+  // Auto Cruise Throttle
+  v_ctl_auto_throttle_nominal_cruise_throttle += v_ctl_auto_throttle_of_airspeed_igain * serr;
+  if (v_ctl_auto_throttle_nominal_cruise_throttle < 0.0f) v_ctl_auto_throttle_nominal_cruise_throttle = 0.0f;
+  else if (v_ctl_auto_throttle_nominal_cruise_throttle > 1.0f) v_ctl_auto_throttle_nominal_cruise_throttle = 1.0f;
+
+  // Total Controller
   float controlled_throttle = v_ctl_auto_throttle_nominal_cruise_throttle
-    + v_ctl_auto_throttle_climb_throttle_increment * v_ctl_climb_setpoint;
+    + v_ctl_auto_throttle_climb_throttle_increment * v_ctl_climb_setpoint
+    + v_ctl_auto_throttle_of_airspeed_pgain * serr;
 
   /* pitch pre-command */
-  float v_ctl_pitch_of_vz = (v_ctl_climb_setpoint /*+ d_err * v_ctl_auto_throttle_pitch_of_vz_dgain*/) * v_ctl_auto_throttle_pitch_of_vz_pgain;
+  ins_pitch_neutral -=  v_ctl_auto_pitch_of_airspeed_igain * RadOfDef(serr);
+  float v_ctl_pitch_of_vz = - v_ctl_auto_pitch_of_airspeed_pgain * serr + (v_ctl_climb_setpoint /*+ d_err * v_ctl_auto_throttle_pitch_of_vz_dgain*/) * v_ctl_auto_throttle_pitch_of_vz_pgain;
 
 
     f_throttle = controlled_throttle;
