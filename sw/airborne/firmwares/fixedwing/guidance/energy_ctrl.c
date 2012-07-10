@@ -125,8 +125,16 @@ void v_ctl_init( void ) {
  * outer loop
  * \brief Computes v_ctl_climb_setpoint and sets v_ctl_auto_throttle_submode
  */
+
+float v_ctl_gamma_setpoint = 0;
+float v_ctl_vdot_setpoint = 0;
+
 void v_ctl_altitude_loop( void ) 
 {
+  // Imput Checks
+  if (v_ctl_auto_airspeed_setpoint <= 0.0f) v_ctl_auto_airspeed_setpoint = NOMINAL_AIRSPEED;
+
+  // Altitude Controller
   v_ctl_altitude_error = v_ctl_altitude_setpoint - estimator_z;
   v_ctl_climb_setpoint = v_ctl_altitude_pgain * v_ctl_altitude_error;
   BoundAbs(v_ctl_climb_setpoint, V_CTL_ALTITUDE_MAX_CLIMB);
@@ -140,13 +148,16 @@ void v_ctl_altitude_loop( void )
 
 void v_ctl_climb_loop( void ) 
 {
-  //static float last_err;
+  float gamma_err  = (estimator_z_dot - v_ctl_climb_setpoint) / v_ctl_auto_airspeed_setpoint;
 
-  float f_throttle = 0;
-  //float err  = estimator_z_dot - v_ctl_climb_setpoint;
-  //float d_err = err - last_err;
-  //last_err = err;
-  float serr = v_ctl_auto_airspeed_setpoint - estimator_airspeed; 
+  float serr = v_ctl_auto_airspeed_setpoint - estimator_airspeed;
+
+  // Speed Controller to PseudoControl
+  float desired_acceleration = (v_ctl_auto_airspeed_setpoint - estimator_airspeed) * v_ctl_auto_pitch_of_airspeed_pgain;
+
+  // Outerloop Energy Commands
+  v_ctl_gamma_setpoint = v_ctl_climb_setpoint / v_ctl_auto_airspeed_setpoint;
+  v_ctl_vdot_setpoint = desired_acceleration / 9.81f;
 
   // Auto Cruise Throttle
   v_ctl_auto_throttle_nominal_cruise_throttle += v_ctl_auto_throttle_of_airspeed_igain * serr;
@@ -159,14 +170,12 @@ void v_ctl_climb_loop( void )
     + v_ctl_auto_throttle_of_airspeed_pgain * serr;
 
   /* pitch pre-command */
-  ins_pitch_neutral -=  v_ctl_auto_pitch_of_airspeed_igain * RadOfDef(serr);
+  ins_pitch_neutral -=  v_ctl_auto_pitch_of_airspeed_igain * RadOfDeg(serr);
   float v_ctl_pitch_of_vz = - v_ctl_auto_pitch_of_airspeed_pgain * serr + (v_ctl_climb_setpoint /*+ d_err * v_ctl_auto_throttle_pitch_of_vz_dgain*/) * v_ctl_auto_throttle_pitch_of_vz_pgain;
 
+  nav_pitch += v_ctl_pitch_of_vz;
 
-    f_throttle = controlled_throttle;
-    nav_pitch += v_ctl_pitch_of_vz;
-
-  v_ctl_throttle_setpoint = TRIM_UPPRZ(f_throttle * MAX_PPRZ);
+  v_ctl_throttle_setpoint = TRIM_UPPRZ(controlled_throttle * MAX_PPRZ);
 }
 
 
