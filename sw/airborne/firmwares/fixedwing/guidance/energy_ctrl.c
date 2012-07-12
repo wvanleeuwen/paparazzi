@@ -146,6 +146,8 @@ void v_ctl_altitude_loop( void )
  * \brief
  */
 
+const float dt = 0.01f;
+
 void v_ctl_climb_loop( void ) 
 {
   float gamma_err  = (estimator_z_dot - v_ctl_climb_setpoint) / v_ctl_auto_airspeed_setpoint;
@@ -160,9 +162,12 @@ void v_ctl_climb_loop( void )
   v_ctl_vdot_setpoint = desired_acceleration / 9.81f;
 
   // Auto Cruise Throttle
-  v_ctl_auto_throttle_nominal_cruise_throttle += v_ctl_auto_throttle_of_airspeed_igain * serr;
-  if (v_ctl_auto_throttle_nominal_cruise_throttle < 0.0f) v_ctl_auto_throttle_nominal_cruise_throttle = 0.0f;
-  else if (v_ctl_auto_throttle_nominal_cruise_throttle > 1.0f) v_ctl_auto_throttle_nominal_cruise_throttle = 1.0f;
+  if (v_ctl_mode >= V_CTL_MODE_AUTO_CLIMB)
+  {
+    v_ctl_auto_throttle_nominal_cruise_throttle += v_ctl_auto_throttle_of_airspeed_igain * serr * dt;
+    if (v_ctl_auto_throttle_nominal_cruise_throttle < 0.0f) v_ctl_auto_throttle_nominal_cruise_throttle = 0.0f;
+    else if (v_ctl_auto_throttle_nominal_cruise_throttle > 1.0f) v_ctl_auto_throttle_nominal_cruise_throttle = 1.0f;
+  }
 
   // Total Controller
   float controlled_throttle = v_ctl_auto_throttle_nominal_cruise_throttle
@@ -170,7 +175,7 @@ void v_ctl_climb_loop( void )
     + v_ctl_auto_throttle_of_airspeed_pgain * serr;
 
   /* pitch pre-command */
-  ins_pitch_neutral -=  v_ctl_auto_pitch_of_airspeed_igain * RadOfDeg(serr);
+  ins_pitch_neutral -=  v_ctl_auto_pitch_of_airspeed_igain * (serr) * dt;
   float v_ctl_pitch_of_vz = - v_ctl_auto_pitch_of_airspeed_pgain * serr + (v_ctl_climb_setpoint /*+ d_err * v_ctl_auto_throttle_pitch_of_vz_dgain*/) * v_ctl_auto_throttle_pitch_of_vz_pgain;
 
   nav_pitch += v_ctl_pitch_of_vz;

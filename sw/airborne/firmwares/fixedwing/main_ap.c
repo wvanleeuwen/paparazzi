@@ -488,8 +488,6 @@ void navigation_task( void ) {
 #endif
     if (lateral_mode >=LATERAL_MODE_COURSE)
       h_ctl_course_loop(); /* aka compute nav_desired_roll */
-    if (v_ctl_mode >= V_CTL_MODE_AUTO_CLIMB)
-      v_ctl_climb_loop();
     if (v_ctl_mode == V_CTL_MODE_AUTO_THROTTLE)
       v_ctl_throttle_setpoint = nav_throttle_setpoint;
 
@@ -524,6 +522,14 @@ void attitude_loop( void ) {
 #if USE_INFRARED
   ahrs_update_infrared();
 #endif /* USE_INFRARED */
+
+  if (pprz_mode >= PPRZ_MODE_AUTO2)
+  {
+    if (v_ctl_mode >= V_CTL_MODE_AUTO_CLIMB)
+    {
+      v_ctl_climb_loop();
+    }
+  }
 
   h_ctl_attitude_loop(); /* Set  h_ctl_aileron_setpoint & h_ctl_elevator_setpoint */
   v_ctl_throttle_slew();
