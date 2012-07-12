@@ -63,8 +63,8 @@
 
 /* mode */
 uint8_t v_ctl_mode = V_CTL_MODE_MANUAL;
-uint8_t v_ctl_climb_mode = V_CTL_CLIMB_MODE_AUTO_ENERGY;
-uint8_t v_ctl_auto_throttle_submode = V_CTL_CLIMB_MODE_AUTO_ENERGY;
+uint8_t v_ctl_climb_mode = V_CTL_CLIMB_MODE_AUTO_THROTTLE;
+uint8_t v_ctl_auto_throttle_submode = V_CTL_CLIMB_MODE_AUTO_THROTTLE;
 float v_ctl_auto_throttle_sum_err = 0;
 float v_ctl_auto_airspeed_controlled = 0;
 float v_ctl_auto_groundspeed_setpoint = 0;

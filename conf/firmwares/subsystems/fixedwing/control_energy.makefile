@@ -4,3 +4,6 @@
 
 
 $(TARGET).srcs += $(SRC_FIRMWARE)/stabilization/stabilization_attitude.c $(SRC_FIRMWARE)/guidance/energy_ctrl.c
+
+$(TARGET).CFLAGS += -DCTRL_TYPE_H=\"firmwares/fixedwing/guidance/energy_ctrl.h\"
+

@@ -25,7 +25,7 @@
 
 
       <dl_settings name="alt">
-        <dl_setting MAX="0.2" MIN="0" STEP="0.01" VAR="v_ctl_altitude_pgain" shortname="alt_pgain" module="guidance/guidance_v" param="V_CTL_ALTITUDE_PGAIN"/>
+        <dl_setting MAX="0.2" MIN="0" STEP="0.01" VAR="v_ctl_altitude_pgain" shortname="alt_pgain" module="guidance/energy_ctrl" param="V_CTL_ALTITUDE_PGAIN"/>
       </dl_settings>
 
       <dl_settings name="auto_throttle">
@@ -35,7 +35,7 @@
         <dl_setting MAX="1" MIN="0" STEP="0.01" VAR="v_ctl_auto_throttle_climb_throttle_increment" shortname="throttle_incr" param="V_CTL_AUTO_THROTTLE_CLIMB_THROTTLE_INCREMENT"/>
         <dl_setting MAX="1" MIN="0" STEP="0.01" VAR="v_ctl_auto_throttle_pitch_of_vz_pgain" shortname="pitch_of_vz" param="V_CTL_AUTO_THROTTLE_PITCH_OF_VZ_PGAIN"/>
 
-        <dl_setting MAX="1" MIN="0" STEP="0.01" VAR="v_ctl_auto_throttle_of_airspeed_pgain" shortname="P_th_air" module="guidance/energy_ctrl"/>
+        <dl_setting MAX="1" MIN="0" STEP="0.01" VAR="v_ctl_auto_throttle_of_airspeed_pgain" shortname="P_th_air"/>
         <dl_setting MAX="0.1" MIN="0" STEP="0.001" VAR="v_ctl_auto_throttle_of_airspeed_igain" shortname="I_th_air" />
         <dl_setting MAX="1" MIN="0" STEP="0.01" VAR="v_ctl_auto_pitch_of_airspeed_pgain" shortname="P_pitch_air" />
         <dl_setting MAX="0.1" MIN="0" STEP="0.001" VAR="v_ctl_auto_pitch_of_airspeed_igain" shortname="I_pitch_air" />

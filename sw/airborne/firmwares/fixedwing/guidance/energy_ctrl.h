@@ -28,36 +28,7 @@
 #ifndef FW_V_CTL_ENERGY_H
 #define FW_V_CTL_ENERGY_H
 
-#include <inttypes.h>
-#include "paparazzi.h"
-
-/////// DEFAULT GUIDANCE_V NECESSITIES //////
-
-/* Vertical mode */
-#define V_CTL_MODE_MANUAL        0
-#define V_CTL_MODE_AUTO_THROTTLE 1
-#define V_CTL_MODE_AUTO_CLIMB    2
-#define V_CTL_MODE_AUTO_ALT      3
-#define V_CTL_MODE_NB            4
-extern uint8_t v_ctl_mode;
-
-extern uint8_t v_ctl_climb_mode;
-extern uint8_t v_ctl_auto_throttle_submode;
-
-#define V_CTL_CLIMB_MODE_AUTO_ENERGY 	   0
-#define V_CTL_CLIMB_MODE_AUTO_PITCHONLY    1
-
-// Needed for telemetry
-extern float v_ctl_auto_throttle_sum_err;
-
-// Needed for course loop gain 
-extern float v_ctl_altitude_error;    ///< in meters, (setpoint - alt) -> positive = too low
-
-// Old airspeed code wants:
-extern float v_ctl_auto_airspeed_controlled;
-extern float v_ctl_auto_groundspeed_setpoint;
-
-/////// ACTUALLY USED STUFF //////
+#include "firmwares/fixedwing/guidance/guidance_common.h"
 
 /* outer loop */
 // extern float v_ctl_altitude_error;    ///< in meters, (setpoint - alt) -> positive = too low
@@ -77,25 +48,5 @@ extern float v_ctl_auto_throttle_of_airspeed_pgain;
 extern float v_ctl_auto_throttle_of_airspeed_igain;
 extern float v_ctl_auto_pitch_of_airspeed_pgain;
 extern float v_ctl_auto_pitch_of_airspeed_igain;
-
-extern pprz_t v_ctl_throttle_setpoint;
-extern pprz_t v_ctl_throttle_slewed;
-
-extern void v_ctl_init( void );
-extern void v_ctl_altitude_loop( void );
-extern void v_ctl_climb_loop ( void );
-
-/** Computes throttle_slewed from throttle_setpoint */
-extern void v_ctl_throttle_slew( void );
-
-#define guidance_v_SetCruiseThrottle(_v) { \
-  v_ctl_auto_throttle_cruise_throttle = (_v ? _v : v_ctl_auto_throttle_nominal_cruise_throttle); \
-  Bound(v_ctl_auto_throttle_cruise_throttle, v_ctl_auto_throttle_min_cruise_throttle, v_ctl_auto_throttle_max_cruise_throttle); \
-}
-
-#define guidance_v_SetAutoThrottleIgain(_v) {	\
-    v_ctl_auto_throttle_igain = _v;		\
-    v_ctl_auto_throttle_sum_err = 0;		\
-  }
 
 #endif /* FW_V_CTL_H */

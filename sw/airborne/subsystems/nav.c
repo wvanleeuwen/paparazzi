@@ -34,7 +34,6 @@
 #include "subsystems/gps.h"
 #include "estimator.h"
 #include "firmwares/fixedwing/stabilization/stabilization_attitude.h"
-#include "firmwares/fixedwing/guidance/guidance_v.h"
 #include "firmwares/fixedwing/autopilot.h"
 #include "inter_mcu.h"
 #include "subsystems/navigation/traffic_info.h"

@@ -58,7 +58,7 @@
 #include "firmwares/fixedwing/autopilot.h"
 #include "estimator.h"
 #include "firmwares/fixedwing/stabilization/stabilization_attitude.h"
-#include "firmwares/fixedwing/guidance/guidance_v.h"
+#include CTRL_TYPE_H
 #include "subsystems/nav.h"
 #include "generated/flight_plan.h"
 #ifdef TRAFFIC_INFO
