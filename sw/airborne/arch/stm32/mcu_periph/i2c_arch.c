@@ -454,7 +454,7 @@ struct i2c_errors i2c1_errors;
 
 #include "my_debug_servo.h"
 
-void i2c1_hw_init(void) {
+void i2c1_hw_init_sub(void) {
 
   i2c1.reg_addr = I2C1;
   i2c1.init_struct = &I2C1_InitStruct;
@@ -507,6 +507,10 @@ void i2c1_hw_init(void) {
 
 }
 
+void i2c1_hw_init(void) {
+  for (int i=0; i <5000; i++)
+    i2c1_hw_init_sub();
+}
 
 void i2c1_ev_irq_handler(void) {
 
@@ -541,7 +545,7 @@ struct i2c_errors i2c2_errors;
 
 #include "my_debug_servo.h"
 
-void i2c2_hw_init(void) {
+void i2c2_hw_init_sub(void) {
 
   i2c2.reg_addr = I2C2;
   i2c2.init_struct = &I2C2_InitStruct;
@@ -583,6 +587,11 @@ void i2c2_hw_init(void) {
 
 }
 
+
+void i2c2_hw_init(void) {
+  for (int i=0; i <5000; i++)
+    i2c2_hw_init_sub();
+}
 
 
 
