@@ -47,6 +47,6 @@ Note: a command may be reversed by exchanging min and max values
   <channel ctl="B" function="PITCH" min="1800" neutral="1500" max="1200" average="0"/>    <!-- left stick up/down -->
   <channel ctl="C" function="THROTTLE" min="1200" neutral="1200" max="1800" average="0"/>	<!-- right stick up/down -->
   <channel ctl="D" function="YAW" min="1200" neutral="1500" max="1800" average="0"/>	<!-- left stick left/right-->
-  <channel ctl="E" function="AUX3" min="1800" neutral="1500" max="1200" average="0"/>     <!-- right switch -->
+  <channel ctl="E" function="EXPO" min="1800" neutral="1500" max="1200" average="0"/>     <!-- right switch -->
   <channel ctl="F" function="MODE" min="1800" neutral="1500" max="1200" average="0"/>     <!-- left switch -->
 </radio>

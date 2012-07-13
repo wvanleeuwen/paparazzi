@@ -55,7 +55,9 @@ void camera_mount_run(void) {
   }
 
   // add in user setpoint from transmitter
-  commands[COMMAND_CAMERA] += radio_control.values[RADIO_AUX3];
+#ifdef RADIO_CAMERA
+  commands[COMMAND_CAMERA] += radio_control.values[RADIO_CAMERA];
+#endif
 //  commands[COMMAND_CAMERA] += radio_control.values[RADIO_GEAR];
   Bound(commands[COMMAND_CAMERA], MIN_PPRZ, MAX_PPRZ);
 }
