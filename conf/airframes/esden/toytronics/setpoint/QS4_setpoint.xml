@@ -7,7 +7,7 @@
     <define name="MODE_1_2_TRANSITION_DEGREES_PER_SEC" value="30.0"/>
 
     <define name="HOVER_PITCH_TRIM_DEG"             value="0.0"/>
-    <define name="ABSOLUTE_FORWARD_PITCH_TRIM_DEG"  value="15.0"/>
+    <define name="ABSOLUTE_FORWARD_PITCH_TRIM_DEG"  value="8.0"/>
 
     <define name="TC_FADING_UPPER_DEG"  value="60.0"/>
     <define name="TC_FADING_LOWER_DEG"  value="30.0"/>
