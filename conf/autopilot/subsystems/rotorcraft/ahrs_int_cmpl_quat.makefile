@@ -11,6 +11,9 @@ AHRS_CFLAGS += -DUSE_AHRS_ALIGNER
 ifdef AHRS_ALIGNER_LED
 AHRS_CFLAGS += -DAHRS_ALIGNER_LED=$(AHRS_ALIGNER_LED)
 endif
+ifdef AHRS_ALT_ALIGNER_LED
+AHRS_CFLAGS += -DAHRS_ALT_ALIGNER_LED=$(AHRS_ALT_ALIGNER_LED)
+endif
 AHRS_CFLAGS += -DAHRS_TYPE_H=\"subsystems/ahrs/ahrs_int_cmpl.h\"
 AHRS_SRCS   += subsystems/ahrs.c
 AHRS_SRCS   += subsystems/ahrs/ahrs_int_cmpl.c

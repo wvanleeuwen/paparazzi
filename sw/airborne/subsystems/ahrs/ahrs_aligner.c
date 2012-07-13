@@ -64,9 +64,9 @@ void ahrs_aligner_run(void) {
   ref_sensor_samples[samples_idx] = imu.accel.z;
   samples_idx++;
 
-/*#ifdef AHRS_ALIGNER_LED
-  RunOnceEvery(200, {LED_TOGGLE(AHRS_ALIGNER_LED);});
-#endif*/
+#ifdef AHRS_ALT_ALIGNER_LED
+  RunOnceEvery(200, {LED_TOGGLE(AHRS_ALT_ALIGNER_LED);});
+#endif
 
   if (samples_idx >= SAMPLES_NB) {
     int32_t avg_ref_sensor = accel_sum.z;
@@ -100,9 +100,9 @@ void ahrs_aligner_run(void) {
 
     if (ahrs_aligner.low_noise_cnt > LOW_NOISE_TIME) {
       ahrs_aligner.status = AHRS_ALIGNER_LOCKED;
-/*#ifdef AHRS_ALIGNER_LED
-      LED_ON(AHRS_ALIGNER_LED);
-#endif*/
+#ifdef AHRS_ALT_ALIGNER_LED
+      LED_ON(AHRS_ALT_ALIGNER_LED);
+#endif
     }
   }
 
