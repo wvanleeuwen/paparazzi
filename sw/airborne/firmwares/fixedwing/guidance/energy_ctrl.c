@@ -58,6 +58,7 @@
 #include "generated/airframe.h"
 #include "firmwares/fixedwing/autopilot.h"
 #include "subsystems/ahrs.h"
+#include "subsystems/imu.h"
 
 /////// DEFAULT GUIDANCE_V NECESSITIES //////
 
@@ -97,6 +98,7 @@ float v_ctl_auto_throttle_of_airspeed_pgain;
 float v_ctl_auto_throttle_of_airspeed_igain;
 float v_ctl_auto_pitch_of_airspeed_pgain;
 float v_ctl_auto_pitch_of_airspeed_igain;
+float v_ctl_auto_pitch_of_airspeed_dgain;
 
 pprz_t v_ctl_throttle_setpoint;
 pprz_t v_ctl_throttle_slewed;
@@ -157,6 +159,11 @@ void v_ctl_climb_loop( void )
   // Speed Controller to PseudoControl
   float desired_acceleration = (v_ctl_auto_airspeed_setpoint - estimator_airspeed) * v_ctl_auto_pitch_of_airspeed_pgain;
 
+  // Actual Acceleration from IMU
+  struct FloatVect3 accel_float = {0,0,0};
+  ACCELS_FLOAT_OF_BFP(accel_float, imu.accel);
+  float xdotdot = accel_float.x / 9.81f - sin(ahrs_float.ltp_to_imu_euler.theta);
+
   // Outerloop Energy Commands
   v_ctl_gamma_setpoint = v_ctl_climb_setpoint / v_ctl_auto_airspeed_setpoint;
   v_ctl_vdot_setpoint = desired_acceleration / 9.81f;
@@ -176,7 +183,11 @@ void v_ctl_climb_loop( void )
 
   /* pitch pre-command */
   ins_pitch_neutral -=  v_ctl_auto_pitch_of_airspeed_igain * (serr) * dt;
-  float v_ctl_pitch_of_vz = - v_ctl_auto_pitch_of_airspeed_pgain * serr + (v_ctl_climb_setpoint /*+ d_err * v_ctl_auto_throttle_pitch_of_vz_dgain*/) * v_ctl_auto_throttle_pitch_of_vz_pgain;
+  float v_ctl_pitch_of_vz = 
+		+ (v_ctl_climb_setpoint /*+ d_err * v_ctl_auto_throttle_pitch_of_vz_dgain*/) * v_ctl_auto_throttle_pitch_of_vz_pgain
+		- v_ctl_auto_pitch_of_airspeed_pgain * serr 
+                + v_ctl_auto_pitch_of_airspeed_dgain * xdotdot;
+		;
 
   nav_pitch = v_ctl_pitch_of_vz;
 

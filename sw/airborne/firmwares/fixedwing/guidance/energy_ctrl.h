@@ -48,5 +48,6 @@ extern float v_ctl_auto_throttle_of_airspeed_pgain;
 extern float v_ctl_auto_throttle_of_airspeed_igain;
 extern float v_ctl_auto_pitch_of_airspeed_pgain;
 extern float v_ctl_auto_pitch_of_airspeed_igain;
+extern float v_ctl_auto_pitch_of_airspeed_dgain;
 
 #endif /* FW_V_CTL_H */

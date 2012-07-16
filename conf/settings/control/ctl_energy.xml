@@ -35,10 +35,11 @@
         <dl_setting MAX="1" MIN="0" STEP="0.01" VAR="v_ctl_auto_throttle_climb_throttle_increment" shortname="throttle_incr" param="V_CTL_AUTO_THROTTLE_CLIMB_THROTTLE_INCREMENT"/>
         <dl_setting MAX="1" MIN="0" STEP="0.01" VAR="v_ctl_auto_throttle_pitch_of_vz_pgain" shortname="pitch_of_vz" param="V_CTL_AUTO_THROTTLE_PITCH_OF_VZ_PGAIN"/>
 
-        <dl_setting MAX="1" MIN="0" STEP="0.01" VAR="v_ctl_auto_throttle_of_airspeed_pgain" shortname="P_th_air"/>
+        <dl_setting MAX="1." MIN="0" STEP="0.01" VAR="v_ctl_auto_throttle_of_airspeed_pgain" shortname="P_th_air"/>
         <dl_setting MAX="0.1" MIN="0" STEP="0.001" VAR="v_ctl_auto_throttle_of_airspeed_igain" shortname="I_th_air" />
-        <dl_setting MAX="1" MIN="0" STEP="0.01" VAR="v_ctl_auto_pitch_of_airspeed_pgain" shortname="P_pitch_air" />
+        <dl_setting MAX="1." MIN="0" STEP="0.001" VAR="v_ctl_auto_pitch_of_airspeed_pgain" shortname="P_pitch_air" />
         <dl_setting MAX="0.1" MIN="0" STEP="0.001" VAR="v_ctl_auto_pitch_of_airspeed_igain" shortname="I_pitch_air" />
+        <dl_setting MAX="0.1" MIN="0" STEP="0.001" VAR="v_ctl_auto_pitch_of_airspeed_dgain" shortname="I_pitch_air" />
       </dl_settings>
 
 <!--
