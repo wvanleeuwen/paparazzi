@@ -38,6 +38,7 @@
     <define name="DIGITAL_CAM" />
     <file name="led_cam_ctrl.c"/>
     <file name="dc.c"/>
+    <define name="SENSOR_SYNC_SEND" value="1" />
 
   </makefile>
 
