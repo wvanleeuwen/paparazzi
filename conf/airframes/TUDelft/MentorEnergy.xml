@@ -169,17 +169,6 @@
   </section>
 
 
-  <section name="AGGRESSIVE" prefix="AGR_">
-    <define name="BLEND_START" value="70"/>
-    <define name="BLEND_END" value="60"/>
-    <define name="CLIMB_THROTTLE" value="0.949999988079"/>
-    <define name="CLIMB_PITCH" value="0.352999985218"/>
-    <define name="DESCENT_THROTTLE" value="0."/>
-    <define name="DESCENT_PITCH" value="-0.252000004053"/>
-    <define name="CLIMB_NAV_RATIO" value="0.8"/>
-    <define name="DESCENT_NAV_RATIO" value="1.0"/>
-  </section>
-
   <section name="FAILSAFE" prefix="FAILSAFE_">
     <define name="DEFAULT_THROTTLE" value="0.35" unit="%"/>
     <define name="DEFAULT_ROLL" value="0.17" unit="rad"/>
@@ -237,6 +226,8 @@
        <define name="USE_0"/>
        <define name="USE_1"/>
 
+       <define name="USE_AHRS_GPS_ACCELERATIONS" />
+
       <configure name="AHRS_ALIGNER_LED" value="1"/>
       <configure name="CPU_LED" value="1"/>
     </target>
@@ -271,7 +262,7 @@
     <!-- Actuators -->
     <subsystem name="control" type="energy"/>
     <!-- Sensors -->
-    <subsystem name="navigation" type="extra"/>
+    <subsystem name="navigation"/>
     <subsystem name="gps" type="ublox">
       <configure name="GPS_PORT" value="UART1"/>
     </subsystem>
