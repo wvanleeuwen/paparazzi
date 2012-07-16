@@ -488,24 +488,8 @@ void navigation_task( void ) {
 #endif
     if (lateral_mode >=LATERAL_MODE_COURSE)
       h_ctl_course_loop(); /* aka compute nav_desired_roll */
-    if (v_ctl_mode == V_CTL_MODE_AUTO_THROTTLE)
-      v_ctl_throttle_setpoint = nav_throttle_setpoint;
 
-#if defined V_CTL_THROTTLE_IDLE
-    Bound(v_ctl_throttle_setpoint, TRIM_PPRZ(V_CTL_THROTTLE_IDLE*MAX_PPRZ), MAX_PPRZ);
-#endif
-
-#ifdef V_CTL_POWER_CTL_BAT_NOMINAL
-    if (vsupply > 0.) {
-      v_ctl_throttle_setpoint *= 10. * V_CTL_POWER_CTL_BAT_NOMINAL / (float)vsupply;
-      v_ctl_throttle_setpoint = TRIM_UPPRZ(v_ctl_throttle_setpoint);
-    }
-#endif
-
-    h_ctl_pitch_setpoint = nav_pitch;
-    Bound(h_ctl_pitch_setpoint, H_CTL_PITCH_MIN_SETPOINT, H_CTL_PITCH_MAX_SETPOINT);
-    if (kill_throttle || (!estimator_flight_time && !launch))
-      v_ctl_throttle_setpoint = 0;
+    // climb_loop(); //4Hz
   }
   energy += ((float)current) / 3600.0f * 0.25f;	// mAh = mA * dt (4Hz -> hours)
 }
@@ -525,10 +509,28 @@ void attitude_loop( void ) {
 
   if (pprz_mode >= PPRZ_MODE_AUTO2)
   {
-    if (v_ctl_mode >= V_CTL_MODE_AUTO_CLIMB)
+    if (v_ctl_mode == V_CTL_MODE_AUTO_THROTTLE)
+      v_ctl_throttle_setpoint = nav_throttle_setpoint;
+    else if (v_ctl_mode >= V_CTL_MODE_AUTO_CLIMB)
     {
       v_ctl_climb_loop();
     }
+
+#if defined V_CTL_THROTTLE_IDLE
+    Bound(v_ctl_throttle_setpoint, TRIM_PPRZ(V_CTL_THROTTLE_IDLE*MAX_PPRZ), MAX_PPRZ);
+#endif
+
+#ifdef V_CTL_POWER_CTL_BAT_NOMINAL
+    if (vsupply > 0.) {
+      v_ctl_throttle_setpoint *= 10. * V_CTL_POWER_CTL_BAT_NOMINAL / (float)vsupply;
+      v_ctl_throttle_setpoint = TRIM_UPPRZ(v_ctl_throttle_setpoint);
+    }
+#endif
+
+    h_ctl_pitch_setpoint = nav_pitch;
+    Bound(h_ctl_pitch_setpoint, H_CTL_PITCH_MIN_SETPOINT, H_CTL_PITCH_MAX_SETPOINT);
+    if (kill_throttle || (!estimator_flight_time && !launch))
+      v_ctl_throttle_setpoint = 0;
   }
 
   h_ctl_attitude_loop(); /* Set  h_ctl_aileron_setpoint & h_ctl_elevator_setpoint */
