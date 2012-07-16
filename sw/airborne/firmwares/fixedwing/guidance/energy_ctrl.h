@@ -50,4 +50,10 @@ extern float v_ctl_auto_pitch_of_airspeed_pgain;
 extern float v_ctl_auto_pitch_of_airspeed_igain;
 extern float v_ctl_auto_pitch_of_airspeed_dgain;
 
+extern float v_ctl_energy_total_pgain;
+extern float v_ctl_energy_total_igain;
+
+extern float v_ctl_energy_diff_pgain;
+extern float v_ctl_energy_diff_igain;
+
 #endif /* FW_V_CTL_H */
