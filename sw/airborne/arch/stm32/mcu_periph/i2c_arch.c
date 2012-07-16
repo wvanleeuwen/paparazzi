@@ -600,15 +600,15 @@ void i2c2_hw_init(void) {
   t.len_r = 0;
   t.len_w = 1;
 
-  for (int i=0; i <5000; i++)
+  for (int i=0; i <2000; i++)
   {
     i2c2_hw_init_sub();
     for (volatile int j=0; j<5000;j++);
   }
 
-  i2c_submit(&i2c2, &t);
+  //i2c_submit(&i2c2, &t);
 
-  for (int i=0; i <5000; i++)
+  for (int i=0; i <2000; i++)
   {
     i2c2_hw_init_sub();
     for (volatile int j=0; j<5000;j++);
