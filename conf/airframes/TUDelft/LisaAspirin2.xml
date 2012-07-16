@@ -186,20 +186,20 @@
 
   <section name="Photogrammetry" prefix="PHOTOGRAMMETRY_">
     <!-- Camera Parameters -->
-    <define name="FOCAL_LENGTH" value="8.3" unit="mm"/>
-    <define name="SENSOR_WIDTH" value="6.66" unit="mm"/>                <!-- In direction of the plane's wings -->
-    <define name="SENSOR_HEIGHT" value="5.32" unit="mm"/>               <!-- In direction of the plane's nose -->
+    <define name="FOCAL_LENGTH" value="8.3f" unit="mm"/>
+    <define name="SENSOR_WIDTH" value="6.66f" unit="mm"/>                <!-- In direction of the plane's wings -->
+    <define name="SENSOR_HEIGHT" value="5.32f" unit="mm"/>               <!-- In direction of the plane's nose -->
     <define name="PIXELS_WIDTH" value="1280" unit=""/>
 
     <!-- Photogrammetry Parameters : defined per flightplan -->
-    <define name="OVERLAP" value="0.5" unit="PROCENT"/>
-    <define name="SIDELAP" value="0.5" unit="PROCENT"/>
-    <define name="RESOLUTION" value="50" unit="mm pixel projection"/>
+    <define name="OVERLAP" value="0.5f" unit="PROCENT"/>
+    <define name="SIDELAP" value="0.5f" unit="PROCENT"/>
+    <define name="RESOLUTION" value="70" unit="mm pixel projection"/>
 
     <!-- Flight Safety Parameters -->
     <define name="HEIGHT_MIN" value="40" unit="m"/>
     <define name="HEIGHT_MAX" value="500" unit="m"/>
-    <define name="RADIUS_MIN" value="70" unit="m"/>
+    <define name="RADIUS_MIN" value="60" unit="m"/>
   </section>
 
 

@@ -221,12 +221,13 @@
       <define name="NAV_LIGHT_MODE_DEFAULT" value="4"/>
     </load>
 
+    <load name="airspeed_ets.xml"/>
 
-    <load name="adc_generic.xml">
+<!--    <load name="adc_generic.xml">
       <configure name="ADC_CHANNEL_GENERIC1" value="ADC_3" />
     </load>
 
-<!--       <load name="digital_cam_i2c.xml"/>  -->
+       <load name="digital_cam_i2c.xml"/>  -->
 
  <!--    <load name="ins_ppzuavimu.xml" /> -->
 
@@ -240,6 +241,9 @@
   <firmware name="fixedwing">
 
     <target name="ap" board="TUDelft/fireswarm_1.0">
+       <define name="AIRSPEED_ETS_I2C_DEV" value="i2c1"/>
+       <define name="USE_I2C1"/>
+
       <define name="LISA_M_LONGITUDINAL_X"/>
 
       <configure name="PERIODIC_FREQUENCY" value="120"/>
@@ -277,7 +281,7 @@
     <!-- Communication -->
     <subsystem name="radio_control" type="ppm"/>
     <subsystem name="telemetry" type="xbee_api">
-      <configure name="MODEM_BAUD" value="B57600"/>
+      <configure name="MODEM_BAUD" value="B9600"/>
       <configure name="MODEM_PORT" value="UART2"/>
     </subsystem>
 
