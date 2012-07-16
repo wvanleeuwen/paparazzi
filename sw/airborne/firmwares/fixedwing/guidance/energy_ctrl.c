@@ -150,6 +150,20 @@ void v_ctl_altitude_loop( void )
 
 const float dt = 0.01f;
 
+float lp_xdotdot[5];
+
+static float low_pass_xdotdot(float v);
+static float low_pass_xdotdot(float v)
+{
+  lp_xdotdot[4] += (v - lp_xdotdot[4]) / 3;
+  lp_xdotdot[3] += (lp_xdotdot[4] - lp_xdotdot[3]) / 3;
+  lp_xdotdot[2] += (lp_xdotdot[3] - lp_xdotdot[2]) / 3;
+  lp_xdotdot[1] += (lp_xdotdot[2] - lp_xdotdot[1]) / 3;
+  lp_xdotdot[0] += (lp_xdotdot[1] - lp_xdotdot[0]) / 3;
+
+  return lp_xdotdot[0];
+}
+
 void v_ctl_climb_loop( void ) 
 {
   float gamma_err  = (estimator_z_dot - v_ctl_climb_setpoint) / v_ctl_auto_airspeed_setpoint;
@@ -162,7 +176,7 @@ void v_ctl_climb_loop( void )
   // Actual Acceleration from IMU
   struct FloatVect3 accel_float = {0,0,0};
   ACCELS_FLOAT_OF_BFP(accel_float, imu.accel);
-  float xdotdot = accel_float.x / 9.81f - sin(ahrs_float.ltp_to_imu_euler.theta);
+  float xdotdot = low_pass_xdotdot( accel_float.x / 9.81f - sin(ahrs_float.ltp_to_imu_euler.theta) );
 
   // Outerloop Energy Commands
   v_ctl_gamma_setpoint = v_ctl_climb_setpoint / v_ctl_auto_airspeed_setpoint;

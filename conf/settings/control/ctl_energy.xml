@@ -39,7 +39,7 @@
         <dl_setting MAX="0.1" MIN="0" STEP="0.001" VAR="v_ctl_auto_throttle_of_airspeed_igain" shortname="I_th_air" />
         <dl_setting MAX="1." MIN="0" STEP="0.001" VAR="v_ctl_auto_pitch_of_airspeed_pgain" shortname="P_pitch_air" />
         <dl_setting MAX="0.1" MIN="0" STEP="0.001" VAR="v_ctl_auto_pitch_of_airspeed_igain" shortname="I_pitch_air" />
-        <dl_setting MAX="0.1" MIN="0" STEP="0.001" VAR="v_ctl_auto_pitch_of_airspeed_dgain" shortname="I_pitch_air" />
+        <dl_setting MAX="5." MIN="0" STEP="0.01" VAR="v_ctl_auto_pitch_of_airspeed_dgain" shortname="D_pitch_air" />
       </dl_settings>
 
 <!--
