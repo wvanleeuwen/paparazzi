@@ -102,10 +102,10 @@
   </section>
 
   <section name="MISC">
-    <define name="CLIMB_AIRSPEED" value="12." unit="m/s"/>
-    <define name="NOMINAL_AIRSPEED" value="14." unit="m/s"/>
-    <define name="GLIDE_AIRSPEED" value="11." unit="m/s"/>
-    <define name="RACE_AIRSPEED" value="17." unit="m/s"/>
+    <define name="CLIMB_AIRSPEED" value="14." unit="m/s"/>
+    <define name="NOMINAL_AIRSPEED" value="16." unit="m/s"/>
+    <define name="GLIDE_AIRSPEED" value="12." unit="m/s"/>
+    <define name="RACE_AIRSPEED" value="25." unit="m/s"/>
 
     <define name="CARROT" value="5." unit="s"/>
     <define name="CONTROL_RATE" value="60" unit="Hz"/>

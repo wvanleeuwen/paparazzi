@@ -128,9 +128,6 @@ void v_ctl_init( void ) {
  * \brief Computes v_ctl_climb_setpoint and sets v_ctl_auto_throttle_submode
  */
 
-float v_ctl_gamma_setpoint = 0;
-float v_ctl_vdot_setpoint = 0;
-
 void v_ctl_altitude_loop( void ) 
 {
   // Imput Checks
@@ -166,8 +163,7 @@ static float low_pass_xdotdot(float v)
 
 void v_ctl_climb_loop( void ) 
 {
-  float gamma_err  = (estimator_z_dot - v_ctl_climb_setpoint) / v_ctl_auto_airspeed_setpoint;
-
+  // Airspeed outerloop
   float serr = v_ctl_auto_airspeed_setpoint - estimator_airspeed;
 
   // Speed Controller to PseudoControl
@@ -176,17 +172,20 @@ void v_ctl_climb_loop( void )
   // Actual Acceleration from IMU
   struct FloatVect3 accel_float = {0,0,0};
   ACCELS_FLOAT_OF_BFP(accel_float, imu.accel);
-  float xdotdot = low_pass_xdotdot( accel_float.x / 9.81f - sin(ahrs_float.ltp_to_imu_euler.theta) );
+  float vdot = low_pass_xdotdot( accel_float.x / 9.81f - sin(ahrs_float.ltp_to_imu_euler.theta) );
 
-  // Outerloop Energy Commands
-  v_ctl_gamma_setpoint = v_ctl_climb_setpoint / v_ctl_auto_airspeed_setpoint;
-  v_ctl_vdot_setpoint = desired_acceleration / 9.81f;
+  // Acceleration Error
+  float vdot_err = (desired_acceleration - vdot) / 9.81f;
+
+  // Flight Path Outerloop
+  float gamma_err  = (estimator_z_dot - v_ctl_climb_setpoint) / v_ctl_auto_airspeed_setpoint;
+
 
   // Auto Cruise Throttle
   if (v_ctl_mode >= V_CTL_MODE_AUTO_CLIMB)
   {
     v_ctl_auto_throttle_nominal_cruise_throttle += v_ctl_auto_throttle_of_airspeed_igain * serr * dt;
-    if (v_ctl_auto_throttle_nominal_cruise_throttle < 0.0f) v_ctl_auto_throttle_nominal_cruise_throttle = 0.0f;
+    if (v_ctl_auto_throttle_nominal_cruise_throttle < 0.1f) v_ctl_auto_throttle_nominal_cruise_throttle = 0.1f;
     else if (v_ctl_auto_throttle_nominal_cruise_throttle > 1.0f) v_ctl_auto_throttle_nominal_cruise_throttle = 1.0f;
   }
 
@@ -200,7 +199,7 @@ void v_ctl_climb_loop( void )
   float v_ctl_pitch_of_vz = 
 		+ (v_ctl_climb_setpoint /*+ d_err * v_ctl_auto_throttle_pitch_of_vz_dgain*/) * v_ctl_auto_throttle_pitch_of_vz_pgain
 		- v_ctl_auto_pitch_of_airspeed_pgain * serr 
-                + v_ctl_auto_pitch_of_airspeed_dgain * xdotdot;
+                + v_ctl_auto_pitch_of_airspeed_dgain * vdot;
 		;
 
   nav_pitch = v_ctl_pitch_of_vz;
