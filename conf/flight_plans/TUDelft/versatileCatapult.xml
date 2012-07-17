@@ -110,12 +110,12 @@
     <block name="final">
       <set var="v_ctl_auto_throttle_cruise_throttle" value="0.69"/>
       <exception cond="ground_alt + 10 > estimator_z" deroute="flare"/>
-      <go from="AF" hmode="route" wp="TD"/>
+      <go from="AF" hmode="route" wp="TD" vmode="glide" />
     </block>
 
     <block name="flare">
       <set var="v_ctl_auto_throttle_cruise_throttle" value="0.3"/>
-      <go from="AF" hmode="route" wp="TD"  approaching_time="0"/>
+      <go from="AF" hmode="route" wp="TD"  approaching_time="0" vmode="glide" />
     </block>
 
     <block name="Ground" strip_button="Kill After Land" strip_icon="kill.png">
