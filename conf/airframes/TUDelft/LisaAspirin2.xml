@@ -216,8 +216,10 @@
     </load>
 
 
-    <load name="adc_generic.xml">
-      <configure name="ADC_CHANNEL_GENERIC1" value="ADC_3" />
+    <load name="airspeed_adc.xml">
+      <configure name="ADC_AIRSPEED" value="ADC_3" />
+      <define name="AIRSPEED_SCALE" value="1" />
+      <define name="AIRSPEED_BIAS" value="0" />
     </load>
 
 <!--       <load name="digital_cam_i2c.xml"/>  -->

@@ -100,6 +100,13 @@ float v_ctl_auto_pitch_of_airspeed_pgain;
 float v_ctl_auto_pitch_of_airspeed_igain;
 float v_ctl_auto_pitch_of_airspeed_dgain;
 
+float v_ctl_energy_total_pgain;
+float v_ctl_energy_total_igain;
+
+float v_ctl_energy_diff_pgain;
+float v_ctl_energy_diff_igain;
+
+
 pprz_t v_ctl_throttle_setpoint;
 pprz_t v_ctl_throttle_slewed;
 
@@ -178,13 +185,20 @@ void v_ctl_climb_loop( void )
   float vdot_err = (desired_acceleration - vdot) / 9.81f;
 
   // Flight Path Outerloop
-  float gamma_err  = (estimator_z_dot - v_ctl_climb_setpoint) / v_ctl_auto_airspeed_setpoint;
+  float gamma_err  = (v_ctl_climb_setpoint - estimator_z_dot) / v_ctl_auto_airspeed_setpoint;
 
+  // Total Energy Error:
+  float en_tot_err = gamma_err + vdot_err;
+
+  // Energy Distribution Error:
+  float en_dis_err = gamma_err - vdot_err;
 
   // Auto Cruise Throttle
   if (v_ctl_mode >= V_CTL_MODE_AUTO_CLIMB)
   {
-    v_ctl_auto_throttle_nominal_cruise_throttle += v_ctl_auto_throttle_of_airspeed_igain * serr * dt;
+    v_ctl_auto_throttle_nominal_cruise_throttle += 
+        	  v_ctl_auto_throttle_of_airspeed_igain * serr * dt
+		+ en_tot_err * v_ctl_energy_total_igain * dt;
     if (v_ctl_auto_throttle_nominal_cruise_throttle < 0.1f) v_ctl_auto_throttle_nominal_cruise_throttle = 0.1f;
     else if (v_ctl_auto_throttle_nominal_cruise_throttle > 1.0f) v_ctl_auto_throttle_nominal_cruise_throttle = 1.0f;
   }
@@ -192,7 +206,8 @@ void v_ctl_climb_loop( void )
   // Total Controller
   float controlled_throttle = v_ctl_auto_throttle_nominal_cruise_throttle
     + v_ctl_auto_throttle_climb_throttle_increment * v_ctl_climb_setpoint
-    + v_ctl_auto_throttle_of_airspeed_pgain * serr;
+    + v_ctl_auto_throttle_of_airspeed_pgain * serr
+    + v_ctl_energy_total_pgain * en_tot_err;
 
   /* pitch pre-command */
   ins_pitch_neutral -=  v_ctl_auto_pitch_of_airspeed_igain * (serr) * dt;
