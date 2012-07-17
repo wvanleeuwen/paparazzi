@@ -23,9 +23,9 @@
     <define name="FORWARD_X_D"      value="-153"/>
     <define name="FORWARD_X_DD"     value="0"/>
 
-    <define name="FORWARD_Y_P"      value="-320"/>
+    <define name="FORWARD_Y_P"      value="-242"/>
     <define name="FORWARD_Y_I"      value="-0"/>
-    <define name="FORWARD_Y_D"      value="-130"/>
+    <define name="FORWARD_Y_D"      value="-104"/>
     <define name="FORWARD_Y_DD"     value="400"/>
 
     <define name="FORWARD_Z_P"      value="-315"/>
