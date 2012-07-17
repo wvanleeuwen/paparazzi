@@ -583,7 +583,13 @@ toytronics_set_sp_absolute_forward_from_rc()
   INT32_VECT3_SCALE_2(toytronics_holder_gains.i,toytronics_forward_gains.i,1,1);
   if (rct>0.45) {
     set_stabilization_gains(&toytronics_holder_gains); }
-  if (rct<0.40) {
+  if (rct<0.44 && rct>0.29) {
+    VECT3_ASSIGN(toytronics_holder_gains.p,-300,-180,-315);
+    VECT3_ASSIGN(toytronics_holder_gains.d,-105,-80,-254);
+    VECT3_ASSIGN(toytronics_holder_gains.dd,235,450,0);
+    INT32_VECT3_SCALE_2(toytronics_holder_gains.i,toytronics_forward_gains.i,1,1);
+    set_stabilization_gains(&toytronics_holder_gains); }
+  if (rct<0.28) {
     set_stabilization_gains(&toytronics_forward_gains); }
   //****************scale gains based on the throttle setting***********************
 
@@ -672,11 +678,17 @@ toytronics_set_sp_incremental_from_rc()
   VECT3_ASSIGN(toytronics_holder_gains.p,-158,-129,-315);
   VECT3_ASSIGN(toytronics_holder_gains.d,-72,-62,-254);
   VECT3_ASSIGN(toytronics_holder_gains.dd,470,500,0);
-  INT32_VECT3_SCALE_2(toytronics_holder_gains.i,toytronics_aerobatic_gains.i,1,1);
+  INT32_VECT3_SCALE_2(toytronics_holder_gains.i,toytronics_forward_gains.i,1,1);
   if (rct>0.45) {
     set_stabilization_gains(&toytronics_holder_gains); }
-  if (rct<0.40) {
-    set_stabilization_gains(&toytronics_aerobatic_gains); }
+  if (rct<0.44 && rct>0.29) {
+    VECT3_ASSIGN(toytronics_holder_gains.p,-300,-180,-315);
+    VECT3_ASSIGN(toytronics_holder_gains.d,-105,-80,-254);
+    VECT3_ASSIGN(toytronics_holder_gains.dd,235,450,0);
+    INT32_VECT3_SCALE_2(toytronics_holder_gains.i,toytronics_forward_gains.i,1,1);
+    set_stabilization_gains(&toytronics_holder_gains); }
+  if (rct<0.28) {
+    set_stabilization_gains(&toytronics_forward_gains); }
   //****************scale gains based on the throttle setting***********************
 
    // rotation vector in body frame
