@@ -90,6 +90,7 @@ float v_ctl_auto_airspeed_setpoint; ///< in meters per second
 float v_ctl_climb_setpoint;
 
 /* "auto throttle" inner loop parameters */
+float v_ctl_auto_throttle_cruise_throttle;
 float v_ctl_auto_throttle_nominal_cruise_throttle;
 float v_ctl_auto_throttle_climb_throttle_increment;
 float v_ctl_auto_throttle_pitch_of_vz_pgain;

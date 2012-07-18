@@ -61,6 +61,7 @@ extern float v_ctl_altitude_error;    ///< in meters, (setpoint - alt) -> positi
 extern float v_ctl_auto_airspeed_controlled;
 extern float v_ctl_auto_groundspeed_setpoint;
 
+extern float v_ctl_auto_throttle_cruise_throttle;
 extern pprz_t v_ctl_throttle_setpoint;
 extern pprz_t v_ctl_throttle_slewed;
 

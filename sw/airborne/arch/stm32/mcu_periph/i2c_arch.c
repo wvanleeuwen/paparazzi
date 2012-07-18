@@ -509,9 +509,16 @@ void i2c1_hw_init_sub(void) {
 }
 
 void i2c1_hw_init(void) {
-  for (int i=0; i <5000; i++)
+  for (int i=0; i <500; i++)
   {
     i2c1_hw_init_sub();
+    for (volatile int j=0; j<5000;j++);
+  }
+
+  for (int i=0; i <1000; i++)
+  {
+    i2c1_hw_init_sub();
+    for (volatile int j=0; j<5000;j++);
   }
 
 }
