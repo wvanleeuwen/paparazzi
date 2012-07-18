@@ -211,11 +211,16 @@ void v_ctl_climb_loop( void )
     + v_ctl_energy_total_pgain * en_tot_err;
 
   /* pitch pre-command */
-  ins_pitch_neutral -=  v_ctl_auto_pitch_of_airspeed_igain * (serr) * dt;
+  if (v_ctl_mode >= V_CTL_MODE_AUTO_CLIMB)
+  {
+    ins_pitch_neutral -=  v_ctl_auto_pitch_of_airspeed_igain * (serr) * dt
+                          - v_ctl_energy_diff_igain * en_dis_err * dt;
+  }
   float v_ctl_pitch_of_vz = 
 		+ (v_ctl_climb_setpoint /*+ d_err * v_ctl_auto_throttle_pitch_of_vz_dgain*/) * v_ctl_auto_throttle_pitch_of_vz_pgain
 		- v_ctl_auto_pitch_of_airspeed_pgain * serr 
-                + v_ctl_auto_pitch_of_airspeed_dgain * vdot;
+                + v_ctl_auto_pitch_of_airspeed_dgain * vdot
+                + v_ctl_energy_diff_pgain * en_dis_err;
 		;
 
   nav_pitch = v_ctl_pitch_of_vz;
