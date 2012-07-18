@@ -36,8 +36,8 @@
     <define name="AUTOPILOT_KILL_WITHOUT_AHRS"  value="TRUE"/>
 
     <!-- for kill switch: -->
-    <!--<define name="AUTOPILOT_ARMING_KILL_SWITCH"/>-->
-    <define name="AUTOPILOT_ARMING_THROTTLE"/>
+    <define name="AUTOPILOT_ARMING_KILL_SWITCH"/><!--
+    <define name="AUTOPILOT_ARMING_THROTTLE"/>-->
   </section>
 
   <command_laws>
@@ -109,7 +109,7 @@
   <section name="STABILIZATION_ATTITUDE" prefix="STABILIZATION_ATTITUDE_">
     <!-- setpoints -->
     <define name="SP_MAX_PHI"     	value="RadOfDeg(45.)"/>
-    <define name="SP_MAX_THETA"   	value="RadOfDeg(120.)"/> <!-- for plane mode -->
+    <define name="SP_MAX_THETA"   	value="RadOfDeg(60.)"/> <!-- for plane mode -->
     <define name="SP_MAX_PSI"     	value="RadOfDeg(45.)"/>
     <define name="SP_MAX_R"       	value="RadOfDeg(90.)"/>
     <define name="SP_MAX_P"       	value="RadOfDeg(90.)"/>
