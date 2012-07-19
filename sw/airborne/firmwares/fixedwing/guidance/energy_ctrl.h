@@ -35,6 +35,7 @@
 extern float v_ctl_altitude_setpoint; ///< in meters above MSL
 extern float v_ctl_altitude_pre_climb; ///< Path Angle
 extern float v_ctl_altitude_pgain;
+extern float v_ctl_airspeed_pgain;
 
 extern float v_ctl_auto_airspeed_setpoint; ///< in meters per second
 

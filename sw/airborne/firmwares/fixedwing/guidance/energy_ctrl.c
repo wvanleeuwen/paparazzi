@@ -82,6 +82,7 @@ float v_ctl_auto_groundspeed_setpoint = 0;
 float v_ctl_altitude_setpoint;
 float v_ctl_altitude_pre_climb; ///< Path Angle
 float v_ctl_altitude_pgain;
+float v_ctl_airspeed_pgain;
 float v_ctl_altitude_error;    ///< in meters, (setpoint - alt) -> positive = too low
 
 float v_ctl_auto_airspeed_setpoint; ///< in meters per second
