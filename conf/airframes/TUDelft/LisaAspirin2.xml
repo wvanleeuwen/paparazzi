@@ -218,8 +218,8 @@
 
     <load name="airspeed_adc.xml">
       <configure name="ADC_AIRSPEED" value="ADC_3" />
-      <define name="AIRSPEED_SCALE" value="1" />
-      <define name="AIRSPEED_BIAS" value="0" />
+      <define name="AIRSPEED_SCALE" value="0.017" />
+      <define name="AIRSPEED_BIAS" value="1577" />
     </load>
 
 <!--       <load name="digital_cam_i2c.xml"/>  -->
