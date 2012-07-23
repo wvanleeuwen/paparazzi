@@ -98,7 +98,7 @@ http://paparazzi.enac.fr/w/index.php?title=Theory_of_Operation
 <!-- To still be able to use rudder, which is needed with sidewind landing in auto1 stabilization mode only YAW -->
     <!-- <set command="YAW"      value="@YAW"/> -->
 <!-- To be able to do a manual drop test even in autonomous modes-->
-    <set command="HATCH" value="@EXTRA1"/>
+   <!-- <set command="HATCH" value="@EXTRA1"/> -->
   </auto_rc_commands>
 
   <command_laws>
@@ -124,9 +124,9 @@ http://paparazzi.enac.fr/w/index.php?title=Theory_of_Operation
 <!-- NEUTRAL value below set via caliberation with all sensors covert and intill set to 0 the read via telemetry data and in this case 515 etc filled in later and reuploaded -->
 <!-- In this plane IR1 points to side to side, the latereal axis ??-->
 <!-- In this plane IR2 points to front and back, the longitudinal axis ??-->
-    <define name="ADC_IR1_NEUTRAL" value="512"/>
-    <define name="ADC_IR2_NEUTRAL" value="512"/>
-    <define name="ADC_TOP_NEUTRAL" value="362"/>
+    <define name="ADC_IR1_NEUTRAL" value="532"/>
+    <define name="ADC_IR2_NEUTRAL" value="532"/>
+    <define name="ADC_TOP_NEUTRAL" value="(362-160)"/>
 
 <!-- The three axis must give similar values for similar air to ground contrasts. -->
 <!-- If you e.g. have a different brand of IR piles for straight up n down sensors. -->
