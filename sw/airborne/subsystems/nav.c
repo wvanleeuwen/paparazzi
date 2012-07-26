@@ -151,7 +151,7 @@ void nav_circle_XY(float x, float y, float radius) {
   float start_alt = waypoints[_last_wp].a; \
   float diff_alt = waypoints[_wp].a - start_alt; \
   float alt = start_alt + nav_leg_progress * diff_alt; \
-  float pre_climb = 0.0f; \
+  float pre_climb = -1.0f; \
   NavVerticalAltitudeMode(alt, pre_climb); \
 }
 

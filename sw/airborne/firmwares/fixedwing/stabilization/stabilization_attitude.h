@@ -102,4 +102,6 @@ extern float h_ctl_roll_rate_gain;
 extern float h_ctl_pitch_attitude_igain;
 extern float h_ctl_roll_attitude_igain;
 
+#define fw_h_ctl_Set
+
 #endif /* FW_H_CTL_H */
