@@ -126,7 +126,7 @@ http://paparazzi.enac.fr/w/index.php?title=Theory_of_Operation
 <!-- In this plane IR2 points to front and back, the longitudinal axis ??-->
     <define name="ADC_IR1_NEUTRAL" value="532"/>
     <define name="ADC_IR2_NEUTRAL" value="532"/>
-    <define name="ADC_TOP_NEUTRAL" value="(362-160)"/>
+    <define name="ADC_TOP_NEUTRAL" value="512"/>
 
 <!-- The three axis must give similar values for similar air to ground contrasts. -->
 <!-- If you e.g. have a different brand of IR piles for straight up n down sensors. -->
