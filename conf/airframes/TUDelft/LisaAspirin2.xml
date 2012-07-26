@@ -73,7 +73,7 @@
 
   <section name="INS" prefix="INS_">
     <define name="ROLL_NEUTRAL_DEFAULT" value="3.9" unit="deg"/>
-    <define name="PITCH_NEUTRAL_DEFAULT" value="6.1" unit="deg"/>
+    <define name="PITCH_NEUTRAL_DEFAULT" value="10.8670043945" unit="deg"/>
   </section>
 
   <section name="AUTO1" prefix="AUTO1_">
@@ -105,12 +105,12 @@
     <define name="GLIDE_PITCH_TRIM" value="0" unit="deg"/>
   </section>
 
-  <section name="CATAPULT" prefix="NAV_CATAPULT_" >
-    <define name="MOTOR_DELAY" value="23" />
-    <define name="HEADING_DELAY" value="160" />
-    <define name="ACCELERATION_THRESHOLD" value="1.75" />
-    <define name="INITIAL_PITCH" value="0.2" />
-    <define name="INITIAL_THROTTLE" value="1.0" />
+  <section name="CATAPULT" prefix="NAV_CATAPULT_">
+    <define name="MOTOR_DELAY" value="23"/>
+    <define name="HEADING_DELAY" value="160"/>
+    <define name="ACCELERATION_THRESHOLD" value="1.75"/>
+    <define name="INITIAL_PITCH" value="0.2"/>
+    <define name="INITIAL_THROTTLE" value="1.0"/>
   </section>
 
   <section name="VERTICAL CONTROL" prefix="V_CTL_">
@@ -152,7 +152,7 @@
     <define name="ROLL_RATE_GAIN" value="250."/>
 
     <define name="ROLL_ATTITUDE_IGAIN" value="0.0"/>
-    <define name="PITCH_ATTITUDE_IGAIN" value="0.0"/>
+    <define name="PITCH_ATTITUDE_IGAIN" value="0.0010000000475"/>
 
   </section>
 
@@ -160,9 +160,9 @@
     <define name="BLEND_START" value="40"/><!-- Altitude Error to Initiate Aggressive Climb CANNOT BE ZERO!!-->
     <define name="BLEND_END" value="20"/><!-- Altitude Error to Blend Aggressive to Regular Climb Modes  CANNOT BE ZERO!!-->
     <define name="CLIMB_THROTTLE" value="1.00"/><!-- Gaz for Aggressive Climb -->
-    <define name="CLIMB_PITCH" value="0.2"/><!-- Pitch for Aggressive Climb -->
+    <define name="CLIMB_PITCH" value="0.101999998093"/><!-- Pitch for Aggressive Climb -->
     <define name="DESCENT_THROTTLE" value="0.33"/><!-- Gaz for Aggressive Decent -->
-    <define name="DESCENT_PITCH" value="-0.18"/><!-- Pitch for Aggressive Decent -->
+    <define name="DESCENT_PITCH" value="-0.208000004292"/><!-- Pitch for Aggressive Decent -->
     <define name="CLIMB_NAV_RATIO" value="0.8"/><!-- Percent Navigation for Altitude Error Equal to Start Altitude -->
     <define name="DESCENT_NAV_RATIO" value="0.9"/>
   </section>
@@ -177,10 +177,10 @@
     <define name="DELAY_WITHOUT_GPS" value="4" unit="s"/>
   </section>
 
-  <section name="GLS_APPROACH" prefix="APP_" >
-    <define name="ANGLE" value="4" />
-    <define name="INTERCEPT_AF_TOD" value="15" />
-    <define name="TARGET_SPEED" value="(65.0/3.6)" />
+  <section name="GLS_APPROACH" prefix="APP_">
+    <define name="ANGLE" value="4"/>
+    <define name="INTERCEPT_AF_TOD" value="15"/>
+    <define name="TARGET_SPEED" value="(65.0/3.6)"/>
   </section>
 
   <section name="DIGITAL_CAMERA" prefix="DC_">
@@ -209,8 +209,8 @@
 
   <modules>
     <load name="gps_ubx_ucenter.xml"/>
-    <load name="nav_catapult.xml" />
-    <load name="photogrammetry_calculator.xml" />
+    <load name="nav_catapult.xml"/>
+    <load name="photogrammetry_calculator.xml"/>
 
     <load name="light.xml">
       <define name="LIGHT_LED_STROBE" value="4"/>
@@ -221,9 +221,9 @@
 
 
     <load name="airspeed_adc.xml">
-      <configure name="ADC_AIRSPEED" value="ADC_3" />
-      <define name="AIRSPEED_SCALE" value="0.017" />
-      <define name="AIRSPEED_BIAS" value="1577" />
+      <configure name="ADC_AIRSPEED" value="ADC_3"/>
+      <define name="AIRSPEED_SCALE" value="0.017"/>
+      <define name="AIRSPEED_BIAS" value="1577"/>
     </load>
 
 <!--       <load name="digital_cam_i2c.xml"/>  -->
