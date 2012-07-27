@@ -109,7 +109,7 @@
     <define name="MOTOR_DELAY" value="23"/>
     <define name="HEADING_DELAY" value="160"/>
     <define name="ACCELERATION_THRESHOLD" value="1.75"/>
-    <define name="INITIAL_PITCH" value="0.2"/>
+    <define name="INITIAL_PITCH" value="0.16"/>
     <define name="INITIAL_THROTTLE" value="1.0"/>
   </section>
 
@@ -146,12 +146,12 @@
     <define name="PITCH_PGAIN" value="9000."/>
     <define name="PITCH_DGAIN" value="1.5"/>
 
-    <define name="ELEVATOR_OF_ROLL" value="1200."/>
+    <define name="ELEVATOR_OF_ROLL" value="400."/>
 
     <define name="ROLL_ATTITUDE_GAIN" value="10400."/>
     <define name="ROLL_RATE_GAIN" value="250."/>
 
-    <define name="ROLL_ATTITUDE_IGAIN" value="0.0"/>
+    <define name="ROLL_ATTITUDE_IGAIN" value="0.001"/>
     <define name="PITCH_ATTITUDE_IGAIN" value="0.0010000000475"/>
 
   </section>

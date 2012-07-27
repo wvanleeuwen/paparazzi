@@ -144,7 +144,7 @@
     <define name="PITCH_PGAIN" value="9000."/>
     <define name="PITCH_DGAIN" value="1.5"/>
 
-    <define name="ELEVATOR_OF_ROLL" value="1200."/>
+    <define name="ELEVATOR_OF_ROLL" value="400."/>
 
     <define name="ROLL_ATTITUDE_GAIN" value="10400."/>
     <define name="ROLL_RATE_GAIN" value="250."/>
@@ -213,7 +213,9 @@
       <define name="NAV_LIGHT_MODE_DEFAULT" value="4"/>
     </load>
 
-    <load name="airspeed_ets.xml"/>
+    <load name="airspeed_ets.xml">
+      <define name="AIRSPEED_ETS_SCALE" value="0.72" />
+    </load>
 
 <!--    <load name="adc_generic.xml">
       <configure name="ADC_CHANNEL_GENERIC1" value="ADC_3" />
