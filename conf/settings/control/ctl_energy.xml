@@ -27,6 +27,8 @@
       <dl_settings name="climb_accel">
         <dl_setting MAX="2.0" MIN="0" STEP="0.01" VAR="v_ctl_altitude_pgain" shortname="alt_pgain" module="guidance/energy_ctrl" param="V_CTL_ALTITUDE_PGAIN"/>
         <dl_setting MAX="1.0" MIN="0" STEP="0.01" VAR="v_ctl_airspeed_pgain" shortname="speed_pgain"  param="V_CTL_AIRSPEED_PGAIN"/>
+        <dl_setting MAX="10.0" MIN="-10" STEP="0.5" VAR="v_ctl_max_climb" shortname="max_climb" />
+        <dl_setting MAX="2.0" MIN="-2" STEP="0.05" VAR="v_ctl_max_acceleration" shortname="max_acc_g" />
       </dl_settings>
 
       <dl_settings name="energy_loop">

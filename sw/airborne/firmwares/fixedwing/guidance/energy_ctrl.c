@@ -87,6 +87,9 @@ float v_ctl_altitude_error;    ///< in meters, (setpoint - alt) -> positive = to
 
 float v_ctl_auto_airspeed_setpoint; ///< in meters per second
 
+float v_ctl_max_climb = 2;
+float v_ctl_max_acceleration = 0.5;
+
 /* inner loop */
 float v_ctl_climb_setpoint;
 
@@ -148,7 +151,7 @@ void v_ctl_altitude_loop( void )
   // Altitude Controller
   v_ctl_altitude_error = v_ctl_altitude_setpoint - estimator_z;
   v_ctl_climb_setpoint = v_ctl_altitude_pgain * v_ctl_altitude_error + v_ctl_altitude_pre_climb ;
-  BoundAbs(v_ctl_climb_setpoint, V_CTL_ALTITUDE_MAX_CLIMB);
+  BoundAbs(v_ctl_climb_setpoint, v_ctl_max_climb);
 }
 
 
@@ -180,7 +183,7 @@ void v_ctl_climb_loop( void )
 
   // Speed Controller to PseudoControl: gain 1 -> 5m/s error = 0.5g acceleration
   v_ctl_desired_acceleration = speed_error * v_ctl_airspeed_pgain / 9.81f;
-  BoundAbs(v_ctl_desired_acceleration, 0.5f);
+  BoundAbs(v_ctl_desired_acceleration, v_ctl_max_acceleration);
 
   // Actual Acceleration from IMU: attempt to reconstruct the actual kinematic acceleration
 #ifndef SITL
@@ -204,12 +207,12 @@ void v_ctl_climb_loop( void )
   float en_dis_err = gamma_err - vdot_err;
 
   // Auto Cruise Throttle
-  if (v_ctl_mode >= V_CTL_MODE_AUTO_CLIMB)
+  if (launch && (v_ctl_mode >= V_CTL_MODE_AUTO_CLIMB))
   {
     v_ctl_auto_throttle_nominal_cruise_throttle += 
         	  v_ctl_auto_throttle_of_airspeed_igain * speed_error * dt
 		+ en_tot_err * v_ctl_energy_total_igain * dt;
-    if (v_ctl_auto_throttle_nominal_cruise_throttle < 0.1f) v_ctl_auto_throttle_nominal_cruise_throttle = 0.1f;
+    if (v_ctl_auto_throttle_nominal_cruise_throttle < 0.0f) v_ctl_auto_throttle_nominal_cruise_throttle = 0.0f;
     else if (v_ctl_auto_throttle_nominal_cruise_throttle > 1.0f) v_ctl_auto_throttle_nominal_cruise_throttle = 1.0f;
   }
 
@@ -219,11 +222,19 @@ void v_ctl_climb_loop( void )
     + v_ctl_auto_throttle_of_airspeed_pgain * speed_error
     + v_ctl_energy_total_pgain * en_tot_err;
 
+
+  if ((controlled_throttle >= 1.0f) || (controlled_throttle <= 0.0f))
+  {
+    // If your energy supply is not sufficient, then neglect the climb requirement
+    en_dis_err = -vdot_err;
+  }
+
   /* pitch pre-command */
-  if (v_ctl_mode >= V_CTL_MODE_AUTO_CLIMB)
+  if (launch && (v_ctl_mode >= V_CTL_MODE_AUTO_CLIMB))
   {
     v_ctl_auto_throttle_nominal_cruise_pitch +=  v_ctl_auto_pitch_of_airspeed_igain * (-speed_error) * dt
                           + v_ctl_energy_diff_igain * en_dis_err * dt;
+    Bound(v_ctl_auto_throttle_nominal_cruise_pitch,H_CTL_PITCH_MIN_SETPOINT, H_CTL_PITCH_MAX_SETPOINT);
   }
   float v_ctl_pitch_of_vz = 
 		+ (v_ctl_climb_setpoint /*+ d_err * v_ctl_auto_throttle_pitch_of_vz_dgain*/) * v_ctl_auto_throttle_pitch_of_vz_pgain
