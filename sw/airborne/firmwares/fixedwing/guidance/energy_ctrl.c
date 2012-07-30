@@ -118,6 +118,39 @@ float v_ctl_energy_diff_igain;
 pprz_t v_ctl_throttle_setpoint;
 pprz_t v_ctl_throttle_slewed;
 
+
+/////////////////////////////////////////////////
+// Automatically found airplane characteristics
+
+float ac_char_climb_pitch = 0.0f;
+float ac_char_climb_max = 0.0f;
+float ac_char_descend_pitch = 0.0f;
+float ac_char_descend_max = 0.0f;
+float ac_char_cruise_throttle = 0.0f;
+float ac_char_cruise_pitch = 0.0f;
+
+#define AC_CHAR_LEARNING 1000.0f
+
+static void ac_char_update(float throttle, float pitch, float climb)
+{
+   if (throttle >= 1.0f)
+   {
+     ac_char_climb_pitch += (pitch - ac_char_climb_pitch)     / (AC_CHAR_LEARNING);
+     ac_char_climb_max += (estimator_z_dot - ac_char_climb_max)  / (AC_CHAR_LEARNING);
+   }
+   else if (throttle <= 0.0f)
+   {
+     ac_char_descend_pitch += (pitch - ac_char_descend_pitch)     / (AC_CHAR_LEARNING);
+     ac_char_descend_max += (estimator_z_dot - ac_char_descend_max)  / (AC_CHAR_LEARNING);
+   }
+   else if ((climb > -0.25) && (climb < 0.25))
+   {
+     ac_char_cruise_throttle += (throttle - ac_char_cruise_throttle) / (AC_CHAR_LEARNING);
+     ac_char_cruise_pitch += (pitch - ac_char_cruise_pitch)          / (AC_CHAR_LEARNING);
+   }
+}
+
+
 void v_ctl_init( void ) {
   /* mode */
   v_ctl_mode = V_CTL_MODE_MANUAL;
@@ -154,7 +187,7 @@ void v_ctl_altitude_loop( void )
   BoundAbs(sp, v_ctl_max_climb);
 
   float incr = sp - v_ctl_climb_setpoint;
-  BoundAbs(incr, 2 / 4);
+  BoundAbs(incr, 2.0 / 4.0);
   v_ctl_climb_setpoint += incr;
 }
 
@@ -248,6 +281,8 @@ void v_ctl_climb_loop( void )
                 + v_ctl_auto_throttle_nominal_cruise_pitch;
 
   nav_pitch = v_ctl_pitch_of_vz;
+
+  ac_char_update(controlled_throttle, v_ctl_pitch_of_vz, v_ctl_climb_setpoint);
 
   v_ctl_throttle_setpoint = TRIM_UPPRZ(controlled_throttle * MAX_PPRZ);
 }

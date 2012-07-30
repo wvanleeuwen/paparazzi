@@ -62,4 +62,14 @@ extern float v_ctl_energy_total_igain;
 extern float v_ctl_energy_diff_pgain;
 extern float v_ctl_energy_diff_igain;
 
+/////////////////////////////////////////////////
+// Automatically found airplane characteristics
+
+extern float ac_char_climb_pitch;
+extern float ac_char_climb_max;
+extern float ac_char_descend_pitch;
+extern float ac_char_descend_max;
+extern float ac_char_cruise_throttle;
+extern float ac_char_cruise_pitch;
+
 #endif /* FW_V_CTL_H */
