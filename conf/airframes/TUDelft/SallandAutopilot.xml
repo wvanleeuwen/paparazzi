@@ -247,6 +247,8 @@
       <configure name="AHRS_CORRECT_FREQUENCY" value="100"/>
        <define name="AHRS_TRIGGERED_ATTITUDE_LOOP"/>
 
+       <define name="USE_AHRS_GPS_ACCELERATIONS" />
+
       <configure name="AHRS_ALIGNER_LED" value="3"/>
       <configure name="CPU_LED" value="3"/>
       <configure name="SYS_TIME_LED" value="2"/>
