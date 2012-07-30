@@ -156,50 +156,55 @@ void v_ctl_altitude_loop( void )
 
 const float dt = 0.01f;
 
-float lp_xdotdot[5];
+float lp_vdot[5];
 
-static float low_pass_xdotdot(float v);
-static float low_pass_xdotdot(float v)
+static float low_pass_vdot(float v);
+static float low_pass_vdot(float v)
 {
-  lp_xdotdot[4] += (v - lp_xdotdot[4]) / 3;
-  lp_xdotdot[3] += (lp_xdotdot[4] - lp_xdotdot[3]) / 3;
-  lp_xdotdot[2] += (lp_xdotdot[3] - lp_xdotdot[2]) / 3;
-  lp_xdotdot[1] += (lp_xdotdot[2] - lp_xdotdot[1]) / 3;
-  lp_xdotdot[0] += (lp_xdotdot[1] - lp_xdotdot[0]) / 3;
+  lp_vdot[4] += (v - lp_vdot[4]) / 3;
+  lp_vdot[3] += (lp_vdot[4] - lp_vdot[3]) / 3;
+  lp_vdot[2] += (lp_vdot[3] - lp_vdot[2]) / 3;
+  lp_vdot[1] += (lp_vdot[2] - lp_vdot[1]) / 3;
+  lp_vdot[0] += (lp_vdot[1] - lp_vdot[0]) / 3;
 
-  return lp_xdotdot[0];
+  return lp_vdot[0];
 }
 
 void v_ctl_climb_loop( void ) 
 {
-  // Airspeed outerloop
-  float serr = v_ctl_auto_airspeed_setpoint - estimator_airspeed;
+  // Airspeed outerloop: positive means we need to accelerate
+  float speed_error = v_ctl_auto_airspeed_setpoint - estimator_airspeed;
 
-  // Speed Controller to PseudoControl
-  float desired_acceleration = (v_ctl_auto_airspeed_setpoint - estimator_airspeed) * v_ctl_auto_pitch_of_airspeed_pgain;
+  // Speed Controller to PseudoControl: gain 1 -> 5m/s error = 0.5g acceleration
+  float desired_acceleration = speed_error * v_ctl_auto_pitch_of_airspeed_pgain / 9.81f;
+  BoundAbs(desired_acceleration, 0.5f);
 
-  // Actual Acceleration from IMU
+  // Actual Acceleration from IMU: attempt to reconstruct the actual kinematic acceleration
+#ifndef SITL
   struct FloatVect3 accel_float = {0,0,0};
   ACCELS_FLOAT_OF_BFP(accel_float, imu.accel);
-  float vdot = low_pass_xdotdot( accel_float.x / 9.81f - sin(ahrs_float.ltp_to_imu_euler.theta) );
+  float vdot = ( accel_float.x / 9.81f - sin(ahrs_float.ltp_to_imu_euler.theta) );
+#else
+  float vdot = 0;
+#endif
 
-  // Acceleration Error
-  float vdot_err = (desired_acceleration - vdot) / 9.81f;
+  // Acceleration Error: positive means UAV needs to accelerate: needs extra energy
+  float vdot_err = low_pass_vdot( desired_acceleration - vdot );
 
-  // Flight Path Outerloop
+  // Flight Path Outerloop: positive means needs to climb more: needs extra energy
   float gamma_err  = (v_ctl_climb_setpoint - estimator_z_dot) / v_ctl_auto_airspeed_setpoint;
 
-  // Total Energy Error:
+  // Total Energy Error: positive means energy should be added
   float en_tot_err = gamma_err + vdot_err;
 
-  // Energy Distribution Error:
+  // Energy Distribution Error: positive means energy should go from overspeed to altitude = pitch up
   float en_dis_err = gamma_err - vdot_err;
 
   // Auto Cruise Throttle
   if (v_ctl_mode >= V_CTL_MODE_AUTO_CLIMB)
   {
     v_ctl_auto_throttle_nominal_cruise_throttle += 
-        	  v_ctl_auto_throttle_of_airspeed_igain * serr * dt
+        	  v_ctl_auto_throttle_of_airspeed_igain * speed_error * dt
 		+ en_tot_err * v_ctl_energy_total_igain * dt;
     if (v_ctl_auto_throttle_nominal_cruise_throttle < 0.1f) v_ctl_auto_throttle_nominal_cruise_throttle = 0.1f;
     else if (v_ctl_auto_throttle_nominal_cruise_throttle > 1.0f) v_ctl_auto_throttle_nominal_cruise_throttle = 1.0f;
@@ -208,21 +213,20 @@ void v_ctl_climb_loop( void )
   // Total Controller
   float controlled_throttle = v_ctl_auto_throttle_nominal_cruise_throttle
     + v_ctl_auto_throttle_climb_throttle_increment * v_ctl_climb_setpoint
-    + v_ctl_auto_throttle_of_airspeed_pgain * serr
+    + v_ctl_auto_throttle_of_airspeed_pgain * speed_error
     + v_ctl_energy_total_pgain * en_tot_err;
 
   /* pitch pre-command */
   if (v_ctl_mode >= V_CTL_MODE_AUTO_CLIMB)
   {
-    ins_pitch_neutral -=  v_ctl_auto_pitch_of_airspeed_igain * (serr) * dt
-                          - v_ctl_energy_diff_igain * en_dis_err * dt;
+    ins_pitch_neutral +=  v_ctl_auto_pitch_of_airspeed_igain * (-speed_error) * dt
+                          + v_ctl_energy_diff_igain * en_dis_err * dt;
   }
   float v_ctl_pitch_of_vz = 
 		+ (v_ctl_climb_setpoint /*+ d_err * v_ctl_auto_throttle_pitch_of_vz_dgain*/) * v_ctl_auto_throttle_pitch_of_vz_pgain
-		- v_ctl_auto_pitch_of_airspeed_pgain * serr 
+		- v_ctl_auto_pitch_of_airspeed_pgain * speed_error 
                 + v_ctl_auto_pitch_of_airspeed_dgain * vdot
                 + v_ctl_energy_diff_pgain * en_dis_err;
-		;
 
   nav_pitch = v_ctl_pitch_of_vz;
 
