@@ -24,15 +24,17 @@
       </dl_settings>
 
 
-      <dl_settings name="alt">
+      <dl_settings name="climb_accel">
         <dl_setting MAX="2.0" MIN="0" STEP="0.01" VAR="v_ctl_altitude_pgain" shortname="alt_pgain" module="guidance/energy_ctrl" param="V_CTL_ALTITUDE_PGAIN"/>
-        <dl_setting MAX="1.0" MIN="0" STEP="0.01" VAR="v_ctl_airspeed_pgain" shortname="speed_pgain" module="guidance/energy_ctrl" param="V_CTL_AIRSPEED_PGAIN"/>
+        <dl_setting MAX="1.0" MIN="0" STEP="0.01" VAR="v_ctl_airspeed_pgain" shortname="speed_pgain"  param="V_CTL_AIRSPEED_PGAIN"/>
       </dl_settings>
 
-      <dl_settings name="auto_throttle">
+      <dl_settings name="energy_loop">
         <dl_setting MAX="45" MIN="8.0" STEP="0.5" VAR="v_ctl_auto_airspeed_setpoint" shortname="airspeed sp" />
 
         <dl_setting MAX="1" MIN="0.0" STEP="0.05" VAR="v_ctl_auto_throttle_nominal_cruise_throttle" shortname="cruise throttle" />
+        <dl_setting MAX="1" MIN="0.0" STEP="0.05" VAR="v_ctl_auto_throttle_nominal_cruise_pitch" shortname="cruise pitch" />
+        <dl_setting MAX="1.0" MIN="0" STEP="0.01" VAR="v_ctl_desired_acceleration" shortname="acc_cmd" />
         <dl_setting MAX="1" MIN="0" STEP="0.01" VAR="v_ctl_auto_throttle_climb_throttle_increment" shortname="throttle_incr" param="V_CTL_AUTO_THROTTLE_CLIMB_THROTTLE_INCREMENT"/>
         <dl_setting MAX="1" MIN="0" STEP="0.01" VAR="v_ctl_auto_throttle_pitch_of_vz_pgain" shortname="pitch_of_vz" param="V_CTL_AUTO_THROTTLE_PITCH_OF_VZ_PGAIN"/>
 

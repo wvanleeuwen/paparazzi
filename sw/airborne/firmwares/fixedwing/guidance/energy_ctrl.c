@@ -91,8 +91,11 @@ float v_ctl_auto_airspeed_setpoint; ///< in meters per second
 float v_ctl_climb_setpoint;
 
 /* "auto throttle" inner loop parameters */
+float v_ctl_desired_acceleration;
+
 float v_ctl_auto_throttle_cruise_throttle;
 float v_ctl_auto_throttle_nominal_cruise_throttle;
+float v_ctl_auto_throttle_nominal_cruise_pitch;
 float v_ctl_auto_throttle_climb_throttle_increment;
 float v_ctl_auto_throttle_pitch_of_vz_pgain;
 
@@ -144,7 +147,7 @@ void v_ctl_altitude_loop( void )
 
   // Altitude Controller
   v_ctl_altitude_error = v_ctl_altitude_setpoint - estimator_z;
-  v_ctl_climb_setpoint = v_ctl_altitude_pgain * v_ctl_altitude_error;
+  v_ctl_climb_setpoint = v_ctl_altitude_pgain * v_ctl_altitude_error + v_ctl_altitude_pre_climb ;
   BoundAbs(v_ctl_climb_setpoint, V_CTL_ALTITUDE_MAX_CLIMB);
 }
 
@@ -176,8 +179,8 @@ void v_ctl_climb_loop( void )
   float speed_error = v_ctl_auto_airspeed_setpoint - estimator_airspeed;
 
   // Speed Controller to PseudoControl: gain 1 -> 5m/s error = 0.5g acceleration
-  float desired_acceleration = speed_error * v_ctl_auto_pitch_of_airspeed_pgain / 9.81f;
-  BoundAbs(desired_acceleration, 0.5f);
+  v_ctl_desired_acceleration = speed_error * v_ctl_airspeed_pgain / 9.81f;
+  BoundAbs(v_ctl_desired_acceleration, 0.5f);
 
   // Actual Acceleration from IMU: attempt to reconstruct the actual kinematic acceleration
 #ifndef SITL
@@ -189,7 +192,7 @@ void v_ctl_climb_loop( void )
 #endif
 
   // Acceleration Error: positive means UAV needs to accelerate: needs extra energy
-  float vdot_err = low_pass_vdot( desired_acceleration - vdot );
+  float vdot_err = low_pass_vdot( v_ctl_desired_acceleration - vdot );
 
   // Flight Path Outerloop: positive means needs to climb more: needs extra energy
   float gamma_err  = (v_ctl_climb_setpoint - estimator_z_dot) / v_ctl_auto_airspeed_setpoint;
@@ -219,14 +222,15 @@ void v_ctl_climb_loop( void )
   /* pitch pre-command */
   if (v_ctl_mode >= V_CTL_MODE_AUTO_CLIMB)
   {
-    ins_pitch_neutral +=  v_ctl_auto_pitch_of_airspeed_igain * (-speed_error) * dt
+    v_ctl_auto_throttle_nominal_cruise_pitch +=  v_ctl_auto_pitch_of_airspeed_igain * (-speed_error) * dt
                           + v_ctl_energy_diff_igain * en_dis_err * dt;
   }
   float v_ctl_pitch_of_vz = 
 		+ (v_ctl_climb_setpoint /*+ d_err * v_ctl_auto_throttle_pitch_of_vz_dgain*/) * v_ctl_auto_throttle_pitch_of_vz_pgain
 		- v_ctl_auto_pitch_of_airspeed_pgain * speed_error 
                 + v_ctl_auto_pitch_of_airspeed_dgain * vdot
-                + v_ctl_energy_diff_pgain * en_dis_err;
+                + v_ctl_energy_diff_pgain * en_dis_err
+                + v_ctl_auto_throttle_nominal_cruise_pitch;
 
   nav_pitch = v_ctl_pitch_of_vz;
 
