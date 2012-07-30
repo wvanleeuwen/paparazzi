@@ -150,8 +150,12 @@ void v_ctl_altitude_loop( void )
 
   // Altitude Controller
   v_ctl_altitude_error = v_ctl_altitude_setpoint - estimator_z;
-  v_ctl_climb_setpoint = v_ctl_altitude_pgain * v_ctl_altitude_error + v_ctl_altitude_pre_climb ;
-  BoundAbs(v_ctl_climb_setpoint, v_ctl_max_climb);
+  float sp = v_ctl_altitude_pgain * v_ctl_altitude_error + v_ctl_altitude_pre_climb ;
+  BoundAbs(sp, v_ctl_max_climb);
+
+  float incr = sp - v_ctl_climb_setpoint;
+  BoundAbs(incr, 2 / 4);
+  v_ctl_climb_setpoint += incr;
 }
 
 
