@@ -16,7 +16,7 @@
       <message name="BOOZ2_CAM"              period="1."/>
       <message name="GPS_INT"                period=".5"/>
       <message name="INS"                    period=".25"/>
-      <message name="AHRS_REF_QUAT"          period=".25"/> <!-- sw/in_progess/python/attitude_viz_non_rot.py-->	
+      <message name="AHRS_REF_QUAT"          period=".25"/> <!-- sw/in_progess/python/attitude_viz_non_rot.py-->
     </mode>
 
     <mode name="ppm">
@@ -93,7 +93,7 @@
       <message name="ROTORCRAFT_NAV_STATUS" period="1.6"/>
       <message name="HFF_GPS"               period=".3"/>
       <message name="INS_REF"               period="5.1"/>
-      <message name="AHRS_REF_QUAT"          period=".25"/> <!-- sw/in_progess/python/attitude_viz_non_rot.py-->	
+      <message name="AHRS_REF_QUAT"          period=".25"/> <!-- sw/in_progess/python/attitude_viz_non_rot.py-->
     </mode>
 
     <mode name="aligner">

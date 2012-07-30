@@ -9,7 +9,7 @@
 -->
 
 <airframe name="TwinJet Tiny 2.11">
-  <modules> 
+  <modules>
 <!--
     <load name="TUDelft/opticflow.xml"/>
     <load name="cam_point.xml">

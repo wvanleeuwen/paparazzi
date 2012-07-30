@@ -39,7 +39,7 @@
 	-glide angle: Vdot = 0, T=0 ==> gamma = Cd/Cl
 	-level flight: Vdot = 0, gamma=0 ==> W/T = Cl/Cd
 	=================================================
-	
+
 	Strategy:  thrust = path + acceleration[g] (total energy)
 		   pitch = path - acceleration[g]  (energy balance)
 
@@ -134,7 +134,7 @@ int ac_char_cruise_count = 0;
 
 static void ac_char_average(float* last, float new, int count)
 {
-  *last = (((*last) * (((float)count) - 1.0f)) + new) / ((float) count); 
+  *last = (((*last) * (((float)count) - 1.0f)) + new) / ((float) count);
 }
 
 static void ac_char_update(float throttle, float pitch, float climb, float accelerate)
@@ -188,7 +188,7 @@ void v_ctl_init( void ) {
  * \brief Computes v_ctl_climb_setpoint and sets v_ctl_auto_throttle_submode
  */
 
-void v_ctl_altitude_loop( void ) 
+void v_ctl_altitude_loop( void )
 {
   // Imput Checks
   if (v_ctl_auto_airspeed_setpoint <= 0.0f) v_ctl_auto_airspeed_setpoint = NOMINAL_AIRSPEED;
@@ -225,7 +225,7 @@ static float low_pass_vdot(float v)
   return lp_vdot[0];
 }
 
-void v_ctl_climb_loop( void ) 
+void v_ctl_climb_loop( void )
 {
   // Airspeed outerloop: positive means we need to accelerate
   float speed_error = v_ctl_auto_airspeed_setpoint - estimator_airspeed;
@@ -258,7 +258,7 @@ void v_ctl_climb_loop( void )
   // Auto Cruise Throttle
   if (launch && (v_ctl_mode >= V_CTL_MODE_AUTO_CLIMB))
   {
-    v_ctl_auto_throttle_nominal_cruise_throttle += 
+    v_ctl_auto_throttle_nominal_cruise_throttle +=
         	  v_ctl_auto_throttle_of_airspeed_igain * speed_error * dt
 		+ en_tot_err * v_ctl_energy_total_igain * dt;
     if (v_ctl_auto_throttle_nominal_cruise_throttle < 0.0f) v_ctl_auto_throttle_nominal_cruise_throttle = 0.0f;
@@ -285,9 +285,9 @@ void v_ctl_climb_loop( void )
                           + v_ctl_energy_diff_igain * en_dis_err * dt;
     Bound(v_ctl_auto_throttle_nominal_cruise_pitch,H_CTL_PITCH_MIN_SETPOINT, H_CTL_PITCH_MAX_SETPOINT);
   }
-  float v_ctl_pitch_of_vz = 
+  float v_ctl_pitch_of_vz =
 		+ (v_ctl_climb_setpoint /*+ d_err * v_ctl_auto_throttle_pitch_of_vz_dgain*/) * v_ctl_auto_throttle_pitch_of_vz_pgain
-		- v_ctl_auto_pitch_of_airspeed_pgain * speed_error 
+		- v_ctl_auto_pitch_of_airspeed_pgain * speed_error
                 + v_ctl_auto_pitch_of_airspeed_dgain * vdot
                 + v_ctl_energy_diff_pgain * en_dis_err
                 + v_ctl_auto_throttle_nominal_cruise_pitch;

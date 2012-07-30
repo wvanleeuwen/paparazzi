@@ -217,7 +217,7 @@ float ahrs_float_dcm_gps_speed = 0;
 float ahrs_float_dcm_gps_acceleration = 0;
 float ahrs_float_dcm_gps_age = 10;
 
-void ahrs_update_gps(void) 
+void ahrs_update_gps(void)
 {
   static float last_gps_speed_3d = 0;
 

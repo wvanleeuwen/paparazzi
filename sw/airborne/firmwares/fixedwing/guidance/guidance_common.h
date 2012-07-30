@@ -54,7 +54,7 @@ extern uint8_t v_ctl_auto_throttle_submode;
 // Needed for telemetry
 extern float v_ctl_auto_throttle_sum_err;
 
-// Needed for course loop gain 
+// Needed for course loop gain
 extern float v_ctl_altitude_error;    ///< in meters, (setpoint - alt) -> positive = too low
 
 // Old airspeed code wants:

@@ -332,7 +332,7 @@ inline static void h_ctl_roll_loop( void ) {
   estimator_p = (err - last_err)/(1/60.);
   last_err = err;
 #endif
- 
+
   if (launch)
     roll_integrator += h_ctl_roll_attitude_gain * err * h_ctl_roll_attitude_igain;
   else
