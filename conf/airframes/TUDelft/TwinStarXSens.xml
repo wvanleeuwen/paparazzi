@@ -73,6 +73,11 @@
     <define name="MAX_PITCH" value="0.7"/>
   </section>
 
+  <section name="INS" prefix="INS_">
+    <define name="ROLL_NEUTRAL_DEFAULT" value="0"/>
+    <define name="PITCH_NEUTRAL_DEFAULT" value="0"/>
+  </section>
+
   <section name="ADC" prefix="ADC_CHANNEL_">
     <define name="VSUPPLY" value="AdcBank0(6)"/>
     <define name="CURRENT" value="AdcBank1(5)"/>
@@ -156,12 +161,15 @@
   <firmware name="fixedwing">
 
     <target name="ap" board="classix">
+      <configure name="SYS_TIME_LED" value="2" />
+
       <define name="STRONG_WIND"/>
       <define name="WIND_INFO"/>
       <define name="WIND_INFO_RET"/>
       <define name="LOITER_TRIM"/>
       <define name="RADIO_CONTROL_AUTO1"/>
 
+      <define name="USE_LED_6" value="1"/>
       <define name="LED_6_BANK" value="0"/>
       <define name="LED_6_PIN" value="15"/>
 
@@ -171,7 +179,7 @@
     </target>
 
     <subsystem name="telemetry" type="xbee_api">
-      <configure name="MODEM_PORT" value="0"/>
+      <configure name="MODEM_PORT" value="UART0"/>
       <configure name="MODEM_BAUD" value="B9600"/>
     </subsystem>
     <subsystem name="control"/>
@@ -180,11 +188,12 @@
       <configure name="XSENS_UART_NR" value="1"/>
     </subsystem>
 
-
   </firmware>
+
   <firmware name="fixedwing">
     <target name="fbw" board="classix">
-      <define name="RADIO_LED" value="2"/>
+      <configure name="SYS_TIME_LED" value="2" />
+      <define name="RADIO_CONTROL_LED" value="1"/>
       <define name="USE_AD1_5" value="1"/>
       <define name="USE_AD1" value="1"/>
       <configure name="ACTUATORS" value="TUDelft/actuators_ppm_fasst"/>
@@ -217,11 +226,5 @@
     <define name="HEIGHT" value="50" unit="m"/>
   </section>
 
-
-  <makefile location="after">
-
-ap.srcs += ./TUDelft/nav_photogrammetry.c
-
-  </makefile>
 
 </airframe>
