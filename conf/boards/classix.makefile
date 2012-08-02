@@ -32,3 +32,7 @@ $(TARGET).ARCHDIR = $(ARCH)
 # Battery Voltage
 fbw.CFLAGS +=  -DUSE_AD0
 
+ifndef SYS_TIME_LED
+SYS_TIME_LED = none
+endif
+
