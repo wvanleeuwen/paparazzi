@@ -44,7 +44,7 @@ Note: a command may be reversed by exchanging min and max values
 
 <!DOCTYPE radio SYSTEM "../radio.dtd">
 <radio name="FASST TX Module" data_min="800" data_max="2250" sync_min="4500" sync_max="13000" pulse_type="POSITIVE">
-  <channel ctl="A" function="ROLL" min="1100" neutral="1525" max="1950" average="0"/>     <!-- right stick left/right -->
+  <channel ctl="A" function="ROLL" min="1950" neutral="1525" max="1100" average="0"/>     <!-- right stick left/right -->
   <channel ctl="B" function="PITCH" min="1100" neutral="1525" max="1950" average="0"/>    <!-- left stick up/down -->
   <channel ctl="C" function="THROTTLE" min="1100" neutral="1100" max="1950" average="0"/>	<!-- right stick up/down -->
   <channel ctl="D" function="YAW" min="1950" neutral="1525" max="1100" average="0"/>		<!-- left stick left/right-->

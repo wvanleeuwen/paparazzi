@@ -53,16 +53,16 @@
     <!-- Differential Aileron Depending on Brake Value -->
     <let var="aileron_up_rate" value="(AILERON_RATE_UP   * (MAX_PPRZ - $brake_value)) + (AILERON_RATE_UP_BRAKE   * $brake_value)"/>
     <let var="aileron_down_rate" value="(AILERON_RATE_DOWN * (MAX_PPRZ - $brake_value)) + (AILERON_RATE_DOWN_BRAKE * $brake_value)"/>
-    <let var="aileron_up" value="(@ROLL  *  (((float)$aileron_up_rate) / ((float)MAX_PPRZ)))"/>
-    <let var="aileron_down" value="(@ROLL  * (((float)$aileron_down_rate) / ((float)MAX_PPRZ)))"/>
-    <let var="leftturn" value="(@ROLL >= 0? 1 : 0)"/>
+    <let var="aileron_up" value="((-@ROLL)  *  (((float)$aileron_up_rate) / ((float)MAX_PPRZ)))"/>
+    <let var="aileron_down" value="((-@ROLL)  * (((float)$aileron_down_rate) / ((float)MAX_PPRZ)))"/>
+    <let var="leftturn" value="((-@ROLL) >= 0? 1 : 0)"/>
     <let var="rightturn" value="(1 - $leftturn)"/>
     <set servo="AILERON_LEFT" value="($aileron_up * $leftturn) + ($aileron_down * $rightturn) - $brake_value*(BRAKE_AILEVON)"/>
     <set servo="AILERON_RIGHT" value="($aileron_up * $rightturn) + ($aileron_down * $leftturn) + $brake_value*(BRAKE_AILEVON)"/>
 
     <!-- Differential Thurst -->
-    <set servo="THROTTLE_LEFT" value="@THROTTLE + @ROLL * (YAW_THRUST)"/>
-    <set servo="THROTTLE_RIGHT" value="@THROTTLE - @ROLL * (YAW_THRUST)"/>
+    <set servo="THROTTLE_LEFT" value="@THROTTLE - @ROLL * (YAW_THRUST)"/>
+    <set servo="THROTTLE_RIGHT" value="@THROTTLE + @ROLL * (YAW_THRUST)"/>
 
     <!-- Pitch with Brake-Trim Function -->
     <set servo="ELEVATOR" value="-@PITCH * PITCH_GAIN + BRAKE_PITCH * $brake_value"/>
