@@ -229,6 +229,7 @@
 
     </target>
     <subsystem name="radio_control" type="ppm"/>
+    <subsystem name="ins" type="xsens"/>
   </firmware>
 
   <modules>
