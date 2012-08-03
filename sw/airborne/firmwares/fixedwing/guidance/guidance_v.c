@@ -235,7 +235,7 @@ void v_ctl_climb_loop ( void ) {
     v_ctl_climb_auto_throttle_loop();
     break;
 #ifdef V_CTL_AUTO_PITCH_PGAIN
-#pragma message AUTO_PITCH
+#pragma message "AUTO PITCH Enabled!"
   case V_CTL_CLIMB_MODE_AUTO_PITCH:
     v_ctl_climb_auto_pitch_loop();
     break;
