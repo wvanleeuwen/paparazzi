@@ -47,18 +47,9 @@
       <while cond="LessThan(NavBlockTime(), 10)"/>
       <call fun="NavSetGroundReferenceHere()"/>
     </block>
-    <block name="Select Touchdown Point" >
-      <call fun="nav_select_touch_down(WP_TD)"/>
-    </block>
     <block name="Holding point" strip_button="Landing Point" strip_icon="target.png">
       <set value="1" var="kill_throttle"/>
       <attitude roll="0" throttle="0" vmode="throttle"/>
-    </block>
-    <block name="Arm Catapult" strip_button="Takeoff (wp CLIMB)" strip_icon="bungee_launch.png">
-      <exception cond="estimator_z > ground_alt+25" deroute="Takeoff"/>
-      <set value="0" var="kill_throttle"/>
-      <call fun="nav_catapult_init()" />
-      <call fun="nav_catapult(WP_TO, WP_CLIMB)"/>
     </block>
     <block name="Takeoff" strip_button="Takeoff (wp CLIMB)" strip_icon="takeoff.png">
       <exception cond="estimator_z > ground_alt+35" deroute="Standby"/>
@@ -80,6 +71,16 @@
       <deroute block="land"/>
     </block>
     <block name="Land Left AF-TD" strip_button="Land left (wp AF-TD)" strip_icon="land-left.png">
+      <set value="-DEFAULT_CIRCLE_RADIUS" var="nav_radius"/>
+      <deroute block="land"/>
+    </block>
+    <block name="GLS Land Right AF-TD" strip_button="Land right (wp AF-TD)" strip_icon="land-right.png">
+      <call fun="nav_compute_final_from_glide(WP_AF, WP_TD, 10.)"/>
+      <set value="DEFAULT_CIRCLE_RADIUS" var="nav_radius"/>
+      <deroute block="land"/>
+    </block>
+    <block name="GLS Land Left AF-TD" strip_button="Land left (wp AF-TD)" strip_icon="land-left.png">
+      <call fun="nav_compute_final_from_glide(WP_AF, WP_TD, 10.)"/>
       <set value="-DEFAULT_CIRCLE_RADIUS" var="nav_radius"/>
       <deroute block="land"/>
     </block>

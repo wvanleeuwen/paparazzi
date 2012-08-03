@@ -1,0 +1,127 @@
+<!DOCTYPE flight_plan SYSTEM "../flight_plan.dtd">
+
+<!--  - lat0="51.233165" lon0="3.78287" -->
+ <flight_plan alt="75" ground_alt="0" lat0="51.990" lon0="4.390" max_dist_from_home="1500" name="Basic" security_height="25">
+  <header>
+#include "subsystems/datalink/datalink.h"
+#include "subsystems/navigation/gls.h"
+#include "subsystems/navigation/OSAMNav.h"
+#include "generated/airframe.h"
+
+#ifdef DC_AUTOSHOOT_QUARTERSEC_PERIOD
+#include "modules/digital_cam/dc.h"
+//#define LINE_START_FUNCTION dc_autoshoot = DC_AUTOSHOOT_PERIODIC;
+#define LINE_START_FUNCTION dc_Survey(dc_gps_dist);
+#define LINE_STOP_FUNCTION dc_autoshoot = DC_AUTOSHOOT_STOP;
+#endif
+
+</header>
+  <waypoints>
+    <waypoint name="HOME" x="-147.3" y="70.9"/>
+    <waypoint name="STDBY" x="20" y="80"/>
+    <waypoint name="1" x="200.0" y="200.0"/>
+    <waypoint name="2" x="-200.0" y="200.0"/>
+    <waypoint name="3" x="-200.0" y="-200.0"/>
+    <waypoint name="4" x="200.0" y="-200.0"/>
+    <waypoint name="5" x="250.0" y="0.0"/>
+    <waypoint name="MOB" x="308.5" y="-229.5"/>
+    <waypoint name="S1" x="-237.7" y="-507.4"/>
+    <waypoint name="S2" x="227.7" y="699.6"/>
+    <waypoint alt="30" name="AF" x="200" y="-10"/>
+    <waypoint alt="30" name="_TOD" x="200" y="-10"/>
+    <waypoint alt="0.0" name="TD" x="-147.7" y="42.1"/>
+    <waypoint name="_BASELEG" x="308.9" y="-187.2"/>
+    <waypoint name="P1" x="209.2" y="-270.9"/>
+    <waypoint name="P2" x="-196.6" y="-273.4"/>
+    <waypoint name="P3" x="-214.2" y="522.5"/>
+    <waypoint name="P4" x="241.7" y="519.9"/>
+    <waypoint name="CLIMB" x="-504.8" y="149.5"/>
+    <waypoint name="TO" x="-241.7" y="519.9"/>
+  </waypoints>
+  <exceptions/>
+  <blocks>
+    <block name="Wait GPS">
+      <set value="1" var="kill_throttle"/>
+      <while cond="!GpsFixValid()"/>
+    </block>
+    <block name="Geo init">
+      <while cond="LessThan(NavBlockTime(), 10)"/>
+      <call fun="NavSetGroundReferenceHere()"/>
+    </block>
+    <block name="Holding point" strip_button="Landing Point" >
+      <set value="1" var="kill_throttle"/>
+      <attitude roll="0" throttle="0" vmode="throttle"/>
+    </block>
+    <block name="Takeoff" strip_button="Takeoff (wp CLIMB)" strip_icon="takeoff.png" key="t" >
+      <exception cond="estimator_z > ground_alt+35" deroute="Standby"/>
+      <set value="0" var="kill_throttle"/>
+      <go wp="CLIMB"/>
+    </block>
+    <block name="Standby" key="<Control>a" strip_button="Standby" strip_icon="home.png">
+      <circle radius="nav_radius" wp="STDBY"/>
+    </block>
+
+    <block group="survey" name="Survey N-S Rect" strip_button="Survey (wp S1-S2)" strip_icon="survey.png">
+      <survey_rectangle grid="150" wp1="S1" wp2="S2"/>
+    </block>
+    <block group="survey" name="Initialize Poly Survey 1234" strip_button="Survey1234" strip_icon="survey.png">
+      <call fun="PhotogrammetryCalculatorPolygonSurvey(WP_1, 4)"/>
+      <call fun="PolygonSurvey()"/>
+    </block>
+    <block group="survey" name="Initialize Poly Survey 56789" strip_button="Survey5678" strip_icon="survey.png">
+      <call fun="PhotogrammetryCalculatorPolygonSurvey(WP_5, 5)"/>
+      <call fun="PolygonSurvey()"/>
+    </block>
+    <block group="survey" name="Initialize ADV Poly 1234 Survey" strip_button="SurveyADV" strip_icon="survey.png">
+      <call fun="PhotogrammetryCalculatorPolygonSurveyADV(WP_1, 4)"/>
+      <call fun="poly_survey_adv()"/>
+    </block>
+
+    <block name="Oval 1-2" strip_button="Oval (wp 1-2)" strip_icon="oval.png">
+      <oval p1="1" p2="2" radius="nav_radius"/>
+    </block>
+    <block name="Land Right AF-TD" strip_button="Land right (wp AF-TD)" strip_icon="land-right.png" group="landnormal">
+      <set value="DEFAULT_CIRCLE_RADIUS" var="nav_radius"/>
+      <deroute block="land"/>
+    </block>
+    <block name="Land Left AF-TD" strip_button="Land left (wp AF-TD)" strip_icon="land-left.png" group="landnormal">
+      <set value="-DEFAULT_CIRCLE_RADIUS" var="nav_radius"/>
+      <deroute block="land"/>
+    </block>
+    <block name="GLS Land Right AF-TD" strip_button="Land right (wp AF-TD)" strip_icon="land-right.png" group="landglide">
+      <call fun="nav_compute_final_from_glide(WP_AF, WP_TD, 10.)"/>
+      <set value="DEFAULT_CIRCLE_RADIUS" var="nav_radius"/>
+      <deroute block="land"/>
+    </block>
+    <block name="GLS Land Left AF-TD" strip_button="Land left (wp AF-TD)" strip_icon="land-left.png"  group="landglide">
+      <call fun="nav_compute_final_from_glide(WP_AF, WP_TD, 10.)"/>
+      <set value="-DEFAULT_CIRCLE_RADIUS" var="nav_radius"/>
+      <deroute block="land"/>
+    </block>
+
+    <block name="land">
+      <call fun="nav_compute_baseleg(WP_AF, WP_TD, WP__BASELEG, nav_radius)"/>
+      <circle radius="nav_radius" until="NavCircleCount() > 0.25" wp="_BASELEG"/>
+      <circle radius="nav_radius" until="NavQdrCloseTo(DegOfRad(baseleg_out_qdr)-(nav_radius/fabs(nav_radius))*10) && 10 > fabs(estimator_z - WaypointAlt(WP__BASELEG))" wp="_BASELEG"/>
+    </block>
+
+    <block name="final">
+      <exception cond="ground_alt + 10 > estimator_z" deroute="flare"/>
+      <go from="AF" hmode="route" vmode="glide" wp="TD"/>
+    </block>
+
+    <block name="flare">
+      <go from="AF" hmode="route" throttle="0.0" vmode="throttle" wp="TD"  approaching_time="5"/>
+    </block>
+
+    <block name="Ground" strip_button="Kill After Land" strip_icon="kill.png">
+      <set value="1" var="kill_throttle"/>
+      <attitude roll="0.0" throttle="0.0" until="FALSE" vmode="throttle"/>
+    </block>
+
+    <block name="Figure 8 around wp 1" strip_button="Figure 8 (wp 1-2)" strip_icon="eight.png">
+      <eight center="1" radius="nav_radius" turn_around="2"/>
+    </block>
+
+  </blocks>
+</flight_plan>
