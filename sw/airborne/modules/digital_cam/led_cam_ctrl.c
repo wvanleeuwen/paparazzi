@@ -34,7 +34,9 @@ void dc_send_command(uint8_t cmd)
   {
     case DC_SHOOT:
       DC_PUSH(DC_SHUTTER_LED);
+#ifndef DC_SHOOT_ON_BUTTON_RELEASE
       dc_send_shot_position();
+#endif
       break;
 #ifdef DC_ZOOM_IN_LED
     case DC_TALLER:
@@ -47,7 +49,7 @@ void dc_send_command(uint8_t cmd)
       break;
 #endif
 #ifdef DC_POWER_LED
-    case DC_POWER:
+    case DC_ON:
       DC_PUSH(DC_POWER_LED);
       break;
 #endif
