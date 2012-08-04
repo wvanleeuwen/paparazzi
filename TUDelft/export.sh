@@ -31,6 +31,7 @@ rm -rf ./conf/conf.xml
 rm -rf ./conf/control_panel.xml
 rm -rf ./BRANCH_INFO
 rm -rf ./goto_field.sh
+git checkout ./.gitignore
 #rm -rf ./sw/airborne/boards/tiny_sense.h
 #rm -rf ./sw/airborne/booz/aerovinci
 #rm -rf ./conf/joysticks
