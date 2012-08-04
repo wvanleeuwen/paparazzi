@@ -152,7 +152,7 @@
     <define name="ROLL_RATE_GAIN" value="250."/>
 
     <define name="ROLL_ATTITUDE_IGAIN" value="0.001"/>
-    <define name="PITCH_ATTITUDE_IGAIN" value="0.0010000000475"/>
+    <define name="PITCH_IGAIN" value="0.001"/>
 
   </section>
 
