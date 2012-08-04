@@ -1,0 +1,15 @@
+<!DOCTYPE module SYSTEM "../module.dtd">
+
+<module name="onboardcam_i2c" dir="onboardcam">
+  <header>
+    <file name="vision.h"/>
+  </header>
+
+  <periodic fun="vision_periodic()" autorun="TRUE"/>
+
+  <makefile target="ap">
+    <file name="vision.c"/>
+  </makefile>
+</module>
+
+

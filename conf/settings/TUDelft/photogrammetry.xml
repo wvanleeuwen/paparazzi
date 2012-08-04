@@ -1,0 +1,11 @@
+<!DOCTYPE settings SYSTEM "../settings.dtd">
+
+<settings>
+    <dl_settings name="Photogrammetry">
+      <dl_settings name="Photogrammetry">
+        <dl_setting MAX="500" MIN="10" STEP="5" VAR="photogrammetry_height" shortname="ph_height" param="PHOTOGRAMMETRY_HEIGHT" module="./TUDelft/nav_photogrammetry"/>
+      </dl_settings>
+    </dl_settings>
+</settings>
+
+

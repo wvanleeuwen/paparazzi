@@ -1,0 +1,18 @@
+<!DOCTYPE settings SYSTEM "../settings.dtd">
+
+<!-- A conf to tune the airspeed loop: define USE_AIRSPEED and include airspeed.c -->
+
+<settings>
+    <dl_settings name="control">
+      <dl_settings name="airspeed">
+        <dl_setting MAX="45" MIN="4" STEP="0.1" VAR="v_ctl_auto_airspeed_setpoint" shortname="airspd_setpoint" param="V_CTL_AUTO_AIRSPEED_SETPOINT" unit="m/s"/>
+        <dl_setting MAX="0.50" MIN="0" STEP="0.005" VAR="v_ctl_auto_airspeed_pgain" shortname="airspd_pgain" param="V_CTL_AUTO_AIRSPEED_PGAIN"/>
+        <dl_setting MAX="0.5" MIN="0." STEP="0.001" VAR="v_ctl_auto_airspeed_igain" shortname="airspd_igain" param="V_CTL_AUTO_AIRSPEED_IGAIN"/>
+        <dl_setting MAX="35" MIN="4" STEP="0.1" VAR="v_ctl_auto_groundspeed_setpoint" shortname="grndspd_setpoint" param="V_CTL_AUTO_GROUNDSPEED_SETPOINT"/>
+        <dl_setting MAX="0.50" MIN="0" STEP="0.005" VAR="v_ctl_auto_groundspeed_pgain" shortname="grdspd_pgain" param="V_CTL_AUTO_GROUNDSPEED_PGAIN"/>
+        <dl_setting MAX="0.5" MIN="0" STEP="0.001" VAR="v_ctl_auto_groundspeed_igain" shortname="grndspd_igain" param="V_CTL_AUTO_GROUNDSPEED_IGAIN"/>
+      </dl_settings>
+    </dl_settings>
+</settings>
+
+

@@ -1,0 +1,18 @@
+<!DOCTYPE module SYSTEM "../module.dtd">
+
+<module name="onboardcam">
+  <header>
+    <file name="onboardcam.h"/>
+  </header>
+  <init fun="init_onboardcam()"/>
+  <periodic fun="periodic_onboardcam()" start="start_onboardcam()" stop="stop_onboardcam()" autorun="FALSE"/>
+  <makefile target="ap">
+    <file name="onboardcam.c"/>
+    <define name="USE_ADC_14"/>
+    <define name="USE_ADC_3"/>
+  </makefile>
+  <makefile target="sim">
+    <file name="sim_onboardcam.c"/>
+  </makefile>
+</module>
+
