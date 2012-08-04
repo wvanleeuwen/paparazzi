@@ -342,7 +342,6 @@ void h_ctl_attitude_loop ( void ) {
 
 #ifdef H_CTL_ROLL_ATTITUDE_GAIN
 inline static void h_ctl_roll_loop( void ) {
-  static float roll_integrator = 0.0f;
   float err = estimator_phi - h_ctl_roll_setpoint;
 #ifdef SITL
   static float last_err = 0;
@@ -457,7 +456,6 @@ inline static float loiter(void) {
 
 inline static void h_ctl_pitch_loop( void ) {
   static float last_err;
-  static float pitch_integrator = 0.0f;
   /* sanity check */
   if (h_ctl_elevator_of_roll <0.)
     h_ctl_elevator_of_roll = 0.;
