@@ -49,6 +49,10 @@
 #include "link_mcu.h"
 #endif
 
+#ifdef MCU_CAN_LINK
+#include "link_mcu_uart.h"
+#endif
+
 uint8_t fbw_mode;
 
 #include "inter_mcu.h"
@@ -172,7 +176,7 @@ void event_task_fbw( void) {
 #endif
 
 
-#ifdef MCU_SPI_LINK
+#if defined( MCU_SPI_LINK ) || defined( MCU_CAN_LINK )
   if (link_mcu_received) {
     link_mcu_received = FALSE;
     inter_mcu_fill_fbw_state(); /** Prepares the next message for AP */
