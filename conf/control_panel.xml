@@ -12,6 +12,9 @@
     <program name="Server" command="sw/ground_segment/tmtc/server">
       <arg flag="-b" variable="ivy_bus"/>
     </program>
+    <program name="SmartUAV" command="../SmartUAV/bin/SmartUAV">
+      <arg flag="-r" />
+    </program>
     <program name="Data Link" command="sw/ground_segment/tmtc/link">
       <arg flag="-b" variable="ivy_bus"/>
     </program>
@@ -76,6 +79,15 @@
     <session name="Forward Skywalker to C172 over ttyUSB1">
       <program name="IvySerialBridge">
         <arg flag="8" constant="/dev/ttyUSB1"/>
+      </program>
+    </session>
+    <session name="SmartUAV">
+      <program name="Ivy2Udp">
+        <arg flag="-h" constant="127.0.0.1"/>
+        <arg flag="-id" constant="8"/>
+      </program>
+      <program name="SmartUAV">
+        <arg flag="1&>2" />
       </program>
     </session>
     <session name="Video">
