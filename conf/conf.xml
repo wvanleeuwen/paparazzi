@@ -31,7 +31,7 @@
   />
   <aircraft
    name="Discovery"
-   ac_id="9"
+   ac_id="99"
    airframe="airframes/TUDelft/openuas_discovery.xml"
    radio="radios/R6107SP_7ch.xml"
    telemetry="telemetry/default_fixedwing.xml"
