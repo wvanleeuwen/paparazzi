@@ -235,6 +235,7 @@
     </target>
 
     <subsystem name="radio_control" type="ppm"/>
+    <subsystem name="actuators" type="direct"/>
 
 
   </firmware>
