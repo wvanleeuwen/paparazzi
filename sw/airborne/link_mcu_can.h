@@ -52,16 +52,12 @@ extern bool_t link_mcu_received;
 extern void link_mcu_event_task( void );
 
 
-#ifdef FBW
-extern void link_mcu_restart(void);
-#endif /* FBW */
+extern void link_mcu_init(void);
+extern void link_mcu_send(void);
 
 #ifdef AP
 extern uint8_t link_mcu_nb_err;
 extern uint8_t link_mcu_fbw_nb_err;
-
-extern void link_mcu_init(void);
-extern void link_mcu_send(void);
 #endif /* AP */
 
 #endif

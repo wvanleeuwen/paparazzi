@@ -227,10 +227,11 @@
 
   <firmware name="fixedwing">
 
-    <target name="fbw" board="lisa_m_1.0">
+    <target name="fbw" board="lisa_m_2.0">
       <configure name="CPU_LED" value="1"/>
       <configure name="SYS_TIME_LED" value="2" />
-      <define name="RADIO_CONTROL_LED" value="1"/>
+      <define name="RADIO_CONTROL_LED" value="4"/>
+      <configure name="FLASH_MODE" value="JTAG" />
     </target>
 
     <subsystem name="radio_control" type="ppm"/>
@@ -240,7 +241,7 @@
 
   <firmware name="fixedwing">
 
-    <target name="ap" board="lisa_m_1.0">
+    <target name="ap" board="lisa_m_2.0">
       <define name="LISA_M_LONGITUDINAL_X"/>
 
       <configure name="PERIODIC_FREQUENCY" value="120"/>
@@ -299,8 +300,13 @@
 
 <makefile>
 
-fbw.srcs += link_mcu_uart.c
+fbw.srcs += ./link_mcu_can.c ./mcu_periph/can.c ./arch/stm32/mcu_periph/can_arch.c
 fbw.CFLAGS += -DINTER_MCU -DMCU_CAN_LINK
+
+$(TARGET).CFLAGS += -DCAN_SJW_TQ=CAN_SJW_1tq -DCAN_BS1_TQ=CAN_BS1_8tq -DCAN_BS2_TQ=CAN_BS1_7tq -DCAN_PRESCALER=5 -DCAN_ERR_RESUME=DISABLE -DUSE_CAN
+
+ap.srcs += link_mcu_can.c
+ap.CFLAGS += -DINTER_MCU -DMCU_CAN_LINK
 
 </makefile>
 
