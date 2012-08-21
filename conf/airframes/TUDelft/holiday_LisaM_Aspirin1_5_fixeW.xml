@@ -7,7 +7,7 @@
   <servos>
     <servo name="THROTTLE"      no="0" min="1100" neutral="1100" max="1900"/>
     <servo name="AILERON"       no="1" min="1900" neutral="1550" max="1100"/>
-    <servo name="ELEVATOR"      no="2" min="1750" neutral="1530" max="1270"/>
+    <servo name="ELEVATOR"      no="2" min="1900" neutral="1550" max="1100"/>
   </servos>
 
 <!-- commands section -->
@@ -102,8 +102,8 @@
   </section>
 
   <section name="INS" prefix="INS_">
-    <define name="ROLL_NEUTRAL_DEFAULT" value="RadOfDeg(0)" unit="rad"/>
-    <define name="PITCH_NEUTRAL_DEFAULT" value="RadOfDeg(0)" unit="deg"/>
+    <define name="ROLL_NEUTRAL_DEFAULT" value="RadOfDeg(  4.5)" unit="rad"/>
+    <define name="PITCH_NEUTRAL_DEFAULT" value="RadOfDeg(-6)" unit="deg"/>
   </section>
 
   <section name="AUTO1" prefix="AUTO1_">
