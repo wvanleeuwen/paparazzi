@@ -113,8 +113,11 @@
 
   <section name="BAT">
     <define name="MILLIAMP_AT_FULL_THROTTLE" value="25000"/>
-    <define name="CATASTROPHIC_BAT_LEVEL" value="6.4" unit="V"/>
+    <define name="LOW_BAT_LEVEL" value="7" unit="V"/>
+    <define name="CRITIC_BAT_LEVEL" value="6.5" unit="V"/>
+    <define name="CATASTROPHIC_BAT_LEVEL" value="6.2" unit="V"/>
   </section>
+
 
   <section name="MISC">
     <define name="NOMINAL_AIRSPEED" value="17." unit="m/s"/>
