@@ -183,7 +183,7 @@ void event_task_fbw( void) {
   if (link_mcu_received) {
     link_mcu_received = FALSE;
     inter_mcu_fill_fbw_state(); /** Prepares the next message for AP */
-#ifdef MCU_SPI_LINK 
+#ifdef MCU_SPI_LINK
     link_mcu_restart(); /** Prepares the next SPI communication */
 #endif
   }
