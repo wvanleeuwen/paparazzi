@@ -203,12 +203,12 @@
 
   <modules>
     <load name="gps_ubx_ucenter.xml"/>
-    <load name="airspeed_ets.xml"/>
+<!--
     <load name="adc_generic.xml">
       <configure name="ADC_CHANNEL_GENERIC1" value="0" />
       <configure name="ADC_CHANNEL_GENERIC2" value="1" />
     </load>
-
+-->
     <load name="light.xml">
       <define name="LIGHT_LED_STROBE" value="2"/>
       <define name="LIGHT_LED_NAV" value="3"/>
@@ -232,6 +232,9 @@
       <configure name="SYS_TIME_LED" value="2" />
       <define name="RADIO_CONTROL_LED" value="4"/>
       <configure name="FLASH_MODE" value="JTAG" />
+<!--
+      <configure name="BMP_PORT" value="/dev/ttyACM0" />
+-->
     </target>
 
     <subsystem name="radio_control" type="ppm"/>
@@ -249,10 +252,10 @@
       <configure name="AHRS_PROPAGATE_FREQUENCY" value="100"/>
       <configure name="AHRS_CORRECT_FREQUENCY" value="100"/>
        <define name="AHRS_TRIGGERED_ATTITUDE_LOOP"/>
-       <define name="AIRSPEED_ETS_I2C_DEV" value="i2c2"/>
-       <define name="USE_I2C2"/>
-       <define name="USE_0"/>
-       <define name="USE_1"/>
+
+      <configure name="FLASH_MODE" value="JTAG" />
+<!--      <configure name="BMP_PORT" value="/dev/ttyACM0" /> -->
+
 
       <configure name="AHRS_ALIGNER_LED" value="1"/>
       <configure name="CPU_LED" value="1"/>
@@ -266,18 +269,9 @@
     <define name="STRONG_WIND"/>
     <define name="WIND_INFO"/>
     <define name="WIND_INFO_RET"/>
-    <!--<define name="SENSOR_SYNC_SEND" />-->
-    <!-- Sensors -->
-    <!--
-    <subsystem name="ahrs" type="int_cmpl_quat">
-      <define name="AHRS_GRAVITY_UPDATE_COORDINATED_TURN" />
-    </subsystem>
-    -->
-    <subsystem name="imu" type="aspirin_v2.1"/>
-    <subsystem name="ahrs" type="float_dcm">
-<!--      <define name="USE_MAGNETOMETER" /> -->
-    </subsystem>
 
+    <subsystem name="imu" type="aspirin_v2.1"/>
+    <subsystem name="ahrs" type="float_dcm" />
 
     <subsystem name="radio_control" type="ppm"/>
 
@@ -301,13 +295,17 @@
 
 <makefile>
 
-fbw.srcs += ./link_mcu_can.c ./mcu_periph/can.c ./arch/stm32/mcu_periph/can_arch.c
-fbw.CFLAGS += -DINTER_MCU -DMCU_CAN_LINK
+fbw.srcs += ./link_mcu_usart.c 
+#./mcu_periph/can.c ./arch/stm32/mcu_periph/can_arch.c
+# fbw.CFLAGS += -DINTER_MCU -DMCU_CAN_LINK
 
-$(TARGET).CFLAGS += -DCAN_SJW_TQ=CAN_SJW_1tq -DCAN_BS1_TQ=CAN_BS1_8tq -DCAN_BS2_TQ=CAN_BS1_7tq -DCAN_PRESCALER=5 -DCAN_ERR_RESUME=DISABLE -DUSE_CAN
+# fbw.srcs += ./link_mcu_can.c ./mcu_periph/can.c ./arch/stm32/mcu_periph/can_arch.c
+# fbw.CFLAGS += -DINTER_MCU -DMCU_CAN_LINK
 
-ap.srcs += link_mcu_can.c
-ap.CFLAGS += -DINTER_MCU -DMCU_CAN_LINK
+# $(TARGET).CFLAGS += -DCAN_SJW_TQ=CAN_SJW_1tq -DCAN_BS1_TQ=CAN_BS1_8tq -DCAN_BS2_TQ=CAN_BS1_7tq -DCAN_PRESCALER=5 -DCAN_ERR_RESUME=DISABLE -DUSE_CAN
+
+# ap.srcs += link_mcu_can.c
+# ap.CFLAGS += -DINTER_MCU -DMCU_CAN_LINK
 
 </makefile>
 
