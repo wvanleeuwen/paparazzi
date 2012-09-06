@@ -64,8 +64,9 @@ void link_mcu_send(void)
   ComputeChecksum(link_mcu_from_fbw_msg);
   link_mcu_from_fbw_msg.checksum = crc;
 
-  can_transmit(3, (uint8_t*)&link_mcu_from_fbw_msg, LINK_MCU_FRAME_LENGTH);
+  can_transmit(3, (uint8_t*)&link_mcu_from_fbw_msg, 4);
 
+//  LED_TOGGLE(3);
 /*
   spi_buffer_input = (uint8_t*)&link_mcu_from_ap_msg;
   spi_buffer_output = (uint8_t*)&link_mcu_from_fbw_msg;

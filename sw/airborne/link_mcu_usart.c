@@ -22,8 +22,6 @@
  *
  */
 
-#define USE_UART0
-
 #include "link_mcu_usart.h"
 #include "mcu_periph/uart.h"
 
@@ -31,8 +29,6 @@
 
 //////////////////////////////////////////////////////////////////////////////////////////////
 // LINK
-
-#define INTERMCU_LINK Uart0
 
 #define __InterMcuLink(dev, _x) dev##_x
 #define _InterMcuLink(dev, _x)  __InterMcuLink(dev, _x)
@@ -290,6 +286,8 @@ void link_mcu_periodic_task( void )
 	fbw_state->nb_err,
 	fbw_state->vsupply,
 	fbw_state->current);
+
+//    LED_TOGGLE(3);
   }
 }
 

@@ -254,7 +254,7 @@
        <define name="AHRS_TRIGGERED_ATTITUDE_LOOP"/>
 
       <configure name="FLASH_MODE" value="JTAG" />
-<!--      <configure name="BMP_PORT" value="/dev/ttyACM0" /> -->
+      <configure name="BMP_PORT" value="/dev/ttyACM0" /> 
 
 
       <configure name="AHRS_ALIGNER_LED" value="1"/>
@@ -295,14 +295,16 @@
 
 <makefile>
 
-fbw.srcs += ./link_mcu_usart.c 
-#./mcu_periph/can.c ./arch/stm32/mcu_periph/can_arch.c
+# $(TARGET).CFLAGS += -DINTERMCU_LINK=Uart3 -DUSE_UART3 -DUART3_BAUD=B115200
+
+# fbw.srcs += ./link_mcu_usart.c 
+# ./mcu_periph/can.c ./arch/stm32/mcu_periph/can_arch.c
 # fbw.CFLAGS += -DINTER_MCU -DMCU_CAN_LINK
 
-# fbw.srcs += ./link_mcu_can.c ./mcu_periph/can.c ./arch/stm32/mcu_periph/can_arch.c
-# fbw.CFLAGS += -DINTER_MCU -DMCU_CAN_LINK
+fbw.srcs += ./link_mcu_can.c ./mcu_periph/can.c ./arch/stm32/mcu_periph/can_arch.c
+fbw.CFLAGS += -DINTER_MCU -DMCU_CAN_LINK 
 
-# $(TARGET).CFLAGS += -DCAN_SJW_TQ=CAN_SJW_1tq -DCAN_BS1_TQ=CAN_BS1_8tq -DCAN_BS2_TQ=CAN_BS1_7tq -DCAN_PRESCALER=5 -DCAN_ERR_RESUME=DISABLE -DUSE_CAN
+$(TARGET).CFLAGS += -DCAN_SJW_TQ=CAN_SJW_1tq -DCAN_BS1_TQ=CAN_BS1_3tq -DCAN_BS2_TQ=CAN_BS2_4tq -DCAN_PRESCALER=12 -DUSE_CAN -DUSE_CAN1 -DUSE_CAN_EXT_ID
 
 # ap.srcs += link_mcu_can.c
 # ap.CFLAGS += -DINTER_MCU -DMCU_CAN_LINK
