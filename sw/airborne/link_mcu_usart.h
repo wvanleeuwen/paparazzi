@@ -1,6 +1,6 @@
 /*
  * $Id: link_mcu.h,v 1.12 2007/08/03 10:06:45 hecto Exp $
- *  
+ *
  * Copyright (C) 2003-2006 Pascal Brisset, Antoine Drouin
  *
  * This file is part of paparazzi.
@@ -18,7 +18,7 @@
  * You should have received a copy of the GNU General Public License
  * along with paparazzi; see the file COPYING.  If not, write to
  * the Free Software Foundation, 59 Temple Place - Suite 330,
- * Boston, MA 02111-1307, USA. 
+ * Boston, MA 02111-1307, USA.
  *
  */
 
@@ -33,8 +33,8 @@
 #include "inter_mcu.h"
 
 struct link_mcu_msg {
-  union  { 
-    struct fbw_state from_fbw; 
+  union  {
+    struct fbw_state from_fbw;
     struct ap_state  from_ap;
   } payload;
 };
@@ -42,6 +42,9 @@ struct link_mcu_msg {
 extern struct link_mcu_msg link_mcu_from_ap_msg;
 extern struct link_mcu_msg link_mcu_from_fbw_msg;
 
+extern bool_t link_mcu_received;
+
+extern void link_mcu_send( void );
 extern void link_mcu_init( void );
 extern void link_mcu_event_task( void );
 extern void link_mcu_periodic_task( void );

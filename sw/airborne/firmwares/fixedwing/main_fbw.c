@@ -53,6 +53,10 @@
 #include "link_mcu_can.h"
 #endif
 
+#ifdef MCU_UART_LINK
+#include "link_mcu_usart.h"
+#endif
+
 uint8_t fbw_mode;
 
 #include "inter_mcu.h"
@@ -130,7 +134,7 @@ void event_task_fbw( void) {
   i2c_event();
 
 #ifdef INTER_MCU
-#ifdef MCU_SPI_LINK
+#if defined MCU_SPI_LINK | defined MCU_UART_LINK
     link_mcu_event_task();
 #endif /* MCU_SPI_LINK */
 
@@ -140,9 +144,11 @@ void event_task_fbw( void) {
     inter_mcu_event_task();
     command_roll_trim = ap_state->command_roll_trim;
     command_pitch_trim = ap_state->command_pitch_trim;
+#ifndef OUTBACK_CHALLANGE_DANGEROUS_RULE
     if (ap_ok && fbw_mode == FBW_MODE_FAILSAFE) {
       fbw_mode = FBW_MODE_AUTO;
     }
+#endif
     if (fbw_mode == FBW_MODE_AUTO) {
       SetCommands(ap_state->commands);
     }
@@ -199,7 +205,12 @@ void periodic_task_fbw( void ) {
 #ifdef RADIO_CONTROL
   radio_control_periodic_task();
   if (fbw_mode == FBW_MODE_MANUAL && radio_control.status == RC_REALLY_LOST) {
+#ifdef OUTBACK_CHALLANGE_DANGEROUS_RULE
+#warning WARNING WARNING WARNING WARNING WARNING: OUTBACK_CHALLANGE_DANGEROUS_RULE is defined. If you loose RC you will NOT go to automatic
+set_failsafe_mode();
+#else
     fbw_mode = FBW_MODE_AUTO;
+#endif
   }
 #endif
 
@@ -213,6 +224,11 @@ void periodic_task_fbw( void ) {
 
 #ifdef MCU_CAN_LINK
   link_mcu_send();
+#endif
+
+#ifdef MCU_UART_LINK
+  inter_mcu_fill_fbw_state();
+  link_mcu_periodic_task();
 #endif
 
 #ifdef DOWNLINK

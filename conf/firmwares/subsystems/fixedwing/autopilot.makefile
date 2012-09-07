@@ -238,8 +238,10 @@ ifeq ($(BOARD),classix)
   ap.srcs 		+= $(SRC_FIXEDWING)/link_mcu.c mcu_periph/spi.c $(SRC_ARCH)/mcu_periph/spi_arch.c
 else
   # Single MCU's run both
-  ap.CFLAGS 		+= $(fbw_CFLAGS)
-  ap.srcs 		+= $(fbw_srcs)
+  ifeq ($(SEPARATE_FBW),)
+    ap.CFLAGS 		+= $(fbw_CFLAGS)
+    ap.srcs 		+= $(fbw_srcs)
+  endif
 endif
 
 #

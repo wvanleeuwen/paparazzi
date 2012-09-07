@@ -232,6 +232,9 @@
       <configure name="SYS_TIME_LED" value="2" />
       <define name="RADIO_CONTROL_LED" value="4"/>
       <configure name="FLASH_MODE" value="JTAG" />
+
+
+      <define name="OUTBACK_CHALLANGE_DANGEROUS_RULE" value="1" />
 <!--
       <configure name="BMP_PORT" value="/dev/ttyACM0" />
 -->
@@ -248,13 +251,15 @@
     <target name="ap" board="lisa_m_2.0">
       <define name="LISA_M_LONGITUDINAL_X"/>
 
+      <configure name="SEPARATE_FBW" value="1"/>
+
       <configure name="PERIODIC_FREQUENCY" value="120"/>
       <configure name="AHRS_PROPAGATE_FREQUENCY" value="100"/>
       <configure name="AHRS_CORRECT_FREQUENCY" value="100"/>
        <define name="AHRS_TRIGGERED_ATTITUDE_LOOP"/>
 
       <configure name="FLASH_MODE" value="JTAG" />
-      <configure name="BMP_PORT" value="/dev/ttyACM0" /> 
+ <!--     <configure name="BMP_PORT" value="/dev/ttyACM0" /> -->
 
 
       <configure name="AHRS_ALIGNER_LED" value="1"/>
@@ -269,16 +274,16 @@
     <define name="STRONG_WIND"/>
     <define name="WIND_INFO"/>
     <define name="WIND_INFO_RET"/>
+    <define name="RADIO_CONTROL_AUTO1"/>
+
 
     <subsystem name="imu" type="aspirin_v2.1"/>
     <subsystem name="ahrs" type="float_dcm" />
 
-    <subsystem name="radio_control" type="ppm"/>
-
     <!-- Communication -->
-    <subsystem name="telemetry" type="transparent">
-<!--  <subsystem name="telemetry" type="xbee_api"> -->
-      <configure name="MODEM_BAUD" value="B9600"/>
+<!--    <subsystem name="telemetry" type="transparent"> -->
+    <subsystem name="telemetry" type="xbee_api">
+      <configure name="MODEM_BAUD" value="B57600"/>
       <configure name="MODEM_PORT" value="UART2"/>
     </subsystem>
 
@@ -290,24 +295,20 @@
       <configure name="GPS_PORT" value="UART1"/>
     </subsystem>
 
+    <subsystem name="actuators" type="dummy"/>
 
 </firmware>
 
 <makefile>
 
-# $(TARGET).CFLAGS += -DINTERMCU_LINK=Uart3 -DUSE_UART3 -DUART3_BAUD=B115200
+$(TARGET).CFLAGS += -DINTER_MCU -DMCU_UART_LINK 
+ap.CFLAGS += -DINTERMCU_LINK=Uart5 -DUSE_UART5 -DUART5_BAUD=B57600
+fbw.CFLAGS += -DINTERMCU_LINK=Uart2 -DUSE_UART2 -DUART2_BAUD=B57600
+$(TARGET).srcs += ./link_mcu_usart.c
 
-# fbw.srcs += ./link_mcu_usart.c 
-# ./mcu_periph/can.c ./arch/stm32/mcu_periph/can_arch.c
+# fbw.srcs += ./link_mcu_can.c ./mcu_periph/can.c ./arch/stm32/mcu_periph/can_arch.c
 # fbw.CFLAGS += -DINTER_MCU -DMCU_CAN_LINK
-
-fbw.srcs += ./link_mcu_can.c ./mcu_periph/can.c ./arch/stm32/mcu_periph/can_arch.c
-fbw.CFLAGS += -DINTER_MCU -DMCU_CAN_LINK 
-
-$(TARGET).CFLAGS += -DCAN_SJW_TQ=CAN_SJW_1tq -DCAN_BS1_TQ=CAN_BS1_3tq -DCAN_BS2_TQ=CAN_BS2_4tq -DCAN_PRESCALER=12 -DUSE_CAN -DUSE_CAN1 -DUSE_CAN_EXT_ID
-
-# ap.srcs += link_mcu_can.c
-# ap.CFLAGS += -DINTER_MCU -DMCU_CAN_LINK
+# $(TARGET).CFLAGS += -DCAN_SJW_TQ=CAN_SJW_1tq -DCAN_BS1_TQ=CAN_BS1_3tq -DCAN_BS2_TQ=CAN_BS2_4tq -DCAN_PRESCALER=12 -DUSE_CAN -DUSE_CAN1 -DUSE_USB_LP_CAN1_RX0_IRQ -DCAN_ERR_RESUME=DISABLE
 
 </makefile>
 

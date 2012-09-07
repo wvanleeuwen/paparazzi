@@ -1,6 +1,6 @@
 /*
  * $Id: link_mcu.c,v 1.18 2006/07/19 06:54:38 hecto Exp $
- *  
+ *
  * Copyright (C) 2003-2006  Pascal Brisset, Antoine Drouin
  *
  * This file is part of paparazzi.
@@ -18,7 +18,7 @@
  * You should have received a copy of the GNU General Public License
  * along with paparazzi; see the file COPYING.  If not, write to
  * the Free Software Foundation, 59 Temple Place - Suite 330,
- * Boston, MA 02111-1307, USA. 
+ * Boston, MA 02111-1307, USA.
  *
  */
 
@@ -233,7 +233,7 @@ void link_mcu_init( void )
    intermcu_data.error_cnt = 0;
 }
 
-void parse_mavpilot_msg( void ) 
+void parse_mavpilot_msg( void )
 {
   if (intermcu_data.msg_class == MSG_INTERMCU_ID)
   {
@@ -264,13 +264,64 @@ void parse_mavpilot_msg( void )
 
       inter_mcu_received_ap = TRUE;
     }
+    else if (intermcu_data.msg_id == MSG_INTERMCU_FBW_ID)
+    {
+      fbw_state->ppm_cpt = MSG_INTERMCU_FBW_MOD(intermcu_data.msg_buf);
+      fbw_state->status = MSG_INTERMCU_FBW_STAT(intermcu_data.msg_buf);
+      fbw_state->nb_err = MSG_INTERMCU_FBW_ERR(intermcu_data.msg_buf);
+      fbw_state->vsupply = MSG_INTERMCU_FBW_VOLT(intermcu_data.msg_buf);
+      fbw_state->current = MSG_INTERMCU_FBW_CURRENT(intermcu_data.msg_buf);
+
+      inter_mcu_received_fbw = TRUE;
+    }
   }
 }
 
 
+#ifdef AP
+void link_mcu_send( void )
+{
+  pprz_t dummy = 0;
+
+  InterMcuSend_INTERMCU_COMMAND(
+#if COMMANDS_NB > 0
+	ap_state->commands[0],
+#else
+	dummy,
+#endif
+#if COMMANDS_NB > 1
+	ap_state->commands[1],
+#else
+	dummy,
+#endif
+#if COMMANDS_NB > 2
+	ap_state->commands[2],
+#else
+	dummy,
+#endif
+#if COMMANDS_NB > 3
+	ap_state->commands[3],
+#else
+	dummy,
+#endif
+#if COMMANDS_NB > 4
+	ap_state->commands[4],
+#else
+	dummy,
+#endif
+#if COMMANDS_NB > 5
+	ap_state->commands[5]
+#else
+	dummy
+#endif
+	);
+}
+#endif
+
+#ifdef FBW
+// 60 Hz
 static uint8_t SixtyHzCounter = 0;
 
-// 60 Hz
 void link_mcu_periodic_task( void )
 {
   SixtyHzCounter++;
@@ -290,6 +341,7 @@ void link_mcu_periodic_task( void )
 //    LED_TOGGLE(3);
   }
 }
+#endif
 
 void link_mcu_event_task( void ) {
   /* A message has been received */
@@ -303,4 +355,4 @@ void link_mcu_event_task( void ) {
     intermcu_data.msg_available = FALSE;
   }
 }
-   
+
