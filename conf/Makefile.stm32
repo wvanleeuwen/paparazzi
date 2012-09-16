@@ -264,6 +264,7 @@ BMP_UPLOAD_SCRIPT = $(PAPARAZZI_SRC)/conf/boards/upload_scripts/bmp_swd_flash.sc
 else
 BMP_UPLOAD_SCRIPT = $(TOOLCHAIN_DIR)/arm-none-eabi/share/libopencm3/scripts/black_magic_probe_flash.scr
 endif
+endif
 
 upload: $(OBJDIR)/$(TARGET).elf
 	@echo "Using Black Magic Probe"
