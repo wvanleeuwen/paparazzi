@@ -24,6 +24,7 @@
 
 #include "link_mcu_usart.h"
 #include "mcu_periph/uart.h"
+#include "led.h"
 
 #include "commands.h"
 
@@ -282,7 +283,7 @@ void parse_mavpilot_msg( void )
 void link_mcu_send( void )
 {
   pprz_t dummy = 0;
-
+  LED_TOGGLE(4);
   InterMcuSend_INTERMCU_COMMAND(
 #if COMMANDS_NB > 0
 	ap_state->commands[0],

@@ -259,6 +259,7 @@
        <define name="AHRS_TRIGGERED_ATTITUDE_LOOP"/>
 
       <configure name="FLASH_MODE" value="JTAG" />
+      <configure name="NO_LUFTBOOT" value="1" />
  <!--     <configure name="BMP_PORT" value="/dev/ttyACM0" /> -->
 
 
