@@ -73,22 +73,30 @@
 // class
 #define MSG_INTERMCU_ID 100
 
-#define MSG_INTERMCU_COMMAND_ID 0x05
-#define MSG_INTERMCU_COMMAND_S1(_intermcu_payload) (uint16_t)(*((uint8_t*)_intermcu_payload+0)|*((uint8_t*)_intermcu_payload+1+0)<<8)
-#define MSG_INTERMCU_COMMAND_S2(_intermcu_payload) (uint16_t)(*((uint8_t*)_intermcu_payload+2)|*((uint8_t*)_intermcu_payload+1+2)<<8)
-#define MSG_INTERMCU_COMMAND_S3(_intermcu_payload) (uint16_t)(*((uint8_t*)_intermcu_payload+4)|*((uint8_t*)_intermcu_payload+1+4)<<8)
-#define MSG_INTERMCU_COMMAND_S4(_intermcu_payload) (uint16_t)(*((uint8_t*)_intermcu_payload+6)|*((uint8_t*)_intermcu_payload+1+6)<<8)
-#define MSG_INTERMCU_COMMAND_S5(_intermcu_payload) (uint16_t)(*((uint8_t*)_intermcu_payload+8)|*((uint8_t*)_intermcu_payload+1+8)<<8)
-#define MSG_INTERMCU_COMMAND_S6(_intermcu_payload) (uint16_t)(*((uint8_t*)_intermcu_payload+10)|*((uint8_t*)_intermcu_payload+1+10)<<8)
 
-#define InterMcuSend_INTERMCU_COMMAND(s1,s2,s3,s4,s5,s6) { \
-  InterMcuHeader(MSG_INTERMCU_ID, MSG_INTERMCU_COMMAND_ID, 12);\
-  uint16_t _s1 = s1; InterMcuSend2ByAddr((uint8_t*)&_s1);\
-  uint16_t _s2 = s2; InterMcuSend2ByAddr((uint8_t*)&_s2);\
-  uint16_t _s3 = s3; InterMcuSend2ByAddr((uint8_t*)&_s3);\
-  uint16_t _s4 = s4; InterMcuSend2ByAddr((uint8_t*)&_s4);\
-  uint16_t _s5 = s5; InterMcuSend2ByAddr((uint8_t*)&_s5);\
-  uint16_t _s6 = s6; InterMcuSend2ByAddr((uint8_t*)&_s6);\
+#define MSG_INTERMCU_COMMAND_ID 0x05
+#define MSG_INTERMCU_COMMAND_LENGTH  (2*(COMMANDS_NB))
+#define MSG_INTERMCU_COMMAND(_intermcu_payload, nr) (uint16_t)(*((uint8_t*)_intermcu_payload+0)|*((uint8_t*)_intermcu_payload+1+(2*(nr)))<<8)
+
+#define InterMcuSend_INTERMCU_COMMAND(cmd) { \
+  InterMcuHeader(MSG_INTERMCU_ID, MSG_INTERMCU_COMMAND_ID, MSG_INTERMCU_COMMAND_LENGTH);\
+  for (int i=0;i<COMMANDS_NB;i++) { \
+    uint16_t _cmd = cmd[i];  \
+    InterMcuSend2ByAddr((uint8_t*)&_cmd);\
+  } \
+  InterMcuTrailer();\
+}
+
+#define MSG_INTERMCU_RADIO_ID 0x08
+#define MSG_INTERMCU_RADIO_LENGTH  (2*(RADIO_CONTROL_NB_CHANNEL))
+#define MSG_INTERMCU_RADIO(_intermcu_payload, nr) (uint16_t)(*((uint8_t*)_intermcu_payload+0)|*((uint8_t*)_intermcu_payload+1+(2*(nr)))<<8)
+
+#define InterMcuSend_INTERMCU_RADIO(cmd) { \
+  InterMcuHeader(MSG_INTERMCU_ID, MSG_INTERMCU_RADIO_ID, MSG_INTERMCU_RADIO_LENGTH);\
+  for (int i=0;i<RADIO_CONTROL_NB_CHANNEL;i++) { \
+    uint16_t _cmd = cmd[i];  \
+    InterMcuSend2ByAddr((uint8_t*)&_cmd);\
+  } \
   InterMcuTrailer();\
 }
 
@@ -106,6 +114,17 @@
   uint8_t _err = err; InterMcuSend1ByAddr((uint8_t*)&_err);\
   uint8_t _volt = volt; InterMcuSend1ByAddr((uint8_t*)&_volt);\
   uint16_t _current = current; InterMcuSend2ByAddr((uint8_t*)&_current);\
+  InterMcuTrailer();\
+}
+
+#define MSG_INTERMCU_TRIM_ID 0x07
+#define MSG_INTERMCU_TRIM_ROLL(_intermcu_payload) (uint16_t)(*((uint8_t*)_intermcu_payload+0)|*((uint8_t*)_intermcu_payload+1)<<8)
+#define MSG_INTERMCU_TRIM_PITCH(_intermcu_payload) (uint16_t)(*((uint8_t*)_intermcu_payload+2)|*((uint8_t*)_intermcu_payload+3)<<8)
+
+#define InterMcuSend_INTERMCU_TRIM(roll,pitch) { \
+  InterMcuHeader(MSG_INTERMCU_ID, MSG_INTERMCU_TRIM_ID, 4);\
+  uint16_t _roll = roll; InterMcuSend2ByAddr((uint8_t*)&_roll);\
+  uint16_t _pitch = pitch; InterMcuSend2ByAddr((uint8_t*)&_pitch);\
   InterMcuTrailer();\
 }
 
@@ -240,30 +259,32 @@ void parse_mavpilot_msg( void )
   {
     if (intermcu_data.msg_id == MSG_INTERMCU_COMMAND_ID)
     {
-#if COMMANDS_NB > 6
-#warning "INTERMCU UART CAN ONLY SEND 6 COMMANDS"
+#if COMMANDS_NB > 8
+#error "INTERMCU UART CAN ONLY SEND 8 COMMANDS OR THE UART WILL BE OVERFILLED"
 #endif
 
-#if COMMANDS_NB > 0
-      ap_state->commands[0] = ((pprz_t)MSG_INTERMCU_COMMAND_S1(intermcu_data.msg_buf));
-#endif
-#if COMMANDS_NB > 1
-      ap_state->commands[1] = ((pprz_t)MSG_INTERMCU_COMMAND_S2(intermcu_data.msg_buf));
-#endif
-#if COMMANDS_NB > 2
-      ap_state->commands[2] = ((pprz_t)MSG_INTERMCU_COMMAND_S3(intermcu_data.msg_buf));
-#endif
-#if COMMANDS_NB > 3
-      ap_state->commands[3] = ((pprz_t)MSG_INTERMCU_COMMAND_S4(intermcu_data.msg_buf));
-#endif
-#if COMMANDS_NB > 4
-      ap_state->commands[4] = ((pprz_t)MSG_INTERMCU_COMMAND_S5(intermcu_data.msg_buf));
-#endif
-#if COMMANDS_NB > 5
-      ap_state->commands[5] = ((pprz_t)MSG_INTERMCU_COMMAND_S6(intermcu_data.msg_buf));
-#endif
+      for (int i=0; i< COMMANDS_NB; i++)
+      {
+        ap_state->commands[i] = ((pprz_t)MSG_INTERMCU_COMMAND(intermcu_data.msg_buf, i));
+      }
 
       inter_mcu_received_ap = TRUE;
+    }
+    else if (intermcu_data.msg_id == MSG_INTERMCU_RADIO_ID)
+    {
+#if RADIO_CONTROL_NB_CHANNEL > 8
+#error "INTERMCU UART CAN ONLY SEND 8 COMMANDS OR THE UART WILL BE OVERFILLED"
+#endif
+
+      for (int i=0; i< RADIO_CONTROL_NB_CHANNEL; i++)
+      {
+        fbw_state->channels[i] = ((pprz_t)MSG_INTERMCU_RADIO(intermcu_data.msg_buf, i));
+      }
+    }
+    else if (intermcu_data.msg_id == MSG_INTERMCU_FBW_ID)
+    {
+      ap_state->command_roll_trim  = ((pprz_t) MSG_INTERMCU_TRIM_ROLL(intermcu_data.msg_buf));
+      ap_state->command_pitch_trim = ((pprz_t) MSG_INTERMCU_TRIM_PITCH(intermcu_data.msg_buf));
     }
     else if (intermcu_data.msg_id == MSG_INTERMCU_FBW_ID)
     {
@@ -282,40 +303,9 @@ void parse_mavpilot_msg( void )
 #ifdef AP
 void link_mcu_send( void )
 {
-  pprz_t dummy = 0;
   LED_TOGGLE(4);
-  InterMcuSend_INTERMCU_COMMAND(
-#if COMMANDS_NB > 0
-	ap_state->commands[0],
-#else
-	dummy,
-#endif
-#if COMMANDS_NB > 1
-	ap_state->commands[1],
-#else
-	dummy,
-#endif
-#if COMMANDS_NB > 2
-	ap_state->commands[2],
-#else
-	dummy,
-#endif
-#if COMMANDS_NB > 3
-	ap_state->commands[3],
-#else
-	dummy,
-#endif
-#if COMMANDS_NB > 4
-	ap_state->commands[4],
-#else
-	dummy,
-#endif
-#if COMMANDS_NB > 5
-	ap_state->commands[5]
-#else
-	dummy
-#endif
-	);
+  InterMcuSend_INTERMCU_COMMAND( ap_state->commands );
+  InterMcuSend_INTERMCU_TRIM( ap_state->command_roll_trim, ap_state->command_pitch_trim );
 }
 #endif
 
@@ -326,9 +316,9 @@ static uint8_t SixtyHzCounter = 0;
 void link_mcu_periodic_task( void )
 {
   SixtyHzCounter++;
-  if (SixtyHzCounter >= 15)
+  if (SixtyHzCounter >= 6)
   {
-    // 4 Hz
+    // 10 Hz
     SixtyHzCounter = 0;
     inter_mcu_fill_fbw_state(); /** Prepares the next message for AP */
 
@@ -338,6 +328,9 @@ void link_mcu_periodic_task( void )
 	fbw_state->nb_err,
 	fbw_state->vsupply,
 	fbw_state->current);
+#if defined RADIO_CONTROL || RADIO_CONTROL_AUTO1
+    InterMcuSend_INTERMCU_RADIO( fbw_state->channels );
+#endif 
 
 //    LED_TOGGLE(3);
   }
