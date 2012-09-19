@@ -232,6 +232,7 @@
       <configure name="SYS_TIME_LED" value="2" />
       <define name="RADIO_CONTROL_LED" value="4"/>
       <configure name="FLASH_MODE" value="JTAG" />
+      <configure name="NO_LUFTBOOT" value="1" />
 
 
       <define name="OUTBACK_CHALLANGE_DANGEROUS_RULE" value="1" />
@@ -285,9 +286,9 @@
     <subsystem name="ahrs" type="float_dcm" />
 
     <!-- Communication -->
-<!--    <subsystem name="telemetry" type="transparent"> -->
-    <subsystem name="telemetry" type="xbee_api">
-      <configure name="MODEM_BAUD" value="B57600"/>
+<!--    <subsystem name="telemetry" type="xbee_api"> -->
+    <subsystem name="telemetry" type="transparent">
+      <configure name="MODEM_BAUD" value="B9600"/>
       <configure name="MODEM_PORT" value="UART2"/>
     </subsystem>
 
