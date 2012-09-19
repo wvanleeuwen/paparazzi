@@ -145,6 +145,21 @@
       </program>
       <program name="Messages"/>
     </session>
+    <session name="[OBC] USB0: xTend Transparent @38400 with FLOW CONTROL">
+      <program name="Data Link">
+        <arg flag="-d" constant="/dev/ttyUSB0"/>
+        <arg flag="-transport" constant="transparent"/>
+        <arg flag="-uplink" constant=""/>
+        <arg flag="-s" constant="38400"/>
+        <arg flag="-shfc" constant=""/>
+      </program>
+      <program name="Server"/>
+      <program name="GCS">
+        <arg flag="-speech" constant=""/>
+        <arg flag="-layout" constant="./TUDelft/gcsHeering.xml"/>
+      </program>
+      <program name="Messages"/>
+    </session>
     <session name="Debug Graphs">
       <program name="Real-time Plotter">
         <arg flag="-t" constant="phi"/>
