@@ -330,7 +330,7 @@ void link_mcu_periodic_task( void )
 	fbw_state->current);
 #if defined RADIO_CONTROL || RADIO_CONTROL_AUTO1
     InterMcuSend_INTERMCU_RADIO( fbw_state->channels );
-#endif 
+#endif
 
 //    LED_TOGGLE(3);
   }
