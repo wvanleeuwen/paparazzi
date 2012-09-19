@@ -272,8 +272,8 @@ void parse_mavpilot_msg( void )
     }
     else if (intermcu_data.msg_id == MSG_INTERMCU_RADIO_ID)
     {
-#if RADIO_CONTROL_NB_CHANNEL > 8
-#error "INTERMCU UART CAN ONLY SEND 8 COMMANDS OR THE UART WILL BE OVERFILLED"
+#if RADIO_CONTROL_NB_CHANNEL > 10
+#error "INTERMCU UART CAN ONLY SEND 10 RADIO CHANNELS OR THE UART WILL BE OVERFILLED"
 #endif
 
       for (int i=0; i< RADIO_CONTROL_NB_CHANNEL; i++)
