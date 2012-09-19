@@ -281,7 +281,7 @@ void parse_mavpilot_msg( void )
         fbw_state->channels[i] = ((pprz_t)MSG_INTERMCU_RADIO(intermcu_data.msg_buf, i));
       }
     }
-    else if (intermcu_data.msg_id == MSG_INTERMCU_FBW_ID)
+    else if (intermcu_data.msg_id == MSG_INTERMCU_TRIM_ID)
     {
       ap_state->command_roll_trim  = ((pprz_t) MSG_INTERMCU_TRIM_ROLL(intermcu_data.msg_buf));
       ap_state->command_pitch_trim = ((pprz_t) MSG_INTERMCU_TRIM_PITCH(intermcu_data.msg_buf));
