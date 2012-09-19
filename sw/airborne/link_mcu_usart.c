@@ -268,6 +268,7 @@ void parse_mavpilot_msg( void )
         ap_state->commands[i] = ((pprz_t)MSG_INTERMCU_COMMAND(intermcu_data.msg_buf, i));
       }
 
+      LED_TOGGLE(3);
       inter_mcu_received_ap = TRUE;
     }
     else if (intermcu_data.msg_id == MSG_INTERMCU_RADIO_ID)
@@ -316,9 +317,9 @@ static uint8_t SixtyHzCounter = 0;
 void link_mcu_periodic_task( void )
 {
   SixtyHzCounter++;
-  if (SixtyHzCounter >= 6)
+  if (SixtyHzCounter >= 3)
   {
-    // 10 Hz
+    // 20 Hz
     SixtyHzCounter = 0;
     inter_mcu_fill_fbw_state(); /** Prepares the next message for AP */
 

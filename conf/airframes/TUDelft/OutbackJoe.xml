@@ -19,6 +19,7 @@
     <axis name="ROLL" failsafe_value="0"/>
     <axis name="PITCH" failsafe_value="0"/>
     <axis name="YAW" failsafe_value="0"/>
+    <axis name="FORCECRASH" failsafe_value="0"/>
   </commands>
 
   <rc_commands>
@@ -26,6 +27,7 @@
     <set command="ROLL" value="@ROLL"/>
     <set command="PITCH" value="@PITCH"/>
     <set command="YAW" value="@YAW"/>
+<!--    <set command="FORCECRASH" value="@FLAPS"/> --> 
   </rc_commands>
 
   <command_laws>
@@ -228,17 +230,16 @@
   <firmware name="fixedwing">
 
     <target name="fbw" board="lisa_m_2.0">
-      <configure name="CPU_LED" value="1"/>
       <configure name="SYS_TIME_LED" value="2" />
       <define name="RADIO_CONTROL_LED" value="4"/>
+
       <configure name="FLASH_MODE" value="JTAG" />
       <configure name="NO_LUFTBOOT" value="1" />
+<!--      <configure name="BMP_PORT" value="/dev/ttyACM0" /> -->
 
+      <define name="OUTBACK_CHALLANGE_DANGEROUS_RULE_RC_LOST_NO_AP" value="1" />
+      <define name="OUTBACK_CHALLANGE_VERY_DANGEROUS_RULE_AP_CAN_FORCE_FAILSAFE" value="1" />
 
-      <define name="OUTBACK_CHALLANGE_DANGEROUS_RULE" value="1" />
-<!--
-      <configure name="BMP_PORT" value="/dev/ttyACM0" />
--->
     </target>
 
     <subsystem name="radio_control" type="ppm"/>
