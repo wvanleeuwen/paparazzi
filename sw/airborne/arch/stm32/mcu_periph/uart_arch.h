@@ -117,8 +117,8 @@
 #define UART3_reg USART3
 #define UART5_reg USART5
 
-#if !defined UART1_FLOW_CONTROL
-#define UART1_FLOW_CONTROL 0
+#if defined UART1_FLOW_CONTROL
+#error UART1_FLOW_CONTROL is renamed to UART1_HW_FLOW_CONTROL
 #endif
 
 #if defined USE_UART1 || OVERRIDE_UART1_IRQ_HANDLER

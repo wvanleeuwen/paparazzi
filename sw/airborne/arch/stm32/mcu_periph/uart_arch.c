@@ -141,8 +141,8 @@ void uart1_init( void ) {
   gpio.GPIO_Mode  = GPIO_Mode_IN_FLOATING;
   GPIO_Init(UART1_RxPort, &gpio);
 
-#ifdef UART1_FLOW_CONTROL
-#warning "USING UART1 FLOW CONTROL. Make sure to pull down CTS if you are not connecting any flow-control-capable hardware."
+#if UART1_HW_FLOW_CONTROL
+#warning "USING UART1 HW FLOW CONTROL. Make sure to pull down CTS if you are not connecting any flow-control-capable hardware."
   /* GPIOA: GPIO_Pin_12 USART1 Rts push-pull */
   gpio.GPIO_Pin   = UART1_RtsPin;
   gpio.GPIO_Mode  = GPIO_Mode_AF_PP;
@@ -155,10 +155,10 @@ void uart1_init( void ) {
   GPIO_Init(UART1_FlowControlPort, &gpio);
 
   /* Configure USART1, enable hardware flow control*/
-  uart_periph_set_baudrate(&uart1, UART1_BAUD,1);
+  uart_periph_set_baudrate(&uart1, UART1_BAUD,TRUE);
 #else
   /* Configure USART1, no flow control */
-  uart_periph_set_baudrate(&uart1, UART1_BAUD,0);
+  uart_periph_set_baudrate(&uart1, UART1_BAUD,FALSE);
 #endif
 }
 
@@ -193,7 +193,7 @@ void uart2_init( void ) {
   GPIO_Init(UART2_RxPort, &gpio);
 
   /* Configure USART2 */
-  uart_periph_set_baudrate(&uart2, UART2_BAUD,0);
+  uart_periph_set_baudrate(&uart2, UART2_BAUD,FALSE);
 }
 
 void usart2_irq_handler(void) { usart_irq_handler(&uart2); }
@@ -229,7 +229,7 @@ void uart3_init( void ) {
   GPIO_Init(UART3_RxPort, &gpio);
 
   /* Configure USART3 */
-  uart_periph_set_baudrate(&uart3, UART3_BAUD,0);
+  uart_periph_set_baudrate(&uart3, UART3_BAUD,FALSE);
 }
 
 void usart3_irq_handler(void) { usart_irq_handler(&uart3); }
@@ -264,7 +264,7 @@ void uart5_init( void ) {
   GPIO_Init(UART5_RxPort, &gpio);
 
   /* Configure UART5 */
-  uart_periph_set_baudrate(&uart5, UART5_BAUD,0);
+  uart_periph_set_baudrate(&uart5, UART5_BAUD,FALSE);
 }
 
 void usart5_irq_handler(void) { usart_irq_handler(&uart5); }

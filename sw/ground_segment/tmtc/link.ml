@@ -444,7 +444,7 @@ let () =
       "-noac_info", Arg.Clear ac_info, (sprintf "Disables AC traffic info (uplink).");
       "-nouplink", Arg.Clear uplink, (sprintf "Disables the uplink (from the ground to the aircraft).");
       "-s", Arg.Set_string baudrate, (sprintf "<baudrate>  Default is %s" !baudrate);
-      "-shfc",  Arg.Set hw_flow_control, "Enable UART hardware flow control (CTS/RTS)";
+      "-hfc",  Arg.Set hw_flow_control, "Enable UART hardware flow control (CTS/RTS)";
       "-local_timestamp", Arg.Unit (fun () -> add_timestamp := Some (Unix.gettimeofday ())), "Add local timestamp to messages sent over ivy";
       "-transport", Arg.Set_string transport, (sprintf "<transport> Available protocols are modem,pprz,pprz2 and xbee. Default is %s" !transport);
       "-udp", Arg.Set udp, "Listen a UDP connection on <udp_port>";
