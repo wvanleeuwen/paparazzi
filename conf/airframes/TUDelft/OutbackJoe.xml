@@ -237,8 +237,8 @@
       <configure name="NO_LUFTBOOT" value="1" />
 <!--      <configure name="BMP_PORT" value="/dev/ttyACM0" /> -->
 
-      <define name="OUTBACK_CHALLANGE_DANGEROUS_RULE_RC_LOST_NO_AP" value="1" />
-      <define name="OUTBACK_CHALLANGE_VERY_DANGEROUS_RULE_AP_CAN_FORCE_FAILSAFE" value="1" />
+      <define name="OUTBACK_CHALLENGE_DANGEROUS_RULE_RC_LOST_NO_AP" value="1" />
+      <define name="OUTBACK_CHALLENGE_VERY_DANGEROUS_RULE_AP_CAN_FORCE_FAILSAFE" value="1" />
 
     </target>
 
