@@ -3,6 +3,7 @@
 #include <stdlib.h>
 #include <ctime>
 #include <iostream>
+#include <string.h>
 
 #include <Ivy/ivy.h>
 #include <Ivy/ivyglibloop.h>
@@ -99,9 +100,12 @@ int main ( int argc, char** argv)
   printf("photolist with no arguments = short list, with one argument medium list, and 2 arguments a full list\n");
   fflush(stdout);
 
-  if (argc >= 3)
+  if ((argc >= 3) && (strlen(argv[2]) > 1))
+  {
+    //printf("arg[2] = %s\n", argv[2]);
     verbose = 2;
-  else if (argc >= 2)
+  }
+  else if ((argc >= 2) && (strlen(argv[1]) > 1))
     verbose = 1;
   else
     verbose = 0;
