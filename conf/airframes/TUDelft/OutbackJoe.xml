@@ -27,7 +27,7 @@
     <set command="ROLL" value="@ROLL"/>
     <set command="PITCH" value="@PITCH"/>
     <set command="YAW" value="@YAW"/>
-<!--    <set command="FORCECRASH" value="@FLAPS"/> --> 
+<!--    <set command="FORCECRASH" value="@FLAPS"/> -->
   </rc_commands>
 
   <command_laws>

@@ -166,7 +166,7 @@ void event_task_fbw( void) {
   }
 
 #if OUTBACK_CHALLENGE_VERY_DANGEROUS_RULE_AP_CAN_FORCE_FAILSAFE
-#warning DANGER DANGER DANGER DANGER: Outback Challenge Rule FORCE-CRASH-RULE: DANGER DANGER: AP is now capable to FORCE your FBW in failsafe mode EVEN IF RC IS NOT LOST: Consider the consequences. 
+#warning DANGER DANGER DANGER DANGER: Outback Challenge Rule FORCE-CRASH-RULE: DANGER DANGER: AP is now capable to FORCE your FBW in failsafe mode EVEN IF RC IS NOT LOST: Consider the consequences.
 
   int crash = 0;
   if (commands[COMMAND_FORCECRASH] >= 8000)
@@ -193,7 +193,7 @@ void event_task_fbw( void) {
     SetActuatorsFromCommands(trimmed_commands);
     fbw_new_actuators = 0;
     #if OUTBACK_CHALLENGE_VERY_DANGEROUS_RULE_AP_CAN_FORCE_FAILSAFE
-    if (crash == 1) 
+    if (crash == 1)
     {
       for (;;) {}
     }

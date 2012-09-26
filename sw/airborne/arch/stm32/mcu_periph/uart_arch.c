@@ -41,7 +41,7 @@ void uart_periph_set_baudrate(struct uart_periph* p, uint32_t baud, bool_t hw_fl
   if (hw_flow_control) {
     usart.USART_HardwareFlowControl = USART_HardwareFlowControl_RTS_CTS;
   }
-  else { 
+  else {
     usart.USART_HardwareFlowControl = USART_HardwareFlowControl_None;
   }
   usart.USART_Mode                = USART_Mode_Rx | USART_Mode_Tx;
