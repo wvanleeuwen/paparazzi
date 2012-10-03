@@ -188,11 +188,13 @@
       <define name="USE_AD0_3"/>
       <define name="ADC_6" value="\"AdcBank0(3)\""/>
 
+
     </target>
     <target name="sim" board="pc">
       <subsystem name="radio_control" type="ppm"/>
     </target>
 
+    <define name="DC_IMAGE_BUFFER" value="65000" />
     <define name="STRONG_WIND"/>
     <define name="WIND_INFO"/>
     <define name="WIND_INFO_RET"/>

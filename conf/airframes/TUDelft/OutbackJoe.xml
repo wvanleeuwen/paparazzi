@@ -19,6 +19,7 @@
     <axis name="ROLL" failsafe_value="0"/>
     <axis name="PITCH" failsafe_value="0"/>
     <axis name="YAW" failsafe_value="0"/>
+    <axis name="FORCECRASH" failsafe_value="0"/>
   </commands>
 
   <rc_commands>
@@ -26,6 +27,7 @@
     <set command="ROLL" value="@ROLL"/>
     <set command="PITCH" value="@PITCH"/>
     <set command="YAW" value="@YAW"/>
+<!--    <set command="FORCECRASH" value="@FLAPS"/> -->
   </rc_commands>
 
   <command_laws>
@@ -203,12 +205,12 @@
 
   <modules>
     <load name="gps_ubx_ucenter.xml"/>
-    <load name="airspeed_ets.xml"/>
+<!--
     <load name="adc_generic.xml">
       <configure name="ADC_CHANNEL_GENERIC1" value="0" />
       <configure name="ADC_CHANNEL_GENERIC2" value="1" />
     </load>
-
+-->
     <load name="light.xml">
       <define name="LIGHT_LED_STROBE" value="2"/>
       <define name="LIGHT_LED_NAV" value="3"/>
@@ -228,14 +230,23 @@
   <firmware name="fixedwing">
 
     <target name="fbw" board="lisa_m_2.0">
-      <configure name="CPU_LED" value="1"/>
       <configure name="SYS_TIME_LED" value="2" />
       <define name="RADIO_CONTROL_LED" value="4"/>
+
       <configure name="FLASH_MODE" value="JTAG" />
+      <configure name="NO_LUFTBOOT" value="1" />
+<!--      <configure name="BMP_PORT" value="/dev/ttyACM0" /> -->
+
+      <define name="OUTBACK_CHALLENGE_DANGEROUS_RULE_RC_LOST_NO_AP" value="1" />
+      <define name="OUTBACK_CHALLENGE_VERY_DANGEROUS_RULE_AP_CAN_FORCE_FAILSAFE" value="1" />
+
     </target>
 
     <subsystem name="radio_control" type="ppm"/>
     <subsystem name="actuators" type="direct"/>
+    <subsystem name="intermcu" type="uart">
+      <configure name="INTERMCU_PORT_NR" value="2" />
+    </subsystem>
 
 
   </firmware>
@@ -245,14 +256,17 @@
     <target name="ap" board="lisa_m_2.0">
       <define name="LISA_M_LONGITUDINAL_X"/>
 
+      <configure name="SEPARATE_FBW" value="1"/>
+
       <configure name="PERIODIC_FREQUENCY" value="120"/>
       <configure name="AHRS_PROPAGATE_FREQUENCY" value="100"/>
       <configure name="AHRS_CORRECT_FREQUENCY" value="100"/>
        <define name="AHRS_TRIGGERED_ATTITUDE_LOOP"/>
-       <define name="AIRSPEED_ETS_I2C_DEV" value="i2c2"/>
-       <define name="USE_I2C2"/>
-       <define name="USE_0"/>
-       <define name="USE_1"/>
+
+      <configure name="FLASH_MODE" value="JTAG" />
+      <configure name="NO_LUFTBOOT" value="1" />
+ <!--     <configure name="BMP_PORT" value="/dev/ttyACM0" /> -->
+
 
       <configure name="AHRS_ALIGNER_LED" value="1"/>
       <configure name="CPU_LED" value="1"/>
@@ -266,24 +280,15 @@
     <define name="STRONG_WIND"/>
     <define name="WIND_INFO"/>
     <define name="WIND_INFO_RET"/>
-    <!--<define name="SENSOR_SYNC_SEND" />-->
-    <!-- Sensors -->
-    <!--
-    <subsystem name="ahrs" type="int_cmpl_quat">
-      <define name="AHRS_GRAVITY_UPDATE_COORDINATED_TURN" />
-    </subsystem>
-    -->
+    <define name="RADIO_CONTROL_AUTO1"/>
+
+
     <subsystem name="imu" type="aspirin_v2.1"/>
-    <subsystem name="ahrs" type="float_dcm">
-<!--      <define name="USE_MAGNETOMETER" /> -->
-    </subsystem>
-
-
-    <subsystem name="radio_control" type="ppm"/>
+    <subsystem name="ahrs" type="float_dcm" />
 
     <!-- Communication -->
+<!--    <subsystem name="telemetry" type="xbee_api"> -->
     <subsystem name="telemetry" type="transparent">
-<!--  <subsystem name="telemetry" type="xbee_api"> -->
       <configure name="MODEM_BAUD" value="B9600"/>
       <configure name="MODEM_PORT" value="UART2"/>
     </subsystem>
@@ -296,18 +301,16 @@
       <configure name="GPS_PORT" value="UART1"/>
     </subsystem>
 
+    <subsystem name="actuators" type="dummy"/>
+
+    <subsystem name="intermcu" type="uart">
+      <configure name="INTERMCU_PORT_NR" value="5" />
+    </subsystem>
 
 </firmware>
 
 <makefile>
 
-fbw.srcs += ./link_mcu_can.c ./mcu_periph/can.c ./arch/stm32/mcu_periph/can_arch.c
-fbw.CFLAGS += -DINTER_MCU -DMCU_CAN_LINK
-
-$(TARGET).CFLAGS += -DCAN_SJW_TQ=CAN_SJW_1tq -DCAN_BS1_TQ=CAN_BS1_8tq -DCAN_BS2_TQ=CAN_BS1_7tq -DCAN_PRESCALER=5 -DCAN_ERR_RESUME=DISABLE -DUSE_CAN
-
-ap.srcs += link_mcu_can.c
-ap.CFLAGS += -DINTER_MCU -DMCU_CAN_LINK
 
 </makefile>
 
