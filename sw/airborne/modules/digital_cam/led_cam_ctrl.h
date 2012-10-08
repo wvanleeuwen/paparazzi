@@ -82,9 +82,9 @@ static inline void led_cam_ctrl_init(void)
 static inline void led_cam_ctrl_periodic( void )
 {
 #ifdef DC_SHOOT_ON_BUTTON_RELEASE
- if (dc_timer==1) {
-   dc_send_shot_position();
- }
+  if (dc_timer==1) {
+    dc_send_shot_position();
+  }
 #endif
 
   if (dc_timer) {

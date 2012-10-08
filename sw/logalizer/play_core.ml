@@ -179,7 +179,7 @@ let init = fun () ->
       "-d", Arg.Set_string port, (sprintf "<port> Default is %s" !port);
       "-o", Arg.Set output_on_serial, "Output binary messages on serial port";
       "-s", Arg.Set_string baudrate, (sprintf "<baudrate>  Default is %s" !baudrate);
-      "-shfc",  Arg.Set hw_flow_control, "Enable UART hardware flow control (CTS/RTS)";]
+      "-hfc",  Arg.Set hw_flow_control, "Enable UART hardware flow control (CTS/RTS)";]
     (fun x -> file_to_load := x)
     "Usage: ";
 
