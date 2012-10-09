@@ -20,8 +20,7 @@
  *
  */
 
-/** \brief Transport for the communication between FBW and AP in a bi-process
-    architecture. Essentially adds a checksum to the inter_mcu structure.
+/** \brief Transport for the communication between FBW and AP via UART.
  */
 
 #ifndef LINK_MCU_H
