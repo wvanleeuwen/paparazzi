@@ -232,6 +232,7 @@
     <target name="fbw" board="lisa_m_2.0">
       <configure name="SYS_TIME_LED" value="2" />
       <define name="RADIO_CONTROL_LED" value="4"/>
+      <define name="LINK_MCU_LED" value="3" />
 
       <configure name="FLASH_MODE" value="JTAG" />
       <configure name="NO_LUFTBOOT" value="1" />
@@ -270,6 +271,7 @@
 
       <configure name="AHRS_ALIGNER_LED" value="1"/>
       <configure name="CPU_LED" value="1"/>
+      <define name="LINK_MCU_LED" value="4" />
     </target>
     <target name="sim" board="pc"/>
 
