@@ -63,14 +63,9 @@ float  h_ctl_roll_slew;
 /* inner pitch loop parameters */
 float  h_ctl_pitch_setpoint;
 float  h_ctl_pitch_loop_setpoint;
-float  h_ctl_pitch_pgain; // P
-float  h_ctl_pitch_igain; // I
-float  h_ctl_pitch_dgain; // D
+float  h_ctl_pitch_pgain;
+float  h_ctl_pitch_dgain;
 pprz_t h_ctl_elevator_setpoint;
-
-float  h_ctl_pitch_integrator;
-
-
 
 #ifdef USE_AOA
   uint8_t h_ctl_pitch_mode;
@@ -114,11 +109,8 @@ static inline void h_ctl_roll_rate_loop( void );
 #define H_CTL_ROLL_RATE_GAIN 0.
 #endif
 
-float h_ctl_roll_attitude_gain;  // P
-float h_ctl_roll_attitude_igain; // I
-float h_ctl_roll_rate_gain;      // D
-
-float h_ctl_roll_integrator;
+float h_ctl_roll_attitude_gain;
+float h_ctl_roll_rate_gain;
 
 #ifdef AGR_CLIMB
 static float nav_ratio;
@@ -174,20 +166,6 @@ void h_ctl_init( void ) {
 #ifdef H_CTL_ROLL_ATTITUDE_GAIN
   h_ctl_roll_attitude_gain = H_CTL_ROLL_ATTITUDE_GAIN;
   h_ctl_roll_rate_gain = H_CTL_ROLL_RATE_GAIN;
-#endif
-
-  h_ctl_pitch_integrator = 0.0f;
-  h_ctl_roll_integrator = 0.0f;
-
-#ifdef H_CTL_PITCH_IGAIN
-  h_ctl_pitch_igain = H_CTL_PITCH_IGAIN;
-#else
-  h_ctl_pitch_igain = 0.0f;
-#endif
-#ifdef H_CTL_ROLL_ATTITUDE_IGAIN
-  h_ctl_roll_attitude_igain = H_CTL_ROLL_ATTITUDE_IGAIN;
-#else
-  h_ctl_roll_attitude_igain = 0.0f;
 #endif
 
 #ifdef AGR_CLIMB
@@ -335,10 +313,6 @@ void h_ctl_attitude_loop ( void ) {
   }
 }
 
-#ifndef H_CTL_MAX_ROLL_INTEGRATOR_COMMAND
-#define H_CTL_MAX_ROLL_INTEGRATOR_COMMAND  0.15f
-#endif
-
 
 #ifdef H_CTL_ROLL_ATTITUDE_GAIN
 inline static void h_ctl_roll_loop( void ) {
@@ -348,17 +322,9 @@ inline static void h_ctl_roll_loop( void ) {
   estimator_p = (err - last_err)/(1/60.);
   last_err = err;
 #endif
-
-  if (launch)
-    h_ctl_roll_integrator += h_ctl_roll_attitude_gain * err * h_ctl_roll_attitude_igain;
-  else
-    h_ctl_roll_integrator = 0.0f;
-  BoundAbs(h_ctl_roll_integrator, (H_CTL_MAX_ROLL_INTEGRATOR_COMMAND * MAX_PPRZ) );
-
   float cmd = h_ctl_roll_attitude_gain * err
     + h_ctl_roll_rate_gain * estimator_p
-    + v_ctl_throttle_setpoint * h_ctl_aileron_of_throttle
-    + h_ctl_roll_integrator;
+    + v_ctl_throttle_setpoint * h_ctl_aileron_of_throttle;
 
   h_ctl_aileron_setpoint = TRIM_PPRZ(cmd);
 }
@@ -450,9 +416,6 @@ inline static float loiter(void) {
 }
 #endif
 
-#ifndef H_CTL_MAX_PITCH_INTEGRATOR_COMMAND
-#define H_CTL_MAX_PITCH_INTEGRATOR_COMMAND  0.1f
-#endif
 
 inline static void h_ctl_pitch_loop( void ) {
   static float last_err;
@@ -481,16 +444,9 @@ inline static void h_ctl_pitch_loop( void ) {
 #endif
 
 
-  if (launch)
-    h_ctl_pitch_integrator += -h_ctl_pitch_pgain * err * h_ctl_pitch_igain;
-  else
-    h_ctl_pitch_integrator = 0.0f;
-  BoundAbs(h_ctl_pitch_integrator, (H_CTL_MAX_PITCH_INTEGRATOR_COMMAND * MAX_PPRZ) );
-
-
   float d_err = err - last_err;
   last_err = err;
-  float cmd = -h_ctl_pitch_pgain * (err + h_ctl_pitch_dgain * d_err) + h_ctl_pitch_integrator;
+  float cmd = -h_ctl_pitch_pgain * (err + h_ctl_pitch_dgain * d_err);
 #ifdef LOITER_TRIM
   cmd += loiter();
 #endif
