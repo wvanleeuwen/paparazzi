@@ -201,7 +201,6 @@ static inline void accel_copy_spi(void)
 }
 
 
-
 static inline void imu_aspirin_event(void (* _gyro_handler)(void), void (* _accel_handler)(void), void (* _mag_handler)(void))
 {
   if (imu_aspirin.status == AspirinStatusUninit) return;

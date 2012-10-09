@@ -247,7 +247,7 @@
     -->
     <subsystem name="imu" type="aspirin_v2.1"/>
     <subsystem name="ahrs" type="float_dcm">
-<!--      <define name="USE_MAGNETOMETER" /> -->
+      <define name="USE_MAGNETOMETER_ONGROUND" />
     </subsystem>
 
 
