@@ -42,6 +42,8 @@
     <program name="Sony" command="sw/ground_segment/tmtc/TUDelft/sony">
       <arg flag="-b" variable="ivy_bus"/>
     </program>
+    <program name="Photolist" command="sw/tools/photolist/build/photolist | tee photolist.log -a">
+    </program>
     <program name="Vision" command="sw/ground_segment/tmtc/TUDelft/visionresult">
       <arg flag="-b" variable="ivy_bus"/>
     </program>
