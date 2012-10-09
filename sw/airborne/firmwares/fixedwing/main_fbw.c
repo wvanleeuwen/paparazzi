@@ -49,10 +49,6 @@
 #include "link_mcu.h"
 #endif
 
-#ifdef MCU_CAN_LINK
-#include "link_mcu_can.h"
-#endif
-
 #ifdef MCU_UART_LINK
 #include "link_mcu_usart.h"
 #endif
@@ -90,9 +86,6 @@ void init_fbw( void ) {
 #endif
 #ifdef MCU_SPI_LINK
   link_mcu_restart();
-#endif
-#ifdef MCU_CAN_LINK
-  link_mcu_init();
 #endif
 
   fbw_mode = FBW_MODE_FAILSAFE;
@@ -205,14 +198,11 @@ void event_task_fbw( void) {
 #endif
 
 
-
-#if defined( MCU_SPI_LINK ) || defined( MCU_CAN_LINK )
+#ifdef MCU_SPI_LINK
   if (link_mcu_received) {
     link_mcu_received = FALSE;
     inter_mcu_fill_fbw_state(); /** Prepares the next message for AP */
-#ifdef MCU_SPI_LINK
     link_mcu_restart(); /** Prepares the next SPI communication */
-#endif
   }
 #endif /* MCU_SPI_LINK */
 #endif /* INTER_MCU */
@@ -241,10 +231,6 @@ set_failsafe_mode();
   {
     set_failsafe_mode();
   }
-#endif
-
-#ifdef MCU_CAN_LINK
-  link_mcu_send();
 #endif
 
 #ifdef MCU_UART_LINK
