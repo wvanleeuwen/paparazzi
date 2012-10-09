@@ -46,7 +46,11 @@
 #include "mcu_periph/i2c.h"
 
 #ifdef MCU_SPI_LINK
-#include "link_mcu.h"
+#include "link_mcu_spi.h"
+#endif
+
+#ifdef MCU_UART_LINK
+#include "link_mcu_usart.h"
 #endif
 
 #ifdef MCU_UART_LINK
