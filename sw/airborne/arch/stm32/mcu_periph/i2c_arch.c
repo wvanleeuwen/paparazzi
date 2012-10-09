@@ -454,8 +454,7 @@ struct i2c_errors i2c1_errors;
 
 #include "my_debug_servo.h"
 
-void i2c1_hw_init_sub(void);
-void i2c1_hw_init_sub(void) {
+void i2c1_hw_init(void) {
 
   i2c1.reg_addr = I2C1;
   i2c1.init_struct = &I2C1_InitStruct;
@@ -508,20 +507,6 @@ void i2c1_hw_init_sub(void) {
 
 }
 
-void i2c1_hw_init(void) {
-  for (int i=0; i <500; i++)
-  {
-    i2c1_hw_init_sub();
-    for (volatile int j=0; j<5000;j++);
-  }
-
-  for (int i=0; i <1000; i++)
-  {
-    i2c1_hw_init_sub();
-    for (volatile int j=0; j<5000;j++);
-  }
-
-}
 
 void i2c1_ev_irq_handler(void) {
 
@@ -556,8 +541,7 @@ struct i2c_errors i2c2_errors;
 
 #include "my_debug_servo.h"
 
-void i2c2_hw_init_sub(void);
-void i2c2_hw_init_sub(void) {
+void i2c2_hw_init(void) {
 
   i2c2.reg_addr = I2C2;
   i2c2.init_struct = &I2C2_InitStruct;
@@ -599,28 +583,6 @@ void i2c2_hw_init_sub(void) {
 
 }
 
-
-void i2c2_hw_init(void) {
-  struct i2c_transaction t;
-  t.type = I2CTransTx;
-  t.slave_addr = 0x00;
-  t.len_r = 0;
-  t.len_w = 1;
-
-  for (int i=0; i <2000; i++)
-  {
-    i2c2_hw_init_sub();
-    for (volatile int j=0; j<5000;j++);
-  }
-
-  //i2c_submit(&i2c2, &t);
-
-  for (int i=0; i <2000; i++)
-  {
-    i2c2_hw_init_sub();
-    for (volatile int j=0; j<5000;j++);
-  }
-}
 
 
 
