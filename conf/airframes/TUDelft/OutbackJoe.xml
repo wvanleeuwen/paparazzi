@@ -273,7 +273,9 @@
       <configure name="CPU_LED" value="1"/>
       <define name="LINK_MCU_LED" value="4" />
     </target>
-    <target name="sim" board="pc"/>
+    <target name="sim" board="pc">
+      <subsystem name="radio_control" type="ppm"/>
+    </target>
 
     <define name="AGR_CLIMB"/>
     <define name="LOITER_TRIM"/>
