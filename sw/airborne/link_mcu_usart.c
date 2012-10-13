@@ -351,4 +351,3 @@ void link_mcu_event_task( void ) {
     intermcu_data.msg_available = FALSE;
   }
 }
-

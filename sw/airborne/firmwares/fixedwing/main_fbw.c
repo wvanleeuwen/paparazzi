@@ -53,10 +53,6 @@
 #include "link_mcu_usart.h"
 #endif
 
-#ifdef MCU_UART_LINK
-#include "link_mcu_usart.h"
-#endif
-
 uint8_t fbw_mode;
 
 #include "inter_mcu.h"
