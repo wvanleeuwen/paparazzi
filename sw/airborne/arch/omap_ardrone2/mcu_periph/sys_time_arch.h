@@ -40,9 +40,12 @@ extern void sys_tick_handler(void);
 #define MSEC_OF_CPU_TICKS(t) ((t) / 1e3)
 #define USEC_OF_CPU_TICKS(t) (t)
 
-#define SysTimeTimerStart(_t) { }
-#define SysTimeTimer(_t) (_t)
-#define SysTimeTimerStop(_t) { }
+#define GET_CUR_TIME_USEC() (sys_time.nb_sec * 1000000 +                \
+                             USEC_OF_CPU_TICKS(sys_time.nb_sec_rem))
+
+#define SysTimeTimerStart(_t) { _t = GET_CUR_TIME_USEC(); }
+#define SysTimeTimer(_t) ( GET_CUR_TIME_USEC() - (_t))
+#define SysTimeTimerStop(_t) { _t = ( GET_CUR_TIME_USEC() - (_t)); }
 
 
 static inline void sys_time_usleep(uint32_t us __attribute__ ((unused))) {}
