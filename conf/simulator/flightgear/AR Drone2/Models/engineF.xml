@@ -2,11 +2,11 @@
 
 <PropertyList>
 
- <path>rotor_mirrored.ac</path>
+ <path>Assembly_rotor.ac</path>
 
  <animation>
   <type>spin</type>
-  <object-name>helice MIR</object-name>
+  <object-name>Assembly rotor</object-name>
   <property>engines/engine[0]/rpm</property>
   <factor>1</factor>   
   <center>
