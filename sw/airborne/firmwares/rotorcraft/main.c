@@ -22,6 +22,7 @@
 
 #define MODULES_C
 
+#include <stdio.h>
 #include <inttypes.h>
 #include "mcu.h"
 #include "mcu_periph/sys_time.h"
@@ -83,13 +84,14 @@ tid_t telemetry_tid;     ///< id for telemetry_periodic() timer
 
 #ifndef SITL
 int main( void ) {
-  main_init();
-
-  while(1) {
-    handle_periodic_tasks();
-    main_event();
-  }
-  return 0;
+	main_init();
+	printf("entering main loop\n");
+	while(1) {
+		sys_tick_handler();
+		handle_periodic_tasks();
+		main_event();
+	}
+	return 0;
 }
 #endif /* SITL */
 
@@ -113,6 +115,14 @@ STATIC_INLINE void main_init( void ) {
 #if DATALINK == XBEE
   xbee_init();
 #endif
+
+  printf("before macro\n");
+#if DATALINK == WIFI
+  printf("before wifi_init\n");
+  wifi_init();
+  printf("wifi_init passed\n");
+#endif
+  printf("after macro\n");
 
   baro_init();
   imu_init();
@@ -147,6 +157,10 @@ STATIC_INLINE void main_init( void ) {
 }
 
 STATIC_INLINE void handle_periodic_tasks( void ) {
+
+	//@TODO: fixme!
+	sys_tick_handler();
+
   if (sys_time_check_and_ack_timer(main_periodic_tid))
     main_periodic();
 #if RADIO_CONTROL
@@ -183,6 +197,7 @@ STATIC_INLINE void main_periodic( void ) {
 }
 
 STATIC_INLINE void telemetry_periodic(void) {
+	printf("tack\n");
   PeriodicSendMain(DefaultChannel,DefaultDevice);
 }
 

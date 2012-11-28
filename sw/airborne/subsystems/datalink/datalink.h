@@ -45,7 +45,7 @@
 /** Datalink kinds */
 #define PPRZ 1
 #define XBEE 2
-
+#define WIFI 3
 
 EXTERN bool_t dl_msg_available;
 /** Flag provided to control calls to ::dl_parse_msg. NOT used in this module*/
