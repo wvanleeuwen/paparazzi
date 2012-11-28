@@ -1,0 +1,69 @@
+<!-- SiRF Binary Protocol description -->
+
+<!DOCTYPE sirf SYSTEM "sirf.dtd">
+
+<sirf>
+  <message name="NAV" ID="0x02">
+    <field name="XPOS" format="I4" unit="m"/>
+    <field name="YPOS" format="I4" unit="m"/>
+    <field name="ZPOS" format="I4" unit="m"/>
+    <field name="XVEL" format="I2" scaling="8" unit="m/sec"/>
+    <field name="YVEL" format="I2" scaling="8" unit="m/sec"/>
+    <field name="ZVEL" format="I2" scaling="8" unit="m/sec"/>
+    <field name="MODE1" format="I1"/>                 <!-- not the right format, but don't intend to use it -->
+    <field name="HDOP" format="U1" scaling="5"/>
+    <field name="MODE2" format="I1"/>                 <!-- not the right format, but don't intend to use it -->
+    <field name="week" format="U2"/>
+    <field name="TOW" format="U4" scaling="100" unit="sec"/>
+    <field name="SV" format="U1"/>
+    <field name="CH1PRN" format="U1"/>
+    <field name="CH2PRN" format="U1"/>
+    <field name="CH3PRN" format="U1"/>
+    <field name="CH4PRN" format="U1"/>
+    <field name="CH5PRN" format="U1"/>
+    <field name="CH6PRN" format="U1"/>
+    <field name="CH7PRN" format="U1"/>
+    <field name="CH8PRN" format="U1"/>
+    <field name="CH9PRN" format="U1"/>
+    <field name="CH10PRN" format="U1"/>
+    <field name="CH11PRN" format="U1"/>
+    <field name="CH12PRN" format="U1"/>
+  </message>
+
+  <message name="GEO" ID="0x29"/>
+    <field name="NAVValid" format="I2"/>             <!-- not the right format but don't intend to use it -->
+    <field name="NAVType" format="I2"/>              <!-- not the right format but don't intend to use it -->
+    <field name="week" format="U2"/>
+    <field name="TOW" format="U4"/>
+    <field name="UTCYear" format="U2"/>
+    <field name="UTCMonth" format="U1"/>
+    <field name="UTCDay" format="U1"/>
+    <field name="UTCHour" format="U1"/>
+    <field name="UTCMinute" format="U1"/>
+    <field name="UTCSecond" format="U2"/>
+    <field name="SATIDList" format="I4"/>             <!-- not the right format but don't intend to use it -->
+    <field name="LAT" format="I4" scaling="1e7" unit="deg"/>
+    <field name="LON" format="I4" scaling="1e7" unit="deg"/>
+    <field name="ALT" format="I4" unit="cm"/>
+    <field name="HMSL" format="I4" unit="cm"/>
+    <field name="MAPDatum" format="I1"/>
+    <field name="GSPEED" format="U2" unit="cm/s"/>
+    <field name="COURSE" format="U2" scaling="1e2" unit="deg"/>
+    <field name="HPE" format="U4" unit="cm"/>
+    <field name="VPE" format="U4" unit="cm"/>
+    <field name="ETE" format="U4" scaling="1e2" unit="sec"/>
+    <field name="HVE" format="U2" unit="cm/s"/>
+    <field name="ClockBias" format="I4" unit="cm"/>
+    <field name="ClockBiasE" format="U4" unit="cm"/>
+    <field name="ClockDrift" format="I4" unit="cm/s"/>
+    <field name="ClockDriftE" format="U4" unit="cm/s"/>
+    <field name="Distance" format="U4" unit="m"/>
+    <field name="DistanceE" format="U2" unit="m"/>
+    <field name="HeadingE" format="U2" scaling="1e2" unit="deg"/>
+    <field name="SV" format="U1"/>
+    <field name="HDOP" format="U1"/>
+    <field name="ModeINFO" format="I1"/>               <!-- not the right format but don't intend to use it -->
+  </message>
+</sirf>
+
+

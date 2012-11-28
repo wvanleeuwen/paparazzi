@@ -13,6 +13,12 @@ ARCH=omap_ardrone2
 $(TARGET).ARCHDIR = $(ARCH)
 
 # -----------------------------------------------------------------------
+USER=foobar
+HOST=ardrone2
+SUB_DIR=bin
+FTP_DIR=/data/video
+TARGET_DIR=$(FTP_DIR)/$(SUB_DIR)
+# -----------------------------------------------------------------------
 
 # Do we need to disable modem? We don't have a modem.
 ifndef MODEM_PORT

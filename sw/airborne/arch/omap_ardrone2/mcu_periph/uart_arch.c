@@ -44,7 +44,7 @@ void uart_periph_set_baudrate(struct uart_periph* p, uint32_t baud, bool_t hw_fl
   p->reg_addr = (void*)fmssp;
 
   //TODO: set device name in application and pass as argument
-  printf("opening %s on uart0 at %d\n",p->dev,baud);
+  printf("opening %s on uart0 at %d baud\n",p->dev,baud);
   serial_port_open_raw(fmssp,p->dev,baud);
 }
 
