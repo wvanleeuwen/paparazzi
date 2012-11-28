@@ -1,0 +1,16 @@
+<!-- SiRF protocol DTD -->
+
+<!ELEMENT sirf (message+)>
+<!ELEMENT message (field+)>
+<!ELEMENT field EMPTY>
+
+<!ATTLIST message
+  name CDATA #REQUIRED
+  ID CDATA #REQUIRED
+  length CDATA #IMPLIED>
+
+<!ATTLIST field
+  name CDATA #REQUIRED
+  format CDATA #REQUIRED
+  scaling CDATA #IMPLIED
+  unit CDATA #IMPLIED>
