@@ -30,7 +30,7 @@
 
 #include "std.h"
 
-extern void sys_tick_handler(void);
+extern void sys_tick_handler(int signum);
 
 // simulate 1us cpu ticks
 #define CPU_TICKS_OF_SEC(s)        (uint32_t)((s) * 1e6 + 0.5)

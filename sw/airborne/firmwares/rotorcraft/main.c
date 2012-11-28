@@ -87,7 +87,6 @@ int main( void ) {
 	main_init();
 	printf("entering main loop\n");
 	while(1) {
-		sys_tick_handler();
 		handle_periodic_tasks();
 		main_event();
 	}
@@ -157,9 +156,6 @@ STATIC_INLINE void main_init( void ) {
 }
 
 STATIC_INLINE void handle_periodic_tasks( void ) {
-
-	//@TODO: fixme!
-	sys_tick_handler();
 
   if (sys_time_check_and_ack_timer(main_periodic_tid))
     main_periodic();
