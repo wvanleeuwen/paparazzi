@@ -32,6 +32,7 @@
 #include "subsystems/datalink/datalink.h"
 #include "subsystems/settings.h"
 #include "subsystems/datalink/xbee.h"
+#include "subsystems/datalink/wifi.h"
 
 #include "subsystems/commands.h"
 #include "subsystems/actuators.h"
