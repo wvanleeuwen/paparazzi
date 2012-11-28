@@ -49,6 +49,9 @@
     <field name="MAPDatum" format="I1"/>
     <field name="GSPEED" format="U2" unit="cm/s"/>
     <field name="COURSE" format="U2" scaling="1e2" unit="deg"/>
+    <field name="MAGVar" format="I2" />
+    <field name="CLIMBRate" format="I2" unit="cm"/>
+    <field name="HEADINGRate" format="I2" scaling="1e2" unit="deg/s"/>
     <field name="HPE" format="U4" unit="cm"/>
     <field name="VPE" format="U4" unit="cm"/>
     <field name="ETE" format="U4" scaling="1e2" unit="sec"/>
