@@ -3,6 +3,7 @@
 
 #include "mcu_periph/uart.h"
 #include "sirf_protocol.h"
+#include "mcu_periph/sys_time.h"
          
 #define GPS_SIRF_MAX_PAYLOAD 1024
 struct GpsSirf {
@@ -17,6 +18,9 @@ struct GpsSirf {
   uint8_t ck_a, ck_b;
   uint8_t error_cnt;
   uint8_t error_last;
+  
+  uint8_t have_geo;
+  uint8_t have_nav;
 };
 
 
@@ -34,19 +38,22 @@ extern void gps_sirf_parse(uint8_t c);
 
 #define GpsBuffer() GpsLink(ChAvailable())
 
-#define GpsEvent(_sol_available_callback) {       \
+#define GpsEvent(_gps_uptodate_callback) {        \
   if (GpsBuffer()) {                              \
     ReadGpsBuffer();                              \
   }                                               \
   if (gps_ubx.msg_available) {                    \
     gps_sirf_read_message();                      \
-    if (gps_sirf.msg_class == SIRF_NAV_ID &&      \
-        gps_sirf.msg_id == SIRF_NAV_NAVOUT_ID) {  \
+    if ((gps_sirf.msg_id == SIRF_GEO_ID ||        \
+      gps_sirf.msg_id == SIRF_NAV_ID) &&          \
+      gps_sirf.have_geo && gps_sirf.have_nav  ) { \
       if (gps.fix == GPS_FIX_3D) {                \
         gps.last_fix_ticks = sys_time.nb_sec_rem; \
         gps.last_fix_time = sys_time.nb_sec;      \
       }                                           \
-      _sol_available_callback();                  \
+      uint8_t have_geo = 0;                       \
+      uint8_t have_nav = 0;                       \
+      _gps_uptodate_callback();                   \
     }                                             \
     gps_sirf.msg_available = FALSE;               \
   }                                               \
