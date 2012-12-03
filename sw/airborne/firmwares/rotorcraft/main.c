@@ -75,12 +75,13 @@ static inline void on_gps_event( void );
 static inline void on_mag_event( void );
 
 
-tid_t main_periodic_tid; ///< id for main_periodic() timer
-tid_t failsafe_tid;      ///< id for failsafe_check() timer
-tid_t radio_control_tid; ///< id for radio_control_periodic_task() timer
-tid_t electrical_tid;    ///< id for electrical_periodic() timer
-tid_t baro_tid;          ///< id for baro_periodic() timer
-tid_t telemetry_tid;     ///< id for telemetry_periodic() timer
+tid_t main_periodic_tid; 	///< id for main_periodic() timer
+tid_t failsafe_tid;      	///< id for failsafe_check() timer
+tid_t radio_control_tid; 	///< id for radio_control_periodic_task() timer
+tid_t electrical_tid;    	///< id for electrical_periodic() timer
+tid_t baro_tid;          	///< id for baro_periodic() timer
+tid_t telemetry_tid;     	///< id for telemetry_periodic() timer
+tid_t navdata_periodic_tid;	///< id for navdata_periodic timer
 
 #ifndef SITL
 int main( void ) {
@@ -153,6 +154,7 @@ STATIC_INLINE void main_init( void ) {
   electrical_tid = sys_time_register_timer(0.1, NULL);
   baro_tid = sys_time_register_timer(0.02, NULL);
   telemetry_tid = sys_time_register_timer((1./60.), NULL);
+  navdata_periodic_tid = sys_time_register_timer((1./PERIODIC_FREQUENCY), NULL);
 }
 
 STATIC_INLINE void handle_periodic_tasks( void ) {
@@ -171,6 +173,10 @@ STATIC_INLINE void handle_periodic_tasks( void ) {
     baro_periodic();
   if (sys_time_check_and_ack_timer(telemetry_tid))
     telemetry_periodic();
+#if PARROT_OMAP_ARCH
+  if (sys_time_check_and_ack_timer(navdata_periodic_tid))
+	navdata_periodic();
+#endif
 }
 
 STATIC_INLINE void main_periodic( void ) {
