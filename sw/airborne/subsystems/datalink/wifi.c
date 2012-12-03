@@ -22,7 +22,6 @@
 
 #include "subsystems/datalink/wifi.h"
 #include "fms/fms_network.h"
-#include <stdio.h>
 
 #define LINK_HOST     "192.168.1.0"
 #define LINK_PORT             4242
@@ -35,19 +34,16 @@ uint8_t ck_a, ck_b;
 struct FmsNetwork* network;
 
 void wifi_init( void ) {
-	printf("trololol_init\n");
 	network = network_new(LINK_HOST, LINK_PORT, DATALINK_PORT, FMS_NETWORK_BROADCAST);
 	udp_buffer_id = 0;
 }
 
 void wifi_transmit( uint8_t data ) {
-	printf("trololol_transmit\n");
 	udp_buffer[udp_buffer_id] = data;
 	udp_buffer_id++;
 }
 
 void wifi_send( void ) {
-	printf("trololol_send\n");
 	network_write(network, udp_buffer, udp_buffer_id);
 	udp_buffer_id =0;
 }
