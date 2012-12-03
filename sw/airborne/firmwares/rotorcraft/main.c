@@ -22,7 +22,6 @@
 
 #define MODULES_C
 
-#include <stdio.h>
 #include <inttypes.h>
 #include "mcu.h"
 #include "mcu_periph/sys_time.h"
@@ -86,7 +85,6 @@ tid_t navdata_periodic_tid;	///< id for navdata_periodic timer
 #ifndef SITL
 int main( void ) {
 	main_init();
-	printf("entering main loop\n");
 	while(1) {
 		handle_periodic_tasks();
 		main_event();
@@ -116,13 +114,9 @@ STATIC_INLINE void main_init( void ) {
   xbee_init();
 #endif
 
-  printf("before macro\n");
 #if DATALINK == WIFI
-  printf("before wifi_init\n");
   wifi_init();
-  printf("wifi_init passed\n");
 #endif
-  printf("after macro\n");
 
   baro_init();
   imu_init();
@@ -199,7 +193,6 @@ STATIC_INLINE void main_periodic( void ) {
 }
 
 STATIC_INLINE void telemetry_periodic(void) {
-	printf("tack\n");
   PeriodicSendMain(DefaultChannel,DefaultDevice);
 }
 
