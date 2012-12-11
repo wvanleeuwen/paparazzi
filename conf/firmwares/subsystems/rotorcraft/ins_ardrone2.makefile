@@ -6,3 +6,7 @@ $(TARGET).CFLAGS += -DINS_TYPE_H=\"subsystems/ins/ins_ardrone2.h\" -DAUTOPILOT_D
 $(TARGET).srcs += $(SRC_SUBSYSTEMS)/ins.c
 $(TARGET).srcs += $(SRC_SUBSYSTEMS)/ins/ins_ardrone2.c
 
+#  vertical filter float version
+$(TARGET).srcs += $(SRC_SUBSYSTEMS)/ins/vf_float.c
+$(TARGET).CFLAGS += -DUSE_VFF -DDT_VFILTER='(1./$(PERIODIC_FREQUENCY).)'
+

@@ -1,26 +1,20 @@
 #ifndef BOARDS_ARDRONE_PACKETS_H
 #define BOARDS_ARDRONE_PACKETS_H
 
-// Define constants for gyrometers handling
+//Define control states
 typedef enum {
-	GYRO_X    = 0,
-	GYRO_Y    = 1,
-	GYRO_Z    = 2,
-	NB_GYROS  = 3
-} def_gyro_t;
-
-// Define constants for accelerometers handling
-typedef enum {
-	ACC_X   = 0,
-	ACC_Y   = 1,
-	ACC_Z   = 2,
-	NB_ACCS = 3
-} def_acc_t;
-
-typedef enum _navdata_tag_t {
-	NAVDATA_DEMO_TAG = 0,
-	NAVDATA_TIME_TAG
-} navdata_tag_t;
+  CTRL_DEFAULT,
+  CTRL_INIT,
+  CTRL_LANDED,
+  CTRL_FLYING,
+  CTRL_HOVERING,
+  CTRL_TEST,
+  CTRL_TRANS_TAKEOFF,
+  CTRL_TRANS_GOTOFIX,
+  CTRL_TRANS_LANDING,
+  CTRL_TRANS_LOOPING,
+  CTRL_NUM_STATES
+} CTRL_STATES;
 
 typedef struct _navdata_option_t {
 	uint16_t  tag;
@@ -65,6 +59,19 @@ typedef struct _navdata_demo_t {
 	struct FloatMat33	drone_camera_rot;		/*!<  Deprecated ! Don't use ! */
 	struct FloatVect3	drone_camera_trans;	    /*!<  Deprecated ! Don't use ! */
 } __attribute__ ((packed)) navdata_demo_t;
+
+typedef struct _navdata_phys_measures_t {
+  uint16_t         tag;
+  uint16_t         size;
+
+  float             accs_temp;
+  uint16_t          gyro_temp;
+  struct NedCoor_f  phys_accs;
+  struct NedCoor_f  phys_gyros;
+  uint32_t          alim3V3;              // 3.3volt alim [LSB]
+  uint32_t          vrefEpson;            // ref volt Epson gyro [LSB]
+  uint32_t          vrefIDG;              // ref volt IDG gyro [LSB]
+} __attribute__ ((packed)) navdata_phys_measures_t;
 
 
 #endif /* BOARDS_ARDRONE_PACKETS_H */

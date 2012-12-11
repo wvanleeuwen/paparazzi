@@ -31,16 +31,16 @@ void sys_time_arch_init( void ) {
 
 	memset(&sa, 0, sizeof(sa));
 	sa.sa_handler = &sys_tick_handler;
-	sigaction(SIGVTALRM, &sa, NULL);
+	sigaction(SIGALRM, &sa, NULL);
 
 	// timer expires after (1./1024) sec
 	timer.it_value.tv_sec = 0;
-	timer.it_value.tv_usec = USEC_OF_SEC(SYS_TIME_RESOLUTION); // (1./1024) as defined in sys_time.h
-	// and every (1./1024) sec after that
+	timer.it_value.tv_usec = USEC_OF_SEC(SYS_TIME_RESOLUTION/2.);
+	// and every SYS_TIME_RESOLUTION sec after that
 	timer.it_interval.tv_sec = 0;
-	timer.it_interval.tv_usec = USEC_OF_SEC(SYS_TIME_RESOLUTION); // (1./1024) as defined in sys_time.h
+	timer.it_interval.tv_usec = USEC_OF_SEC(SYS_TIME_RESOLUTION/2.);
 
-	setitimer(ITIMER_VIRTUAL, &timer, NULL);
+	setitimer(ITIMER_REAL, &timer, NULL);
 }
 
 void sys_tick_handler( int signum ) {

@@ -1803,6 +1803,9 @@
     <field name="speed_x" type="float"/>
     <field name="speed_y" type="float"/>
     <field name="speed_z" type="float"/>
+    <field name="accel_x" type="float"/>
+    <field name="accel_y" type="float"/>
+    <field name="accel_z" type="float"/>
     <field name="altitude" type="int32"/>
     <field name="battery" type="uint32"/>
   </message>

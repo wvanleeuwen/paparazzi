@@ -380,6 +380,9 @@
              &ahrs_impl.speed.x,				\
              &ahrs_impl.speed.y,				\
              &ahrs_impl.speed.z,				\
+             &ahrs_impl.accel.x,				\
+             &ahrs_impl.accel.y,				\
+             &ahrs_impl.accel.z,				\
              &ahrs_impl.altitude,				\
              &ahrs_impl.battery);				\
   }

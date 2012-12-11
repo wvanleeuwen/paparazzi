@@ -29,11 +29,21 @@
 struct AhrsARDrone {
   uint32_t           control_state;
   struct FloatEulers eulers;
-  struct NedCoor_i   speed;
+  struct NedCoor_f   speed;
+  struct NedCoor_f   accel;
   int32_t            altitude;
   uint32_t           battery;
 };
 
 extern struct AhrsARDrone ahrs_impl;
+
+extern int at_socket,
+	navdata_socket;
+extern struct sockaddr_in pc_addr,
+				   drone_at,
+				   drone_nav,
+				   from;
+
+extern int seq;
 
 #endif /* AHRS_ARDRONE2_H */

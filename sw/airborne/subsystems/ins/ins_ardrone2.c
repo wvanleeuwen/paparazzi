@@ -25,10 +25,15 @@
 #include "generated/airframe.h"
 #include "generated/flight_plan.h"
 #include "math/pprz_geodetic_int.h"
+#include <stdio.h>
 
 #ifdef SITL
 #include "nps_fdm.h"
 #include <stdio.h>
+#endif
+
+#if USE_VFF
+#include "subsystems/ins/vf_float.h"
 #endif
 
 /* TODO: Remove from messages */
@@ -66,6 +71,9 @@ void ins_init() {
 #else
   ins_ltp_initialised  = FALSE;
 #endif
+#if USE_VFF
+  vff_init(0., 0., 0.);
+#endif
   ins.vf_realign = FALSE;
   ins.hf_realign = FALSE;
 
@@ -79,6 +87,55 @@ void ins_init() {
 }
 
 void ins_periodic( void ) {
+	/* untilt accels */
+	struct Int32Vect3 accel_meas_body;
+	ACCELS_BFP_OF_REAL(accel_meas_body, ahrs_impl.accel);
+	struct Int32Vect3 accel_meas_ltp;
+	INT32_RMAT_TRANSP_VMULT(accel_meas_ltp, (*stateGetNedToBodyRMat_i()), accel_meas_body);
+
+	struct Int32Vect3 speed_meas_body;
+	SPEEDS_BFP_OF_REAL(speed_meas_body, ahrs_impl.speed);
+	struct Int32Vect3 speed_meas_ltp;
+	INT32_RMAT_TRANSP_VMULT(speed_meas_ltp, (*stateGetNedToBodyRMat_i()), speed_meas_body);
+
+#if USE_VFF
+	if (ahrs_impl.control_state >= 3) {
+		if (ins.vf_realign) {
+			ins.vf_realign = FALSE;
+			ins_qfe = (float)ahrs_impl.altitude/1000.0f;
+			vff_realign(0.);
+			ins_ltp_accel.z = ACCEL_BFP_OF_REAL(vff_zdotdot);
+			ins_ltp_speed.z = SPEED_BFP_OF_REAL(vff_zdot);
+			ins_ltp_pos.z   = POS_BFP_OF_REAL(vff_z);
+		}
+		else {  /* not realigning, so normal update with baro measurement */
+			float alt_float = (float)ahrs_impl.altitude/1000.0f;
+			printf("troll!");
+			vff_update(alt_float);
+		}
+	}
+
+	float z_accel_meas_float = ACCEL_FLOAT_OF_BFP(accel_meas_ltp.z);
+	if (ahrs_impl.control_state >= 3) {
+		vff_propagate(z_accel_meas_float);
+		ins_ltp_accel.z = ACCEL_BFP_OF_REAL(vff_zdotdot);
+		ins_ltp_speed.z = SPEED_BFP_OF_REAL(vff_zdot);
+		ins_ltp_pos.z   = POS_BFP_OF_REAL(vff_z);
+	}
+	else { // feed accel from the sensors
+		// subtract -9.81m/s2 (acceleration measured due to gravity, but vehivle not accelerating in ltp)
+		ins_ltp_accel.z = accel_meas_ltp.z + ACCEL_BFP_OF_REAL(9.81);
+	}
+	VECT2_COPY(ins_ltp_speed, speed_meas_ltp);
+#else
+	VECT3_COPY(ins_ltp_speed, speed_meas_ltp);
+	ins_ltp_accel.z = accel_meas_ltp.z + ACCEL_BFP_OF_REAL(9.81);
+#endif /* USE_VFF */
+
+	ins_ltp_accel.x = accel_meas_ltp.x;
+	ins_ltp_accel.y = accel_meas_ltp.y;
+
+	INS_NED_TO_STATE();
 }
 
 void ins_realign_h(struct FloatVect2 pos __attribute__ ((unused)), struct FloatVect2 speed __attribute__ ((unused))) {
@@ -86,7 +143,9 @@ void ins_realign_h(struct FloatVect2 pos __attribute__ ((unused)), struct FloatV
 }
 
 void ins_realign_v(float z __attribute__ ((unused))) {
-
+#if USE_VFF
+  vff_realign(z);
+#endif
 }
 
 void ins_propagate() {
@@ -111,8 +170,11 @@ void ins_update_gps(void) {
     ned_of_ecef_point_i(&ins_gps_pos_cm_ned, &ins_ltp_def, &gps.ecef_pos);
     ned_of_ecef_vect_i(&ins_gps_speed_cm_s_ned, &ins_ltp_def, &gps.ecef_vel);
 
+#if !USE_VFF /* neither hf nor vf used */
     INT32_VECT3_SCALE_2(ins_ltp_pos, ins_gps_pos_cm_ned, INT32_POS_OF_CM_NUM, INT32_POS_OF_CM_DEN);
-    INT32_VECT3_SCALE_2(ins_ltp_speed, ins_gps_speed_cm_s_ned, INT32_SPEED_OF_CM_S_NUM, INT32_SPEED_OF_CM_S_DEN);
+#else /* only vff used */
+    INT32_VECT2_SCALE_2(ins_ltp_pos, ins_gps_pos_cm_ned, INT32_POS_OF_CM_NUM, INT32_POS_OF_CM_DEN);
+#endif
 
 #if USE_GPS_LAG_HACK
     VECT2_COPY(d_pos, ins_ltp_speed);
