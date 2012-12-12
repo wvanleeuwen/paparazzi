@@ -18,10 +18,12 @@
  * the Free Software Foundation, 59 Temple Place - Suite 330,
  * Boston, MA 02111-1307, USA.
  */
-#ifndef STABILISATION_ATTITUDE_REF_FLOAT_H
-#define STABILISATION_ATTITUDE_REF_FLOAT_H
+#ifndef STABILIZATION_ATTITUDE_REF_FLOAT_H
+#define STABILIZATION_ATTITUDE_REF_FLOAT_H
 
 #include "generated/airframe.h"
+
+#include "state.h"
 
 extern struct FloatEulers stab_att_sp_euler;
 extern struct FloatQuat   stab_att_sp_quat;
@@ -37,4 +39,10 @@ struct FloatRefModel {
 
 extern struct FloatRefModel stab_att_ref_model[];
 
-#endif /* STABILISATION_ATTITUDE_REF_FLOAT_H */
+static inline void reset_psi_ref_from_body(void) {
+  stab_att_ref_euler.psi = stateGetNedToBodyEulers_f()->psi;
+  stab_att_ref_rate.r = 0;
+  stab_att_ref_accel.r = 0;
+}
+
+#endif /* STABILIZATION_ATTITUDE_REF_FLOAT_H */
