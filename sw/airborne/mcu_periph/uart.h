@@ -58,9 +58,12 @@ extern void uart_periph_init(struct uart_periph* p);
 extern void uart_periph_set_baudrate(struct uart_periph* p, uint32_t baud, bool_t hw_flow_control);
 //extern void uart_periph_init_param(struct uart_periph* p, uint32_t baud, uint8_t mode, uint8_t fmode, char * dev);
 extern void uart_transmit(struct uart_periph* p, uint8_t data);
+extern bool_t uart_recieve(struct uart_periph* p);
 extern bool_t uart_check_free_space(struct uart_periph* p, uint8_t len);
 
+#ifndef UartChAvailable
 #define UartChAvailable(_p) (_p.rx_insert_idx != _p.rx_extract_idx)
+#endif
 
 #define UartGetch(_p) ({                                            \
    uint8_t ret = _p.rx_buf[_p.rx_extract_idx];                   \

@@ -24,105 +24,106 @@
 #include <stdint.h>
 #include <unistd.h>
 #include <stdio.h>
-#include <stdlib.h>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <fcntl.h>
 #include <string.h>
 
 #include "fms/fms_serial_port.h"
 
 
 void uart_periph_set_baudrate(struct uart_periph* p, uint32_t baud, bool_t hw_flow_control __attribute__ ((unused))) {
-  struct FmsSerialPort* fmssp;
-  // close serial port if already open
-  if (p->reg_addr != NULL) {
-    fmssp = (struct FmsSerialPort*)(p->reg_addr);
-    serial_port_close(fmssp);
-    serial_port_free(fmssp);
-  }
-  // open serial port
-  fmssp = serial_port_new();
-  // use register address to store SerialPort structure pointer...
-  p->reg_addr = (void*)fmssp;
+	int fd = 0;
+	struct termios tio;
 
-  //TODO: set device name in application and pass as argument
-  printf("opening %s on uart0 at %d baud\n",p->dev,baud);
-  serial_port_open_raw(fmssp,p->dev,baud);
+	// Close port if already open
+	if (p->reg_addr != NULL) {
+		fd = (int)(p->reg_addr);
+		close(fd);
+	}
+
+	// Open serial port
+	printf("opening %s on uart0 at %d baud\n", p->dev, baud);
+	fd = open(p->dev, O_RDWR | O_NOCTTY | O_NONBLOCK);
+
+	// Set baud rate
+	tio.c_iflag= IGNBRK;
+	tio.c_oflag= 0;
+	tio.c_cflag= CS8 | CLOCAL | CREAD;
+	tio.c_cflag|= B9600;
+	tio.c_lflag= 0;
+	tio.c_cc[VTIME]= 0;
+	tio.c_cc[VMIN]= 1;
+	tcsetattr(fd, TCSANOW, &tio);
+
+	// uUe register address to store file pointer
+	p->reg_addr = (void*)fd;
 }
 
 void uart_transmit(struct uart_periph* p, uint8_t data ) {
-  uint16_t temp = (p->tx_insert_idx + 1) % UART_TX_BUFFER_SIZE;
+	uint16_t temp = (p->tx_insert_idx + 1) % UART_TX_BUFFER_SIZE;
 
-  if (temp == p->tx_extract_idx)
-    return;                          // no room
+	if (temp == p->tx_extract_idx)
+		return;                          // no room
 
-  // check if in process of sending data
-  if (p->tx_running) { // yes, add to queue
-    p->tx_buf[p->tx_insert_idx] = data;
-    p->tx_insert_idx = temp;
-  }
-  else { // no, set running flag and write to output register
-    p->tx_running = TRUE;
-    struct FmsSerialPort* fmssp = (struct FmsSerialPort*)(p->reg_addr);
-    write((int)(fmssp->fd),&data,1);
-    //printf("w %x\n",data);
-  }
+	// check if in process of sending data
+	if (p->tx_running) { // yes, add to queue
+		p->tx_buf[p->tx_insert_idx] = data;
+		p->tx_insert_idx = temp;
+	}
+	else { // no, set running flag and write to output register
+		p->tx_running = TRUE;
+		int fd = (int)(p->reg_addr);
+		write(fd, &data, 1);
+		//printf("w %x\n",data);
+	}
 }
 
-static inline void uart_handler(struct uart_periph* p) {
-  unsigned char c='D';
+bool_t uart_recieve(struct uart_periph* p) {
+	//Check if device is initialized
+	if(p->reg_addr == NULL)
+		return 0;
 
-  if (p->reg_addr == NULL) return; // device not initialized ?
+	int fd = (int)p->reg_addr;
 
-  struct FmsSerialPort* fmssp = (struct FmsSerialPort*)(p->reg_addr);
-  int fd = fmssp->fd;
+	// check if more data to send
+	if (p->tx_insert_idx != p->tx_extract_idx) {
+		write(fd, &(p->tx_buf[p->tx_extract_idx]), 1);
+		//printf("w %x\n",p->tx_buf[p->tx_extract_idx]);
+		p->tx_extract_idx++;
+		p->tx_extract_idx %= UART_TX_BUFFER_SIZE;
+	}
+	else {
+		p->tx_running = FALSE;   // clear running flag
+	}
 
-  // check if more data to send
-  if (p->tx_insert_idx != p->tx_extract_idx) {
-    write(fd,&(p->tx_buf[p->tx_extract_idx]),1);
-    //printf("w %x\n",p->tx_buf[p->tx_extract_idx]);
-    p->tx_extract_idx++;
-    p->tx_extract_idx %= UART_TX_BUFFER_SIZE;
-  }
-  else {
-    p->tx_running = FALSE;   // clear running flag
-  }
+	//Read data
+	unsigned char c = 0x0;
+	if(read(fd, &c,1) > 0){
+		//printf("r %x %c\n",c,c);
+		uint16_t temp = (p->rx_insert_idx + 1) % UART_RX_BUFFER_SIZE;
+		p->rx_buf[p->rx_insert_idx] = c;
+		// check for more room in queue
+		if (temp != p->rx_extract_idx)
+			p->rx_insert_idx = temp; // update insert index
+	}
 
-  if(read(fd,&c,1) > 0){
-    //printf("r %x %c\n",c,c);
-    uint16_t temp = (p->rx_insert_idx + 1) % UART_RX_BUFFER_SIZE;
-    p->rx_buf[p->rx_insert_idx] = c;
-    // check for more room in queue
-    if (temp != p->rx_extract_idx)
-      p->rx_insert_idx = temp; // update insert index
-  }
-
+	return p->rx_insert_idx != p->rx_extract_idx;
 }
 
 #ifdef USE_UART0
-
 void uart0_init( void ) {
-  uart_periph_init(&uart0);
-  strcpy(uart0.dev, UART0_DEV);
-  uart_periph_set_baudrate(&uart0,UART0_BAUD,0);
+	uart_periph_init(&uart0);
+	strcpy(uart0.dev, UART0_DEV);
+	Uart0SetBaudrate(UART0_BAUD);
 }
-
-
-void uart0_handler(void) {
-  uart_handler(&uart0);
-}
-
-#endif /* USE_UART0 */
+#endif
 
 #ifdef USE_UART1
-
 void uart1_init( void ) {
-  uart_periph_init(&uart1);
-  strcpy(uart1.dev, UART1_DEV);
-  uart_periph_set_baudrate(&uart1,UART1_BAUD,0);
+	uart_periph_init(&uart1);
+	strcpy(uart1.dev, UART1_DEV);
+	Uart1SetBaudrate(UART1_BAUD);
 }
-
-void uart1_handler(void) {
-  uart_handler(&uart1);
-}
-
-#endif /* USE_UART1 */
+#endif
 
