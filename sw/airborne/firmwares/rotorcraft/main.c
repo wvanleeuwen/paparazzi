@@ -40,21 +40,28 @@
 #include "subsystems/actuators/motor_mixing.h"
 #endif
 
-#include "subsystems/imu.h"
-#include "subsystems/gps.h"
 
+//Sensors
+#if USE_GPS
+#include "subsystems/gps.h"
+#endif
+#if USE_IMU
+#include "subsystems/imu.h"
+#endif
+#if USE_AHRS
+#include "subsystems/ahrs.h"
+#endif
+#if USE_BAROMETER
 #include "subsystems/sensors/baro.h"
 #include "baro_board.h"
+#endif
+#include "subsystems/ins.h"
 
 #include "subsystems/electrical.h"
 
 #include "firmwares/rotorcraft/autopilot.h"
-
 #include "firmwares/rotorcraft/stabilization.h"
 #include "firmwares/rotorcraft/guidance.h"
-
-#include "subsystems/ahrs.h"
-#include "subsystems/ins.h"
 
 #include "state.h"
 
@@ -66,12 +73,15 @@
 
 #include "generated/modules.h"
 
+#if USE_IMU
 static inline void on_gyro_event( void );
 static inline void on_accel_event( void );
+static inline void on_mag_event( void );
+#endif
+
 static inline void on_baro_abs_event( void );
 static inline void on_baro_dif_event( void );
 static inline void on_gps_event( void );
-static inline void on_mag_event( void );
 
 
 tid_t main_periodic_tid; 	///< id for main_periodic() timer
@@ -119,15 +129,21 @@ STATIC_INLINE void main_init( void ) {
 #endif
 
   baro_init();
+#if USE_IMU
   imu_init();
+#endif
   autopilot_init();
   nav_init();
   guidance_h_init();
   guidance_v_init();
   stabilization_init();
 
+#if USE_AHRS
+#if USE_AHRS_ALIGNER
   ahrs_aligner_init();
+#endif
   ahrs_init();
+#endif
 
   ins_init();
 
@@ -152,7 +168,6 @@ STATIC_INLINE void main_init( void ) {
 }
 
 STATIC_INLINE void handle_periodic_tasks( void ) {
-
   if (sys_time_check_and_ack_timer(main_periodic_tid))
     main_periodic();
 #if RADIO_CONTROL
@@ -165,7 +180,7 @@ STATIC_INLINE void handle_periodic_tasks( void ) {
     electrical_periodic();
   if (sys_time_check_and_ack_timer(baro_tid))
     baro_periodic();
-  if (sys_time_check_and_ack_timer(telemetry_tid))
+  //if (sys_time_check_and_ack_timer(telemetry_tid))
     telemetry_periodic();
 #if PARROT_OMAP_ARCH
   if (sys_time_check_and_ack_timer(navdata_periodic_tid))
@@ -174,8 +189,9 @@ STATIC_INLINE void handle_periodic_tasks( void ) {
 }
 
 STATIC_INLINE void main_periodic( void ) {
-
+#if USE_IMU
   imu_periodic();
+#endif
 
   /* run control loops */
   autopilot_periodic();
@@ -231,7 +247,13 @@ STATIC_INLINE void main_event( void ) {
     RadioControlEvent(autopilot_on_rc_frame);
   }
 
+#if USE_IMU
   ImuEvent(on_gyro_event, on_accel_event, on_mag_event);
+#endif
+
+#if !USE_AHRS
+  ins_periodic();
+#endif
 
   BaroEvent(on_baro_abs_event, on_baro_dif_event);
 
@@ -247,6 +269,7 @@ STATIC_INLINE void main_event( void ) {
 
 }
 
+#if USE_IMU
 static inline void on_accel_event( void ) {
   ImuScaleAccel(imu);
 
@@ -260,9 +283,11 @@ static inline void on_gyro_event( void ) {
   ImuScaleGyro(imu);
 
   if (ahrs.status == AHRS_UNINIT) {
+#if USE_AHRS_ALIGNER
     ahrs_aligner_run();
     if (ahrs_aligner.status == AHRS_ALIGNER_LOCKED)
       ahrs_align();
+#endif
   }
   else {
     ahrs_propagate();
@@ -275,6 +300,21 @@ static inline void on_gyro_event( void ) {
   vi_notify_imu_available();
 #endif
 }
+
+static inline void on_mag_event(void) {
+  ImuScaleMag(imu);
+
+#if USE_MAGNETOMETER
+  if (ahrs.status == AHRS_RUNNING) {
+    ahrs_update_mag();
+  }
+#endif
+
+#ifdef USE_VEHICLE_INTERFACE
+  vi_notify_mag_available();
+#endif
+}
+#endif
 
 static inline void on_baro_abs_event( void ) {
   ins_update_baro();
@@ -292,19 +332,5 @@ static inline void on_gps_event(void) {
 #ifdef USE_VEHICLE_INTERFACE
   if (gps.fix == GPS_FIX_3D)
     vi_notify_gps_available();
-#endif
-}
-
-static inline void on_mag_event(void) {
-  ImuScaleMag(imu);
-
-#if USE_MAGNETOMETER
-  if (ahrs.status == AHRS_RUNNING) {
-    ahrs_update_mag();
-  }
-#endif
-
-#ifdef USE_VEHICLE_INTERFACE
-  vi_notify_mag_available();
 #endif
 }

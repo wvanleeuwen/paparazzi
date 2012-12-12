@@ -21,11 +21,9 @@
 		</subsystem>
 
 		<subsystem name="telemetry" type="wifi" />
-		<subsystem name="imu" type="ardrone2" />
 		<subsystem name="gps" type="nmea" />
 		<subsystem name="stabilization" type="int_quat" />
-		<subsystem name="ahrs" type="int_cmpl_quat" />
-		<subsystem name="ins" />
+		<subsystem name="ins" type="ardrone2" />
 
 	</firmware>
 
@@ -234,10 +232,10 @@
 	</section>
 
 	<section name="BAT">
-		<define name="CATASTROPHIC_BAT_LEVEL" value="9.3" unit="V" />
-		<define name="CRITIC_BAT_LEVEL" value="9.6" unit="V" />
-		<define name="LOW_BAT_LEVEL" value="9.7" unit="V" />
-		<define name="MAX_BAT_LEVEL" value="12.4" unit="V" />
+		<define name="CATASTROPHIC_BAT_LEVEL" value="2.0" unit="V" />
+		<define name="CRITIC_BAT_LEVEL" value="5.0" unit="V" />
+		<define name="LOW_BAT_LEVEL" value="10.0" unit="V" />
+		<define name="MAX_BAT_LEVEL" value="100.0" unit="V" />
 	</section>
 
 </airframe>

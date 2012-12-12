@@ -42,7 +42,9 @@
 
 #include "mcu_periph/sys_time.h"
 #include "subsystems/electrical.h"
+#if USE_IMU
 #include "subsystems/imu.h"
+#endif
 #if USE_GPS
 #include "subsystems/gps.h"
 #endif
@@ -140,6 +142,7 @@
 #define PERIODIC_SEND_ACTUATORS(_trans, _dev) {}
 #endif
 
+#if USE_IMU
 #define PERIODIC_SEND_IMU_GYRO_SCALED(_trans, _dev) {		\
     DOWNLINK_SEND_IMU_GYRO_SCALED(_trans, _dev,			\
                  &imu.gyro.p,		\
@@ -181,7 +184,14 @@
                   &imu.mag_unscaled.y,			\
                   &imu.mag_unscaled.z);		\
   }
-
+#else
+#define PERIODIC_SEND_IMU_GYRO_SCALED(_trans, _dev) {}
+#define PERIODIC_SEND_IMU_ACCEL_SCALED(_trans, _dev) {}
+#define PERIODIC_SEND_IMU_MAG_SCALED(_trans, _dev) {}
+#define PERIODIC_SEND_IMU_GYRO_RAW(_trans, _dev) {}
+#define PERIODIC_SEND_IMU_ACCEL_RAW(_trans, _dev) {}
+#define PERIODIC_SEND_IMU_MAG_RAW(_trans, _dev) {}
+#endif
 
 #include "subsystems/sensors/baro.h"
 #define PERIODIC_SEND_BARO_RAW(_trans, _dev) {         \
@@ -303,6 +313,7 @@
 #endif /* STABILISATION_ATTITUDE_TYPE_FLOAT */
 
 
+#if USE_AHRS_ALIGNER && USE_IMU
 #include "subsystems/ahrs/ahrs_aligner.h"
 #define PERIODIC_SEND_FILTER_ALIGNER(_trans, _dev) {			\
     DOWNLINK_SEND_FILTER_ALIGNER(_trans, _dev,                  \
@@ -316,6 +327,9 @@
                                  &ahrs_aligner.low_noise_cnt,   \
                                  &ahrs_aligner.status);         \
   }
+#else
+#define PERIODIC_SEND_FILTER_ALIGNER(_trans, _dev) {}
+#endif
 
 
 #define PERIODIC_SEND_ROTORCRAFT_CMD(_trans, _dev) {                    \
@@ -434,6 +448,7 @@
 #define PERIODIC_SEND_AHRS_REF_QUAT(_trans, _dev) {}
 #endif /* STABILISATION_ATTITUDE_TYPE_QUAT */
 
+#if USE_AHRS
 #define PERIODIC_SEND_AHRS_QUAT_INT(_trans, _dev) {   \
     DOWNLINK_SEND_AHRS_QUAT_INT(_trans, _dev,         \
                   &ahrs_impl.ltp_to_imu_quat.qi,      \
@@ -445,7 +460,21 @@
                   &(stateGetNedToBodyQuat_i()->qy),   \
                   &(stateGetNedToBodyQuat_i()->qz));  \
   }
+#else
+#define PERIODIC_SEND_AHRS_QUAT_INT(_trans, _dev) {   \
+    DOWNLINK_SEND_AHRS_QUAT_INT(_trans, _dev,         \
+                  0,                                  \
+                  0,                                  \
+                  0,                                  \
+                  0,                                  \
+                  &(stateGetNedToBodyQuat_i()->qi),   \
+                  &(stateGetNedToBodyQuat_i()->qx),   \
+                  &(stateGetNedToBodyQuat_i()->qy),   \
+                  &(stateGetNedToBodyQuat_i()->qz));  \
+  }
+#endif
 
+#if USE_AHRS
 #define PERIODIC_SEND_AHRS_EULER_INT(_trans, _dev) {      \
     DOWNLINK_SEND_AHRS_EULER_INT(_trans, _dev,            \
                    &ahrs_impl.ltp_to_imu_euler.phi,       \
@@ -455,7 +484,19 @@
                    &(stateGetNedToBodyEulers_i()->theta), \
                    &(stateGetNedToBodyEulers_i()->psi));  \
   }
+#else
+#define PERIODIC_SEND_AHRS_EULER_INT(_trans, _dev) {      \
+    DOWNLINK_SEND_AHRS_EULER_INT(_trans, _dev,            \
+    		       0,       							  \
+                   0,     								  \
+                   0,       							  \
+                   &(stateGetNedToBodyEulers_i()->phi),   \
+                   &(stateGetNedToBodyEulers_i()->theta), \
+                   &(stateGetNedToBodyEulers_i()->psi));  \
+  }
+#endif
 
+#if USE_AHRS
 #define PERIODIC_SEND_AHRS_RMAT_INT(_trans, _dev) {       \
   struct Int32RMat* att_rmat = stateGetNedToBodyRMat_i(); \
   DOWNLINK_SEND_AHRS_RMAT(_trans, _dev,                   \
@@ -478,6 +519,30 @@
       &(att_rmat->m[7]),                                  \
       &(att_rmat->m[8]));                                 \
 }
+#else
+#define PERIODIC_SEND_AHRS_RMAT_INT(_trans, _dev) {       \
+  struct Int32RMat* att_rmat = stateGetNedToBodyRMat_i(); \
+  DOWNLINK_SEND_AHRS_RMAT(_trans, _dev,                   \
+      0,                                                  \
+      0,                                                  \
+      0,                                                  \
+      0,                                                  \
+      0,                                                  \
+      0,                                                  \
+      0,                                                  \
+      0,                                                  \
+      0,                                                  \
+      &(att_rmat->m[0]),                                  \
+      &(att_rmat->m[1]),                                  \
+      &(att_rmat->m[2]),                                  \
+      &(att_rmat->m[3]),                                  \
+      &(att_rmat->m[4]),                                  \
+      &(att_rmat->m[5]),                                  \
+      &(att_rmat->m[6]),                                  \
+      &(att_rmat->m[7]),                                  \
+      &(att_rmat->m[8]));                                 \
+}
+#endif
 
 
 
