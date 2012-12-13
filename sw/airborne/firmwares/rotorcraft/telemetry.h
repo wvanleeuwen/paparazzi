@@ -193,12 +193,16 @@
 #define PERIODIC_SEND_IMU_MAG_RAW(_trans, _dev) {}
 #endif
 
+#if USE_BAROMETER
 #include "subsystems/sensors/baro.h"
 #define PERIODIC_SEND_BARO_RAW(_trans, _dev) {         \
     DOWNLINK_SEND_BARO_RAW(_trans, _dev,               \
                            &baro.absolute,      \
                            &baro.differential); \
   }
+#else
+#define PERIODIC_SEND_BARO_RAW(_trans, _dev) {}
+#endif
 
 
 
@@ -365,6 +369,24 @@
 #define PERIODIC_SEND_FILTER(_trans, _dev) {}
 #endif
 
+#if USE_AHRS_ARDRONE2
+#include "subsystems/ahrs/ahrs_ardrone2.h"
+#define PERIODIC_SEND_AHRS_ARDRONE2(_trans, _dev) {	\
+    DOWNLINK_SEND_AHRS_ARDRONE2(_trans, _dev,	\
+    		 &ahrs_impl.control_state,			\
+             &ahrs_impl.eulers.phi,				\
+             &ahrs_impl.eulers.theta,			\
+             &ahrs_impl.eulers.psi,				\
+             &ahrs_impl.speed.x,				\
+             &ahrs_impl.speed.y,				\
+             &ahrs_impl.speed.z,				\
+             &ahrs_impl.altitude,				\
+             &ahrs_impl.battery);				\
+  }
+#else
+#define PERIODIC_SEND_AHRS_ARDRONE2(_trans, _dev) {}
+#endif
+
 #if USE_AHRS_LKF
 #include "subsystems/ahrs.h"
 #include "ahrs/ahrs_float_lkf.h"
@@ -448,7 +470,7 @@
 #define PERIODIC_SEND_AHRS_REF_QUAT(_trans, _dev) {}
 #endif /* STABILIZATION_ATTITUDE_TYPE_QUAT */
 
-#if USE_AHRS
+#if USE_AHRS_CMPL_QUAT
 #define PERIODIC_SEND_AHRS_QUAT_INT(_trans, _dev) {   \
     DOWNLINK_SEND_AHRS_QUAT_INT(_trans, _dev,         \
                   &ahrs_impl.ltp_to_imu_quat.qi,      \
@@ -461,20 +483,10 @@
                   &(stateGetNedToBodyQuat_i()->qz));  \
   }
 #else
-#define PERIODIC_SEND_AHRS_QUAT_INT(_trans, _dev) {   \
-    DOWNLINK_SEND_AHRS_QUAT_INT(_trans, _dev,         \
-                  0,                                  \
-                  0,                                  \
-                  0,                                  \
-                  0,                                  \
-                  &(stateGetNedToBodyQuat_i()->qi),   \
-                  &(stateGetNedToBodyQuat_i()->qx),   \
-                  &(stateGetNedToBodyQuat_i()->qy),   \
-                  &(stateGetNedToBodyQuat_i()->qz));  \
-  }
+#define PERIODIC_SEND_AHRS_QUAT_INT(_trans, _dev) {}
 #endif
 
-#if USE_AHRS
+#if USE_AHRS_CMPL_EULER
 #define PERIODIC_SEND_AHRS_EULER_INT(_trans, _dev) {      \
     DOWNLINK_SEND_AHRS_EULER_INT(_trans, _dev,            \
                    &ahrs_impl.ltp_to_imu_euler.phi,       \
@@ -485,18 +497,10 @@
                    &(stateGetNedToBodyEulers_i()->psi));  \
   }
 #else
-#define PERIODIC_SEND_AHRS_EULER_INT(_trans, _dev) {      \
-    DOWNLINK_SEND_AHRS_EULER_INT(_trans, _dev,            \
-    		       0,       							  \
-                   0,     								  \
-                   0,       							  \
-                   &(stateGetNedToBodyEulers_i()->phi),   \
-                   &(stateGetNedToBodyEulers_i()->theta), \
-                   &(stateGetNedToBodyEulers_i()->psi));  \
-  }
+#define PERIODIC_SEND_AHRS_EULER_INT(_trans, _dev) {}
 #endif
 
-#if USE_AHRS
+#if USE_AHRS_CMPL_EULER || USE_AHRS_CMPL_QUAT
 #define PERIODIC_SEND_AHRS_RMAT_INT(_trans, _dev) {       \
   struct Int32RMat* att_rmat = stateGetNedToBodyRMat_i(); \
   DOWNLINK_SEND_AHRS_RMAT(_trans, _dev,                   \
@@ -520,31 +524,8 @@
       &(att_rmat->m[8]));                                 \
 }
 #else
-#define PERIODIC_SEND_AHRS_RMAT_INT(_trans, _dev) {       \
-  struct Int32RMat* att_rmat = stateGetNedToBodyRMat_i(); \
-  DOWNLINK_SEND_AHRS_RMAT(_trans, _dev,                   \
-      0,                                                  \
-      0,                                                  \
-      0,                                                  \
-      0,                                                  \
-      0,                                                  \
-      0,                                                  \
-      0,                                                  \
-      0,                                                  \
-      0,                                                  \
-      &(att_rmat->m[0]),                                  \
-      &(att_rmat->m[1]),                                  \
-      &(att_rmat->m[2]),                                  \
-      &(att_rmat->m[3]),                                  \
-      &(att_rmat->m[4]),                                  \
-      &(att_rmat->m[5]),                                  \
-      &(att_rmat->m[6]),                                  \
-      &(att_rmat->m[7]),                                  \
-      &(att_rmat->m[8]));                                 \
-}
+#define PERIODIC_SEND_AHRS_RMAT_INT(_trans, _dev) {}
 #endif
-
-
 
 #if USE_VFF
 #include "subsystems/ins/vf_float.h"

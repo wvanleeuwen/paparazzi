@@ -48,10 +48,8 @@
 #if USE_IMU
 #include "subsystems/imu.h"
 #endif
-#if USE_AHRS
 #include "subsystems/ahrs.h"
-#endif
-#if USE_BAROMETER
+#if USE_BAROMETERMETER
 #include "subsystems/sensors/baro.h"
 #include "baro_board.h"
 #endif
@@ -83,8 +81,10 @@ static inline void on_accel_event( void );
 static inline void on_mag_event( void );
 #endif
 
+#if USE_BAROMETER
 static inline void on_baro_abs_event( void );
 static inline void on_baro_dif_event( void );
+#endif
 static inline void on_gps_event( void );
 
 
@@ -132,7 +132,10 @@ STATIC_INLINE void main_init( void ) {
   wifi_init();
 #endif
 
+#if USE_BAROMETER
   baro_init();
+#endif
+
 #if USE_IMU
   imu_init();
 #endif
@@ -142,12 +145,10 @@ STATIC_INLINE void main_init( void ) {
   guidance_v_init();
   stabilization_init();
 
-#if USE_AHRS
 #if USE_AHRS_ALIGNER
   ahrs_aligner_init();
 #endif
   ahrs_init();
-#endif
 
   ins_init();
 
@@ -182,8 +183,10 @@ STATIC_INLINE void handle_periodic_tasks( void ) {
     failsafe_check();
   if (sys_time_check_and_ack_timer(electrical_tid))
     electrical_periodic();
+#if USE_BAROMETER
   if (sys_time_check_and_ack_timer(baro_tid))
     baro_periodic();
+#endif
   //if (sys_time_check_and_ack_timer(telemetry_tid))
     telemetry_periodic();
 #if PARROT_OMAP_ARCH
@@ -253,13 +256,13 @@ STATIC_INLINE void main_event( void ) {
 
 #if USE_IMU
   ImuEvent(on_gyro_event, on_accel_event, on_mag_event);
+#else
+  ahrs_propagate();
 #endif
 
-#if !USE_AHRS
-  ins_periodic();
-#endif
-
+#if USE_BAROMETER
   BaroEvent(on_baro_abs_event, on_baro_dif_event);
+#endif
 
 #if USE_GPS
   GpsEvent(on_gps_event);
@@ -320,6 +323,7 @@ static inline void on_mag_event(void) {
 }
 #endif
 
+#if USE_BAROMETER
 static inline void on_baro_abs_event( void ) {
   ins_update_baro();
 #ifdef USE_VEHICLE_INTERFACE
@@ -330,6 +334,7 @@ static inline void on_baro_abs_event( void ) {
 static inline void on_baro_dif_event( void ) {
 
 }
+#endif
 
 static inline void on_gps_event(void) {
   ins_update_gps();

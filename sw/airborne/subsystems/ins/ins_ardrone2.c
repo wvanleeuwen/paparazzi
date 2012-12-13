@@ -20,160 +20,77 @@
  */
 
 #include "subsystems/ins/ins_ardrone2.h"
-
-#include "subsystems/sensors/baro.h"
+#include "subsystems/ahrs.h"
 #include "subsystems/gps.h"
-
 #include "generated/airframe.h"
-
-#if USE_VFF
-#include "subsystems/ins/vf_float.h"
-#endif
-
-#if USE_HFF
-#include "subsystems/ins/hf_float.h"
-#endif
+#include "generated/flight_plan.h"
+#include "math/pprz_geodetic_int.h"
 
 #ifdef SITL
 #include "nps_fdm.h"
 #include <stdio.h>
 #endif
-#include <stdio.h>
 
-
-#include "math/pprz_geodetic_int.h"
-#include "math/pprz_algebra_float.h"
-
-#include "generated/flight_plan.h"
+/* TODO: Remove from messages */
+int32_t ins_qfe;
 
 /* gps transformed to LTP-NED  */
 struct LtpDef_i  ins_ltp_def;
          bool_t  ins_ltp_initialised;
 struct NedCoor_i ins_gps_pos_cm_ned;
 struct NedCoor_i ins_gps_speed_cm_s_ned;
-#if USE_HFF
-/* horizontal gps transformed to NED in meters as float */
-struct FloatVect2 ins_gps_pos_m_ned;
-struct FloatVect2 ins_gps_speed_m_s_ned;
-#endif
-
-/* barometer                   */
-int32_t ins_qfe;
 
 /* output                      */
 struct NedCoor_i ins_ltp_pos;
 struct NedCoor_i ins_ltp_speed;
 struct NedCoor_i ins_ltp_accel;
 
-/* ARDRONE2 */
-#include "subsystems/electrical.h"
-#include <netdb.h>
-#include <netinet/in.h>
-#include <arpa/inet.h>
-#include <errno.h>
-#define NAVDATA_PORT 5554
-#define AT_PORT 5556
-#define NAVDATA_BUFFER_SIZE 2048
-#define WIFI_MYKONOS_IP "192.168.1.1"
-
-int seq=1;
-char msg[NAVDATA_BUFFER_SIZE];
-
-int at_socket = -1, //sendto
-		navdata_socket = -1; //recvfrom
-
-struct sockaddr_in
-pc_addr, //INADDR_ANY
-drone_at, //send at addr
-drone_nav, //send nav addr
-from;
-
 
 void ins_init() {
-  //INIT ARDrone
-	int32_t one = 1;
-
-	if((at_socket = socket (AF_INET, SOCK_DGRAM, 0)) < 0){
-		printf ("at_socket error: %s\n", strerror(errno));
-	};
-
-	if((navdata_socket = socket (AF_INET, SOCK_DGRAM, 0)) < 0){
-		printf ("navdata_socket: %s\n", strerror(errno));
-	};
-
-	//for recvfrom
-	pc_addr.sin_family = AF_INET;
-	pc_addr.sin_addr.s_addr = htonl(INADDR_ANY);
-	pc_addr.sin_port = htons(9800);
-
-	//for sendto AT
-	drone_at.sin_family = AF_INET;
-	drone_at.sin_addr.s_addr = inet_addr(WIFI_MYKONOS_IP);
-	drone_at.sin_port = htons(AT_PORT);
-
-	//for sendto navadata init
-	drone_nav.sin_family = AF_INET;
-	drone_nav.sin_addr.s_addr = inet_addr(WIFI_MYKONOS_IP);
-	drone_nav.sin_port = htons(NAVDATA_PORT);
-
-	if(bind( navdata_socket, (struct sockaddr *)&pc_addr, sizeof(pc_addr)) < 0){
-		printf ("bind: %s\n", strerror(errno));
-	};
-
-	//set unicast mode on
-	sendto(navdata_socket, &one, 4, 0, (struct sockaddr *)&drone_nav, sizeof(drone_nav));
-
-
+#if USE_INS_NAV_INIT
   ins_ltp_initialised = TRUE;
+
+  /** FIXME: should use the same code than MOVE_WP in firmwares/rotorcraft/datalink.c */
+  struct LlaCoor_i llh_nav0; /* Height above the ellipsoid */
+  llh_nav0.lat = INT32_RAD_OF_DEG(NAV_LAT0);
+  llh_nav0.lon = INT32_RAD_OF_DEG(NAV_LON0);
+  /* NAV_ALT0 = ground alt above msl, NAV_MSL0 = geoid-height (msl) over ellipsoid */
+  llh_nav0.alt = NAV_ALT0 + NAV_MSL0;
+
+  struct EcefCoor_i ecef_nav0;
+  ecef_of_lla_i(&ecef_nav0, &llh_nav0);
+
+  ltp_def_from_ecef_i(&ins_ltp_def, &ecef_nav0);
+  ins_ltp_def.hmsl = NAV_ALT0;
+  stateSetLocalOrigin_i(&ins_ltp_def);
+#else
+  ins_ltp_initialised  = FALSE;
+#endif
+  ins.vf_realign = FALSE;
+  ins.hf_realign = FALSE;
+
+  INT32_VECT3_ZERO(ins_ltp_pos);
+  INT32_VECT3_ZERO(ins_ltp_speed);
+  INT32_VECT3_ZERO(ins_ltp_accel);
+
   // TODO correct init
   ins.status = INS_RUNNING;
+
 }
 
 void ins_periodic( void ) {
-	int l,size;
-	navdata_t* packet;
-	navdata_demo_t* packet2;
-	struct FloatEulers angles;
-	struct NedCoor_i pos;
-	struct NedCoor_i speed;
-
-	//printf("test\n");
-
-	size = recvfrom ( navdata_socket, &msg, NAVDATA_BUFFER_SIZE, 0x0, (struct sockaddr *)&from, (socklen_t *)&l);
-
-	//printf("read %d data\n",size);
-	packet = (navdata_t*) &msg;
-	printf("Packet tag %i, %i, %x, %x\n", packet->sequence, packet->vision_defined, packet->options[0].tag, packet->options[0].size);
-	if(packet->options[0].tag == 0) {
-		packet2 = (navdata_demo_t*) &packet->options[0];
-		//printf("Packet tag %f %f %f %d %d\n", packet2->theta, packet2->psi, packet2->phi, packet2->altitude, packet2->vbat_flying_percentage);
-		angles.theta = packet2->theta/180000.*M_PI;
-		angles.psi = packet2->psi/180000.*M_PI;
-		angles.phi = -packet2->phi/180000.*M_PI;
-		electrical.vsupply = packet2->vbat_flying_percentage;
-		pos.x = 0;
-		pos.y = 0;
-		pos.z = packet2->altitude;
-		speed.x = packet2->vx;
-		speed.y = packet2->vy;
-		speed.z = packet2->vz;
-	}
-	//printf("pos\n");
-	stateSetNedToBodyEulers_f(&angles);
-	stateSetPositionNed_i(&pos);
-	stateSetSpeedNed_i(&speed);
 }
 
 void ins_realign_h(struct FloatVect2 pos __attribute__ ((unused)), struct FloatVect2 speed __attribute__ ((unused))) {
-#if USE_HFF
-  b2_hff_realign(pos, speed);
-#endif /* USE_HFF */
+
 }
 
 void ins_realign_v(float z __attribute__ ((unused))) {
-#if USE_VFF
-  vff_realign(z);
-#endif
+
+}
+
+void ins_propagate() {
+
 }
 
 void ins_update_baro() {
@@ -182,7 +99,30 @@ void ins_update_baro() {
 
 
 void ins_update_gps(void) {
+#if USE_GPS
+  if (gps.fix == GPS_FIX_3D) {
+    if (!ins_ltp_initialised) {
+      ltp_def_from_ecef_i(&ins_ltp_def, &gps.ecef_pos);
+      ins_ltp_def.lla.alt = gps.lla_pos.alt;
+      ins_ltp_def.hmsl = gps.hmsl;
+      ins_ltp_initialised = TRUE;
+      stateSetLocalOrigin_i(&ins_ltp_def);
+    }
+    ned_of_ecef_point_i(&ins_gps_pos_cm_ned, &ins_ltp_def, &gps.ecef_pos);
+    ned_of_ecef_vect_i(&ins_gps_speed_cm_s_ned, &ins_ltp_def, &gps.ecef_vel);
 
+    INT32_VECT3_SCALE_2(ins_ltp_pos, ins_gps_pos_cm_ned, INT32_POS_OF_CM_NUM, INT32_POS_OF_CM_DEN);
+    INT32_VECT3_SCALE_2(ins_ltp_speed, ins_gps_speed_cm_s_ned, INT32_SPEED_OF_CM_S_NUM, INT32_SPEED_OF_CM_S_DEN);
+
+#if USE_GPS_LAG_HACK
+    VECT2_COPY(d_pos, ins_ltp_speed);
+    INT32_VECT2_RSHIFT(d_pos, d_pos, 11);
+    VECT2_ADD(ins_ltp_pos, d_pos);
+#endif
+
+    INS_NED_TO_STATE();
+  }
+#endif /* USE_GPS */
 }
 
 void ins_update_sonar() {
