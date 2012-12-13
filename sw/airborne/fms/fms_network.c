@@ -51,7 +51,7 @@ int network_write(struct FmsNetwork* me, char* buf, int len) {
 int network_read(struct FmsNetwork* me, unsigned char* buf, int len) {
 
 	// MSG_DONTWAIT => nonblocking flag
-	ssize_t byte_read = recvfrom(me->socket_in, buf, len, 0,
+	ssize_t byte_read = recvfrom(me->socket_in, buf, len, MSG_DONTWAIT,
 				(struct sockaddr*)&me->addr_in, (socklen_t *) sizeof(me->addr_in));
 
 	// @TODO: maybe fix if byte_read == -1 => check errno == EWOULDBLOCK and do something accordingly
