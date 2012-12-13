@@ -35,6 +35,7 @@
 void wifi_init( void );
 void wifi_transmit( uint8_t data );
 void wifi_send( void );
+void wifi_receive( void );
 
 #define WifiInit() wifi_init()
 #define WifiCheckFreeSpace(_x) (TRUE)
@@ -124,6 +125,9 @@ _put(_dev, &_x[_i]); \
 	WifiTransportSendMessage(_dev); \
 }
 
+#define WifiCheckAndParse() {       \
+		wifi_receive(); \
+  }
 
 #endif /* WIFI_TELEM_H */
 

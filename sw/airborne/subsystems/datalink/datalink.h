@@ -87,6 +87,14 @@ EXTERN void dl_parse_msg(void);
     DlCheckAndParse();                          \
   }
 
+#elif defined DATALINK && DATALINK == WIFI
+
+#define DatalinkEvent() {                       \
+    WifiCheckAndParse();        \
+    DlCheckAndParse();                          \
+  }
+
+
 #else
 
 // Unknown DATALINK
