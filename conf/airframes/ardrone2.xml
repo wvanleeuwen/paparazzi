@@ -4,28 +4,22 @@
 
 	<firmware name="rotorcraft">
 		<target name="ap" board="ardrone2">
-			<define name="ACTUATORS_START_DELAY" value="3" />
 			<define name="USE_INS_NAV_INIT" />
-			<!--configure name="USE_NEW_I2C_DRIVER" value="1"/ -->
+			<define name="ROTORCRAFT_COMMANDS_YAW_ALWAYS_ENABLED"/>
 		</target>
 
 		<target name="nps" board="pc">
 			<subsystem name="fdm" type="jsbsim" />
 		</target>
 
-		<subsystem name="radio_control" type="wifi" />
-		<subsystem name="motor_mixing" />
-
-		<subsystem name="actuators" type="pwm">
-			<define name="SERVO_HZ" value="400" />
-		</subsystem>
+		<subsystem name="radio_control" type="datalink" />
 
 		<subsystem name="telemetry" type="wifi" />
 		<subsystem name="gps" type="nmea" />
-		<subsystem name="stabilization" type="int_quat" />
 		<subsystem name="ahrs" type="ardrone2" />
 		<subsystem name="ins" type="ardrone2" />
-
+		<subsystem name="actuators" type="ardrone2" />
+		
 	</firmware>
 
 	<modules main_freq="512">
@@ -38,45 +32,6 @@
 		<axis name="YAW" failsafe_value="0" />
 		<axis name="THRUST" failsafe_value="0" />
 	</commands>
-
-	<servos driver="Pwm">
-		<servo name="TOP_RIGHT" no="0" min="1000" neutral="1100" max="1900" />
-		<servo name="BOTTOM_LEFT" no="1" min="1000" neutral="1100" max="1900" />
-		<servo name="BOTTOM_RIGHT" no="2" min="1000" neutral="1100" max="1900" />
-		<servo name="TOP_LEFT" no="3" min="1000" neutral="1100" max="1900" />
-	</servos>
-
-	<section name="MIXING" prefix="MOTOR_MIXING_">
-		<define name="TRIM_ROLL" value="0" />
-		<define name="TRIM_PITCH" value="0" />
-		<define name="TRIM_YAW" value="0" />
-		<define name="NB_MOTOR" value="4" />
-		<define name="SCALE" value="256" />
-		<!-- Time cross layout (X), as documented in paparazzi -->
-		<define name="ROLL_COEF" value="{ -256, -256,  256,  256 }" />
-		<define name="PITCH_COEF" value="{  256, -256, -256,  256 }" />
-		<define name="YAW_COEF" value="{ -256,  256, -256,  256 }" />
-		<define name="THRUST_COEF" value="{  256,  256,  256,  256 }" />
-	</section>
-
-	<command_laws>
-		<call fun="motor_mixing_run(autopilot_motors_on,FALSE,values)" />
-		<set servo="TOP_RIGHT" value="motor_mixing.commands[SERVO_TOP_RIGHT]" />
-		<set servo="BOTTOM_LEFT" value="motor_mixing.commands[SERVO_BOTTOM_LEFT]" />
-		<set servo="BOTTOM_RIGHT" value="motor_mixing.commands[SERVO_BOTTOM_RIGHT]" />
-		<set servo="TOP_LEFT" value="motor_mixing.commands[SERVO_TOP_LEFT]" />
-	</command_laws>
-
-	<!-- local magnetic field, calculated for: 52°0'0", 4°22'22" -->
-	<section name="AHRS" prefix="AHRS_">
-		<define name="H_X" value="0.390471116" />
-		<define name="H_Y" value="0.001535123" />
-		<define name="H_Z" value="0.920613899" />
-	</section>
-
-	<section name="INS" prefix="INS_">
-		<define name="BARO_SENS" value="22.3" integer="16" />
-	</section>
 
 	<section name="STABILIZATION_RATE" prefix="STABILIZATION_RATE_">
 		<!-- setpoints -->
@@ -171,13 +126,6 @@
 		<define name="PGAIN" value="100" />
 		<define name="DGAIN" value="100" />
 		<define name="IGAIN" value="0" />
-	</section>
-
-	<section name="SIMULATOR" prefix="NPS_">
-		<define name="ACTUATOR_NAMES"
-			value="{&quot;top_right_motor&quot;, &quot;bottom_left_motor&quot;, &quot;bottom_right_motor&quot;, &quot;top_left_motor&quot;}" />
-		<define name="INITIAL_CONDITITONS" value="&quot;reset00&quot;" />
-		<define name="SENSORS_PARAMS" value="&quot;nps_sensors_params_default.h&quot;" />
 	</section>
 
 	<section name="AUTOPILOT">

@@ -71,6 +71,9 @@
 
 #include "generated/modules.h"
 
+#if USE_ACTUATORS_AT
+#include "arch/omap_ardrone2/subsystems/actuators/actuators_at.h"
+#endif
 
 #ifndef BARO_PERIODIC_FREQUENCY
 #define BARO_PERIODIC_FREQUENCY 50
