@@ -15,10 +15,11 @@
 		<subsystem name="radio_control" type="datalink" />
 
 		<subsystem name="telemetry" type="wifi" />
-		<subsystem name="gps" type="nmea" />
+		<subsystem name="gps" type="sirf" />
 		<subsystem name="ahrs" type="ardrone2" />
 		<subsystem name="ins" type="ardrone2" />
 		<subsystem name="actuators" type="ardrone2" />
+		<subsystem name="stabilization" type="int_quat"/>
 		
 	</firmware>
 

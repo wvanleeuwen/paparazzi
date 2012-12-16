@@ -33,9 +33,12 @@
 #include "math/pprz_geodetic_float.h"
 
 #include <inttypes.h>
+#include <math.h>
 #include "gps_sirf.h"
 
 struct GpsSirf gps_sirf;
+void sirf_parse_2(void);
+void sirf_parse_41(void);
 
 void gps_impl_init( void ) {
   gps_sirf.msg_available = FALSE;
@@ -86,20 +89,77 @@ void sirf_parse_char(uint8_t c) {
 }
 
 void sirf_parse_41(void) {
+	struct sirf_msg_41* p = (struct sirf_msg_41*)&gps_sirf.msg_buf;
 
+	gps.tow = p->tow;
+	gps.hmsl = p->alt_msl*10;
+	gps.num_sv = p->num_sat;
+	gps.nb_channels = p ->num_sat;
+
+	/* read latitude, longitude and altitude from packet */
+	gps.lla_pos.lat = RadOfDeg(p->latitude);
+	gps.lla_pos.lon = RadOfDeg(p->longitude);
+	gps.lla_pos.alt = p->alt_ellipsoid * 10;
+
+	#if GPS_USE_LATLONG
+	  /* convert to utm */
+	  struct UtmCoor_f utm_f;
+	  utm_f.zone = nav_utm_zone0;
+	  utm_of_lla_f(&utm_f, &lla_pos);
+
+	  /* copy results of utm conversion */
+	  gps.utm_pos.east = utm_f.east*100;
+	  gps.utm_pos.north = utm_f.north*100;
+	  gps.utm_pos.alt = gps.lla_pos.alt;
+	  gps.utm_pos.zone = nav_utm_zone0;
+	#endif
+
+	gps.sacc = p->ehve;
+	gps.course = RadOfDeg(p->cog)*pow(10, 5);
+	gps.gspeed = RadOfDeg(p->sog)*pow(10, 5);
+	gps.cacc = RadOfDeg(p->heading_err)*pow(10, 5);
+	gps.pacc = p->ehpe;
+	gps.pdop = p->hdop * 20;
+
+	if ((p->nav_type & 0x7) >= 0x4)
+		gps.fix = GPS_FIX_3D;
+	else if ((p->nav_type & 0x7) >= 0x3)
+		gps.fix = GPS_FIX_2D;
+	else
+		gps.fix = GPS_FIX_NONE;
+
+	//Let gps_sirf know we have a position update
+	gps_sirf.pos_available = TRUE;
 }
 
-void sirf_parse_2() {
+void sirf_parse_2(void) {
+	struct sirf_msg_2* p = (struct sirf_msg_2*)&gps_sirf.msg_buf;
 
+	gps.week = p->week;
+
+	gps.ecef_pos.x = p->x_pos * 100;
+	gps.ecef_pos.y = p->y_pos * 100;
+	gps.ecef_pos.z = p->z_pos * 100;
+
+	gps.ecef_vel.x = p->vx*100/8;
+	gps.ecef_vel.y = p->vy*100/8;
+	gps.ecef_vel.z = p->vz*100/8;
+
+	//struct EnuCoor_f enu; /* speed NED in cm/s */
+	/*enu_of_ecef_point_f(&enu, def, ecef);
+	ENU_OF_TO_NED(*ned, enu);*/
 }
 
 void sirf_parse_msg(void) {
+	//Set position available to false and check if it is a valid message
+	gps_sirf.pos_available = FALSE;
 	if(gps_sirf.msg_len < 8)
 		return;
 
+	//Check the message id and parse the message
 	uint8_t message_id = gps_sirf.msg_buf[4];
 	switch(message_id) {
-	case 0x28:
+	case 0x29:
 		sirf_parse_41();
 		break;
 	case 0x02:
