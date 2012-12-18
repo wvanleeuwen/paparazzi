@@ -15,7 +15,8 @@
       <subsystem name="radio_control" type="ppm"/>
       <!-- MPU600 is configured to output data at 500Hz -->
       <configure name="AHRS_PROPAGATE_FREQUENCY" value="500"/>
-      <configure name="FLASH_MODE" value="JTAG" />
+<!--      <configure name="FLASH_MODE" value="JTAG" />
+      <configure name="NO_LUFTBOOT" value="1"/>-->
     </target>
 
     <target name="nps" board="pc">
@@ -34,6 +35,10 @@
     <subsystem name="stabilization" type="int_quat"/>
     <subsystem name="ahrs"          type="int_cmpl_quat"/>
   </firmware>
+
+<modules>
+    <load name="gps_ubx_ucenter.xml"/>
+</modules>
 
   <servos>
     <servo name="FRONT"   no="0" min="1100" neutral="1100" max="2000"/>
@@ -210,5 +215,4 @@
     <define name="LOW_BAT_LEVEL" value="6.5" unit="V"/>
     <define name="MAX_BAT_LEVEL" value="7.4" unit="V"/>
   </section>
-
 </airframe>
