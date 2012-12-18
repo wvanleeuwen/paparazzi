@@ -44,6 +44,10 @@ struct GpsSirf {
 
 extern struct GpsSirf gps_sirf;
 
+//Invert bytes
+#define Invert2Bytes(x) ((x>>8) | (x<<8))
+#define Invert4Bytes(x) ((x>>24) | ((x<<8) & 0x00FF0000) | ((x>>8) & 0x0000FF00) | (x<<24))
+
 /* Message ID 2 from GPS. Total payload length should be 41 bytes. */
 struct sirf_msg_2 {
 	uint8_t msg_id; 		/* hex value 0x02 ( = decimal 2) */

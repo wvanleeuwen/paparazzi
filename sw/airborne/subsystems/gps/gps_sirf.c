@@ -34,6 +34,7 @@
 
 #include <inttypes.h>
 #include <math.h>
+#include <stdio.h>
 #include "gps_sirf.h"
 
 struct GpsSirf gps_sirf;
@@ -89,17 +90,17 @@ void sirf_parse_char(uint8_t c) {
 }
 
 void sirf_parse_41(void) {
-	struct sirf_msg_41* p = (struct sirf_msg_41*)&gps_sirf.msg_buf;
+	struct sirf_msg_41* p = (struct sirf_msg_41*)&gps_sirf.msg_buf[4];
 
-	gps.tow = p->tow;
-	gps.hmsl = p->alt_msl*10;
+	gps.tow = Invert4Bytes(p->tow);
+	gps.hmsl = Invert4Bytes(p->alt_msl)*10;
 	gps.num_sv = p->num_sat;
 	gps.nb_channels = p ->num_sat;
 
 	/* read latitude, longitude and altitude from packet */
-	gps.lla_pos.lat = RadOfDeg(p->latitude);
-	gps.lla_pos.lon = RadOfDeg(p->longitude);
-	gps.lla_pos.alt = p->alt_ellipsoid * 10;
+	gps.lla_pos.lat = RadOfDeg(Invert4Bytes(p->latitude));
+	gps.lla_pos.lon = RadOfDeg(Invert4Bytes(p->longitude));
+	gps.lla_pos.alt = Invert4Bytes(p->alt_ellipsoid) * 10;
 
 	#if GPS_USE_LATLONG
 	  /* convert to utm */
@@ -114,16 +115,16 @@ void sirf_parse_41(void) {
 	  gps.utm_pos.zone = nav_utm_zone0;
 	#endif
 
-	gps.sacc = p->ehve;
-	gps.course = RadOfDeg(p->cog)*pow(10, 5);
-	gps.gspeed = RadOfDeg(p->sog)*pow(10, 5);
-	gps.cacc = RadOfDeg(p->heading_err)*pow(10, 5);
-	gps.pacc = p->ehpe;
+	gps.sacc = (Invert2Bytes(p->ehve)>>16);
+	gps.course = RadOfDeg(Invert2Bytes(p->cog))*pow(10, 5);
+	gps.gspeed = RadOfDeg(Invert2Bytes(p->sog))*pow(10, 5);
+	gps.cacc = RadOfDeg(Invert2Bytes(p->heading_err))*pow(10, 5);
+	gps.pacc = Invert4Bytes(p->ehpe);
 	gps.pdop = p->hdop * 20;
 
-	if ((p->nav_type & 0x7) >= 0x4)
+	if ((p->nav_type >> 8 & 0xF) >= 0x4)
 		gps.fix = GPS_FIX_3D;
-	else if ((p->nav_type & 0x7) >= 0x3)
+	else if ((p->nav_type >> 8 & 0xF) >= 0x3)
 		gps.fix = GPS_FIX_2D;
 	else
 		gps.fix = GPS_FIX_NONE;
@@ -133,17 +134,17 @@ void sirf_parse_41(void) {
 }
 
 void sirf_parse_2(void) {
-	struct sirf_msg_2* p = (struct sirf_msg_2*)&gps_sirf.msg_buf;
+	struct sirf_msg_2* p = (struct sirf_msg_2*)&gps_sirf.msg_buf[4];
 
-	gps.week = p->week;
+	gps.week = Invert2Bytes(p->week);
 
-	gps.ecef_pos.x = p->x_pos * 100;
-	gps.ecef_pos.y = p->y_pos * 100;
-	gps.ecef_pos.z = p->z_pos * 100;
+	gps.ecef_pos.x = Invert4Bytes(p->x_pos) * 100;
+	gps.ecef_pos.y = Invert4Bytes(p->y_pos) * 100;
+	gps.ecef_pos.z = Invert4Bytes(p->z_pos) * 100;
 
-	gps.ecef_vel.x = p->vx*100/8;
-	gps.ecef_vel.y = p->vy*100/8;
-	gps.ecef_vel.z = p->vz*100/8;
+	gps.ecef_vel.x = (Invert2Bytes(p->vx)>>16)*100/8;
+	gps.ecef_vel.y = (Invert2Bytes(p->vy)>>16)*100/8;
+	gps.ecef_vel.z = (Invert2Bytes(p->vz)>>16)*100/8;
 
 	//struct EnuCoor_f enu; /* speed NED in cm/s */
 	/*enu_of_ecef_point_f(&enu, def, ecef);
