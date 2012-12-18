@@ -22,8 +22,8 @@
  *
  */
 
-#include "link_mcu_can.h"
-#include "mcu_periph/can.h"
+#include "link_mcu_spi.h"
+#include "mcu_periph/spi.h"
 
 struct link_mcu_msg link_mcu_from_ap_msg;
 struct link_mcu_msg link_mcu_from_fbw_msg;
@@ -46,40 +46,22 @@ static uint16_t crc = 0;
 
 #ifdef FBW
 
-void can_fbw_rx_callback(uint32_t id, uint8_t *buf, int len);
-void can_fbw_rx_callback(uint32_t id, uint8_t *buf, int len)
-{
-  if (id == 0)	// Servo Commands
-  {
-  }
-}
-
-void link_mcu_init(void)
-{
-  can_init(can_fbw_rx_callback);
-}
-
-void link_mcu_send(void)
-{
+void link_mcu_restart(void) {
   ComputeChecksum(link_mcu_from_fbw_msg);
   link_mcu_from_fbw_msg.checksum = crc;
 
-  can_transmit(3, (uint8_t*)&link_mcu_from_fbw_msg, 4);
-
-//  LED_TOGGLE(3);
-/*
   spi_buffer_input = (uint8_t*)&link_mcu_from_ap_msg;
   spi_buffer_output = (uint8_t*)&link_mcu_from_fbw_msg;
   spi_buffer_length = LINK_MCU_FRAME_LENGTH;
   SpiStart();
-*/
 }
 
 void link_mcu_event_task( void ) {
-/*
   if (spi_message_received) {
+    /* Got a message on SPI. */
     spi_message_received = FALSE;
 
+    /* A message has been received */
     ComputeChecksum(link_mcu_from_ap_msg);
     link_mcu_received = TRUE;
     if (link_mcu_from_ap_msg.checksum == crc)
@@ -87,7 +69,6 @@ void link_mcu_event_task( void ) {
     else
       fbw_state->nb_err++;
   }
-*/
 }
 
 #endif /* FBW */
@@ -100,17 +81,12 @@ void link_mcu_event_task( void ) {
 uint8_t link_mcu_nb_err;
 uint8_t link_mcu_fbw_nb_err;
 
-void can_ap_rx_callback(uint32_t id, uint8_t *buf, int len)
-{
-}
-
 void link_mcu_init(void) {
   link_mcu_nb_err = 0;
-  can_init(can_ap_rx_callback);
 }
 
 void link_mcu_send(void) {
-/*
+
   if (!SpiCheckAvailable()) {
     SpiOverRun();
     return;
@@ -123,20 +99,19 @@ void link_mcu_send(void) {
   spi_buffer_length = LINK_MCU_FRAME_LENGTH;
   SpiSelectSlave0();
   SpiStart();
-*/
 }
 
 void link_mcu_event_task( void ) {
-/*
   if (spi_message_received) {
+    /* Got a message on SPI. */
     spi_message_received = FALSE;
+    /* A message has been received */
     ComputeChecksum(link_mcu_from_fbw_msg);
     if (link_mcu_from_fbw_msg.checksum == crc)
       inter_mcu_received_fbw = TRUE;
     else
       link_mcu_nb_err++;
   }
-*/
 }
 
 #endif /* AP */

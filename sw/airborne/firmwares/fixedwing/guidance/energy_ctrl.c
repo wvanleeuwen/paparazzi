@@ -169,7 +169,12 @@ void v_ctl_init( void ) {
 
   /* outer loop */
   v_ctl_altitude_setpoint = 0.;
+
+#ifdef V_CTL_ALTITUDE_PGAIN
   v_ctl_altitude_pgain = V_CTL_ALTITUDE_PGAIN;
+  v_ctl_airspeed_pgain = V_CTL_AIRSPEED_PGAIN;
+#endif
+
   v_ctl_auto_airspeed_setpoint = NOMINAL_AIRSPEED;
 
   /* inner loops */
@@ -177,8 +182,23 @@ void v_ctl_init( void ) {
 
   /* "auto throttle" inner loop parameters */
   v_ctl_auto_throttle_nominal_cruise_throttle = V_CTL_AUTO_THROTTLE_NOMINAL_CRUISE_THROTTLE;
+
+#ifdef V_CTL_AUTO_THROTTLE_CLIMB_THROTTLE_INCREMENT
   v_ctl_auto_throttle_climb_throttle_increment = V_CTL_AUTO_THROTTLE_CLIMB_THROTTLE_INCREMENT;
   v_ctl_auto_throttle_pitch_of_vz_pgain = V_CTL_AUTO_THROTTLE_PITCH_OF_VZ_PGAIN;
+#endif
+
+#ifdef V_CTL_AUTO_THROTTLE_OF_AIRSPEED_PGAIN
+  v_ctl_auto_throttle_of_airspeed_pgain = V_CTL_AUTO_THROTTLE_OF_AIRSPEED_PGAIN;
+  v_ctl_auto_throttle_of_airspeed_igain = V_CTL_AUTO_THROTTLE_OF_AIRSPEED_IGAIN;
+#endif
+
+#ifdef V_CTL_ENERGY_TOT_PGAIN
+  v_ctl_energy_total_pgain = V_CTL_ENERGY_TOT_PGAIN;
+  v_ctl_energy_total_igain = V_CTL_ENERGY_TOT_IGAIN;
+  v_ctl_energy_diff_pgain = V_CTL_ENERGY_DIFF_PGAIN;
+  v_ctl_energy_diff_igain = V_CTL_ENERGY_DIFF_IGAIN;
+#endif
 
   v_ctl_throttle_setpoint = 0;
 }
@@ -236,9 +256,9 @@ void v_ctl_climb_loop( void )
 
   // Actual Acceleration from IMU: attempt to reconstruct the actual kinematic acceleration
 #ifndef SITL
-  struct FloatVect3 accel_float = {0,0,0};
-  ACCELS_FLOAT_OF_BFP(accel_float, imu.accel);
-  float vdot = ( accel_float.x / 9.81f - sin(ahrs_float.ltp_to_imu_euler.theta) );
+  struct Int32Vect3 accel_meas_body;
+  INT32_RMAT_TRANSP_VMULT(accel_meas_body, imu.body_to_imu_rmat, imu.accel);
+  float vdot = ACCEL_FLOAT_OF_BFP(accel_meas_body.x) / 9.81f - sinf(ahrs_float.ltp_to_imu_euler.theta);
 #else
   float vdot = 0;
 #endif
@@ -259,8 +279,8 @@ void v_ctl_climb_loop( void )
   if (launch && (v_ctl_mode >= V_CTL_MODE_AUTO_CLIMB))
   {
     v_ctl_auto_throttle_nominal_cruise_throttle +=
-        	  v_ctl_auto_throttle_of_airspeed_igain * speed_error * dt
-		+ en_tot_err * v_ctl_energy_total_igain * dt;
+        v_ctl_auto_throttle_of_airspeed_igain * speed_error * dt
+      + en_tot_err * v_ctl_energy_total_igain * dt;
     if (v_ctl_auto_throttle_nominal_cruise_throttle < 0.0f) v_ctl_auto_throttle_nominal_cruise_throttle = 0.0f;
     else if (v_ctl_auto_throttle_nominal_cruise_throttle > 1.0f) v_ctl_auto_throttle_nominal_cruise_throttle = 1.0f;
   }

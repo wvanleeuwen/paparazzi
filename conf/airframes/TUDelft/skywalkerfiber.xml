@@ -16,7 +16,7 @@
 
 <!-- **************************** FIRMWARE ********************************* -->
   <firmware name="fixedwing">
-    <target name="ap" board="tiny_2.11">
+    <target name="ap" board="yapa_2.0">
       <configure name="PERIODIC_FREQUENCY" value="120"/>
       <configure name="AHRS_PROPAGATE_FREQUENCY" value="100"/>
       <configure name="AHRS_CORRECT_FREQUENCY" value="100"/>

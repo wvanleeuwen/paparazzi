@@ -46,11 +46,7 @@
 #include "mcu_periph/i2c.h"
 
 #ifdef MCU_SPI_LINK
-#include "link_mcu.h"
-#endif
-
-#ifdef MCU_CAN_LINK
-#include "link_mcu_can.h"
+#include "link_mcu_spi.h"
 #endif
 
 #ifdef MCU_UART_LINK
@@ -72,7 +68,9 @@ void init_fbw( void ) {
 
   mcu_init();
 
+#if !(DISABLE_ELECTRICAL)
   electrical_init();
+#endif
 
 #ifdef ACTUATORS
   actuators_init();
@@ -88,9 +86,6 @@ void init_fbw( void ) {
 #endif
 #ifdef MCU_SPI_LINK
   link_mcu_restart();
-#endif
-#ifdef MCU_CAN_LINK
-  link_mcu_init();
 #endif
 
   fbw_mode = FBW_MODE_FAILSAFE;
@@ -203,14 +198,11 @@ void event_task_fbw( void) {
 #endif
 
 
-
-#if defined( MCU_SPI_LINK ) || defined( MCU_CAN_LINK )
+#ifdef MCU_SPI_LINK
   if (link_mcu_received) {
     link_mcu_received = FALSE;
     inter_mcu_fill_fbw_state(); /** Prepares the next message for AP */
-#ifdef MCU_SPI_LINK
     link_mcu_restart(); /** Prepares the next SPI communication */
-#endif
   }
 #endif /* MCU_SPI_LINK */
 #endif /* INTER_MCU */
@@ -241,10 +233,6 @@ set_failsafe_mode();
   }
 #endif
 
-#ifdef MCU_CAN_LINK
-  link_mcu_send();
-#endif
-
 #ifdef MCU_UART_LINK
   inter_mcu_fill_fbw_state();
   link_mcu_periodic_task();
@@ -261,7 +249,9 @@ void handle_periodic_tasks_fbw(void) {
   if (sys_time_check_and_ack_timer(fbw_periodic_tid))
     periodic_task_fbw();
 
+#if !(DISABLE_ELECTRICAL)
   if (sys_time_check_and_ack_timer(electrical_tid))
     electrical_periodic();
+#endif
 
 }

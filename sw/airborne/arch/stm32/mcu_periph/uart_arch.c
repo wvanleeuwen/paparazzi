@@ -155,10 +155,10 @@ void uart1_init( void ) {
   GPIO_Init(UART1_FlowControlPort, &gpio);
 
   /* Configure USART1, enable hardware flow control*/
-  uart_periph_set_baudrate(&uart1, UART1_BAUD,TRUE);
+  uart_periph_set_baudrate(&uart1, UART1_BAUD, TRUE);
 #else
   /* Configure USART1, no flow control */
-  uart_periph_set_baudrate(&uart1, UART1_BAUD,FALSE);
+  uart_periph_set_baudrate(&uart1, UART1_BAUD, FALSE);
 #endif
 }
 
@@ -193,7 +193,7 @@ void uart2_init( void ) {
   GPIO_Init(UART2_RxPort, &gpio);
 
   /* Configure USART2 */
-  uart_periph_set_baudrate(&uart2, UART2_BAUD,FALSE);
+  uart_periph_set_baudrate(&uart2, UART2_BAUD, FALSE);
 }
 
 void usart2_irq_handler(void) { usart_irq_handler(&uart2); }
@@ -229,7 +229,7 @@ void uart3_init( void ) {
   GPIO_Init(UART3_RxPort, &gpio);
 
   /* Configure USART3 */
-  uart_periph_set_baudrate(&uart3, UART3_BAUD,FALSE);
+  uart_periph_set_baudrate(&uart3, UART3_BAUD, FALSE);
 }
 
 void usart3_irq_handler(void) { usart_irq_handler(&uart3); }
@@ -264,10 +264,9 @@ void uart5_init( void ) {
   GPIO_Init(UART5_RxPort, &gpio);
 
   /* Configure UART5 */
-  uart_periph_set_baudrate(&uart5, UART5_BAUD,FALSE);
+  uart_periph_set_baudrate(&uart5, UART5_BAUD, FALSE);
 }
 
 void usart5_irq_handler(void) { usart_irq_handler(&uart5); }
 
 #endif /* USE_UART5 */
-
