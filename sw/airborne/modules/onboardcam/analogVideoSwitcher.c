@@ -32,6 +32,7 @@ int32_t advance_direction;
 
 void analogVideoSwitch_init(void) {
   active_cam = 1;
+  advance_direction = 1;
 }
 
 void analogVideoSwitch_periodic(void) {
