@@ -46,7 +46,6 @@
 extern void analogVideoSwitch_init(void);
 extern void analogVideoSwitch_periodic(void);
 
-extern int16_t analogVideoSwitch_command;
 
 #endif //ANALOG_VIDEO_SWITCH_H
 

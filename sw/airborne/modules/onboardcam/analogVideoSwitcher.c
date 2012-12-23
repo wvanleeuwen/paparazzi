@@ -25,8 +25,7 @@
 #include "generated/airframe.h"
 #include "actuators.h"
 
-int8_t active_cam;
-int16_t analogVideoSwitch_command;
+int32_t active_cam;
 int32_t prev_rc_val;
 int32_t advance_direction;
 
