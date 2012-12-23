@@ -38,6 +38,7 @@ void analogVideoSwitch_periodic(void) {
   if ((radio_control.values[ANALOG_VIDEO_SWITCH_RC_CHANNEL] - prev_rc_val) >  ANALOG_VIDEO_SWITCH_RC_MINDIFF ||
       (radio_control.values[ANALOG_VIDEO_SWITCH_RC_CHANNEL] - prev_rc_val) < -ANALOG_VIDEO_SWITCH_RC_MINDIFF) {
       analogVideoSwitch_advanceCam();
+      analogVideoSwitch_setCam();
   }
 }
 
