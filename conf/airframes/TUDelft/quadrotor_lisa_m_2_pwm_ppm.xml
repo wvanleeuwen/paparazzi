@@ -45,6 +45,7 @@
     <servo name="BACK"    no="1" min="1100" neutral="1100" max="2000"/>
     <servo name="RIGHT"   no="2" min="1100" neutral="1100" max="2000"/>
     <servo name="LEFT"    no="3" min="1100" neutral="1100" max="2000"/>
+    <servo name="CAM"     no="4" min="1100" neutral="1100" max="2000"/>
   </servos>
 
   <commands>
@@ -57,6 +58,7 @@
   <command_laws>
     <!-- command_laws is needed for pwm_supervision -->
     <!-- but can be empty if no additional servos are used -->
+    <set servo="CAM" value="radio_control.values[RADIO_EXTRA1]"/>
   </command_laws>
 
   <section name="SUPERVISION" prefix="SUPERVISION_">

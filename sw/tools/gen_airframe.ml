@@ -158,7 +158,7 @@ let parse_command_laws = fun command ->
      "set" ->
        let servo = a "servo"
        and value = a "value" in
-       let v = preprocess_value value "values" "COMMAND" in
+       let v = preprocess_value value "values_param" "COMMAND" in
        printf "  command_value = %s;\\\n" v;
        printf "  command_value *= command_value>0 ? SERVO_%s_TRAVEL_UP : SERVO_%s_TRAVEL_DOWN;\\\n" servo servo;
        printf "  servo_value = SERVO_%s_NEUTRAL + (int32_t)(command_value);\\\n" servo;
@@ -169,14 +169,14 @@ let parse_command_laws = fun command ->
    | "let" ->
        let var = a "var"
        and value = a "value" in
-       let v = preprocess_value value "values" "COMMAND" in
+       let v = preprocess_value value "values_param" "COMMAND" in
        printf "  int16_t _var_%s = %s;\\\n" var v
    | "ratelimit" ->
        let var = a "var"
        and value = a "value"
        and rate_min = a "rate_min"
        and rate_max = a "rate_max" in
-       let v = preprocess_value value "values" "COMMAND" in
+       let v = preprocess_value value "values_param" "COMMAND" in
        printf "  static int16_t _var_%s = 0; _var_%s += Chop((%s) - (_var_%s), (%s), (%s));\\\n" var var v var rate_min rate_max
    | "define" ->
        parse_element "" command
@@ -282,7 +282,7 @@ let rec parse_section = fun s ->
       List.iter parse_ap_only_commands (Xml.children s);
       printf "}\n\n"
   | "command_laws" ->
-      printf "#define SetActuatorsFromCommands(values) { \\\n";
+      printf "#define SetActuatorsFromCommands(values_param) { \\\n";
       printf "  uint32_t servo_value;\\\n";
       printf "  float command_value;\\\n";
 
