@@ -41,6 +41,7 @@ void analogVideoSwitch_periodic(void) {
       analogVideoSwitch_advanceCam();
       analogVideoSwitch_setCam();
   }
+  prev_rc_val = radio_control.values[ANALOG_VIDEO_SWITCH_RC_CHANNEL];
 }
 
 void analogVideoSwitch_setCam(void) {
