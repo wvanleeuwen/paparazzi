@@ -270,7 +270,7 @@ AP_MODE_NAV
      <define name="FAILSAFE_GROUND_DETECT"/>
      <define name="USE_GPS_ACC4R"/>
      <target name="ap" board="lisa_l_1.1">
-<!--      <configure name="FLASH_MODE" value="SERIAL"/>-->
+      <configure name="FLASH_MODE" value="SERIAL"/>
       <subsystem name="radio_control" type="ppm"/>
       <subsystem name="actuators" type="asctec_v2"/>
         <define name="AUTOPILOT_ARMING_KILL_SWITCH"/>
