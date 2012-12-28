@@ -23,39 +23,54 @@
 
 #include "onboardcam/analogVideoSwitcher.h"
 #include "generated/airframe.h"
+#include "generated/airframe.h"
 #include "actuators.h"
-
-int32_t active_cam;
+#include "firmwares/rotorcraft/telemetry.h"
+#include "firmwares/rotorcraft/commands.h"
+uint8_t active_cam;
 int32_t prev_rc_val;
 int32_t advance_direction;
 
-void analogVideoSwitch_init(void) {
+void analogVideoSwitcher_init(void) {
   active_cam = 1;
   advance_direction = 1;
+  prev_rc_val = radio_control.values[ANALOG_VIDEO_SWITCHER_RC_CHANNEL];
 }
 
-void analogVideoSwitch_periodic(void) {
-  if ((radio_control.values[ANALOG_VIDEO_SWITCH_RC_CHANNEL] - prev_rc_val) >  ANALOG_VIDEO_SWITCH_RC_MINDIFF ||
-      (radio_control.values[ANALOG_VIDEO_SWITCH_RC_CHANNEL] - prev_rc_val) < -ANALOG_VIDEO_SWITCH_RC_MINDIFF) {
-      analogVideoSwitch_advanceCam();
-      analogVideoSwitch_setCam();
+void analogVideoSwitcher_periodic(void) {
+  if ((radio_control.values[ANALOG_VIDEO_SWITCHER_RC_CHANNEL] - prev_rc_val) >  ANALOG_VIDEO_SWITCHER_RC_MINDIFF ||
+      (radio_control.values[ANALOG_VIDEO_SWITCHER_RC_CHANNEL] - prev_rc_val) < -ANALOG_VIDEO_SWITCHER_RC_MINDIFF) {
+    analogVideoSwitcher_advanceCam();
+    analogVideoSwitcher_setCam();
   }
-  prev_rc_val = radio_control.values[ANALOG_VIDEO_SWITCH_RC_CHANNEL];
+  prev_rc_val = radio_control.values[ANALOG_VIDEO_SWITCHER_RC_CHANNEL];
 }
 
-void analogVideoSwitch_setCam(void) {
-  active_cam = (active_cam < ANALOG_VIDEO_SWITCH_NUM_CAMS) ? active_cam : (ANALOG_VIDEO_SWITCH_NUM_CAMS-1);
-  commands[COMMAND_AVS] = Chop((MIN_PPRZ + ANALOG_VIDEO_SWITCH_CMD_STEP*active_cam),MIN_PPRZ,MAX_PPRZ);
+void analogVideoSwitcher_setCam(void) {
+  active_cam = (active_cam < ANALOG_VIDEO_SWITCHER_NUM_CAMS) ? active_cam : (ANALOG_VIDEO_SWITCHER_NUM_CAMS-1);
+  commands[COMMAND_AVS] = Chop((MIN_PPRZ + ANALOG_VIDEO_SWITCHER_CMD_STEP*active_cam),MIN_PPRZ,MAX_PPRZ);
 }
 
-void analogVideoSwitch_advanceCam(void) {
-  active_cam += advance_direction;
-  if (active_cam == ANALOG_VIDEO_SWITCH_NUM_CAMS) {
+void analogVideoSwitcher_setCamFromGCS(uint8_t cam_nr) {
+  if (cam_nr < active_cam)
+    advance_direction = -1;
+  else if (cam_nr > active_cam)
+      advance_direction = 1;
+
+  active_cam = cam_nr;
+  analogVideoSwitcher_setCam();
+}
+
+void analogVideoSwitcher_advanceCam(void) {
+  if (active_cam == ANALOG_VIDEO_SWITCHER_NUM_CAMS-1) {
     active_cam--;
-    advance_direction *= -1;
+    advance_direction = -1;
   }
-  else if (active_cam == -1) {
-      active_cam = 0;
-      advance_direction *= -1;
+  else if (active_cam == 0) {
+    active_cam++;
+    advance_direction = 1;
+  }
+  else {
+      active_cam += advance_direction;
   }
 }
