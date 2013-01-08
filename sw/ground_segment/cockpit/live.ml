@@ -400,7 +400,8 @@ let key_press_event = fun keys do_action ev ->
 (*****************************************************************************)
 let create_ac = fun alert (geomap:G.widget) (acs_notebook:GPack.notebook) (ac_id:string) config ->
   let color = Pprz.string_assoc "default_gui_color" config
-  and name = Pprz.string_assoc "ac_name" config in
+  and name = Pprz.string_assoc "ac_name" config
+  and speech_name = Pprz.string_assoc "ac_speech_name" config in
 
   (** Get the flight plan **)
   let fp_url = Pprz.string_assoc "flight_plan" config in
