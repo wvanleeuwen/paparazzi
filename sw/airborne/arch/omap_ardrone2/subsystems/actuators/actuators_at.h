@@ -3,9 +3,10 @@
 #ifndef BOARDS_ARDRONE_ACTUATORS_H
 #define BOARDS_ARDRONE_ACTUATORS_H
 
-#include <stdio.h>
+#include "paparazzi.h"
 
 extern void actuators_init(void);
-#define SetActuatorsFromCommands(command) { printf("Commads: %d %d %d %d\n", command[0], command[1], command[2], command[3]); }
+extern void actuators_set(pprz_t commands[]);
+#define SetActuatorsFromCommands(commands) actuators_set(commands)
 
 #endif /* BOARDS_ARDRONE_ACTUATORS_H */
