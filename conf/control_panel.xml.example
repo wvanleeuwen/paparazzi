@@ -87,6 +87,10 @@
       <program name="Data Link">
         <arg flag="-udp"/>
       </program>
+      <program name="Joystick">
+      	<arg flag="-ac" constant="ardrone2"/>
+      	<arg flag="extreme_3d_pro.xml"/>
+      </program>
     </session>
 
    <session name="Flight USB-serial@9600">
