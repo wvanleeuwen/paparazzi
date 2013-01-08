@@ -98,7 +98,6 @@ tid_t radio_control_tid; 	///< id for radio_control_periodic_task() timer
 tid_t electrical_tid;    	///< id for electrical_periodic() timer
 tid_t baro_tid;          	///< id for baro_periodic() timer
 tid_t telemetry_tid;     	///< id for telemetry_periodic() timer
-tid_t navdata_periodic_tid;	///< id for navdata_periodic timer
 
 #ifndef SITL
 int main( void ) {
@@ -118,11 +117,6 @@ STATIC_INLINE void main_init( void ) {
   electrical_init();
 
   stateInit();
-
-  actuators_init();
-#if USE_MOTOR_MIXING
-  motor_mixing_init();
-#endif
 
   radio_control_init();
 
@@ -158,6 +152,11 @@ STATIC_INLINE void main_init( void ) {
   gps_init();
 #endif
 
+  actuators_init();
+#if USE_MOTOR_MIXING
+    motor_mixing_init();
+#endif
+
   modules_init();
 
   settings_init();
@@ -171,28 +170,23 @@ STATIC_INLINE void main_init( void ) {
   electrical_tid = sys_time_register_timer(0.1, NULL);
   baro_tid = sys_time_register_timer(1./BARO_PERIODIC_FREQUENCY, NULL);
   telemetry_tid = sys_time_register_timer((1./60.), NULL);
-  navdata_periodic_tid = sys_time_register_timer((1./PERIODIC_FREQUENCY), NULL);
 }
 
 STATIC_INLINE void handle_periodic_tasks( void ) {
-  //if (sys_time_check_and_ack_timer(main_periodic_tid))
+  if (sys_time_check_and_ack_timer(main_periodic_tid))
     main_periodic();
-  //if (sys_time_check_and_ack_timer(radio_control_tid))
+  if (sys_time_check_and_ack_timer(radio_control_tid))
     radio_control_periodic_task();
-  //if (sys_time_check_and_ack_timer(failsafe_tid))
+  if (sys_time_check_and_ack_timer(failsafe_tid))
     failsafe_check();
-  //if (sys_time_check_and_ack_timer(electrical_tid))
+  if (sys_time_check_and_ack_timer(electrical_tid))
     electrical_periodic();
 #if USE_BAROMETER
   if (sys_time_check_and_ack_timer(baro_tid))
     baro_periodic();
 #endif
-  //if (sys_time_check_and_ack_timer(telemetry_tid))
+  if (sys_time_check_and_ack_timer(telemetry_tid))
     telemetry_periodic();
-#if PARROT_OMAP_ARCH
-  if (sys_time_check_and_ack_timer(navdata_periodic_tid))
-	navdata_periodic();
-#endif
 }
 
 STATIC_INLINE void main_periodic( void ) {
@@ -254,6 +248,7 @@ STATIC_INLINE void main_event( void ) {
   ImuEvent(on_gyro_event, on_accel_event, on_mag_event);
 #else
   ahrs_propagate();
+  ins_periodic();
 #endif
 
 #if USE_BAROMETER
