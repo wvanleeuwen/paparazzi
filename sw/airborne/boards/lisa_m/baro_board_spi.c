@@ -1,23 +1,15 @@
-/**
+/** 
  *  Measurement Specialties (Intersema) MS5611-01BA pressure/temperature sensor interface for I2C
- *
+ *  
  * Edit by: Michal Podhradsky, michal.podhradsky@aggiemail.usu.edu
  * Utah State University, http://aggieair.usu.edu/
  */
 #include "subsystems/sensors/baro.h"
-#include "baro_board.h"
-#include "peripherals/ms5611.h"
+#include "baro_board_spi.h"
 #include "led.h"
-#include "std.h"
-#include "mcu_periph/sys_time.h"
-
-#include "mcu_periph/spi.h"
-#ifndef MS5611_SPI_DEV
-#define MS5611_SPI_DEV spi2
-#endif
-#define MS5611_BUFFER_LENGTH    4
 
 #ifdef DEBUG
+#pragma message "Baro SPI debugging downlik active"
 #ifndef DOWNLINK_DEVICE
 #define DOWNLINK_DEVICE DOWNLINK_AP_DEVICE
 #endif
@@ -56,9 +48,9 @@ static int8_t baro_ms5611_crc(uint16_t* prom) {
 }
 
 static void trans_cb_ms5611( struct spi_transaction *trans ) {
-#ifdef ROTORCRAFT_BARO_LED
-  RunOnceEvery(10,LED_TOGGLE(ROTORCRAFT_BARO_LED));
-#endif
+  #ifdef ROTORCRAFT_BARO_LED
+    RunOnceEvery(10,LED_TOGGLE(ROTORCRAFT_BARO_LED));
+  #endif
 }
 
 void baro_init(void) {
@@ -112,7 +104,7 @@ void baro_periodic(void) {
       ms5611_status = MS5611_ADC_D2;
       ms5611_trans.output_buf[0] = MS5611_ADC_READ;
       spi_submit(&(MS5611_SPI_DEV), &ms5611_trans);
-    }
+    }    
     else if (ms5611_status == MS5611_UNINIT) {
       /* reset sensor */
       ms5611_status = MS5611_RESET;
@@ -123,7 +115,7 @@ void baro_periodic(void) {
       /* start getting prom data */
       ms5611_status = MS5611_PROM;
       ms5611_trans.output_buf[0] = MS5611_PROM_READ | (prom_cnt << 1);
-      spi_submit(&(MS5611_SPI_DEV), &ms5611_trans);
+      spi_submit(&(MS5611_SPI_DEV), &ms5611_trans); 
     }
   }
 }
@@ -143,7 +135,7 @@ void baro_event(void (*b_abs_handler)(void), void (*b_diff_handler)(void)){
       if (prom_cnt < PROM_NB) {//8 bytes at PROM
         /* get next prom data */
         ms5611_trans.output_buf[0] = MS5611_PROM_READ | (prom_cnt << 1);
-        spi_submit(&(MS5611_SPI_DEV), &ms5611_trans);
+        spi_submit(&(MS5611_SPI_DEV), &ms5611_trans); 
       }
       else {
         /* done reading prom */
@@ -168,7 +160,7 @@ void baro_event(void (*b_abs_handler)(void), void (*b_diff_handler)(void)){
       /* start D2 conversion */
       ms5611_status = MS5611_CONV_D2;
       ms5611_trans.output_buf[0] = MS5611_START_CONV_D2;
-      spi_submit(&(MS5611_SPI_DEV), &ms5611_trans);
+      spi_submit(&(MS5611_SPI_DEV), &ms5611_trans); 
       break;
 
     case  MS5611_ADC_D2: {
