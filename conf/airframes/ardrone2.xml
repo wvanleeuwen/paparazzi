@@ -19,7 +19,7 @@
 		<subsystem name="ahrs" type="ardrone2" />
 		<subsystem name="ins" type="ardrone2" />
 		<subsystem name="actuators" type="ardrone2" />
-		<subsystem name="stabilization" type="int_quat"/>
+		<subsystem name="stabilization" type="euler"/>
 		
 	</firmware>
 
@@ -35,7 +35,6 @@
 	</commands>
 
 	<section name="STABILIZATION_RATE" prefix="STABILIZATION_RATE_">
-		<!-- setpoints -->
 		<define name="SP_MAX_P" value="10000" />
 		<define name="SP_MAX_Q" value="10000" />
 		<define name="SP_MAX_R" value="10000" />
@@ -86,22 +85,22 @@
 		<define name="REF_MAX_RDOT" value="RadOfDeg(1800.)" />
 
 		<!-- feedback -->
-		<define name="PHI_PGAIN" value="1000" />
-		<define name="PHI_DGAIN" value="400" />
-		<define name="PHI_IGAIN" value="200" />
+		<define name="PHI_PGAIN" value="1" />
+		<define name="PHI_DGAIN" value="1" />
+		<define name="PHI_IGAIN" value="1" />
 
-		<define name="THETA_PGAIN" value="1000" />
-		<define name="THETA_DGAIN" value="400" />
-		<define name="THETA_IGAIN" value="200" />
+		<define name="THETA_PGAIN" value="1" />
+		<define name="THETA_DGAIN" value="1" />
+		<define name="THETA_IGAIN" value="1" />
 
-		<define name="PSI_PGAIN" value="500" />
-		<define name="PSI_DGAIN" value="300" />
-		<define name="PSI_IGAIN" value="10" />
+		<define name="PSI_PGAIN" value="1"  />
+		<define name="PSI_DGAIN" value="1" />
+		<define name="PSI_IGAIN" value="1" />
 
 		<!-- feedforward -->
-		<define name="PHI_DDGAIN" value="300" />
-		<define name="THETA_DDGAIN" value="300" />
-		<define name="PSI_DDGAIN" value="300" />
+		<define name="PHI_DDGAIN" value="0" />
+		<define name="THETA_DDGAIN" value="0" />
+		<define name="PSI_DDGAIN" value="0" />
 	</section>
 
 	<section name="GUIDANCE_V" prefix="GUIDANCE_V_">
@@ -130,9 +129,9 @@
 	</section>
 
 	<section name="AUTOPILOT">
-		<define name="MODE_MANUAL" value="AP_MODE_ATTITUDE_DIRECT" />
-		<define name="MODE_AUTO1" value="AP_MODE_ATTITUDE_Z_HOLD" />
-		<define name="MODE_AUTO2" value="AP_MODE_HOVER_Z_HOLD" />
+		<define name="MODE_MANUAL" value="AP_MODE_RC_DIRECT" />
+		<define name="MODE_AUTO1" value="AP_MODE_HOVER_DIRECT" />
+		<define name="MODE_AUTO2" value="AP_MODE_NAV" />
 	</section>
 
 	<section name="BAT">
