@@ -23,7 +23,6 @@
 
 #include <stdint.h>
 #include <unistd.h>
-#include <stdio.h>
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <fcntl.h>
@@ -43,14 +42,13 @@ void uart_periph_set_baudrate(struct uart_periph* p, uint32_t baud, bool_t hw_fl
 	}
 
 	// Open serial port
-	printf("opening %s on uart0 at %d baud\n", p->dev, baud);
 	fd = open(p->dev, O_RDWR | O_NOCTTY | O_NONBLOCK);
 
 	// Set baud rate
 	tio.c_iflag= IGNBRK;
 	tio.c_oflag= 0;
 	tio.c_cflag= CS8 | CLOCAL | CREAD;
-	tio.c_cflag|= B9600;
+	tio.c_cflag|= baud;
 	tio.c_lflag= 0;
 	tio.c_cc[VTIME]= 0;
 	tio.c_cc[VMIN]= 1;

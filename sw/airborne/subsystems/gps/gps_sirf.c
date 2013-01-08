@@ -34,7 +34,6 @@
 
 #include <inttypes.h>
 #include <math.h>
-#include <stdio.h>
 #include "gps_sirf.h"
 
 struct GpsSirf gps_sirf;
@@ -122,12 +121,13 @@ void sirf_parse_41(void) {
 	gps.pacc = Invert4Bytes(p->ehpe);
 	gps.pdop = p->hdop * 20;
 
-	if ((p->nav_type >> 8 & 0xF) >= 0x4)
+	if ((p->nav_type >> 8 & 0x7) >= 0x4)
 		gps.fix = GPS_FIX_3D;
-	else if ((p->nav_type >> 8 & 0xF) >= 0x3)
+	else if((p->nav_type >> 8 & 0x7) >= 0x1)
 		gps.fix = GPS_FIX_2D;
 	else
-		gps.fix = GPS_FIX_NONE;
+			gps.fix = GPS_FIX_NONE;
+
 
 	//Let gps_sirf know we have a position update
 	gps_sirf.pos_available = TRUE;

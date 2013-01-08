@@ -24,7 +24,6 @@
 
 #include "mcu_periph/uart.h"
 #include "std.h"
-#include <stdio.h>
 
 #define UartChAvailable(_p) uart_recieve(&_p)
 
