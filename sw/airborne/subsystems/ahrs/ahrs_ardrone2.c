@@ -114,22 +114,20 @@ void ahrs_propagate(void) {
 			ahrs_impl.eulers.psi = navdata_demo->psi;
 			ahrs_impl.speed.x = navdata_demo->vx / 100.0f;
 			ahrs_impl.speed.y = navdata_demo->vy / 100.0f;
-			ahrs_impl.speed.z = navdata_demo->vz / 100.0f;
-			ahrs_impl.altitude = navdata_demo->altitude;
+			ahrs_impl.speed.z = -navdata_demo->vz / 100.0f; // added minus, debugging
+			ahrs_impl.altitude = -navdata_demo->altitude;
 			ahrs_impl.battery = navdata_demo->vbat_flying_percentage;
 
 			angles.theta = navdata_demo->theta/180000.*M_PI;
 			angles.psi = navdata_demo->psi/180000.*M_PI;
 			angles.phi = -navdata_demo->phi/180000.*M_PI;
 			electrical.vsupply = navdata_demo->vbat_flying_percentage;
-			//full_read = TRUE;
 			//printf("Read: %d %d %d\n", &main_packet->options[0], navdata_option, &navdata_demo->drone_camera_trans);
 			break;
 		case 3:
 			navdata_phys_measures = (navdata_phys_measures_t*) navdata_option;
-			VECT3_SDIV(ahrs_impl.accel, navdata_phys_measures->phys_accs, 1000);
-			//printf("DONE!");
-			//full_read = TRUE;
+			navdata_phys_measures->phys_accs.z = -navdata_phys_measures->phys_accs.z;
+			INT32_VECT3_SCALE_2(ahrs_impl.accel, navdata_phys_measures->phys_accs, 9.81, 1000)
 			break;
 		case 0xFFFF:
 			full_read = TRUE;

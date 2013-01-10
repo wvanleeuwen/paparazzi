@@ -110,6 +110,7 @@ void guidance_h_mode_changed(uint8_t new_mode) {
   if (new_mode == guidance_h_mode)
     return;
 
+#ifndef STABILIZATION_NONE
   switch (new_mode) {
 
   case GUIDANCE_H_MODE_RC_DIRECT:
@@ -134,6 +135,9 @@ void guidance_h_mode_changed(uint8_t new_mode) {
   default:
     break;
   }
+#else
+  stabilization_none_enter();
+#endif
 
   guidance_h_mode = new_mode;
 
@@ -142,6 +146,7 @@ void guidance_h_mode_changed(uint8_t new_mode) {
 
 void guidance_h_read_rc(bool_t  in_flight) {
 
+#ifndef STABILIZATION_NONE
   switch ( guidance_h_mode ) {
 
   case GUIDANCE_H_MODE_RC_DIRECT:
@@ -171,6 +176,9 @@ void guidance_h_read_rc(bool_t  in_flight) {
   default:
     break;
   }
+#else
+  stabilization_none_read_rc();
+#endif
 
 }
 
@@ -183,11 +191,19 @@ void guidance_h_run(bool_t  in_flight) {
     break;
 
   case GUIDANCE_H_MODE_RATE:
+#ifndef STABILIZATION_NONE
     stabilization_rate_run(in_flight);
+#else
+    stabilization_none_run(in_flight);
+#endif
     break;
 
   case GUIDANCE_H_MODE_ATTITUDE:
+#ifndef STABILIZATION_NONE
     stabilization_attitude_run(in_flight);
+#else
+    stabilization_none_run(in_flight);
+#endif
     break;
 
   case GUIDANCE_H_MODE_HOVER:
@@ -197,8 +213,11 @@ void guidance_h_run(bool_t  in_flight) {
     guidance_h_command_body.psi = guidance_h_rc_sp.psi;
     /* compute roll and pitch commands and set final attitude setpoint */
     guidance_h_traj_run(in_flight);
-
+#ifndef STABILIZATION_NONE
     stabilization_attitude_run(in_flight);
+#else
+    stabilization_none_run(in_flight);
+#endif
     break;
 
   case GUIDANCE_H_MODE_NAV:
@@ -228,7 +247,11 @@ void guidance_h_run(bool_t  in_flight) {
         /* compute roll and pitch commands and set final attitude setpoint */
         guidance_h_traj_run(in_flight);
       }
+#ifndef STABILIZATION_NONE
       stabilization_attitude_run(in_flight);
+#else
+      stabilization_none_run(in_flight);
+#endif
       break;
     }
   default:

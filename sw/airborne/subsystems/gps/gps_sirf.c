@@ -34,6 +34,7 @@
 
 #include <inttypes.h>
 #include <math.h>
+#include <stdio.h>
 #include "gps_sirf.h"
 
 struct GpsSirf gps_sirf;
@@ -88,6 +89,11 @@ void sirf_parse_char(uint8_t c) {
 		gps_sirf.read_state = UNINIT;
 }
 
+int start_time = 0;
+int ticks = 0;
+int start_time2 = 0;
+int ticks2 = 0;
+
 void sirf_parse_41(void) {
 	struct sirf_msg_41* p = (struct sirf_msg_41*)&gps_sirf.msg_buf[4];
 
@@ -126,7 +132,7 @@ void sirf_parse_41(void) {
 	else if((p->nav_type >> 8 & 0x7) >= 0x1)
 		gps.fix = GPS_FIX_2D;
 	else
-			gps.fix = GPS_FIX_NONE;
+		gps.fix = GPS_FIX_NONE;
 
 
 	//Let gps_sirf know we have a position update
@@ -146,6 +152,15 @@ void sirf_parse_2(void) {
 	gps.ecef_vel.y = (Invert2Bytes(p->vy)>>16)*100/8;
 	gps.ecef_vel.z = (Invert2Bytes(p->vz)>>16)*100/8;
 
+	if(gps.fix == GPS_FIX_3D) {
+		ticks++;
+		printf("GPS %d %d %d %d\n", ticks, (sys_time.nb_sec - start_time), ticks2, (sys_time.nb_sec - start_time2));
+	}
+	else if(sys_time.nb_sec - gps.last_fix_time > 10) {
+		start_time = sys_time.nb_sec;
+		ticks = 0;
+	}
+
 	//struct EnuCoor_f enu; /* speed NED in cm/s */
 	/*enu_of_ecef_point_f(&enu, def, ecef);
 	ENU_OF_TO_NED(*ned, enu);*/
@@ -156,6 +171,10 @@ void sirf_parse_msg(void) {
 	gps_sirf.pos_available = FALSE;
 	if(gps_sirf.msg_len < 8)
 		return;
+
+	if(start_time2 == 0)
+		start_time2 = sys_time.nb_sec;
+	ticks2++;
 
 	//Check the message id and parse the message
 	uint8_t message_id = gps_sirf.msg_buf[4];

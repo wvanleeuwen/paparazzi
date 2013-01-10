@@ -110,7 +110,6 @@ void ins_periodic( void ) {
 		}
 		else {  /* not realigning, so normal update with baro measurement */
 			float alt_float = (float)ahrs_impl.altitude/1000.0f;
-			printf("troll!");
 			vff_update(alt_float);
 		}
 	}
