@@ -197,11 +197,11 @@ void gps_ubx_parse( uint8_t c ) {
   }
   switch (gps_ubx.status) {
   case UNINIT:
-    if (c == SIRF_SYNC1)
+    if (c == UBX_SYNC1)
       gps_ubx.status++;
     break;
   case GOT_SYNC1:
-    if (c != SIRF_SYNC2) {
+    if (c != UBX_SYNC2) {
       gps_ubx.error_last = GPS_UBX_ERR_OUT_OF_SYNC;
       goto error;
     }
