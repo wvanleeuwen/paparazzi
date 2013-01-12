@@ -1,0 +1,31 @@
+<!DOCTYPE settings SYSTEM "../settings.dtd">
+
+<!-- A conf to tune the opticflow loop
+
+extern uint16_t adc_opticflow_catastrophic;
+extern uint16_t adc_opticflow_low;
+
+extern float opticflow_climb_rate;
+extern float opticflow_descend_rate;
+
+-->
+
+<settings>
+    <dl_settings name="opticflow">
+      <dl_settings name="opticflow">
+        <dl_setting MAX="1023" MIN="0" STEP="1" VAR="adc_opticflow_catastrophic" shortname="OF Cata" param="OPTICFLOW_THRESHOLD_CATASTROPHIC" unit="flow" />
+        <dl_setting MAX="1023" MIN="0" STEP="1" VAR="adc_opticflow_low" shortname="OF Low" param="OPTICFLOW_THRESHOLD_LOW" unit="flow" />
+
+        <dl_setting MAX="5.0" MIN="0.0" STEP="0.001" VAR="opticflow_climb_rate" shortname="Climb" param="OPTICFLOW_CLIMB_RATE" unit="m/s" />
+        <dl_setting MAX="0.0" MIN="-5.0" STEP="0.001" VAR="opticflow_descend_rate" shortname="Descend" param="OPTICFLOW_DESCEND_RATE" unit="m/s" />
+
+        <dl_setting MAX="2" MIN="0" STEP="1.0" VAR="opticflow_status" shortname="stat" param="0" unit="" />
+        <dl_setting MAX="30" MIN="0" STEP="1.0" VAR="max_opticflow_phi" shortname="phimax" param="0" unit="deg" />
+        <dl_setting MAX="30" MIN="0" STEP="1.0" VAR="max_opticflow_theta" shortname="thetamax" param="0" unit="deg" />
+        <dl_setting MAX="500.0" MIN="-100.0" STEP="0.1" VAR="opticflow_ref_alt" shortname="Ref" param="0" unit="m/s" />
+        <dl_setting MAX="100" MIN="0" STEP="5" VAR="wp_border" shortname="border" param="0" unit="m" />
+      </dl_settings>
+    </dl_settings>
+</settings>
+
+
