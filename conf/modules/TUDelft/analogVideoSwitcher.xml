@@ -1,5 +1,4 @@
 <!DOCTYPE module SYSTEM "../module.dtd">
-
 <module name="analogVideoSwitcher" dir="onboardcam">
   <doc>
     <description>Analog video switcher control using both GCS and RC</description>
@@ -9,5 +8,8 @@
   </header>
   <init fun="analogVideoSwitcher_init()"/>
   <periodic fun="analogVideoSwitcher_periodic()" freq="10."/>
+  <makefile target="ap">
+    <file name="analogVideoSwitcher.c"/>
+  </makefile>
 </module>
 

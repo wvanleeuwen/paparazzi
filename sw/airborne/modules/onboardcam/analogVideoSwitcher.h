@@ -21,32 +21,35 @@
  * Boston, MA 02111-1307, USA.
  */
 
-#ifndef ANALOG_VIDEO_SWITCH_H
-#define ANALOG_VIDEO_SWITCH_H
+#ifndef ANALOG_VIDEO_SWITCHER_H
+#define ANALOG_VIDEO_SWITCHER_H
 
 #include "std.h"
 #include "paparazzi.h"
 
-#ifndef ANALOG_VIDEO_SWITCH_NUM_CAMS
-#define ANALOG_VIDEO_SWITCH_NUM_CAMS 3
+#ifndef ANALOG_VIDEO_SWITCHER_NUM_CAMS
+#define ANALOG_VIDEO_SWITCHER_NUM_CAMS 3
 #endif
 
-#define ANALOG_VIDEO_SWITCH_CMD_STEP ((MAX_PPRZ-(MIN_PPRZ)) / ANALOG_VIDEO_SWITCH_NUM_CAMS)
+#define ANALOG_VIDEO_SWITCHER_CMD_STEP ((MAX_PPRZ-(MIN_PPRZ)) / (ANALOG_VIDEO_SWITCHER_NUM_CAMS-1))
 
-#ifndef ANALOG_VIDEO_SWITCH_RC_CHANNEL
-#define ANALOG_VIDEO_SWITCH_RC_CHANNEL RADIO_EXTRA1
+#ifndef ANALOG_VIDEO_SWITCHER_RC_CHANNEL
+#define ANALOG_VIDEO_SWITCHER_RC_CHANNEL RADIO_EXTRA1
 #endif
 
-#ifndef ANALOG_VIDEO_SWITCH_RC_MINDIFF
-#define ANALOG_VIDEO_SWITCH_RC_MINDIFF 200
+#ifndef ANALOG_VIDEO_SWITCHER_RC_MINDIFF
+#define ANALOG_VIDEO_SWITCHER_RC_MINDIFF 200
 #endif
 
 
 
-extern void analogVideoSwitch_init(void);
-extern void analogVideoSwitch_periodic(void);
+extern void analogVideoSwitcher_init(void);
+extern void analogVideoSwitcher_periodic(void);
+extern void analogVideoSwitcher_setCam(void);
+extern void analogVideoSwitcher_setCamFromGCS(uint8_t cam_nr);
+extern void analogVideoSwitcher_advanceCam(void);
 
-extern int16_t analogVideoSwitch_command;
+extern uint8_t active_cam;
 
-#endif //ANALOG_VIDEO_SWITCH_H
+#endif //ANALOG_VIDEO_SWITCHER_H
 
