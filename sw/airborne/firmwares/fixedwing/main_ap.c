@@ -125,7 +125,7 @@ bool_t launch = FALSE;
 /** Supply voltage in deciVolt.
  * This the ap copy of the measurement from fbw
  */
-uint8_t vsupply;
+uint16_t vsupply;
 
 /** Supply current in milliAmpere.
  * This the ap copy of the measurement from fbw
@@ -662,7 +662,9 @@ void event_task_ap( void ) {
 #if USE_GPS
 static inline void on_gps_solution( void ) {
   estimator_update_state_gps();
+#if USE_AHRS
   ahrs_update_gps();
+#endif
 #ifdef GPS_TRIGGERED_FUNCTION
   GPS_TRIGGERED_FUNCTION();
 #endif
