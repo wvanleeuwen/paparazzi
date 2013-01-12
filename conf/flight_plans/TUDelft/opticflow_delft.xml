@@ -88,7 +88,7 @@ lat0="51.440182 " lon0="4.329118" Woensdrecht -->
       <attitude roll="0" throttle="0" vmode="throttle"/>
     </block>
     <block name="Takeoff" strip_button="Takeoff (wp CLIMB)" strip_icon="takeoff.png">
-      <exception cond="estimator_z > ground_alt+40" deroute="Standby"/>
+      <exception cond="GetPosAlt() > ground_alt+40" deroute="Standby"/>
       <set value="0" var="kill_throttle"/>
       <go wp="CLIMB"/>
     </block>
@@ -100,7 +100,7 @@ lat0="51.440182 " lon0="4.329118" Woensdrecht -->
       <set value="DEFAULT_CIRCLE_RADIUS" var="nav_radius"/>
       <set value="0" var="opticflow_status"/>
       <call fun="nav_compute_baseleg(WP_AF, WP_FLOW, WP_BASELEG, nav_radius)"/>
-      <circle radius="nav_radius" until="NavQdrCloseTo(DegOfRad(baseleg_out_qdr)-10) && 10 > fabs(estimator_z - WaypointAlt(WP_BASELEG))" wp="BASELEG"/>
+      <circle radius="nav_radius" until="NavQdrCloseTo(DegOfRad(baseleg_out_qdr)-10) && 10 > fabs(GetPosAlt() - WaypointAlt(WP_BASELEG))" wp="BASELEG"/>
     </block>
     <block name="OpticFlow">
       <set value="1" var="opticflow_status"/>
@@ -138,10 +138,10 @@ lat0="51.440182 " lon0="4.329118" Woensdrecht -->
     </block>
     <block name="land">
       <call fun="nav_compute_baseleg(WP_AF, WP_TD, WP_BASELEG, nav_radius)"/>
-      <circle radius="nav_radius" until="NavQdrCloseTo(DegOfRad(baseleg_out_qdr)-10) && 10 > fabs(estimator_z - WaypointAlt(WP_BASELEG))" wp="BASELEG"/>
+      <circle radius="nav_radius" until="NavQdrCloseTo(DegOfRad(baseleg_out_qdr)-10) && 10 > fabs(GetPosAlt() - WaypointAlt(WP_BASELEG))" wp="BASELEG"/>
     </block>
     <block name="final">
-      <exception cond="ground_alt + 10 > estimator_z" deroute="flare"/>
+      <exception cond="ground_alt + 10 > GetPosAlt()" deroute="flare"/>
       <go from="AF" hmode="route" throttle="0.0" vmode="throttle" wp="TD"/>
     </block>
     <block name="flare">
@@ -160,26 +160,26 @@ lat0="51.440182 " lon0="4.329118" Woensdrecht -->
     </block>
     <block name="Stratosfeer 1.5 km 40secnodata">
       <exception cond="datalink_time > 60" deroute="Standby"/>
-      <circle alt="1500" radius="150" until="15 > fabs(estimator_z - 1500)" wp="STDBY"/>
+      <circle alt="1500" radius="150" until="15 > fabs(GetPosAlt() - 1500)" wp="STDBY"/>
       <deroute block="Standby"/>
     </block>
      <block name="Stratosfeer 3.0 km 60secnodata">
       <exception cond="datalink_time > 60" deroute="Standby"/>
-      <circle alt="3000" radius="200" until="15 > fabs(estimator_z - 3000)" wp="STDBY"/>
+      <circle alt="3000" radius="200" until="15 > fabs(GetPosAlt() - 3000)" wp="STDBY"/>
       <deroute block="Standby"/>
     </block>
      <block name="Stratosfeer 7.0 km 120secnodata">
       <exception cond="datalink_time > 80" deroute="Standby"/>
-      <circle alt="7000" radius="300" until="15 > fabs(estimator_z - 7000)" wp="STDBY"/>
+      <circle alt="7000" radius="300" until="15 > fabs(GetPosAlt() - 7000)" wp="STDBY"/>
       <deroute block="Standby"/>
     </block>
      <block name="Stratosfeer DOWN">
-      <circle alt="7000" radius="100" until="fabs(estimator_z - WaypointAlt(WP_STDBY)) > 15" wp="STDBY"/>
+      <circle alt="7000" radius="100" until="fabs(GetPosAlt() - WaypointAlt(WP_STDBY)) > 15" wp="STDBY"/>
       <deroute block="Standby"/>
     </block>
     <block name="Circle LR">
       <exception cond="datalink_time > 25" deroute="Standby"/>
-      <circle alt="WaypointAlt(WP_aerospace)" radius="nav_radius" until="15 > fabs(estimator_z - WaypointAlt(WP_aerospace))" wp="STDBY"/>
+      <circle alt="WaypointAlt(WP_aerospace)" radius="nav_radius" until="15 > fabs(GetPosAlt() - WaypointAlt(WP_aerospace))" wp="STDBY"/>
       <go alt="WaypointAlt(WP_aerospace)" approaching_time="-15" from="STDBY" hmode="route" wp="aerospace"/>
       <circle radius="nav_radius" until="NavCircleCount() > 0.7" wp="aerospace"/>
       <go alt="WaypointAlt(WP_aerospace)" approaching_time="-15" from="aerospace" hmode="route" wp="STDBY"/>
@@ -187,7 +187,7 @@ lat0="51.440182 " lon0="4.329118" Woensdrecht -->
     </block>
     <block name="Circle BOUWKUNDE">
       <exception cond="datalink_time > 25" deroute="Standby"/>
-      <circle alt="WaypointAlt(WP_BOUWKUNDE)" radius="nav_radius" until="15 > fabs(estimator_z - WaypointAlt(WP_BOUWKUNDE))" wp="STDBY"/>
+      <circle alt="WaypointAlt(WP_BOUWKUNDE)" radius="nav_radius" until="15 > fabs(GetPosAlt() - WaypointAlt(WP_BOUWKUNDE))" wp="STDBY"/>
       <go alt="WaypointAlt(WP_BOUWKUNDE)" approaching_time="-15" from="STDBY" hmode="route" wp="BOUWKUNDE"/>
       <circle radius="nav_radius" until="NavCircleCount() > 0.7" wp="BOUWKUNDE"/>
       <go alt="WaypointAlt(WP_BOUWKUNDE)" approaching_time="-15" from="BOUWKUNDE" hmode="route" wp="STDBY"/>
@@ -203,7 +203,7 @@ lat0="51.440182 " lon0="4.329118" Woensdrecht -->
     </block>
     <block name="Survey Railroal">
       <exception cond="datalink_time > 25" deroute="Standby"/>
-      <circle alt="WaypointAlt(WP_SPOOR1)" radius="nav_radius" until="15 > fabs(estimator_z - WaypointAlt(WP_SPOOR1))" wp="STDBY"/>
+      <circle alt="WaypointAlt(WP_SPOOR1)" radius="nav_radius" until="15 > fabs(GetPosAlt() - WaypointAlt(WP_SPOOR1))" wp="STDBY"/>
       <go approaching_time="-10" from="STDBY" hmode="route" wp="SPOOR1"/>
       <go approaching_time="-10" from="SPOOR1" hmode="route" wp="SPOOR2"/>
       <go approaching_time="-20" from="SPOOR2" hmode="route" wp="STDBY"/>
@@ -211,7 +211,7 @@ lat0="51.440182 " lon0="4.329118" Woensdrecht -->
     </block>
     <block name="Inspect Tomatos">
       <exception cond="datalink_time > 22" deroute="Standby"/>
-      <circle alt="WaypointAlt(WP_TOMATOS)" radius="nav_radius" until="15 > fabs(estimator_z - WaypointAlt(WP_TOMATOS))" wp="STDBY"/>
+      <circle alt="WaypointAlt(WP_TOMATOS)" radius="nav_radius" until="15 > fabs(GetPosAlt() - WaypointAlt(WP_TOMATOS))" wp="STDBY"/>
       <go from="STDBY" hmode="route" wp="TOMATOS"/>
       <go alt="WaypointAlt(WP_TOMATOS)" from="TOMATOS" hmode="route" wp="STDBY"/>
     </block>
