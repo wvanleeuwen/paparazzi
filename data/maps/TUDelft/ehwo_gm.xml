@@ -1,0 +1,4 @@
+<map file="ehwo_gm.png" projection="Mercator">
+  <point x="0" y="0" geo="WGS84 51.4595 4.2301"/>
+  <point x="820" y="818" geo="WGS84 51.2831 4.5113"/>
+</map>

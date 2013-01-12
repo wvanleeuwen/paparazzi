@@ -1,0 +1,110 @@
+<!DOCTYPE flight_plan SYSTEM "../flight_plan.dtd">
+
+<!--
+Delft             lat0="51.979506" lon0="4.390265"
+Smink, Amersfoort lat0="52.204872" lon0="5.393987" -->
+
+<flight_plan alt="50" ground_alt="-1" lat0="51.979506" lon0="4.390265" max_dist_from_home="2500" name="Heering" qfu="90" security_height="125">
+  <header>
+#include "./subsystems/datalink/datalink.h"
+#include "./TUDelft/nav_photogrammetry.h"
+#include "firmwares/fixedwing/guidance/guidance_v.h"
+// Automatic include of camera trigger is camera is present
+#include "generated/airframe.h"
+#ifdef DC_AUTOSHOOT_QUARTERSEC_PERIOD
+#include "modules/digital_cam/dc.h"
+#define LINE_START_FUNCTION dc_autoshoot = DC_AUTOSHOOT_PERIODIC;
+#define LINE_STOP_FUNCTION dc_autoshoot = DC_AUTOSHOOT_STOP;
+#endif
+</header>
+  <waypoints>
+    <waypoint name="HOME" x="16.9" y="-0.4"/>
+    <waypoint alt="70.0" name="STDBY" x="-29.2" y="16.8"/>
+    <waypoint alt="55.0" name="1" x="93.8" y="83.8"/>
+    <waypoint alt="55.0" name="2" x="-233.0" y="-38.5"/>
+    <waypoint name="S1" x="-45.2" y="-72.5"/>
+    <waypoint name="S2" x="-359.7" y="-350.8"/>
+    <waypoint alt="30.0" name="AF" x="66.4" y="17.3"/>
+    <waypoint alt="0.0" name="TD" x="-112.7" y="17.2"/>
+    <waypoint alt="30.0" name="BASELEG" x="62.3" y="-80.5"/>
+    <waypoint alt="70.0" name="CLIMB" x="211.3" y="7.7"/>
+    <waypoint alt="100.0" name="PHOTO_FROM" x="-374.2" y="-91.8"/>
+    <waypoint alt="70.0" name="PHOTO_TO" x="326.5" y="-750.9"/>
+    <waypoint alt="70.0" name="PHOTO_TOP_1" x="951.6" y="-69.2"/>
+    <waypoint alt="70.0" name="PHOTO_TOP_2" x="-0.3" y="108.6"/>
+  </waypoints>
+  <exceptions>
+    <exception cond="datalink_time > 60" deroute="Standby"/>
+  </exceptions>
+  <blocks>
+    <block name="Wait GPS">
+      <set value="1" var="kill_throttle"/>
+      <while cond="!GpsFixValid()"/>
+    </block>
+    <block name="Geo init">
+      <while cond="LessThan(NavBlockTime(), 10)"/>
+      <call fun="NavSetGroundReferenceHere()"/>
+    </block>
+    <block name="Holding point">
+      <set value="1" var="kill_throttle"/>
+      <attitude roll="0" throttle="0" vmode="throttle"/>
+    </block>
+    <block name="Takeoff" strip_button="Takeoff (wp CLIMB)" strip_icon="takeoff.png">
+      <exception cond="estimator_z > ground_alt+40" deroute="Standby"/>
+      <set value="0" var="ap_state->commands[COMMAND_BRAKE]"/>
+      <set value="V_CTL_AUTO_THROTTLE_NOMINAL_CRUISE_THROTTLE" var="v_ctl_auto_throttle_cruise_throttle"/>
+      <set value="0" var="kill_throttle"/>
+      <go wp="CLIMB"/>
+    </block>
+    <block name="Standby" strip_button="Standby" strip_icon="home.png">
+      <set value="0" var="ap_state->commands[COMMAND_BRAKE]"/>
+      <set value="V_CTL_AUTO_THROTTLE_NOMINAL_CRUISE_THROTTLE" var="v_ctl_auto_throttle_cruise_throttle"/>
+      <circle alt="WaypointAlt(WP_STDBY)" radius="nav_radius" wp="STDBY"/>
+    </block>
+    <block name="Oval 1-2" strip_button="Oval (wp 1-2)" strip_icon="oval.png">
+      <oval p1="1" p2="2" radius="nav_radius"/>
+    </block>
+    <block name="Photogrammetry" strip_button="P" strip_icon="survey.png">
+      <call fun="PhotogrammetryInit(WP_PHOTO_FROM, 0.8f, 0.25f, 5.0f, 0)"/>
+      <call fun="Photogrammetry()"/>
+      <deroute block="Standby"/>
+    </block>
+    <block name="Photogrammetry_Reset">
+      <call fun="PhotogrammetryInit(WP_PHOTO_FROM, 0.8f, 0.25f, 5.0f, 1)"/>
+      <deroute block="Standby"/>
+    </block>
+    <block name="Land Right AF-TD" strip_button="Land right (wp AF-TD)" strip_icon="land-right.png">
+      <set value="DEFAULT_CIRCLE_RADIUS" var="nav_radius"/>
+      <deroute block="land"/>
+    </block>
+    <block name="Land Left AF-TD" strip_button="Land left (wp AF-TD)" strip_icon="land-left.png">
+      <set value="-DEFAULT_CIRCLE_RADIUS" var="nav_radius"/>
+      <deroute block="land"/>
+    </block>
+    <block name="land">
+      <call fun="nav_compute_baseleg(WP_AF, WP_TD, WP_BASELEG, nav_radius)"/>
+      <set value="V_CTL_AUTO_THROTTLE_MIN_CRUISE_THROTTLE" var="v_ctl_auto_throttle_cruise_throttle"/>
+      <circle radius="nav_radius" until="NavQdrCloseTo(DegOfRad(baseleg_out_qdr)-10) && 10 > fabs(estimator_z - WaypointAlt(WP_BASELEG))" wp="BASELEG"/>
+    </block>
+    <block name="final">
+      <set value="-MAX_PPRZ" var="ap_state->commands[COMMAND_BRAKE]"/>
+      <go from="AF" hmode="route" throttle="0.0" vmode="throttle" wp="TD"/>
+    </block>
+    <block name="flare">
+      <go approaching_time="0" from="AF" hmode="route" throttle="0.0" vmode="throttle" wp="TD"/>
+      <attitude roll="0.0" throttle="0.0" until="FALSE" vmode="throttle"/>
+    </block>
+    <block name="Test datalink (go to wp 2)">
+      <exception cond="datalink_time > 22" deroute="Standby"/>
+      <go from="STDBY" hmode="route" wp="2"/>
+      <go from="2" hmode="route" wp="STDBY"/>
+    </block>
+    <block name="Test VMODE AlongLine">
+      <go from="1" hmode="route" vmode="glide" wp="2"/>
+    </block>
+    <block name="Test Descend 1ms">
+      <exception cond="  WaypointAlt(WP_STDBY) > estimator_z" deroute="Standby"/>
+      <go climb="-1" from="CLIMB" hmode="route" vmode="climb" wp="STDBY"/>
+    </block>
+  </blocks>
+</flight_plan>

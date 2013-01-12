@@ -1,0 +1,46 @@
+<!DOCTYPE settings SYSTEM "../settings.dtd">
+
+<!-- A conf to use to tune a new A/C -->
+
+<settings>
+  <dl_settings>
+    <dl_settings NAME="VControl">
+
+      <dl_settings name="flight envelope">
+        <dl_setting  MIN="1" MAX="60" STEP="0.25" VAR="v_ctl_vmin" shortname="Vmin" module="fw_v_ctl_energy" param="8"/>
+        <dl_setting  MIN="1" MAX="60" STEP="0.25" VAR="v_ctl_vmax" shortname="Vmax" param="20"/>
+        <dl_setting  MIN="0.1" MAX="12" STEP="0.25" VAR="v_ctl_vz_max" shortname="Vz_max" param="2"/>
+
+        <dl_setting  MIN="0" MAX="100" STEP="1" VAR="v_ctl_pot_energy_bounds" shortname="E_pot_max" param="20"/>
+        <dl_setting  MIN="0" MAX="20" STEP="0.5" VAR="v_ctl_kin_energy_bounds" shortname="E_pot_max" param="20"/>
+
+        <dl_setting  MIN="-1.5" MAX="0." STEP="0.01" VAR="v_ctl_pitch_min" shortname="ThetaMin" param="20"/>
+        <dl_setting  MIN="0." MAX="1.5" STEP="0.01" VAR="v_ctl_pitch_max" shortname="ThetaMax" param="20"/>
+
+        <dl_setting  MIN="0." MAX="1." STEP="0.01" VAR="v_ctl_throttle_min" shortname="ThMin" param="20"/>
+        <dl_setting  MIN="0." MAX="1." STEP="0.01" VAR="v_ctl_throttle_max" shortname="ThMax" param="20"/>
+      </dl_settings>
+
+
+      <dl_settings name="setpoints">
+        <dl_setting  MIN="1" MAX="60" STEP="0.25" VAR="v_ctl_auto_airspeed_setpoint" shortname="Airspeed" param="12">
+          <strip_button name="Slow" value="11"/>
+          <strip_button name="Fast" value="16"/>
+          <strip_button name="Race" value="21"/>
+        </dl_setting>
+        <dl_setting  MIN="1" MAX="300" STEP="0.5" VAR="v_ctl_altitude_setpoint" shortname="Altitude" param="70"/>
+      </dl_settings>
+
+
+      <dl_settings name="total energy">
+        <dl_setting MAX="1." MIN="0." STEP="0.0001" VAR="v_ctl_energy_tot_i" shortname="Ki Etot" param="15"/>
+        <dl_setting MAX="1." MIN="0." STEP="0.0001" VAR="v_ctl_energy_dis_i" shortname="Ki Edis" param="15"/>
+        <dl_setting MAX="10." MIN="0" STEP="0.001" VAR="v_ctl_energy_tot_p" shortname="Kp Etot" param="15"/>
+        <dl_setting MAX="10." MIN="0" STEP="0.001" VAR="v_ctl_energy_dis_p" shortname="Kp Edis" param="15"/>
+        <dl_setting MAX="100." MIN="-100." STEP="0.001" VAR="v_ctl_energy_tot_d" shortname="Kd Etot" param="15"/>
+        <dl_setting MAX="100." MIN="-100." STEP="0.001" VAR="v_ctl_energy_dis_d" shortname="Kd Edis" param="15"/>
+      </dl_settings>
+
+    </dl_settings>
+  </dl_settings>
+</settings>
