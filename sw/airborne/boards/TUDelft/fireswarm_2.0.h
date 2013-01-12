@@ -118,4 +118,12 @@
 #define PWM5_Pin GPIO_Pin_0
 #define PWM6_Pin GPIO_Pin_1
 
+/* Default actuators driver */
+#define DEFAULT_ACTUATORS "subsystems/actuators/actuators_pwm.h"
+#define ActuatorDefaultSet(_x,_y) ActuatorPwmSet(_x,_y)
+#define ActuatorsDefaultInit() ActuatorsPwmInit()
+#define ActuatorsDefaultCommit() ActuatorsPwmCommit()
+
+s
+
 #endif /* CONFIG_LISA_M_1_0_H */

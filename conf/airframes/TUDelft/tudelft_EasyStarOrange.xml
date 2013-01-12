@@ -54,6 +54,7 @@ http://paparazzi.enac.fr/w/index.php?title=Theory_of_Operation
     <subsystem name="navigation" type="extra"/>
     <subsystem name="navigation" type="bomb"/>
     <!-- <subsystem name="navigation" type="hereyourextendedreleasecode"/> -->
+    <subsystem name="ins" type="gps_passthrough"/>
   </firmware>
 
 <!-- ******************* MODULES ********************************** -->
@@ -174,7 +175,7 @@ or tuning_via?_transmitter config.
     <define name="MAXIMUM_AIRSPEED" value="15.0" unit="m/s"/>
     <define name="CARROT" value="5." unit="s"/>
     <define name="KILL_MODE_DISTANCE" value="(1.5*MAX_DIST_FROM_HOME)"/>
-    <define name="CONTROL_RATE" value="60" unit="Hz"/>
+    <define name="CONTROL_FREQUENCY" value="60" unit="Hz"/>
     <!-- For special scenarios, API protocol in makefile-->
     <!-- <define name="XBEE_INIT" value="&quot;ATCHC\rATID3332\rATPL4\rATRN1\rATTT80\rATBD3\rATWR\r&quot;"/> -->
     <!-- <define name="NO_XBEE_API_INIT" value="TRUE"/> -->  <!--un-comment after the XBee module is programmed-->

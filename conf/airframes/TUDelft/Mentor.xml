@@ -104,7 +104,7 @@
   <section name="MISC">
     <define name="NOMINAL_AIRSPEED" value="13." unit="m/s"/>
     <define name="CARROT" value="5." unit="s"/>
-    <define name="CONTROL_RATE" value="60" unit="Hz"/>
+    <define name="CONTROL_FREQUENCY" value="60" unit="Hz"/>
 
     <define name="ALT_KALMAN_ENABLED" value="TRUE"/>
 
@@ -281,6 +281,7 @@
       <configure name="GPS_PORT" value="UART1"/>
     </subsystem>
 
+    <subsystem name="ins" type="gps_passthrough"/>
 
 </firmware>
 
