@@ -31,7 +31,7 @@
       <attitude roll="0" throttle="0" vmode="throttle"/>
     </block>
     <block name="Takeoff" strip_button="Takeoff (wp CLIMB)" strip_icon="takeoff.png">
-      <exception cond="estimator_z > ground_alt+40" deroute="SlowLow"/>
+      <exception cond="GetPosAlt() > ground_alt+40" deroute="SlowLow"/>
       <set value="0" var="kill_throttle"/>
       <go wp="CLIMB"/>
     </block>
