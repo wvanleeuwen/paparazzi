@@ -19,7 +19,7 @@
 #cd ../gitsvnpprz/
 #git archive master | tar -x -C ../paparazzi/
 echo "Exporting TUDelft Master4 SVN To Paparazzi"
-git archive tudelft4.0 | tar -x -C ../paparazzi/ 
+git archive tudelft4.2 | tar -x -C ../paparazzi/ 
 cd ../paparazzi/
 git status -s | grep 'TUDelft' | sed 's/?? /rm -rf /' > rm.sh
 chmod +x ./rm.sh
@@ -27,10 +27,13 @@ chmod +x ./rm.sh
 rm ./rm.sh
 rm -rf ./sw/airborne/modules/onboardcam
 rm -rf ./sw/airborne/modules/opticflow
+rm -rf ./sw/airborne/modules/fireswarm
+rm -rf ./sw/tools/photolist
 rm -rf ./conf/conf.xml
 rm -rf ./conf/control_panel.xml
 rm -rf ./BRANCH_INFO
 rm -rf ./goto_field.sh
+rm -rf ./checklist.sh
 git checkout ./.gitignore
 #rm -rf ./sw/airborne/boards/tiny_sense.h
 #rm -rf ./sw/airborne/booz/aerovinci
