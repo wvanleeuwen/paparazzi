@@ -1,0 +1,34 @@
+
+
+Update:
+
+all flightplans:
+
+	- replace estimator_z -> GpsPosAlt()
+
+all airframes:
+
+	- replace CONTROL_RATE -> CONTROL_FREQUENCY
+	- add 
+
+
+all conf/boards.makefile:
+
+	- add 
+		#
+		# default actuator configuration
+		#
+		# you can use different actuators by adding a configure option to your firmware section
+		# e.g. <configure name="ACTUATORS" value="actuators_ppm/>
+		#
+		ifndef ACTUATORS
+		ACTUATORS = actuators_pwm
+		endif
+
+
+all sw/airborne/boards.h
+
+	- totally reorganize
+	- change to openlocm3
+
+

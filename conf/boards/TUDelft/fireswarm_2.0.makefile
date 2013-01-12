@@ -26,8 +26,6 @@ FLASH_MODE = JTAG
 endif
 
 
-ACTUATORS = actuators_direct
-
 #
 #
 # some default values shared between different firmwares
@@ -84,6 +82,18 @@ ifndef GPS_BAUD
 GPS_BAUD=B38400
 endif
 
+
+
+#
+# default actuator configuration
+#
+# you can use different actuators by adding a configure option to your firmware section
+# e.g. <configure name="ACTUATORS" value="actuators_ppm/>
+#
+
+ifndef ACTUATORS
+ACTUATORS = actuators_pwm
+endif
 
 
 ifndef ADC_IR1
