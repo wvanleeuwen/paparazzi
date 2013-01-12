@@ -213,12 +213,13 @@
       <define name="NAV_LIGHT_MODE_DEFAULT" value="4"/>
     </load>
 
-    <load name="airspeed_ets.xml">
-      <define name="AIRSPEED_ETS_SCALE" value="0.72" />
+    <load name="adc_generic.xml">
+      <configure name="ADC_CHANNEL_GENERIC1" value="ADC_1" />
     </load>
 
-<!--    <load name="adc_generic.xml">
-      <configure name="ADC_CHANNEL_GENERIC1" value="ADC_3" />
+<!--
+    <load name="airspeed_ets.xml">
+      <define name="AIRSPEED_ETS_SCALE" value="0.72" />
     </load>
 
        <load name="digital_cam_i2c.xml"/>  -->
@@ -234,9 +235,13 @@
 
   <firmware name="fixedwing">
 
+      <configure name="FLASH_MODE" value="JTAG"/>
+      <configure name="BMP_PORT" value="/dev/ttyACM0"/>
+
+
     <define name="USE_AIRSPEED"/>
 
-    <target name="ap" board="TUDelft/fireswarm_1.0">
+    <target name="ap" board="TUDelft/fireswarm_2.0">
        <define name="AIRSPEED_ETS_I2C_DEV" value="i2c1"/>
        <define name="USE_I2C1"/>
 
@@ -277,9 +282,9 @@
 
     <!-- Communication -->
     <subsystem name="radio_control" type="ppm"/>
-    <subsystem name="telemetry" type="xbee_api">
+    <subsystem name="telemetry" type="transparent">
       <configure name="MODEM_BAUD" value="B9600"/>
-      <configure name="MODEM_PORT" value="UART2"/>
+      <configure name="MODEM_PORT" value="UART3"/>
     </subsystem>
 
     <!-- Autopilot -->
