@@ -37,6 +37,8 @@
 
 <modules>
     <load name="gps_ubx_ucenter.xml"/>
+  <!-- Using Geo Mag module -->
+    <load name="geo_mag.xml"/>
 </modules>
 
   <servos>
@@ -194,9 +196,9 @@
 
   <section name="GUIDANCE_H" prefix="GUIDANCE_H_">
     <define name="MAX_BANK" value="20" unit="deg"/>
-    <define name="PGAIN" value="100"/>
-    <define name="DGAIN" value="100"/>
-    <define name="IGAIN" value="0"/>
+    <define name="PGAIN" value="25"/>
+    <define name="DGAIN" value="150"/>
+    <define name="IGAIN" value="10"/>
   </section>
 
   <section name="SIMULATOR" prefix="NPS_">
