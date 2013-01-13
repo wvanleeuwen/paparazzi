@@ -39,11 +39,12 @@ struct FmsNetwork* network_new(const char* str_ip_out, const int port_out, const
 
 }
 
+int errno;
 int network_write(struct FmsNetwork* me, char* buf, int len) {
   ssize_t byte_written = sendto(me->socket_out, buf, len, MSG_DONTWAIT,
 				(struct sockaddr*)&me->addr_out, sizeof(me->addr_out));
   if ( byte_written != len) {
-    TRACE(TRACE_ERROR, "error sending to network %d\n", byte_written);
+    TRACE(TRACE_ERROR, "error sending to network %d (%d)\n", byte_written, errno);
   }
   return len;
 }
