@@ -15,7 +15,7 @@ all airframes:
 all conf/boards.makefile:
 
 	- add $(TARGET).LDSCRIPT
-
+	- replace ifndef bij XXX_LED en ports by ?=
 	- add 
 		#
 		# default actuator configuration
@@ -30,7 +30,9 @@ all conf/boards.makefile:
 
 all sw/airborne/boards.h
 
-	- totally reorganize
+	- add EXT_CLK
 	- change to openlocm3
+	- Default actuator driver
+	- ADC_CHANNEL_X -> X
 
 
