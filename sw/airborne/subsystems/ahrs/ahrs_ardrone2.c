@@ -83,6 +83,9 @@ void ahrs_align(void) {
 
 }
 
+#define Invert2Bytes(x) ((x>>8) | (x<<8))
+#define Invert4Bytes(x) ((x>>24) | ((x<<8) & 0x00FF0000) | ((x>>8) & 0x0000FF00) | (x<<24))
+
 void ahrs_propagate(void) {
 	int l,size;
 	navdata_t* main_packet;
@@ -114,7 +117,7 @@ void ahrs_propagate(void) {
 			ahrs_impl.eulers.psi = navdata_demo->psi;
 			ahrs_impl.speed.x = navdata_demo->vx / 100.0f;
 			ahrs_impl.speed.y = navdata_demo->vy / 100.0f;
-			ahrs_impl.speed.z = -navdata_demo->vz / 100.0f; // added minus, debugging
+			ahrs_impl.speed.z = navdata_demo->vz / 100.0f;
 			ahrs_impl.altitude = -navdata_demo->altitude;
 			ahrs_impl.battery = navdata_demo->vbat_flying_percentage;
 
@@ -126,7 +129,6 @@ void ahrs_propagate(void) {
 			break;
 		case 3:
 			navdata_phys_measures = (navdata_phys_measures_t*) navdata_option;
-			navdata_phys_measures->phys_accs.z = -navdata_phys_measures->phys_accs.z;
 			INT32_VECT3_SCALE_2(ahrs_impl.accel, navdata_phys_measures->phys_accs, 9.81, 1000)
 			break;
 		case 0xFFFF:

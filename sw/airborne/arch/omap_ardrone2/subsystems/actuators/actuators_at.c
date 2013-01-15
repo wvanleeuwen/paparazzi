@@ -10,7 +10,7 @@
 #include <errno.h>
 
 bool_t calibrated = FALSE;
-bool_t calibrating = FALSE;
+int calibrating = 0;
 int calib_tick = 0;
 
 void actuators_init(void) {
@@ -44,18 +44,18 @@ void actuators_set(pprz_t commands[]) {
 		//printf("Send stop to drone\n");
 	}
 
-	//Calibration
-	if(!calibrated && (ahrs_impl.control_state == 3 || ahrs_impl.control_state == 4)) {
-		if(!calibrating) {
+	//Calibration (TODO fix inside navigation.h)
+	/*if(!calibrated && (ahrs_impl.control_state == 3 || ahrs_impl.control_state == 4)) {
+		if(calibrating < 10) {
 			sprintf(command,"AT*CALIB=%d,%d\r", seq++, 0);
 			sendto(at_socket, command, strlen(command), 0, (struct sockaddr*)&drone_at, sizeof(drone_at) );
-			calibrating = TRUE;
+			calibrating++;
 		}
 		calib_tick++;
 
 		if(calib_tick > 3000)
 			calibrated = TRUE;
-	}
+	}*/
 	calibrated = TRUE;
 
 	//Moving
@@ -66,5 +66,5 @@ void actuators_set(pprz_t commands[]) {
 
 	//Keep alive (FIXME)
 	sprintf(command,"AT*CONFIG=%d,\"general:navdata_demo\",\"FALSE\"\r", seq++);
-		sendto(at_socket, command, strlen(command), 0, (struct sockaddr*)&drone_at, sizeof(drone_at) );
+	sendto(at_socket, command, strlen(command), 0, (struct sockaddr*)&drone_at, sizeof(drone_at) );
 }
