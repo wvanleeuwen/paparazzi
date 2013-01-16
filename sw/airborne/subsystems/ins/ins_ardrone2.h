@@ -27,27 +27,11 @@
 #include "math/pprz_geodetic_int.h"
 #include "math/pprz_algebra_float.h"
 
-// TODO integrate all internal state to the structure
-
-/* gps transformed to LTP-NED  */
-extern struct LtpDef_i  ins_ltp_def;
-extern          bool_t  ins_ltp_initialised;
-extern struct NedCoor_i ins_gps_pos_cm_ned;
-extern struct NedCoor_i ins_gps_speed_cm_s_ned;
-
-/* barometer                   */
+//TODO: implement in state
 extern int32_t ins_qfe;
+extern int32_t ins_baro_alt;
 
-/* output LTP NED               */
-extern struct NedCoor_i ins_ltp_pos;
-extern struct NedCoor_i ins_ltp_speed;
-extern struct NedCoor_i ins_ltp_accel;
-
-/* copy position and speed to state interface */
-#define INS_NED_TO_STATE() {             \
-  stateSetPositionNed_i(&ins_ltp_pos);   \
-  stateSetSpeedNed_i(&ins_ltp_speed);    \
-  stateSetAccelNed_i(&ins_ltp_accel);    \
-}
+extern struct LtpDef_i ins_ltp_def;
+extern bool_t ins_ltp_initialised;
 
 #endif /* INS_INT_H */

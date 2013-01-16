@@ -71,7 +71,7 @@ void ahrs_init(void) {
 	drone_nav.sin_port = htons(ARDRONE_NAVDATA_PORT);
 
 	if(bind(navdata_socket, (struct sockaddr *)&pc_addr, sizeof(pc_addr)) < 0){
-		printf("bind: %s\n", strerror(errno));
+		printf("bind error: %s\n", strerror(errno));
 	};
 
 	//set unicast mode on
@@ -87,66 +87,63 @@ void ahrs_align(void) {
 #define Invert4Bytes(x) ((x>>24) | ((x<<8) & 0x00FF0000) | ((x>>8) & 0x0000FF00) | (x<<24))
 
 void ahrs_propagate(void) {
-	int l,size;
-	navdata_t* main_packet;
-	struct FloatEulers angles;
-	INT_EULERS_ZERO(angles);
+	//Recieve the main packet
+	int l;
+	recvfrom(navdata_socket, &buffer, ARDRONE_NAVDATA_BUFFER_SIZE, 0x0, (struct sockaddr *)&from, (socklen_t *)&l);
+	navdata_t*main_packet = (navdata_t*) &buffer;
 
-	//printf("test\n");
-
-	size = recvfrom(navdata_socket, &buffer, ARDRONE_NAVDATA_BUFFER_SIZE, 0x0, (struct sockaddr *)&from, (socklen_t *)&l);
-
-	//printf("read %d data\n",size);
-	main_packet = (navdata_t*) &buffer;
-	//printf("Packet tag %i, %i, %x, %x\n", packet->sequence, packet->vision_defined, packet->options[0].tag, packet->options[0].size);
-
+	//Init the option
 	navdata_option_t* navdata_option = (navdata_option_t*)&main_packet->options[0];
 	bool_t full_read = FALSE;
+
+	//The possible packets
 	navdata_demo_t* navdata_demo;
 	navdata_phys_measures_t* navdata_phys_measures;
 
-
+	//Read the navdata until packet is fully readed
 	while(!full_read) {
+		//Check the tag for the right option
 		switch(navdata_option->tag) {
-		case 0:
+		case 0: //NAVDATA_DEMO
 			navdata_demo = (navdata_demo_t*) navdata_option;
-			//printf("Packet tag %f %f %f %d %d\n", navdata_demo->theta, navdata_demo->psi, navdata_demo->phi, navdata_demo->altitude, navdata_demo->vbat_flying_percentage);
+
+			//Set the AHRS state
 			ahrs_impl.control_state = navdata_demo->ctrl_state >> 16;
 			ahrs_impl.eulers.phi = navdata_demo->phi;
 			ahrs_impl.eulers.theta = navdata_demo->theta;
 			ahrs_impl.eulers.psi = navdata_demo->psi;
-			ahrs_impl.speed.x = navdata_demo->vx / 100.0f;
-			ahrs_impl.speed.y = navdata_demo->vy / 100.0f;
-			ahrs_impl.speed.z = navdata_demo->vz / 100.0f;
-			ahrs_impl.altitude = -navdata_demo->altitude;
+			ahrs_impl.speed.x = navdata_demo->vx / 1000;
+			ahrs_impl.speed.y = navdata_demo->vy / 1000;
+			ahrs_impl.speed.z = navdata_demo->vz / 1000;
+			ahrs_impl.altitude = -navdata_demo->altitude / 100;
 			ahrs_impl.battery = navdata_demo->vbat_flying_percentage;
 
+			//Set the ned to body eulers
+			struct FloatEulers angles;
 			angles.theta = navdata_demo->theta/180000.*M_PI;
 			angles.psi = navdata_demo->psi/180000.*M_PI;
 			angles.phi = -navdata_demo->phi/180000.*M_PI;
+			stateSetNedToBodyEulers_f(&angles);
+
+			//Update the electrical supply
 			electrical.vsupply = navdata_demo->vbat_flying_percentage;
-			//printf("Read: %d %d %d\n", &main_packet->options[0], navdata_option, &navdata_demo->drone_camera_trans);
 			break;
-		case 3:
+		case 3: //NAVDATA_PHYS_MEASURES
 			navdata_phys_measures = (navdata_phys_measures_t*) navdata_option;
+
+			//Set the AHRS accel state
 			INT32_VECT3_SCALE_2(ahrs_impl.accel, navdata_phys_measures->phys_accs, 9.81, 1000)
 			break;
-		case 0xFFFF:
+		case 0xFFFF: //LAST OPTION
 			full_read = TRUE;
 			break;
 		default:
-			//printf("TAG: %d\n", navdata_option->tag);
+			//printf("NAVDATA UNKNOWN TAG: %d\n", navdata_option->tag);
 			break;
 		}
-
-		//printf("Prev: %d\n", navdata_option);
-		//printf("Size: %d, %d\n", navdata_option->size, ((int)navdata_option + navdata_option->size));
 		navdata_option = (navdata_option_t*) ((int)navdata_option + navdata_option->size);
-		//printf("Next: %d\n", navdata_option);
-		//break;
 	}
-	//printf("pos\n");
-	stateSetNedToBodyEulers_f(&angles);
+
 }
 
 void ahrs_update_accel(void) {

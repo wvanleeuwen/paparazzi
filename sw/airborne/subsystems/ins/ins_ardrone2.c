@@ -25,116 +25,73 @@
 #include "generated/airframe.h"
 #include "generated/flight_plan.h"
 #include "math/pprz_geodetic_int.h"
-#include <stdio.h>
 
 #ifdef SITL
 #include "nps_fdm.h"
 #include <stdio.h>
 #endif
 
-#if USE_VFF
-#include "subsystems/ins/vf_float.h"
-#endif
-
-/* TODO: Remove from messages */
+/* TODO: implement in state */
 int32_t ins_qfe;
+int32_t ins_baro_alt;
 
-/* gps transformed to LTP-NED  */
-struct LtpDef_i  ins_ltp_def;
-         bool_t  ins_ltp_initialised;
-struct NedCoor_i ins_gps_pos_cm_ned;
-struct NedCoor_i ins_gps_speed_cm_s_ned;
-
-/* output                      */
+//Keep track of gps pos and the init pos
 struct NedCoor_i ins_ltp_pos;
-struct NedCoor_i ins_ltp_speed;
-struct NedCoor_i ins_ltp_accel;
+struct LtpDef_i ins_ltp_def;
 
+bool_t ins_ltp_initialised;
 
 void ins_init() {
 #if USE_INS_NAV_INIT
-  ins_ltp_initialised = TRUE;
+  struct LlaCoor_i llh_nav;
 
   /** FIXME: should use the same code than MOVE_WP in firmwares/rotorcraft/datalink.c */
-  struct LlaCoor_i llh_nav0; /* Height above the ellipsoid */
-  llh_nav0.lat = INT32_RAD_OF_DEG(NAV_LAT0);
-  llh_nav0.lon = INT32_RAD_OF_DEG(NAV_LON0);
-  /* NAV_ALT0 = ground alt above msl, NAV_MSL0 = geoid-height (msl) over ellipsoid */
-  llh_nav0.alt = NAV_ALT0 + NAV_MSL0;
+  llh_nav.lat = INT32_RAD_OF_DEG(NAV_LAT0);
+  llh_nav.lon = INT32_RAD_OF_DEG(NAV_LON0);
+  llh_nav.alt = NAV_ALT0 + NAV_MSL0;
 
-  struct EcefCoor_i ecef_nav0;
-  ecef_of_lla_i(&ecef_nav0, &llh_nav0);
-
-  ltp_def_from_ecef_i(&ins_ltp_def, &ecef_nav0);
+  //Convert ltp
+  ltp_def_from_lla_i(&ins_ltp_def, &llh_nav);
   ins_ltp_def.hmsl = NAV_ALT0;
+
+  //Set the ltp
   stateSetLocalOrigin_i(&ins_ltp_def);
+
+  ins_ltp_initialised = TRUE;
 #else
-  ins_ltp_initialised  = FALSE;
+  ins_ltp_initialised = FALSE;
 #endif
+
 #if USE_VFF
   vff_init(0., 0., 0.);
 #endif
+
   ins.vf_realign = FALSE;
   ins.hf_realign = FALSE;
 
   INT32_VECT3_ZERO(ins_ltp_pos);
-  INT32_VECT3_ZERO(ins_ltp_speed);
-  INT32_VECT3_ZERO(ins_ltp_accel);
 
   // TODO correct init
   ins.status = INS_RUNNING;
-
 }
 
 void ins_periodic( void ) {
-	/* untilt accels */
-	struct Int32Vect3 accel_meas_body;
-	ACCELS_BFP_OF_REAL(accel_meas_body, ahrs_impl.accel);
-	struct Int32Vect3 accel_meas_ltp;
-	INT32_RMAT_TRANSP_VMULT(accel_meas_ltp, (*stateGetNedToBodyRMat_i()), accel_meas_body);
+	/* untilt accels and speeds */
+	struct NedCoor_f ins_ltp_accel;
+	struct NedCoor_f ins_ltp_speed;
+	FLOAT_RMAT_VECT3_TRANSP_MUL(ins_ltp_accel, (*stateGetNedToBodyRMat_f()), ahrs_impl.accel);
+	FLOAT_RMAT_VECT3_TRANSP_MUL(ins_ltp_speed, (*stateGetNedToBodyRMat_f()), ahrs_impl.speed);
 
-	struct Int32Vect3 speed_meas_body;
-	SPEEDS_BFP_OF_REAL(speed_meas_body, ahrs_impl.speed);
-	struct Int32Vect3 speed_meas_ltp;
-	INT32_RMAT_TRANSP_VMULT(speed_meas_ltp, (*stateGetNedToBodyRMat_i()), speed_meas_body);
+	//Add g to the accelerations
+	ins_ltp_accel.z += 9.81;
 
-#if USE_VFF
-	if (ahrs_impl.control_state >= 3) {
-		if (ins.vf_realign) {
-			ins.vf_realign = FALSE;
-			ins_qfe = (float)ahrs_impl.altitude/1000.0f;
-			vff_realign(0.);
-			ins_ltp_accel.z = ACCEL_BFP_OF_REAL(vff_zdotdot);
-			ins_ltp_speed.z = SPEED_BFP_OF_REAL(vff_zdot);
-			ins_ltp_pos.z   = POS_BFP_OF_REAL(vff_z);
-		}
-		else {  /* not realigning, so normal update with baro measurement */
-			float alt_float = (float)ahrs_impl.altitude/1000.0f;
-			vff_update(alt_float);
-		}
-	}
+	//Save the accelerations and speeds
+	stateSetAccelNed_f(&ins_ltp_accel);
+	stateSetSpeedNed_f(&ins_ltp_speed);
 
-	float z_accel_meas_float = ACCEL_FLOAT_OF_BFP(accel_meas_ltp.z);
-	if (ahrs_impl.control_state >= 3) {
-		vff_propagate(z_accel_meas_float);
-		ins_ltp_accel.z = ACCEL_BFP_OF_REAL(vff_zdotdot);
-		ins_ltp_speed.z = SPEED_BFP_OF_REAL(vff_zdot);
-		ins_ltp_pos.z   = POS_BFP_OF_REAL(vff_z);
-	}
-	else { // feed accel from the sensors
-		// subtract -9.81m/s2 (acceleration measured due to gravity, but vehivle not accelerating in ltp)
-		ins_ltp_accel.z = accel_meas_ltp.z + ACCEL_BFP_OF_REAL(9.81);
-	}
-	VECT2_COPY(ins_ltp_speed, speed_meas_ltp);
-#else
-	VECT3_COPY(ins_ltp_speed, speed_meas_ltp);
-	ins_ltp_accel.z = accel_meas_ltp.z + ACCEL_BFP_OF_REAL(9.81);
-#endif /* USE_VFF */
-
-	ins_ltp_accel.x = accel_meas_ltp.x;
-	ins_ltp_accel.y = accel_meas_ltp.y;
-
-	INS_NED_TO_STATE();
+	//Set the height and save the position
+	ins_ltp_pos.z = ahrs_impl.altitude;
+	stateSetPositionNed_i(&ins_ltp_pos);
 }
 
 void ins_realign_h(struct FloatVect2 pos __attribute__ ((unused)), struct FloatVect2 speed __attribute__ ((unused))) {
@@ -142,9 +99,7 @@ void ins_realign_h(struct FloatVect2 pos __attribute__ ((unused)), struct FloatV
 }
 
 void ins_realign_v(float z __attribute__ ((unused))) {
-#if USE_VFF
-  vff_realign(z);
-#endif
+
 }
 
 void ins_propagate() {
@@ -158,30 +113,22 @@ void ins_update_baro() {
 
 void ins_update_gps(void) {
 #if USE_GPS
+  //Check for GPS fix
   if (gps.fix == GPS_FIX_3D) {
-    if (!ins_ltp_initialised) {
+	//Set the initial coordinates
+    if(!ins_ltp_initialised) {
       ltp_def_from_ecef_i(&ins_ltp_def, &gps.ecef_pos);
       ins_ltp_def.lla.alt = gps.lla_pos.alt;
       ins_ltp_def.hmsl = gps.hmsl;
       ins_ltp_initialised = TRUE;
       stateSetLocalOrigin_i(&ins_ltp_def);
     }
+
+    //Set the x and y position in ltp and save
+    struct NedCoor_i ins_gps_pos_cm_ned;
     ned_of_ecef_point_i(&ins_gps_pos_cm_ned, &ins_ltp_def, &gps.ecef_pos);
-    ned_of_ecef_vect_i(&ins_gps_speed_cm_s_ned, &ins_ltp_def, &gps.ecef_vel);
-
-#if !USE_VFF /* neither hf nor vf used */
-    INT32_VECT3_SCALE_2(ins_ltp_pos, ins_gps_pos_cm_ned, INT32_POS_OF_CM_NUM, INT32_POS_OF_CM_DEN);
-#else /* only vff used */
     INT32_VECT2_SCALE_2(ins_ltp_pos, ins_gps_pos_cm_ned, INT32_POS_OF_CM_NUM, INT32_POS_OF_CM_DEN);
-#endif
-
-#if USE_GPS_LAG_HACK
-    VECT2_COPY(d_pos, ins_ltp_speed);
-    INT32_VECT2_RSHIFT(d_pos, d_pos, 11);
-    VECT2_ADD(ins_ltp_pos, d_pos);
-#endif
-
-    INS_NED_TO_STATE();
+    stateSetPositionNed_i(&ins_ltp_pos);
   }
 #endif /* USE_GPS */
 }
