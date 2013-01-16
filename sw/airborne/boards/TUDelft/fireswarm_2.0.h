@@ -1,5 +1,5 @@
-#ifndef CONFIG_LISA_M_1_0_H
-#define CONFIG_LISA_M_1_0_H
+#ifndef CONFIG_LISA_M_2_0_H
+#define CONFIG_LISA_M_2_0_H
 
 #define BOARD_LISA_M
 
@@ -7,18 +7,23 @@
 #define EXT_CLK 12000000
 #define AHB_CLK 72000000
 
-/* Onboard LEDs */
-/* red 
+/*
+ * Onboard LEDs
+ */
+
+/* red, on PA8 
 #ifndef USE_LED_1
 #define USE_LED_1 1
 #endif
 #define LED_1_GPIO GPIOA
-#define LED_1_GPIO_CLK RCC_APB2Periph_GPIOA
-#define LED_1_GPIO_PIN GPIO_Pin_5
+#define LED_1_GPIO_CLK RCC_APB2ENR_IOPAEN
+#define LED_1_GPIO_PIN GPIO7
+#define LED_1_GPIO_ON GPIO_BRR
+#define LED_1_GPIO_OFF GPIO_BSRR
 #define LED_1_AFIO_REMAP ((void)0)
 */
 
-/* blue */
+/* green, shared with JTAG_TRST */
 #ifndef USE_LED_2
 #define USE_LED_2 1
 #endif
@@ -29,7 +34,7 @@
 #define LED_2_GPIO_OFF GPIO_BSRR
 #define LED_2_AFIO_REMAP ((void)0)
 
-/* blue */
+/* green, shared with ADC12 (ADC_6 on connector ANALOG2) */
 #ifndef USE_LED_3
 #define USE_LED_3 1
 #endif
@@ -40,7 +45,7 @@
 #define LED_3_GPIO_OFF GPIO_BSRR
 #define LED_3_AFIO_REMAP ((void)0)
 
-// GPIO pins
+/* red, shared with ADC15 (ADC_4 on connector ANALOG2) */
 #ifndef USE_LED_4
 #define USE_LED_4 1
 #endif
@@ -51,6 +56,7 @@
 #define LED_4_GPIO_OFF GPIO_BSRR
 #define LED_4_AFIO_REMAP ((void)0)
 
+/* green, on PC15 */
 #ifndef USE_LED_5
 #define USE_LED_5 1
 #endif
@@ -69,6 +75,15 @@
 #define LED_BODY_GPIO_OFF GPIO_BRR
 #define LED_BODY_AFIO_REMAP ((void)0)
 
+/* PC12, on GPIO connector*/
+#define LED_12_GPIO GPIOC
+#define LED_12_GPIO_CLK RCC_APB2ENR_IOPCEN
+#define LED_12_GPIO_PIN GPIO12
+#define LED_1_GPIO_ON GPIO_BRR
+#define LED_1_GPIO_OFF GPIO_BSRR
+#define LED_12_AFIO_REMAP ((void)0)
+
+
 /* configuration for aspirin - and more generaly IMUs */
 #define IMU_ACC_DRDY_RCC_GPIO         RCC_APB2ENR_IOPBEN
 #define IMU_ACC_DRDY_GPIO             GPIOB
@@ -81,16 +96,17 @@
 #define ActuatorsDefaultInit() ActuatorsPwmInit()
 #define ActuatorsDefaultCommit() ActuatorsPwmCommit()
 
+
 #define DefaultVoltageOfAdc(adc) (0.003921*adc)
 
 /* Onboard ADCs */
 /*
-   ADC_1 PC3/ADC13
-   ADC_2 PC0/ADC10
-   ADC_3 PC1/ADC11
-   ADC_4 PC5/ADC15
-   ADC_6 PC2/ADC12
-   BATT  PC4/ADC14
+   ADC1 PC3/ADC13
+   ADC2 PC0/ADC10
+   ADC3 PC1/ADC11
+   ADC4 PC5/ADC15
+   ADC6 PC2/ADC12
+   BATT PC4/ADC14
 */
 #define BOARD_ADC_CHANNEL_1 15
 #define BOARD_ADC_CHANNEL_2 10
@@ -115,10 +131,10 @@
 /* GPIO mapping for ADC1 pins, overwrites the default in arch/stm32/mcu_periph/adc_arch.c */
 // FIXME, this is not very nice, is also stm lib specific
 #ifdef USE_AD1
-#define ADC1_GPIO_INIT(gpio) {                  \
-  gpio_set_mode(GPIOC, GPIO_MODE_INPUT,         \
-		GPIO_CNF_INPUT_ANALOG,          \
-		GPIO3 | GPIO0 | GPIO1 | GPIO4); \
+#define ADC1_GPIO_INIT(gpio) {                                          \
+    gpio_set_mode(GPIOC, GPIO_MODE_INPUT,                               \
+		  GPIO_CNF_INPUT_ANALOG,                                \
+		  GPIO3 | GPIO0 | GPIO1 | GPIO4);                       \
   }
 #endif // USE_AD1
 
