@@ -235,9 +235,11 @@
 
   <firmware name="fixedwing">
 
-      <configure name="FLASH_MODE" value="JTAG"/>
+<!--
+      <configure name="NO_LUFTBOOT" value="1" />
+      <configure name="FLASH_MODE" value="SWD"/>
       <configure name="BMP_PORT" value="/dev/ttyACM0"/>
-
+-->
 
     <define name="USE_AIRSPEED"/>
 

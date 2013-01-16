@@ -1,6 +1,6 @@
 # Hey Emacs, this is a -*- makefile -*-
 #
-# lisa_m_1.0.makefile
+# lisa_m_2.0.makefile
 #
 # http://paparazzi.enac.fr/wiki/Lisa/M
 #
@@ -9,7 +9,7 @@ BOARD=TUDelft/fireswarm
 BOARD_VERSION=2.0
 BOARD_CFG=\"boards/$(BOARD)_$(BOARD_VERSION).h\"
 ifndef NO_LUFTBOOT
-NO_LUFTBOOT=1
+NO_LUFTBOOT=0
 endif
 
 ARCH=stm32
@@ -22,8 +22,14 @@ $(TARGET).LDSCRIPT=$(SRC_ARCH)/lisa-m.ld
 # -----------------------------------------------------------------------
 
 ifndef FLASH_MODE
-FLASH_MODE = JTAG
+FLASH_MODE = DFU
+#FLASH_MODE = JTAG
 #FLASH_MODE = SERIAL
+endif
+
+ifndef NO_LUFTBOOT
+$(TARGET).CFLAGS+=-DLUFTBOOT
+$(TARGET).LDFLAGS+=-Wl,-Ttext=0x8002000
 endif
 
 #
@@ -38,9 +44,9 @@ endif
 #
 RADIO_CONTROL_LED  ?= none
 BARO_LED           ?= none
-AHRS_ALIGNER_LED   ?= 6
+AHRS_ALIGNER_LED   ?= 2
 GPS_LED            ?= none
-SYS_TIME_LED       ?= 1
+SYS_TIME_LED       ?= 3
 
 
 #
