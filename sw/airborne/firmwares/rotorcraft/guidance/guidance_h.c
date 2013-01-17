@@ -117,19 +117,11 @@ void guidance_h_mode_changed(uint8_t new_mode) {
     break;
 
   case GUIDANCE_H_MODE_RATE:
-#ifndef STABILIZATION_NONE
     stabilization_rate_enter();
-#else
-    stabilization_none_enter();
-#endif
     break;
 
   case GUIDANCE_H_MODE_ATTITUDE:
-#ifndef STABILIZATION_NONE
 	stabilization_attitude_enter();
-#else
-	stabilization_none_enter();
-#endif
     break;
 
   case GUIDANCE_H_MODE_HOVER:
