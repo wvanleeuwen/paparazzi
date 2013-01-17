@@ -4,11 +4,6 @@
 #include "generated/airframe.h"
 #include "boards/ardrone/at_com.h"
 
-//Calibrating at startup FIXME
-bool_t calibrated = FALSE;
-int calibrating = 0;
-int calib_tick = 0;
-
 void actuators_init(void) {
 	init_at_com();
 
@@ -34,21 +29,12 @@ void actuators_set(pprz_t commands[]) {
 	else if(thrust < -0.9 && !(ahrs_impl.control_state == CTRL_DEFAULT || ahrs_impl.control_state == CTRL_INIT || ahrs_impl.control_state == CTRL_LANDED))
 		at_com_send_ref(0);
 
-	//Calibration (TODO fix inside navigation.h)
-	/*if(!calibrated && (ahrs_impl.control_state == CTRL_FLYING || ahrs_impl.control_state == CTRL_HOVERING)) {
-		if(calibrating < 10) {
-			at_com_send_calib();
-			calibrating++;
-		}
-		calib_tick++;
-
-		if(calib_tick > 3000)
-			calibrated = TRUE;
-	}*/
-	calibrated = TRUE;
+	//Calibration
+	if((ahrs_impl.state & ARDRONE_MAGNETO_NEEDS_CALIB) != 0 && (ahrs_impl.control_state == CTRL_FLYING || ahrs_impl.control_state == CTRL_HOVERING))
+		at_com_send_calib(0);
 
 	//Moving
-	if(calibrated && (ahrs_impl.control_state == CTRL_FLYING || ahrs_impl.control_state == CTRL_HOVERING))
+	if((ahrs_impl.state & ARDRONE_MAGNETO_NEEDS_CALIB) == 0 && (ahrs_impl.control_state == CTRL_FLYING || ahrs_impl.control_state == CTRL_HOVERING))
 		at_com_send_pcmd(0, thrust, roll, pitch, yaw);
 
 	//Keep alive (FIXME)
