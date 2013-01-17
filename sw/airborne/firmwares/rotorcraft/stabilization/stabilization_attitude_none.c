@@ -20,36 +20,51 @@
  */
 
 #include "firmwares/rotorcraft/stabilization.h"
+#include "firmwares/rotorcraft/stabilization/stabilization_attitude_rc_setpoint.h"
 
 #include "subsystems/radio_control.h"
 #include "generated/airframe.h"
 
-struct Int32Rates stabilization_none_rc_cmd;
+struct FloatEulers stab_att_sp_euler;
 
 //STUB
-struct Int32Eulers stabilization_att_sum_err;
-int32_t stabilization_att_fb_cmd[COMMANDS_NB];
-int32_t stabilization_att_ff_cmd[COMMANDS_NB];
+struct FloatEulers stab_att_ref_euler;
+struct FloatRates  stab_att_ref_rate;
+struct FloatRates  stab_att_ref_accel;
+struct FloatEulers stabilization_att_sum_err_eulers;
+float stabilization_att_fb_cmd[COMMANDS_NB];
+float stabilization_att_ff_cmd[COMMANDS_NB];
 
 void stabilization_attitude_init(void) {
-	INT_RATES_ZERO(stabilization_none_rc_cmd);
+	FLOAT_EULERS_ZERO( stabilization_att_sum_err_eulers );
+	FLOAT_EULERS_ZERO(stab_att_sp_euler);
+	FLOAT_EULERS_ZERO(stab_att_ref_euler);
+	FLOAT_RATES_ZERO(stab_att_ref_rate);
+	FLOAT_RATES_ZERO(stab_att_ref_accel);
 }
 
 
 void stabilization_attitude_read_rc(bool_t in_flight) {
-	stabilization_none_rc_cmd.p = (int32_t)radio_control.values[RADIO_ROLL];
-	stabilization_none_rc_cmd.q = (int32_t)radio_control.values[RADIO_PITCH];
-	stabilization_none_rc_cmd.r = (int32_t)radio_control.values[RADIO_YAW];
+	//Read from RC
+	stabilization_attitude_read_rc_setpoint_eulers_f(&stab_att_sp_euler, in_flight);
 }
 
 
 void stabilization_attitude_enter(void) {
-	INT_RATES_ZERO(stabilization_none_rc_cmd);
+
 }
 
 void stabilization_attitude_run(bool_t  in_flight __attribute__ ((unused))) {
-	/* just directly pass rc commands through */
-	stabilization_cmd[COMMAND_ROLL]  = stabilization_none_rc_cmd.p;
-	stabilization_cmd[COMMAND_PITCH] = stabilization_none_rc_cmd.q;
-	stabilization_cmd[COMMAND_YAW]   = stabilization_none_rc_cmd.r;
+	/* just directly pass guidance commands */
+	stabilization_cmd[COMMAND_ROLL]  = stab_att_sp_euler.phi;
+	stabilization_cmd[COMMAND_PITCH] = stab_att_sp_euler.theta;
+	stabilization_cmd[COMMAND_YAW]   = stab_att_sp_euler.psi;
+}
+
+void stabilization_attitude_ref_init(void) {
+
+}
+
+void stabilization_attitude_ref_update(void) {
+
 }
