@@ -36,11 +36,12 @@ ifeq ($(TARGET), ap)
   IMU_ASPIRIN_CFLAGS  += -DUSE_IMU
 endif
 
-# Accelerometer
-IMU_ASPIRIN_SRCS   += peripherals/adxl345_spi.c
+IMU_ASPIRIN_CFLAGS += -DIMU_TYPE_H=\"imu/imu_aspirin.h\"
+IMU_ASPIRIN_SRCS    = $(SRC_SUBSYSTEMS)/imu.c             \
+                      $(SRC_SUBSYSTEMS)/imu/imu_aspirin.c \
+                      $(SRC_ARCH)/subsystems/imu/imu_aspirin_arch.c
 
-# Gyro
-IMU_ASPIRIN_SRCS   += peripherals/itg3200.c
+include $(CFG_SHARED)/spi.makefile
 
 # Magnetometer
 #IMU_ASPIRIN_SRCS   += peripherals/hmc5843.c $(SRC_ARCH)/peripherals/hmc5843_arch.c

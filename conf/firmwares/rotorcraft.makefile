@@ -146,10 +146,9 @@ ap.CFLAGS += -DUSE_I2C2
 ap.srcs += $(SRC_BOARD)/baro_board.c
 else ifeq ($(BOARD), lisa_m)
   ifeq ($(BARO), BARO_SPI)
-    ap.CFLAGS += -DUSE_SPI -DSPI_MASTER -DUSE_SPI2 -DUSE_SPI_SLAVE3
+    include $(CFG_SHARED)/spi.makefile
+    ap.CFLAGS += -DUSE_SPI2 -DUSE_SPI_SLAVE3
     ap.srcs += $(SRC_BOARD)/baro_board_spi.c
-    ap.srcs += $(SRC_ARCH)/mcu_periph/spi_arch.c
-    ap.srcs += mcu_periph/spi.c
   else ifeq ($(BARO), BARO_I2C)
     ap.CFLAGS += -DUSE_I2C2
     ap.srcs += $(SRC_BOARD)/baro_board_i2c.c
