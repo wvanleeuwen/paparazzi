@@ -21,32 +21,35 @@
 
 #include "firmwares/rotorcraft/stabilization.h"
 #include "firmwares/rotorcraft/stabilization/stabilization_attitude_rc_setpoint.h"
+#include "paparazzi.h"
 
 #include "subsystems/radio_control.h"
 #include "generated/airframe.h"
 
-struct FloatEulers stab_att_sp_euler;
+#define TRAJ_MAX_BANK BFP_OF_REAL(GUIDANCE_H_MAX_BANK, INT32_ANGLE_FRAC)
+
+struct Int32Eulers stab_att_sp_euler;
 
 //STUB
-struct FloatEulers stab_att_ref_euler;
-struct FloatRates  stab_att_ref_rate;
-struct FloatRates  stab_att_ref_accel;
-struct FloatEulers stabilization_att_sum_err_eulers;
-float stabilization_att_fb_cmd[COMMANDS_NB];
-float stabilization_att_ff_cmd[COMMANDS_NB];
+struct Int32Eulers stabilization_att_sum_err;
+struct Int32Eulers stab_att_ref_euler; ///< with #REF_ANGLE_FRAC
+struct Int32Rates  stab_att_ref_rate;  ///< with #REF_RATE_FRAC
+struct Int32Rates  stab_att_ref_accel; ///< with #REF_ACCEL_FRAC
+int32_t stabilization_att_fb_cmd[COMMANDS_NB];
+int32_t stabilization_att_ff_cmd[COMMANDS_NB];
 
 void stabilization_attitude_init(void) {
-	FLOAT_EULERS_ZERO( stabilization_att_sum_err_eulers );
-	FLOAT_EULERS_ZERO(stab_att_sp_euler);
-	FLOAT_EULERS_ZERO(stab_att_ref_euler);
-	FLOAT_RATES_ZERO(stab_att_ref_rate);
-	FLOAT_RATES_ZERO(stab_att_ref_accel);
+	INT_EULERS_ZERO(stabilization_att_sum_err);
+	INT_EULERS_ZERO(stab_att_sp_euler);
+	INT_EULERS_ZERO(stab_att_ref_euler);
+	INT_RATES_ZERO(stab_att_ref_rate);
+	INT_RATES_ZERO(stab_att_ref_accel);
 }
 
 
 void stabilization_attitude_read_rc(bool_t in_flight) {
 	//Read from RC
-	stabilization_attitude_read_rc_setpoint_eulers_f(&stab_att_sp_euler, in_flight);
+	stabilization_attitude_read_rc_setpoint_eulers(&stab_att_sp_euler, in_flight);
 }
 
 
@@ -56,7 +59,8 @@ void stabilization_attitude_enter(void) {
 
 void stabilization_attitude_run(bool_t  in_flight __attribute__ ((unused))) {
 	/* just directly pass guidance commands */
-	stabilization_cmd[COMMAND_ROLL]  = stab_att_sp_euler.phi;
+	EULERS_SMUL(stab_att_ref_euler, stab_att_sp_euler, MAX_PPRZ/TRAJ_MAX_BANK);
+	stabilization_cmd[COMMAND_ROLL], stab_att_sp_euler.phi;
 	stabilization_cmd[COMMAND_PITCH] = stab_att_sp_euler.theta;
 	stabilization_cmd[COMMAND_YAW]   = stab_att_sp_euler.psi;
 }
