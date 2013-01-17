@@ -617,15 +617,15 @@
 
 #define PERIODIC_SEND_INS(_trans, _dev) {			\
     DOWNLINK_SEND_INS(_trans, _dev,				\
-                       &(stateGetPositionNed_i()->x),		\
-                       &(stateGetPositionNed_i()->y),      \
-                       &(stateGetPositionNed_i()->z),		\
-                       &(stateGetSpeedNed_i()->x),	\
-                       &(stateGetSpeedNed_i()->y),	\
-                       &(stateGetSpeedNed_i()->z),	\
-                       &(stateGetAccelNed_i()->x),	\
-                       &(stateGetAccelNed_i()->y),	\
-                       &(stateGetAccelNed_i()->z));	\
+                       &(stateGetPositionNed_f()->x),		\
+                       &(stateGetPositionNed_f()->y),      \
+                       &(stateGetPositionNed_f()->z),		\
+                       &(stateGetSpeedNed_f()->x),	\
+                       &(stateGetSpeedNed_f()->y),	\
+                       &(stateGetSpeedNed_f()->z),	\
+                       &(stateGetAccelNed_f()->x),	\
+                       &(stateGetAccelNed_f()->y),	\
+                       &(stateGetAccelNed_f()->z));	\
   }
 
 #define PERIODIC_SEND_INS_REF(_trans, _dev) {       \
