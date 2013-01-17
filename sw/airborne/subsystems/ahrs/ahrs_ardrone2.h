@@ -28,11 +28,11 @@
 
 struct AhrsARDrone {
   uint32_t           control_state;
-  struct FloatEulers eulers;
-  struct NedCoor_f   speed;
-  struct NedCoor_f   accel;
-  int32_t            altitude;
-  uint32_t           battery;
+  struct FloatEulers eulers;	// in radians
+  struct NedCoor_f   speed;		// in m/s
+  struct NedCoor_f   accel;		// in m/s^2
+  int32_t            altitude;	// in cm above ground
+  uint32_t           battery;	// in percentage
 };
 
 extern struct AhrsARDrone ahrs_impl;

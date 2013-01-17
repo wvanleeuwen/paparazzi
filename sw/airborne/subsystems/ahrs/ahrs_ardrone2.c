@@ -115,7 +115,7 @@ void ahrs_propagate(void) {
 			ahrs_impl.speed.x = navdata_demo->vx / 1000;
 			ahrs_impl.speed.y = navdata_demo->vy / 1000;
 			ahrs_impl.speed.z = navdata_demo->vz / 1000;
-			ahrs_impl.altitude = -navdata_demo->altitude / 100;
+			ahrs_impl.altitude = navdata_demo->altitude;
 			ahrs_impl.battery = navdata_demo->vbat_flying_percentage;
 
 			//Set the ned to body eulers
