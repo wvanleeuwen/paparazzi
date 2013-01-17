@@ -131,8 +131,8 @@ static char serial_no[24+8];
 
 static const char *usb_strings[] = {
 	"x",
-	"Transition Robotics Inc.",
-	"Lisa/M (Upgrade) " VERSION,
+	"TUDelft MavLab.",
+	"Fireswarm (Upgrade) " VERSION,
 	serial_no,
 	/* This string is used by ST Microelectronics' DfuSe utility */
 	"@Internal Flash   /0x08000000/4*002Ka,124*002Kg"
