@@ -90,7 +90,7 @@ void ins_periodic( void ) {
 	stateSetSpeedNed_f(&ins_ltp_speed);
 
 	//Set the height and save the position
-	ins_ltp_pos.z = (ahrs_impl.altitude * INT32_POS_OF_CM_NUM) / INT32_POS_OF_CM_DEN;
+	ins_ltp_pos.z = -(ahrs_impl.altitude * INT32_POS_OF_CM_NUM) / INT32_POS_OF_CM_DEN;
 	stateSetPositionNed_i(&ins_ltp_pos);
 }
 

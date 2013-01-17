@@ -22,78 +22,28 @@
 #include "ahrs_ardrone2.h"
 #include "state.h"
 #include "math/pprz_algebra_float.h"
-#include "boards/ardrone2.h"
-#include "boards/ardrone/packets.h"
-
-/* ARDRONE2 */
+#include "boards/ardrone/at_com.h"
 #include "subsystems/electrical.h"
-#include <stdio.h>
-#include <netdb.h>
-#include <netinet/in.h>
-#include <arpa/inet.h>
-#include <errno.h>
 
 struct AhrsARDrone ahrs_impl;
-
-//AR Drone communication
-unsigned char buffer[ARDRONE_NAVDATA_BUFFER_SIZE];
-int at_socket = -1,
-	navdata_socket = -1;
-struct sockaddr_in pc_addr,
-				   drone_at,
-				   drone_nav,
-				   from;
-
-int seq = 1;
+unsigned char buffer[2048]; //Packet buffer
 
 void ahrs_init(void) {
-	if((at_socket = socket (AF_INET, SOCK_DGRAM, 0)) < 0){
-		printf ("at_socket error: %s\n", strerror(errno));
-	};
-
-	if((navdata_socket = socket (AF_INET, SOCK_DGRAM, 0)) < 0){
-		printf ("navdata_socket: %s\n", strerror(errno));
-	};
-
-	//for recvfrom
-	pc_addr.sin_family = AF_INET;
-	pc_addr.sin_addr.s_addr = htonl(INADDR_ANY);
-	pc_addr.sin_port = htons(9800);
-
-	//for sendto AT
-	drone_at.sin_family = AF_INET;
-	drone_at.sin_addr.s_addr = inet_addr(ARDRONE_IP);
-	drone_at.sin_port = htons(ARDRONE_AT_PORT);
-
-	//for sendto navadata init
-	drone_nav.sin_family = AF_INET;
-	drone_nav.sin_addr.s_addr = inet_addr(ARDRONE_IP);
-	drone_nav.sin_port = htons(ARDRONE_NAVDATA_PORT);
-
-	if(bind(navdata_socket, (struct sockaddr *)&pc_addr, sizeof(pc_addr)) < 0){
-		printf("bind error: %s\n", strerror(errno));
-	};
-
-	//set unicast mode on
-	int one = 1;
-	sendto(navdata_socket, &one, 4, 0, (struct sockaddr *)&drone_nav, sizeof(drone_nav));
+	init_at_com();
 }
 
 void ahrs_align(void) {
 
 }
 
-#define Invert2Bytes(x) ((x>>8) | (x<<8))
-#define Invert4Bytes(x) ((x>>24) | ((x<<8) & 0x00FF0000) | ((x>>8) & 0x0000FF00) | (x<<24))
-
 void ahrs_propagate(void) {
 	//Recieve the main packet
-	int l;
-	recvfrom(navdata_socket, &buffer, ARDRONE_NAVDATA_BUFFER_SIZE, 0x0, (struct sockaddr *)&from, (socklen_t *)&l);
-	navdata_t*main_packet = (navdata_t*) &buffer;
+	at_com_recieve_navdata(&buffer);
+	navdata_t* main_packet = (navdata_t*) &buffer;
+	ahrs_impl.state = main_packet->ardrone_state;
 
 	//Init the option
-	navdata_option_t* navdata_option = (navdata_option_t*)&main_packet->options[0];
+	navdata_option_t* navdata_option = (navdata_option_t*)&(main_packet->options[0]);
 	bool_t full_read = FALSE;
 
 	//The possible packets
@@ -134,16 +84,16 @@ void ahrs_propagate(void) {
 			//Set the AHRS accel state
 			INT32_VECT3_SCALE_2(ahrs_impl.accel, navdata_phys_measures->phys_accs, 9.81, 1000)
 			break;
-		case 0xFFFF: //LAST OPTION
+		case 0xFFFF: //CHECKSUM
+			//TODO: Check the checksum
 			full_read = TRUE;
 			break;
 		default:
-			//printf("NAVDATA UNKNOWN TAG: %d\n", navdata_option->tag);
+			//printf("NAVDATA UNKNOWN TAG: %d %d\n", navdata_option->tag, navdata_option->size);
 			break;
 		}
 		navdata_option = (navdata_option_t*) ((int)navdata_option + navdata_option->size);
 	}
-
 }
 
 void ahrs_update_accel(void) {

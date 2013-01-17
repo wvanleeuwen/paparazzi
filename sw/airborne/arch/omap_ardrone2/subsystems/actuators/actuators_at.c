@@ -1,54 +1,43 @@
 
+#include "subsystems/ahrs/ahrs_ardrone2.h"
 #include "actuators_at.h"
 #include "generated/airframe.h"
-#include "subsystems/ahrs/ahrs_ardrone2.h"
+#include "boards/ardrone/at_com.h"
 
-#include <stdio.h>
-#include <netdb.h>
-#include <netinet/in.h>
-#include <arpa/inet.h>
-#include <errno.h>
-
+//Calibrating at startup FIXME
 bool_t calibrated = FALSE;
 int calibrating = 0;
 int calib_tick = 0;
 
 void actuators_init(void) {
-	char command[256];
-	sprintf(command,"AT*CONFIG=%d,\"general:navdata_demo\",\"FALSE\"\r", seq++);
-	sendto(at_socket, command, strlen(command), 0, (struct sockaddr*)&drone_at, sizeof(drone_at) );
+	init_at_com();
 
-	sprintf(command,"AT*FTRIM=%d\r", seq++);
-	sendto(at_socket, command, strlen(command), 0, (struct sockaddr*)&drone_at, sizeof(drone_at) );
+	//Set navdata_demo to FALSE and flat trim the ar drone
+	at_com_send_config("general:navdata_demo", "FALSE");
+	at_com_send_ftrim();
 }
 
 void actuators_set(pprz_t commands[]) {
-	char command[256];
+	//Calculate the thrus, roll, pitch and yaw from the PPRZ commands
 	float thrust = ((float)(commands[COMMAND_THRUST]-MAX_PPRZ/2) / (float)MAX_PPRZ)*2.0f;
 	float roll = ((float)commands[COMMAND_ROLL] / (float)MAX_PPRZ);
 	float pitch = ((float)commands[COMMAND_PITCH] / (float)MAX_PPRZ);
 	float yaw = ((float)commands[COMMAND_YAW] / (float)MAX_PPRZ);
-	//printf("Commands: %f\t%f\t%f\t%f\n", thrust, roll, pitch, yaw);
 
 	//Starting engine
-	if(thrust > 0 && ahrs_impl.control_state != 3 && ahrs_impl.control_state != 4) {
-		sprintf(command,"AT*REF=%d,%d\r", seq++, 0x11540000 + 0x200);
-		sendto(at_socket, command, strlen(command), 0, (struct sockaddr*)&drone_at, sizeof(drone_at) );
-		//printf("Send start to drone\n");
-	}
+	if(thrust > 0 && (ahrs_impl.control_state == CTRL_DEFAULT || ahrs_impl.control_state == CTRL_INIT || ahrs_impl.control_state == CTRL_LANDED))
+		at_com_send_ref(REF_TAKEOFF);
 
-	//Stopping engine
-	if(thrust < -0.9) {
-		sprintf(command,"AT*REF=%d,%d\r", seq++, 0x11540000);
-		sendto(at_socket, command, strlen(command), 0, (struct sockaddr*)&drone_at, sizeof(drone_at) );
-		//printf("Send stop to drone\n");
-	}
+	//Check emergency or stop engine
+	if((ahrs_impl.state & ARDRONE_EMERGENCY_MASK) != 0)
+		at_com_send_ref(REF_EMERGENCY);
+	else if(thrust < -0.9 && !(ahrs_impl.control_state == CTRL_DEFAULT || ahrs_impl.control_state == CTRL_INIT || ahrs_impl.control_state == CTRL_LANDED))
+		at_com_send_ref(0);
 
 	//Calibration (TODO fix inside navigation.h)
-	/*if(!calibrated && (ahrs_impl.control_state == 3 || ahrs_impl.control_state == 4)) {
+	/*if(!calibrated && (ahrs_impl.control_state == CTRL_FLYING || ahrs_impl.control_state == CTRL_HOVERING)) {
 		if(calibrating < 10) {
-			sprintf(command,"AT*CALIB=%d,%d\r", seq++, 0);
-			sendto(at_socket, command, strlen(command), 0, (struct sockaddr*)&drone_at, sizeof(drone_at) );
+			at_com_send_calib();
 			calibrating++;
 		}
 		calib_tick++;
@@ -59,12 +48,9 @@ void actuators_set(pprz_t commands[]) {
 	calibrated = TRUE;
 
 	//Moving
-	if(calibrated && (ahrs_impl.control_state == 3 || ahrs_impl.control_state == 4)) {
-		sprintf(command,"AT*PCMD=%d,%d,%d,%d,%d,%d\r", seq++, 0x1, *(int*)(&roll), *(int*)(&pitch), *(int*)(&thrust), *(int*)(&yaw));
-		sendto(at_socket, command, strlen(command), 0, (struct sockaddr*)&drone_at, sizeof(drone_at) );
-	}
+	if(calibrated && (ahrs_impl.control_state == CTRL_FLYING || ahrs_impl.control_state == CTRL_HOVERING))
+		at_com_send_pcmd(0, thrust, roll, pitch, yaw);
 
 	//Keep alive (FIXME)
-	sprintf(command,"AT*CONFIG=%d,\"general:navdata_demo\",\"FALSE\"\r", seq++);
-	sendto(at_socket, command, strlen(command), 0, (struct sockaddr*)&drone_at, sizeof(drone_at) );
+	at_com_send_config("general:navdata_demo", "FALSE");
 }

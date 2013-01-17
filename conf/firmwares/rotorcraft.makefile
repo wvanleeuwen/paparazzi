@@ -139,6 +139,8 @@ ap.srcs += subsystems/actuators.c
 #
 ifneq ($(BOARD), ardrone)
 ap.srcs += $(SRC_BOARD)/baro_board.c
+else
+ap.srcs += $(SRC_BOARD)/at_com.c
 endif
 
 ifeq ($(BOARD), booz)

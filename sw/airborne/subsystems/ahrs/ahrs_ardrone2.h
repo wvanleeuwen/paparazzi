@@ -27,23 +27,14 @@
 #include "math/pprz_algebra_int.h"
 
 struct AhrsARDrone {
-  uint32_t           control_state;
-  struct FloatEulers eulers;	// in radians
-  struct NedCoor_f   speed;		// in m/s
-  struct NedCoor_f   accel;		// in m/s^2
-  int32_t            altitude;	// in cm above ground
-  uint32_t           battery;	// in percentage
+  uint32_t				state;			// ARDRONE_STATES
+  uint32_t				control_state;	// CTRL_STATES
+  struct FloatEulers	eulers;			// in radians
+  struct NedCoor_f		speed;			// in m/s
+  struct NedCoor_f		accel;			// in m/s^2
+  int32_t				altitude;		// in cm above ground
+  uint32_t				battery;		// in percentage
 };
-
 extern struct AhrsARDrone ahrs_impl;
-
-extern int at_socket,
-	navdata_socket;
-extern struct sockaddr_in pc_addr,
-				   drone_at,
-				   drone_nav,
-				   from;
-
-extern int seq;
 
 #endif /* AHRS_ARDRONE2_H */
