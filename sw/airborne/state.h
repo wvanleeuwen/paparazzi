@@ -442,7 +442,7 @@ static inline void stateSetLocalOrigin_i(struct LtpDef_i* ltp_def) {
   ECEF_FLOAT_OF_BFP(state.ned_origin_f.ecef, state.ned_origin_i.ecef);
   LLA_FLOAT_OF_BFP(state.ned_origin_f.lla, state.ned_origin_i.lla);
   RMAT_FLOAT_OF_BFP(state.ned_origin_f.ltp_of_ecef, state.ned_origin_i.ltp_of_ecef);
-  state.ned_origin_f.hmsl = M_OF_MM(state.ned_origin_f.hmsl);
+  state.ned_origin_f.hmsl = M_OF_MM(state.ned_origin_i.hmsl);
   state.ned_initialized_f = TRUE;
 
   /* clear bits for all local frame representations */
@@ -462,6 +462,11 @@ static inline void stateSetLocalOrigin_i(struct LtpDef_i* ltp_def) {
 static inline void stateSetLocalUtmOrigin_f(struct UtmCoor_f* utm_def) {
   memcpy(&state.utm_origin_f, utm_def, sizeof(struct UtmCoor_f));
   state.utm_initialized_f = TRUE;
+  ECEF_BFP_OF_REAL(state.ned_origin_i.ecef, state.ned_origin_f.ecef);
+  LLA_BFP_OF_REAL(state.ned_origin_i.lla, state.ned_origin_f.lla);
+  RMAT_BFP_OF_REAL(state.ned_origin_i.ltp_of_ecef, state.ned_origin_f.ltp_of_ecef);
+  state.ned_origin_i.hmsl = MM_OF_M(state.ned_origin_f.hmsl);
+  state.ned_initialized_i = TRUE;
 
   /* clear bits for all local frame representations */
   ClearBit(state.pos_status, POS_NED_I);
@@ -475,6 +480,29 @@ static inline void stateSetLocalUtmOrigin_f(struct UtmCoor_f* utm_def) {
   ClearBit(state.accel_status, ACCEL_NED_I);
   ClearBit(state.accel_status, ACCEL_NED_F);
 }
+
+/************************ Get functions ****************************/
+
+/// Get position in ECEF coordinates (int).
+static inline struct EcefCoor_i* stateGetLocalEcef_i(void) {
+  return &state.ned_origin_i.ecef;
+}
+
+/// Get position in LLA coordinates (int).
+static inline struct LlaCoor_i* stateGetLocalLla_i(void) {
+  return &state.ned_origin_i.lla;
+}
+
+/// Get position in ECEF coordinates (float).
+static inline struct EcefCoor_f* stateGetLocalEcef_f(void) {
+  return &state.ned_origin_f.ecef;
+}
+
+/// Get position in LLA coordinates (flaot).
+static inline struct LlaCoor_f* stateGetLocalLla_f(void) {
+  return &state.ned_origin_f.lla;
+}
+
 /*******************************************************************************
  *                                                                             *
  * Set and Get functions for the POSITION representations                      *

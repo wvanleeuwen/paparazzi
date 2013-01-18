@@ -632,12 +632,12 @@
 #define PERIODIC_SEND_INS_REF(_trans, _dev) {       \
     if (ins_ltp_initialised)                        \
       DOWNLINK_SEND_INS_REF(_trans, _dev,           \
-                            &(stateGetPositionEcef_i()->x),    \
-                            &(stateGetPositionEcef_i()->y),    \
-                            &(stateGetPositionEcef_i()->z),    \
-                            &(stateGetPositionLla_i()->lat),   \
-                            &(stateGetPositionLla_i()->lon),   \
-                            &(stateGetPositionLla_i()->alt),   \
+                            &(stateGetLocalEcef_i()->x),    \
+                            &(stateGetLocalEcef_i()->y),    \
+                            &(stateGetLocalEcef_i()->z),    \
+                            &(stateGetLocalLla_i()->lat),   \
+                            &(stateGetLocalLla_i()->lon),   \
+                            &(stateGetLocalLla_i()->alt),   \
                             &ins_ltp_def.hmsl,		\
                             &ins_qfe);				\
   }
