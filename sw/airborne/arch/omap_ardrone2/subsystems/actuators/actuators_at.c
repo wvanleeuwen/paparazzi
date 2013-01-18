@@ -35,7 +35,7 @@ void actuators_set(pprz_t commands[]) {
 
 	//Moving
 	if((ahrs_impl.state & ARDRONE_MAGNETO_NEEDS_CALIB) == 0 && (ahrs_impl.control_state == CTRL_FLYING || ahrs_impl.control_state == CTRL_HOVERING))
-		at_com_send_pcmd(0, thrust, roll, pitch, yaw);
+		at_com_send_pcmd(1, thrust, roll, pitch, yaw);
 
 	//Keep alive (FIXME)
 	at_com_send_config("general:navdata_demo", "FALSE");

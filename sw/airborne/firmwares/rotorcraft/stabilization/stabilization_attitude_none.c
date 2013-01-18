@@ -26,7 +26,7 @@
 #include "subsystems/radio_control.h"
 #include "generated/airframe.h"
 
-#define TRAJ_MAX_BANK BFP_OF_REAL(GUIDANCE_H_MAX_BANK, INT32_ANGLE_FRAC)
+#define TRAJ_MAX_BANK (int32_t)ANGLE_BFP_OF_REAL(GUIDANCE_H_MAX_BANK)
 
 struct Int32Eulers stab_att_sp_euler;
 
@@ -60,9 +60,11 @@ void stabilization_attitude_enter(void) {
 void stabilization_attitude_run(bool_t  in_flight __attribute__ ((unused))) {
 	/* just directly pass guidance commands */
 	EULERS_SMUL(stab_att_ref_euler, stab_att_sp_euler, MAX_PPRZ/TRAJ_MAX_BANK);
-	stabilization_cmd[COMMAND_ROLL], stab_att_sp_euler.phi;
-	stabilization_cmd[COMMAND_PITCH] = stab_att_sp_euler.theta;
-	stabilization_cmd[COMMAND_YAW]   = stab_att_sp_euler.psi;
+	EULERS_BOUND_CUBE(stab_att_ref_euler, -MAX_PPRZ, MAX_PPRZ);
+
+	stabilization_cmd[COMMAND_ROLL] = stab_att_ref_euler.phi;
+	stabilization_cmd[COMMAND_PITCH] = stab_att_ref_euler.theta;
+	//stabilization_cmd[COMMAND_YAW]   = (int)((float)((ANGLE_FLOAT_OF_BFP(stab_att_sp_euler.psi) - stateGetNedToBodyEulers_f()->psi) / M_PI) * MAX_PPRZ);
 }
 
 void stabilization_attitude_ref_init(void) {

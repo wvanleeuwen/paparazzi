@@ -1,6 +1,6 @@
 <!DOCTYPE flight_plan SYSTEM "flight_plan.dtd">
 
-<flight_plan alt="2.0" ground_alt="0" lat0="52.992121" lon0="4.374962" max_dist_from_home="60" name="Basic TUDelft" security_height="1.0">
+<flight_plan alt="1.0" ground_alt="0" lat0="52.992121" lon0="4.374962" max_dist_from_home="60" name="Basic TUDelft" security_height=".5">
   <header>
 #include "autopilot.h"
   </header>
