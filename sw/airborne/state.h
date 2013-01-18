@@ -484,22 +484,22 @@ static inline void stateSetLocalUtmOrigin_f(struct UtmCoor_f* utm_def) {
 /************************ Get functions ****************************/
 
 /// Get position in ECEF coordinates (int).
-static inline struct EcefCoor_i* stateGetLocalEcef_i(void) {
+static inline struct EcefCoor_i* stateGetLocalOriginEcef_i(void) {
   return &state.ned_origin_i.ecef;
 }
 
 /// Get position in LLA coordinates (int).
-static inline struct LlaCoor_i* stateGetLocalLla_i(void) {
+static inline struct LlaCoor_i* stateGetLocalOriginLla_i(void) {
   return &state.ned_origin_i.lla;
 }
 
 /// Get position in ECEF coordinates (float).
-static inline struct EcefCoor_f* stateGetLocalEcef_f(void) {
+static inline struct EcefCoor_f* stateGetLocalOriginEcef_f(void) {
   return &state.ned_origin_f.ecef;
 }
 
 /// Get position in LLA coordinates (flaot).
-static inline struct LlaCoor_f* stateGetLocalLla_f(void) {
+static inline struct LlaCoor_f* stateGetLocalOriginLla_f(void) {
   return &state.ned_origin_f.lla;
 }
 
