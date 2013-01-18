@@ -186,4 +186,19 @@ void sirf_parse_msg(void) {
 		sirf_parse_2();
 		break;
 	}
+
+	//FAKE
+	/*gps.fix = GPS_FIX_3D;
+	gps.lla_pos.lat = RadOfDeg(520013040);
+	gps.lla_pos.lon = RadOfDeg(43718690);
+	gps.lla_pos.alt = 0;
+	ecef_of_lla_i(&gps.ecef_pos, &gps.lla_pos);
+	//gps.ecef_pos.x = Invert4Bytes(p->x_pos) * 100;
+	//gps.ecef_pos.y = Invert4Bytes(p->y_pos) * 100;
+	//gps.ecef_pos.z = Invert4Bytes(p->z_pos) * 100;
+
+	gps.ecef_vel.x = 0;
+	gps.ecef_vel.y = 0;
+	gps.ecef_vel.z = 0;
+	gps_sirf.pos_available = TRUE;*/
 }
