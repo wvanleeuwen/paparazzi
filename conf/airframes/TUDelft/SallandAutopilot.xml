@@ -208,9 +208,9 @@
 
     <load name="light.xml">
       <define name="LIGHT_LED_STROBE" value="4"/>
-      <define name="LIGHT_LED_NAV" value="5"/>
+<!--      <define name="LIGHT_LED_NAV" value="5"/> -->
       <define name="STROBE_LIGHT_MODE_DEFAULT" value="6"/>
-      <define name="NAV_LIGHT_MODE_DEFAULT" value="4"/>
+<!--      <define name="NAV_LIGHT_MODE_DEFAULT" value="4"/> -->
     </load>
 
     <load name="adc_generic.xml">
@@ -229,6 +229,10 @@
 <!--  -->
     <load name="digital_cam.xml">
       <define name="DC_SHUTTER_LED" value="5"/>
+    </load>
+
+    <load name="TUDelft/fireswarm_payload.xml" >
+      <define name="FIRESWARM_PAYLOAD_POWER_LED" value="5" />
     </load>
 
   </modules>
@@ -284,9 +288,9 @@
 
     <!-- Communication -->
     <subsystem name="radio_control" type="ppm"/>
-    <subsystem name="telemetry" type="transparent">
+    <subsystem name="telemetry" type="xbee_api">
       <configure name="MODEM_BAUD" value="B9600"/>
-      <configure name="MODEM_PORT" value="UART3"/>
+<!--      <configure name="MODEM_PORT" value="UART3"/> -->
     </subsystem>
 
     <!-- Autopilot -->
