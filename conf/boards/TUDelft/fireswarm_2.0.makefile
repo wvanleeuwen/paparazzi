@@ -8,7 +8,7 @@
 BOARD=TUDelft/fireswarm
 BOARD_VERSION=2.0
 BOARD_CFG=\"boards/$(BOARD)_$(BOARD_VERSION).h\"
-ifndef NO_LUFTBOOT
+ifneq ($(NO_LUFTBOOT),1)
 NO_LUFTBOOT=0
 endif
 
@@ -27,7 +27,7 @@ FLASH_MODE = DFU
 #FLASH_MODE = SERIAL
 endif
 
-ifndef NO_LUFTBOOT
+ifneq ($(NO_LUFTBOOT),1)
 $(TARGET).CFLAGS+=-DLUFTBOOT
 $(TARGET).LDFLAGS+=-Wl,-Ttext=0x8002000
 endif
