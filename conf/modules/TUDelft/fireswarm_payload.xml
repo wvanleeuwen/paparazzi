@@ -1,0 +1,18 @@
+<!DOCTYPE module SYSTEM "../module.dtd">
+
+<module name="fireswarm_payload" dir="fireswarm">
+  <doc>
+    <description>FireSwarm Payload Interface</description>
+  </doc>
+  <header>
+    <file name="fireswarm_payload.h"/>
+  </header>
+  <init fun="fireswarm_payload_init()"/>
+  <periodic fun="fireswarm_periodic()" freq="20"/>
+  <event fun="fireswarm_event()" />
+  <makefile>
+    <file name="fireswarm_payload.c"/>
+  </makefile>
+</module>
+
+
