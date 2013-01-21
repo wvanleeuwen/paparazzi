@@ -131,8 +131,8 @@ static char serial_no[24+8];
 
 static const char *usb_strings[] = {
 	"x",
-	"TUDelft MavLab.",
-	"Fireswarm (Upgrade) " VERSION,
+	"TUDelft MavLab. 2012->13",
+	"Fireswarm (Boot) " VERSION,
 	serial_no,
 	/* This string is used by ST Microelectronics' DfuSe utility */
 	"@Internal Flash   /0x08000000/4*002Ka,124*002Kg"
@@ -344,18 +344,19 @@ static inline void led_advance(void)
 {
 	static int state = 0;
 
-	if (state < 5) {
+	if (state < 2) {
 		led_set(state, 1);
-	} else if (state < 10) {
-		led_set(state - 5, 0);
-	} else if (state < 15) {
-		led_set(14 - state, 1);
-	} else if (state < 20) {
-		led_set(19 - state, 0);
+		led_set(3,1);
+	} else if (state < 4) {
+		led_set(state - 2, 0);
+	} else if (state < 6) {
+		led_set(5 - state, 1);
+	} else if (state < 8) {
+		led_set(7 - state, 0);
 	}
 
 	state++;
-	if(state == 20) state = 0;
+	if(state == 8) state = 0;
 
 }
 
