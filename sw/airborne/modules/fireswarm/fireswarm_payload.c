@@ -22,18 +22,39 @@
 
 #include "fireswarm_payload.h"
 #include "mcu_periph/uart.h"
+#include "subsystems/datalink/downlink.h"
 #include "led.h"
 
+#include "AutoPilotProt.h"
+
 #define FIRESWARM_PAYLOAD_POWER_LED  5
+
+AutoPilotMsgSensorData FireSwarmData;
 
 void fireswarm_payload_init(void)
 {
   LED_INIT(FIRESWARM_PAYLOAD_POWER_LED);
+
+  FireSwarmData.FlyState = 1;
+  FireSwarmData.GPSState = 3;
 }
+
+const char* hello_world = "Hello World\n";
 
 void fireswarm_periodic(void)
 {
+  static uint8_t distribute = 0;
   LED_TOGGLE(FIRESWARM_PAYLOAD_POWER_LED);
+
+  distribute++;
+  if (distribute >= 25)
+  {
+    char* c = (char*) hello_world;
+    while (*c != 0)
+      Uart3Transmit(*c++);
+
+    distribute = 0;
+  }
 }
 
 void fireswarm_event(void)

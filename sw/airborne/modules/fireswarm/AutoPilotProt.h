@@ -106,48 +106,50 @@ enum EAutoPilotWpType
 	AP_PROT_WP_CIRCLE
 };
 
+////////////////////////////////////////////////////
+// Data Types
 
-struct AutoPilotMsgPosition
+typedef struct AutoPilotMsgPositionStruct
 {
 	AutoPilotMsgPosType X; // In m
 	AutoPilotMsgPosType Y; // In m
 	AutoPilotMsgPosType Z; // In m
-};
+} AutoPilotMsgPosition;
 
-struct AutoPilotMsgPositionGPS
+typedef struct AutoPilotMsgPositionGPSStruct
 {
 	float GpsLat;	// In radians?
 	float GpsLong;	// In radians?
 	float GpsZ;		// In m above sea level?
-};
+} AutoPilotMsgPositionGPS;
 
 
-struct AutoPilotMsgWpLine
+typedef struct AutoPilotMsgWpLineStruct
 {
 	AutoPilotMsgPosition		From;
 	AutoPilotMsgPosition		To;
 	// 2*12 = 24 B
-};
+} AutoPilotMsgWpLine;
 
-struct AutoPilotMsgWpArc
+typedef struct AutoPilotMsgWpArcStruct
 {
 	AutoPilotMsgPosition		Center;
 	AutoPilotMsgDistanceType	Radius;
 	AutoPilotMsgRotationType	AngleStart;		// Range: [0, 2pi]
 	AutoPilotMsgRotationType	AngleArc;		// Range: (-2pi, 2pi), negative is clockwise
 	// 12+4+4+4 = 24 B
-};
+} AutoPilotMsgWpArc;
 
-struct AutoPilotMsgWpCircle
+typedef struct AutoPilotMsgWpCircleStruct
 {
 	AutoPilotMsgPosition		Center;
 	AutoPilotMsgDistanceType	Radius;
 	// 12+4 = 16 B
 	uint8_t						Padding[8];
 	// 16+8 = 24 B
-};
+} AutoPilotMsgWpCircle;
 
-struct AutoPilotMsgWp
+typedef struct AutoPilotMsgWpStruct
 {
 	uint32_t					Id;
 	uint8_t						WpType;			// See EAutoPilotWpType
@@ -159,19 +161,22 @@ struct AutoPilotMsgWp
 		AutoPilotMsgWpArc		Arc;
 		AutoPilotMsgWpCircle	Circle;
 	};
-};
+} AutoPilotMsgWp;
 
-struct AutoPilotMsgWayPoints
+typedef struct AutoPilotMsgWayPointsStruct
 {
 	uint8_t						NumWayPoints;
 	AutoPilotMsgWp				WayPoints[AP_PROT_WAYPOINTS_MAX];
-};
+} AutoPilotMsgWayPoints;
 
 
 struct AutoPilotMsgMode
 {
 	uint8_t						Mode;	// See EAutoPilotMode
 };
+
+/////////////////////////////////////////////////////////
+// Actual Messages
 
 
 struct AutoPilotMsgField
@@ -183,7 +188,7 @@ struct AutoPilotMsgField
 };
 
 
-struct AutoPilotMsgSensorData
+typedef struct AutoPilotMsgSensorDataStruct
 {
 	uint8_t						FlyState;		// See EAutoPilotFlyState
 	uint8_t						GPSState;		// 0 is none, 255 is best
@@ -201,7 +206,7 @@ struct AutoPilotMsgSensorData
 	AutoPilotMsgRotationType	Roll;
 	AutoPilotMsgRotationType	WindHeading;
 	AutoPilotMsgSpeedType		WindSpeed;
-};
+} AutoPilotMsgSensorData;
 
 
 struct AutoPilotMsgWpStatus
