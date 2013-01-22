@@ -1,5 +1,9 @@
-# for Tiny v2 or Twog v1
+# to output standard PPM to a R/C receiver
+#
+# This is used in the case where you want to directly drive a receiver which has a microcontroller
+# to do the decoding and driving of the servos (not a 4015 or 4017 decoder chip).
+# The PPM is output on the SERV_CLK pin. The PPM frame rate, pulse width, and number of channels
+# can be adjusted in the "servos_ppm_hw.h" file to suit your particular receiver.
 
-
-fbw.CFLAGS += -DACTUATORS=\"./TUDelft/servos_ppm_hw_fasst.h\" -DSERVOS_PPM_MAT
-fbw.srcs += $(SRC_ARCH)/TUDelft/servos_ppm_hw_fasst.c actuators.c
+fbw.CFLAGS += -DACTUATORS=\"$(SRC_ARCH)/subsystems/actuators/TUDelft/servos_ppm_hw_fasst.h\" -DSERVOS_PPM_MAT
+fbw.srcs += $(SRC_ARCH)/subsystems/actuators/TUDelft/servos_ppm_hw_fasst.c

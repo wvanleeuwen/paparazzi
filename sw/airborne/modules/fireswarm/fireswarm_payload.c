@@ -47,7 +47,7 @@ void fireswarm_periodic(void)
   LED_TOGGLE(FIRESWARM_PAYLOAD_POWER_LED);
 
   distribute++;
-  if (distribute >= 25)
+  if (distribute >= 10)
   {
     char* c = (char*) hello_world;
     while (*c != 0)

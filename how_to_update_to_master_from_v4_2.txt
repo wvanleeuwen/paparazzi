@@ -9,7 +9,12 @@ all flightplans:
 all airframes:
 
 	- replace CONTROL_RATE -> CONTROL_FREQUENCY
-	- add 
+
+fixedwing airframes:
+
+	- add <subsystem name="ins" type="alt_float" /> if there is an ALT_KALMAN(_ENABLED) define or if you use a Baro
+	- add <subsystem name="ins" type="gps_passthrough" /> to use direct GPS data (remove all ALT_KALMAN)
+	- ALT_KALMAN -> ALT_KALMAN_ENABLED = TRUE
 
 
 all conf/boards.makefile:
