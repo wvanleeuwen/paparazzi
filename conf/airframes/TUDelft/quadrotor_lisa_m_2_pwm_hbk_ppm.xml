@@ -37,6 +37,8 @@
 
 <modules>
     <load name="gps_ubx_ucenter.xml"/>
+  <!-- Using Geo Mag module -->
+    <load name="geo_mag.xml"/>
 </modules>
 
   <servos>
@@ -44,6 +46,7 @@
     <servo name="BACK"    no="1" min="1100" neutral="1100" max="2000"/>
     <servo name="RIGHT"   no="2" min="1100" neutral="1100" max="2000"/>
     <servo name="LEFT"    no="3" min="1100" neutral="1100" max="2000"/>
+    <servo name="CAM"     no="4" min="1100" neutral="1500" max="2000"/>
   </servos>
 
   <commands>
@@ -56,6 +59,7 @@
   <command_laws>
     <!-- command_laws is needed for pwm_supervision -->
     <!-- but can be empty if no additional servos are used -->
+    <set servo="CAM" value="radio_control.values[RADIO_EXTRA1]"/>
   </command_laws>
 
   <section name="SUPERVISION" prefix="SUPERVISION_">
@@ -88,8 +92,8 @@
 	<define name="MAG_Z_SENS" value="4.06715337569" integer="16"/>
 
 
-    <define name="BODY_TO_IMU_PHI"   value="0." unit="deg"/>
-    <define name="BODY_TO_IMU_THETA" value="0." unit="deg"/>
+    <define name="BODY_TO_IMU_PHI"   value="-2.5" unit="deg"/>
+    <define name="BODY_TO_IMU_THETA" value=" 1.5" unit="deg"/>
     <define name="BODY_TO_IMU_PSI"   value="-45." unit="deg"/>
   </section>
 
@@ -192,9 +196,9 @@
 
   <section name="GUIDANCE_H" prefix="GUIDANCE_H_">
     <define name="MAX_BANK" value="20" unit="deg"/>
-    <define name="PGAIN" value="100"/>
-    <define name="DGAIN" value="100"/>
-    <define name="IGAIN" value="0"/>
+    <define name="PGAIN" value="25"/>
+    <define name="DGAIN" value="150"/>
+    <define name="IGAIN" value="10"/>
   </section>
 
   <section name="SIMULATOR" prefix="NPS_">
