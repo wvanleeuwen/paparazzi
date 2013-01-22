@@ -33,7 +33,7 @@ receiver futabe fast spetial vertion https://www.mikrocontroller.com/index.php?m
     </target>
 
     <subsystem name="radio_control" type="ppm"/>
-    <subsystem name="telemetry"     type="xbee_api"/>
+    <subsystem name="telemetry"     type="transparent"/>
     <subsystem name="actuators"     type="skiron">
       <define name="SKIRON_I2C_SCL_TIME" value="25"/>
     </subsystem>

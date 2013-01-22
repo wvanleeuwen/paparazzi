@@ -23,10 +23,11 @@
       <subsystem name="radio_control" type="ppm"/>
     </target>
 
-    <subsystem name="actuators"     type="pwm_supervision">
+    <subsystem name="actuators"     type="pwm">
       <define name="SERVO_HZ" value="400"/>
       <define name="USE_SERVOS_7AND8"/>
     </subsystem>
+    <subsystem name="motor_mixing" />
 
     <subsystem name="telemetry"     type="xbee_api"/>
     <subsystem name="imu"           type="aspirin_v2.1"/>
@@ -57,12 +58,16 @@
   </commands>
 
   <command_laws>
-    <!-- command_laws is needed for pwm_supervision -->
-    <!-- but can be empty if no additional servos are used -->
+    <call fun="motor_mixing_run(autopilot_motors_on,FALSE,values)"/>
+    <set servo="FRONT"  value="motor_mixing.commands[SERVO_FRONT]"/>
+    <set servo="BACK"   value="motor_mixing.commands[SERVO_BACK]"/>
+    <set servo="RIGHT"  value="motor_mixing.commands[SERVO_RIGHT]"/>
+    <set servo="LEFT"   value="motor_mixing.commands[SERVO_LEFT]"/>
+
     <set servo="CAM" value="radio_control.values[RADIO_EXTRA1]"/>
   </command_laws>
 
-  <section name="SUPERVISION" prefix="SUPERVISION_">
+  <section name="MIXING" prefix="MOTOR_MIXING_">
     <define name="STOP_MOTOR" value="1000"/>
     <define name="MIN_MOTOR"  value="1100"/>
     <define name="MAX_MOTOR"  value="1860"/>
