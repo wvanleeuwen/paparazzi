@@ -267,7 +267,6 @@
     <target name="sim" board="pc"/>
 
     <define name="AGR_CLIMB"/>
-    <define name="ALT_KALMAN"/>
     <define name="TUNE_AGRESSIVE_CLIMB"/>
 <!--    <define name="STRONG_WIND"/> -->
     <define name="WIND_INFO"/>

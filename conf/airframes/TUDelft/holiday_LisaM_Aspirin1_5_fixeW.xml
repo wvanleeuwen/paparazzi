@@ -123,7 +123,7 @@
     <define name="NOMINAL_AIRSPEED" value="17." unit="m/s"/>
     <define name="CARROT" value="5." unit="s"/>
     <define name="KILL_MODE_DISTANCE" value="(1.5*MAX_DIST_FROM_HOME)"/>
-    <define name="CONTROL_RATE" value="60" unit="Hz"/>
+    <define name="CONTROL_FREQUENCY" value="60" unit="Hz"/>
 <!--    <define name="XBEE_INIT" value="&quot;ATPL2\rATRN5\rATTT80\r&quot;"/> -->
 <!--    <define name="NO_XBEE_API_INIT" value="TRUE"/> -->
     <define name="ALT_KALMAN_ENABLED" value="TRUE"/>
@@ -156,12 +156,12 @@
     <define name="AUTO_THROTTLE_IGAIN" value="0."/>
     <define name="AUTO_THROTTLE_PITCH_OF_VZ_PGAIN" value="0.202000007033"/>
 
-    <!-- auto pitch inner loop -->
+    <!-- auto pitch inner loop 
     <define name="AUTO_PITCH_PGAIN" value="0.0399999991059"/>
     <define name="AUTO_PITCH_IGAIN" value="0.019999999553"/>
     <define name="AUTO_PITCH_MAX_PITCH" value="0.35"/>
     <define name="AUTO_PITCH_MIN_PITCH" value="-0.35"/>
-
+    -->
     <define name="THROTTLE_SLEW_LIMITER" value="2" unit="s"/>
 
   </section>
@@ -253,7 +253,6 @@
       <define name="AHRS_TRIGGERED_ATTITUDE_LOOP"/>
       <define name="STRONG_WIND"/>
       <define name="LOITER_TRIM"/>
-      <define name="ALT_KALMAN"/>
       <define name="AGR_CLIMB"/>
       <define name="TUNE_AGRESSIVE_CLIMB"/>
     </target>
@@ -274,6 +273,7 @@
       <configure name="GPS_BAUD"        value="B38400"/>
     </subsystem>
     <subsystem name="control"/>
+    <subsystem name="ins" 		type="alt_float" />
     <subsystem name="navigation"/>
 
     <target name="sim" board="pc">

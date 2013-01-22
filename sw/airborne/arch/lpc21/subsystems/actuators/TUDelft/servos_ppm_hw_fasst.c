@@ -1,6 +1,4 @@
 /*
- * $Id: servos_ppm_hw.c 4343 2009-11-22 12:00:37Z markgriffin $
- *
  * Copyright (C) 2008  Mark Griffin
  *
  * This file is part of paparazzi.
@@ -21,14 +19,19 @@
  * Boston, MA 02111-1307, USA.
  *
  */
-/** \file servos_ppm_out.c
- *  \Efficient driving of MAT0.1 (SERVO_CLOCK_PIN) using TIMER0 to produce PPM
- *  \ for a R/C receiver which has a microcontroller to drive the servos
- *  \(not a 4015 or 4017 decade counter chip).
+
+/**
+ * @file arch/lpc21/subsystems/actuators/servos_ppm_hw.c
+ *
+ * Efficient driving of MAT0.1 (SERVO_CLOCK_PIN) using TIMER0 to produce PPM
+ * for a R/C receiver which has a microcontroller to drive the servos
+ * (not a 4015 or 4017 decade counter chip).
  */
-#include "actuators.h"
+
+#include "subsystems/actuators.h"
 #include "paparazzi.h"
 #include "generated/airframe.h"
+#include "servos_ppm_hw_fasst.h"
 
 uint8_t servos_PPM_idx;
 uint8_t ppm_pulse;
@@ -36,7 +39,7 @@ uint32_t servos_delay = SERVO_REFRESH_TICS;
 
 #define START_TIMEOUT 0xFFFF;
 
-void actuators_init ( void ) {
+void actuators_ppm_init ( void ) {
   /* select ppm output pin as MAT0.1 output */
   SERVO_CLOCK_PINSEL |= SERVO_CLOCK_PINSEL_VAL << SERVO_CLOCK_PINSEL_BIT;
 
