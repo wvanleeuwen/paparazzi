@@ -16,6 +16,19 @@ fixedwing airframes:
 	- add <subsystem name="ins" type="gps_passthrough" /> to use direct GPS data (remove all ALT_KALMAN)
 	- ALT_KALMAN -> ALT_KALMAN_ENABLED = TRUE
 
+rotorcraft airframes:
+
+	- <section name="MIXING" prefix="MOTOR_MIXING_"> instead of <section name="SUPERVISION" prefix="SUPERVISION_">
+	- servos need a driver <servos driver="Asctec">
+	-   <command_laws>
+	    <call fun="motor_mixing_run(autopilot_motors_on,FALSE,values)"/>
+	    <set servo="FRONT"  value="motor_mixing.commands[SERVO_FRONT]"/>
+	    <set servo="BACK"   value="motor_mixing.commands[SERVO_BACK]"/>
+	    <set servo="RIGHT"  value="motor_mixing.commands[SERVO_RIGHT]"/>
+	    <set servo="LEFT"   value="motor_mixing.commands[SERVO_LEFT]"/>
+	  </command_laws>
+
+
 
 all conf/boards.makefile:
 
