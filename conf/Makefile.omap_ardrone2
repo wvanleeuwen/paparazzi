@@ -20,25 +20,14 @@
 # Boston, MA 02111-1307, USA.
 #
 
-# Define programs and commands.
-
-# Look for an open embedded directory
-#OVERO_OE := $(shell find -L /opt/paparazzi/omap ~ / -maxdepth 1 -type d -name overo-oe 2>/dev/null | head -n 1)
-
-# Multiple places to look for compiler within oe directory structure
-#CC_NAME = arm-angstrom-linux-gnueabi-gcc
-#CCPATH1 = $(OVERO_OE)/tmp/cross/armv7a/bin
-#CCPATH2 = $(OVERO_OE)/tmp/sysroots/i686-linux/usr/armv7a/bin
-#CCPATH3 = $(OVERO_OE)/tmp/sysroots/x86_64-linux/usr/armv7a/bin
-#CC := $(shell find -L $(CCPATH1) $(CCPATH2) $(CCPATH3) -name $(CC_NAME) -type f 2>/dev/null | head -n 1)
-CC   = /usr/local/codesourcery/arm-2011.03/bin/arm-none-linux-gnueabi-gcc
-LD = $(CC)
-
-#GLIB_INC = $(OVERO_OE)/tmp/work/armv7a-angstrom-linux-gnueabi/glib-2.0-2.22.4-r1/staging-pkg/staging/armv7a-angstrom-linux-gnueabi/usr/include/glib-2.0
-#GLIB_LIB = $(OVERO_OE)/tmp/work/armv7a-angstrom-linux-gnueabi/glib-2.0-2.22.4-r1/staging-pkg/staging/armv7a-angstrom-linux-gnueabi/usr/lib/
-
 # Launch with "make Q=''" to get full command display
 Q=@
+
+#
+# find compiler toolchain
+#
+include $(PAPARAZZI_SRC)/conf/Makefile.arm-none-linux-gnueabi
+
 
 OPT=3
 CSTANDARD = -std=gnu99
@@ -47,12 +36,10 @@ CINCS = $(INCLUDES) -I$(PAPARAZZI_SRC)/sw/include
 # Compiler flags.
 CFLAGS += $(CINCS)
 CFLAGS += -O$(OPT) -mfloat-abi=softfp -mtune=cortex-a8 -mfpu=vfp -march=armv7-a
-# CFLAGS += -malignment-traps
+CFLAGS += -fno-short-enums
 CFLAGS += -Wall -Wcast-qual -Wimplicit -Wcast-align
 CFLAGS += -Wpointer-arith -Wswitch
 CFLAGS += -Wredundant-decls -Wreturn-type -Wshadow -Wunused
-#CFLAGS += -Wa,-adhlns=$(OBJDIR)/$(notdir $(subst $(suffix $<),.lst,$<))
-#CFLAGS += $(patsubst %,-I%,$(EXTRAINCDIRS))
 
 CFLAGS += -lm
 
