@@ -1,7 +1,29 @@
+/*
+ * Copyright (C) 2012-2013 Freek van Tienen
+ *
+ * This file is part of paparazzi.
+ *
+ * paparazzi is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2, or (at your option)
+ * any later version.
+ *
+ * paparazzi is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with paparazzi; see the file COPYING.  If not, write to
+ * the Free Software Foundation, 59 Temple Place - Suite 330,
+ * Boston, MA 02111-1307, USA.
+ */
 
-#include "boards/ardrone2.h"
 #include "at_com.h"
+#include "boards/ardrone2.h"
+#include "generated/airframe.h"
 
+#include <stdlib.h>
 #include <stdio.h>
 #include <netdb.h>
 #include <netinet/in.h>
@@ -20,8 +42,10 @@ struct sockaddr_in pc_addr,								//Own pc address
 				   from;								//From address
 
 bool_t at_com_ready = FALSE;							//Status of the at communication
+char sessionId[9];										//THe config session ID
 
 void at_com_send(char* command);
+void init_at_config(void);
 
 //Init the at_com
 void init_at_com(void) {
@@ -65,6 +89,38 @@ void init_at_com(void) {
 	at_com_ready = TRUE;
 }
 
+//Init the at config
+void init_at_config(void) {
+	//Generate a session id
+	uint32_t binaryId = (uint32_t)rand ();
+	binaryId = (0 != binaryId) ? binaryId : 1u;
+	snprintf(sessionId, 9, "%08x", binaryId);
+	sessionId[8] = '\0';
+
+	//Send session, application and user id:
+	at_com_send_config("CUSTOM:session_id", sessionId);
+	at_com_send_config("CUSTOM:application_id", "9D7BFD45");
+	at_com_send_config("CUSTOM:profile_id", "2BF07F58");
+
+	//Send config values
+	at_com_send_config("CONTROL:euler_angle_max","0.52");
+	at_com_send_config("CONTROL:altitude_max","20000");
+	at_com_send_config("CONTROL:control_vz_max","2000");
+	at_com_send_config("CONTROL:control_yaw","6.11");
+
+	//Send config values with the airframe.h
+#ifndef ARDRONE_FLIGHT_INDOOR
+	at_com_send_config("CONTROL:outdoor","TRUE");
+#else
+	at_com_send_config("CONTROL:outdoor","FALSE");
+#endif
+#ifndef ARDRONE_WITHOUT_SHELL
+	at_com_send_config("CONTROL:flight_without_shell","FALSE");
+#else
+	at_com_send_config("CONTROL:flight_without_shell","TRUE");
+#endif
+}
+
 //Recieve a navdata packet
 void at_com_recieve_navdata(unsigned char* buffer) {
 	int l;
@@ -79,6 +135,8 @@ void at_com_send(char* command) {
 //Send a Config
 void at_com_send_config(char* key, char* value) {
 	char command[256];
+	sprintf(command, "AT*CONFIG_IDS=%d,\"%s\",\"2BF07F58\",\"9D7BFD45\"\r", packet_seq++, sessionId);
+	at_com_send(command);
 	sprintf(command, "AT*CONFIG=%d,\"%s\",\"%s\"\r", packet_seq++, key, value);
 	at_com_send(command);
 }

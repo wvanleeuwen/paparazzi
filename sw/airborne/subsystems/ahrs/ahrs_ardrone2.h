@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2010 The Paparazzi Team
+ * Copyright (C) 2012-2013 Freek van Tienen
  *
  * This file is part of paparazzi.
  *

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2010 The Paparazzi Team
+ * Copyright (C) 2012-2013 Freek van Tienen
  *
  * This file is part of paparazzi.
  *
@@ -30,6 +30,10 @@ unsigned char buffer[2048]; //Packet buffer
 
 void ahrs_init(void) {
 	init_at_com();
+
+	//Set navdata_demo to FALSE and flat trim the ar drone
+	at_com_send_config("general:navdata_demo", "FALSE");
+	at_com_send_ftrim();
 }
 
 void ahrs_align(void) {
@@ -38,7 +42,7 @@ void ahrs_align(void) {
 
 void ahrs_propagate(void) {
 	//Recieve the main packet
-	at_com_recieve_navdata(&buffer);
+	at_com_recieve_navdata(buffer);
 	navdata_t* main_packet = (navdata_t*) &buffer;
 	ahrs_impl.state = main_packet->ardrone_state;
 

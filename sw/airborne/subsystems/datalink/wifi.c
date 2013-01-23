@@ -23,11 +23,21 @@
 #include "subsystems/datalink/wifi.h"
 #include "fms/fms_network.h"
 
+//Check if variables are set and else define them
+#ifndef LINK_HOST
 #define LINK_HOST     "192.168.1.0"
+#endif
+#ifndef LINK_PORT
 #define LINK_PORT             4242
+#endif
+#ifndef DATALINK_PORT
 #define DATALINK_PORT         4243
+#endif
+#ifndef FMS_NETWORK_BROADCAST
 #define FMS_NETWORK_BROADCAST TRUE
+#endif
 
+//Define the buffer, check bytes and FmsNetwork
 char udp_buffer[1496];
 unsigned char udp_read_buffer[128];
 uint16_t udp_buffer_id;
@@ -50,16 +60,16 @@ void wifi_send( void ) {
 }
 
 void wifi_receive( void ) {
-
-	/*if (dl_msg_available == TRUE) {
+	//First check if it isn't already having a message
+	if(dl_msg_available == TRUE) {
 		return;
-	}*/
+	}
 
-	// TODO: fix argument 2 incompatible pointer type
-	network_read(network, &udp_read_buffer, TRANSPORT_PAYLOAD_LEN);
+	//Read from the network
+	network_read(network, udp_read_buffer, TRANSPORT_PAYLOAD_LEN);
 
-	if (udp_read_buffer[0] == STX) {
-
+	//Parse the packet
+	if(udp_read_buffer[0] == STX) {
 		uint8_t size = udp_read_buffer[1]-4; // minus STX, LENGTH, CK_A, CK_B
 		uint8_t ck_aa, ck_bb;
 		ck_aa = ck_bb = size+4;
