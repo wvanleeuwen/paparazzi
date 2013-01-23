@@ -302,8 +302,6 @@ static bool_t nps_main_parse_options(int argc, char** argv) {
             nps_main.spektrum_dev = strdup(optarg); break;
           case 5:
             nps_main.rc_script = atoi(optarg); break;
-          case 6:
-            nps_main.ivy_bus = strdup(optarg); break;
         }
         break;
 
