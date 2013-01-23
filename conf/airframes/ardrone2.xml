@@ -6,14 +6,10 @@
 		<target name="ap" board="ardrone2">
 			<define name="USE_INS_NAV_INIT" />
 			<define name="ROTORCRAFT_COMMANDS_YAW_ALWAYS_ENABLED"/>
-		</target>
-
-		<target name="nps" board="pc">
-			<subsystem name="fdm" type="jsbsim" />
+			<!-- <define name="USE_GPS_HEIGHT" /> -->
 		</target>
 
 		<subsystem name="radio_control" type="datalink" />
-
 		<subsystem name="telemetry" type="wifi" />
 		<subsystem name="gps" type="ublox" />
 		<subsystem name="ahrs" type="ardrone2" />
@@ -89,7 +85,7 @@
 
 	<section name="GUIDANCE_H" prefix="GUIDANCE_H_">
 		<define name="MAX_BANK" value="30." unit="deg" />
-		<define name="PGAIN" value="5" />
+		<define name="PGAIN" value="7" />
 		<define name="DGAIN" value="2" />
 		<define name="IGAIN" value="0" />
 	</section>
