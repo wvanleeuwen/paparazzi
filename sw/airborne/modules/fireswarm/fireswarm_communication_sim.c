@@ -41,7 +41,15 @@ void fireswarm_payload_link_init(void)
   }
   else
   {
+    struct termios options;
+    
     fcntl(sim_uart_p, F_SETFL, 0);
+    
+    tcgetattr(sim_uart_p, &options);
+    cfsetispeed(&options, B57600);
+    cfsetospeed(&options, B57600);
+    options.c_cflag |= (CLOCAL | CREAD);
+    tcsetattr(sim_uart_p, TCSANOW, &options); 
   }
 }
 

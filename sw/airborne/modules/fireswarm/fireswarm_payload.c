@@ -37,7 +37,7 @@ void fireswarm_payload_init(void)
 {
   LED_INIT(FIRESWARM_PAYLOAD_POWER_LED);
  
-  FireSwarmHeader.Header = 0x1234;
+  FireSwarmHeader.Header = AP_PROT_HEADER;
   FireSwarmHeader.MsgType = AP_PROT_REQ_SENSORDATA;
   FireSwarmHeader.TimeStamp = 0;
   FireSwarmHeader.DataSize = sizeof(FireSwarmData);
@@ -60,9 +60,9 @@ void fireswarm_periodic(void)
   FireSwarmData.AutoPilotState = AP_PROT_STATE_AP_OUTER_LOOP | AP_PROT_STATE_AP_INNER_LOOP;
   FireSwarmData.SensorState = AP_PROT_STATE_SENSOR_COMPASS | AP_PROT_STATE_SENSOR_ACCELERO | AP_PROT_STATE_SENSOR_GPS | AP_PROT_STATE_SENSOR_WIND | AP_PROT_STATE_SENSOR_PRESSURE;
   
-  FireSwarmData.Position.X = stateGetPositionUtm_f()->alt;
-  FireSwarmData.Position.Y = 3;
-  FireSwarmData.Position.Z = 3;
+  FireSwarmData.Position.X = stateGetPositionUtm_f()->east;
+  FireSwarmData.Position.Y = stateGetPositionUtm_f()->north;
+  FireSwarmData.Position.Z = stateGetPositionUtm_f()->alt;
 
   FireSwarmData.GroundSpeed = 3;
   FireSwarmData.VerticalSpeed = 3;
