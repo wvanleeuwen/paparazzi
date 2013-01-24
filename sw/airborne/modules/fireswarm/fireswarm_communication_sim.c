@@ -76,5 +76,9 @@ char fireswarm_payload_link_get(void)
 {
   char c;
   int ret = read(sim_uart_p, &c, 1);
-  return c;
+  if (ret > 0)
+    return c;
+  else
+    printf("read(1)_error\n");
+  return 0;
 }
