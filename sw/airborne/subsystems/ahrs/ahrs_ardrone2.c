@@ -76,7 +76,7 @@ void ahrs_propagate(void) {
 			struct FloatEulers angles;
 			angles.theta = navdata_demo->theta/180000.*M_PI;
 			angles.psi = navdata_demo->psi/180000.*M_PI;
-			angles.phi = -navdata_demo->phi/180000.*M_PI;
+			angles.phi = navdata_demo->phi/180000.*M_PI;
 			stateSetNedToBodyEulers_f(&angles);
 
 			//Update the electrical supply
