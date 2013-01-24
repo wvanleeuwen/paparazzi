@@ -64,18 +64,20 @@ void fireswarm_periodic(void)
   FireSwarmData.Position.Y = stateGetPositionUtm_f()->north;
   FireSwarmData.Position.Z = stateGetPositionUtm_f()->alt;
 
-  FireSwarmData.GroundSpeed = 3;
-  FireSwarmData.VerticalSpeed = 3;
-  FireSwarmData.Heading = 3;
-  FireSwarmData.Yaw = 3;
-  FireSwarmData.Pitch = 3;
-  FireSwarmData.Roll = 3;
-  FireSwarmData.WindHeading = 3;
-  FireSwarmData.WindSpeed = 3;
+  FireSwarmData.GroundSpeed = 0;
+  FireSwarmData.VerticalSpeed = 0;
+  FireSwarmData.Heading = 0;
+  FireSwarmData.Yaw = 0;
+  FireSwarmData.Pitch = 0;
+  FireSwarmData.Roll = 0;
+  FireSwarmData.WindHeading = 0;
+  FireSwarmData.WindSpeed = 0;
     
   
+  fireswarm_payload_link_transmit((uint8_t*)&FireSwarmHeader, sizeof(FireSwarmHeader));
   fireswarm_payload_link_transmit((uint8_t*)&FireSwarmData, sizeof(FireSwarmData));
-  fireswarm_payload_link_transmit((uint8_t*)&FireSwarmData, sizeof(FireSwarmData));
+
+  fprintf(stderr,"Bytes: %d \n", fireswarm_payload_link_has_data());
 
 }
 
