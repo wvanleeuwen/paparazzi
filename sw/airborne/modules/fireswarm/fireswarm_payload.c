@@ -38,7 +38,7 @@ void fireswarm_payload_init(void)
   LED_INIT(FIRESWARM_PAYLOAD_POWER_LED);
  
   FireSwarmHeader.Header = AP_PROT_HEADER;
-  FireSwarmHeader.MsgType = AP_PROT_REQ_SENSORDATA;
+  FireSwarmHeader.MsgType = AP_PROT_SENSORDATA;
   FireSwarmHeader.TimeStamp = 0;
   FireSwarmHeader.DataSize = sizeof(FireSwarmData);
   
@@ -77,11 +77,104 @@ void fireswarm_periodic(void)
   fireswarm_payload_link_transmit((uint8_t*)&FireSwarmHeader, sizeof(FireSwarmHeader));
   fireswarm_payload_link_transmit((uint8_t*)&FireSwarmData, sizeof(FireSwarmData));
 
-  fprintf(stderr,"Bytes: %d \n", fireswarm_payload_link_has_data());
+  //fprintf(stderr,"Bytes: %d \n", fireswarm_payload_link_has_data());
 
 }
 
+/* parser status */
+#define UNINIT        0
+#define GOT_SYNC1     1
+#define GOT_SYNC2     2
+#define GOT_ID        3
+#define GOT_T0        4
+#define GOT_T1        5
+#define GOT_T2        6
+#define GOT_T3        7
+#define GOT_LEN       8
+
+#define FIRESWARM_MAX_PAYLOAD 255
+struct FireSwarmMessage {
+  bool_t msg_available;
+  uint8_t msg_buf[FIRESWARM_MAX_PAYLOAD] __attribute__ ((aligned));
+  uint8_t msg_id;
+
+  uint8_t status;
+  uint8_t len;
+  uint8_t msg_idx;
+  uint8_t error_cnt;
+  uint8_t error_last;
+};
+
+struct FireSwarmMessage fsw_msg;
+
+/* parsing */
+void fireswarm_parse( uint8_t c ) {
+  // printf("P%d ",fsw_msg.status);
+  switch (fsw_msg.status) {
+  case UNINIT:
+    if (c == 0xee)
+      fsw_msg.status++;
+    break;
+  case GOT_SYNC1:
+    if (c != 0xfe) {
+      fsw_msg.error_last = 0x01;
+      goto error;
+    }
+    fsw_msg.status++;
+    break;
+  case GOT_SYNC2:
+    if (fsw_msg.msg_available) {
+      /* Previous message has not yet been parsed: discard this one */
+      fsw_msg.error_last = 2;
+      goto error;
+    }
+    fsw_msg.msg_id = c;
+    fsw_msg.status++;
+    break;
+  case GOT_ID:
+  case GOT_T0:
+  case GOT_T1:
+  case GOT_T2:
+    fsw_msg.status++;
+    break;
+  case GOT_T3:
+    fsw_msg.len = c;
+    fsw_msg.msg_idx = 0;
+    fsw_msg.status++;
+    break;
+  case GOT_LEN:
+    fsw_msg.msg_buf[fsw_msg.msg_idx] = c;
+    fsw_msg.msg_idx++;
+    if (fsw_msg.msg_idx >= fsw_msg.len) {
+      fsw_msg.msg_available = TRUE;
+      goto restart;
+    }
+    break;
+  default:
+    fsw_msg.error_last = 3;
+    goto error;
+  }
+  return;
+ error:
+  fsw_msg.error_cnt++;
+ restart:
+  fsw_msg.status = UNINIT;
+  return;
+}
+
+
+
 void fireswarm_event(void)
 {
+  while (fireswarm_payload_link_has_data())
+  {
+    //printf("read ->");
+    fireswarm_parse(fireswarm_payload_link_get());
+    if (fsw_msg.msg_available)
+    {
+      fprintf(stderr,"MSG %d %d\n",fsw_msg.msg_id, fsw_msg.len );
+      fsw_msg.msg_available = 0;
+    }
+  }
 }
 

@@ -8,7 +8,7 @@
     <file name="fireswarm_payload.h"/>
   </header>
   <init fun="fireswarm_payload_init()"/>
-  <periodic fun="fireswarm_periodic()" freq="10"/>
+  <periodic fun="fireswarm_periodic()" freq="16"/>
   <event fun="fireswarm_event()" />
   <makefile >
     <file name="fireswarm_payload.c"/>
