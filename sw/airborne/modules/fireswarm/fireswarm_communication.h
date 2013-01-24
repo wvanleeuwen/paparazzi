@@ -31,6 +31,10 @@
 #include "std.h"
 
 extern void fireswarm_payload_link_init(void);
+
+extern void fireswarm_payload_link_start(void);
+extern void fireswarm_payload_link_crc(void);
+
 extern void fireswarm_payload_link_transmit(uint8_t* buff, int size);
 extern int fireswarm_payload_link_has_data(void);
 extern char fireswarm_payload_link_get(void);
