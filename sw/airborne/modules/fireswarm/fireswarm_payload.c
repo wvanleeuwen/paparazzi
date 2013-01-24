@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2009  Gautier Hattenberger
+ * Copyright (C) 2013  Christophe De Wagter
  *
  * This file is part of paparazzi.
  *
@@ -26,9 +26,11 @@
 #include "led.h"
 
 #include "AutoPilotProt.h"
+#include "fireswarm_communication.h"
 
 #define FIRESWARM_PAYLOAD_POWER_LED  5
 
+AutoPilotMsgHeader FireSwarmHeader;
 AutoPilotMsgSensorData FireSwarmData;
 
 void fireswarm_payload_init(void)
@@ -37,24 +39,25 @@ void fireswarm_payload_init(void)
 
   FireSwarmData.FlyState = 1;
   FireSwarmData.GPSState = 3;
+ 
+  FireSwarmHeader.Header = 0x1234;
+  FireSwarmHeader.MsgType = AP_PROT_REQ_SENSORDATA;
+  FireSwarmHeader.TimeStamp = 0;
+  FireSwarmHeader.DataSize = sizeof(FireSwarmData);
+  
+  fireswarm_payload_link_init();
+ 
 }
 
 const char* hello_world = "Hello World\n";
 
 void fireswarm_periodic(void)
 {
-  static uint8_t distribute = 0;
   LED_TOGGLE(FIRESWARM_PAYLOAD_POWER_LED);
 
-  distribute++;
-  if (distribute >= 10)
-  {
-    char* c = (char*) hello_world;
-    while (*c != 0)
-      Uart3Transmit(*c++);
+  fireswarm_payload_link_transmit((uint8_t*)&FireSwarmData, sizeof(FireSwarmData));
+  fireswarm_payload_link_transmit((uint8_t*)&FireSwarmData, sizeof(FireSwarmData));
 
-    distribute = 0;
-  }
 }
 
 void fireswarm_event(void)

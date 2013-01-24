@@ -20,16 +20,20 @@
  *
  */
 
-/** \file fireswarm_payload.h
+/** \file fireswarm_communication.h
  *
  * Interface with FireSwarm Payload Module
  */
 
-#ifndef FIRESWARM_PAYLOAD_H
-#define FIRESWARM_PAYLOAD_H
+#ifndef FIRESWARM_PAYLOAD_COMMUNICATIONS_H
+#define FIRESWARM_PAYLOAD_COMMUNICATIONS_H
 
-void fireswarm_payload_init(void);
-void fireswarm_periodic(void);
-void fireswarm_event(void);
+#include "std.h"
+
+extern void fireswarm_payload_link_init(void);
+extern void fireswarm_payload_link_transmit(uint8_t* buff, int size);
+extern int fireswarm_payload_link_has_data(void);
+extern char fireswarm_payload_link_get(void);
+
 
 #endif

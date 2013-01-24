@@ -20,16 +20,17 @@
  *
  */
 
-/** \file fireswarm_payload.h
- *
- * Interface with FireSwarm Payload Module
- */
+#include "fireswarm_communication.h"
 
-#ifndef FIRESWARM_PAYLOAD_H
-#define FIRESWARM_PAYLOAD_H
 
-void fireswarm_payload_init(void);
-void fireswarm_periodic(void);
-void fireswarm_event(void);
+void fireswarm_payload_link_init(void)
+{
+}
 
-#endif
+
+void fireswarm_payload_link_transmit(uint8_t* buff, int size)
+{
+  while (size-- > 0)
+    Uart3Transmit(*buff++);
+}
+

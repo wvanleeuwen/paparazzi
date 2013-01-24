@@ -238,13 +238,13 @@ struct AutoPilotMsgXBeeMsg
 };
 
 
-struct AutoPilotMsgHeader
+typedef struct AutoPilotMsgHeaderStruct
 {
 	uint16_t 					Header;		// Set this to some special number
 	uint8_t 					MsgType; 	// EAutoPilotMsgType
 	AutoPilotMsgTimeType		TimeStamp;
 	uint8_t 					DataSize; 	// Length of the data following in bytes (can be 0)
-};
+} AutoPilotMsgHeader;
 
 #pragma pack()
 
