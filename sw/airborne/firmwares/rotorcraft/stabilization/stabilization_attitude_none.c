@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2009 Antoine Drouin <poinix@gmail.com>
+ * Copyright (C) 2012-2013 Freek van Tienen
  *
  * This file is part of paparazzi.
  *
@@ -58,13 +58,20 @@ void stabilization_attitude_enter(void) {
 }
 
 void stabilization_attitude_run(bool_t  in_flight __attribute__ ((unused))) {
-	/* just directly pass guidance commands */
+	/* For roll an pitch we pass truough the desired angles as stabilization command */
 	EULERS_SMUL(stab_att_ref_euler, stab_att_sp_euler, MAX_PPRZ/TRAJ_MAX_BANK);
-	EULERS_BOUND_CUBE(stab_att_ref_euler, -MAX_PPRZ, MAX_PPRZ);
-
 	stabilization_cmd[COMMAND_ROLL] = stab_att_ref_euler.phi;
 	stabilization_cmd[COMMAND_PITCH] = stab_att_ref_euler.theta;
-	//stabilization_cmd[COMMAND_YAW]   = (int)((float)((ANGLE_FLOAT_OF_BFP(stab_att_sp_euler.psi) - stateGetNedToBodyEulers_f()->psi) / M_PI) * MAX_PPRZ);
+
+	//TODO: Fix yaw with PID controller
+	int32_t yaw_error = stateGetNedToBodyEulers_i()->psi-stab_att_sp_euler.psi;
+	INT32_ANGLE_NORMALIZE(yaw_error);
+	stabilization_cmd[COMMAND_YAW] = yaw_error * MAX_PPRZ / INT32_ANGLE_PI;
+
+	/* bound the result */
+	BoundAbs(stabilization_cmd[COMMAND_ROLL], MAX_PPRZ);
+	BoundAbs(stabilization_cmd[COMMAND_PITCH], MAX_PPRZ);
+	BoundAbs(stabilization_cmd[COMMAND_YAW], MAX_PPRZ);
 }
 
 void stabilization_attitude_ref_init(void) {
