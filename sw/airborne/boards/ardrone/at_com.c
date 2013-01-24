@@ -85,6 +85,9 @@ void init_at_com(void) {
 	int one = 1;
 	sendto(navdata_socket, &one, 4, 0, (struct sockaddr *)&drone_nav, sizeof(drone_nav));
 
+	//Init at config
+	init_at_config();
+
 	//Set at_com to ready
 	at_com_ready = TRUE;
 }
@@ -98,26 +101,29 @@ void init_at_config(void) {
 	sessionId[8] = '\0';
 
 	//Send session, application and user id:
-	at_com_send_config("CUSTOM:session_id", sessionId);
-	at_com_send_config("CUSTOM:application_id", "9D7BFD45");
-	at_com_send_config("CUSTOM:profile_id", "2BF07F58");
+	at_com_send_config("custom:session_id", sessionId);
+	at_com_send_config("custom:application_id", "9D7BFD45");
+	at_com_send_config("custom:profile_id", "2BF07F58");
 
 	//Send config values
-	at_com_send_config("CONTROL:euler_angle_max","0.52");
-	at_com_send_config("CONTROL:altitude_max","20000");
-	at_com_send_config("CONTROL:control_vz_max","2000");
-	at_com_send_config("CONTROL:control_yaw","6.11");
+	at_com_send_config("control:euler_angle_max","0.52");
+	at_com_send_config("control:altitude_max","20000");
+	at_com_send_config("control:control_vz_max","2000");
+	at_com_send_config("control:control_yaw","6.11");
 
 	//Send config values with the airframe.h
 #ifndef ARDRONE_FLIGHT_INDOOR
-	at_com_send_config("CONTROL:outdoor","TRUE");
+	at_com_send_config("control:outdoor","TRUE");
 #else
-	at_com_send_config("CONTROL:outdoor","FALSE");
+	at_com_send_config("control:outdoor","FALSE");
 #endif
 #ifndef ARDRONE_WITHOUT_SHELL
-	at_com_send_config("CONTROL:flight_without_shell","FALSE");
+	at_com_send_config("control:flight_without_shell","FALSE");
 #else
-	at_com_send_config("CONTROL:flight_without_shell","TRUE");
+	at_com_send_config("control:flight_without_shell","TRUE");
+#endif
+#ifdef ARDRONE_OWNER_MAC
+	at_com_send_config("network:owner_mac",ARDRONE_OWNER_MAC);
 #endif
 }
 
