@@ -74,11 +74,13 @@ void fireswarm_periodic(void)
   FireSwarmData.WindSpeed = 0;
     
   
+  fireswarm_payload_link_start();
   fireswarm_payload_link_transmit((uint8_t*)&FireSwarmHeader, sizeof(FireSwarmHeader));
   fireswarm_payload_link_transmit((uint8_t*)&FireSwarmData, sizeof(FireSwarmData));
+  fireswarm_payload_link_crc();
 
   //fprintf(stderr,"Bytes: %d \n", fireswarm_payload_link_has_data());
-
+  fprintf(stderr,".");
 }
 
 /* parser status */
@@ -91,12 +93,14 @@ void fireswarm_periodic(void)
 #define GOT_T2        6
 #define GOT_T3        7
 #define GOT_LEN       8
+#define GOT_PAYLOAD   9
 
 #define FIRESWARM_MAX_PAYLOAD 255
 struct FireSwarmMessage {
   bool_t msg_available;
   uint8_t msg_buf[FIRESWARM_MAX_PAYLOAD] __attribute__ ((aligned));
   uint8_t msg_id;
+  uint8_t crc;
 
   uint8_t status;
   uint8_t len;
@@ -109,13 +113,14 @@ struct FireSwarmMessage fsw_msg;
 
 /* parsing */
 void fireswarm_parse( uint8_t c ) {
-  // printf("P%d ",fsw_msg.status);
   switch (fsw_msg.status) {
   case UNINIT:
+    fsw_msg.crc = c;
     if (c == 0xee)
       fsw_msg.status++;
     break;
   case GOT_SYNC1:
+    fsw_msg.crc += c;
     if (c != 0xfe) {
       fsw_msg.error_last = 0x01;
       goto error;
@@ -130,32 +135,52 @@ void fireswarm_parse( uint8_t c ) {
     }
     fsw_msg.msg_id = c;
     fsw_msg.status++;
+    fsw_msg.crc += c;
     break;
   case GOT_ID:
   case GOT_T0:
   case GOT_T1:
   case GOT_T2:
+    fsw_msg.crc += c;
     fsw_msg.status++;
     break;
   case GOT_T3:
+    fsw_msg.crc += c;
     fsw_msg.len = c;
     fsw_msg.msg_idx = 0;
     fsw_msg.status++;
+    if (fsw_msg.msg_idx >= fsw_msg.len)
+      fsw_msg.status++;
     break;
   case GOT_LEN:
+    fsw_msg.crc += c;
     fsw_msg.msg_buf[fsw_msg.msg_idx] = c;
     fsw_msg.msg_idx++;
     if (fsw_msg.msg_idx >= fsw_msg.len) {
+      fsw_msg.status++;
+    }
+    break;
+  case GOT_PAYLOAD:
+    if (fsw_msg.crc == c)
+    {
+      // fprintf(stderr,"OK %d %d %d <> %d \n", fsw_msg.msg_id, fsw_msg.len, fsw_msg.crc, c);
+      
       fsw_msg.msg_available = TRUE;
       goto restart;
     }
+    else
+    {
+      fsw_msg.error_last = 3;
+      goto error;
+    } 
     break;
   default:
-    fsw_msg.error_last = 3;
+    fsw_msg.error_last = 4;
     goto error;
   }
   return;
  error:
+   fprintf(stderr,"Error %d %d %d %d <> %d \n", fsw_msg.error_last, fsw_msg.msg_id, fsw_msg.len, fsw_msg.crc, c);
   fsw_msg.error_cnt++;
  restart:
   fsw_msg.status = UNINIT;
@@ -172,7 +197,7 @@ void fireswarm_event(void)
     fireswarm_parse(fireswarm_payload_link_get());
     if (fsw_msg.msg_available)
     {
-      fprintf(stderr,"MSG %d %d\n",fsw_msg.msg_id, fsw_msg.len );
+      fprintf(stderr,"MSG %d %d \n",fsw_msg.msg_id, fsw_msg.len );
       fsw_msg.msg_available = 0;
     }
   }
