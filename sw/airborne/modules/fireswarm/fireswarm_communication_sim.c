@@ -28,6 +28,7 @@
 #include <errno.h>
 #include <fcntl.h>
 #include <unistd.h>
+#include <sys/ioctl.h>
 
 int sim_uart_p = 0;
 
@@ -44,6 +45,7 @@ void fireswarm_payload_link_init(void)
     struct termios options;
     
     fcntl(sim_uart_p, F_SETFL, 0);
+    fcntl(sim_uart_p, F_SETFL, FNDELAY);
     
     tcgetattr(sim_uart_p, &options);
     cfsetispeed(&options, B57600);
@@ -63,3 +65,16 @@ void fireswarm_payload_link_transmit(uint8_t* buff, int size)
   }
 }
 
+int fireswarm_payload_link_has_data(void)
+{
+  int bytes;
+  ioctl(sim_uart_p, FIONREAD, &bytes);
+  return bytes;
+}
+
+char fireswarm_payload_link_get(void)
+{
+  char c;
+  int ret = read(sim_uart_p, &c, 1);
+  return c;
+}
