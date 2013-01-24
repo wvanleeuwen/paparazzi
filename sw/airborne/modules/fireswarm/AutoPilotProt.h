@@ -39,6 +39,7 @@
 // Length in bytes of a message that can be sent over the xbee
 #define AP_PROT_XBEE_MSG_LENGTH 8
 
+#define AP_PROT_HEADER 65262
 
 typedef float		AutoPilotMsgPosType;		// In m
 typedef float		AutoPilotMsgDistanceType;	// In m
