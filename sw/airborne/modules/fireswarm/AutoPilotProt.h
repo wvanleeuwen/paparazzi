@@ -82,7 +82,7 @@ enum EAutoPilotMode
 #define AP_PROT_STATE_SERVO_PROP		1
 #define AP_PROT_STATE_SERVO_WING_LEFT	2
 #define AP_PROT_STATE_SERVO_WING_RIGHT	4
-#define AP_PROT_STATE_SERVO_TAIL		8
+#define AP_PROT_STATE_SERVO_TAIL		8		// No Tail Servo
 
 // Sensor state bitmask (1 is ok, 0 is error)
 #define AP_PROT_STATE_SENSOR_COMPASS	1
@@ -193,6 +193,7 @@ typedef struct AutoPilotMsgSensorDataStruct
 	uint8_t						FlyState;		// See EAutoPilotFlyState
 	uint8_t						GPSState;		// 0 is none, 255 is best
 	AutoPilotMsgTimeType		BatteryLeft;
+	// No info about servo's
 	uint8_t						ServoState;		// Bitmask, see defines AP_PROT_STATE_AP_*
 	uint8_t						AutoPilotState;	// Bitmask, see defines AP_PROT_STATE_SERVO_*
 	uint8_t						SensorState;	// Bitmask, see defines AP_PROT_STATE_SENSOR_*

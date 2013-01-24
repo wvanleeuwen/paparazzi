@@ -36,9 +36,6 @@ AutoPilotMsgSensorData FireSwarmData;
 void fireswarm_payload_init(void)
 {
   LED_INIT(FIRESWARM_PAYLOAD_POWER_LED);
-
-  FireSwarmData.FlyState = 1;
-  FireSwarmData.GPSState = 3;
  
   FireSwarmHeader.Header = 0x1234;
   FireSwarmHeader.MsgType = AP_PROT_REQ_SENSORDATA;
@@ -49,12 +46,34 @@ void fireswarm_payload_init(void)
  
 }
 
-const char* hello_world = "Hello World\n";
-
 void fireswarm_periodic(void)
 {
   LED_TOGGLE(FIRESWARM_PAYLOAD_POWER_LED);
 
+  FireSwarmData.FlyState = AP_PROT_FLY_STATE_FLYING;
+  int gps_quality = 255 - (gps.pacc-200) / 20;
+  if (gps_quality < 0) gps_quality = 0;
+  if (gps_quality > 255) gps_quality = 255;
+  FireSwarmData.GPSState = gps_quality;
+  FireSwarmData.BatteryLeft = 255;
+  FireSwarmData.ServoState = AP_PROT_STATE_SERVO_PROP | AP_PROT_STATE_SERVO_WING_LEFT | AP_PROT_STATE_SERVO_WING_RIGHT | AP_PROT_STATE_SERVO_TAIL;
+  FireSwarmData.AutoPilotState = AP_PROT_STATE_AP_OUTER_LOOP | AP_PROT_STATE_AP_INNER_LOOP;
+  FireSwarmData.SensorState = AP_PROT_STATE_SENSOR_COMPASS | AP_PROT_STATE_SENSOR_ACCELERO | AP_PROT_STATE_SENSOR_GPS | AP_PROT_STATE_SENSOR_WIND | AP_PROT_STATE_SENSOR_PRESSURE;
+  
+  FireSwarmData.Position.X = stateGetPositionUtm_f()->alt;
+  FireSwarmData.Position.Y = 3;
+  FireSwarmData.Position.Z = 3;
+
+  FireSwarmData.GroundSpeed = 3;
+  FireSwarmData.VerticalSpeed = 3;
+  FireSwarmData.Heading = 3;
+  FireSwarmData.Yaw = 3;
+  FireSwarmData.Pitch = 3;
+  FireSwarmData.Roll = 3;
+  FireSwarmData.WindHeading = 3;
+  FireSwarmData.WindSpeed = 3;
+    
+  
   fireswarm_payload_link_transmit((uint8_t*)&FireSwarmData, sizeof(FireSwarmData));
   fireswarm_payload_link_transmit((uint8_t*)&FireSwarmData, sizeof(FireSwarmData));
 
