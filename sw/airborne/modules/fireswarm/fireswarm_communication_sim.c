@@ -20,16 +20,38 @@
  *
  */
 
-/** \file fireswarm_payload.h
- *
- * Interface with FireSwarm Payload Module
- */
+#include "fireswarm_communication.h"
 
-#ifndef FIRESWARM_PAYLOAD_H
-#define FIRESWARM_PAYLOAD_H
+#include <stdio.h>
+#include <string.h>
+#include <termios.h>
+#include <errno.h>
+#include <fcntl.h>
+#include <unistd.h>
 
-void fireswarm_payload_init(void);
-void fireswarm_periodic(void);
-void fireswarm_event(void);
+int sim_uart_p = 0;
 
-#endif
+
+void fireswarm_payload_link_init(void)
+{
+  sim_uart_p = open("/dev/ttyUSB0", O_RDWR | O_NOCTTY | O_NDELAY);  
+  if (sim_uart_p == -1)
+  {
+    perror("OpenPort failed");
+  }
+  else
+  {
+    fcntl(sim_uart_p, F_SETFL, 0);
+  }
+}
+
+
+void fireswarm_payload_link_transmit(uint8_t* buff, int size)
+{
+  int n = write(sim_uart_p, buff, size);
+  if (n < 0)
+  {
+    printf("Write Failed");
+  }
+}
+
