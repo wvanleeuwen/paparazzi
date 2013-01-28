@@ -39,31 +39,40 @@
 // Length in bytes of a message that can be sent over the xbee
 #define AP_PROT_XBEE_MSG_LENGTH 8
 
-#define AP_PROT_HEADER 65262
+// Magic number for the header
+#define AP_PROT_HEADER 65262 // Binary: 11111110 11101110, hex: FEEE
 
-typedef float		AutoPilotMsgPosType;		// In m
+// Serial speed (75 110 300 1200 2400 4800 9600 19200 38400 57600 115200)
+#define AP_PROT_SERIAL_SPEED 57600
+
+// Checksum is sent after header and data.
+// Checksum is 1 byte (uint8_t) and sum of header and data.
+
+
+typedef uint16_t	AutoPilotMsgHeaderType;		// Type used for the magic number
+typedef float		AutoPilotMsgPosType;		// In m <-- MERCATOR, origin far way! -- y=north, x=east, z=height
 typedef float		AutoPilotMsgDistanceType;	// In m
 typedef float		AutoPilotMsgSpeedType;		// In m/s
-typedef uint32_t	AutoPilotMsgTimeType;		// micro seconds?
-typedef float		AutoPilotMsgRotationType;	// In rad
+typedef uint32_t	AutoPilotMsgTimeType;		// milli seconds?
+typedef float		AutoPilotMsgRotationType;	// In rad, 0=east
 
 
 #pragma pack(1)
 
 enum EAutoPilotMsgType
 {
-	AP_PROT_SET_MODE=0,		// See EAutoPilotMode
-	AP_PROT_SET_FIELD,		// Set origin of coordinate system and borders of the field
-	AP_PROT_SET_HOME,		// Set origin of coordinate system and borders of the field
-	AP_PROT_SET_WAYPOINTS,	// Set new waypoints (overwrite old ones)
-	AP_PROT_REQ_SENSORDATA,	// Request sensor data
-	AP_PROT_SENSORDATA,		// Sensor data
-	AP_PROT_REQ_WP_STATUS,	// Request status of waypoints
-	AP_PROT_WP_STATUS,		// Status of waypoints
-	AP_PROT_REQ_WP_BOUNDS,	// Request bounds of waypoints
-	AP_PROT_WP_BOUNDS,		// Bounds of waypoints
+	AP_PROT_SET_MODE=0,		// Gumstix wants auto pilot to set mode, see EAutoPilotMode
+//	AP_PROT_SET_FIELD,		// Set origin of coordinate system and borders of the field
+	AP_PROT_SET_WAYPOINTS,	// Gumstix wants auto pilot to set new waypoints (overwrites old ones)
+	AP_PROT_SET_LAND,		// Gumstix wants auto pilot to set new landing data
+	AP_PROT_REQ_SENSORDATA,	// Gumstix requests sensor data
+	AP_PROT_SENSORDATA,		// Sensor data from auto pilot
+	AP_PROT_REQ_WP_STATUS,	// Gumstix requests status of waypoints
+	AP_PROT_WP_STATUS,		// Status of waypoints from auto pilot
+	AP_PROT_REQ_WP_BOUNDS,	// Gumstix requests bounds of waypoints
+	AP_PROT_WP_BOUNDS,		// Bounds of waypoints from auto pilot
 	AP_PROT_REQ_XBEE_MSG,	// Gumstix wants to send a msg over xbee
-	AP_PROT_XBEE_MSG,		// xbee received a msg for the gumstix
+	AP_PROT_XBEE_MSG,		// Auto pilot received an xbee  msg for the gumstix
 };
 
 enum EAutoPilotMode
@@ -117,12 +126,13 @@ typedef struct AutoPilotMsgPositionStruct
 	AutoPilotMsgPosType Z; // In m
 } AutoPilotMsgPosition;
 
-typedef struct AutoPilotMsgPositionGPSStruct
-{
-	float GpsLat;	// In radians?
-	float GpsLong;	// In radians?
-	float GpsZ;		// In m above sea level?
-} AutoPilotMsgPositionGPS;
+// Unused
+//struct AutoPilotMsgPositionGPS
+//{
+//	float GpsLat;	// In radians?
+//	float GpsLong;	// In radians?
+//	float GpsZ;		// In m above sea level?
+//};
 
 
 typedef struct AutoPilotMsgWpLineStruct
@@ -179,14 +189,22 @@ struct AutoPilotMsgMode
 /////////////////////////////////////////////////////////
 // Actual Messages
 
+// Unused
+//struct AutoPilotMsgField
+//{
+//	AutoPilotMsgPositionGPS		Origin;	// The point x=0, y=0
+//	AutoPilotMsgPositionGPS		XBound; // The point x=max, y=0
+//	AutoPilotMsgPositionGPS		YBound; // The point x=0, y=max
+//	AutoPilotMsgPositionGPS		Home;	// Location of the ground station
+//};
 
-struct AutoPilotMsgField
+
+typedef struct AutoPilotMsgLandingStruct
 {
-	AutoPilotMsgPositionGPS		Origin;	// The point x=0, y=0
-	AutoPilotMsgPositionGPS		XBound; // The point x=max, y=0
-	AutoPilotMsgPositionGPS		YBound; // The point x=0, y=max
-	AutoPilotMsgPositionGPS		Home;	// Location of the ground station
-};
+	AutoPilotMsgPosition		LandPoint; // Z unused?
+	AutoPilotMsgRotationType	LandHeading;
+	bool						LandLeftTurn;
+} AutoPilotMsgLanding;
 
 
 typedef struct AutoPilotMsgSensorDataStruct
@@ -215,7 +233,7 @@ struct AutoPilotMsgWpStatus
 {
 	uint8_t						NumWaypoints;
 	uint32_t					ID[AP_PROT_WAYPOINTS_MAX];
-	AutoPilotMsgTimeType		ETA[AP_PROT_WAYPOINTS_MAX];
+	AutoPilotMsgTimeType		ETA[AP_PROT_WAYPOINTS_MAX]; // ETA of 0 means no ETA available
 };
 
 
