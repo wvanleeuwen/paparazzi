@@ -20,6 +20,8 @@
  *
  */
 
+#include "mcu_periph/uart.h"
+
 #include "fireswarm_communication.h"
 
 
@@ -28,9 +30,34 @@ void fireswarm_payload_link_init(void)
 }
 
 
+uint8_t fsw_crc = 0;
+
+void fireswarm_payload_link_start(void)
+{
+  fsw_crc = 0;
+}
+
 void fireswarm_payload_link_transmit(uint8_t* buff, int size)
 {
   while (size-- > 0)
+  {
+    fsw_crc += *buff;
     Uart3Transmit(*buff++);
+  }
 }
 
+void fireswarm_payload_link_crc(void)
+{
+  Uart3Transmit(fsw_crc);
+}
+
+
+int fireswarm_payload_link_has_data(void)
+{
+  return 0;
+}
+
+char fireswarm_payload_link_get(void)
+{
+  return 0;
+}

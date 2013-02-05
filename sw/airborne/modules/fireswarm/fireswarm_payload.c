@@ -80,20 +80,20 @@ void fireswarm_periodic(void)
   fireswarm_payload_link_crc();
 
   //fprintf(stderr,"Bytes: %d \n", fireswarm_payload_link_has_data());
-  fprintf(stderr,".");
+  //fprintf(stderr,".");
 }
 
 /* parser status */
-#define UNINIT        0
-#define GOT_SYNC1     1
-#define GOT_SYNC2     2
-#define GOT_ID        3
-#define GOT_T0        4
-#define GOT_T1        5
-#define GOT_T2        6
-#define GOT_T3        7
-#define GOT_LEN       8
-#define GOT_PAYLOAD   9
+#define FIRESWARM_UNINIT        0
+#define FIRESWARM_GOT_SYNC1     1
+#define FIRESWARM_GOT_SYNC2     2
+#define FIRESWARM_GOT_ID        3
+#define FIRESWARM_GOT_T0        4
+#define FIRESWARM_GOT_T1        5
+#define FIRESWARM_GOT_T2        6
+#define FIRESWARM_GOT_T3        7
+#define FIRESWARM_GOT_LEN       8
+#define FIRESWARM_GOT_PAYLOAD   9
 
 #define FIRESWARM_MAX_PAYLOAD 255
 struct FireSwarmMessage {
@@ -112,14 +112,15 @@ struct FireSwarmMessage {
 struct FireSwarmMessage fsw_msg;
 
 /* parsing */
+void fireswarm_parse( uint8_t c );
 void fireswarm_parse( uint8_t c ) {
   switch (fsw_msg.status) {
-  case UNINIT:
+  case FIRESWARM_UNINIT:
     fsw_msg.crc = c;
     if (c == 0xee)
       fsw_msg.status++;
     break;
-  case GOT_SYNC1:
+  case FIRESWARM_GOT_SYNC1:
     fsw_msg.crc += c;
     if (c != 0xfe) {
       fsw_msg.error_last = 0x01;
@@ -127,7 +128,7 @@ void fireswarm_parse( uint8_t c ) {
     }
     fsw_msg.status++;
     break;
-  case GOT_SYNC2:
+  case FIRESWARM_GOT_SYNC2:
     if (fsw_msg.msg_available) {
       /* Previous message has not yet been parsed: discard this one */
       fsw_msg.error_last = 2;
@@ -137,14 +138,14 @@ void fireswarm_parse( uint8_t c ) {
     fsw_msg.status++;
     fsw_msg.crc += c;
     break;
-  case GOT_ID:
-  case GOT_T0:
-  case GOT_T1:
-  case GOT_T2:
+  case FIRESWARM_GOT_ID:
+  case FIRESWARM_GOT_T0:
+  case FIRESWARM_GOT_T1:
+  case FIRESWARM_GOT_T2:
     fsw_msg.crc += c;
     fsw_msg.status++;
     break;
-  case GOT_T3:
+  case FIRESWARM_GOT_T3:
     fsw_msg.crc += c;
     fsw_msg.len = c;
     fsw_msg.msg_idx = 0;
@@ -152,7 +153,7 @@ void fireswarm_parse( uint8_t c ) {
     if (fsw_msg.msg_idx >= fsw_msg.len)
       fsw_msg.status++;
     break;
-  case GOT_LEN:
+  case FIRESWARM_GOT_LEN:
     fsw_msg.crc += c;
     fsw_msg.msg_buf[fsw_msg.msg_idx] = c;
     fsw_msg.msg_idx++;
@@ -160,7 +161,7 @@ void fireswarm_parse( uint8_t c ) {
       fsw_msg.status++;
     }
     break;
-  case GOT_PAYLOAD:
+  case FIRESWARM_GOT_PAYLOAD:
     if (fsw_msg.crc == c)
     {
       // fprintf(stderr,"OK %d %d %d <> %d \n", fsw_msg.msg_id, fsw_msg.len, fsw_msg.crc, c);
@@ -180,7 +181,9 @@ void fireswarm_parse( uint8_t c ) {
   }
   return;
  error:
+#ifdef SITL
    fprintf(stderr,"Error %d %d %d %d <> %d \n", fsw_msg.error_last, fsw_msg.msg_id, fsw_msg.len, fsw_msg.crc, c);
+#endif
   fsw_msg.error_cnt++;
  restart:
   fsw_msg.status = UNINIT;
@@ -197,7 +200,9 @@ void fireswarm_event(void)
     fireswarm_parse(fireswarm_payload_link_get());
     if (fsw_msg.msg_available)
     {
+#ifdef SITL
       fprintf(stderr,"MSG %d %d \n",fsw_msg.msg_id, fsw_msg.len );
+#endif
       fsw_msg.msg_available = 0;
     }
   }
