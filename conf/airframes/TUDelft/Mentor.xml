@@ -6,6 +6,8 @@
 
 <airframe name="LisaAspirin2">
 
+  <!------------------- Firmware ------------------->
+
   <firmware name="fixedwing">
 
     <target name="ap" board="lisa_m_1.0">

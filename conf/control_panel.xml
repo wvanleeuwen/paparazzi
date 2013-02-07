@@ -52,7 +52,7 @@
     <program name="Log File Player" command="sw/logalizer/play">
       <arg flag="-b" variable="ivy_bus"/>
     </program>
-    <program name="Simulator" command="sw/simulator/launchsitl">
+    <program name="Simulator" command="sw/simulator/pprzsim-launch">
       <arg flag="-b" variable="ivy_bus"/>
     </program>
     <program name="Hardware in the Loop" command="sw/simulator/simhitl">
