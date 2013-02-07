@@ -10,16 +10,20 @@
 
 <airframe name="Quadrotor LisaM_2.0 pwm">
 
+ <!------------------- Firmware ------------------->
+
   <firmware name="rotorcraft">
+    <define name="USE_INS_NAV_INIT"/>
+    <!--define name="GUIDANCE_H_USE_REF"/-->
+
     <target name="ap" board="lisa_m_2.0">
-      <subsystem name="radio_control" type="ppm"/>
-      <configure name="AHRS_PROPAGATE_FREQUENCY" value="500"/>
-    <!--  <configure name="FLASH_MODE" value="JTAG" />-->
+      <define name="FAILSAFE_GROUND_DETECT"/>
+      <define name="USE_GPS_ACC4R"/>
+      <define name="ACTUATORS_START_DELAY" value="3"/>
     </target>
 
     <target name="nps" board="pc">
-      <subsystem name="fdm" type="jsbsim"/>
-      <subsystem name="radio_control" type="ppm"/>
+      <subsystem name="fdm" 	    type="jsbsim"/>
     </target>
 
     <subsystem name="actuators"     type="pwm">
@@ -28,25 +32,30 @@
     </subsystem>
     <subsystem name="motor_mixing" />
 
+    <subsystem name="radio_control" type="ppm"/>
     <subsystem name="telemetry"     type="xbee_api"/>
     <subsystem name="imu"           type="aspirin_v2.1"/>
     <subsystem name="gps"           type="ublox"/>
-    <subsystem name="stabilization" type="int_quat"/>
+    <subsystem name="stabilization" type="euler"/>
     <subsystem name="ahrs"          type="int_cmpl_quat"/>
     <subsystem name="ins"           type="hff"/>
   </firmware>
 
-<modules>
-    <load name="gps_ubx_ucenter.xml"/>
-  <!-- Using Geo Mag module -->
-    <load name="geo_mag.xml"/>
-</modules>
+  <!------------------- Modules ------------------->
+
+  <modules>
+      <load name="gps_ubx_ucenter.xml"/>
+    <!-- Using Geo Mag module -->
+      <load name="geo_mag.xml"/>
+  </modules>
+
+ <!------------------- Servo's ------------------->
 
   <servos>
-    <servo name="FRONT"   no="0" min="1100" neutral="1100" max="2000"/>
-    <servo name="BACK"    no="1" min="1100" neutral="1100" max="2000"/>
-    <servo name="RIGHT"   no="2" min="1100" neutral="1100" max="2000"/>
-    <servo name="LEFT"    no="3" min="1100" neutral="1100" max="2000"/>
+    <servo name="FRONT"   no="0" min="1000" neutral="1100" max="1860"/>
+    <servo name="BACK"    no="1" min="1000" neutral="1100" max="1860"/>
+    <servo name="RIGHT"   no="2" min="1000" neutral="1100" max="1860"/>
+    <servo name="LEFT"    no="3" min="1000" neutral="1100" max="1860"/>
     <servo name="CAM"     no="4" min="1100" neutral="1500" max="2000"/>
   </servos>
 
@@ -64,16 +73,13 @@
     <set servo="RIGHT"  value="motor_mixing.commands[SERVO_RIGHT]"/>
     <set servo="LEFT"   value="motor_mixing.commands[SERVO_LEFT]"/>
 
-    <set servo="CAM" value="radio_control.values[RADIO_EXTRA1]"/>
+    <!--set servo="CAM" value="radio_control.values[RADIO_EXTRA1]"/-->
   </command_laws>
 
   <section name="MIXING" prefix="MOTOR_MIXING_">
-    <define name="STOP_MOTOR" value="1000"/>
-    <define name="MIN_MOTOR"  value="1100"/>
-    <define name="MAX_MOTOR"  value="1860"/>
-    <define name="TRIM_A" value="0"/>
-    <define name="TRIM_E" value="0"/>
-    <define name="TRIM_R" value="0"/>
+    <define name="TRIM_ROLL" value="0"/>
+    <define name="TRIM_PITCH" value="0"/>
+    <define name="TRIM_YAW" value="0"/>
     <define name="NB_MOTOR" value="4"/>
     <define name="SCALE" value="256"/>
     <!-- front/back turning CW, right/left CCW -->
@@ -82,6 +88,8 @@
     <define name="YAW_COEF"    value="{ 256,  -256, 256,  -256 }"/>
     <define name="THRUST_COEF" value="{  256,  256,  256,  256 }"/>
   </section>
+
+ <!------------------- IMU ------------------->
 
   <section name="IMU" prefix="IMU_">
     <define name="ACCEL_X_NEUTRAL" value="11"/>
@@ -111,6 +119,8 @@
   <section name="INS" prefix="INS_">
     <define name="BARO_SENS" value="22.3" integer="16"/>
   </section>
+
+  <!------------------- Control ------------------->
 
   <section name="STABILIZATION_RATE" prefix="STABILIZATION_RATE_">
     <!-- setpoints -->
@@ -205,6 +215,8 @@
     <define name="DGAIN" value="150"/>
     <define name="IGAIN" value="10"/>
   </section>
+
+  <!------------------- Misc ------------------->
 
   <section name="SIMULATOR" prefix="NPS_">
     <define name="ACTUATOR_NAMES"  value="{&quot;front_motor&quot;, &quot;back_motor&quot;, &quot;right_motor&quot;, &quot;left_motor&quot;}"/>

@@ -2,6 +2,12 @@
 
 Update:
 
+conf/controlpanel.xml
+
+	-    <program name="Simulator" command="sw/simulator/launchsitl">
+	+    <program name="Simulator" command="sw/simulator/pprzsim-launch">
+
+
 all flightplans:
 
 	- replace estimator_z -> GpsPosAlt()
@@ -27,6 +33,13 @@ rotorcraft airframes:
 	    <set servo="RIGHT"  value="motor_mixing.commands[SERVO_RIGHT]"/>
 	    <set servo="LEFT"   value="motor_mixing.commands[SERVO_LEFT]"/>
 	  </command_laws>
+
+	- <define name="TRIM_A" value="0"/>
+	- <define name="TRIM_E" value="0"/>
+	- <define name="TRIM_R" value="0"/>
+	+ <define name="TRIM_ROLL" value="0"/>
+	+ <define name="TRIM_PITCH" value="0"/>
+	+ <define name="TRIM_YAW" value="0"/>
 
 
 

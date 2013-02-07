@@ -2,14 +2,7 @@
 
 <airframe name="Blender">
 
-  <modules main_freq="512">
-    <!--load name="servo_switch.xml"/-->
-    <!--<load name="rotorcraft_cam.xml"/-->
-    <!--load name="sonar_maxbotix_booz.xml"/-->
-    <!--load name="adc_generic.xml">
-      <configure name="ADC_CHANNEL_GENERIC1" value="ADC_0"/>
-    </load-->
-  </modules>
+ <!------------------- Firmware ------------------->
 
   <firmware name="rotorcraft">
     <define name="USE_INS_NAV_INIT"/>
@@ -20,6 +13,7 @@
       <define name="USE_GPS_ACC4R"/>
       <define name="ACTUATORS_START_DELAY" value="3"/>
     </target>
+    
     <target name="nps" board="pc">
       <subsystem name="fdm"         type="jsbsim"/>
     </target>
@@ -38,15 +32,28 @@
     <subsystem name="ins"           type="hff"/>
   </firmware>
 
+ <!------------------- Modules ------------------->
+
+  <modules main_freq="512">
+    <!--load name="servo_switch.xml"/-->
+    <!--<load name="rotorcraft_cam.xml"/-->
+    <!--load name="sonar_maxbotix_booz.xml"/-->
+    <!--load name="adc_generic.xml">
+      <configure name="ADC_CHANNEL_GENERIC1" value="ADC_0"/>
+    </load-->
+  </modules>
+
+ <!------------------- Servo's ------------------->
+
   <section name="MKK" prefix="ACTUATORS_MKK_">
       <define name="NB" value="4"/>
       <define name="ADDR" value="{0x52, 0x54, 0x56, 0x58}"/>
   </section>
 
   <section name="MIXING" prefix="MOTOR_MIXING_">
-    <define name="TRIM_ROLL" value="-50"/>
-    <define name="TRIM_PITCH" value="-150"/>
-    <define name="TRIM_YAW" value="-100"/>
+    <define name="TRIM_ROLL" value="0"/>
+    <define name="TRIM_PITCH" value="0"/>
+    <define name="TRIM_YAW" value="0"/>
     <define name="NB_MOTOR" value="4"/>
     <define name="SCALE" value="256"/>
     <define name="ROLL_COEF"  value="{    0, -256,    0,  256}"/>
@@ -76,6 +83,8 @@
     <set servo="RIGHT"  value="motor_mixing.commands[SERVO_RIGHT]"/>
     <set servo="LEFT"   value="motor_mixing.commands[SERVO_LEFT]"/>
   </command_laws>
+
+ <!------------------- IMU ------------------->
 
   <section name="IMU" prefix="IMU_">
 
@@ -148,6 +157,7 @@
     <define name="SONAR_BARO_THRESHOLD" value="20."/>
   </section>
 
+  <!------------------- Control ------------------->
 
   <section name="STABILIZATION_RATE" prefix="STABILIZATION_RATE_">
 
@@ -238,6 +248,8 @@
    <!-- feedforward -->
    <define name="AGAIN" value="0"/>
  </section>
+
+  <!------------------- Misc ------------------->
 
  <section name="BAT">
    <define name="CATASTROPHIC_BAT_LEVEL" value="9.3" unit="V"/>
