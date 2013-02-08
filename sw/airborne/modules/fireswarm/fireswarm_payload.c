@@ -36,14 +36,14 @@ AutoPilotMsgSensorData FireSwarmData;
 void fireswarm_payload_init(void)
 {
   LED_INIT(FIRESWARM_PAYLOAD_POWER_LED);
- 
+
   FireSwarmHeader.Header = AP_PROT_HEADER;
   FireSwarmHeader.MsgType = AP_PROT_SENSORDATA;
   FireSwarmHeader.TimeStamp = 0;
   FireSwarmHeader.DataSize = sizeof(FireSwarmData);
-  
+
   fireswarm_payload_link_init();
- 
+
 }
 
 void fireswarm_periodic(void)
@@ -59,7 +59,7 @@ void fireswarm_periodic(void)
   FireSwarmData.ServoState = AP_PROT_STATE_SERVO_PROP | AP_PROT_STATE_SERVO_WING_LEFT | AP_PROT_STATE_SERVO_WING_RIGHT | AP_PROT_STATE_SERVO_TAIL;
   FireSwarmData.AutoPilotState = AP_PROT_STATE_AP_OUTER_LOOP | AP_PROT_STATE_AP_INNER_LOOP;
   FireSwarmData.SensorState = AP_PROT_STATE_SENSOR_COMPASS | AP_PROT_STATE_SENSOR_ACCELERO | AP_PROT_STATE_SENSOR_GPS | AP_PROT_STATE_SENSOR_WIND | AP_PROT_STATE_SENSOR_PRESSURE;
-  
+
   FireSwarmData.Position.X = stateGetPositionUtm_f()->east;
   FireSwarmData.Position.Y = stateGetPositionUtm_f()->north;
   FireSwarmData.Position.Z = stateGetPositionUtm_f()->alt;
@@ -72,8 +72,8 @@ void fireswarm_periodic(void)
   FireSwarmData.Roll = 0;
   FireSwarmData.WindHeading = 0;
   FireSwarmData.WindSpeed = 0;
-    
-  
+
+
   fireswarm_payload_link_start();
   fireswarm_payload_link_transmit((uint8_t*)&FireSwarmHeader, sizeof(FireSwarmHeader));
   fireswarm_payload_link_transmit((uint8_t*)&FireSwarmData, sizeof(FireSwarmData));
@@ -165,7 +165,7 @@ void fireswarm_parse( uint8_t c ) {
     if (fsw_msg.crc == c)
     {
       // fprintf(stderr,"OK %d %d %d <> %d \n", fsw_msg.msg_id, fsw_msg.len, fsw_msg.crc, c);
-      
+
       fsw_msg.msg_available = TRUE;
       goto restart;
     }
@@ -173,7 +173,7 @@ void fireswarm_parse( uint8_t c ) {
     {
       fsw_msg.error_last = 3;
       goto error;
-    } 
+    }
     break;
   default:
     fsw_msg.error_last = 4;
@@ -186,7 +186,7 @@ void fireswarm_parse( uint8_t c ) {
 #endif
   fsw_msg.error_cnt++;
  restart:
-  fsw_msg.status = UNINIT;
+  fsw_msg.status = FIRESWARM_UNINIT;
   return;
 }
 

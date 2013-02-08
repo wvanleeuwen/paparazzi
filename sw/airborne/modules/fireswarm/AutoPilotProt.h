@@ -1,5 +1,5 @@
 /**
- * @brief 
+ * @brief
  * @file AutoPilotProt.h
  *
  * This file is created at Almende B.V. It is open-source software and part of the Common
@@ -16,7 +16,7 @@
  *
  * @author        Bart van Vliet
  * @date          Nov 13, 2012
- * @project       
+ * @project
  * @company       Distributed Organisms B.V.
  * @case          Swarm robots
  */
