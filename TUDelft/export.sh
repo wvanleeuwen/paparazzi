@@ -19,7 +19,7 @@
 #cd ../gitsvnpprz/
 #git archive master | tar -x -C ../paparazzi/
 echo "Exporting TUDelft Master4 SVN To Paparazzi"
-git archive tudelft4.2 | tar -x -C ../paparazzi/ 
+git archive tudelft4.9 | tar -x -C ../paparazzi/ 
 cd ../paparazzi/
 git status -s | grep 'TUDelft' | sed 's/?? /rm -rf /' > rm.sh
 chmod +x ./rm.sh
