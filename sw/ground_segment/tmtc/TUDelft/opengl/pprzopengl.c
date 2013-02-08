@@ -1,7 +1,7 @@
 /*
  * An example of using GtkGLExt and Ivy in C
  *
- * 
+ *
  */
 
 #include <gtk/gtk.h>
@@ -27,7 +27,7 @@ static double heading=0.0;
 
 void openglinit()
 {
-			
+
   glClearDepth(1.0);
   glClearColor(0.0, 0.0, 0.0, 0.0);
   glMatrixMode(GL_PROJECTION);
@@ -71,7 +71,7 @@ glVertex3f(1.0,0.0,3.0);
 glVertex3f(1.0,7.0,3.0);
 glVertex3f(7.0,0.0,2.0);
       glEnd();
-	
+
         glPopMatrix();
 	glFlush ();
 }
@@ -140,7 +140,7 @@ update (gpointer user_data)
 
 /* jump here when a GPS message is received */
 void on_GPS_STATUS(IvyClientPtr app, void *user_data, int argc, char *argv[]){
-  
+
   heading= atof(argv[3])/10.;
   altitude = atof(argv[4])/100.;
   speed = atof(argv[5])/100.;
@@ -190,15 +190,15 @@ int main (int argc, char **argv)
 	gtk_init (&argc, &argv);
 	gtk_gl_init (&argc, &argv);
 
-	if (xid==-1){	
+	if (xid==-1){
 		window = gtk_window_new (GTK_WINDOW_TOPLEVEL);
-		gtk_window_set_default_size (GTK_WINDOW (window), 512, 400);		
+		gtk_window_set_default_size (GTK_WINDOW (window), 512, 400);
  	}
 	else {
 		window = gtk_window_new(GTK_WINDOW_POPUP);
 	}
-	
-		
+
+
 	da = gtk_drawing_area_new ();
 
 
@@ -211,7 +211,7 @@ int main (int argc, char **argv)
 
 	if (xid!=-1){
 		XReparentWindow(GDK_WINDOW_XDISPLAY(window->window), GDK_WINDOW_XWINDOW(window->window), xid, 0,0);
-		gtk_widget_map(window); 
+		gtk_widget_map(window);
 	}
 
 	/* prepare GL */

@@ -11,7 +11,7 @@
  * Onboard LEDs
  */
 
-/* red, on PA8 
+/* red, on PA8
 #ifndef USE_LED_1
 #define USE_LED_1 1
 #endif

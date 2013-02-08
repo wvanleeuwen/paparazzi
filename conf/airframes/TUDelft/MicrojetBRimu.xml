@@ -39,16 +39,16 @@
    <subsystem name="navigation"/>
 
  </firmware>
- 
+
  <modules>
    <load name="light.xml">
      <define name="LIGHT_LED_STROBE" value="3"/>
      <define name="STROBE_LIGHT_MODE_DEFAULT" value="6"/>
    </load>
  </modules>
- 
+
  <!------------------- Servo's ------------------->
- 
+
  <servos>
     <servo name="THROTTLE" no="0" min="1100" neutral="1100" max="1700"/>
     <servo name="AILEVON_LEFT" no="1" min="2000" neutral="1500" max="1000"/>
@@ -151,7 +151,7 @@
   </section>
 
   <!------------------- Misc ------------------->
- 
+
   <section name="INS" prefix="INS_">
     <define name="ROLL_NEUTRAL_DEFAULT" value="RadOfDeg(6.18794441223)" unit="rad"/>
     <define name="PITCH_NEUTRAL_DEFAULT" value="RadOfDeg(-6.87549352646)" unit="deg"/>
@@ -187,7 +187,7 @@
     <define name="DEFAULT_PITCH" value="0.5" unit="rad"/>
     <define name="HOME_RADIUS" value="80" unit="m"/>
   </section>
- 
+
   <section name="external leds">
     <!-- ADC 4 -->
     <define name="LED_4_BANK" value="0"/>
