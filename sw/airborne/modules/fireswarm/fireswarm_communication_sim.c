@@ -35,23 +35,23 @@ int sim_uart_p = 0;
 
 void fireswarm_payload_link_init(void)
 {
-  sim_uart_p = open("/dev/ttyUSB0", O_RDWR | O_NOCTTY | O_NDELAY);  
+  sim_uart_p = open("/dev/ttyUSB0", O_RDWR | O_NOCTTY | O_NDELAY);
   if (sim_uart_p == -1)
   {
-    perror("OpenPort failed");
+    fprintf(stderr,"Error: FireswarmCommunicationSim failed to open %s", "/dev/ttyUSB0");
   }
   else
   {
     struct termios options;
-    
+
     fcntl(sim_uart_p, F_SETFL, 0);
     fcntl(sim_uart_p, F_SETFL, FNDELAY);
-    
+
     tcgetattr(sim_uart_p, &options);
     cfsetispeed(&options, B57600);
     cfsetospeed(&options, B57600);
     options.c_cflag |= (CLOCAL | CREAD);
-    tcsetattr(sim_uart_p, TCSANOW, &options); 
+    tcsetattr(sim_uart_p, TCSANOW, &options);
   }
 }
 
@@ -64,27 +64,33 @@ void fireswarm_payload_link_start(void)
 
 void fireswarm_payload_link_crc(void)
 {
+  if (sim_uart_p == -1) return;
+
   int n = write(sim_uart_p, &fsw_crc, 1);
   if (n < 0)
   {
-    printf("Write Failed");
+    fprintf(stderr,"Error: Write Failed");
   }
 }
 
 
 void fireswarm_payload_link_transmit(uint8_t* buff, int size)
 {
+  if (sim_uart_p == -1) return;
+
   for (int i=0; i<size;i++) fsw_crc += buff[i];
-  
+
   int n = write(sim_uart_p, buff, size);
   if (n < 0)
   {
-    printf("Write Failed");
+    fprintf(stderr, "Error: Write Failed");
   }
 }
 
 int fireswarm_payload_link_has_data(void)
 {
+  if (sim_uart_p == -1) return 0;
+
   int bytes;
   ioctl(sim_uart_p, FIONREAD, &bytes);
   return bytes;
@@ -93,18 +99,22 @@ int fireswarm_payload_link_has_data(void)
 char fireswarm_payload_link_get(void)
 {
   char c;
-  int ret = read(sim_uart_p, &c, 1);
+  int ret;
+
+  if (sim_uart_p == -1) return ' ';
+
+  ret = read(sim_uart_p, &c, 1);
   if (ret > 0)
   {
     fprintf(stderr,"%x ",(uint8_t)c);
     return c;
   }
   else
-    printf("read(1)_error\n");
+    fprintf(stderr, "Error: read(1)_error\n");
   return 0;
 }
 
-
+/*
 
 #include <sys/types.h>
 #include <fcntl.h>
@@ -121,9 +131,7 @@ char fireswarm_payload_link_get(void)
 static int baudrates[] = { B0, B50, B75, B110, B134, B150, B200, B300, B600, B1200, B1800, B2400, B4800, B9600, B19200, B38400, B57600, B115200, B230400 };
 
 
-/****************************************************************************/
-/* Open serial device for requested protocoll */
-/****************************************************************************/
+// Open serial device for requested protocoll
 value c_init_serial(value device, value speed, value hw_flow_control)
 {
   struct termios orig_termios, cur_termios;
@@ -137,16 +145,16 @@ value c_init_serial(value device, value speed, value hw_flow_control)
   if (tcgetattr(fd, &orig_termios)) failwith("getting modem serial device attr");
   cur_termios = orig_termios;
 
-  /* input modes */
+  // input modes
   cur_termios.c_iflag &= ~(IGNBRK|BRKINT|IGNPAR|PARMRK|INPCK|ISTRIP|INLCR|IGNCR
 			    |ICRNL |IXON|IXANY|IXOFF|IMAXBEL);
-  /* pas IGNCR sinon il vire les 0x0D */
+  // pas IGNCR sinon il vire les 0x0D
   cur_termios.c_iflag |= BRKINT;
 
-  /* output_flags */
+  // output_flags
   cur_termios.c_oflag  &=~(OPOST|ONLCR|OCRNL|ONOCR|ONLRET);
 
-  /* control modes */
+  // control modes
   if (Bool_val(hw_flow_control)) {
     cur_termios.c_cflag &= ~(CSIZE|CSTOPB|CREAD|PARENB|PARODD|HUPCL|CLOCAL);
     cur_termios.c_cflag |= CREAD|CS8|CLOCAL|CRTSCTS;
@@ -156,7 +164,7 @@ value c_init_serial(value device, value speed, value hw_flow_control)
     cur_termios.c_cflag |= CREAD|CS8|CLOCAL;
   }
 
-  /* local modes */
+  // local modes
   cur_termios.c_lflag &= ~(ISIG|ICANON|IEXTEN|ECHO|FLUSHO|PENDIN);
   cur_termios.c_lflag |= NOFLSH;
 
@@ -167,7 +175,7 @@ value c_init_serial(value device, value speed, value hw_flow_control)
   return Val_int(fd);
 }
 
-
+*/
 
 
 
