@@ -1,4 +1,4 @@
-# 
+#
 #   $Id: Makefile 3641 2009-07-03 21:53:55Z hecto $
 #   Copyright (C) 2003-2006 Pascal Brisset, Antoine Drouin
 #
@@ -17,8 +17,8 @@
 # You should have received a copy of the GNU General Public License
 # along with paparazzi; see the file COPYING.  If not, write to
 # the Free Software Foundation, 59 Temple Place - Suite 330,
-# Boston, MA 02111-1307, USA.  
-# 
+# Boston, MA 02111-1307, USA.
+#
 
 # Quiet
 Q=@
@@ -81,7 +81,7 @@ GTK_LDFLAGS =  `pkg-config gtk+-2.0 --libs` -lglibivy -lpcre
 .depend: Makefile
 	ocamldep -I ../../../lib/ocaml *.ml* > .depend
 
-ifneq ($(MAKECMDGOALS),clean) 
+ifneq ($(MAKECMDGOALS),clean)
 -include .depend
 endif
 

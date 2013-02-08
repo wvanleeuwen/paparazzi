@@ -1,5 +1,5 @@
-all:	
-	mkdir -p build; 
+all:
+	mkdir -p build;
 	cmake -H. -B./build
 	make -C build
 
