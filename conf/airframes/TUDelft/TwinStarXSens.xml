@@ -1,5 +1,11 @@
 <!DOCTYPE airframe SYSTEM "../airframe.dtd">
 
+<!--
+
+  Heering TwinStar XSens + Classix
+
+-->
+
 <airframe name="TwinStarXSens">
 
   <servos>

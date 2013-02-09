@@ -2,50 +2,50 @@
 
 <airframe name="Microjet BR Tiny 1.1">
 
- <firmware name="fixedwing">
-   <target name="ap" board="tiny_1.1">
-     <configure name="FLASH_MODE" value="IAP"/>
-     <configure name="PERIODIC_FREQUENCY" value="120"/>
-     <configure name="AHRS_PROPAGATE_FREQUENCY" value="100"/>
-     <configure name="AHRS_CORRECT_FREQUENCY" value="100"/>
-     <define name="AHRS_TRIGGERED_ATTITUDE_LOOP"/>
-     <configure name="AHRS_ALIGNER_LED" value="2"/>
-     <define name="STRONG_WIND"/>
-     <define name="LOITER_TRIM"/>
-     <define name="ALT_KALMAN"/>
-     <define name="AGR_CLIMB"/>
-     <define name="TUNE_AGRESSIVE_CLIMB"/>
-   </target>
-   <target name="sim" board="pc">
-     <define name="STRONG_WIND"/>
-     <define name="TUNE_AGRESSIVE_CLIMB"/>
-     <define name="LOITER_TRIM"/>
-     <define name="AGR_CLIMB"/>
-   </target>
+  <!------------------- Firmware ------------------->
 
-   <subsystem name="radio_control" type="ppm"/>
+  <firmware name="fixedwing">
 
-   <!-- Communication -->
-   <subsystem name="telemetry" type="transparent">
-     <configure name="MODEM_BAUD" value="B57600"/>
-   </subsystem>
+    <target name="ap" board="tiny_1.1">
+      <configure name="PERIODIC_FREQUENCY" value="120"/>
+      <configure name="AHRS_PROPAGATE_FREQUENCY" value="100"/>
+      <configure name="AHRS_CORRECT_FREQUENCY" value="100"/>
+      <define name="AHRS_TRIGGERED_ATTITUDE_LOOP"/>
+      <configure name="AHRS_ALIGNER_LED" value="2"/>
+    </target>
+    <target name="sim" board="pc" />
 
-   <!-- Sensors -->
-   <subsystem name="imu" type="ppzuav"/>
-   <subsystem name="ahrs" type="float_dcm"/>
+    <define name="AGR_CLIMB"/>
+    <define name="STRONG_WIND"/>
+    <define name="LOITER_TRIM"/>
+    <define name="TUNE_AGRESSIVE_CLIMB"/>
 
-   <subsystem name="gps"     type="ublox_utm"/>
-   <subsystem name="control"/>
-   <subsystem name="navigation"/>
+    <subsystem name="radio_control" type="ppm"/>
 
- </firmware>
+    <!-- Communication -->
+    <subsystem name="telemetry" type="transparent">
+      <configure name="MODEM_BAUD" value="B57600"/>
+    </subsystem>
 
- <modules>
-   <load name="light.xml">
-     <define name="LIGHT_LED_STROBE" value="3"/>
-     <define name="STROBE_LIGHT_MODE_DEFAULT" value="6"/>
-   </load>
- </modules>
+    <!-- Sensors -->
+    <subsystem name="imu"     type="ppzuav"/>
+    <subsystem name="ahrs"    type="float_dcm"/>
+    <subsystem name="ins"     type="alt_float" />
+
+    <subsystem name="gps"     type="ublox_utm"/>
+    <subsystem name="control"/>
+    <subsystem name="navigation"/>
+
+  </firmware>
+
+  <!------------------- Modules ------------------->
+
+  <modules>
+    <load name="light.xml">
+      <define name="LIGHT_LED_STROBE" value="3"/>
+      <define name="STROBE_LIGHT_MODE_DEFAULT" value="6"/>
+    </load>
+  </modules>
 
  <!------------------- Servo's ------------------->
 

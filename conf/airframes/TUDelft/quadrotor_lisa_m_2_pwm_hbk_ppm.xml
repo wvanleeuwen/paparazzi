@@ -1,11 +1,15 @@
 <!DOCTYPE airframe SYSTEM "../airframe.dtd">
 
-<!-- this is a quadrotor frame equiped with
-     * Autopilot:   Lisa/M 2.0             http://paparazzi.enac.fr/wiki/Lisa/M_v20
-     * IMU:         Aspirin 2.1            http://paparazzi.enac.fr/wiki/AspirinIMU
-     * Actuators:   PWM motor controllers  http://paparazzi.enac.fr/wiki/Subsystem/actuators#PWM_Supervision
-     * GPS:         Ublox                  http://paparazzi.enac.fr/wiki/Subsystem/gps
-     * RC:          ppm
+<!--
+
+  Quadrotor frame equiped with
+
+  * Autopilot:   Lisa/M 2.0             http://paparazzi.enac.fr/wiki/Lisa/M_v20
+  * IMU:         Aspirin 2.1            http://paparazzi.enac.fr/wiki/AspirinIMU
+  * Actuators:   PWM motor controllers  http://paparazzi.enac.fr/wiki/Subsystem/actuators#PWM_Supervision
+  * GPS:         Ublox                  http://paparazzi.enac.fr/wiki/Subsystem/gps
+  * RC:          ppm
+
 -->
 
 <airframe name="Quadrotor LisaM_2.0 pwm">

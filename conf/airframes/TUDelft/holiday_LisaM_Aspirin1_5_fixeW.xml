@@ -1,16 +1,63 @@
 <!DOCTYPE airframe SYSTEM "../airframe.dtd">
 
+<!--
+
+  50cm Holiday
+
+-->
+
 <airframe name="Holiday LisaM">
 
-<!-- commands section -->
-<!-- servos section -->
+  <!------------------- Firmware ------------------->
+
+  <firmware name="fixedwing">
+
+    <target name="ap" board="lisa_m_1.0">
+      <configure name="PERIODIC_FREQUENCY" value="120"/>
+      <configure name="AHRS_PROPAGATE_FREQUENCY" value="100"/>
+      <configure name="AHRS_CORRECT_FREQUENCY" value="100"/>
+      <define name="AHRS_TRIGGERED_ATTITUDE_LOOP"/>
+    </target>
+
+    <target name="sim" board="pc" />
+
+    <define name="STRONG_WIND"/>
+    <define name="TUNE_AGRESSIVE_CLIMB"/>
+    <define name="LOITER_TRIM"/>
+    <define name="AGR_CLIMB"/>
+
+    <subsystem name="radio_control" type="ppm"/>
+
+    <!-- Communication -->
+    <subsystem name="telemetry" 	type="xbee_api"/>
+
+    <!-- Sensors -->
+    <subsystem name="imu"               type="aspirin_v1.5">
+	<define name="LISA_M_LONGITUDINAL_X"/>
+    </subsystem>
+    <subsystem name="ahrs" type="float_dcm"/>
+    <subsystem name="ins" 		type="alt_float" />
+
+    <subsystem name="gps" 		type="ublox"/>
+    <subsystem name="control"/>
+    <subsystem name="navigation"/>
+
+  </firmware>
+
+  <!------------------- Firmware ------------------->
+
+  <modules main_freq="60">
+    <load name="gps_ubx_ucenter.xml"/>
+  </modules>
+
+  <!------------------- Servo's ------------------->
+
   <servos>
     <servo name="THROTTLE"      no="0" min="1100" neutral="1100" max="1900"/>
     <servo name="AILERON"       no="1" min="1900" neutral="1560" max="1100"/>
     <servo name="ELEVATOR"      no="2" min="1900" neutral="1565" max="1100"/>
   </servos>
 
-<!-- commands section -->
   <commands>
     <axis name="THROTTLE" failsafe_value="0"/>
     <axis name="ROLL" failsafe_value="0"/>
@@ -28,6 +75,8 @@
     <set servo="AILERON"  value="@ROLL"/>
     <set servo="ELEVATOR" value="@PITCH"/>
   </command_laws>
+
+  <!------------------- IMU ------------------->
 
   <!-- Local magnetic field -->
     <!--Rotterdam
@@ -47,53 +96,26 @@
   </section>-->
 
   <section name="IMU" prefix="IMU_">
-<!--
-      <define name="GYRO_P_CHAN" value="1"/>
-      <define name="GYRO_Q_CHAN" value="0"/>
-      <define name="GYRO_R_CHAN" value="2"/>
+    <define name="GYRO_P_NEUTRAL" value="-31"/>
+    <define name="GYRO_Q_NEUTRAL" value="-48"/>
+    <define name="GYRO_R_NEUTRAL" value="-17"/>
+    <define name="GYRO_P_SENS" value="4.412" integer="16"/>
+    <define name="GYRO_Q_SENS" value="4.412" integer="16"/>
+    <define name="GYRO_R_SENS" value="4.412" integer="16"/>
 
-      <define name="GYRO_P_SIGN" value="1"/>
-      <define name="GYRO_Q_SIGN" value="-1"/>
-      <define name="GYRO_R_SIGN" value="1"/>
--->
-	<define name="GYRO_P_NEUTRAL" value="-31"/>
-	<define name="GYRO_Q_NEUTRAL" value="-48"/>
-	<define name="GYRO_R_NEUTRAL" value="-17"/>
-	<define name="GYRO_P_SENS" value="4.412" integer="16"/>
-	<define name="GYRO_Q_SENS" value="4.412" integer="16"/>
-	<define name="GYRO_R_SENS" value="4.412" integer="16"/>
-<!--
-      <define name="ACCEL_X_CHAN" value="3"/>
-      <define name="ACCEL_Y_CHAN" value="5"/>
-      <define name="ACCEL_Z_CHAN" value="6"/>
+    <define name="ACCEL_X_NEUTRAL" value="10"/>
+    <define name="ACCEL_Y_NEUTRAL" value="1"/>
+    <define name="ACCEL_Z_NEUTRAL" value="-3"/>
+    <define name="ACCEL_X_SENS" value="38.4436411998" integer="16"/>
+    <define name="ACCEL_Y_SENS" value="38.7116161958" integer="16"/>
+    <define name="ACCEL_Z_SENS" value="39.970909149" integer="16"/>
 
-      <define name="ACCEL_X_SIGN" value="1"/>
-      <define name="ACCEL_Y_SIGN" value="-1"/>
-      <define name="ACCEL_Z_SIGN" value="1"/>
--->
-	<define name="ACCEL_X_NEUTRAL" value="10"/>
-	<define name="ACCEL_Y_NEUTRAL" value="1"/>
-	<define name="ACCEL_Z_NEUTRAL" value="-3"/>
-	<define name="ACCEL_X_SENS" value="38.4436411998" integer="16"/>
-	<define name="ACCEL_Y_SENS" value="38.7116161958" integer="16"/>
-	<define name="ACCEL_Z_SENS" value="39.970909149" integer="16"/>
-<!--
-      <define name="MAG_X_CHAN" value="4"/>
-      <define name="MAG_Y_CHAN" value="0"/>
-      <define name="MAG_Z_CHAN" value="2"/>
-
-      <define name="MAG_45_HACK" value="1"/>
-
-      <define name="MAG_X_SIGN" value="1"/>
-      <define name="MAG_Y_SIGN" value=" 1"/>
-      <define name="MAG_Z_SIGN" value="1"/>
--->
-	<define name="MAG_X_NEUTRAL" value="-56"/>
-	<define name="MAG_Y_NEUTRAL" value="-171"/>
-	<define name="MAG_Z_NEUTRAL" value="-100"/>
-	<define name="MAG_X_SENS" value="4.3833130016" integer="16"/>
-	<define name="MAG_Y_SENS" value="4.59820229976" integer="16"/>
-	<define name="MAG_Z_SENS" value="4.3085068988" integer="16"/>
+    <define name="MAG_X_NEUTRAL" value="-56"/>
+    <define name="MAG_Y_NEUTRAL" value="-171"/>
+    <define name="MAG_Z_NEUTRAL" value="-100"/>
+    <define name="MAG_X_SENS" value="4.3833130016" integer="16"/>
+    <define name="MAG_Y_SENS" value="4.59820229976" integer="16"/>
+    <define name="MAG_Z_SENS" value="4.3085068988" integer="16"/>
 
     <define name="BODY_TO_IMU_PHI"   value="RadOfDeg(  5.5)"/>
     <define name="BODY_TO_IMU_THETA" value="RadOfDeg(  7.)"/>
@@ -106,36 +128,7 @@
     <define name="PITCH_NEUTRAL_DEFAULT" value="RadOfDeg(-5)" unit="deg"/>
   </section>
 
-  <section name="AUTO1" prefix="AUTO1_">
-    <define name="MAX_ROLL" value="1.1"/>
-    <define name="MAX_PITCH" value="0.9"/>
-  </section>
-
-  <section name="BAT">
-    <define name="MILLIAMP_AT_FULL_THROTTLE" value="25000"/>
-    <define name="LOW_BAT_LEVEL" value="7" unit="V"/>
-    <define name="CRITIC_BAT_LEVEL" value="6.5" unit="V"/>
-    <define name="CATASTROPHIC_BAT_LEVEL" value="6.2" unit="V"/>
-  </section>
-
-
-  <section name="MISC">
-    <define name="NOMINAL_AIRSPEED" value="17." unit="m/s"/>
-    <define name="CARROT" value="5." unit="s"/>
-    <define name="KILL_MODE_DISTANCE" value="(1.5*MAX_DIST_FROM_HOME)"/>
-    <define name="CONTROL_FREQUENCY" value="60" unit="Hz"/>
-<!--    <define name="XBEE_INIT" value="&quot;ATPL2\rATRN5\rATTT80\r&quot;"/> -->
-<!--    <define name="NO_XBEE_API_INIT" value="TRUE"/> -->
-    <define name="ALT_KALMAN_ENABLED" value="TRUE"/>
-
-    <define name="DEFAULT_CIRCLE_RADIUS" value="80."/>
-
-    <define name="GLIDE_AIRSPEED" value="10"/>
-    <define name="GLIDE_VSPEED" value="3."/>
-    <define name="GLIDE_PITCH" value="45" unit="deg"/>
-  </section>
-
-
+  <!------------------- Control ------------------->
 
   <section name="VERTICAL CONTROL" prefix="V_CTL_">
 
@@ -156,12 +149,6 @@
     <define name="AUTO_THROTTLE_IGAIN" value="0."/>
     <define name="AUTO_THROTTLE_PITCH_OF_VZ_PGAIN" value="0.202000007033"/>
 
-    <!-- auto pitch inner loop
-    <define name="AUTO_PITCH_PGAIN" value="0.0399999991059"/>
-    <define name="AUTO_PITCH_IGAIN" value="0.019999999553"/>
-    <define name="AUTO_PITCH_MAX_PITCH" value="0.35"/>
-    <define name="AUTO_PITCH_MIN_PITCH" value="-0.35"/>
-    -->
     <define name="THROTTLE_SLEW_LIMITER" value="2" unit="s"/>
 
   </section>
@@ -215,6 +202,37 @@
     <define name="DESCENT_NAV_RATIO" value="1."/>
     </section>
 
+  <!------------------- Misc ------------------->
+
+  <section name="AUTO1" prefix="AUTO1_">
+    <define name="MAX_ROLL" value="1.1"/>
+    <define name="MAX_PITCH" value="0.9"/>
+  </section>
+
+  <section name="BAT">
+    <define name="MILLIAMP_AT_FULL_THROTTLE" value="25000"/>
+    <define name="LOW_BAT_LEVEL" value="7" unit="V"/>
+    <define name="CRITIC_BAT_LEVEL" value="6.5" unit="V"/>
+    <define name="CATASTROPHIC_BAT_LEVEL" value="6.2" unit="V"/>
+  </section>
+
+
+  <section name="MISC">
+    <define name="NOMINAL_AIRSPEED" value="17." unit="m/s"/>
+    <define name="CARROT" value="5." unit="s"/>
+    <define name="KILL_MODE_DISTANCE" value="(1.5*MAX_DIST_FROM_HOME)"/>
+    <define name="CONTROL_FREQUENCY" value="60" unit="Hz"/>
+<!--    <define name="XBEE_INIT" value="&quot;ATPL2\rATRN5\rATTT80\r&quot;"/> -->
+<!--    <define name="NO_XBEE_API_INIT" value="TRUE"/> -->
+    <define name="ALT_KALMAN_ENABLED" value="TRUE"/>
+
+    <define name="DEFAULT_CIRCLE_RADIUS" value="80."/>
+
+    <define name="GLIDE_AIRSPEED" value="10"/>
+    <define name="GLIDE_VSPEED" value="3."/>
+    <define name="GLIDE_PITCH" value="45" unit="deg"/>
+  </section>
+
   <section name="FAILSAFE" prefix="FAILSAFE_">
     <define name="DELAY_WITHOUT_GPS" value="2" unit="s"/>
     <define name="DEFAULT_THROTTLE" value="0.3" unit="%"/>
@@ -236,53 +254,5 @@
     <define name="AFHeight" value="10" unit="m"/>
     <define name="FinalStageTime" value="10" unit="s"/>
   </section>
-
- <section name="SIMU">
-    <define name="YAW_RESPONSE_FACTOR" value="0.5"/> <!-- ?????????????????????????? -->
- </section>
-<!-- ******************* MODULES ********************************** -->
- <modules main_freq="60">
-   <load name="gps_ubx_ucenter.xml"/>
- </modules>
-
-  <firmware name="fixedwing">
-    <target name="ap" board="lisa_m_1.0">
-      <configure name="PERIODIC_FREQUENCY" value="120"/>
-      <configure name="AHRS_PROPAGATE_FREQUENCY" value="100"/>
-      <configure name="AHRS_CORRECT_FREQUENCY" value="100"/>
-      <define name="AHRS_TRIGGERED_ATTITUDE_LOOP"/>
-      <define name="STRONG_WIND"/>
-      <define name="LOITER_TRIM"/>
-      <define name="AGR_CLIMB"/>
-      <define name="TUNE_AGRESSIVE_CLIMB"/>
-    </target>
-
-    <subsystem name="radio_control" type="ppm"/>
-
-    <!-- Communication -->
-    <subsystem name="telemetry" 	type="xbee_api"/>
-
-    <!-- Sensors -->
-    <subsystem name="imu"               type="aspirin_v1.5">
-	<define name="LISA_M_LONGITUDINAL_X"/>
-    </subsystem>
-    <subsystem name="ahrs" type="float_dcm"/>
-
-    <subsystem name="gps" 		type="ublox">
-      <configure name="GPS_PORT"        value="UART1"/>
-      <configure name="GPS_BAUD"        value="B38400"/>
-    </subsystem>
-    <subsystem name="control"/>
-    <subsystem name="ins" 		type="alt_float" />
-    <subsystem name="navigation"/>
-
-    <target name="sim" board="pc">
-      <define name="STRONG_WIND"/>
-      <define name="TUNE_AGRESSIVE_CLIMB"/>
-      <define name="LOITER_TRIM"/>
-      <define name="AGR_CLIMB"/>
-    </target>
-
-  </firmware>
 
 </airframe>
