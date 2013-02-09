@@ -8,7 +8,77 @@
 
 <airframe name="TwinStarXSens">
 
-  <servos>
+  <!------------------- Firmware ------------------->
+
+  <firmware name="fixedwing">
+
+    <target name="ap" board="classix">
+      <configure name="SYS_TIME_LED" value="2"/>
+
+      <define name="USE_LED_6" value="1"/>
+      <define name="LED_6_BANK" value="0"/>
+      <define name="LED_6_PIN" value="15"/>
+
+      <define name="USE_AD0"/>
+      <define name="USE_AD0_3"/>
+      <define name="ADC_6" value="AdcBank0\(3\)"/>
+
+      <subsystem name="control"/>
+      <subsystem name="navigation" type="extra"/>
+    </target>
+
+    <target name="fbw" board="classix">
+      <configure name="SYS_TIME_LED" value="2"/>
+      <define name="RADIO_CONTROL_LED" value="1"/>
+      <define name="USE_AD1_5" value="1"/>
+      <define name="USE_AD1" value="1"/>
+      <configure name="ACTUATORS" value="actuators_ppm"/>
+      <define name="ADC_CHANNEL_VSUPPLY" value="AdcBank0\(6\)"/>
+
+      <subsystem name="radio_control" type="ppm"/>
+    </target>
+
+    <target name="sim" board="pc">
+      <subsystem name="radio_control" type="ppm"/>
+      <subsystem name="control"/>
+      <subsystem name="navigation" type="extra"/>
+    </target>
+
+    <define name="DC_IMAGE_BUFFER" value="65000" />
+    <define name="STRONG_WIND"/>
+    <define name="WIND_INFO"/>
+    <define name="WIND_INFO_RET"/>
+    <define name="LOITER_TRIM"/>
+    <define name="RADIO_CONTROL_AUTO1"/>
+
+
+    <subsystem name="telemetry" type="xbee_api">
+      <configure name="MODEM_PORT" value="UART0"/>
+      <configure name="MODEM_BAUD" value="B9600"/>
+    </subsystem>
+
+    <subsystem name="ins" type="xsens">
+      <configure name="XSENS_UART_NR" value="1"/>
+    </subsystem>
+
+  </firmware>
+
+  <!------------------- Modules ------------------->
+
+  <modules>
+    <load name="digital_cam.xml">
+      <define name="DC_SHUTTER_LED" value="6"/>
+   </load>
+   <load name="adc_generic.xml">
+      <define name="ADC_GENERIC_NB_SAMPLES" value="32"/>
+      <configure name="ADC_CHANNEL_GENERIC1" value="ADC_6"/> <!-- e.g. current sensor -->
+   </load>
+   <load name="photogrammetry_calculator.xml" />
+  </modules>
+
+  <!------------------- Servo's ------------------->
+
+  <servos driver="Ppm">
     <servo name="THROTTLE_LEFT" no="1" min="1100" neutral="1100" max="1900"/>
     <servo name="THROTTLE_RIGHT" no="0" min="1100" neutral="1100" max="1900"/>
     <servo name="AILERON_RIGHT" no="2" min="2300" neutral="1550" max="700"/>
@@ -69,10 +139,17 @@
     <set servo="ELEVATOR" value="-@PITCH * PITCH_GAIN + BRAKE_PITCH * $brake_value"/>
   </command_laws>
 
+  <section name="TRIM" >
+    <define name="COMMAND_ROLL_TRIM" value="180"/>
+    <define name="COMMAND_PITCH_TRIM" value="-194."/>
+  </section>
+
   <section name="AUTO1" prefix="AUTO1_">
     <define name="MAX_ROLL" value="0.7"/>
     <define name="MAX_PITCH" value="0.7"/>
   </section>
+
+  <!------------------- INS ------------------->
 
   <section name="INS" prefix="INS_">
     <define name="ROLL_NEUTRAL_DEFAULT" value="0"/>
@@ -92,29 +169,7 @@
     <define name="GPS_IMU_LEVER_ARM_Z" value="0.0f"/>
   </section>
 
-
-  <section name="ADC" prefix="ADC_CHANNEL_">
-    <define name="CURRENT" value="AdcBank1(5)"/>
-  </section>
-
-  <section name="BAT">
-    <define name="VoltageOfAdc(adc)" value="(0.01688000f*(adc)+2)"/>
-    <define name="MilliAmpereOfAdc(adc)" value="((adc) - 505) * 124.0f"/>
-
-    <define name="LOW_BAT_LEVEL" value="10.5" unit="V"/>
-    <define name="CRITIC_BAT_LEVEL" value="10" unit="V"/>
-    <define name="CATASTROPHIC_BAT_LEVEL" value="9.1" unit="V"/>
-  </section>
-
-  <section name="FAILSAFE" prefix="FAILSAFE_">
-    <define name="DEFAULT_THROTTLE" value="0.45" unit="%"/>
-    <define name="DEFAULT_ROLL" value="0.17" unit="rad"/>
-    <define name="DEFAULT_PITCH" value="0.08" unit="rad"/>
-
-    <define name="HOME_RADIUS" value="DEFAULT_CIRCLE_RADIUS" unit="m"/>
-    <define name="KILL_MODE_DISTANCE" value="(MAX_DIST_FROM_HOME*1.5)"/>
-    <define name="DELAY_WITHOUT_GPS" value="3" unit="s"/>
-  </section>
+  <!------------------- Control ------------------->
 
   <section name="HORIZONTAL CONTROL" prefix="H_CTL_">
     <define name="COURSE_PGAIN" value="0.75"/>
@@ -135,7 +190,8 @@
   </section>
 
 
- <section name="VERTICAL CONTROL" prefix="V_CTL_">
+  <section name="VERTICAL CONTROL" prefix="V_CTL_">
+
     <!-- outer loop proportional gain -->
     <define name="ALTITUDE_PGAIN" value="0.1"/>
 
@@ -162,92 +218,46 @@
     <define name="AGR_CLIMB_PITCH" value="0."/> <!-- Needed For OSAMNav -->
   </section>
 
+  <!------------------- Misc ------------------->
+
+  <section name="ADC" prefix="ADC_CHANNEL_">
+    <define name="CURRENT" value="AdcBank1(5)"/>
+  </section>
+
+  <section name="BAT">
+    <define name="VoltageOfAdc(adc)" value="(0.01688000f*(adc)+2)"/>
+    <define name="MilliAmpereOfAdc(adc)" value="((adc) - 505) * 124.0f"/>
+
+    <define name="LOW_BAT_LEVEL" value="10.5" unit="V"/>
+    <define name="CRITIC_BAT_LEVEL" value="10" unit="V"/>
+    <define name="CATASTROPHIC_BAT_LEVEL" value="9.1" unit="V"/>
+  </section>
+
+  <section name="FAILSAFE" prefix="FAILSAFE_">
+    <define name="DEFAULT_THROTTLE" value="0.45" unit="%"/>
+    <define name="DEFAULT_ROLL" value="0.17" unit="rad"/>
+    <define name="DEFAULT_PITCH" value="0.08" unit="rad"/>
+
+    <define name="HOME_RADIUS" value="DEFAULT_CIRCLE_RADIUS" unit="m"/>
+    <define name="KILL_MODE_DISTANCE" value="(MAX_DIST_FROM_HOME*1.5)"/>
+    <define name="DELAY_WITHOUT_GPS" value="3" unit="s"/>
+  </section>
+
   <section name="MISC">
     <define name="NOMINAL_AIRSPEED" value="15." unit="m/s"/>
     <define name="CARROT" value="5." unit="s"/>
-    <define name="CONTROL_FREQUENCY" value="60" unit="Hz"/>
 
     <define name="DEFAULT_CIRCLE_RADIUS" value="75."/>
 
     <define name="GLIDE_AIRSPEED" value="10"/>
     <define name="GLIDE_PITCH" value="45" unit="deg"/>
 
-    <define name="COMMAND_ROLL_TRIM" value="180"/>
-    <define name="COMMAND_PITCH_TRIM" value="-194."/>
   </section>
 
   <section name="DIGITAL_CAMERA" prefix="DC_">
     <define name="AUTOSHOOT_QUARTERSEC_PERIOD" value="8" unit="quarter_second"/>
     <define name="AUTOSHOOT_METER_GRID" value="50" unit="meter"/>
   </section>
-
-  <firmware name="fixedwing">
-
-    <target name="ap" board="classix">
-      <configure name="SYS_TIME_LED" value="2" />
-
-      <define name="USE_LED_6" value="1"/>
-      <define name="LED_6_BANK" value="0"/>
-      <define name="LED_6_PIN" value="15"/>
-
-      <define name="USE_AD0"/>
-      <define name="USE_AD0_3"/>
-      <define name="ADC_6" value="\"AdcBank0(3)\""/>
-
-
-    </target>
-    <target name="sim" board="pc">
-      <subsystem name="radio_control" type="ppm"/>
-    </target>
-
-    <define name="DC_IMAGE_BUFFER" value="65000" />
-    <define name="STRONG_WIND"/>
-    <define name="WIND_INFO"/>
-    <define name="WIND_INFO_RET"/>
-    <define name="LOITER_TRIM"/>
-    <define name="RADIO_CONTROL_AUTO1"/>
-
-
-    <subsystem name="telemetry" type="xbee_api">
-      <configure name="MODEM_PORT" value="UART0"/>
-      <configure name="MODEM_BAUD" value="B9600"/>
-    </subsystem>
-    <subsystem name="control"/>
-    <subsystem name="navigation" type="extra"/>
-    <subsystem name="ins" type="xsens">
-      <configure name="XSENS_UART_NR" value="1"/>
-    </subsystem>
-
-  </firmware>
-
-  <firmware name="fixedwing">
-    <target name="fbw" board="classix">
-      <configure name="SYS_TIME_LED" value="2" />
-      <define name="RADIO_CONTROL_LED" value="1"/>
-      <define name="USE_AD1_5" value="1"/>
-      <define name="USE_AD1" value="1"/>
-      <configure name="ACTUATORS" value="TUDelft/actuators_ppm_fasst"/>
-
-      <define name="ADC_CHANNEL_VSUPPLY" value="AdcBank0\(6\)"/>
-
-    </target>
-    <subsystem name="radio_control" type="ppm"/>
-    <subsystem name="ins" type="xsens"/>
-  </firmware>
-
-  <modules>
-    <load name="digital_cam.xml">
-      <define name="DC_SHUTTER_LED" value="6"/>
-   </load>
-   <load name="adc_generic.xml">
-      <define name="ADC_GENERIC_NB_SAMPLES" value="32"/>
-      <configure name="ADC_CHANNEL_GENERIC1" value="ADC_6"/> <!-- e.g. current sensor -->
-   </load>
-   <load name="photogrammetry_calculator.xml" />
-  </modules>
-
-<!-- --------------------------------------------------------------------------- -->
-
 
   <section name="Photogrammetry" prefix="PHOTOGRAMMETRY_">
     <!-- Camera Parameters -->
