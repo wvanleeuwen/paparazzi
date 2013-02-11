@@ -149,8 +149,8 @@
 /sw/tools/fp_parser.ml
 /sw/tools/wiki_gen/wiki_gen
 /sw/tools/mergelogs
-/sw/tools/photolist/build
-/sw/tools/photolist/cmake
+/sw/tools/TUDelft/photolist/build
+/sw/tools/TUDelft/photolist/cmake
 
 # /sw/ground_segment/misc
 /sw/ground_segment/misc/davis2ivy
