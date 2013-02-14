@@ -70,7 +70,7 @@ endif
 PERIODIC_FREQUENCY ?= 60
 $(TARGET).CFLAGS += -DPERIODIC_FREQUENCY=$(PERIODIC_FREQUENCY)
 $(TARGET).srcs   += mcu_periph/sys_time.c $(SRC_ARCH)/mcu_periph/sys_time_arch.c
-$(TARGET).CFLAGS += -DUSE_SYS_TIME -DSYS_TIME_RESOLUTION='(1./$(PERIODIC_FREQUENCY).)'
+$(TARGET).CFLAGS += -DUSE_SYS_TIME
 
 #
 # InterMCU & Commands
@@ -172,6 +172,14 @@ ap_srcs 	+= peripherals/ads1114.c
 endif
 else ifeq ($(BOARD), lisa_l)
 ap_CFLAGS += -DUSE_I2C2
+endif
+
+# ahrs frequencies if configured
+ifdef AHRS_PROPAGATE_FREQUENCY
+ap_CFLAGS += -DAHRS_PROPAGATE_FREQUENCY=$(AHRS_PROPAGATE_FREQUENCY)
+endif
+ifdef AHRS_CORRECT_FREQUENCY
+ap_CFLAGS += -DAHRS_CORRECT_FREQUENCY=$(AHRS_CORRECT_FREQUENCY)
 endif
 
 
