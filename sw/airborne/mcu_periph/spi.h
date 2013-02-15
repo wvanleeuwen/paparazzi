@@ -135,6 +135,9 @@ typedef void (*SPICallback)( struct spi_transaction *trans );
  *   of the two specifies the toal number of exchanged bytes,
  * - if input_length is larger than output length,
  *   0 is sent for the remaining bytes
+ * WARNING: For STM32 only, the output_buf size MUST be greater than or equal
+ * to the input_buf size. This is only required in the event any transaction
+ * has (0 < output_length < input_length).
  */
 struct spi_transaction {
   volatile uint8_t* input_buf;
@@ -194,7 +197,7 @@ extern void spi0_init(void);
  */
 extern void spi0_arch_init(void);
 
-#endif
+#endif // USE_SPI0
 
 #if USE_SPI1
 
@@ -206,7 +209,7 @@ extern void spi1_init(void);
  */
 extern void spi1_arch_init(void);
 
-#endif
+#endif // USE_SPI1
 
 #if USE_SPI2
 
@@ -218,8 +221,19 @@ extern void spi2_init(void);
  */
 extern void spi2_arch_init(void);
 
+#endif // USE_SPI2
 
-#endif
+#if USE_SPI3
+
+extern struct spi_periph spi3;
+extern void spi3_init(void);
+
+/** Architecture dependant SPI3 initialization.
+ * Must be implemented by underlying architecture
+ */
+extern void spi3_arch_init(void);
+
+#endif // USE_SPI3
 
 /** Initialize a spi peripheral.
  * @param p spi peripheral to be configured
@@ -275,7 +289,7 @@ extern bool_t spi_resume(struct spi_periph* p, uint8_t slave);
 extern struct spi_periph spi0;
 extern void spi0_slave_init(void);
 
-/** Architecture dependant SPI1 initialization.
+/** Architecture dependant SPI0 initialization as slave.
  * Must be implemented by underlying architecture
  */
 extern void spi0_slave_arch_init(void);
@@ -287,7 +301,7 @@ extern void spi0_slave_arch_init(void);
 extern struct spi_periph spi1;
 extern void spi1_slave_init(void);
 
-/** Architecture dependant SPI1 initialization.
+/** Architecture dependant SPI1 initialization as slave.
  * Must be implemented by underlying architecture
  */
 extern void spi1_slave_arch_init(void);
@@ -299,10 +313,22 @@ extern void spi1_slave_arch_init(void);
 extern struct spi_periph spi2;
 extern void spi2_slave_init(void);
 
-/** Architecture dependant SPI1 initialization.
+/** Architecture dependant SPI2 initialization as slave.
  * Must be implemented by underlying architecture
  */
 extern void spi2_slave_arch_init(void);
+
+#endif
+
+#if USE_SPI3_SLAVE
+
+extern struct spi_periph spi3;
+extern void spi3_slave_init(void);
+
+/** Architecture dependant SPI3 initialization as slave.
+ * Must be implemented by underlying architecture
+ */
+extern void spi3_slave_arch_init(void);
 
 #endif
 
