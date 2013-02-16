@@ -96,17 +96,18 @@
  <!------------------- IMU ------------------->
 
   <section name="IMU" prefix="IMU_">
-    <define name="ACCEL_X_NEUTRAL" value="11"/>
-    <define name="ACCEL_Y_NEUTRAL" value="11"/>
-    <define name="ACCEL_Z_NEUTRAL" value="-25"/>
+     <define name="ACCEL_X_NEUTRAL" value="50"/>
+     <define name="ACCEL_Y_NEUTRAL" value="24"/>
+     <define name="ACCEL_Z_NEUTRAL" value="-33"/>
+
 
     <!-- replace this with your own calibration -->
-	<define name="MAG_X_NEUTRAL" value="-241"/>
-	<define name="MAG_Y_NEUTRAL" value="-12"/>
-	<define name="MAG_Z_NEUTRAL" value="42"/>
-	<define name="MAG_X_SENS" value="3.69835361765" integer="16"/>
-	<define name="MAG_Y_SENS" value="3.85215121206" integer="16"/>
-	<define name="MAG_Z_SENS" value="4.06715337569" integer="16"/>
+	<define name="MAG_X_NEUTRAL" value="-197"/>
+	<define name="MAG_Y_NEUTRAL" value="-48"/>
+	<define name="MAG_Z_NEUTRAL" value="-130"/>
+	<define name="MAG_X_SENS" value="3.90512687291" integer="16"/>
+	<define name="MAG_Y_SENS" value="3.85058747204" integer="16"/>
+	<define name="MAG_Z_SENS" value="4.8263506035" integer="16"/>
 
 
     <define name="BODY_TO_IMU_PHI"   value="-2.5" unit="deg"/>
