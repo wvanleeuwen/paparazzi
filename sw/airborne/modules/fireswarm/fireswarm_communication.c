@@ -27,6 +27,7 @@
 
 void fireswarm_payload_link_init(void)
 {
+  Uart3SetBaudrate(B57600);
 }
 
 
