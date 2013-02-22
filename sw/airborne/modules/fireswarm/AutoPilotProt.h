@@ -31,7 +31,7 @@
 // ------------------------------------------------
 
 // Maximum number of waypoints to be set
-#define AP_PROT_WAYPOINTS_MAX 5
+#define AP_PROT_WAYPOINTS_MAX 4
 
 // Number of directions to give the waypoint bounds
 #define AP_PROT_DIRECTIONS 16

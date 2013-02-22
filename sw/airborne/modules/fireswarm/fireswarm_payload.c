@@ -25,6 +25,8 @@
 #include "subsystems/datalink/downlink.h"
 #include "subsystems/gps.h"
 #include "subsystems/nav.h"
+#include "subsystems/ahrs.h"
+#include "generated/flight_plan.h"
 #include "state.h"
 #include "led.h"
 
@@ -40,6 +42,9 @@ AutoPilotMsgWpStatus   FireSwarmStatus;    // out
 AutoPilotMsgLanding    FireSwarmLanding;   // in
 AutoPilotMsgMode       FireSwarmMode;      // in
 AutoPilotMsgWayPoints  FireSwarmWaypoints; // in
+
+#define FIRESWARM_HEARTBEAT_DELAY 20
+uint8_t fireswarm_heartbeat = 0;
 
 #define FIRESWARM_LED_ON(X) LED_OFF(X)
 #define FIRESWARM_LED_OFF(X) LED_ON(X)
@@ -61,22 +66,51 @@ void fireswarm_payload_init(void)
 
 }
 
-void fireswarm_periodic(void)
+void fireswarm_status_led(uint8_t ahrs, uint8_t gps, uint8_t payload)
 {
   static uint8_t dispatch = 0;
+  dispatch++;
+
+  if (ahrs)
+  {
+    if (gps && payload)
+    {
+      FIRESWARM_LED_ON(FIRESWARM_READY_LED);
+    }
+    else
+    {
+      uint8_t rate = 15;
+
+      if (gps)
+        rate = 6;
+
+      if (dispatch >= rate)
+      {
+        dispatch = 0;
+        LED_TOGGLE(FIRESWARM_READY_LED);
+      }
+
+    }
+  }
+  else
+  {
+    // Flash Error FAST
+    LED_TOGGLE(FIRESWARM_READY_LED);
+  }
+}
+
+
+void fireswarm_periodic(void)
+{
+  if (fireswarm_heartbeat > 0)
+    fireswarm_heartbeat--;
 
   FireSwarmData.FlyState = AP_PROT_FLY_STATE_FLYING;
   int gps_quality = 255 - (gps.pacc-200) / 20;
   if (gps_quality < 0) gps_quality = 0;
   if (gps_quality > 255) gps_quality = 255;
 
-  dispatch++;
-  if (dispatch >= 16)
-  {
-    dispatch = 0;
-//     LED_TOGGLE(FIRESWARM_READY_LED);
-  }
-
+  fireswarm_status_led(ahrs.status == AHRS_RUNNING, gps.fix == GPS_FIX_3D, fireswarm_heartbeat > 0);
 
   FireSwarmHeader.MsgType = AP_PROT_SENSORDATA;
   FireSwarmHeader.DataSize = sizeof(FireSwarmData);
@@ -84,7 +118,7 @@ void fireswarm_periodic(void)
   FireSwarmData.GPSState = gps_quality;
   FireSwarmData.BatteryLeft = 255;
   FireSwarmData.ServoState = AP_PROT_STATE_SERVO_PROP | AP_PROT_STATE_SERVO_WING_LEFT | AP_PROT_STATE_SERVO_WING_RIGHT | AP_PROT_STATE_SERVO_TAIL;
-  FireSwarmData.AutoPilotState = AP_PROT_STATE_AP_OUTER_LOOP | AP_PROT_STATE_AP_INNER_LOOP;
+  FireSwarmData.AutoPilotState |= AP_PROT_STATE_AP_OUTER_LOOP | AP_PROT_STATE_AP_INNER_LOOP;
   FireSwarmData.SensorState = AP_PROT_STATE_SENSOR_COMPASS | AP_PROT_STATE_SENSOR_ACCELERO | AP_PROT_STATE_SENSOR_GPS | AP_PROT_STATE_SENSOR_WIND | AP_PROT_STATE_SENSOR_PRESSURE;
 
   FireSwarmData.Position.X = stateGetPositionUtm_f()->east;
@@ -113,11 +147,25 @@ void fireswarm_periodic(void)
 
 bool_t fireswarm_periodic_nav_init(void)
 {
+  FireSwarmData.AutoPilotState |= AP_PROT_STATE_AP_TAKEOVER;
+
   return FALSE;
 }
 
+
+
 bool_t fireswarm_periodic_nav(void)
 {
+  // Stop listening to payload if to becomes quite
+  if (fireswarm_heartbeat == 0)
+    return FALSE;
+
+
+  NavVerticalAltitudeMode(100, 0);    // vertical mode (folow glideslope)
+  NavVerticalAutoThrottleMode(0);     // throttle mode
+  NavGotoWaypoint(WP_FS1);            // horizontal mode (stay on localiser)
+
+  
   FireSwarmHeader.MsgType = AP_PROT_WP_STATUS;
   FireSwarmHeader.DataSize = sizeof(FireSwarmStatus);
 
@@ -255,18 +303,14 @@ void fireswarm_event(void)
       fprintf(stderr,"MSG %d %d \n",fsw_msg.msg_id, fsw_msg.len );
 #endif
       fsw_msg.msg_available = 0;
-
+      fireswarm_heartbeat = FIRESWARM_HEARTBEAT_DELAY;
       switch (fsw_msg.msg_id)
       {
       case AP_PROT_SET_MODE:
         memcpy(&FireSwarmMode, fsw_msg.msg_buf, sizeof(FireSwarmMode));
-        //nav_block = FireSwarmMode.Mode + 3;
-        nav_pitch = ((float)FireSwarmMode.Mode) / 10;
-        LED_TOGGLE(FIRESWARM_READY_LED);
         break;
       case AP_PROT_SET_WAYPOINTS:
         memcpy(&FireSwarmWaypoints, fsw_msg.msg_buf, sizeof(FireSwarmWaypoints));
-        LED_TOGGLE(FIRESWARM_PAYLOAD_POWER_LED);
         break;
       case AP_PROT_SET_LAND:
         memcpy(&FireSwarmLanding, fsw_msg.msg_buf, sizeof(FireSwarmLanding));
