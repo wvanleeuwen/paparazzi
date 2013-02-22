@@ -23,8 +23,7 @@
 #include "fireswarm_communication.h"
 
 //#include <errno.h>
-//#include <unistd.h>
-
+#include <unistd.h>
 #include <sys/types.h>
 #include <fcntl.h>
 #include <termios.h>
@@ -36,26 +35,48 @@
 
 int sim_uart_p = 0;
 
+#define failwith(X)     \
+{                       \
+  fprintf(stderr,X);    \
+  return;               \
+}
+
 
 void fireswarm_payload_link_init(void)
 {
-  sim_uart_p = open("/dev/ttyUSB0", O_RDWR | O_NOCTTY | O_NDELAY);
+  sim_uart_p = open("/dev/ttyUSB0", O_RDWR|O_NONBLOCK);
   if (sim_uart_p == -1)
   {
     fprintf(stderr,"Error: FireswarmCommunicationSim failed to open %s", "/dev/ttyUSB0");
   }
   else
   {
-    struct termios options;
+    struct termios orig_termios, cur_termios;
 
-    fcntl(sim_uart_p, F_SETFL, 0);
-    fcntl(sim_uart_p, F_SETFL, FNDELAY);
+    if (tcgetattr(sim_uart_p, &orig_termios)) failwith("getting modem serial device attr");
+    cur_termios = orig_termios;
 
-    tcgetattr(sim_uart_p, &options);
-    cfsetispeed(&options, B57600);
-    cfsetospeed(&options, B57600);
-    options.c_cflag |= (CLOCAL | CREAD);
-    tcsetattr(sim_uart_p, TCSANOW, &options);
+    // input modes
+    cur_termios.c_iflag &= ~(IGNBRK|BRKINT|IGNPAR|PARMRK|INPCK|ISTRIP|INLCR|IGNCR
+                  |ICRNL |IXON|IXANY|IXOFF|IMAXBEL);
+    // pas IGNCR sinon il vire les 0x0D
+    cur_termios.c_iflag |= BRKINT;
+
+    // output_flags
+    cur_termios.c_oflag  &=~(OPOST|ONLCR|OCRNL|ONOCR|ONLRET);
+
+    // control modes
+    cur_termios.c_cflag &= ~(CSIZE|CSTOPB|CREAD|PARENB|PARODD|HUPCL|CLOCAL|CRTSCTS);
+    cur_termios.c_cflag |= CREAD|CS8|CLOCAL;
+
+    // local modes
+    cur_termios.c_lflag &= ~(ISIG|ICANON|IEXTEN|ECHO|FLUSHO|PENDIN);
+    cur_termios.c_lflag |= NOFLSH;
+
+    if (cfsetspeed(&cur_termios, B57600)) failwith("setting modem serial device speed");
+
+    if (tcsetattr(sim_uart_p, TCSADRAIN, &cur_termios)) failwith("setting modem serial device attr");
+
   }
 }
 
