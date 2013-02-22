@@ -22,13 +22,17 @@
 
 #include "fireswarm_communication.h"
 
+//#include <errno.h>
+//#include <unistd.h>
+
+#include <sys/types.h>
+#include <fcntl.h>
+#include <termios.h>
 #include <stdio.h>
 #include <string.h>
-#include <termios.h>
-#include <errno.h>
-#include <fcntl.h>
-#include <unistd.h>
+#include <sys/termios.h>
 #include <sys/ioctl.h>
+
 
 int sim_uart_p = 0;
 

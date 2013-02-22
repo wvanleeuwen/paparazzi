@@ -23,6 +23,8 @@
 #include "fireswarm_payload.h"
 #include "mcu_periph/uart.h"
 #include "subsystems/datalink/downlink.h"
+#include "subsystems/gps.h"
+#include "state.h"
 #include "led.h"
 
 #include "AutoPilotProt.h"
@@ -33,9 +35,13 @@
 AutoPilotMsgHeader FireSwarmHeader;
 AutoPilotMsgSensorData FireSwarmData;
 
+#define FIRESWARM_LED_ON(X) LED_OFF(X)
+#define FIRESWARM_LED_OFF(X) LED_ON(X)
+
 void fireswarm_payload_init(void)
 {
   LED_INIT(FIRESWARM_PAYLOAD_POWER_LED);
+  LED_INIT(FIRESWARM_READY_LED);
 
   FireSwarmHeader.Header = AP_PROT_HEADER;
   FireSwarmHeader.MsgType = AP_PROT_SENSORDATA;
@@ -44,16 +50,27 @@ void fireswarm_payload_init(void)
 
   fireswarm_payload_link_init();
 
+  FIRESWARM_LED_ON(FIRESWARM_PAYLOAD_POWER_LED);
+  FIRESWARM_LED_OFF(FIRESWARM_READY_LED);
+
 }
 
 void fireswarm_periodic(void)
 {
-  LED_TOGGLE(FIRESWARM_PAYLOAD_POWER_LED);
+  static uint8_t dispatch = 0;
 
   FireSwarmData.FlyState = AP_PROT_FLY_STATE_FLYING;
   int gps_quality = 255 - (gps.pacc-200) / 20;
   if (gps_quality < 0) gps_quality = 0;
   if (gps_quality > 255) gps_quality = 255;
+
+  dispatch++;
+  if (dispatch >= 16)
+  {
+    dispatch = 0;
+    LED_TOGGLE(FIRESWARM_READY_LED);
+  }
+
   FireSwarmData.GPSState = gps_quality;
   FireSwarmData.BatteryLeft = 255;
   FireSwarmData.ServoState = AP_PROT_STATE_SERVO_PROP | AP_PROT_STATE_SERVO_WING_LEFT | AP_PROT_STATE_SERVO_WING_RIGHT | AP_PROT_STATE_SERVO_TAIL;
@@ -166,6 +183,7 @@ void fireswarm_parse( uint8_t c ) {
     {
       // fprintf(stderr,"OK %d %d %d <> %d \n", fsw_msg.msg_id, fsw_msg.len, fsw_msg.crc, c);
 
+      LED_TOGGLE(FIRESWARM_READY_LED);
       fsw_msg.msg_available = TRUE;
       goto restart;
     }
