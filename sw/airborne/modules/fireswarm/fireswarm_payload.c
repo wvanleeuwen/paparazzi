@@ -254,12 +254,14 @@ void fireswarm_event(void)
         memcpy(&FireSwarmMode, fsw_msg.msg_buf, sizeof(FireSwarmMode));
         //nav_block = FireSwarmMode.Mode + 3;
         nav_pitch = ((float)FireSwarmMode.Mode) / 10;
+        LED_TOGGLE(FIRESWARM_READY_LED);
         break;
       case AP_PROT_SET_WAYPOINTS:
+        memcpy(&FireSwarmWaypoints, fsw_msg.msg_buf, sizeof(FireSwarmWaypoints));
         LED_TOGGLE(FIRESWARM_PAYLOAD_POWER_LED);
         break;
       case AP_PROT_SET_LAND:
-        LED_TOGGLE(FIRESWARM_READY_LED);
+        memcpy(&FireSwarmLanding, fsw_msg.msg_buf, sizeof(FireSwarmLanding));
         break;
       }
     }
