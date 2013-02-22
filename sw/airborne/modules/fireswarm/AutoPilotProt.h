@@ -203,7 +203,7 @@ typedef struct AutoPilotMsgLandingStruct
 {
 	AutoPilotMsgPosition		LandPoint; // Z unused?
 	AutoPilotMsgRotationType	LandHeading;
-	bool						LandLeftTurn;
+	uint8_t						LandLeftTurn;
 } AutoPilotMsgLanding;
 
 

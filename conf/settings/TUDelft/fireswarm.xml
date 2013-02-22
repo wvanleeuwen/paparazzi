@@ -1,0 +1,9 @@
+<!DOCTYPE settings SYSTEM "../settings.dtd">
+
+<settings>
+  <dl_settings name="fireswarm">
+    <dl_settings name="fireswarm">
+      <dl_setting max="4" min="0" step="1" var="FireSwarmMode.Mode" shortname="Mode"/>
+    </dl_settings>
+  </dl_settings>
+</settings>

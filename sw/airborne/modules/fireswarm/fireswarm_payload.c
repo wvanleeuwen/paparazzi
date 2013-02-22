@@ -24,11 +24,12 @@
 #include "mcu_periph/uart.h"
 #include "subsystems/datalink/downlink.h"
 #include "subsystems/gps.h"
+#include "subsystems/nav.h"
 #include "state.h"
 #include "led.h"
 
-#include "AutoPilotProt.h"
 #include "fireswarm_communication.h"
+#include "subsystems/navigation/common_flight_plan.h"
 
 #define FIRESWARM_PAYLOAD_POWER_LED  5
 
@@ -38,7 +39,7 @@ AutoPilotMsgSensorData FireSwarmData;      // out
 AutoPilotMsgWpStatus   FireSwarmStatus;    // out
 AutoPilotMsgLanding    FireSwarmLanding;   // in
 AutoPilotMsgMode       FireSwarmMode;      // in
-AutoPilotMsgWayPoints FireSwarmWaypoints;  // in
+AutoPilotMsgWayPoints  FireSwarmWaypoints; // in
 
 #define FIRESWARM_LED_ON(X) LED_OFF(X)
 #define FIRESWARM_LED_OFF(X) LED_ON(X)
@@ -250,6 +251,9 @@ void fireswarm_event(void)
       switch (fsw_msg.msg_id)
       {
       case AP_PROT_SET_MODE:
+        memcpy(&FireSwarmMode, fsw_msg.msg_buf, sizeof(FireSwarmMode));
+        //nav_block = FireSwarmMode.Mode + 3;
+        nav_pitch = ((float)FireSwarmMode.Mode) / 10;
         break;
       case AP_PROT_SET_WAYPOINTS:
         LED_TOGGLE(FIRESWARM_PAYLOAD_POWER_LED);

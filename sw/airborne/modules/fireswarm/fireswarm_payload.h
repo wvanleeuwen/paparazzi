@@ -28,6 +28,13 @@
 #ifndef FIRESWARM_PAYLOAD_H
 #define FIRESWARM_PAYLOAD_H
 
+#include "AutoPilotProt.h"
+
+extern AutoPilotMsgLanding    FireSwarmLanding;
+extern AutoPilotMsgMode       FireSwarmMode;
+extern AutoPilotMsgWayPoints  FireSwarmWaypoints;
+
+
 void fireswarm_payload_init(void);
 void fireswarm_periodic(void);
 void fireswarm_periodic_nav(void);
