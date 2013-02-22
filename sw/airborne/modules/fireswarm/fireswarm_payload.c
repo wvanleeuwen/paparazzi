@@ -110,7 +110,13 @@ void fireswarm_periodic(void)
   //fprintf(stderr,".");
 }
 
-void fireswarm_periodic_nav(void)
+
+bool_t fireswarm_periodic_nav_init(void)
+{
+  return FALSE;
+}
+
+bool_t fireswarm_periodic_nav(void)
 {
   FireSwarmHeader.MsgType = AP_PROT_WP_STATUS;
   FireSwarmHeader.DataSize = sizeof(FireSwarmStatus);
@@ -124,6 +130,8 @@ void fireswarm_periodic_nav(void)
 
   //fprintf(stderr,"Bytes: %d \n", fireswarm_payload_link_has_data());
   //fprintf(stderr,".");
+
+  return TRUE;
 }
 
 /* parser status */

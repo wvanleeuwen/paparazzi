@@ -28,6 +28,9 @@
 #ifndef FIRESWARM_PAYLOAD_H
 #define FIRESWARM_PAYLOAD_H
 
+#include "std.h"
+#include "paparazzi.h"
+
 #include "AutoPilotProt.h"
 
 extern AutoPilotMsgLanding    FireSwarmLanding;
@@ -37,7 +40,8 @@ extern AutoPilotMsgWayPoints  FireSwarmWaypoints;
 
 void fireswarm_payload_init(void);
 void fireswarm_periodic(void);
-void fireswarm_periodic_nav(void);
+extern bool_t fireswarm_periodic_nav_init(void);
+extern bool_t fireswarm_periodic_nav(void);
 void fireswarm_event(void);
 
 #endif

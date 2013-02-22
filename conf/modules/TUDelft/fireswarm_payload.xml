@@ -9,7 +9,7 @@
   </header>
   <init fun="fireswarm_payload_init()"/>
   <periodic fun="fireswarm_periodic()" freq="15"/>
-  <periodic fun="fireswarm_periodic_nav()" freq="4"/>
+  <!-- called from flightplan now... periodic fun="fireswarm_periodic_nav()" freq="4"/-->
   <event fun="fireswarm_event()" />
   <makefile >
     <file name="fireswarm_payload.c"/>
