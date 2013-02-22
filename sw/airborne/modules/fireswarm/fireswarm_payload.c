@@ -147,9 +147,11 @@ void fireswarm_periodic(void)
 }
 
 
+static uint8_t slowdown = 0;
 bool_t fireswarm_periodic_nav_init(void)
 {
   FireSwarmData.AutoPilotState |= AP_PROT_STATE_AP_TAKEOVER;
+  slowdown = 36;
 
   return FALSE;
 }
@@ -157,51 +159,67 @@ bool_t fireswarm_periodic_nav_init(void)
 
 bool_t fireswarm_periodic_nav(void)
 {
+
   // Stop listening to payload if to becomes quite
   if (fireswarm_heartbeat == 0)
     return FALSE;
 
-  for (int i=0; i<FireSwarmWaypoints.NumWayPoints; i++)
+
+    for (int i=0; i<FireSwarmWaypoints.NumWayPoints; i++)
+    {
+      //fprintf(stderr,"Bytes: %d \n", fireswarm_payload_link_has_data());
+      if (FireSwarmWaypoints.WayPoints[i].WpType == AP_PROT_WP_LINE)
+      {
+        WaypointX(WP_FS1+i) = FireSwarmWaypoints.WayPoints[i].Line.To.X - nav_utm_east0;
+        WaypointY(WP_FS1+i) = FireSwarmWaypoints.WayPoints[i].Line.To.Y - nav_utm_north0;
+        WaypointAlt(WP_FS1+i) = FireSwarmWaypoints.WayPoints[i].Line.To.Z;
+        fprintf(stderr,"LINE %f %f ",FireSwarmWaypoints.WayPoints[i].Line.To.X,WaypointX(0));
+
+//        DOWNLINK_SEND_CIRCLE(_trans, _dev, &nav_circle_x, &nav_circle_y, &nav_circle_radius);
+
+//#define PERIODIC_SEND_SEGMENT(_trans, _dev) if (nav_in_segment) { DOWNLINK_SEND_SEGMENT(_trans, _dev, &nav_segment_x_1, &nav_segment_y_1, &nav_segment_x_2, &nav_segment_y_2); }
+      }
+      else if (FireSwarmWaypoints.WayPoints[i].WpType == AP_PROT_WP_ARC)
+      {
+        float arm = FireSwarmWaypoints.WayPoints[i].Arc.Radius;
+        float ang = - FireSwarmWaypoints.WayPoints[i].Arc.AngleStart - FireSwarmWaypoints.WayPoints[i].Arc.AngleArc;
+        float dn = cos(ang)*arm;
+        float de = sin(ang)*arm;
+
+        fprintf(stderr,"ARC ");
+        WaypointX(WP_FS1+i) = FireSwarmWaypoints.WayPoints[i].Arc.Center.X - nav_utm_east0 + de;
+        WaypointY(WP_FS1+i) = FireSwarmWaypoints.WayPoints[i].Arc.Center.Y - nav_utm_north0 + dn;
+        WaypointAlt(WP_FS1+i) = FireSwarmWaypoints.WayPoints[i].Arc.Center.Z;
+      }
+      else
+      {
+        fprintf(stderr,"CIRCLE ");
+        WaypointX(WP_FS1+i) = FireSwarmWaypoints.WayPoints[i].Circle.Center.X - nav_utm_east0;
+        WaypointY(WP_FS1+i) = FireSwarmWaypoints.WayPoints[i].Circle.Center.Y - nav_utm_north0;
+        WaypointAlt(WP_FS1+i) = FireSwarmWaypoints.WayPoints[i].Circle.Center.Z;
+      }
+    }
+    if (FireSwarmWaypoints.NumWayPoints > 0)
+      fprintf(stderr,"\n");
+
+
+  if (slowdown == 36)
   {
-    //fprintf(stderr,"Bytes: %d \n", fireswarm_payload_link_has_data());
-    if (FireSwarmWaypoints.WayPoints[i].WpType == AP_PROT_WP_LINE)
-    {
-      WaypointX(WP_FS1+i) = FireSwarmWaypoints.WayPoints[i].Line.To.X - nav_utm_east0;
-      WaypointY(WP_FS1+i) = FireSwarmWaypoints.WayPoints[i].Line.To.Y - nav_utm_north0;
-      WaypointAlt(WP_FS1+i) = FireSwarmWaypoints.WayPoints[i].Line.To.Z;
-      fprintf(stderr,"LINE %f %f ",FireSwarmWaypoints.WayPoints[i].Line.To.X,WaypointX(0));
-    }
-    else if (FireSwarmWaypoints.WayPoints[i].WpType == AP_PROT_WP_ARC)
-    {
-      fprintf(stderr,"ARC ");
-      WaypointX(WP_FS1+i) = FireSwarmWaypoints.WayPoints[i].Arc.Center.X - nav_utm_east0;
-      WaypointY(WP_FS1+i) = FireSwarmWaypoints.WayPoints[i].Arc.Center.Y - nav_utm_north0;
-      WaypointAlt(WP_FS1+i) = FireSwarmWaypoints.WayPoints[i].Arc.Center.Z;
-    }
-    else
-    {
-      fprintf(stderr,"CIRCLE ");
-      WaypointX(WP_FS1+i) = FireSwarmWaypoints.WayPoints[i].Circle.Center.X - nav_utm_east0;
-      WaypointY(WP_FS1+i) = FireSwarmWaypoints.WayPoints[i].Circle.Center.Y - nav_utm_north0;
-      WaypointAlt(WP_FS1+i) = FireSwarmWaypoints.WayPoints[i].Circle.Center.Z;
-    }
+    slowdown = 0;
+
+    FireSwarmHeader.MsgType = AP_PROT_WP_STATUS;
+    FireSwarmHeader.DataSize = sizeof(FireSwarmStatus);
+
+    FireSwarmStatus.NumWaypoints = 0;
+
+    fireswarm_payload_link_start();
+    fireswarm_payload_link_transmit((uint8_t*)&FireSwarmHeader, sizeof(FireSwarmHeader));
+    fireswarm_payload_link_transmit((uint8_t*)&FireSwarmStatus, sizeof(FireSwarmStatus));
+    fireswarm_payload_link_crc();
   }
-  if (FireSwarmWaypoints.NumWayPoints > 0)
-    fprintf(stderr,"\n");
+  slowdown++;
 
-
-  FireSwarmHeader.MsgType = AP_PROT_WP_STATUS;
-  FireSwarmHeader.DataSize = sizeof(FireSwarmStatus);
-
-  FireSwarmStatus.NumWaypoints = 0;
-
-  fireswarm_payload_link_start();
-  fireswarm_payload_link_transmit((uint8_t*)&FireSwarmHeader, sizeof(FireSwarmHeader));
-  fireswarm_payload_link_transmit((uint8_t*)&FireSwarmStatus, sizeof(FireSwarmStatus));
-  fireswarm_payload_link_crc();
-
-
-  NavVerticalAltitudeMode(WaypointAlt(WP_FS1), 0);    // vertical mode (folow glideslope)
+  NavVerticalAltitudeMode(WaypointAlt(WP_FS3), 0);    // vertical mode (folow glideslope)
   NavVerticalAutoThrottleMode(0);     // throttle mode
   NavGotoWaypoint(WP_FS1);            // horizontal mode (stay on localiser)
 
