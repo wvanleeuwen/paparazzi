@@ -102,6 +102,8 @@ void fireswarm_status_led(uint8_t ahrs, uint8_t gps, uint8_t payload)
 
 void fireswarm_periodic(void)
 {
+  struct FloatEulers* att = stateGetNedToBodyEulers_f();
+
   if (fireswarm_heartbeat > 0)
     fireswarm_heartbeat--;
 
@@ -127,10 +129,10 @@ void fireswarm_periodic(void)
 
   FireSwarmData.GroundSpeed = 0;
   FireSwarmData.VerticalSpeed = 0;
-  FireSwarmData.Heading = 0;
-  FireSwarmData.Yaw = 0;
-  FireSwarmData.Pitch = 0;
-  FireSwarmData.Roll = 0;
+  FireSwarmData.Heading = att->psi;
+  FireSwarmData.Yaw = att->psi;
+  FireSwarmData.Pitch = att->theta;
+  FireSwarmData.Roll = att->phi;
   FireSwarmData.WindHeading = 0;
   FireSwarmData.WindSpeed = 0;
 
@@ -153,19 +155,41 @@ bool_t fireswarm_periodic_nav_init(void)
 }
 
 
-
 bool_t fireswarm_periodic_nav(void)
 {
   // Stop listening to payload if to becomes quite
   if (fireswarm_heartbeat == 0)
     return FALSE;
 
+  for (int i=0; i<FireSwarmWaypoints.NumWayPoints; i++)
+  {
+    //fprintf(stderr,"Bytes: %d \n", fireswarm_payload_link_has_data());
+    if (FireSwarmWaypoints.WayPoints[i].WpType == AP_PROT_WP_LINE)
+    {
+      WaypointX(WP_FS1+i) = FireSwarmWaypoints.WayPoints[i].Line.To.X - nav_utm_east0;
+      WaypointY(WP_FS1+i) = FireSwarmWaypoints.WayPoints[i].Line.To.Y - nav_utm_north0;
+      WaypointAlt(WP_FS1+i) = FireSwarmWaypoints.WayPoints[i].Line.To.Z;
+      fprintf(stderr,"LINE %f %f ",FireSwarmWaypoints.WayPoints[i].Line.To.X,WaypointX(0));
+    }
+    else if (FireSwarmWaypoints.WayPoints[i].WpType == AP_PROT_WP_ARC)
+    {
+      fprintf(stderr,"ARC ");
+      WaypointX(WP_FS1+i) = FireSwarmWaypoints.WayPoints[i].Arc.Center.X - nav_utm_east0;
+      WaypointY(WP_FS1+i) = FireSwarmWaypoints.WayPoints[i].Arc.Center.Y - nav_utm_north0;
+      WaypointAlt(WP_FS1+i) = FireSwarmWaypoints.WayPoints[i].Arc.Center.Z;
+    }
+    else
+    {
+      fprintf(stderr,"CIRCLE ");
+      WaypointX(WP_FS1+i) = FireSwarmWaypoints.WayPoints[i].Circle.Center.X - nav_utm_east0;
+      WaypointY(WP_FS1+i) = FireSwarmWaypoints.WayPoints[i].Circle.Center.Y - nav_utm_north0;
+      WaypointAlt(WP_FS1+i) = FireSwarmWaypoints.WayPoints[i].Circle.Center.Z;
+    }
+  }
+  if (FireSwarmWaypoints.NumWayPoints > 0)
+    fprintf(stderr,"\n");
 
-  NavVerticalAltitudeMode(100, 0);    // vertical mode (folow glideslope)
-  NavVerticalAutoThrottleMode(0);     // throttle mode
-  NavGotoWaypoint(WP_FS1);            // horizontal mode (stay on localiser)
 
-  
   FireSwarmHeader.MsgType = AP_PROT_WP_STATUS;
   FireSwarmHeader.DataSize = sizeof(FireSwarmStatus);
 
@@ -176,8 +200,10 @@ bool_t fireswarm_periodic_nav(void)
   fireswarm_payload_link_transmit((uint8_t*)&FireSwarmStatus, sizeof(FireSwarmStatus));
   fireswarm_payload_link_crc();
 
-  //fprintf(stderr,"Bytes: %d \n", fireswarm_payload_link_has_data());
-  //fprintf(stderr,".");
+
+  NavVerticalAltitudeMode(WaypointAlt(WP_FS1), 0);    // vertical mode (folow glideslope)
+  NavVerticalAutoThrottleMode(0);     // throttle mode
+  NavGotoWaypoint(WP_FS1);            // horizontal mode (stay on localiser)
 
   return TRUE;
 }

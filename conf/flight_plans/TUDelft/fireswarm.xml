@@ -5,7 +5,7 @@ Delft: lat0="51.990" lon0="4.390"
 EHWO: lat0="51.4444719" lon0="4.333919"
 
 -->
-<flight_plan alt="80" ground_alt="5" lat0="51.990" lon0="4.390"  max_dist_from_home="1500" name="FireSwarm" security_height="75">
+<flight_plan alt="80" ground_alt="5" lat0="51.990" lon0="4.390"  max_dist_from_home="8000" name="FireSwarm" security_height="75">
   <header>
 #include "subsystems/navigation/nav_line.h"
 #include "subsystems/datalink/datalink.h"
@@ -13,16 +13,12 @@ EHWO: lat0="51.4444719" lon0="4.333919"
   <waypoints>
     <waypoint name="HOME" x="0" y="0"/>
     <waypoint name="STDBY" x="49.5" y="100.1"/>
-    <waypoint name="1" x="10.1" y="189.9"/>
-    <waypoint name="2" x="132.3" y="139.1"/>
-    <waypoint name="MOB" x="137.0" y="-11.6"/>
     <waypoint name="S1" x="-119.2" y="69.6"/>
     <waypoint name="S2" x="274.4" y="209.5"/>
     <waypoint alt="215.0" name="AF" x="177.4" y="45.1"/>
     <waypoint alt="185.0" name="TD" x="28.8" y="57.0"/>
     <waypoint name="_BASELEG" x="168.8" y="-13.8"/>
     <waypoint name="CLIMB" x="-114.5" y="162.3"/>
-    <waypoint name="TO" x="-241.7" y="519.9"/>
 
     <waypoint name="FS1" x="-600.0" y="-600.0"/>
     <waypoint name="FS2" x="-600.0" y="600.0"/>
@@ -39,7 +35,7 @@ EHWO: lat0="51.4444719" lon0="4.333919"
       <while cond="!GpsFixValid()"/>
     </block>
     <block name="Geo init">
-      <while cond="LessThan(NavBlockTime(), 10)"/>
+      <while cond="LessThan(NavBlockTime(), 2)"/>
       <call fun="NavSetGroundReferenceHere()"/>
     </block>
     <block name="Holding point">
@@ -51,7 +47,7 @@ EHWO: lat0="51.4444719" lon0="4.333919"
       <exception cond="GetPosAlt() > ground_alt+20" deroute="Takeoff"/>
       <set value="0" var="kill_throttle"/>
       <call fun="nav_catapult_init()" />
-      <call fun="nav_catapult(WP_TO, WP_CLIMB)"/>
+      <call fun="nav_catapult(WP_HOME, WP_CLIMB)"/>
     </block>
     <block key="t" name="Takeoff" strip_button="Takeoff (wp CLIMB)" strip_icon="takeoff.png" group="home">
       <exception cond="GetPosAlt() > ground_alt+25" deroute="Swarm"/>
@@ -86,18 +82,6 @@ EHWO: lat0="51.4444719" lon0="4.333919"
     </block>
     <block key="<Control>a" name="Standby" strip_button="Standby" strip_icon="home.png" group="home">
       <circle radius="nav_radius" wp="STDBY"/>
-    </block>
-    <block name="Oval 1-2" strip_button="Oval (wp 1-2)" strip_icon="oval.png" group="base_pattern">
-      <oval p1="1" p2="2" radius="nav_radius"/>
-    </block>
-    <block name="MOB" strip_button="Turn around here" strip_icon="mob.png" group="base_pattern">
-      <call fun="NavSetWaypointHere(WP_MOB)"/>
-      <set value="DEFAULT_CIRCLE_RADIUS" var="nav_radius"/>
-      <circle radius="nav_radius" wp="MOB"/>
-    </block>
-    <block name="Line 1-2" strip_button="Line (wp 1-2)" strip_icon="line.png" group="extra_pattern">
-      <call fun="nav_line_init()"/>
-      <call fun="nav_line(WP_1, WP_2, nav_radius)"/>
     </block>
     <block name="Survey S1-S2" strip_button="Survey (wp S1-S2)" strip_icon="survey.png" group="extra_pattern">
       <survey_rectangle grid="150" wp1="S1" wp2="S2"/>
