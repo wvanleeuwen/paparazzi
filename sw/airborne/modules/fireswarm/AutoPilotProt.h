@@ -181,10 +181,10 @@ typedef struct AutoPilotMsgWayPointsStruct
 } AutoPilotMsgWayPoints;
 
 
-struct AutoPilotMsgMode
+typedef struct AutoPilotMsgModeStruct
 {
 	uint8_t						Mode;	// See EAutoPilotMode
-};
+} AutoPilotMsgMode;
 
 /////////////////////////////////////////////////////////
 // Actual Messages
@@ -229,12 +229,12 @@ typedef struct AutoPilotMsgSensorDataStruct
 } AutoPilotMsgSensorData;
 
 
-struct AutoPilotMsgWpStatus
+typedef struct AutoPilotMsgWpStatusStruct
 {
 	uint8_t						NumWaypoints;
 	uint32_t					ID[AP_PROT_WAYPOINTS_MAX];
 	AutoPilotMsgTimeType		ETA[AP_PROT_WAYPOINTS_MAX]; // ETA of 0 means no ETA available
-};
+} AutoPilotMsgWpStatus;
 
 
 // Bounds in several directions, starting at angle=0

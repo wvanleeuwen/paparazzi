@@ -32,8 +32,13 @@
 
 #define FIRESWARM_PAYLOAD_POWER_LED  5
 
-AutoPilotMsgHeader FireSwarmHeader;
-AutoPilotMsgSensorData FireSwarmData;
+AutoPilotMsgHeader     FireSwarmHeader;
+
+AutoPilotMsgSensorData FireSwarmData;      // out
+AutoPilotMsgWpStatus   FireSwarmStatus;    // out
+AutoPilotMsgLanding    FireSwarmLanding;   // in
+AutoPilotMsgMode       FireSwarmMode;      // in
+AutoPilotMsgWayPoints FireSwarmWaypoints;  // in
 
 #define FIRESWARM_LED_ON(X) LED_OFF(X)
 #define FIRESWARM_LED_OFF(X) LED_ON(X)
@@ -68,8 +73,12 @@ void fireswarm_periodic(void)
   if (dispatch >= 16)
   {
     dispatch = 0;
-    LED_TOGGLE(FIRESWARM_READY_LED);
+//     LED_TOGGLE(FIRESWARM_READY_LED);
   }
+
+
+  FireSwarmHeader.MsgType = AP_PROT_SENSORDATA;
+  FireSwarmHeader.DataSize = sizeof(FireSwarmData);
 
   FireSwarmData.GPSState = gps_quality;
   FireSwarmData.BatteryLeft = 255;
@@ -94,6 +103,22 @@ void fireswarm_periodic(void)
   fireswarm_payload_link_start();
   fireswarm_payload_link_transmit((uint8_t*)&FireSwarmHeader, sizeof(FireSwarmHeader));
   fireswarm_payload_link_transmit((uint8_t*)&FireSwarmData, sizeof(FireSwarmData));
+  fireswarm_payload_link_crc();
+
+  //fprintf(stderr,"Bytes: %d \n", fireswarm_payload_link_has_data());
+  //fprintf(stderr,".");
+}
+
+void fireswarm_periodic_nav(void)
+{
+  FireSwarmHeader.MsgType = AP_PROT_WP_STATUS;
+  FireSwarmHeader.DataSize = sizeof(FireSwarmStatus);
+
+  FireSwarmStatus.NumWaypoints = 0;
+
+  fireswarm_payload_link_start();
+  fireswarm_payload_link_transmit((uint8_t*)&FireSwarmHeader, sizeof(FireSwarmHeader));
+  fireswarm_payload_link_transmit((uint8_t*)&FireSwarmStatus, sizeof(FireSwarmStatus));
   fireswarm_payload_link_crc();
 
   //fprintf(stderr,"Bytes: %d \n", fireswarm_payload_link_has_data());
@@ -183,7 +208,6 @@ void fireswarm_parse( uint8_t c ) {
     {
       // fprintf(stderr,"OK %d %d %d <> %d \n", fsw_msg.msg_id, fsw_msg.len, fsw_msg.crc, c);
 
-      LED_TOGGLE(FIRESWARM_READY_LED);
       fsw_msg.msg_available = TRUE;
       goto restart;
     }
@@ -222,6 +246,18 @@ void fireswarm_event(void)
       fprintf(stderr,"MSG %d %d \n",fsw_msg.msg_id, fsw_msg.len );
 #endif
       fsw_msg.msg_available = 0;
+
+      switch (fsw_msg.msg_id)
+      {
+      case AP_PROT_SET_MODE:
+        break;
+      case AP_PROT_SET_WAYPOINTS:
+        LED_TOGGLE(FIRESWARM_PAYLOAD_POWER_LED);
+        break;
+      case AP_PROT_SET_LAND:
+        LED_TOGGLE(FIRESWARM_READY_LED);
+        break;
+      }
     }
   }
 }

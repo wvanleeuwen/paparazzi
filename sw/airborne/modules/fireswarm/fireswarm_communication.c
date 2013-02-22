@@ -25,6 +25,39 @@
 #include "fireswarm_communication.h"
 
 
+#define __FireSwarmPayloadLink(dev, _x) dev##_x
+#define _FireSwarmPayloadLink(dev, _x)  __FireSwarmPayloadLink(dev, _x)
+#define FireSwarmPayloadLink(_x) _FireSwarmPayloadLink(FIRESWARM_LINK, _x)
+
+#define FireSwarmPayloadBuffer() FireSwarmPayloadLink(ChAvailable())
+
+/*
+#define FireSwarmPayloadEvent(_msg_available_callback) { \
+    if (GpsBuffer()) {                             \
+      ReadGpsBuffer();                             \
+    }                                              \
+    if (gps_ubx.msg_available) {                   \
+      gps_ubx_read_message();                      \
+      gps_ubx_ucenter_event();                     \
+      if (gps_ubx.msg_class == UBX_NAV_ID &&       \
+          (gps_ubx.msg_id == UBX_NAV_VELNED_ID ||  \
+           (gps_ubx.msg_id == UBX_NAV_SOL_ID &&    \
+            gps_ubx.have_velned == 0))) {          \
+        if (gps.fix == GPS_FIX_3D) {               \
+          gps.last_fix_ticks = sys_time.nb_sec_rem; \
+          gps.last_fix_time = sys_time.nb_sec;      \
+        }                                          \
+        _sol_available_callback();                 \
+      }                                            \
+      gps_ubx.msg_available = FALSE;               \
+    }                                              \
+  }
+*/
+
+
+
+
+
 void fireswarm_payload_link_init(void)
 {
   Uart3SetBaudrate(B57600);
@@ -55,10 +88,10 @@ void fireswarm_payload_link_crc(void)
 
 int fireswarm_payload_link_has_data(void)
 {
-  return 0;
+  return FireSwarmPayloadLink(ChAvailable());
 }
 
 char fireswarm_payload_link_get(void)
 {
-  return 0;
+  return FireSwarmPayloadLink(Getch());
 }

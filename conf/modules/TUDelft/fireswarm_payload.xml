@@ -8,7 +8,8 @@
     <file name="fireswarm_payload.h"/>
   </header>
   <init fun="fireswarm_payload_init()"/>
-  <periodic fun="fireswarm_periodic()" freq="16"/>
+  <periodic fun="fireswarm_periodic()" freq="15"/>
+  <periodic fun="fireswarm_periodic_nav()" freq="4"/>
   <event fun="fireswarm_event()" />
   <makefile >
     <file name="fireswarm_payload.c"/>
@@ -19,6 +20,7 @@
   </makefile>
   <makefile target="ap">
     <file name="fireswarm_communication.c"/>
+    <define name="FIRESWARM_LINK" value="Uart3"/>
     <define name="USE_UART3" value="1" />
     <define name="UART3_BAUD" value="B9600" />
   </makefile>

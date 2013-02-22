@@ -30,6 +30,7 @@
 
 void fireswarm_payload_init(void);
 void fireswarm_periodic(void);
+void fireswarm_periodic_nav(void);
 void fireswarm_event(void);
 
 #endif
