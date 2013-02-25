@@ -40,7 +40,7 @@
     <subsystem name="telemetry"     type="xbee_api"/>
     <subsystem name="imu"           type="aspirin_v2.1"/>
     <subsystem name="gps"           type="ublox"/>
-    <subsystem name="stabilization" type="euler"/>
+    <subsystem name="stabilization" type="int_quat"/>
     <subsystem name="ahrs"          type="int_cmpl_quat"/>
     <subsystem name="ins"           type="hff"/>
   </firmware>
@@ -172,10 +172,10 @@
     <define name="REF_MAX_Q"    value="400." unit="deg/s"/>
     <define name="REF_MAX_QDOT" value="RadOfDeg(8000.)"/>
 
-    <define name="REF_OMEGA_R"  value="500" unit="deg/s"/>
-    <define name="REF_ZETA_R"   value="0.85"/>
-    <define name="REF_MAX_R"    value="180." unit="deg/s"/>
-    <define name="REF_MAX_RDOT" value="RadOfDeg(1800.)"/>
+    <define name="REF_OMEGA_R"  value="2500" unit="deg/s"/>
+    <define name="REF_ZETA_R"   value="0.6"/>
+    <define name="REF_MAX_R"    value="1000." unit="deg/s"/>
+    <define name="REF_MAX_RDOT" value="RadOfDeg(9000.)"/>
 
     <!-- feedback -->
     <define name="PHI_PGAIN"  value="70"/>
