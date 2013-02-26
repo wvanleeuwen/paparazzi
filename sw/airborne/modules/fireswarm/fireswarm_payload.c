@@ -66,14 +66,15 @@ void fireswarm_payload_init(void)
 
 }
 
-void fireswarm_status_led(uint8_t ahrs, uint8_t gps, uint8_t payload)
+void fireswarm_status_led(uint8_t ahrs_ok, uint8_t gps_ok, uint8_t payload_ok);
+void fireswarm_status_led(uint8_t ahrs_ok, uint8_t gps_ok, uint8_t payload_ok)
 {
   static uint8_t dispatch = 0;
   dispatch++;
 
-  if (ahrs)
+  if (ahrs_ok)
   {
-    if (gps && payload)
+    if (gps_ok && payload_ok)
     {
       FIRESWARM_LED_ON(FIRESWARM_READY_LED);
     }
@@ -81,7 +82,7 @@ void fireswarm_status_led(uint8_t ahrs, uint8_t gps, uint8_t payload)
     {
       uint8_t rate = 15;
 
-      if (gps)
+      if (gps_ok)
         rate = 6;
 
       if (dispatch >= rate)
@@ -173,7 +174,9 @@ bool_t fireswarm_periodic_nav(void)
         WaypointX(WP_FS1+i) = FireSwarmWaypoints.WayPoints[i].Line.To.X - nav_utm_east0;
         WaypointY(WP_FS1+i) = FireSwarmWaypoints.WayPoints[i].Line.To.Y - nav_utm_north0;
         WaypointAlt(WP_FS1+i) = FireSwarmWaypoints.WayPoints[i].Line.To.Z;
+#ifdef SITL
         fprintf(stderr,"LINE %f %f ",FireSwarmWaypoints.WayPoints[i].Line.To.X,WaypointX(0));
+#endif
 
 //        DOWNLINK_SEND_CIRCLE(_trans, _dev, &nav_circle_x, &nav_circle_y, &nav_circle_radius);
 
@@ -186,22 +189,27 @@ bool_t fireswarm_periodic_nav(void)
         float dn = cos(ang)*arm;
         float de = sin(ang)*arm;
 
+#ifdef SITL
         fprintf(stderr,"ARC ");
+#endif
         WaypointX(WP_FS1+i) = FireSwarmWaypoints.WayPoints[i].Arc.Center.X - nav_utm_east0 + de;
         WaypointY(WP_FS1+i) = FireSwarmWaypoints.WayPoints[i].Arc.Center.Y - nav_utm_north0 + dn;
         WaypointAlt(WP_FS1+i) = FireSwarmWaypoints.WayPoints[i].Arc.Center.Z;
       }
       else
       {
+#ifdef SITL
         fprintf(stderr,"CIRCLE ");
+#endif
         WaypointX(WP_FS1+i) = FireSwarmWaypoints.WayPoints[i].Circle.Center.X - nav_utm_east0;
         WaypointY(WP_FS1+i) = FireSwarmWaypoints.WayPoints[i].Circle.Center.Y - nav_utm_north0;
         WaypointAlt(WP_FS1+i) = FireSwarmWaypoints.WayPoints[i].Circle.Center.Z;
       }
     }
+#ifdef SITL
     if (FireSwarmWaypoints.NumWayPoints > 0)
       fprintf(stderr,"\n");
-
+#endif
 
   if (slowdown == 36)
   {
@@ -358,6 +366,9 @@ void fireswarm_event(void)
         break;
       case AP_PROT_SET_LAND:
         memcpy(&FireSwarmLanding, fsw_msg.msg_buf, sizeof(FireSwarmLanding));
+        break;
+      default:
+        // decode
         break;
       }
     }
