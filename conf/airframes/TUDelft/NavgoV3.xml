@@ -36,8 +36,8 @@ This airframe file use  IMU 3000 , not the standart ITG3200 Please change teh gy
     <subsystem name="gps"           type="ublox">
       <configure name="GPS_BAUD" value="B57600"/>
     </subsystem>
-    <subsystem name="stabilization" type="euler"/>
-    <subsystem name="ahrs"          type="int_cmpl_euler"/>
+    <subsystem name="stabilization" type="int_quat"/>
+    <subsystem name="ahrs"          type="int_cmpl_quat"/>
     <subsystem name="ins"           type="hff"/>
   </firmware>
 
@@ -127,7 +127,7 @@ This airframe file use  IMU 3000 , not the standart ITG3200 Please change teh gy
     <define name="MAG_Y_SENS" value="4.19805048993" integer="16"/>
     <define name="MAG_Z_SENS" value="4.97732250572" integer="16"/>
 
-    <define name="BODY_TO_IMU_PHI"   value="0." unit="deg"/>
+    <define name="BODY_TO_IMU_PHI"   value="180." unit="deg"/>
     <define name="BODY_TO_IMU_THETA" value="0." unit="deg"/>
     <define name="BODY_TO_IMU_PSI"   value="0." unit="deg"/>
 
