@@ -214,7 +214,7 @@
     <define name="NOMINAL_AIRSPEED" value="14." unit="m/s"/>
     <define name="CARROT" value="5." unit="s"/>
     <define name="CONTROL_FREQUENCY" value="60" unit="Hz"/>
-    <define name="XBEE_INIT" value="&quot;ATPL4\rATID332\r&quot;"/>
+    <define name="XBEE_INIT" value="&quot;ATPL4\rATID3332\r&quot;"/>
 
     <define name="DEFAULT_CIRCLE_RADIUS" value="80."/>
 
