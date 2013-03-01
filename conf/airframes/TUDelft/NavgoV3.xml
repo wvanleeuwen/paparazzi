@@ -65,10 +65,10 @@ This airframe file use  IMU 3000 , not the standart ITG3200 Please change teh gy
     <define name="TRIM_YAW" value="0"/>
     <define name="NB_MOTOR" value="4"/>
     <define name="SCALE" value="256"/>
-    <define name="ROLL_COEF"  value="{    0, -256,    0,  256}"/>
-    <define name="PITCH_COEF" value="{  256,    0, -256,    0}"/>
-    <define name="YAW_COEF"   value="{ -256,  256, -256,  256}"/>
-    <define name="THRUST_COEF" value="{ 256,  256,  256,  256}"/>
+    <define name="ROLL_COEF"   value="{    0,    0,  256, -256 }"/>
+    <define name="PITCH_COEF"  value="{  256, -256,    0,    0 }"/>
+    <define name="YAW_COEF"    value="{ -256, -256,  256,  256 }"/>
+    <define name="THRUST_COEF" value="{  256,  256,  256,  256 }"/>
   </section>
 
   <servos driver="Mkk">
@@ -262,8 +262,7 @@ This airframe file use  IMU 3000 , not the standart ITG3200 Please change teh gy
  <section name="AUTOPILOT">
    <define name="MODE_MANUAL" value="AP_MODE_ATTITUDE_DIRECT"/>
    <define name="MODE_AUTO1"  value="AP_MODE_ATTITUDE_Z_HOLD"/>
-   <!--define name="MODE_AUTO2"  value="AP_MODE_ATTITUDE_Z_HOLD"/-->
-   <define name="MODE_AUTO2"  value="AP_MODE_NAV"/>
+   <define name="MODE_AUTO2"  value="AP_MODE_ATTITUDE_RC_CLIMB"/>
  </section>
 
  <section name="FMS">
