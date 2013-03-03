@@ -56,7 +56,7 @@ This airframe file use  IMU 3000 , not the standart ITG3200 Please change teh gy
 
   <section name="MKK" prefix="ACTUATORS_MKK_">
       <define name="NB" value="4"/>
-      <define name="ADDR" value="{0x52, 0x54, 0x56, 0x58}"/>
+      <define name="ADDR" value="{0x54, 0x58, 0x56, 0x52}"/>
   </section>
 
   <section name="MIXING" prefix="MOTOR_MIXING_">
@@ -73,9 +73,9 @@ This airframe file use  IMU 3000 , not the standart ITG3200 Please change teh gy
 
   <servos driver="Mkk">
     <servo name="FRONT"  no="0"    min="0" neutral="20" max="255"/>
-    <servo name="RIGHT"  no="1"    min="0" neutral="20" max="255"/>
-    <servo name="BACK"   no="2"    min="0" neutral="20" max="255"/>
-    <servo name="LEFT"   no="3"    min="0" neutral="20" max="255"/>
+    <servo name="BACK"   no="1"    min="0" neutral="20" max="255"/>
+    <servo name="LEFT"   no="2"    min="0" neutral="20" max="255"/>
+    <servo name="RIGHT"  no="3"    min="0" neutral="20" max="255"/>
   </servos>
 
   <commands>
@@ -200,11 +200,11 @@ This airframe file use  IMU 3000 , not the standart ITG3200 Please change teh gy
     <define name="REF_MAX_RDOT" value="RadOfDeg(900.)"/>
 
     <!-- feedback -->
-    <define name="PHI_PGAIN"  value="1800"/>
+    <define name="PHI_PGAIN"  value="1000"/>
     <define name="PHI_DGAIN"  value="240"/>
     <define name="PHI_IGAIN"  value="200"/>
 
-    <define name="THETA_PGAIN"  value="1800"/>
+    <define name="THETA_PGAIN"  value="1000"/>
     <define name="THETA_DGAIN"  value="240"/>
     <define name="THETA_IGAIN"  value="200"/>
 
