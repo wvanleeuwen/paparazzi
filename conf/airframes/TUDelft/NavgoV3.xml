@@ -1,7 +1,7 @@
 
 <!--
 This airframe file use  IMU 3000 , not the standart ITG3200 Please change teh gyrosens values back to the original value when you use a purgaded Navgo
- SENS ITG3200  1/14.375 (deg/s)/LSB, rate frac 12bit => 1/14.375 * pi / 180 * 2^12 
+ SENS ITG3200  1/14.375 (deg/s)/LSB, rate frac 12bit => 1/14.375 * pi / 180 * 2^12
     <define name="GYRO_P_SENS" value="4.97312" integer="16"/>
     <define name="GYRO_Q_SENS" value="4.97312" integer="16"/>
     <define name="GYRO_R_SENS" value="4.97312" integer="16"/>-->
@@ -11,7 +11,7 @@ This airframe file use  IMU 3000 , not the standart ITG3200 Please change teh gy
 
 <airframe name="Blender">
 
- <!------------------- Firmware ------------------->
+
 
   <firmware name="rotorcraft">
     <define name="USE_INS_NAV_INIT"/>
@@ -41,7 +41,7 @@ This airframe file use  IMU 3000 , not the standart ITG3200 Please change teh gy
     <subsystem name="ins"           type="hff"/>
   </firmware>
 
- <!------------------- Modules ------------------->
+
 
   <modules main_freq="512">
       <load name="gps_ubx_ucenter.xml"/>
@@ -54,7 +54,7 @@ This airframe file use  IMU 3000 , not the standart ITG3200 Please change teh gy
     <load name="imu_quality_assessment.xml" />
   </modules>
 
- <!------------------- Servo's ------------------->
+ <!-- Servo's -->
 
   <section name="MKK" prefix="ACTUATORS_MKK_">
       <define name="NB" value="4"/>
@@ -95,7 +95,7 @@ This airframe file use  IMU 3000 , not the standart ITG3200 Please change teh gy
     <set servo="LEFT"   value="motor_mixing.commands[SERVO_LEFT]"/>
   </command_laws>
 
- <!------------------- IMU ------------------->
+
 
   <section name="IMU" prefix="IMU_">
 
@@ -103,7 +103,7 @@ This airframe file use  IMU 3000 , not the standart ITG3200 Please change teh gy
     <define name="GYRO_Q_NEUTRAL" value="-32"/>
     <define name="GYRO_R_NEUTRAL" value="11"/>
 
-    <!-- SENS ITG3200  1/14.375 (deg/s)/LSB, rate frac 12bit => 1/14.375 * pi / 180 * 2^12 
+    <!-- SENS ITG3200  1/14.375 (deg/s)/LSB, rate frac 12bit => 1/14.375 * pi / 180 * 2^12
     <define name="GYRO_P_SENS" value="4.97312" integer="16"/>
     <define name="GYRO_Q_SENS" value="4.97312" integer="16"/>
     <define name="GYRO_R_SENS" value="4.97312" integer="16"/>-->
@@ -163,7 +163,7 @@ This airframe file use  IMU 3000 , not the standart ITG3200 Please change teh gy
     <define name="SONAR_BARO_THRESHOLD" value="20."/>
   </section>
 
-  <!------------------- Control ------------------->
+
 
   <section name="STABILIZATION_RATE" prefix="STABILIZATION_RATE_">
 
@@ -255,7 +255,7 @@ This airframe file use  IMU 3000 , not the standart ITG3200 Please change teh gy
    <define name="AGAIN" value="0"/>
  </section>
 
-  <!------------------- Misc ------------------->
+
 
  <section name="BAT">
    <define name="CATASTROPHIC_BAT_LEVEL" value="9.3" unit="V"/>

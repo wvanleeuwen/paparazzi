@@ -14,7 +14,7 @@
 
 <airframe name="Quadrotor LisaM_2.0 pwm">
 
- <!------------------- Firmware ------------------->
+
 
   <firmware name="rotorcraft">
     <define name="USE_INS_NAV_INIT"/>
@@ -45,7 +45,7 @@
     <subsystem name="ins"           type="hff"/>
   </firmware>
 
-  <!------------------- Modules ------------------->
+
 
   <modules>
       <load name="gps_ubx_ucenter.xml"/>
@@ -54,7 +54,7 @@
       <load name="imu_quality_assessment.xml"/>
   </modules>
 
- <!------------------- Servo's ------------------->
+ <!-- Servo's -->
 
   <servos>
     <servo name="FRONT"   no="0" min="1000" neutral="1100" max="1860"/>
@@ -94,7 +94,7 @@
     <define name="THRUST_COEF" value="{  256,  256,  256,  256 }"/>
   </section>
 
- <!------------------- IMU ------------------->
+
 
   <section name="IMU" prefix="IMU_">
      <define name="ACCEL_X_NEUTRAL" value="50"/>
@@ -126,7 +126,7 @@
     <define name="BARO_SENS" value="22.3" integer="16"/>
   </section>
 
-  <!------------------- Control ------------------->
+
 
   <section name="STABILIZATION_RATE" prefix="STABILIZATION_RATE_">
     <!-- setpoints -->
@@ -222,7 +222,7 @@
     <define name="IGAIN" value="10"/>
   </section>
 
-  <!------------------- Misc ------------------->
+
 
   <section name="SIMULATOR" prefix="NPS_">
     <define name="ACTUATOR_NAMES"  value="{&quot;front_motor&quot;, &quot;back_motor&quot;, &quot;right_motor&quot;, &quot;left_motor&quot;}"/>

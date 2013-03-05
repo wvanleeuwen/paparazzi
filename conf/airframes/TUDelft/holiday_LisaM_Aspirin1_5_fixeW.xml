@@ -8,7 +8,7 @@
 
 <airframe name="Holiday LisaM">
 
-  <!------------------- Firmware ------------------->
+
 
   <firmware name="fixedwing">
 
@@ -44,13 +44,13 @@
 
   </firmware>
 
-  <!------------------- Firmware ------------------->
+
 
   <modules main_freq="60">
     <load name="gps_ubx_ucenter.xml"/>
   </modules>
 
-  <!------------------- Servo's ------------------->
+  <!-- Servo's -->
 
   <servos>
     <servo name="THROTTLE"      no="0" min="1100" neutral="1100" max="1900"/>
@@ -76,7 +76,7 @@
     <set servo="ELEVATOR" value="@PITCH"/>
   </command_laws>
 
-  <!------------------- IMU ------------------->
+
 
   <!-- Local magnetic field -->
     <!--Rotterdam
@@ -128,7 +128,7 @@
     <define name="PITCH_NEUTRAL_DEFAULT" value="RadOfDeg(-5)" unit="deg"/>
   </section>
 
-  <!------------------- Control ------------------->
+
 
   <section name="VERTICAL CONTROL" prefix="V_CTL_">
 
@@ -202,7 +202,7 @@
     <define name="DESCENT_NAV_RATIO" value="1."/>
     </section>
 
-  <!------------------- Misc ------------------->
+
 
   <section name="AUTO1" prefix="AUTO1_">
     <define name="MAX_ROLL" value="1.1"/>

@@ -8,7 +8,7 @@
 
 <airframe name="TwinStarXSens">
 
-  <!------------------- Firmware ------------------->
+
 
   <firmware name="fixedwing">
 
@@ -63,7 +63,7 @@
 
   </firmware>
 
-  <!------------------- Modules ------------------->
+
 
   <modules>
     <load name="digital_cam.xml">
@@ -76,7 +76,7 @@
    <load name="photogrammetry_calculator.xml" />
   </modules>
 
-  <!------------------- Servo's ------------------->
+  <!-- Servo's -->
 
   <servos driver="Ppm">
     <servo name="THROTTLE_LEFT" no="1" min="1100" neutral="1100" max="1900"/>
@@ -149,7 +149,7 @@
     <define name="MAX_PITCH" value="0.7"/>
   </section>
 
-  <!------------------- INS ------------------->
+  <!-- INS -->
 
   <section name="INS" prefix="INS_">
     <define name="ROLL_NEUTRAL_DEFAULT" value="0"/>
@@ -169,7 +169,7 @@
     <define name="GPS_IMU_LEVER_ARM_Z" value="0.0f"/>
   </section>
 
-  <!------------------- Control ------------------->
+
 
   <section name="HORIZONTAL CONTROL" prefix="H_CTL_">
     <define name="COURSE_PGAIN" value="0.75"/>
@@ -218,7 +218,7 @@
     <define name="AGR_CLIMB_PITCH" value="0."/> <!-- Needed For OSAMNav -->
   </section>
 
-  <!------------------- Misc ------------------->
+
 
   <section name="ADC" prefix="ADC_CHANNEL_">
     <define name="CURRENT" value="AdcBank1(5)"/>

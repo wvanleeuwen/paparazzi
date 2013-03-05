@@ -2,7 +2,7 @@
 
 <airframe name="Microjet CDW Tiny 1.1">
 
-  <!------------------- Firmware ------------------->
+
 
   <firmware name="fixedwing">
     <target name="ap" board="tiny_1.1">
@@ -41,7 +41,7 @@
     <target name="tunnel" board="tiny_1.1"/>
   </firmware>
 
-  <!------------------- Modules ------------------->
+
 
   <modules>
     <load name="light.xml">
@@ -50,7 +50,7 @@
     </load>
   </modules>
 
-  <!------------------- Serov's ------------------->
+  <!-- Serov's -->
 
   <servos>
     <servo name="THROTTLE" no="0" min="1050" neutral="1050" max="1900"/>
@@ -84,7 +84,7 @@
     <set servo="AILEVON_RIGHT" value="$elevator - $aileron"/>
   </command_laws>
 
-  <!------------------- IMU ------------------->
+
 
   <section name="IMU" prefix="IMU_">
     <!-- MAX1168 ADC CHANNELS -->
@@ -150,7 +150,7 @@
     <define name="PITCH_NEUTRAL_DEFAULT" value="-0.0570000000298"/>
   </section>
 
-  <!------------------- Misc ------------------->
+
 
   <section name="AUTO1" prefix="AUTO1_">
     <define name="MAX_ROLL" value="0.8"/>
@@ -174,7 +174,7 @@
 
   </section>
 
-  <!------------------- GAINS ------------------->
+
 
   <section name="VERTICAL CONTROL" prefix="V_CTL_">
     <define name="POWER_CTL_BAT_NOMINAL" value="11.1" unit="volt"/>

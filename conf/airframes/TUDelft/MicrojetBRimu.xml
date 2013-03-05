@@ -2,7 +2,7 @@
 
 <airframe name="Microjet BR Tiny 1.1">
 
-  <!------------------- Firmware ------------------->
+
 
   <firmware name="fixedwing">
 
@@ -38,7 +38,7 @@
 
   </firmware>
 
-  <!------------------- Modules ------------------->
+
 
   <modules>
     <load name="light.xml">
@@ -47,7 +47,7 @@
     </load>
   </modules>
 
- <!------------------- Servo's ------------------->
+ <!-- Servo's -->
 
  <servos>
     <servo name="THROTTLE" no="0" min="1100" neutral="1100" max="1700"/>
@@ -89,7 +89,7 @@
     <set servo="CAM_TILT" value="@CAM_TILT"/>
   </command_laws>
 
-  <!------------------- IMU ------------------->
+
 
   <!-- Local magnetic field -->
   <section name="AHRS" prefix="AHRS_">
@@ -150,7 +150,7 @@
     <define name="BODY_TO_IMU_PSI" value="0"/>
   </section>
 
-  <!------------------- Misc ------------------->
+
 
   <section name="INS" prefix="INS_">
     <define name="ROLL_NEUTRAL_DEFAULT" value="RadOfDeg(6.18794441223)" unit="rad"/>
@@ -194,7 +194,7 @@
     <define name="LED_4_PIN" value="22"/>
   </section>
 
-  <!------------------- Control Gains ------------------->
+
 
   <section name="VERTICAL CONTROL" prefix="V_CTL_">
 
@@ -262,7 +262,7 @@
     <define name="DESCENT_NAV_RATIO" value="1."/>
   </section>
 
-  <!------------------- Misc Module ------------------->
+
 
   <section name="CAM" prefix="CAM_">
     <define name="TILT_MAX" value="30" unit="deg"/>

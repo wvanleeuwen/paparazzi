@@ -6,7 +6,7 @@
 
 <airframe name="LisaAspirin2">
 
-  <!------------------- Firmware ------------------->
+
 
   <firmware name="fixedwing">
 
@@ -64,7 +64,7 @@
 
   </firmware>
 
- <!------------------- Modules ------------------->
+
 
   <modules>
     <load name="gps_ubx_ucenter.xml"/>
@@ -89,7 +89,7 @@
 
   </modules>
 
- <!------------------- Servo's ------------------->
+ <!-- Servo's -->
 
   <servos>
     <servo name="THROTTLE" no="0" min="1000" neutral="1000" max="2000"/>
@@ -121,7 +121,7 @@
     <set servo="RUDDER" value="@YAW"/>
   </command_laws>
 
- <!------------------- IMU ------------------->
+
 
   <!-- Local magnetic field -->
   <section name="AHRS" prefix="AHRS_">
@@ -163,7 +163,7 @@
     <define name="BODY_TO_IMU_PSI" value="0"/>
   </section>
 
- <!------------------- Misc ------------------->
+
 
   <section name="INS" prefix="INS_">
     <define name="ROLL_NEUTRAL_DEFAULT" value="-0.0" unit="rad"/>
@@ -206,7 +206,7 @@
     <define name="DELAY_WITHOUT_GPS" value="3" unit="s"/>
   </section>
 
- <!------------------- Control Gains ------------------->
+
 
 
   <section name="VERTICAL CONTROL" prefix="V_CTL_">
@@ -263,7 +263,7 @@
     <define name="DESCENT_NAV_RATIO" value="1.0"/>
   </section>
 
-  <!------------------- Misc Module ------------------->
+
 
   <section name="DIGITAL_CAMERA" prefix="DC_">
     <define name="AUTOSHOOT_QUARTERSEC_PERIOD" value="6" unit="quarter_second"/>
