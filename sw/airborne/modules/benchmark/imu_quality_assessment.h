@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008  Antoine Drouin
+ * Copyright (C) 2005-2013 The Paparazzi Team
  *
  * This file is part of paparazzi.
  *
@@ -20,21 +20,30 @@
  *
  */
 
-/*
- * Simulator hardware implementation of the PNI micromag magnetometer
- */
+#ifndef IMU_QUALITY_ASSESSMENT_H_
+#define IMU_QUALITY_ASSESSMENT_H_
 
-#include "micromag.h"
+#include "std.h"
 
+extern void imu_quality_assessment_init(void);
+extern void imu_quality_assessment_periodic(void);
 
-void micromag_hw_init( void ) {}
+struct imu_quality_assessment_data_struct {
+    int q_ax;
+    int q_ay;
+    int q_az;
 
-void micromag_read( void ) {}
+    int q_m;
 
-void micromag_hw_feed_value(VEC* mag) {
-  micromag_values[0] =  mag->ve[0];
-  micromag_values[1] =  mag->ve[1];
-  micromag_values[2] =  mag->ve[2];
-  micromag_status = MM_DATA_AVAILABLE;
+    int q;
+};
+
+extern struct imu_quality_assessment_data_struct imu_quality_assessment_data;
+
+#define imu_quality_assessment_Reset(_v) {   \
+  imu_quality_assessment_data.q_ax = 0;      \
+  imu_quality_assessment_data.q_ay = 0;      \
+  imu_quality_assessment_data.q_az = 0;      \
 }
 
+#endif /* IMU_QUALITY_ASSESSMENT_H_ */

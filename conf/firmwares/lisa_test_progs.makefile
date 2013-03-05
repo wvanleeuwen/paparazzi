@@ -361,10 +361,10 @@ test_imu_b2.srcs   += $(IMU_B2_SRCS)
 #
 IMU_B2_2_CFLAGS  = -DIMU_B2_VERSION_1_2
 # mag stuff
-IMU_B2_2_CFLAGS += -DUSE_I2C2
+IMU_B2_2_CFLAGS += -DIMU_B2_I2C_DEV=i2c2 -DUSE_I2C2
 IMU_B2_2_SRCS    = mcu_periph/i2c.c $(SRC_ARCH)/mcu_periph/i2c_arch.c
-IMU_B2_2_CFLAGS += -DIMU_B2_MAG_TYPE=IMU_B2_MAG_HMC5843
-IMU_B2_2_SRCS   += peripherals/hmc5843.c $(SRC_ARCH)/peripherals/hmc5843_arch.c
+IMU_B2_2_CFLAGS += -DIMU_B2_MAG_TYPE=IMU_B2_MAG_HMC58XX
+IMU_B2_2_SRCS   += peripherals/hmc58xx.c
 
 test_imu_b2_2.ARCHDIR = $(ARCH)
 test_imu_b2_2.srcs    = test/subsystems/test_imu.c
@@ -480,9 +480,21 @@ endif
 
 
 
+#
+# test ms2100 mag
+#
+test_ms2100.ARCHDIR = $(ARCH)
+test_ms2100.CFLAGS  = $(COMMON_TEST_CFLAGS)
+test_ms2100.srcs    = $(COMMON_TEST_SRCS)
+test_ms2100.CFLAGS += $(COMMON_TELEMETRY_CFLAGS)
+test_ms2100.srcs   += $(COMMON_TELEMETRY_SRCS)
 
-
-
+test_ms2100.CFLAGS += -I$(SRC_LISA)
+test_ms2100.srcs   += test/peripherals/test_ms2100.c
+test_ms2100.srcs   += peripherals/ms2100.c $(SRC_ARCH)/peripherals/ms2100_arch.c
+test_ms2100.CFLAGS += -DUSE_SPI_SLAVE4 -DMS2100_SLAVE_IDX=4 -DMS2100_SPI_DEV=spi2
+test_ms2100.CFLAGS += -DUSE_SPI -DSPI_MASTER -DUSE_SPI2
+test_ms2100.srcs   += mcu_periph/spi.c $(SRC_ARCH)/mcu_periph/spi_arch.c
 
 #
 # test hmc5843
@@ -497,7 +509,6 @@ test_hmc5843.CFLAGS += -I$(SRC_LISA)
 test_hmc5843.srcs   += lisa/test/lisa_test_hmc5843.c
 test_hmc5843.CFLAGS += -DUSE_I2C2
 test_hmc5843.srcs   += mcu_periph/i2c.c $(SRC_ARCH)/mcu_periph/i2c_arch.c
-
 
 #
 # test ITG3200

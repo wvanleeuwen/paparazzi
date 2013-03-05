@@ -135,12 +135,9 @@ typedef void (*SPICallback)( struct spi_transaction *trans );
  * - The input/output buffers needs to be created separately
  * - Take care of pointing input_buf/ouput_buf correctly
  * - input_length and output_length can be different, the larger number
- *   of the two specifies the toal number of exchanged bytes,
+ *   of the two specifies the toal number of exchanged words,
  * - if input_length is larger than output length,
- *   0 is sent for the remaining bytes
- * WARNING: For STM32 only, the output_buf size MUST be greater than or equal
- * to the input_buf size. This is only required in the event any transaction
- * has (0 < output_length < input_length).
+ *   0 is sent for the remaining words
  */
 struct spi_transaction {
   volatile uint8_t* input_buf;  ///< pointer to receive buffer for DMA
@@ -186,6 +183,7 @@ struct spi_periph {
 #define SPI_SLAVE2 2
 #define SPI_SLAVE3 3
 #define SPI_SLAVE4 4
+#define SPI_SLAVE5 5
 
 /// @todo SPI error struct
 //extern uint8_t spi_nb_ovrn;
