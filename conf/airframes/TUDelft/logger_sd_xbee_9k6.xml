@@ -7,14 +7,24 @@
 -->
 
 <airframe name="Logger">
+  <!-- ************************* FIRMWARE ************************* -->
 
   <firmware name="logger">
-    <target name="ap" board="sdlog_1.0" >
+    <target name="ap" board="sdlog_1.0">
       <configure name="LOG_MSG_FMT" value="LOG_XBEE"/>
-      <configure name="UART0_BAUD" value="B9600" />
-      <configure name="UART1_BAUD" value="B9600" />
+      <configure name="UART0_BAUD" value="B9600"/>
+      <configure name="UART1_BAUD" value="B9600"/>
     </target>
   </firmware>
 
-</airframe>
+  <!-- ************************* MODULES ************************* -->
 
+  <!-- ************************* ACTUATORS ************************* -->
+
+  <!-- ************************* SENSORS ************************* -->
+
+  <!-- ************************* GAINS ************************* -->
+
+  <!-- ************************* MISC ************************* -->
+
+  </airframe>

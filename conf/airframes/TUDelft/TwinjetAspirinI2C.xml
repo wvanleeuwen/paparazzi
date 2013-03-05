@@ -9,8 +9,43 @@
 -->
 
 <airframe name="TwinJet Tiny 2.11">
+  <!-- ************************* FIRMWARE ************************* -->
+
+  <firmware name="fixedwing">
+    <target name="ap" board="tiny_2.11">
+      <configure name="FLASH_MODE" value="IAP"/>
+      <configure name="PERIODIC_FREQUENCY" value="120"/>
+      <configure name="AHRS_PROPAGATE_FREQUENCY" value="100"/>
+      <configure name="AHRS_CORRECT_FREQUENCY" value="100"/>
+      <define name="AHRS_TRIGGERED_ATTITUDE_LOOP"/>
+      <configure name="AHRS_ALIGNER_LED" value="3"/>
+    </target>
+    <target name="sim" board="pc"/>
+    <define name="LOITER_TRIM"/>
+    <define name="TUNE_AGRESSIVE_CLIMB"/>
+    <define name="AGR_CLIMB"/>
+    <define name="ALT_KALMAN"/>
+    <subsystem name="radio_control" type="ppm"/>
+    <!-- Communication -->
+    <subsystem name="telemetry" type="xbee_api">
+      <configure name="MODEM_BAUD" value="B9600"/>
+    </subsystem>
+    <!-- Actuators -->
+    <subsystem name="control"/>
+    <!-- Sensors -->
+    <subsystem name="imu" type="aspirin_i2c"/>
+    <subsystem name="ahrs" type="float_dcm"/>
+    <subsystem name="ins" type="alt_float"/>
+    <subsystem name="gps" type="ublox"/>
+    <subsystem name="navigation"/>
+    <!--this includes OSAMNav, nav, discsurvey and nav_cube as well-->
+    <subsystem name="i2c"/>
+  </firmware>
+
+  <!-- ************************* MODULES ************************* -->
+
   <modules>
-<!--
+    <!--
     <load name="TUDelft/opticflow.xml"/>
     <load name="cam_point.xml">
       <define name="POINT_CAM_YAW_PITCH" value="1"/>
@@ -18,6 +53,8 @@
     </load>
 -->
   </modules>
+
+  <!-- ************************* ACTUATORS ************************* -->
 
   <servos>
     <servo name="MOTOR_LEFT" no="3" min="1000" neutral="1000" max="2000"/>
@@ -46,6 +83,11 @@
     <set command="CAM_TILT" value="@YAW"/>
   </rc_commands>
 
+  <section name="AUTO1" prefix="AUTO1_">
+    <define name="MAX_ROLL" value="0.95"/>
+    <define name="MAX_PITCH" value="0.7"/>
+  </section>
+
   <section name="MIXER">
     <define name="AILEVON_AILERON_RATE" value="0.75"/>
     <define name="AILEVON_ELEVATOR_RATE" value="0.80"/>
@@ -64,63 +106,62 @@
     <set servo="CAM_TILT" value="@CAM_TILT"/>
   </command_laws>
 
-  <!-- Local magnetic field -->
-  <section name="AHRS" prefix="AHRS_">
-    <define name="H_X" value="0.51562740288882"/>
-    <define name="H_Y" value="-0.05707735220832"/>
-    <define name="H_Z" value="0.85490967783446"/>
+  <section name="FAILSAFE" prefix="FAILSAFE_">
+    <define name="DELAY_WITHOUT_GPS" value="1" unit="s"/>
+    <define name="DEFAULT_THROTTLE" value="0.3" unit="%"/>
+    <define name="DEFAULT_ROLL" value="0.3" unit="rad"/>
+    <define name="DEFAULT_PITCH" value="0.5" unit="rad"/>
+    <define name="HOME_RADIUS" value="100" unit="m"/>
   </section>
+
+  <!-- ************************* SENSORS ************************* -->
 
   <section name="IMU" prefix="IMU_">
     <!-- Calibration Neutral -->
     <define name="GYRO_P_NEUTRAL" value="0"/>
     <define name="GYRO_Q_NEUTRAL" value="0"/>
     <define name="GYRO_R_NEUTRAL" value="0"/>
-
     <!-- SENS = 14.375 LSB/(deg/sec) * 57.6 deg/rad = 828 LSB/rad/sec / 12bit FRAC: 4096 / 828 -->
     <define name="GYRO_P_SENS" value="4.947" integer="16"/>
     <define name="GYRO_Q_SENS" value="4.947" integer="16"/>
     <define name="GYRO_R_SENS" value="4.947" integer="16"/>
-
     <define name="GYRO_P_Q" value="0."/>
     <define name="GYRO_P_R" value="0"/>
     <define name="GYRO_Q_P" value="0."/>
     <define name="GYRO_Q_R" value="0."/>
     <define name="GYRO_R_P" value="0."/>
     <define name="GYRO_R_Q" value="0."/>
-
     <define name="GYRO_P_SIGN" value="1"/>
     <define name="GYRO_Q_SIGN" value="1"/>
     <define name="GYRO_R_SIGN" value="1"/>
-
     <define name="ACCEL_X_NEUTRAL" value="-14"/>
     <define name="ACCEL_Y_NEUTRAL" value="0"/>
     <define name="ACCEL_Z_NEUTRAL" value="0"/>
-
     <!-- SENS = 256 LSB/g @ 2.5V [X&Y: 265 LSB/g @ 3.3V] / 9.81 ms2/g = 26.095 LSB/ms2 / 10bit FRAC: 1024 / 26.095 for z and 1024 / 27.01 for X&Y -->
     <define name="ACCEL_X_SENS" value="37.9" integer="16"/>
     <define name="ACCEL_Y_SENS" value="37.9" integer="16"/>
     <define name="ACCEL_Z_SENS" value="39.24" integer="16"/>
-
     <define name="ACCEL_X_SIGN" value="1"/>
     <define name="ACCEL_Y_SIGN" value="1"/>
     <define name="ACCEL_Z_SIGN" value="1"/>
-
     <define name="MAG_X_NEUTRAL" value="0"/>
     <define name="MAG_Y_NEUTRAL" value="0"/>
     <define name="MAG_Z_NEUTRAL" value="0"/>
-
     <define name="MAG_X_SENS" value="1" integer="16"/>
     <define name="MAG_Y_SENS" value="1" integer="16"/>
     <define name="MAG_Z_SENS" value="1" integer="16"/>
-
     <define name="MAG_X_SIGN" value="1"/>
     <define name="MAG_Y_SIGN" value="1"/>
     <define name="MAG_Z_SIGN" value="1"/>
-
     <define name="BODY_TO_IMU_PHI" value="0"/>
     <define name="BODY_TO_IMU_THETA" value="0"/>
     <define name="BODY_TO_IMU_PSI" value="0"/>
+  </section>
+
+  <section name="AHRS" prefix="AHRS_">
+    <define name="H_X" value="0.51562740288882"/>
+    <define name="H_Y" value="-0.05707735220832"/>
+    <define name="H_Z" value="0.85490967783446"/>
   </section>
 
   <section name="INS" prefix="INS_">
@@ -128,47 +169,30 @@
     <define name="PITCH_NEUTRAL_DEFAULT" value="0." unit="deg"/>
   </section>
 
-  <section name="AUTO1" prefix="AUTO1_">
-    <define name="MAX_ROLL" value="0.95"/>
-    <define name="MAX_PITCH" value="0.7"/>
-  </section>
+  <!-- ************************* GAINS ************************* -->
 
-
-<!--
-  <section name="AIRSPEED" prefix="AIRSPEED_">
-    <define name="BIAS" value="(64.5f * 5.7f)"/>
-    <define name="QUADRATIC_SCALE" value="1.47f"/>
-  </section>
--->
-
-  <section name="BAT">
-    <define name="MILLIAMP_AT_FULL_THROTTLE" value="5000"/>
-    <define name="CATASTROPHIC_BAT_LEVEL" value="9.3" unit="V"/>
-  </section>
-
-  <section name="MISC">
-<!--    <define name="MINIMUM_AIRSPEED" value="8." unit="m/s"/>-->
-    <define name="NOMINAL_AIRSPEED" value="15." unit="m/s"/>
-<!--    <define name="MAXIMUM_AIRSPEED" value="25." unit="m/s"/>-->
-    <define name="CARROT" value="5." unit="s"/>
-    <define name="KILL_MODE_DISTANCE" value="(1.5*MAX_DIST_FROM_HOME)"/>
-
-    <define name="ALT_KALMAN_ENABLED" value="TRUE"/>
-    <define name="DEFAULT_CIRCLE_RADIUS" value="70.1299972534"/>
-    <define name="MIN_CIRCLE_RADIUS" value="50."/> <!-- not in fw_h_ctl.c fw_v_ctl.c nav.c but where????-->
-    <!--uncommant API protocol in makefile-->
-<!--    <define name="XBEE_INIT" value="&quot;ATCHC\rATID3332\rATPL4\rATRN1\rATTT80\rATBD3\rATWR\r&quot;"/>
-    <define name="NO_XBEE_API_INIT" value="TRUE"/>   uncommant after programed-->
+  <section name="HORIZONTAL CONTROL" prefix="H_CTL_">
+    <define name="ELEVATOR_OF_ROLL" value="1640."/>
+    <define name="PITCH_PGAIN" value="-8000."/>
+    <define name="PITCH_DGAIN" value="0."/>
+    <define name="ROLL_MAX_SETPOINT" value="0.699999988079" unit="radians"/>
+    <define name="ROLL_ATTITUDE_GAIN" value="-6000.90917969"/>
+    <define name="ROLL_RATE_GAIN" value="-750."/>
+    <define name="AILERON_OF_THROTTLE" value="0."/>
+    <define name="COURSE_PGAIN" value="-1.35300004482"/>
+    <define name="COURSE_DGAIN" value="0.368000000715"/>
+    <define name="COURSE_PRE_BANK_CORRECTION" value="0.90600001812"/>
+    <define name="PITCH_MAX_SETPOINT" value="0.5" unit="radians"/>
+    <!-- not in fw_h_ctl.c fw_v_ctl.c but where????-->
+    <define name="PITCH_MIN_SETPOINT" value="-0.5" unit="radians"/>
+    <!-- not in fw_h_ctl.c fw_v_ctl.c but where????-->
   </section>
 
   <section name="VERTICAL CONTROL" prefix="V_CTL_">
-
     <!-- outer loop proportional gain -->
     <define name="ALTITUDE_PGAIN" value="-0.0890000015497"/>
     <!-- outer loop saturation -->
     <define name="ALTITUDE_MAX_CLIMB" value="2."/>
-
-
     <!-- auto throttle inner loop -->
     <define name="AUTO_THROTTLE_NOMINAL_CRUISE_THROTTLE" value="0.435000002384"/>
     <define name="AUTO_THROTTLE_MIN_CRUISE_THROTTLE" value="0.25"/>
@@ -177,20 +201,16 @@
     <define name="AUTO_THROTTLE_PGAIN" value="0."/>
     <define name="AUTO_THROTTLE_IGAIN" value="0."/>
     <define name="AUTO_THROTTLE_DGAIN" value="0."/>
-
     <define name="AUTO_THROTTLE_LOITER_TRIM" value="1500."/>
     <define name="AUTO_THROTTLE_DASH_TRIM" value="-1000"/>
     <define name="AUTO_THROTTLE_PITCH_OF_VZ_PGAIN" value="0.187999993563"/>
     <define name="AUTO_THROTTLE_PITCH_OF_VZ_DGAIN" value="0."/>
-
     <!-- auto pitch inner loop -->
     <define name="AUTO_PITCH_PGAIN" value="-0.0399999991059"/>
     <define name="AUTO_PITCH_IGAIN" value="0.0520000010729"/>
     <define name="AUTO_PITCH_MAX_PITCH" value="0.35"/>
     <define name="AUTO_PITCH_MIN_PITCH" value="-0.35"/>
-
     <define name="THROTTLE_SLEW" value="0.5"/>
-
     <!--airspeed
     <define name="AUTO_AIRSPEED_SETPOINT" value="15" unit="(m/s)"/>
     <define name="AUTO_AIRSPEED_PGAIN" value="0.1"/>
@@ -199,28 +219,6 @@
     <define name="AUTO_GROUNDSPEED_PGAIN" value="0"/>
     <define name="AUTO_GROUNDSPEED_IGAIN" value="0"/> -->
   </section>
-
-  <section name="HORIZONTAL CONTROL" prefix="H_CTL_">
-
-    <define name="ELEVATOR_OF_ROLL" value="1640."/>
-    <define name="PITCH_PGAIN" value="-8000."/>
-    <define name="PITCH_DGAIN" value="0."/>
-
-    <define name="ROLL_MAX_SETPOINT" value="0.699999988079" unit="radians"/>
-    <define name="ROLL_ATTITUDE_GAIN" value="-6000.90917969"/>
-    <define name="ROLL_RATE_GAIN" value="-750."/>
-    <define name="AILERON_OF_THROTTLE" value="0."/>
-
-    <define name="COURSE_PGAIN" value="-1.35300004482"/>
-    <define name="COURSE_DGAIN" value="0.368000000715"/>
-    <define name="COURSE_PRE_BANK_CORRECTION" value="0.90600001812"/>
-
-    <define name="PITCH_MAX_SETPOINT" value="0.5" unit="radians"/> <!-- not in fw_h_ctl.c fw_v_ctl.c but where????-->
-    <define name="PITCH_MIN_SETPOINT" value="-0.5" unit="radians"/> <!-- not in fw_h_ctl.c fw_v_ctl.c but where????-->
-
-  </section>
-
-<!--FW_hc 00178 ifdef STRONG_WIND -->
 
   <section name="AGGRESSIVE" prefix="AGR_">
     <define name="BLEND_START" value="20"/>
@@ -233,47 +231,37 @@
     <define name="DESCENT_NAV_RATIO" value="1."/>
   </section>
 
+  <!-- ************************* MISC ************************* -->
 
-  <section name="FAILSAFE" prefix="FAILSAFE_">
-	<define name="DELAY_WITHOUT_GPS" value="1" unit="s"/>
-    	<define name="DEFAULT_THROTTLE" value="0.3" unit="%"/>
-    	<define name="DEFAULT_ROLL" value="0.3" unit="rad"/>
-    	<define name="DEFAULT_PITCH" value="0.5" unit="rad"/>
-	<define name="HOME_RADIUS" value="100" unit="m"/>
+  <!-- Local magnetic field -->
+
+  <!--
+  <section name="AIRSPEED" prefix="AIRSPEED_">
+    <define name="BIAS" value="(64.5f * 5.7f)"/>
+    <define name="QUADRATIC_SCALE" value="1.47f"/>
+  </section>
+-->
+
+  <section name="BAT">
+    <define name="MILLIAMP_AT_FULL_THROTTLE" value="5000"/>
+    <define name="CATASTROPHIC_BAT_LEVEL" value="9.3" unit="V"/>
   </section>
 
-  <firmware name="fixedwing">
-    <target name="ap" board="tiny_2.11">
-      <configure name="FLASH_MODE" value="IAP"/>
-      <configure name="PERIODIC_FREQUENCY" value="120"/>
-      <configure name="AHRS_PROPAGATE_FREQUENCY" value="100"/>
-      <configure name="AHRS_CORRECT_FREQUENCY" value="100"/>
-      <define name="AHRS_TRIGGERED_ATTITUDE_LOOP"/>
-      <configure name="AHRS_ALIGNER_LED" value="3"/>
-    </target>
-    <target name="sim" board="pc"/>
+  <section name="MISC">
+    <!--    <define name="MINIMUM_AIRSPEED" value="8." unit="m/s"/>-->
+    <define name="NOMINAL_AIRSPEED" value="15." unit="m/s"/>
+    <!--    <define name="MAXIMUM_AIRSPEED" value="25." unit="m/s"/>-->
+    <define name="CARROT" value="5." unit="s"/>
+    <define name="KILL_MODE_DISTANCE" value="(1.5*MAX_DIST_FROM_HOME)"/>
+    <define name="ALT_KALMAN_ENABLED" value="TRUE"/>
+    <define name="DEFAULT_CIRCLE_RADIUS" value="70.1299972534"/>
+    <define name="MIN_CIRCLE_RADIUS" value="50."/>
+    <!-- not in fw_h_ctl.c fw_v_ctl.c nav.c but where????-->
+    <!--uncommant API protocol in makefile-->
+    <!--    <define name="XBEE_INIT" value="&quot;ATCHC\rATID3332\rATPL4\rATRN1\rATTT80\rATBD3\rATWR\r&quot;"/>
+    <define name="NO_XBEE_API_INIT" value="TRUE"/>   uncommant after programed-->
+  </section>
 
-    <define name="LOITER_TRIM"/>
-    <define name="TUNE_AGRESSIVE_CLIMB"/>
-    <define name="AGR_CLIMB"/>
-    <define name="ALT_KALMAN"/>
+  <!--FW_hc 00178 ifdef STRONG_WIND -->
 
-    <subsystem name="radio_control" type="ppm"/>
-    <!-- Communication -->
-    <subsystem name="telemetry" type="xbee_api">
-      <configure name="MODEM_BAUD" value="B9600"/>
-    </subsystem>
-    <!-- Actuators -->
-    <subsystem name="control"/>
-    <!-- Sensors -->
-
-    <subsystem name="imu" type="aspirin_i2c"/>
-    <subsystem name="ahrs" type="float_dcm"/>
-    <subsystem name="ins" type="alt_float" />
-    <subsystem name="gps" type="ublox"/>
-    <subsystem name="navigation"/><!--this includes OSAMNav, nav, discsurvey and nav_cube as well-->
-    <subsystem name="i2c"/>
-  </firmware>
-
-
-</airframe>
+  </airframe>
