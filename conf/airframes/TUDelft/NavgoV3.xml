@@ -51,6 +51,7 @@ This airframe file use  IMU 3000 , not the standart ITG3200 Please change teh gy
     <!--load name="adc_generic.xml">
       <configure name="ADC_CHANNEL_GENERIC1" value="ADC_0"/>
     </load-->
+    <load name="imu_quality_assessment.xml" />
   </modules>
 
  <!------------------- Servo's ------------------->
