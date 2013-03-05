@@ -1,6 +1,6 @@
 # Hey Emacs, this is a -*- makefile -*-
 #
-#   Copyright (C) 2009-2010 The Paparazzi Team
+#   Copyright (C) 2009-2013 The Paparazzi Team
 #
 # This file is part of paparazzi.
 #
@@ -28,6 +28,7 @@ Q=@
 #
 include $(PAPARAZZI_SRC)/conf/Makefile.arm-none-linux-gnueabi
 
+# Define programs and commands.
 
 OPT=3
 CSTANDARD = -std=gnu99
@@ -49,15 +50,13 @@ CFLAGS += -Wmissing-prototypes -Wnested-externs
 CFLAGS += $(CSTANDARD)
 CFLAGS += $($(TARGET).CFLAGS)
 
+LDFLAGS += -lm
 
-#CXX = /opt/paparazzi/omap/overo-oe/tmp/sysroots/i686-linux/usr/armv7a/bin/arm-angstrom-linux-gnueabi-g++
-CXX = /usr/local/codesourcery/arm-2011.03/bin/arm-none-linux-gnueabi-g++
 CXXFLAGS = -pipe -O3 -fshow-column -ffast-math -fPIC
 CXXFLAGS += -g -ffunction-sections -fdata-sections
 CXXFLAGS += -mfloat-abi=softfp -mtune=cortex-a8 -mfpu=vfp -march=armv7-a
 CXXFLAGS += -Wall -Wextra
 CXXFLAGS += $($(TARGET).CXXFLAGS)
-
 
 SRC_C_OMAP  = $($(TARGET).srcs)
 OBJ_C_OMAP = $(SRC_C_OMAP:%.c=$(OBJDIR)/%.o)
