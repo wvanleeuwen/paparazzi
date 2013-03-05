@@ -97,14 +97,14 @@
     <define name="MAG_X_SENS" value="4.3833130016" integer="16"/>
     <define name="MAG_Y_SENS" value="4.59820229976" integer="16"/>
     <define name="MAG_Z_SENS" value="4.3085068988" integer="16"/>
-    <define name="BODY_TO_IMU_PHI" value="RadOfDeg(  5.5)"/>
-    <define name="BODY_TO_IMU_THETA" value="RadOfDeg(  7.)"/>
-    <define name="BODY_TO_IMU_PSI" value="RadOfDeg(  0.)"/>
+    <define name="BODY_TO_IMU_PHI" value="5.5" unit="deg"/>
+    <define name="BODY_TO_IMU_THETA" value="7." unit="deg"/>
+    <define name="BODY_TO_IMU_PSI" value="0." unit="deg"/>
   </section>
 
   <section name="INS" prefix="INS_">
-    <define name="ROLL_NEUTRAL_DEFAULT" value="RadOfDeg(  4.5)" unit="rad"/>
-    <define name="PITCH_NEUTRAL_DEFAULT" value="RadOfDeg(-5)" unit="deg"/>
+    <define name="ROLL_NEUTRAL_DEFAULT" value="4.5" unit="deg"/>
+    <define name="PITCH_NEUTRAL_DEFAULT" value="-5" unit="deg"/>
   </section>
 
   <!--Rotterdam

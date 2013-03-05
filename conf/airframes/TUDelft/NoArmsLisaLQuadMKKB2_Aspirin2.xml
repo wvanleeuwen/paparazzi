@@ -32,17 +32,19 @@
       <define name="ACTUATORS_START_DELAY" value="3"/>
     </target>
     <target name="sim" board="pc">
-      <subsystem name="fdm" type="nps"/>
+      <subsystem name="fdm" type="jsbsim"/>
       <subsystem name="actuators" type="mkk"/>
     </target>
     <subsystem name="telemetry" type="xbee_api"/>
-    <subsystem name="imu" type="aspirin_v2.1"/>
     <subsystem name="gps" type="ublox">
       <configure name="GPS_PORT" value="UART3"/>
     </subsystem>
+    <subsystem name="imu" type="aspirin_v2.1"/>
     <subsystem name="ahrs" type="int_cmpl_quat"/>
+    <subsystem name="ins" type="hff"/>
     <subsystem name="stabilization" type="int_quat"/>
     <define name="MAG_UPDATE_YAW_ONLY" value="1"/>
+    <subsystem name="motor_mixing" />
   </firmware>
 
   <section name="AUTOPILOT">
@@ -61,11 +63,16 @@
 
   <!-- ************************* ACTUATORS ************************* -->
 
-  <servos min="0" neutral="0" max="0xff">
-    <servo name="FRONT" no="0" min="0" neutral="0" max="255"/>
-    <servo name="BACK" no="1" min="0" neutral="0" max="255"/>
-    <servo name="LEFT" no="2" min="0" neutral="0" max="255"/>
-    <servo name="RIGHT" no="3" min="0" neutral="0" max="255"/>
+  <section name="ACTUATORS_MKK" prefix="ACTUATORS_MKK_">
+    <define name="NB" value="4"/>
+    <define name="ADDR" value="{ 0x52, 0x54, 0x56, 0x58 }"/>
+  </section>
+
+  <servos min="0" neutral="0" max="0xff" driver="Mkk">
+    <servo name="FRONT" no="0" min="0" neutral="3" max="200"/>
+    <servo name="BACK" no="1" min="0" neutral="3" max="200"/>
+    <servo name="LEFT" no="2" min="0" neutral="3" max="200"/>
+    <servo name="RIGHT" no="3" min="0" neutral="3" max="200"/>
   </servos>
 
   <commands>
@@ -74,6 +81,14 @@
     <axis name="YAW" failsafe_value="0"/>
     <axis name="THRUST" failsafe_value="0"/>
   </commands>
+
+  <command_laws>
+    <call fun="motor_mixing_run(autopilot_motors_on,FALSE,values)"/>
+    <set servo="FRONT"  value="motor_mixing.commands[SERVO_FRONT]"/>
+    <set servo="BACK"   value="motor_mixing.commands[SERVO_BACK]"/>
+    <set servo="RIGHT"  value="motor_mixing.commands[SERVO_RIGHT]"/>
+    <set servo="LEFT"   value="motor_mixing.commands[SERVO_LEFT]"/>
+  </command_laws>
 
   <!-- ************************* SENSORS ************************* -->
 
@@ -113,7 +128,7 @@
     <define name="MAG_X_SENS" value="1" integer="16"/>
     <define name="MAG_Y_SENS" value="1" integer="16"/>
     <define name="MAG_Z_SENS" value="1" integer="16"/>
-    <define name="BODY_TO_IMU_PHI" value="0.0 " unit="deg"/>
+    <define name="BODY_TO_IMU_PHI" value="0.0" unit="deg"/>
     <define name="BODY_TO_IMU_THETA" value="180.0" unit="deg"/>
     <define name="BODY_TO_IMU_PSI" value="-135.0" unit="deg"/>
   </section>
@@ -214,17 +229,10 @@
 
   <!-- ************************* MISC ************************* -->
 
-  <section name="ACTUATORS_MKK" prefix="ACTUATORS_MKK_">
-    <define name="NB" value="4"/>
-    <define name="ADDR" value="{ 0x52, 0x54, 0x56, 0x58 }"/>
-  </section>
-
-  <section name="SUPERVISION" prefix="SUPERVISION_">
-    <define name="MIN_MOTOR" value="3"/>
-    <define name="MAX_MOTOR" value="200"/>
-    <define name="TRIM_A" value="0"/>
-    <define name="TRIM_E" value="0"/>
-    <define name="TRIM_R" value="0"/>
+  <section name="MIXING" prefix="MOTOR_MIXING_">
+    <define name="TRIM_ROLL" value="0"/>
+    <define name="TRIM_PITCH" value="0"/>
+    <define name="TRIM_YAW" value="0"/>
     <define name="NB_MOTOR" value="4"/>
     <define name="SCALE" value="256"/>
     <define name="ROLL_COEF" value="{ -256,  256, -256,  256 }"/>

@@ -41,6 +41,12 @@ rotorcraft airframes:
 	+ <define name="TRIM_PITCH" value="0"/>
 	+ <define name="TRIM_YAW" value="0"/>
 
+    - <define name="MIN_MOTOR" value="3"/>    replaced by min value in servo
+    - <define name="MAX_MOTOR" value="200"/>  replaced by neutral value in servo
+
+    + and <ins is now compulsary
+
+
 
 
 all conf/boards.makefile:

@@ -51,9 +51,16 @@
     <subsystem name="settings" type="rc"/>
     <subsystem name="control"/>
     <subsystem name="ahrs" type="infrared"/>
+    <subsystem name="ins" type="gps_passthrough" />
     <subsystem name="gps" type="ublox"/>
     <subsystem name="navigation" type="extra"/>
     <subsystem name="navigation" type="bomb"/>
+  </firmware>
+
+  <firmware name="setup">
+    <target name="tunnel"          board="twog_1.0" />
+    <target name="usb_tunnel_0"    board="twog_1.0" />
+    <!--target name="setup_actuators" board="twog_1.0" /-->
   </firmware>
 
   <!-- ************************* MODULES ************************* -->
@@ -101,6 +108,7 @@
   <!-- ************************* ACTUATORS ************************* -->
 
   <servos>
+    <!-- Define here to which CONNECTOR NUMBER the servo is connected to, on the autopilot cicuit board -->
     <!-- a CastleCreations ESC needs to be set with FIXED endpoints, then the just before start pw is 1250 and the pw 1860 for max throtte -->
     <servo name="MOTOR" no="0" min="1100" neutral="1250" max="1860"/>
     <servo name="AILERON_LEFT" no="2" min="1900" neutral="1440" max="1100"/>
@@ -348,17 +356,6 @@
 
   <!-- ************************* MISC ************************* -->
 
-  <!--
-  <firmware name="setup">
-    <target name="tunnel"          board="twog_1.0" />
-    <target name="usb_tunnel_0"    board="twog_1.0" />
-    <target name="setup_actuators" board="twog_1.0" />
-  </firmware>
--->
-
-  <!-- Define here to which CONNECTOR NUMBER the servo is connected to, on the autopilot cicuit board -->
-
-  <!-- commands section -->
 
   <!--
   <auto_rc_commands>
@@ -374,8 +371,6 @@ To still be able to use rudder, which is needed with sidewind landing in auto1 s
 
   </auto_rc_commands>
 -->
-
-  <!--For mixed controlflaps -->
 
   <!-- Do not set MAX_ROLL, MAX_PITCH to small of a value, otherwise one can NOT control the plane very well manually -->
 
@@ -409,7 +404,6 @@ To still be able to use rudder, which is needed with sidewind landing in auto1 s
     <define name="MAXIMUM_AIRSPEED" value="23.0" unit="m/s"/>
     <define name="CARROT" value="5.0" unit="s"/>
     <define name="KILL_MODE_DISTANCE" value="(1.3*MAX_DIST_FROM_HOME)"/>
-    <define name="CONTROL_RATE" value="60" unit="Hz"/>
     <define name="NO_XBEE_API_INIT" value="TRUE"/>
     <!--UNLOCKED_HOME_MODE if set to TRUE means that HOME mode does not get stuck.
 If not set before when you would enter home mode you had to flip a bit via the GCS to get out. -->
@@ -432,7 +426,7 @@ If not set before when you would enter home mode you had to flip a bit via the G
     <define name="GLIDE_PITCH" value="10." unit="deg"/>
   </section>
 
-  <!-- ******************************** PHOTOGRAMMETRY ********************************** -->
+  <!-- ************************* PHOTOGRAMMETRY ************************* -->
 
   <section name="PHOTOGRAMMETRY" prefix="PHOTOGRAMMETRY_">
     <!-- Camera Parameters -->
@@ -452,23 +446,10 @@ If not set before when you would enter home mode you had to flip a bit via the G
     <define name="RADIUS_MIN" value="40" unit="m"/>
   </section>
 
-  <!-- ******************************** NAV ********************************** -->
-
-  <!-- TODO: prefix="NAV_"> -->
-
-  <section name="NAV">
-    <define name="NAV_PITCH" value="0."/>
-    <define name="NAV_GLIDE_PITCH_TRIM" value="0."/>
+  <section name="NAV" prefix="NAV_">
+    <define name="PITCH" value="0."/>
+    <define name="GLIDE_PITCH_TRIM" value="0."/>
   </section>
-
-  <!-- ****************************** DATALINK ******************************* -->
-
-  <section name="DATALINK" prefix="DATALINK_">
-    <define name="DEVICE_TYPE" value="PPRZ"/>
-    <define name="DEVICE_ADDRESS" value="...."/>
-  </section>
-
-  <!-- ******************************** SIMU ********************************* -->
 
   <section name="SIMU">
     <define name="YAW_RESPONSE_FACTOR" value="0.5"/>

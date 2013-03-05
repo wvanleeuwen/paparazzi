@@ -33,13 +33,11 @@
     <!-- Actuators -->
     <subsystem name="control"/>
     <!-- Sensors -->
-    <subsystem name="imu" type="aspirin_i2c"/>
+    <subsystem name="imu" type="aspirin_i2c_v1.5"/>
     <subsystem name="ahrs" type="float_dcm"/>
     <subsystem name="ins" type="alt_float"/>
     <subsystem name="gps" type="ublox"/>
     <subsystem name="navigation"/>
-    <!--this includes OSAMNav, nav, discsurvey and nav_cube as well-->
-    <subsystem name="i2c"/>
   </firmware>
 
   <!-- ************************* MODULES ************************* -->
@@ -183,17 +181,12 @@
     <define name="COURSE_DGAIN" value="0.368000000715"/>
     <define name="COURSE_PRE_BANK_CORRECTION" value="0.90600001812"/>
     <define name="PITCH_MAX_SETPOINT" value="0.5" unit="radians"/>
-    <!-- not in fw_h_ctl.c fw_v_ctl.c but where????-->
     <define name="PITCH_MIN_SETPOINT" value="-0.5" unit="radians"/>
-    <!-- not in fw_h_ctl.c fw_v_ctl.c but where????-->
   </section>
 
   <section name="VERTICAL CONTROL" prefix="V_CTL_">
-    <!-- outer loop proportional gain -->
     <define name="ALTITUDE_PGAIN" value="-0.0890000015497"/>
-    <!-- outer loop saturation -->
     <define name="ALTITUDE_MAX_CLIMB" value="2."/>
-    <!-- auto throttle inner loop -->
     <define name="AUTO_THROTTLE_NOMINAL_CRUISE_THROTTLE" value="0.435000002384"/>
     <define name="AUTO_THROTTLE_MIN_CRUISE_THROTTLE" value="0.25"/>
     <define name="AUTO_THROTTLE_MAX_CRUISE_THROTTLE" value="0.80"/>
@@ -205,19 +198,6 @@
     <define name="AUTO_THROTTLE_DASH_TRIM" value="-1000"/>
     <define name="AUTO_THROTTLE_PITCH_OF_VZ_PGAIN" value="0.187999993563"/>
     <define name="AUTO_THROTTLE_PITCH_OF_VZ_DGAIN" value="0."/>
-    <!-- auto pitch inner loop -->
-    <define name="AUTO_PITCH_PGAIN" value="-0.0399999991059"/>
-    <define name="AUTO_PITCH_IGAIN" value="0.0520000010729"/>
-    <define name="AUTO_PITCH_MAX_PITCH" value="0.35"/>
-    <define name="AUTO_PITCH_MIN_PITCH" value="-0.35"/>
-    <define name="THROTTLE_SLEW" value="0.5"/>
-    <!--airspeed
-    <define name="AUTO_AIRSPEED_SETPOINT" value="15" unit="(m/s)"/>
-    <define name="AUTO_AIRSPEED_PGAIN" value="0.1"/>
-    <define name="AUTO_AIRSPEED_IGAIN" value="0"/>
-    <define name="AUTO_GROUNDSPEED_SETPOINT" value="15" unit="(m/s)"/>
-    <define name="AUTO_GROUNDSPEED_PGAIN" value="0"/>
-    <define name="AUTO_GROUNDSPEED_IGAIN" value="0"/> -->
   </section>
 
   <section name="AGGRESSIVE" prefix="AGR_">
@@ -233,14 +213,10 @@
 
   <!-- ************************* MISC ************************* -->
 
-  <!-- Local magnetic field -->
-
-  <!--
   <section name="AIRSPEED" prefix="AIRSPEED_">
     <define name="BIAS" value="(64.5f * 5.7f)"/>
     <define name="QUADRATIC_SCALE" value="1.47f"/>
   </section>
--->
 
   <section name="BAT">
     <define name="MILLIAMP_AT_FULL_THROTTLE" value="5000"/>
@@ -248,20 +224,13 @@
   </section>
 
   <section name="MISC">
-    <!--    <define name="MINIMUM_AIRSPEED" value="8." unit="m/s"/>-->
     <define name="NOMINAL_AIRSPEED" value="15." unit="m/s"/>
-    <!--    <define name="MAXIMUM_AIRSPEED" value="25." unit="m/s"/>-->
     <define name="CARROT" value="5." unit="s"/>
     <define name="KILL_MODE_DISTANCE" value="(1.5*MAX_DIST_FROM_HOME)"/>
     <define name="ALT_KALMAN_ENABLED" value="TRUE"/>
     <define name="DEFAULT_CIRCLE_RADIUS" value="70.1299972534"/>
     <define name="MIN_CIRCLE_RADIUS" value="50."/>
-    <!-- not in fw_h_ctl.c fw_v_ctl.c nav.c but where????-->
-    <!--uncommant API protocol in makefile-->
-    <!--    <define name="XBEE_INIT" value="&quot;ATCHC\rATID3332\rATPL4\rATRN1\rATTT80\rATBD3\rATWR\r&quot;"/>
-    <define name="NO_XBEE_API_INIT" value="TRUE"/>   uncommant after programed-->
+    <define name="XBEE_INIT" value="&quot;ATID3332\rATPL4\r&quot;"/>
   </section>
 
-  <!--FW_hc 00178 ifdef STRONG_WIND -->
-
-  </airframe>
+</airframe>

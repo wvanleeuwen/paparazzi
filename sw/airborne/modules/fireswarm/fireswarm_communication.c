@@ -60,7 +60,7 @@
 
 void fireswarm_payload_link_init(void)
 {
-  Uart3SetBaudrate(B57600);
+  UART3SetBaudrate(B57600);
 }
 
 
@@ -76,13 +76,13 @@ void fireswarm_payload_link_transmit(uint8_t* buff, int size)
   while (size-- > 0)
   {
     fsw_crc += *buff;
-    Uart3Transmit(*buff++);
+    UART3Transmit(*buff++);
   }
 }
 
 void fireswarm_payload_link_crc(void)
 {
-  Uart3Transmit(fsw_crc);
+  UART3Transmit(fsw_crc);
 }
 
 

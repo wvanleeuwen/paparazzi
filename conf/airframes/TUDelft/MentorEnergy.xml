@@ -5,7 +5,7 @@
 -->
 
 <airframe name="LisaAspirin2">
-  <!--+-+-+-+-+-+-+- FIRMWARE -+-+-+-+-+-+-+-->
+  <!-- ************************* FIRMWARE ************************* -->
 
   <firmware name="fixedwing">
     <define name="USE_AIRSPEED"/>
@@ -31,23 +31,21 @@
     <define name="WIND_INFO"/>
     <define name="WIND_INFO_RET"/>
     <define name="SENSOR_SYNC_SEND"/>
-    <!-- Sensors -->
     <subsystem name="imu" type="aspirin_v2.1"/>
     <subsystem name="ahrs" type="float_dcm">
       <define name="USE_MAGNETOMETER_ONGROUND"/>
     </subsystem>
+    <subsystem name="ins" type="gps_passthrough"/>
     <subsystem name="radio_control" type="ppm"/>
-    <!-- Communication -->
     <subsystem name="telemetry" type="xbee_api">
       <configure name="MODEM_BAUD" value="B57600"/>
     </subsystem>
-    <!-- Actuators -->
     <subsystem name="control" type="energy"/>
     <subsystem name="navigation"/>
     <subsystem name="gps" type="ublox"/>
   </firmware>
 
-  <!--+-+-+-+-+-+-+- MODULES -+-+-+-+-+-+-+-->
+  <!-- ************************* MODULES ************************* -->
 
   <modules>
     <load name="gps_ubx_ucenter.xml"/>
@@ -68,7 +66,7 @@
     <load name="nav_catapult.xml"/>
   </modules>
 
-  <!--+-+-+-+-+-+-+- ACTUATORS -+-+-+-+-+-+-+-->
+  <!-- ************************* ACTUATORS ************************* -->
 
   <servos>
     <servo name="THROTTLE" no="0" min="1000" neutral="1000" max="2000"/>
@@ -105,6 +103,11 @@
     <set servo="RUDDER" value="@YAW"/>
   </command_laws>
 
+  <section name="TRIM" prefix="COMMAND_">
+    <define name="ROLL_TRIM" value="0"/>
+    <define name="PITCH_TRIM" value="788."/>
+  </section>
+
   <section name="FAILSAFE" prefix="FAILSAFE_">
     <define name="DEFAULT_THROTTLE" value="0.35" unit="%"/>
     <define name="DEFAULT_ROLL" value="0.17" unit="rad"/>
@@ -114,7 +117,7 @@
     <define name="DELAY_WITHOUT_GPS" value="3" unit="s"/>
   </section>
 
-  <!--+-+-+-+-+-+-+- SENSORS -+-+-+-+-+-+-+-->
+  <!-- ************************* SENSORS ************************* -->
 
   <section name="IMU" prefix="IMU_">
     <!-- Calibration Neutral -->
@@ -154,7 +157,7 @@
     <define name="PITCH_NEUTRAL_DEFAULT" value="0.103000000119" unit="rad"/>
   </section>
 
-  <!--+-+-+-+-+-+-+- GAINS -+-+-+-+-+-+-+-->
+  <!-- ************************* GAINS ************************* -->
 
   <section name="HORIZONTAL CONTROL" prefix="H_CTL_">
     <define name="COURSE_PGAIN" value="0.89200001955"/>
@@ -173,11 +176,8 @@
 
   <section name="VERTICAL CONTROL" prefix="V_CTL_">
     <define name="POWER_CTL_BAT_NOMINAL" value="11.1" unit="volt"/>
-    <!-- outer loop proportional gain -->
     <define name="ALTITUDE_PGAIN" value="0.104999996722"/>
-    <!-- outer loop saturation -->
     <define name="ALTITUDE_MAX_CLIMB" value="3."/>
-    <!-- auto throttle inner loop -->
     <define name="AUTO_THROTTLE_NOMINAL_CRUISE_THROTTLE" value="0.5"/>
     <define name="AUTO_THROTTLE_MIN_CRUISE_THROTTLE" value="0.36700001359"/>
     <define name="AUTO_THROTTLE_MAX_CRUISE_THROTTLE" value="0.626999974251"/>
@@ -186,14 +186,7 @@
     <define name="THROTTLE_SLEW_LIMITER" value="1" unit="s"/>
   </section>
 
-  <!--+-+-+-+-+-+-+- MISC -+-+-+-+-+-+-+-->
-
-  <!-- Local magnetic field -->
-
-  <section name="TRIM" prefix="COMMAND_">
-    <define name="ROLL_TRIM" value="0"/>
-    <define name="PITCH_TRIM" value="788."/>
-  </section>
+  <!-- ************************* MISC ************************* -->
 
   <section name="BAT">
     <define name="MilliAmpereOfAdc(adc)" value="((adc) - 505) * 124.0f"/>
@@ -208,7 +201,6 @@
     <define name="GLIDE_AIRSPEED" value="12." unit="m/s"/>
     <define name="RACE_AIRSPEED" value="25." unit="m/s"/>
     <define name="CARROT" value="5." unit="s"/>
-    <define name="CONTROL_RATE" value="60" unit="Hz"/>
     <define name="ALT_KALMAN_ENABLED" value="TRUE"/>
     <define name="DEFAULT_CIRCLE_RADIUS" value="80."/>
     <define name="NAV_GLIDE_PITCH_TRIM" value="0."/>
@@ -233,4 +225,4 @@
     <define name="AUTOSHOOT_METER_GRID" value="50" unit="meter"/>
   </section>
 
-  </airframe>
+</airframe>

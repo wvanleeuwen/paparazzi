@@ -37,8 +37,9 @@
     </subsystem>
     <subsystem name="control"/>
     <subsystem name="navigation"/>
-    <subsystem name="imu" type="aspirin_i2c"/>
+    <subsystem name="imu" type="aspirin_i2c_v1.5"/>
     <subsystem name="ahrs" type="float_dcm"/>
+    <subsystem name="ins" type="gps_passthrough"/>
     <subsystem name="gps" type="ublox"/>
   </firmware>
 
@@ -104,7 +105,7 @@
     <let var="aileron_down_rate" value="(AILERON_RATE_DOWN * (MAX_PPRZ - $brake_value)) + (AILERON_RATE_DOWN_BRAKE * $brake_value)"/>
     <let var="aileron_up" value="(@ROLL  *  (((float)$aileron_up_rate) / ((float)MAX_PPRZ)))"/>
     <let var="aileron_down" value="(@ROLL  * (((float)$aileron_down_rate) / ((float)MAX_PPRZ)))"/>
-    <let var="leftturn" value="(@ROLL &gt;= 0? 1 : 0)"/>
+    <let var="leftturn" value="(@ROLL >= 0? 1 : 0)"/>
     <let var="rightturn" value="(1 - $leftturn)"/>
     <set servo="AILERON_LEFT" value="($aileron_up * $leftturn) + ($aileron_down * $rightturn) - $brake_value*(BRAKE_SPOILERON) - (MAX_PPRZ * AILERON_NEUTRAL)"/>
     <set servo="AILERON_RIGHT" value="($aileron_up * $rightturn) + ($aileron_down * $leftturn) + $brake_value*(BRAKE_SPOILERON) + (MAX_PPRZ *AILERON_NEUTRAL)"/>
@@ -226,7 +227,7 @@
   <!-- ************************* MISC ************************* -->
 
   <section name="BAT">
-    <!--    <define name="MilliAmpereOfAdc(adc)" value="((adc) - 505) * 124.0f"/> -->
+    <!--define name="MilliAmpereOfAdc(adc)" value="((adc) - 505) * 124.0f"/-->
     <!-- Note that 3S lipo 3.1*3=9.3 most of the time the cutof for the motor part of the ESC -->
     <define name="CATASTROPHIC_BAT_LEVEL" value="9.1" unit="V"/>
     <define name="CRITIC_BAT_LEVEL" value="10" unit="V"/>
@@ -238,8 +239,7 @@
     <define name="COMMAND_PITCH_TRIM" value="-1"/>
     <define name="NOMINAL_AIRSPEED" value="17." unit="m/s"/>
     <define name="CARROT" value="5." unit="s"/>
-    <define name="CONTROL_RATE" value="60" unit="Hz"/>
-    <define name="XBEE_INIT" value="&quot;ATPL2\rATRN5\rATTT80\r&quot;"/>
+    <define name="XBEE_INIT" value="&quot;ATPL4\rATID3332\r&quot;"/>
     <define name="ALT_KALMAN_ENABLED" value="TRUE"/>
     <define name="DEFAULT_CIRCLE_RADIUS" value="80."/>
     <!-- The Glide definitions are used for calculating the touch down point during auto landing -->
@@ -248,7 +248,7 @@
     <define name="GLIDE_PITCH" value="45" unit="deg"/>
   </section>
 
-  <!-- ******************************* CAMERA ******************************** -->
+  <!-- ************************* CAMERA ************************* -->
 
   <section name="DIGITAL_CAMERA" prefix="DC_">
     <define name="AUTOSHOOT_QUARTERSEC_PERIOD" value="6" unit="quarter_second"/>

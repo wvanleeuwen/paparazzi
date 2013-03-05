@@ -20,7 +20,7 @@
   </makefile>
   <makefile target="ap">
     <file name="fireswarm_communication.c"/>
-    <define name="FIRESWARM_LINK" value="Uart3"/>
+    <define name="FIRESWARM_LINK" value="UART3"/>
     <define name="USE_UART3" value="1" />
     <define name="UART3_BAUD" value="B9600" />
   </makefile>

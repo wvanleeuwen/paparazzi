@@ -161,11 +161,11 @@
       <go from="2" hmode="route" wp="STDBY"/>
     </block>
     <block name="Fly in Square">
-      <exception cond="! InsideSquare(estimator_x, estimator_y)" deroute="Come back wp 1"/>
+      <exception cond="! InsideSquare(GetPosX(), GetPosY())" deroute="Come back wp 1"/>
       <attitude alt="ground_alt+75" roll="0" vmode="alt"/>
     </block>
     <block name="Come back wp 1">
-      <exception cond="InsideSquare(estimator_x, estimator_y)" deroute="Fly in Square"/>
+      <exception cond="InsideSquare(GetPosX(), GetPosY())" deroute="Fly in Square"/>
       <go wp="1"/>
       <deroute block="Fly in Square"/>
     </block>
