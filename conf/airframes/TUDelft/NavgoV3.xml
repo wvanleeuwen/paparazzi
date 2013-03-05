@@ -44,6 +44,7 @@ This airframe file use  IMU 3000 , not the standart ITG3200 Please change teh gy
  <!------------------- Modules ------------------->
 
   <modules main_freq="512">
+      <load name="gps_ubx_ucenter.xml"/>
     <!--load name="servo_switch.xml"/-->
     <!--<load name="rotorcraft_cam.xml"/-->
     <!--load name="sonar_maxbotix_booz.xml"/-->
