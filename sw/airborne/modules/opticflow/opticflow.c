@@ -10,7 +10,7 @@
 #include "mcu_periph/uart.h"
 #include "messages.h"
 #include "subsystems/datalink/downlink.h"
-#include "estimator.h"
+#include "state.h"
 
 #include BOARD_CONFIG
 
@@ -69,12 +69,13 @@ bool_t opticflow_setup(uint8_t wp_flow_start, uint8_t wp_flow)
 
 void periodic_opticflow(void)
 {
-if ((estimator_phi > RadOfDeg(max_opticflow_phi)) | (estimator_theta > RadOfDeg(max_opticflow_theta)) | (estimator_phi < RadOfDeg(-max_opticflow_phi)) | (estimator_theta < RadOfDeg(-max_opticflow_theta)))
+  struct FloatEulers* att = stateGetNedToBodyEulers_f();
+if ((att->phi > RadOfDeg(max_opticflow_phi)) | (att->theta > RadOfDeg(max_opticflow_theta)) | (att->phi < RadOfDeg(-max_opticflow_phi)) | (att->theta < RadOfDeg(-max_opticflow_theta)))
  {
 	opticflow_status = 0;
  }
   else
-  { if(fabs(estimator_z-WaypointAlt(wp_opticflow)) > wp_border)
+  { if(fabs(stateGetPositionUtm_f()->alt - WaypointAlt(wp_opticflow)) > wp_border)
 	{
 		opticflow_status = 0;
 	}

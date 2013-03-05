@@ -10,11 +10,11 @@
 #endif
 #include "mcu_periph/uart.h"
 #include "messages.h"
-#include "downlink.h"
-#include "generated/periodic.h"
+#include "subsystems/datalink/downlink.h"
+#include "generated/periodic_telemetry.h"
 
 #include "subsystems/sensors/infrared.h"
-#include "estimator.h"
+#include "state.h"
 
 #define IS_CAMERA 1
 
@@ -37,11 +37,12 @@ void init_onboardcam(void) {
 
 void periodic_onboardcam(void) {
 
+    struct FloatEulers* att = stateGetNedToBodyEulers_f();
 
 	if ( onboardcam_mode == IS_CAMERA )
 	{
-		estimator_phi  = (adc_onboardcama-512.00f)/512.00f; //0=1pi 512=0 930=1pi
-		estimator_theta  =(adc_onboardcamb-512.00f)/512.00f;
+		att->phi  = (adc_onboardcama-512.00f)/512.00f; //0=1pi 512=0 930=1pi
+		att->theta  =(adc_onboardcamb-512.00f)/512.00f;
 	}
 	else	// Infrared ATT
 	{

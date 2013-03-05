@@ -39,9 +39,8 @@
 #endif
 #include "mcu_periph/uart.h"
 #include "messages.h"
-#include "downlink.h"
-#include "generated/periodic.h"
-#include "estimator.h"
+#include "subsystems/datalink/downlink.h"
+#include "generated/periodic_telemetry.h"
 
 
 uint8_t to_atmega48[ATMEGA_TX_SIZE];
@@ -63,7 +62,7 @@ void atmega48_periodic( void )
 {
   from_atmega48[10] = to_atmega48[0];
   from_atmega48[11] = to_atmega48[1];
-  RunOnceEvery(6,DOWNLINK_SEND_PAYLOAD(DefaultChannel, ATMEGA_RX_SIZE, from_atmega48));
+  RunOnceEvery(6,DOWNLINK_SEND_PAYLOAD(DefaultChannel, DefaultDevice, ATMEGA_RX_SIZE, from_atmega48));
 }
 
 void atmega48_event( void )
