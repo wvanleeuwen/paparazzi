@@ -51,6 +51,7 @@
       <load name="gps_ubx_ucenter.xml"/>
     <!-- Using Geo Mag module -->
       <load name="geo_mag.xml"/>
+      <load name="imu_quality_assessment.xml"/>
   </modules>
 
  <!------------------- Servo's ------------------->
