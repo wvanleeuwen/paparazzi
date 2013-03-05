@@ -17,11 +17,9 @@
     <define name="LOITER_TRIM"/>
     <define name="TUNE_AGRESSIVE_CLIMB"/>
     <subsystem name="radio_control" type="ppm"/>
-    <!-- Communication -->
     <subsystem name="telemetry" type="transparent">
       <configure name="MODEM_BAUD" value="B57600"/>
     </subsystem>
-    <!-- Sensors -->
     <subsystem name="imu" type="ppzuav"/>
     <subsystem name="ahrs" type="float_dcm"/>
     <subsystem name="ins" type="alt_float"/>
@@ -203,7 +201,7 @@
     <define name="NOMINAL_AIRSPEED" value="17." unit="m/s"/>
     <define name="CARROT" value="5." unit="s"/>
     <define name="KILL_MODE_DISTANCE" value="(1.5*MAX_DIST_FROM_HOME)"/>
-    <define name="XBEE_INIT" value="&quot;ATPL2\rATID3332\r&quot;"/>
+    <define name="XBEE_INIT" value="&quot;ATPL4\rATID3332\r&quot;"/>
     <define name="ALT_KALMAN_ENABLED" value="TRUE"/>
     <define name="DEFAULT_CIRCLE_RADIUS" value="80."/>
     <define name="LIGHT_LED_1" value="3"/>
