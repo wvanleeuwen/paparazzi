@@ -1,11 +1,11 @@
 <!DOCTYPE airframe SYSTEM "../airframe.dtd">
 
-<!-- Microjet Multiplex (http://www.multiplex-rc.de/)
-     Tiny 2.11 board (http://paparazzi.enac.fr/wiki/index.php/Tiny_v2)
-     Tilted infrared sensor
-     API xbee modem
-     Pan tild camera
-     NOAirspeed sencor
+<!--
+
+  Microjet Multiplex (http://www.multiplex-rc.de/)
+  Tiny 2.11 board (http://paparazzi.enac.fr/wiki/index.php/Tiny_v2)
+  Tilted infrared sensor
+
 -->
 
 <airframe name="TwinJet Tiny 2.11">

@@ -1,7 +1,9 @@
 <!DOCTYPE airframe SYSTEM "../airframe.dtd">
 
 <!--
-	Lisa + Aspirin v2 using SPI only
+
+  Fireswarm v2.1 Board
+
 -->
 
 <airframe name="LisaAspirin2">
@@ -32,20 +34,12 @@
     <define name="WIND_INFO"/>
     <define name="WIND_INFO_RET"/>
     <!-- Attitude -->
-    <!--
-    <subsystem name="ahrs" type="int_cmpl_quat">
-      <define name="AHRS_GRAVITY_UPDATE_COORDINATED_TURN" />
-    </subsystem>
-    -->
     <subsystem name="imu" type="aspirin_v2.1"/>
-    <subsystem name="ahrs" type="float_dcm">
-      <!--      <define name="USE_MAGNETOMETER" /> -->
-    </subsystem>
+    <subsystem name="ahrs" type="float_dcm"/>
     <!-- Communication -->
     <subsystem name="radio_control" type="ppm"/>
     <subsystem name="telemetry" type="xbee_api">
       <configure name="MODEM_BAUD" value="B9600"/>
-      <!--      <configure name="MODEM_PORT" value="UART3"/> -->
     </subsystem>
     <!-- Autopilot -->
     <subsystem name="control" type="energy"/>
@@ -62,28 +56,9 @@
   <modules>
     <load name="gps_ubx_ucenter.xml"/>
     <load name="nav_catapult.xml"/>
-    <load name="photogrammetry_calculator.xml"/>
-    <!--    <load name="light.xml">
-      <define name="LIGHT_LED_STROBE" value="4"/>
-      <define name="LIGHT_LED_NAV" value="5"/>
-      <define name="STROBE_LIGHT_MODE_DEFAULT" value="6"/>
-    </load>
--->
     <load name="adc_generic.xml">
       <configure name="ADC_CHANNEL_GENERIC1" value="ADC_1"/>
     </load>
-    <!--
-    <load name="airspeed_ets.xml">
-      <define name="AIRSPEED_ETS_SCALE" value="0.72" />
-    </load>
-
-       <load name="digital_cam_i2c.xml"/>  -->
-    <!--    <load name="ins_ppzuavimu.xml" /> -->
-    <!--
-    <load name="digital_cam.xml">
-      <define name="DC_SHUTTER_LED" value="5"/>
-    </load>
--->
     <load name="TUDelft/fireswarm_payload.xml">
       <define name="FIRESWARM_READY_LED" value="4"/>
       <define name="FIRESWARM_PAYLOAD_POWER_LED" value="5"/>
@@ -191,11 +166,8 @@
 
   <section name="VERTICAL CONTROL" prefix="V_CTL_">
     <define name="POWER_CTL_BAT_NOMINAL" value="11.1" unit="volt"/>
-    <!-- outer loop proportional gain -->
     <define name="ALTITUDE_PGAIN" value="0.10"/>
-    <!-- outer loop saturation -->
     <define name="ALTITUDE_MAX_CLIMB" value="3."/>
-    <!-- auto throttle inner loop -->
     <define name="AUTO_THROTTLE_NOMINAL_CRUISE_THROTTLE" value="0.746999979019"/>
     <define name="AUTO_THROTTLE_MIN_CRUISE_THROTTLE" value="0.45"/>
     <define name="AUTO_THROTTLE_MAX_CRUISE_THROTTLE" value="0.95"/>
@@ -208,25 +180,16 @@
 
   <section name="AGGRESSIVE" prefix="AGR_">
     <define name="BLEND_START" value="20"/>
-    <!-- Altitude Error to Initiate Aggressive Climb CANNOT BE ZERO!!-->
     <define name="BLEND_END" value="10"/>
-    <!-- Altitude Error to Blend Aggressive to Regular Climb Modes  CANNOT BE ZERO!!-->
     <define name="CLIMB_THROTTLE" value="1.00"/>
-    <!-- Gaz for Aggressive Climb -->
     <define name="CLIMB_PITCH" value="0.3"/>
-    <!-- Pitch for Aggressive Climb -->
     <define name="DESCENT_THROTTLE" value="0.5"/>
-    <!-- Gaz for Aggressive Decent -->
     <define name="DESCENT_PITCH" value="-0.25"/>
-    <!-- Pitch for Aggressive Decent -->
     <define name="CLIMB_NAV_RATIO" value="0.8"/>
-    <!-- Percent Navigation for Altitude Error Equal to Start Altitude -->
     <define name="DESCENT_NAV_RATIO" value="0.9"/>
   </section>
 
   <!-- ************************* MISC ************************* -->
-
-  <!-- Local magnetic field -->
 
   <section name="BAT">
     <!--    <define name="MilliAmpereOfAdc(adc)" value="((adc) - 505) * 124.0f"/> -->
@@ -242,8 +205,7 @@
     <define name="RACE_AIRSPEED" value="25." unit="m/s"/>
     <define name="CARROT" value="5." unit="s"/>
     <define name="CONTROL_FREQUENCY" value="60" unit="Hz"/>
-    <define name="XBEE_INIT" value="&quot;ATPL2\rATRN5\rATTT80\r&quot;"/>
-    <!--    <define name="NO_XBEE_API_INIT" value="TRUE"/> -->
+    <define name="XBEE_INIT" value="&quot;ATPL4\rATID3332\r&quot;"/>
     <define name="ALT_KALMAN_ENABLED" value="TRUE"/>
     <define name="DEFAULT_CIRCLE_RADIUS" value="105."/>
   </section>
@@ -260,29 +222,6 @@
     <define name="ANGLE" value="4"/>
     <define name="INTERCEPT_AF_TOD" value="15"/>
     <define name="TARGET_SPEED" value="(65.0/3.6)"/>
-  </section>
-
-  <section name="DIGITAL_CAMERA" prefix="DC_">
-    <define name="AUTOSHOOT_QUARTERSEC_PERIOD" value="12" unit="quarter_second"/>
-    <define name="AUTOSHOOT_METER_GRID" value="50" unit="meter"/>
-  </section>
-
-  <section name="Photogrammetry" prefix="PHOTOGRAMMETRY_">
-    <!-- Camera Parameters -->
-    <define name="FOCAL_LENGTH" value="8.3" unit="mm"/>
-    <define name="SENSOR_WIDTH" value="6.66" unit="mm"/>
-    <!-- In direction of the plane's wings -->
-    <define name="SENSOR_HEIGHT" value="5.32" unit="mm"/>
-    <!-- In direction of the plane's nose -->
-    <define name="PIXELS_WIDTH" value="1280" unit=""/>
-    <!-- Photogrammetry Parameters : defined per flightplan -->
-    <define name="OVERLAP" value="0.5" unit="PROCENT"/>
-    <define name="SIDELAP" value="0.5" unit="PROCENT"/>
-    <define name="RESOLUTION" value="50" unit="mm pixel projection"/>
-    <!-- Flight Safety Parameters -->
-    <define name="HEIGHT_MIN" value="40" unit="m"/>
-    <define name="HEIGHT_MAX" value="500" unit="m"/>
-    <define name="RADIUS_MIN" value="70" unit="m"/>
   </section>
 
   </airframe>

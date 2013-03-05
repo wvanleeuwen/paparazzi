@@ -1,11 +1,16 @@
 
 <!--
-This airframe file use  IMU 3000 , not the standart ITG3200 Please change teh gyrosens values back to the original value when you use a purgaded Navgo
- SENS ITG3200  1/14.375 (deg/s)/LSB, rate frac 12bit => 1/14.375 * pi / 180 * 2^12
-    <define name="GYRO_P_SENS" value="4.97312" integer="16"/>
-    <define name="GYRO_Q_SENS" value="4.97312" integer="16"/>
-    <define name="GYRO_R_SENS" value="4.97312" integer="16"/>-->
 
+  This airframe file use  IMU 3000 , not the standart ITG3200
+  Please change the gyrosens values back to the original value
+  when you use a purchased Navgo
+
+  SENS ITG3200  1/14.375 (deg/s)/LSB, rate frac 12bit => 1/14.375 * pi / 180 * 2^12
+  <define name="GYRO_P_SENS" value="4.97312" integer="16"/>
+  <define name="GYRO_Q_SENS" value="4.97312" integer="16"/>
+  <define name="GYRO_R_SENS" value="4.97312" integer="16"/>
+
+-->
 
 <!DOCTYPE airframe SYSTEM "../airframe.dtd">
 
@@ -125,7 +130,18 @@ This airframe file use  IMU 3000 , not the standart ITG3200 Please change teh gy
     <define name="BODY_TO_IMU_PSI" value="0." unit="deg"/>
   </section>
 
+  <!-- Magnetic field for Toulouse (declination -16&#176;) -->
+
+  <!--section name="AHRS" prefix="AHRS_">
+    <define name="PROPAGATE_FREQUENCY" value="512"/>
+    <define name="PROPAGATE_LOW_PASS_RATES" value="1"/>
+    <define name="H_X" value=" 0.513081"/>
+    <define name="H_Y" value="-0.00242783"/>
+    <define name="H_Z" value=" 0.858336"/>
+  </section-->
+
   <section name="AHRS" prefix="AHRS_">
+    <!--Rotterdam-->
     <define name="PROPAGATE_FREQUENCY" value="512"/>
     <define name="H_X" value=" 0.3913233"/>
     <define name="H_Y" value=" 0.0005934"/>
@@ -218,30 +234,15 @@ This airframe file use  IMU 3000 , not the standart ITG3200 Please change teh gy
     <define name="DGAIN" value="80"/>
     <define name="IGAIN" value="20"/>
     <define name="NGAIN" value="0"/>
-    <!-- feedforward -->
     <define name="AGAIN" value="0"/>
   </section>
 
   <!-- ************************* MISC ************************* -->
 
-  <!-- Servo's -->
-
   <section name="MKK" prefix="ACTUATORS_MKK_">
     <define name="NB" value="4"/>
     <define name="ADDR" value="{0x54, 0x58, 0x56, 0x52}"/>
   </section>
-
-  <!-- Magnetic field for Toulouse (declination -16&#176;) -->
-
-  <!--section name="AHRS" prefix="AHRS_">
-    <define name="PROPAGATE_FREQUENCY" value="512"/>
-    <define name="PROPAGATE_LOW_PASS_RATES" value="1"/>
-    <define name="H_X" value=" 0.513081"/>
-    <define name="H_Y" value="-0.00242783"/>
-    <define name="H_Z" value=" 0.858336"/>
-  </section-->
-
-  <!--Rotterdam-->
 
   <section name="BAT">
     <define name="CATASTROPHIC_BAT_LEVEL" value="9.3" unit="V"/>

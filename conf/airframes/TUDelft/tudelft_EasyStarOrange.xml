@@ -1,19 +1,23 @@
 <!DOCTYPE airframe SYSTEM "../airframe.dtd">
 
-<!-- Easystar with Orange tail
-     * Multiplex Easystar (http://www.multiplex-rc.de/)
-     * Paparazzi Tiny 2.11 board (http://paparazzi.enac.fr/wiki/index.php/Tiny_v2)
-     * Tilted Infrared sensor for X,Y and Z
-     * XBee Pro Series 1 on 2.4 Ghz
-     * uBlox LEA5H Flat GPS antenna on AP board
-     * Futaba 6107 microcopter version PPM out receiver 2.4 Ghz
+<!--
 
-     NOTES:
-     * Has a external servo connector for connection of a Drop Mechanism servo
-     * Uses by default a 2S 7.4V LiPo battery
+  Easystar with Orange tail
 
-READ this first
-http://paparazzi.enac.fr/w/index.php?title=Theory_of_Operation
+  * Multiplex Easystar (http://www.multiplex-rc.de/)
+  * Paparazzi Tiny 2.11 board (http://paparazzi.enac.fr/wiki/index.php/Tiny_v2)
+  * Tilted Infrared sensor for X,Y and Z
+  * XBee Pro Series 1 on 2.4 Ghz
+  * uBlox LEA5H Flat GPS antenna on AP board
+  * Futaba 6107 microcopter version PPM out receiver 2.4 Ghz
+
+  NOTES:
+  * Has a external servo connector for connection of a Drop Mechanism servo
+  * Uses by default a 2S 7.4V LiPo battery
+
+  READ this first
+  http://paparazzi.enac.fr/w/index.php?title=Theory_of_Operation
+
 -->
 
 <airframe name="EasyStarOrange">
@@ -32,13 +36,7 @@ http://paparazzi.enac.fr/w/index.php?title=Theory_of_Operation
     <define name="USE_I2C0"/>
     <define name="TUNE_AGRESSIVE_CLIMB"/>
     <!-- Communication -->
-    <!-- <subsystem name="telemetry" type="transparent"> -->
-    <subsystem name="telemetry" type="xbee_api">
-      <!--
-      <configure name="MODEM_BAUD" value="B9600"/>
-      <configure name="MODEM_PORT" value="UART0"/>
--->
-    </subsystem>
+    <subsystem name="telemetry" type="xbee_api"/>
     <subsystem name="radio_control" type="ppm">
       <!-- for debugging PPM values uncomment the line below -->
       <!-- <define name="TELEMETRY_MODE_FBW" value="1"/> -->
@@ -48,7 +46,6 @@ http://paparazzi.enac.fr/w/index.php?title=Theory_of_Operation
     <subsystem name="gps" type="ublox"/>
     <subsystem name="navigation" type="extra"/>
     <subsystem name="navigation" type="bomb"/>
-    <!-- <subsystem name="navigation" type="hereyourextendedreleasecode"/> -->
     <subsystem name="ins" type="gps_passthrough"/>
   </firmware>
 
@@ -96,11 +93,6 @@ http://paparazzi.enac.fr/w/index.php?title=Theory_of_Operation
   <section name="AUTO1" prefix="AUTO1_">
     <define name="MAX_ROLL" value="0.85" unit="rad"/>
     <define name="MAX_PITCH" value="0.60" unit="rad"/>
-    <!-- Or use as below -->
-    <!--    <define name="MAX_ROLL" value="RadOfDeg(45)"/> -->
-    <!--    <define name="MAX_PITCH" value="RadOfDeg(45)"/> -->
-    <!--    <define name="MAX_ROLL" value="45" unit="deg"/>/> -->
-    <!--    <define name="MAX_PITCH" value="45" unit="deg"/> -->
   </section>
 
   <command_laws>
@@ -142,10 +134,9 @@ http://paparazzi.enac.fr/w/index.php?title=Theory_of_Operation
     <define name="IR2_SIGN" value="1"/>
     <define name="TOP_SIGN" value="-1"/>
     <!-- below is very important per individual airframe, first set to 0,
-then adjusted after testflight data is analyzed.
-Setting also can be adjusted realtime via tuning config
-or tuning_via?_transmitter config.
--->
+    then adjusted after testflight data is analyzed.
+    Setting also can be adjusted realtime via tuning config
+    or tuning_via?_transmitter config.-->
     <define name="ROLL_NEUTRAL_DEFAULT" value="-6" unit="deg"/>
     <define name="PITCH_NEUTRAL_DEFAULT" value="7" unit="deg"/>
     <define name="CORRECTION_UP" value="1."/>
@@ -169,11 +160,8 @@ or tuning_via?_transmitter config.
   </section>
 
   <section name="VERTICAL CONTROL" prefix="V_CTL_">
-    <!-- outer loop proportional gain -->
     <define name="ALTITUDE_PGAIN" value="0.103000000119"/>
-    <!-- outer loop saturation -->
     <define name="ALTITUDE_MAX_CLIMB" value="2.0"/>
-    <!-- auto throttle inner loop -->
     <define name="AUTO_THROTTLE_NOMINAL_CRUISE_THROTTLE" value="0.697000026703" unit="%"/>
     <define name="AUTO_THROTTLE_MIN_CRUISE_THROTTLE" value="0.25" unit="%"/>
     <define name="AUTO_THROTTLE_MAX_CRUISE_THROTTLE" value="0.80" unit="%"/>
@@ -183,50 +171,21 @@ or tuning_via?_transmitter config.
     <define name="AUTO_THROTTLE_PGAIN" value="0."/>
     <define name="AUTO_THROTTLE_IGAIN" value="0."/>
     <define name="AUTO_THROTTLE_PITCH_OF_VZ_PGAIN" value="0.31099998951"/>
-    <!-- auto pitch inner loop -->
-    <define name="AUTO_PITCH_PGAIN" value="0.05"/>
-    <define name="AUTO_PITCH_IGAIN" value="0.075"/>
-    <define name="AUTO_PITCH_MAX_PITCH" value="0.35" unit="rad"/>
-    <define name="AUTO_PITCH_MIN_PITCH" value="-0.35" unit="rad"/>
     <define name="THROTTLE_SLEW" value="0.5"/>
   </section>
 
   <section name="AGGRESSIVE" prefix="AGR_">
     <define name="BLEND_START" value="20"/>
-    <!-- Altitude Error to Initiate Aggressive Climb CANNOT BE ZERO!!-->
     <define name="BLEND_END" value="10"/>
-    <!-- Altitude Error to Blend Aggressive to Regular Climb Modes  CANNOT BE ZERO!!-->
     <define name="CLIMB_THROTTLE" value="1."/>
-    <!-- Gaz for Aggressive Climb -->
     <define name="CLIMB_PITCH" value="0.331000000238"/>
-    <!-- Pitch for Aggressive Climb -->
     <define name="DESCENT_THROTTLE" value="0.0"/>
-    <!-- Gaz for Aggressive Decent -->
     <define name="DESCENT_PITCH" value="-0.261000007391"/>
-    <!-- Pitch for Aggressive Decent -->
     <define name="CLIMB_NAV_RATIO" value="0.8"/>
-    <!-- Percent Navigation for Altitude Error Equal to Start Altitude -->
     <define name="DESCENT_NAV_RATIO" value="0.834999978542"/>
   </section>
 
   <!-- ************************* MISC ************************* -->
-
-  <!-- ******************* MODULES ********************************** -->
-
-  <!-- Define here to which CONNECTOR NUMBER the servo is connected to, on the autopilot cicuit board -->
-
-  <!-- commands section -->
-
-  <auto_rc_commands>
-    <!-- To still be able to use rudder, which is needed with sidewind landing in auto1 stabilization mode only YAW -->
-    <!-- <set command="YAW"      value="@YAW"/> -->
-    <!-- To be able to do a manual drop test even in autonomous modes-->
-    <!-- <set command="HATCH" value="@EXTRA1"/> -->
-  </auto_rc_commands>
-
-  <!-- Do not set MAX_ROLL, MAX_PITCH to small of a value, otherwise one can NOT control the plane very well manually -->
-
-  <!-- If you have dual rate swith it of with same swtch as mode switch thus auto1 means dualrate is switched off also -->
 
   <section name="BAT">
     <define name="MILLIAMP_AT_FULL_THROTTLE" value="35000"/>
@@ -251,16 +210,12 @@ or tuning_via?_transmitter config.
     <!--un-comment after the XBee module is programmed-->
     <define name="ALT_KALMAN_ENABLED" value="TRUE"/>
     <!--UNLOCKED_HOME_MODE if set to TRUE means that HOME mode does not get stuck.
-If not set before when you would enter home mode you had to flip a bit via the GCS to get out. -->
+    If not set before when you would enter home mode you had to flip a bit via the GCS to get out. -->
     <define name="UNLOCKED_HOME_MODE" value="TRUE"/>
     <!-- RC_LOST_MODE means that if your RC Transmitter signal is not received anymore in the autopilot, e.g. you switch it off
      or  fly a long range mission you define the wanted mode behaviour here.
      If you do not define it, it defaults to flying to the flightplan HOME -->
     <define name="RC_LOST_MODE" value="PPRZ_MODE_AUTO2"/>
-    <!--
-    <define name="CAM_PHI_MAX_DEG" value="45" unit="deg"/>
-    <define name="VIDEO_SWITCH_PIN" value="20" unit="deg"/>
--->
     <define name="ALT_KALMAN_ENABLED" value="TRUE"/>
     <define name="TRIGGER_DELAY" value="1.0" unit="s"/>
     <define name="DEFAULT_CIRCLE_RADIUS" value="70.0" unit="m"/>

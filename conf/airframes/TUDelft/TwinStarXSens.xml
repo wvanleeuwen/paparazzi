@@ -2,7 +2,7 @@
 
 <!--
 
-  Heering TwinStar XSens + Classix
+  Heering TwinStar XSens MtiG300 + Classix
 
 -->
 
@@ -59,7 +59,6 @@
     <load name="adc_generic.xml">
       <define name="ADC_GENERIC_NB_SAMPLES" value="32"/>
       <configure name="ADC_CHANNEL_GENERIC1" value="ADC_6"/>
-      <!-- e.g. current sensor -->
     </load>
     <load name="photogrammetry_calculator.xml"/>
   </modules>
@@ -175,17 +174,13 @@
     <define name="PITCH_PGAIN" value="11000"/>
     <define name="PITCH_DGAIN" value="0."/>
     <define name="ELEVATOR_OF_ROLL" value="1000."/>
-    <!--  roll rate loop -->
     <define name="ROLL_ATTITUDE_GAIN" value="7000."/>
     <define name="ROLL_RATE_GAIN" value="1100"/>
   </section>
 
   <section name="VERTICAL CONTROL" prefix="V_CTL_">
-    <!-- outer loop proportional gain -->
     <define name="ALTITUDE_PGAIN" value="0.1"/>
-    <!-- outer loop saturation -->
     <define name="ALTITUDE_MAX_CLIMB" value="3.0"/>
-    <!-- auto throttle inner loop -->
     <define name="AUTO_THROTTLE_MIN_CRUISE_THROTTLE" value=".38"/>
     <define name="AUTO_THROTTLE_NOMINAL_CRUISE_THROTTLE" value="0.45"/>
     <define name="AUTO_THROTTLE_MAX_CRUISE_THROTTLE" value="0.62"/>
@@ -199,12 +194,6 @@
   </section>
 
   <!-- ************************* MISC ************************* -->
-
-  <!-- Servo's -->
-
-  <!-- INS -->
-
-  <!-- Local magnetic field -->
 
   <section name="NAV">
     <define name="AGR_CLIMB_PITCH" value="0."/>

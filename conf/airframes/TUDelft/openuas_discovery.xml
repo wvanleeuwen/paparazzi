@@ -1,22 +1,26 @@
 <!DOCTYPE airframe SYSTEM "../airframe.dtd">
-<!-- ST Model Discovery (http://www.sheng-teng.com/)
-     TWOG1  (http://paparazzi.enac.fr/wiki/index.php/)
-     With modified power routing by a cut PCB trace
-     * Tilted Infrared sensor for X,Y,Z
-     * XBee XSC 900Mhz
-     * uBlox LEA5H and Sarantel helix GPS antenna
+<!--
 
-     Near Future
-     * Current sensor
-     * Airspeed sensor via I2C
-     * Height sensor via I2C
-     * RPM sensor for brushless
+  ST Model Discovery (http://www.sheng-teng.com/)
+  TWOG1  (http://paparazzi.enac.fr/wiki/index.php/)
+  With modified power routing by a cut PCB trace
 
-     NOTES:
-      no special things (for now)
+  * Tilted Infrared sensor for X,Y,Z
+  * XBee XSC 900Mhz
+  * uBlox LEA5H and Sarantel helix GPS antenna
 
-READ this first
-http://paparazzi.enac.fr/w/index.php?title=Theory_of_Operation
+  Near Future
+  * Current sensor
+  * Airspeed sensor via I2C
+  * Height sensor via I2C
+  * RPM sensor for brushless
+
+  NOTES:
+  no special things (for now)
+
+  READ this first
+  http://paparazzi.enac.fr/w/index.php?title=Theory_of_Operation
+
 -->
 
 <airframe name="Discovery">
@@ -428,10 +432,6 @@ If not set before when you would enter home mode you had to flip a bit via the G
     <define name="GLIDE_PITCH" value="10." unit="deg"/>
   </section>
 
-  <!-- ******************* VERTICAL CONTROL ********************************** -->
-
-  <!-- ******************* HORIZONTAL CONTROL ******************************** -->
-
   <!-- ******************************** PHOTOGRAMMETRY ********************************** -->
 
   <section name="PHOTOGRAMMETRY" prefix="PHOTOGRAMMETRY_">
@@ -461,10 +461,6 @@ If not set before when you would enter home mode you had to flip a bit via the G
     <define name="NAV_GLIDE_PITCH_TRIM" value="0."/>
   </section>
 
-  <!-- ***************************** AGGRESIVE ******************************* -->
-
-  <!-- ****************************** FAILSAFE ******************************* -->
-
   <!-- ****************************** DATALINK ******************************* -->
 
   <section name="DATALINK" prefix="DATALINK_">
@@ -478,7 +474,5 @@ If not set before when you would enter home mode you had to flip a bit via the G
     <define name="YAW_RESPONSE_FACTOR" value="0.5"/>
     <!-- a to low of a value gives bad simulation results -->
   </section>
-
-  <!-- ******************* MODULES ********************************** -->
 
   </airframe>

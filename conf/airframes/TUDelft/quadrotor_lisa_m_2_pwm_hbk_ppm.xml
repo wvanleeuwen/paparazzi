@@ -100,7 +100,6 @@
     <define name="ACCEL_X_NEUTRAL" value="50"/>
     <define name="ACCEL_Y_NEUTRAL" value="24"/>
     <define name="ACCEL_Z_NEUTRAL" value="-33"/>
-    <!-- replace this with your own calibration -->
     <define name="MAG_X_NEUTRAL" value="-197"/>
     <define name="MAG_Y_NEUTRAL" value="-48"/>
     <define name="MAG_Z_NEUTRAL" value="-130"/>
@@ -208,8 +207,6 @@
   </section>
 
   <!-- ************************* MISC ************************* -->
-
-  <!-- Servo's -->
 
   <section name="SIMULATOR" prefix="NPS_">
     <define name="ACTUATOR_NAMES" value="{&quot;front_motor&quot;, &quot;back_motor&quot;, &quot;right_motor&quot;, &quot;left_motor&quot;}"/>

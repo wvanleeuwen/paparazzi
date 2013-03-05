@@ -1,15 +1,18 @@
 <!DOCTYPE airframe SYSTEM "../airframe.dtd">
 
 <!--
-     Skywalker Fiberglass "GraySky" FPV 168 (http://www..com/)
-     YAPA v2  (http://paparazzi.enac.fr/wiki/Yapa#Yapa_v2)
-     With modified power routing
-     * Aspiring
-     * XBee 2.4Ghz
-     * uBlox LEA5H and Sarantel helix GPS antenna
 
-     Notes:
-     The two aileron servos are separately connected and have an additional spoileron function
+  Skywalker Fiberglass "GraySky" FPV 168 (http://www..com/)
+  YAPA v2  (http://paparazzi.enac.fr/wiki/Yapa#Yapa_v2)
+  With modified power routing
+
+  * Aspirin
+  * XBee 2.4Ghz
+  * uBlox LEA5H and Sarantel helix GPS antenna
+
+  Notes:
+  The two aileron servos are separately connected and have an additional spoileron function
+
 -->
 
 <airframe name="Graysky">
@@ -28,17 +31,12 @@
     <define name="TUNE_AGRESSIVE_CLIMB"/>
     <define name="AGR_CLIMB"/>
     <define name="ALT_KALMAN"/>
-    <!-- Radio Control -->
     <subsystem name="radio_control" type="ppm"/>
-    <!-- Communication -->
     <subsystem name="telemetry" type="xbee_api">
       <configure name="MODEM_BAUD" value="B9600"/>
     </subsystem>
-    <!-- Actuators -->
     <subsystem name="control"/>
-    <!-- Navigation -->
     <subsystem name="navigation"/>
-    <!-- Sensors -->
     <subsystem name="imu" type="aspirin_i2c"/>
     <subsystem name="ahrs" type="float_dcm"/>
     <subsystem name="gps" type="ublox"/>
@@ -47,15 +45,6 @@
   <!-- ************************* MODULES ************************* -->
 
   <modules>
-    <!--    <load name="light.xml">
-      <define name="LIGHT_LED_STROBE" value="3"/>
-      <define name="LIGHT_LED_NAV" value="2"/>
-      <define name="STROBE_LIGHT_MODE_DEFAULT" value="6"/>
-      <define name="NAV_LIGHT_MODE_DEFAULT" value="4"/>
-    </load>
--->
-    <!--    <load name="digital_cam_i2c.xml"/>  -->
-    <!--    <load name="ins_ppzuavimu.xml"/>  -->
     <load name="digital_cam.xml">
       <define name="DC_SHUTTER_LED" value="3"/>
     </load>
@@ -64,7 +53,6 @@
   <!-- ************************* ACTUATORS ************************* -->
 
   <servos>
-    <!-- Define here to which CONNECTOR NUMBER the servo is connected to, on the autopilot cicuit board -->
     <servo name="THROTTLE" no="9" min="1000" neutral="1000" max="2000"/>
     <servo name="AILERON_LEFT" no="4" min="1000" neutral="1500" max="2000"/>
     <servo name="AILERON_RIGHT" no="8" min="1000" neutral="1500" max="2000"/>
@@ -210,11 +198,8 @@
 
   <section name="VERTICAL CONTROL" prefix="V_CTL_">
     <define name="POWER_CTL_BAT_NOMINAL" value="11.1" unit="volt"/>
-    <!-- outer loop proportional gain -->
     <define name="ALTITUDE_PGAIN" value="0.108000002801"/>
-    <!-- outer loop saturation -->
     <define name="ALTITUDE_MAX_CLIMB" value="2."/>
-    <!-- auto throttle inner loop -->
     <define name="AUTO_THROTTLE_NOMINAL_CRUISE_THROTTLE" value="0.312000006437"/>
     <define name="AUTO_THROTTLE_MIN_CRUISE_THROTTLE" value="0.25"/>
     <define name="AUTO_THROTTLE_MAX_CRUISE_THROTTLE" value="0.65"/>
@@ -240,26 +225,6 @@
 
   <!-- ************************* MISC ************************* -->
 
-  <!-- **************************** FIRMWARE ********************************* -->
-
-  <!-- **************************** MODULES ********************************** -->
-
-  <!-- ***************************** SERVOS ********************************** -->
-
-  <!-- commands section -->
-
-  <!-- To still be able to use rudder in autonomous fight YAW  can come in handy while tuning -->
-
-  <!--
-  <auto_rc_commands>
-    <set command="YAW"      value="@YAW"/>
-    <set command="GAIN1"    value="@GAIN1"/>
-    <set command="CALIB"    value="@CALIB"/>
-  </auto_rc_commands>
--->
-
-  <!-- Local magnetic field -->
-
   <section name="BAT">
     <!--    <define name="MilliAmpereOfAdc(adc)" value="((adc) - 505) * 124.0f"/> -->
     <!-- Note that 3S lipo 3.1*3=9.3 most of the time the cutof for the motor part of the ESC -->
@@ -283,14 +248,6 @@
     <define name="GLIDE_PITCH" value="45" unit="deg"/>
   </section>
 
-  <!-- ******************* VERTICAL CONTROL ********************************** -->
-
-  <!-- ******************* HORIZONTAL CONTROL ******************************** -->
-
-  <!-- ***************************** AGGRESIVE ******************************* -->
-
-  <!-- ****************************** FAILSAFE ******************************* -->
-
   <!-- ******************************* CAMERA ******************************** -->
 
   <section name="DIGITAL_CAMERA" prefix="DC_">
@@ -298,4 +255,4 @@
     <define name="AUTOSHOOT_METER_GRID" value="50" unit="meter"/>
   </section>
 
-  </airframe>
+</airframe>

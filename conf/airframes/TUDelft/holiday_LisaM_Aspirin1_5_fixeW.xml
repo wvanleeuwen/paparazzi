@@ -22,12 +22,8 @@
     <define name="LOITER_TRIM"/>
     <define name="AGR_CLIMB"/>
     <subsystem name="radio_control" type="ppm"/>
-    <!-- Communication -->
     <subsystem name="telemetry" type="xbee_api"/>
-    <!-- Sensors -->
-    <subsystem name="imu" type="aspirin_v1.5">
-      <define name="LISA_M_LONGITUDINAL_X"/>
-    </subsystem>
+    <subsystem name="imu" type="aspirin_v1.5"/>
     <subsystem name="ahrs" type="float_dcm"/>
     <subsystem name="ins" type="alt_float"/>
     <subsystem name="gps" type="ublox"/>
@@ -111,78 +107,6 @@
     <define name="PITCH_NEUTRAL_DEFAULT" value="RadOfDeg(-5)" unit="deg"/>
   </section>
 
-  <!-- ************************* GAINS ************************* -->
-
-  <section name="HORIZONTAL CONTROL" prefix="H_CTL_">
-    <define name="COURSE_PGAIN" value="1.12900002003"/>
-    <define name="COURSE_DGAIN" value="0.556999993324"/>
-    <define name="ROLL_MAX_SETPOINT" value="0.916999995708" unit="radians"/>
-    <define name="PITCH_MAX_SETPOINT" value="0.6" unit="radians"/>
-    <define name="PITCH_MIN_SETPOINT" value="-0.4" unit="radians"/>
-    <define name="ROLL_PGAIN" value="0."/>
-    <define name="AILERON_OF_THROTTLE" value="0.0"/>
-    <define name="PITCH_PGAIN" value="8550.48925781"/>
-    <define name="PITCH_DGAIN" value="1.7254999876"/>
-    <define name="ELEVATOR_OF_ROLL" value="1250."/>
-    <define name="ROLL_RATE_GAIN" value="625."/>
-    <define name="ROLL_ATTITUDE_GAIN" value="4464.28613281"/>
-    <!--  roll rate loop -->
-    <define name="ROLL_RATE_MODE_DEFAULT" value="1"/>
-    <define name="ROLL_RATE_SETPOINT_PGAIN" value="10." unit="rad/s/rad"/>
-    <define name="ROLL_RATE_MAX_SETPOINT" value="10"/>
-    <define name="LO_THROTTLE_ROLL_RATE_PGAIN" value="3000."/>
-    <define name="HI_THROTTLE_ROLL_RATE_PGAIN" value="3000."/>
-    <define name="ROLL_RATE_IGAIN" value="0."/>
-    <define name="ROLL_RATE_DGAIN" value="0."/>
-    <define name="ROLL_RATE_SUM_NB_SAMPLES" value="64"/>
-    <define name="ROLL_SLEW" value="0.1"/>
-    <define name="SIMPLE_ROLL_PGAIN" value="15000"/>
-    <define name="SIMPLE_ROLL_DGAIN" value="3000"/>
-  </section>
-
-  <section name="VERTICAL CONTROL" prefix="V_CTL_">
-    <define name="POWER_CTL_BAT_NOMINAL" value="11.1" unit="volt"/>
-    <!-- outer loop proportional gain -->
-    <define name="ALTITUDE_PGAIN" value="0.101000003517"/>
-    <!-- outer loop saturation max m/s the alt tap can be-->
-    <define name="ALTITUDE_MAX_CLIMB" value="4"/>
-    <!-- auto throttle inner loop -->
-    <define name="AUTO_THROTTLE_NOMINAL_CRUISE_THROTTLE" value="0.386999994516"/>
-    <define name="AUTO_THROTTLE_MIN_CRUISE_THROTTLE" value="0.35"/>
-    <define name="AUTO_THROTTLE_MAX_CRUISE_THROTTLE" value="0.45"/>
-    <define name="AUTO_THROTTLE_LOITER_TRIM" value="219.511993408"/>
-    <define name="AUTO_THROTTLE_DASH_TRIM" value="-1200"/>
-    <define name="AUTO_THROTTLE_CLIMB_THROTTLE_INCREMENT" value="0.104999996722" unit="%/(m/s)"/>
-    <define name="AUTO_THROTTLE_PGAIN" value="0."/>
-    <define name="AUTO_THROTTLE_IGAIN" value="0."/>
-    <define name="AUTO_THROTTLE_PITCH_OF_VZ_PGAIN" value="0.202000007033"/>
-    <define name="THROTTLE_SLEW_LIMITER" value="2" unit="s"/>
-  </section>
-
-  <section name="AGGRESSIVE" prefix="AGR_">
-    <define name="BLEND_START" value="50"/>
-    <!-- Altitude Error to Initiate Aggressive Climb CANNOT BE ZERO!!-->
-    <define name="BLEND_END" value="25"/>
-    <!-- Altitude Error to Blend Aggressive to Regular Climb Modes  CANNOT BE ZERO!!-->
-    <define name="CLIMB_THROTTLE" value="0.550000011921"/>
-    <!-- Gaz for Aggressive Climb -->
-    <define name="CLIMB_PITCH" value="0.5"/>
-    <!-- Pitch for Aggressive Climb -->
-    <define name="DESCENT_THROTTLE" value="0."/>
-    <!-- Gaz for Aggressive Decent -->
-    <define name="DESCENT_PITCH" value="-0.300000011921"/>
-    <!-- Pitch for Aggressive Decent -->
-    <define name="CLIMB_NAV_RATIO" value="0.800000011921"/>
-    <!-- Percent Navigation for Altitude Error Equal to Start Altitude -->
-    <define name="DESCENT_NAV_RATIO" value="1."/>
-  </section>
-
-  <!-- ************************* MISC ************************* -->
-
-  <!-- Servo's -->
-
-  <!-- Local magnetic field -->
-
   <!--Rotterdam
   <section name="AHRS" prefix="AHRS_">
     <define name="PROPAGATE_FREQUENCY" value="512"/>
@@ -199,6 +123,52 @@
     <define name="H_Y" value=" 0.0008547"/>
     <define name="H_Z" value=" 0.9162349"/>
   </section>-->
+
+  <!-- ************************* GAINS ************************* -->
+
+  <section name="HORIZONTAL CONTROL" prefix="H_CTL_">
+    <define name="COURSE_PGAIN" value="1.12900002003"/>
+    <define name="COURSE_DGAIN" value="0.556999993324"/>
+    <define name="ROLL_MAX_SETPOINT" value="0.916999995708" unit="radians"/>
+    <define name="PITCH_MAX_SETPOINT" value="0.6" unit="radians"/>
+    <define name="PITCH_MIN_SETPOINT" value="-0.4" unit="radians"/>
+    <define name="ROLL_PGAIN" value="0."/>
+    <define name="AILERON_OF_THROTTLE" value="0.0"/>
+    <define name="PITCH_PGAIN" value="8550.48925781"/>
+    <define name="PITCH_DGAIN" value="1.7254999876"/>
+    <define name="ELEVATOR_OF_ROLL" value="1250."/>
+    <define name="ROLL_RATE_GAIN" value="625."/>
+    <define name="ROLL_ATTITUDE_GAIN" value="4464.28613281"/>
+  </section>
+
+  <section name="VERTICAL CONTROL" prefix="V_CTL_">
+    <define name="POWER_CTL_BAT_NOMINAL" value="11.1" unit="volt"/>
+    <define name="ALTITUDE_PGAIN" value="0.101000003517"/>
+    <define name="ALTITUDE_MAX_CLIMB" value="4"/>
+    <define name="AUTO_THROTTLE_NOMINAL_CRUISE_THROTTLE" value="0.386999994516"/>
+    <define name="AUTO_THROTTLE_MIN_CRUISE_THROTTLE" value="0.35"/>
+    <define name="AUTO_THROTTLE_MAX_CRUISE_THROTTLE" value="0.45"/>
+    <define name="AUTO_THROTTLE_LOITER_TRIM" value="219.511993408"/>
+    <define name="AUTO_THROTTLE_DASH_TRIM" value="-1200"/>
+    <define name="AUTO_THROTTLE_CLIMB_THROTTLE_INCREMENT" value="0.104999996722" unit="%/(m/s)"/>
+    <define name="AUTO_THROTTLE_PGAIN" value="0."/>
+    <define name="AUTO_THROTTLE_IGAIN" value="0."/>
+    <define name="AUTO_THROTTLE_PITCH_OF_VZ_PGAIN" value="0.202000007033"/>
+    <define name="THROTTLE_SLEW_LIMITER" value="2" unit="s"/>
+  </section>
+
+  <section name="AGGRESSIVE" prefix="AGR_">
+    <define name="BLEND_START" value="50"/>
+    <define name="BLEND_END" value="25"/>
+    <define name="CLIMB_THROTTLE" value="0.550000011921"/>
+    <define name="CLIMB_PITCH" value="0.5"/>
+    <define name="DESCENT_THROTTLE" value="0."/>
+    <define name="DESCENT_PITCH" value="-0.300000011921"/>
+    <define name="CLIMB_NAV_RATIO" value="0.800000011921"/>
+    <define name="DESCENT_NAV_RATIO" value="1."/>
+  </section>
+
+  <!-- ************************* MISC ************************* -->
 
   <section name="NAV">
     <define name="NAV_PITCH" value="0."/>
@@ -220,7 +190,6 @@
     <define name="KILL_MODE_DISTANCE" value="(1.5*MAX_DIST_FROM_HOME)"/>
     <define name="CONTROL_FREQUENCY" value="60" unit="Hz"/>
     <!--    <define name="XBEE_INIT" value="&quot;ATPL2\rATRN5\rATTT80\r&quot;"/> -->
-    <!--    <define name="NO_XBEE_API_INIT" value="TRUE"/> -->
     <define name="ALT_KALMAN_ENABLED" value="TRUE"/>
     <define name="DEFAULT_CIRCLE_RADIUS" value="80."/>
     <define name="GLIDE_AIRSPEED" value="10"/>
@@ -228,19 +197,4 @@
     <define name="GLIDE_PITCH" value="45" unit="deg"/>
   </section>
 
-  <!--moet nog in tuning-->
-
-  <section name="Takeoff" prefix="Takeoff_">
-    <define name="Height" value="30" unit="m"/>
-    <define name="Speed" value="15" unit="m/s"/>
-    <define name="MinSpeed" value="5" unit="m/s"/>
-    <define name="Distance" value="10" unit="m"/>
-  </section>
-
-  <section name="Landing" prefix="Landing_">
-    <define name="FinalHeight" value="30" unit="m"/>
-    <define name="AFHeight" value="10" unit="m"/>
-    <define name="FinalStageTime" value="10" unit="s"/>
-  </section>
-
-  </airframe>
+</airframe>

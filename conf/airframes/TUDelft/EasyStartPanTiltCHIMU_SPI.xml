@@ -1,7 +1,9 @@
 <!DOCTYPE airframe SYSTEM "../airframe.dtd">
 
 <!--
-	YAPA + XSens + XBee
+
+  Tiny2.11 + CHIMU via SPI
+
 -->
 
 <airframe name="Yapa v1">
@@ -19,13 +21,10 @@
     <!--    <target name="sim" board="pc"/> -->
     <subsystem name="radio_control" type="ppm"/>
     <subsystem name="gps" type="ublox"/>
-    <!-- Communication -->
     <subsystem name="telemetry" type="xbee_api">
       <configure name="MODEM_BAUD" value="B9600"/>
     </subsystem>
-    <!-- Actuators -->
     <subsystem name="control"/>
-    <!-- Sensors -->
     <subsystem name="navigation"/>
     <subsystem name="spi_slave_hs"/>
   </firmware>
@@ -121,11 +120,8 @@
 
   <section name="VERTICAL CONTROL" prefix="V_CTL_">
     <define name="POWER_CTL_BAT_NOMINAL" value="11.1" unit="volt"/>
-    <!-- outer loop proportional gain -->
     <define name="ALTITUDE_PGAIN" value="0.03"/>
-    <!-- outer loop saturation -->
     <define name="ALTITUDE_MAX_CLIMB" value="2."/>
-    <!-- auto throttle inner loop -->
     <define name="AUTO_THROTTLE_NOMINAL_CRUISE_THROTTLE" value="0.32"/>
     <define name="AUTO_THROTTLE_MIN_CRUISE_THROTTLE" value="0.25"/>
     <define name="AUTO_THROTTLE_MAX_CRUISE_THROTTLE" value="0.65"/>
@@ -140,19 +136,12 @@
 
   <section name="AGGRESSIVE" prefix="AGR_">
     <define name="BLEND_START" value="20"/>
-    <!-- Altitude Error to Initiate Aggressive Climb CANNOT BE ZERO!!-->
     <define name="BLEND_END" value="10"/>
-    <!-- Altitude Error to Blend Aggressive to Regular Climb Modes  CANNOT BE ZERO!!-->
     <define name="CLIMB_THROTTLE" value="1.00"/>
-    <!-- Gaz for Aggressive Climb -->
     <define name="CLIMB_PITCH" value="0.3"/>
-    <!-- Pitch for Aggressive Climb -->
     <define name="DESCENT_THROTTLE" value="0.1"/>
-    <!-- Gaz for Aggressive Decent -->
     <define name="DESCENT_PITCH" value="-0.25"/>
-    <!-- Pitch for Aggressive Decent -->
     <define name="CLIMB_NAV_RATIO" value="0.8"/>
-    <!-- Percent Navigation for Altitude Error Equal to Start Altitude -->
     <define name="DESCENT_NAV_RATIO" value="1.0"/>
   </section>
 
@@ -180,8 +169,7 @@
     <define name="NOMINAL_AIRSPEED" value="13." unit="m/s"/>
     <define name="CARROT" value="5." unit="s"/>
     <define name="CONTROL_RATE" value="60" unit="Hz"/>
-    <!--   <define name="XBEE_INIT" value="&quot;ATPL2\rATRN5\rATTT80\r&quot;"/>
-    <define name="NO_XBEE_API_INIT" value="TRUE"/> -->
+    <define name="XBEE_INIT" value="&quot;ATPL4\rATID3332\r&quot;"/>
     <define name="ALT_KALMAN_ENABLED" value="TRUE"/>
     <define name="DEFAULT_CIRCLE_RADIUS" value="80."/>
     <define name="GLIDE_AIRSPEED" value="10"/>
@@ -194,4 +182,4 @@
     <define name="AUTOSHOOT_METER_GRID" value="50" unit="meter"/>
   </section>
 
-  </airframe>
+</airframe>

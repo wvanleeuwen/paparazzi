@@ -1,21 +1,24 @@
-<!-- The newly designed removable Arms Quadcopter airframe
-     * Lisa L Autopilot board
-     * 2x Microcopter BL Ctrl v1.2 ESC
-     * 2x Microcopter BL Ctrl v2.0 ESC
-     * XBee Pro Sseries 1 2.4Ghz
-     * uBlox LEA5H and Sarantel helix GPS antenna
+<!--
 
-     Near Future
-     * uBlox LEA-5H and Sarantel helix GPS antenna
+  The newly designed removable Arms Quadcopter airframe
+  * Lisa L Autopilot board
+  * 2x Microcopter BL Ctrl v1.2 ESC
+  * 2x Microcopter BL Ctrl v2.0 ESC
+  * XBee Pro Sseries 1 2.4Ghz
+  * uBlox LEA5H and Sarantel helix GPS antenna
+
+  Near Future
+  * uBlox LEA-5H and Sarantel helix GPS antenna
+
 -->
 
 <airframe name="tudelft_noarmsquad">
   <!-- ************************* FIRMWARE ************************* -->
 
   <firmware name="rotorcraft">
-    <!--     <define name="USE_PERSISTENT_SETTINGS"/> -->
-    <!--     <define name="USE_INS_NAV_INIT"/>
-    <define name= "NO_RC_THRUST_LIMIT"/>-->
+    <!--define name="USE_PERSISTENT_SETTINGS"/-->
+    <!--define name="USE_INS_NAV_INIT"/-->
+    <!--define name= "NO_RC_THRUST_LIMIT"/-->
     <define name="BARO_LOW_GAIN"/>
     <!-- The Netherlands: caution, this affects calibration -->
     <!--    <define name="USE_ADAPT_HOVER"/>-->
@@ -114,6 +117,16 @@
     <define name="BODY_TO_IMU_THETA" value="180.0" unit="deg"/>
     <define name="BODY_TO_IMU_PSI" value="-135.0" unit="deg"/>
   </section>
+
+  <!--Rotterdam
+  <section name="AHRS" prefix="AHRS_">
+    <define name="PROPAGATE_FREQUENCY" value="512"/>
+    <define name="H_X" value=" 0.3913233"/>
+    <define name="H_Y" value=" 0.0005934"/>
+    <define name="H_Z" value=" 0.9202531"/>
+  </section>-->
+
+  <!--Antwerpen-->
 
   <section name="AHRS" prefix="AHRS_">
     <define name="PROPAGATE_FREQUENCY" value="512"/>
@@ -233,16 +246,6 @@
     <define name="CATASTROPHIC_BAT_LEVEL" value="9.3" unit="V"/>
   </section>
 
-  <!--Rotterdam
-  <section name="AHRS" prefix="AHRS_">
-    <define name="PROPAGATE_FREQUENCY" value="512"/>
-    <define name="H_X" value=" 0.3913233"/>
-    <define name="H_Y" value=" 0.0005934"/>
-    <define name="H_Z" value=" 0.9202531"/>
-  </section>-->
-
-  <!--Antwerpen-->
-
   <section name="MISC">
     <define name="FACE_REINJ_1" value="1024"/>
   </section>
@@ -252,11 +255,5 @@
     <define name="INITIAL_CONDITITONS" value="&quot;reset00&quot;"/>
     <define name="SENSORS_PARAMS" value="&quot;nps_sensors_params_booz2_a1.h&quot;"/>
   </section>
-
-  <!--
-  <modules main_freq="512">
-    <load name="vehicle_interface_overo_link.xml"/>
-  </modules>
--->
 
   </airframe>

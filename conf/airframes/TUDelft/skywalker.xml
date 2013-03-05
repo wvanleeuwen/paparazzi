@@ -1,7 +1,9 @@
 <!DOCTYPE airframe SYSTEM "../airframe.dtd">
 
 <!--
-	YAPA + XSens + XBee
+
+  YAPA + XSens + XBee
+
 -->
 
 <airframe name="Yapa v1">
@@ -17,14 +19,11 @@
     <define name="TUNE_AGRESSIVE_CLIMB"/>
     <define name="AGR_CLIMB"/>
     <subsystem name="radio_control" type="ppm"/>
-    <!-- Communication -->
     <subsystem name="telemetry" type="xbee_api">
       <configure name="MODEM_BAUD" value="B9600"/>
     </subsystem>
-    <!-- Actuators -->
     <subsystem name="control"/>
     <subsystem name="navigation"/>
-    <!-- Sensors -->
     <subsystem name="ins" type="xsens">
       <configure name="XSENS_UART_NR" value="0"/>
       <configure name="XSENS_UART_BAUD" value="B230400"/>
@@ -36,7 +35,6 @@
   <modules>
     <load name="light.xml">
       <define name="LIGHT_LED_STROBE" value="1"/>
-      <!-- define name="LIGHT_LED_NAV" value="2"/-->
       <define name="STROBE_LIGHT_MODE_DEFAULT" value="6"/>
       <define name="NAV_LIGHT_MODE_DEFAULT" value="4"/>
     </load>
@@ -61,7 +59,7 @@
     <axis name="PITCH" failsafe_value="0"/>
     <axis name="YAW" failsafe_value="0"/>
     <axis name="BRAKE" failsafe_value="9600"/>
-    <!-- both elerons up as butterfly brake ? -->
+    <!-- both elerons up as butterfly brake -->
   </commands>
 
   <rc_commands>
@@ -156,11 +154,8 @@
 
   <section name="VERTICAL CONTROL" prefix="V_CTL_">
     <define name="POWER_CTL_BAT_NOMINAL" value="11.1" unit="volt"/>
-    <!-- outer loop proportional gain -->
     <define name="ALTITUDE_PGAIN" value="0.108000002801"/>
-    <!-- outer loop saturation -->
     <define name="ALTITUDE_MAX_CLIMB" value="2."/>
-    <!-- auto throttle inner loop -->
     <define name="AUTO_THROTTLE_NOMINAL_CRUISE_THROTTLE" value="0.43599998951"/>
     <define name="AUTO_THROTTLE_MIN_CRUISE_THROTTLE" value="0.25"/>
     <define name="AUTO_THROTTLE_MAX_CRUISE_THROTTLE" value="0.549000024796"/>
@@ -185,10 +180,6 @@
   </section>
 
   <!-- ************************* MISC ************************* -->
-
-  <!-- Servo's -->
-
-  <!-- Local magnetic field -->
 
   <section name="BAT">
     <define name="LOW_BAT_LEVEL" value="10.5" unit="V"/>

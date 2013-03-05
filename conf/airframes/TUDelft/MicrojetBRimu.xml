@@ -96,7 +96,7 @@
   <!-- ************************* SENSORS ************************* -->
 
   <section name="IMU" prefix="IMU_">
-    <!-- Calibration Neutral -->
+    <!-- Gyro -->
     <define name="GYRO_P_NEUTRAL" value="0"/>
     <define name="GYRO_Q_NEUTRAL" value="0"/>
     <define name="GYRO_R_NEUTRAL" value="0"/>
@@ -104,15 +104,10 @@
     <define name="GYRO_P_SENS" value="4.947" integer="16"/>
     <define name="GYRO_Q_SENS" value="4.947" integer="16"/>
     <define name="GYRO_R_SENS" value="4.947" integer="16"/>
-    <define name="GYRO_P_Q" value="0."/>
-    <define name="GYRO_P_R" value="0"/>
-    <define name="GYRO_Q_P" value="0."/>
-    <define name="GYRO_Q_R" value="0."/>
-    <define name="GYRO_R_P" value="0."/>
-    <define name="GYRO_R_Q" value="0."/>
     <define name="GYRO_P_SIGN" value="-1"/>
     <define name="GYRO_Q_SIGN" value="-1"/>
     <define name="GYRO_R_SIGN" value="1"/>
+    <!-- Accelerometer -->
     <define name="ACCEL_X_NEUTRAL" value="-14"/>
     <define name="ACCEL_Y_NEUTRAL" value="0"/>
     <define name="ACCEL_Z_NEUTRAL" value="0"/>
@@ -123,6 +118,7 @@
     <define name="ACCEL_X_SIGN" value="-1"/>
     <define name="ACCEL_Y_SIGN" value="-1"/>
     <define name="ACCEL_Z_SIGN" value="1"/>
+    <!-- Magnetometer -->
     <define name="MAG_X_NEUTRAL" value="0"/>
     <define name="MAG_Y_NEUTRAL" value="0"/>
     <define name="MAG_Z_NEUTRAL" value="0"/>
@@ -132,6 +128,7 @@
     <define name="MAG_X_SIGN" value="1"/>
     <define name="MAG_Y_SIGN" value="1"/>
     <define name="MAG_Z_SIGN" value="1"/>
+    <!-- IMU -->
     <define name="BODY_TO_IMU_PHI" value="0"/>
     <define name="BODY_TO_IMU_THETA" value="0"/>
     <define name="BODY_TO_IMU_PSI" value="0"/>
@@ -212,10 +209,6 @@
 
   <!-- ************************* MISC ************************* -->
 
-  <!-- Servo's -->
-
-  <!-- Local magnetic field -->
-
   <section name="BAT">
     <define name="MILLIAMP_AT_FULL_THROTTLE" value="25000"/>
     <define name="CATASTROPHIC_BAT_LEVEL" value="9.3" unit="V"/>
@@ -227,7 +220,6 @@
     <define name="KILL_MODE_DISTANCE" value="(1.5*MAX_DIST_FROM_HOME)"/>
     <define name="CONTROL_RATE" value="60" unit="Hz"/>
     <!--    <define name="XBEE_INIT" value="&quot;ATPL2\rATRN5\rATTT80\r&quot;"/> -->
-    <!--    <define name="NO_XBEE_API_INIT" value="TRUE"/> -->
     <define name="ALT_KALMAN_ENABLED" value="TRUE"/>
     <define name="DEFAULT_CIRCLE_RADIUS" value="80."/>
     <define name="LIGHT_LED_1" value="3"/>

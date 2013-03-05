@@ -18,15 +18,9 @@
       <define name="TUNE_AGRESSIVE_CLIMB"/>
     </target>
     <subsystem name="radio_control" type="ppm"/>
-    <!-- Communication -->
     <subsystem name="telemetry" type="transparent">
       <configure name="MODEM_BAUD" value="B57600"/>
     </subsystem>
-    <!-- Sensors -->
-    <!--    <subsystem name="gyro"		type="roll">
-      <configure name="ADC_GYRO_ROLL" 	value="ADC_3" />
-    </subsystem>
--->
     <subsystem name="ahrs" type="infrared"/>
     <subsystem name="gps" type="ublox_utm"/>
     <subsystem name="control"/>
@@ -133,18 +127,6 @@
     <define name="ELEVATOR_OF_ROLL" value="1250."/>
     <define name="ROLL_RATE_GAIN" value="112.781997681"/>
     <define name="ROLL_ATTITUDE_GAIN" value="4957.62695312"/>
-    <!--  roll rate loop -->
-    <define name="ROLL_RATE_MODE_DEFAULT" value="1"/>
-    <define name="ROLL_RATE_SETPOINT_PGAIN" value="10." unit="rad/s/rad"/>
-    <define name="ROLL_RATE_MAX_SETPOINT" value="10"/>
-    <define name="LO_THROTTLE_ROLL_RATE_PGAIN" value="3000."/>
-    <define name="HI_THROTTLE_ROLL_RATE_PGAIN" value="3000."/>
-    <define name="ROLL_RATE_IGAIN" value="0."/>
-    <define name="ROLL_RATE_DGAIN" value="0."/>
-    <define name="ROLL_RATE_SUM_NB_SAMPLES" value="64"/>
-    <define name="ROLL_SLEW" value="0.1"/>
-    <define name="SIMPLE_ROLL_PGAIN" value="15000"/>
-    <define name="SIMPLE_ROLL_DGAIN" value="3000"/>
   </section>
 
   <section name="VERTICAL CONTROL" prefix="V_CTL_">
@@ -163,11 +145,6 @@
     <define name="AUTO_THROTTLE_PGAIN" value="0.00700000021607"/>
     <define name="AUTO_THROTTLE_IGAIN" value="0."/>
     <define name="AUTO_THROTTLE_PITCH_OF_VZ_PGAIN" value="0.12800000608"/>
-    <!-- auto pitch inner loop -->
-    <define name="AUTO_PITCH_PGAIN" value="0.0399999991059"/>
-    <define name="AUTO_PITCH_IGAIN" value="0.019999999553"/>
-    <define name="AUTO_PITCH_MAX_PITCH" value="0.35"/>
-    <define name="AUTO_PITCH_MIN_PITCH" value="-0.35"/>
     <define name="THROTTLE_SLEW_LIMITER" value="2" unit="s"/>
   </section>
 
@@ -190,8 +167,6 @@
   </section>
 
   <!-- ************************* MISC ************************* -->
-
-  <!-- commands section -->
 
   <section name="GYRO" prefix="GYRO_">
     <define name="ADC_ROLL_NEUTRAL" value="450"/>
@@ -257,11 +232,6 @@
 
   <section name="SIMU">
     <define name="YAW_RESPONSE_FACTOR" value="0.5"/>
-    <!-- ?????????????????????????? -->
   </section>
-
-  <makefile location="after">
-
-  </makefile>
 
   </airframe>
