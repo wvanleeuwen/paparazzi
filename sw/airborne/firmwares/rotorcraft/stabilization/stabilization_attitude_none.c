@@ -66,7 +66,7 @@ void stabilization_attitude_run(bool_t  in_flight __attribute__ ((unused))) {
 	//TODO: Fix yaw with PID controller
 	int32_t yaw_error = stateGetNedToBodyEulers_i()->psi-stab_att_sp_euler.psi;
 	INT32_ANGLE_NORMALIZE(yaw_error);
-	stabilization_cmd[COMMAND_YAW] = yaw_error * MAX_PPRZ / INT32_ANGLE_PI;
+//	stabilization_cmd[COMMAND_YAW] = yaw_error * MAX_PPRZ / INT32_ANGLE_PI;
 
 	/* bound the result */
 	BoundAbs(stabilization_cmd[COMMAND_ROLL], MAX_PPRZ);

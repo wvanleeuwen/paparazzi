@@ -1,15 +1,15 @@
 <!DOCTYPE flight_plan SYSTEM "flight_plan.dtd">
 
-<flight_plan alt="1.2" ground_alt="0" lat0="52.992121" lon0="4.374962" max_dist_from_home="60" name="Basic TUDelft" security_height=".15">
+<flight_plan alt="5" ground_alt="0" lat0="52.992121" lon0="4.374962" max_dist_from_home="60" name="Basic TUDelft" security_height="1">
   <header>
 #include "autopilot.h"
   </header>
   <waypoints>
     <waypoint name="HOME" x="0.0" y="0.0"/>
     <waypoint name="CLIMB" x="0.0" y="5.0"/>
-    <waypoint name="STDBY" x="-2.0" y="-5.0"/>
-    <waypoint name="p1" x="3.6" y="-13.9"/>
-    <waypoint name="p2" x="6.5" y="-28.2"/>
+    <waypoint name="STDBY" x="319" y="4"/>
+    <waypoint name="p1" x="309" y="10"/>
+    <waypoint name="p2" x="348" y="43"/>
     <waypoint name="p3" x="16.7" y="-19.6"/>
     <waypoint name="p4" x="13.7" y="-40.7"/>
     <waypoint name="CAM" x="-20" y="-50" height="2."/>

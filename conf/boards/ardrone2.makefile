@@ -25,9 +25,9 @@ GPS_PORT=UART1
 endif
 
 ifndef GPS_BAUD
-GPS_BAUD=B57600
+GPS_BAUD=B38400
 endif
 
 # This is a (temporary) fix for uart_arch.c to compile with a device name
-$(TARGET).CFLAGS += -DUART1_DEV=\"/dev/ttyACM0\"
+$(TARGET).CFLAGS += -DUART1_DEV=\"/dev/ttyUSB0\"
 # -----------------------------------------------------------------------

@@ -9,7 +9,7 @@
 			<!-- <define name="USE_GPS_HEIGHT" /> -->
 			<!-- <define name="ARDRONE_FLIGHT_INDOOR" /> -->
 			<!-- <define name="ARDRONE_WITHOUT_SHELL" /> -->
-			<define name="ARDRONE_OWNER_MAC" value="00:24:d7:47:f0:f4" />
+			<!-- <define name="ARDRONE_OWNER_MAC" value="00:24:d7:47:f0:f4" /> -->
 		</target>
 
 		<subsystem name="radio_control" type="datalink" />
