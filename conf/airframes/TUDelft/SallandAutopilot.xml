@@ -10,9 +10,9 @@
   <!-- ************************* FIRMWARE ************************* -->
 
   <firmware name="fixedwing">
-    <configure name="NO_LUFTBOOT" value="1"/>
+    <!--configure name="NO_LUFTBOOT" value="1"/>
     <configure name="FLASH_MODE" value="SWD"/>
-    <configure name="BMP_PORT" value="/dev/ttyACM0"/>
+    <configure name="BMP_PORT" value="/dev/ttyACM0"/-->
     <define name="USE_AIRSPEED"/>
     <target name="ap" board="TUDelft/fireswarm_2.0">
       <define name="AIRSPEED_ETS_I2C_DEV" value="i2c1"/>
@@ -39,7 +39,7 @@
     <!-- Communication -->
     <subsystem name="radio_control" type="ppm"/>
     <subsystem name="telemetry" type="xbee_api">
-      <configure name="MODEM_BAUD" value="B9600"/>
+      <configure name="MODEM_BAUD" value="B57600"/>
     </subsystem>
     <!-- Autopilot -->
     <subsystem name="control" type="energy"/>
