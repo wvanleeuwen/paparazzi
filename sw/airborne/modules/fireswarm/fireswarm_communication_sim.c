@@ -131,7 +131,7 @@ char fireswarm_payload_link_get(void)
   ret = read(sim_uart_p, &c, 1);
   if (ret > 0)
   {
-    fprintf(stderr,"%x ",(uint8_t)c);
+    // fprintf(stderr,"%x ",(uint8_t)c);
     return c;
   }
   else

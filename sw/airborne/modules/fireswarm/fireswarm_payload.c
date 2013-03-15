@@ -149,10 +149,12 @@ void fireswarm_periodic(void)
 
 
 static uint8_t slowdown = 0;
+static uint8_t slowdown_wp_update = 0;
 bool_t fireswarm_periodic_nav_init(void)
 {
   FireSwarmData.AutoPilotState |= AP_PROT_STATE_AP_TAKEOVER;
   slowdown = 36;
+  slowdown_wp_update = 1;
 
   return FALSE;
 }
@@ -165,17 +167,20 @@ bool_t fireswarm_periodic_nav(void)
   if (fireswarm_heartbeat == 0)
     return FALSE;
 
-
-    for (int i=0; i<FireSwarmWaypoints.NumWayPoints; i++)
+  if (slowdown_wp_update == 1)
+  {
+    slowdown_wp_update = 0;
+    for (int i=0; i<FireSwarmWaypoints.NumWayPoints-1; i++)
     {
       //fprintf(stderr,"Bytes: %d \n", fireswarm_payload_link_has_data());
-      if (FireSwarmWaypoints.WayPoints[i].WpType == AP_PROT_WP_LINE)
+      int ii = i+1;
+      if (FireSwarmWaypoints.WayPoints[ii].WpType == AP_PROT_WP_LINE)
       {
-        WaypointX(WP_FS1+i) = FireSwarmWaypoints.WayPoints[i].Line.To.X - nav_utm_east0;
-        WaypointY(WP_FS1+i) = FireSwarmWaypoints.WayPoints[i].Line.To.Y - nav_utm_north0;
-        WaypointAlt(WP_FS1+i) = FireSwarmWaypoints.WayPoints[i].Line.To.Z;
+        WaypointX(WP_FS1+i) = FireSwarmWaypoints.WayPoints[ii].Line.To.X - nav_utm_east0;
+        WaypointY(WP_FS1+i) = FireSwarmWaypoints.WayPoints[ii].Line.To.Y - nav_utm_north0;
+        WaypointAlt(WP_FS1+i) = FireSwarmWaypoints.WayPoints[ii].Line.To.Z;
 #ifdef SITL
-        fprintf(stderr,"LINE %f %f ",FireSwarmWaypoints.WayPoints[i].Line.To.X,WaypointX(0));
+        fprintf(stderr,"LINE %f %f ",FireSwarmWaypoints.WayPoints[ii].Line.To.X, FireSwarmWaypoints.WayPoints[ii].Line.To.Y);
 #endif
 
 //        DOWNLINK_SEND_CIRCLE(_trans, _dev, &nav_circle_x, &nav_circle_y, &nav_circle_radius);
@@ -185,31 +190,40 @@ bool_t fireswarm_periodic_nav(void)
       else if (FireSwarmWaypoints.WayPoints[i].WpType == AP_PROT_WP_ARC)
       {
         float arm = FireSwarmWaypoints.WayPoints[i].Arc.Radius;
-        float ang = - FireSwarmWaypoints.WayPoints[i].Arc.AngleStart - FireSwarmWaypoints.WayPoints[i].Arc.AngleArc;
-        float dn = cos(ang)*arm;
-        float de = sin(ang)*arm;
+        float ang = -(FireSwarmWaypoints.WayPoints[i].Arc.AngleStart - 0.5*M_PI) -(FireSwarmWaypoints.WayPoints[i].Arc.AngleArc - 0.5*M_PI);
+        float de = cos(ang)*arm;
+        float dn = sin(ang)*arm;
 
 #ifdef SITL
-        fprintf(stderr,"ARC ");
+        fprintf(stderr, "x=%f y=%f ", stateGetPositionUtm_f()->east, stateGetPositionUtm_f()->north);
+//        fprintf(stderr,"ARC ang=%f cx=%f cy=%f -> x=%f y=%f ",
+//        		ang,
+//        		FireSwarmWaypoints.WayPoints[ii].Arc.Center.X,
+//        		FireSwarmWaypoints.WayPoints[ii].Arc.Center.Y,
+//        		FireSwarmWaypoints.WayPoints[ii].Arc.Center.X + de,
+//        		FireSwarmWaypoints.WayPoints[ii].Arc.Center.Y + dn);
+        fprintf(stderr,"ARC x=%f y=%f ", FireSwarmWaypoints.WayPoints[ii].Arc.Center.X + de, FireSwarmWaypoints.WayPoints[ii].Arc.Center.Y + dn);
 #endif
-        WaypointX(WP_FS1+i) = FireSwarmWaypoints.WayPoints[i].Arc.Center.X - nav_utm_east0 + de;
-        WaypointY(WP_FS1+i) = FireSwarmWaypoints.WayPoints[i].Arc.Center.Y - nav_utm_north0 + dn;
-        WaypointAlt(WP_FS1+i) = FireSwarmWaypoints.WayPoints[i].Arc.Center.Z;
+        WaypointX(WP_FS1+i) = FireSwarmWaypoints.WayPoints[ii].Arc.Center.X - nav_utm_east0 + de;
+        WaypointY(WP_FS1+i) = FireSwarmWaypoints.WayPoints[ii].Arc.Center.Y - nav_utm_north0 + dn;
+        WaypointAlt(WP_FS1+i) = FireSwarmWaypoints.WayPoints[ii].Arc.Center.Z;
       }
       else
       {
 #ifdef SITL
         fprintf(stderr,"CIRCLE ");
 #endif
-        WaypointX(WP_FS1+i) = FireSwarmWaypoints.WayPoints[i].Circle.Center.X - nav_utm_east0;
-        WaypointY(WP_FS1+i) = FireSwarmWaypoints.WayPoints[i].Circle.Center.Y - nav_utm_north0;
-        WaypointAlt(WP_FS1+i) = FireSwarmWaypoints.WayPoints[i].Circle.Center.Z;
+        WaypointX(WP_FS1+i) = FireSwarmWaypoints.WayPoints[ii].Circle.Center.X - nav_utm_east0;
+        WaypointY(WP_FS1+i) = FireSwarmWaypoints.WayPoints[ii].Circle.Center.Y - nav_utm_north0;
+        WaypointAlt(WP_FS1+i) = FireSwarmWaypoints.WayPoints[ii].Circle.Center.Z;
       }
     }
 #ifdef SITL
     if (FireSwarmWaypoints.NumWayPoints > 0)
       fprintf(stderr,"\n");
 #endif
+  }
+  slowdown_wp_update++;
 
   if (slowdown == 36)
   {
@@ -352,7 +366,7 @@ void fireswarm_event(void)
     if (fsw_msg.msg_available)
     {
 #ifdef SITL
-      fprintf(stderr,"MSG %d %d \n",fsw_msg.msg_id, fsw_msg.len );
+      //fprintf(stderr,"MSG %d %d \n",fsw_msg.msg_id, fsw_msg.len );
 #endif
       fsw_msg.msg_available = 0;
       fireswarm_heartbeat = FIRESWARM_HEARTBEAT_DELAY;
@@ -374,4 +388,5 @@ void fireswarm_event(void)
     }
   }
 }
+
 
