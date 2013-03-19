@@ -356,7 +356,7 @@ static inline void led_advance(void)
 	if ((state % 2) == 0)
 		led_set(2,1);
 	else
-		led_set(2,0);
+		led_set(2,1);
 
 	state++;
 	if(state == 8) state = 0;
