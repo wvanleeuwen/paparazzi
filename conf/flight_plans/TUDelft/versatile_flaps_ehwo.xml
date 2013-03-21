@@ -1,34 +1,22 @@
 <!DOCTYPE flight_plan SYSTEM "../flight_plan.dtd">
 
-<flight_plan alt="75" ground_alt="0" lat0="51.4444719" lon0="4.333919" max_dist_from_home="1500" name="Versatile" qfu="270" security_height="25" home_mode_height="100">
+<flight_plan alt="75" ground_alt="0" home_mode_height="100" lat0="51.4444719" lon0="4.333919" max_dist_from_home="500" name="Versatile" qfu="270" security_height="25">
   <header>
 #include "subsystems/datalink/datalink.h"
 </header>
   <waypoints>
-    <waypoint name="HOME" x="274.8" y="287.8"/>
-    <waypoint name="STDBY" x="382.9" y="432.3"/>
-    <waypoint name="1" x="716.0" y="348.4"/>
-    <waypoint name="2" x="434.1" y="287.3"/>
+    <waypoint name="HOME" x="248.0" y="200.1"/>
+    <waypoint name="STDBY" x="291.4" y="397.6"/>
+    <waypoint name="1" x="407.2" y="309.7"/>
+    <waypoint name="2" x="36.9" y="169.3"/>
     <waypoint name="MOB" x="620.8" y="-39.4"/>
     <waypoint name="S1" x="-151.6" y="80.4"/>
     <waypoint name="S2" x="180.1" y="214.9"/>
     <waypoint alt="30" name="AF" x="200" y="-10"/>
     <waypoint alt="0.0" name="TD" x="218.4" y="301.9"/>
     <waypoint name="BASELEG" x="621.5" y="7.0"/>
-    <waypoint name="_1" x="-100" y="0"/>
-    <waypoint name="_2" x="-100" y="200"/>
-    <waypoint name="_3" x="100" y="200"/>
-    <waypoint name="_4" x="100" y="0"/>
-    <waypoint name="CLIMB" x="-193.3" y="175.5"/>
+    <waypoint name="CLIMB" x="314.6" y="568.9"/>
   </waypoints>
-  <sectors>
-    <sector name="Square">
-      <corner name="_1"/>
-      <corner name="_2"/>
-      <corner name="_3"/>
-      <corner name="_4"/>
-    </sector>
-  </sectors>
   <exceptions/>
   <blocks>
     <block name="Wait GPS">
@@ -155,15 +143,6 @@
       <exception cond="datalink_time > 22" deroute="Standby"/>
       <go from="STDBY" hmode="route" wp="2"/>
       <go from="2" hmode="route" wp="STDBY"/>
-    </block>
-    <block name="Fly in Square">
-      <exception cond="! InsideSquare(GetPosX(), GetPosY())" deroute="Come back wp 1"/>
-      <attitude alt="ground_alt+75" roll="0" vmode="alt"/>
-    </block>
-    <block name="Come back wp 1">
-      <exception cond="InsideSquare(GetPosX(), GetPosY())" deroute="Fly in Square"/>
-      <go wp="1"/>
-      <deroute block="Fly in Square"/>
     </block>
   </blocks>
 </flight_plan>
