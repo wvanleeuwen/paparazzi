@@ -156,9 +156,9 @@
     <define name="POWER_CTL_BAT_NOMINAL" value="11.1" unit="volt"/>
     <define name="ALTITUDE_PGAIN" value="0.108000002801"/>
     <define name="ALTITUDE_MAX_CLIMB" value="2."/>
-    <define name="AUTO_THROTTLE_NOMINAL_CRUISE_THROTTLE" value="0.43599998951"/>
+    <define name="AUTO_THROTTLE_NOMINAL_CRUISE_THROTTLE" value="0.6"/>
     <define name="AUTO_THROTTLE_MIN_CRUISE_THROTTLE" value="0.25"/>
-    <define name="AUTO_THROTTLE_MAX_CRUISE_THROTTLE" value="0.549000024796"/>
+    <define name="AUTO_THROTTLE_MAX_CRUISE_THROTTLE" value="0.9"/>
     <define name="AUTO_THROTTLE_LOITER_TRIM" value="1500"/>
     <define name="AUTO_THROTTLE_DASH_TRIM" value="-4000"/>
     <define name="AUTO_THROTTLE_CLIMB_THROTTLE_INCREMENT" value="0.158000007272" unit="%/(m/s)"/>
@@ -188,7 +188,7 @@
   </section>
 
   <section name="MISC">
-    <define name="NOMINAL_AIRSPEED" value="14." unit="m/s"/>
+    <define name="NOMINAL_AIRSPEED" value="8." unit="m/s"/>
     <define name="CARROT" value="5." unit="s"/>
     <define name="CONTROL_FREQUENCY" value="60" unit="Hz"/>
     <define name="XBEE_INIT" value="&quot;ATPL4\rATID3332\r&quot;"/>
