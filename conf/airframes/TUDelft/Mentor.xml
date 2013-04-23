@@ -66,6 +66,7 @@
       <define name="DC_SHUTTER_LED" value="3"/>
     </load>
     <load name="nav_catapult.xml"/>
+    <load name="tcas.xml"/>
   </modules>
 
   <!-- ************************* ACTUATORS ************************* -->
@@ -244,4 +245,12 @@
     <define name="TARGET_SPEED" value="13"/>
   </section>
 
-  </airframe>
+  <section name="TCAS" prefix="TCAS_">
+    <define name="TAU_TA" value="10." unit="s"/>
+    <define name="TAU_RA" value="6." unit="s"/>
+    <define name="ALIM" value="15." unit="m"/>
+    <define name="DMOD" value="20." unit="m"/>
+    <define name="DT_MAX" value="2000" unit="ms"/>
+  </section>
+
+</airframe>
