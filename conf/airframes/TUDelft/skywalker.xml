@@ -41,6 +41,7 @@
     <load name="digital_cam.xml">
       <define name="DC_SHUTTER_LED" value="2"/>
     </load>
+    <load name="tcas.xml"/>
   </modules>
 
   <!-- ************************* ACTUATORS ************************* -->
@@ -200,6 +201,14 @@
   <section name="DIGITAL_CAMERA" prefix="DC_">
     <define name="AUTOSHOOT_QUARTERSEC_PERIOD" value="6" unit="quarter_second"/>
     <define name="AUTOSHOOT_METER_GRID" value="50" unit="meter"/>
+  </section>
+
+  <section name="TCAS" prefix="TCAS_">
+    <define name="TAU_TA" value="10." unit="s"/>
+    <define name="TAU_RA" value="6." unit="s"/>
+    <define name="ALIM" value="15." unit="m"/>
+    <define name="DMOD" value="20." unit="m"/>
+    <define name="DT_MAX" value="2000" unit="ms"/>
   </section>
 
   </airframe>
