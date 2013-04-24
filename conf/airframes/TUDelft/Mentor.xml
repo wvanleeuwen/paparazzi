@@ -29,13 +29,14 @@
     <define name="STRONG_WIND"/>
     <define name="WIND_INFO"/>
     <define name="WIND_INFO_RET"/>
+    <define name="TRAFFIC_INFO" />
     <!--<define name="SENSOR_SYNC_SEND" />-->
     <subsystem name="imu" type="aspirin_v2.1"/>
     <subsystem name="ahrs" type="float_dcm"/>
     <subsystem name="ins" type="gps_passthrough"/>
     <!-- Communication -->
     <subsystem name="telemetry" type="xbee_api">
-      <configure name="MODEM_BAUD" value="B9600"/>
+      <configure name="MODEM_BAUD" value="B57600"/>
       <configure name="MODEM_PORT" value="UART2"/>
     </subsystem>
     <!-- Actuators -->

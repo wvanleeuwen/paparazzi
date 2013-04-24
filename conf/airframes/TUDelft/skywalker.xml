@@ -18,6 +18,7 @@
     <define name="LOITER_TRIM"/>
     <define name="TUNE_AGRESSIVE_CLIMB"/>
     <define name="AGR_CLIMB"/>
+    <define name="TRAFFIC_INFO" />
     <subsystem name="radio_control" type="ppm"/>
     <subsystem name="telemetry" type="xbee_api">
       <configure name="MODEM_BAUD" value="B9600"/>

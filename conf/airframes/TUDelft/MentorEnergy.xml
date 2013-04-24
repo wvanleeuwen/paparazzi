@@ -29,6 +29,7 @@
     <define name="ALT_KALMAN"/>
     <define name="STRONG_WIND"/>
     <define name="WIND_INFO"/>
+    <define name="TRAFFIC_INFO" />
     <define name="WIND_INFO_RET"/>
     <define name="SENSOR_SYNC_SEND"/>
     <subsystem name="imu" type="aspirin_v2.1"/>
