@@ -1,0 +1,45 @@
+<!DOCTYPE flight_plan SYSTEM "../flight_plan.dtd">
+
+<flight_plan alt="100" ground_alt="0" lat0="51.445086" lon0="4.334175" max_dist_from_home="1500" name="Real Airplane Circuit" security_height="50">
+  <header>
+#include "subsystems/navigation/nav_line.h"
+#include "subsystems/datalink/datalink.h"
+</header>
+  <waypoints>
+    <waypoint name="HOME" x="0" y="0"/>
+    <waypoint name="_R1" x="-316.1" y="101.9"/>
+    <waypoint name="_R2" x="483.2" y="419.2"/>
+    <waypoint name="_R3" x="375.3" y="664.8"/>
+    <waypoint name="_R4" x="-427.4" y="385.9"/>
+    <waypoint name="_CLIMB" x="540.2" y="446.1"/>
+  </waypoints>
+  <exceptions/>
+  <blocks>
+    <block name="Wait GPS">
+      <set value="1" var="kill_throttle"/>
+      <while cond="!GpsFixValid()"/>
+    </block>
+    <block name="Geo init">
+      <while cond="LessThan(NavBlockTime(), 10)"/>
+      <call fun="NavSetGroundReferenceHere()"/>
+    </block>
+    <block group="home" key="t" name="Takeoff" strip_button="Takeoff (wp _CLIMB)" strip_icon="takeoff.png">
+      <exception cond="estimator_z > ground_alt+65" deroute="SimpleSquareRoute"/>
+      <set value="0" var="kill_throttle"/>
+      <set value="0" var="estimator_flight_time"/>
+      <set value="0" var="kill_throttle"/>
+      <set value="1" var="launch"/>
+      <set value="0" var="estimator_flight_time"/>
+      <go from="HOME" pitch="15" throttle="1.0" vmode="throttle" wp="_CLIMB"/>
+    </block>
+    <block name="SimpleSquareRoute">
+      <for from="0" to="20000" var="i">
+        <go from="_R1" hmode="route" wp="_R2"/>
+        <go from="_R2" hmode="route" wp="_R3"/>
+        <go from="_R3" hmode="route" wp="_R4"/>
+        <go from="_R4" hmode="route" wp="_R1"/>
+      </for>
+    </block>
+  </blocks>
+</flight_plan>
+
