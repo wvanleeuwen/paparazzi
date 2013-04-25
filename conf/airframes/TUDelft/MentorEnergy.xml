@@ -65,7 +65,7 @@
       <define name="DC_SHUTTER_LED" value="3"/>
     </load>
     <load name="nav_catapult.xml"/>
-    <load name="tcas.xml"/>
+    <!--load name="tcas.xml"/-->
   </modules>
 
   <!-- ************************* ACTUATORS ************************* -->

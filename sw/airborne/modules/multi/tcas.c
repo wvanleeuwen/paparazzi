@@ -112,13 +112,13 @@ void tcas_periodic_task_1Hz( void ) {
   float tau_min = tcas_tau_ta;
   uint8_t ac_id_close = AC_ID;
   uint8_t i;
- float myhy = the_acs[i].east;
+// float myhy = the_acs[i].east;
   float vx = (*stateGetHorizontalSpeedNorm_f()) * sinf((*stateGetHorizontalSpeedDir_f()));
   float vy = (*stateGetHorizontalSpeedNorm_f()) * cosf((*stateGetHorizontalSpeedDir_f()));
   for (i = 2; i < NB_ACS; i++) {
     if (the_acs[i].ac_id == 0) continue; // no AC data
     DOWNLINK_SEND_TCAS_DEBUG(DefaultChannel, DefaultDevice,&the_acs[i].ac_id,&the_acs[i].east);
-    uint32_t dt = gps.tow - the_acs[i].itow;
+//    uint32_t dt = gps.tow - the_acs[i].itow;
 //    if (dt > 3*TCAS_DT_MAX) {
 //      tcas_acs_status[i].status = TCAS_NO_ALARM; // timeout, reset status
 //      continue;

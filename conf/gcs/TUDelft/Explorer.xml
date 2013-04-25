@@ -1,0 +1,11 @@
+<layout width="965" height="645">
+  <columns>
+    <rows>
+      <widget NAME="map2d" SIZE="500"/>
+    </rows>
+    <rows SIZE="100">  
+      <widget NAME="alarms"  SIZE="53"/>
+      <widget name="altgraph"/>
+    </rows>
+  </columns>
+</layout>
