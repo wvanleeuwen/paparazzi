@@ -223,7 +223,13 @@
                                   &stabilization_cmd[COMMAND_THRUST]); \
   }
 
-#ifdef STABILIZATION_ATTITUDE_TYPE_INT
+
+#ifdef STABILIZATION_ATTITUDE_NO_REF
+#define PERIODIC_SEND_STAB_ATTITUDE(_trans, _dev) {}
+#define PERIODIC_SEND_STAB_ATTITUDE_REF(_trans, _dev) {}
+
+#elif defined STABILIZATION_ATTITUDE_TYPE_INT
+
 #define PERIODIC_SEND_STAB_ATTITUDE(_trans, _dev) {       \
   struct Int32Rates* body_rate = stateGetBodyRates_i();   \
   struct Int32Eulers* att = stateGetNedToBodyEulers_i();  \
@@ -247,25 +253,24 @@
       &stabilization_cmd[COMMAND_YAW]);                   \
 }
 
-
-#define PERIODIC_SEND_STAB_ATTITUDE_REF(_trans, _dev) {			\
-    DOWNLINK_SEND_STAB_ATTITUDE_REF_INT(_trans, _dev,			\
-                          &stab_att_sp_euler.phi, \
-                          &stab_att_sp_euler.theta, \
-                          &stab_att_sp_euler.psi, \
-                          &stab_att_ref_euler.phi, \
-                          &stab_att_ref_euler.theta, \
-                          &stab_att_ref_euler.psi, \
-                          &stab_att_ref_rate.p, \
-                          &stab_att_ref_rate.q, \
-                          &stab_att_ref_rate.r, \
-                          &stab_att_ref_accel.p, \
-                          &stab_att_ref_accel.q, \
-                          &stab_att_ref_accel.r); \
+#define PERIODIC_SEND_STAB_ATTITUDE_REF(_trans, _dev) {             \
+    DOWNLINK_SEND_STAB_ATTITUDE_REF_INT(_trans, _dev,               \
+                                        &stab_att_sp_euler.phi,     \
+                                        &stab_att_sp_euler.theta,   \
+                                        &stab_att_sp_euler.psi,     \
+                                        &stab_att_ref_euler.phi,    \
+                                        &stab_att_ref_euler.theta,  \
+                                        &stab_att_ref_euler.psi,    \
+                                        &stab_att_ref_rate.p,       \
+                                        &stab_att_ref_rate.q,       \
+                                        &stab_att_ref_rate.r,       \
+                                        &stab_att_ref_accel.p,      \
+                                        &stab_att_ref_accel.q,      \
+                                        &stab_att_ref_accel.r);     \
   }
-#endif /* STABILIZATION_ATTITUDE_TYPE_INT */
 
-#ifdef STABILIZATION_ATTITUDE_TYPE_FLOAT
+#elif defined STABILIZATION_ATTITUDE_TYPE_FLOAT
+
 #define PERIODIC_SEND_STAB_ATTITUDE(_trans, _dev) {       \
   struct FloatRates* body_rate = stateGetBodyRates_f();   \
   struct FloatEulers* att = stateGetNedToBodyEulers_f();  \
@@ -291,20 +296,20 @@
       &foo, &foo, &foo);                                  \
   }
 
-#define PERIODIC_SEND_STAB_ATTITUDE_REF(_trans, _dev) {			\
-    DOWNLINK_SEND_STAB_ATTITUDE_REF_FLOAT(_trans, _dev,			\
-                        &stab_att_sp_euler.phi, \
-                        &stab_att_sp_euler.theta, \
-                        &stab_att_sp_euler.psi, \
-                        &stab_att_ref_euler.phi, \
-                        &stab_att_ref_euler.theta, \
-                        &stab_att_ref_euler.psi, \
-                        &stab_att_ref_rate.p,	\
-                        &stab_att_ref_rate.q,	\
-                        &stab_att_ref_rate.r,	\
-                        &stab_att_ref_accel.p, \
-                        &stab_att_ref_accel.q, \
-                        &stab_att_ref_accel.r); \
+#define PERIODIC_SEND_STAB_ATTITUDE_REF(_trans, _dev) {                 \
+    DOWNLINK_SEND_STAB_ATTITUDE_REF_FLOAT(_trans, _dev,                 \
+                                          &stab_att_sp_euler.phi,       \
+                                          &stab_att_sp_euler.theta,     \
+                                          &stab_att_sp_euler.psi,       \
+                                          &stab_att_ref_euler.phi,      \
+                                          &stab_att_ref_euler.theta,    \
+                                          &stab_att_ref_euler.psi,      \
+                                          &stab_att_ref_rate.p,         \
+                                          &stab_att_ref_rate.q,         \
+                                          &stab_att_ref_rate.r,         \
+                                          &stab_att_ref_accel.p,        \
+                                          &stab_att_ref_accel.q,        \
+                                          &stab_att_ref_accel.r);       \
   }
 
 #endif /* STABILIZATION_ATTITUDE_TYPE_FLOAT */
@@ -356,6 +361,28 @@
   }
 #else
 #define PERIODIC_SEND_FILTER(_trans, _dev) {}
+#endif
+
+#if USE_AHRS_ARDRONE2
+#include "subsystems/ahrs/ahrs_ardrone2.h"
+#define PERIODIC_SEND_AHRS_ARDRONE2(_trans, _dev) {	\
+    DOWNLINK_SEND_AHRS_ARDRONE2(_trans, _dev,	\
+             &ahrs_impl.state,					\
+             &ahrs_impl.control_state,			\
+             &ahrs_impl.eulers.phi,				\
+             &ahrs_impl.eulers.theta,			\
+             &ahrs_impl.eulers.psi,				\
+             &ahrs_impl.speed.x,				\
+             &ahrs_impl.speed.y,				\
+             &ahrs_impl.speed.z,				\
+             &ahrs_impl.accel.x,				\
+             &ahrs_impl.accel.y,				\
+             &ahrs_impl.accel.z,				\
+             &ahrs_impl.altitude,				\
+             &ahrs_impl.battery);				\
+  }
+#else
+#define PERIODIC_SEND_AHRS_ARDRONE2(_trans, _dev) {}
 #endif
 
 #if USE_AHRS_CMPL_EULER || USE_AHRS_CMPL_QUAT
@@ -452,6 +479,7 @@
 #define PERIODIC_SEND_AHRS_REF_QUAT(_trans, _dev) {}
 #endif /* STABILIZATION_ATTITUDE_TYPE_QUAT */
 
+#ifndef AHRS_FLOAT
 #define PERIODIC_SEND_AHRS_QUAT_INT(_trans, _dev) {   \
     DOWNLINK_SEND_AHRS_QUAT_INT(_trans, _dev,         \
                   &ahrs_impl.ltp_to_imu_quat.qi,      \
@@ -463,7 +491,9 @@
                   &(stateGetNedToBodyQuat_i()->qy),   \
                   &(stateGetNedToBodyQuat_i()->qz));  \
   }
+#endif
 
+#if USE_AHRS_CMPL_EULER
 #define PERIODIC_SEND_AHRS_EULER_INT(_trans, _dev) {      \
     DOWNLINK_SEND_AHRS_EULER_INT(_trans, _dev,            \
                    &ahrs_impl.ltp_to_imu_euler.phi,       \
@@ -473,6 +503,35 @@
                    &(stateGetNedToBodyEulers_i()->theta), \
                    &(stateGetNedToBodyEulers_i()->psi));  \
   }
+#else
+#ifndef AHRS_FLOAT
+#define PERIODIC_SEND_AHRS_EULER_INT(_trans, _dev) {                    \
+    struct Int32Eulers ltp_to_imu_euler;                                \
+    INT32_EULERS_OF_QUAT(ltp_to_imu_euler, ahrs_impl.ltp_to_imu_quat);  \
+    DOWNLINK_SEND_AHRS_EULER_INT(_trans, _dev,                          \
+                                 &ltp_to_imu_euler.phi,                 \
+                                 &ltp_to_imu_euler.theta,               \
+                                 &ltp_to_imu_euler.psi,                 \
+                                 &(stateGetNedToBodyEulers_i()->phi),   \
+                                 &(stateGetNedToBodyEulers_i()->theta), \
+                                 &(stateGetNedToBodyEulers_i()->psi));  \
+}
+#else
+#define PERIODIC_SEND_AHRS_EULER_INT(_trans, _dev) {                    \
+    struct FloatEulers ltp_to_imu_euler;                                \
+    FLOAT_EULERS_OF_QUAT(ltp_to_imu_euler, ahrs_impl.ltp_to_imu_quat);  \
+    struct Int32Eulers euler_i;                                         \
+    EULERS_BFP_OF_REAL(euler_i, ltp_to_imu_euler);                \
+    DOWNLINK_SEND_AHRS_EULER_INT(_trans, _dev,                          \
+                                 &euler_i.phi,                          \
+                                 &euler_i.theta,                        \
+                                 &euler_i.psi,                          \
+                                 &(stateGetNedToBodyEulers_i()->phi),   \
+                                 &(stateGetNedToBodyEulers_i()->theta), \
+                                 &(stateGetNedToBodyEulers_i()->psi));  \
+  }
+#endif
+#endif
 
 #define PERIODIC_SEND_AHRS_RMAT_INT(_trans, _dev) {       \
   struct Int32RMat* att_rmat = stateGetNedToBodyRMat_i(); \
@@ -568,12 +627,14 @@
 #define PERIODIC_SEND_HFF_GPS(_trans, _dev) {}
 #endif
 
-#define PERIODIC_SEND_GUIDANCE(_trans, _dev) {				\
-    DOWNLINK_SEND_GUIDANCE(_trans, _dev,					\
-                 &guidance_h_cur_pos.x,		\
-                 &guidance_h_cur_pos.y,		\
-                 &guidance_h_held_pos.x,		\
-                 &guidance_h_held_pos.y);		\
+#define PERIODIC_SEND_GUIDANCE_H_INT(_trans, _dev) {   \
+  DOWNLINK_SEND_GUIDANCE_H_INT(_trans, _dev,           \
+                               &guidance_h_pos_sp.x,   \
+                               &guidance_h_pos_sp.y,   \
+                               &guidance_h_pos_ref.x,  \
+                               &guidance_h_pos_ref.y,  \
+                               &ins_ltp_pos.x,         \
+                               &ins_ltp_pos.y);        \
   }
 
 #define PERIODIC_SEND_INS_Z(_trans, _dev) {				\
@@ -758,6 +819,7 @@
 #define PERIODIC_SEND_ROTORCRAFT_CAM(_trans, _dev) {}
 #endif
 
+#ifndef AHRS_FLOAT
 #define PERIODIC_SEND_ROTORCRAFT_TUNE_HOVER(_trans, _dev) {             \
     DOWNLINK_SEND_ROTORCRAFT_TUNE_HOVER(_trans, _dev,                   \
                                         &radio_control.values[RADIO_ROLL], \
@@ -774,6 +836,7 @@
                                         &(stateGetNedToBodyEulers_i()->theta),  \
                                         &(stateGetNedToBodyEulers_i()->psi));   \
   }
+#endif
 
 #ifdef USE_I2C0
 #define PERIODIC_SEND_I2C0_ERRORS(_trans, _dev) {                             \
@@ -860,11 +923,22 @@
 #endif
 
 #ifndef SITL
-#define PERIODIC_SEND_I2C_ERRORS(_trans, _dev) { \
-    PERIODIC_SEND_I2C0_ERRORS(_trans, _dev);     \
-    PERIODIC_SEND_I2C1_ERRORS(_trans, _dev);     \
-    PERIODIC_SEND_I2C2_ERRORS(_trans, _dev);     \
-}
+#define PERIODIC_SEND_I2C_ERRORS(_trans, _dev) {        \
+    static uint8_t _i2c_nb_cnt = 0;                     \
+    switch (_i2c_nb_cnt) {                              \
+      case 0:                                           \
+        PERIODIC_SEND_I2C0_ERRORS(_trans, _dev); break; \
+      case 1:                                           \
+        PERIODIC_SEND_I2C1_ERRORS(_trans, _dev); break; \
+      case 2:                                           \
+        PERIODIC_SEND_I2C2_ERRORS(_trans, _dev); break; \
+      default:                                          \
+        break;                                          \
+    }                                                   \
+    _i2c_nb_cnt++;                                      \
+    if (_i2c_nb_cnt == 3)                               \
+      _i2c_nb_cnt = 0;                                  \
+  }
 #else
 #define PERIODIC_SEND_I2C_ERRORS(_trans, _dev) {}
 #endif
@@ -885,7 +959,121 @@
 #define PERIODIC_SEND_CAM_TRACK(_trans, _dev) {}
 #endif
 
+#ifdef ARDRONE2_RAW
+#include "navdata.h"
+#define PERIODIC_SEND_ARDRONE_NAVDATA(_trans, _dev) DOWNLINK_SEND_ARDRONE_NAVDATA(_trans, _dev, \
+	&navdata->taille, \
+	&navdata->nu_trame, \
+	&navdata->ax, \
+	&navdata->ay, \
+	&navdata->az, \
+	&navdata->vx, \
+	&navdata->vy, \
+	&navdata->vz, \
+	&navdata->temperature_acc, \
+	&navdata->temperature_gyro, \
+	&navdata->ultrasound, \
+	&navdata->us_debut_echo, \
+	&navdata->us_fin_echo, \
+	&navdata->us_association_echo, \
+	&navdata->us_distance_echo, \
+	&navdata->us_curve_time, \
+	&navdata->us_curve_value, \
+	&navdata->us_curve_ref, \
+	&navdata->nb_echo, \
+	&navdata->sum_echo, \
+	&navdata->gradient, \
+	&navdata->flag_echo_ini, \
+	&navdata->pressure, \
+	&navdata->temperature_pressure, \
+	&navdata->mx, \
+	&navdata->my, \
+	&navdata->mz, \
+	&navdata->chksum \
+	)
+#else
+#define PERIODIC_SEND_ARDRONE_NAVDATA(_trans, _dev) {}
+#endif
+
 #include "generated/settings.h"
 #define PERIODIC_SEND_DL_VALUE(_trans, _dev) PeriodicSendDlValue(_trans, _dev)
+
+/*
+ * Sending of UART errors.
+ */
+#ifdef USE_UART1
+#define PERIODIC_SEND_UART1_ERRORS(_trans, _dev) {   \
+    const uint8_t _bus1 = 1;                         \
+    DOWNLINK_SEND_UART_ERRORS(_trans, _dev,          \
+                             &uart1.ore,             \
+                             &uart1.ne_err,          \
+                             &uart1.fe_err,          \
+                             &_bus1);                \
+  }
+#else
+#define PERIODIC_SEND_UART1_ERRORS(_trans, _dev) {}
+#endif
+
+#ifdef USE_UART2
+#define PERIODIC_SEND_UART2_ERRORS(_trans, _dev) {   \
+    const uint8_t _bus2 = 2;                         \
+    DOWNLINK_SEND_UART_ERRORS(_trans, _dev,          \
+                             &uart2.ore,             \
+                             &uart2.ne_err,          \
+                             &uart2.fe_err,          \
+                             &_bus2);                \
+  }
+#else
+#define PERIODIC_SEND_UART2_ERRORS(_trans, _dev) {}
+#endif
+
+#ifdef USE_UART3
+#define PERIODIC_SEND_UART3_ERRORS(_trans, _dev) {   \
+    const uint8_t _bus3 = 3;                         \
+    DOWNLINK_SEND_UART_ERRORS(_trans, _dev,          \
+                             &uart3.ore,             \
+                             &uart3.ne_err,          \
+                             &uart3.fe_err,          \
+                             &_bus3);                \
+  }
+#else
+#define PERIODIC_SEND_UART3_ERRORS(_trans, _dev) {}
+#endif
+
+#ifdef USE_UART5
+#define PERIODIC_SEND_UART5_ERRORS(_trans, _dev) {   \
+    const uint8_t _bus5 = 5;                         \
+    DOWNLINK_SEND_UART_ERRORS(_trans, _dev,          \
+                             &uart5.ore,             \
+                             &uart5.ne_err,          \
+                             &uart5.fe_err,          \
+                             &_bus5);                \
+  }
+#else
+#define PERIODIC_SEND_UART5_ERRORS(_trans, _dev) {}
+#endif
+
+
+#ifndef SITL
+#define PERIODIC_SEND_UART_ERRORS(_trans, _dev) {           \
+    static uint8_t uart_nb_cnt = 0;                         \
+    switch (uart_nb_cnt) {                                  \
+      case 0:                                               \
+        PERIODIC_SEND_UART1_ERRORS(_trans, _dev); break;    \
+      case 1:                                               \
+        PERIODIC_SEND_UART2_ERRORS(_trans, _dev); break;    \
+      case 2:                                               \
+        PERIODIC_SEND_UART3_ERRORS(_trans, _dev); break;    \
+      case 3:                                               \
+        PERIODIC_SEND_UART5_ERRORS(_trans, _dev); break;    \
+      default: break;                                       \
+    }                                                       \
+    uart_nb_cnt++;                                          \
+    if (uart_nb_cnt == 4)                                   \
+      uart_nb_cnt = 0;                                      \
+  }
+#else
+#define PERIODIC_SEND_UART_ERRORS(_trans, _dev) {}
+#endif
 
 #endif /* TELEMETRY_H */

@@ -67,7 +67,10 @@ nps.srcs += mcu_periph/i2c.c
 nps.srcs += $(SRC_ARCH)/mcu_periph/i2c_arch.c
 
 
-nps.CFLAGS += -DPERIODIC_FREQUENCY=512
+PERIODIC_FREQUENCY ?= 512
+TELEMETRY_FREQUENCY ?= 60
+nps.CFLAGS += -DPERIODIC_FREQUENCY=$(PERIODIC_FREQUENCY)
+nps.CFLAGS += -DTELEMETRY_FREQUENCY=$(TELEMETRY_FREQUENCY)
 #nps.CFLAGS += -DUSE_LED
 nps.srcs += mcu_periph/sys_time.c $(SRC_ARCH)/mcu_periph/sys_time_arch.c
 
@@ -111,42 +114,11 @@ nps.srcs += $(SRC_FIRMWARE)/stabilization.c
 nps.srcs += $(SRC_FIRMWARE)/stabilization/stabilization_rate.c
 nps.srcs += $(SRC_FIRMWARE)/stabilization/stabilization_none.c
 
-
-NUM_TYPE=integer
-#NUM_TYPE=float
-
-STAB_TYPE=euler
-#STAB_TYPE=quaternion
-
-ifeq ($(NUM_TYPE), integer)
-  nps.CFLAGS += -DSTABILIZATION_ATTITUDE_TYPE_INT
-  nps.CFLAGS += -DSTABILIZATION_ATTITUDE_TYPE_H=\"stabilization/stabilization_attitude_int.h\"
-  ifeq ($(STAB_TYPE), euler)
-    nps.CFLAGS += -DSTABILIZATION_ATTITUDE_REF_TYPE_H=\"stabilization/stabilization_attitude_ref_euler_int.h\"
-    nps.srcs += $(SRC_FIRMWARE)/stabilization/stabilization_attitude_ref_euler_int.c
-    nps.srcs += $(SRC_FIRMWARE)/stabilization/stabilization_attitude_euler_int.c
-  else ifeq ($(STAB_TYPE), quaternion)
-    nps.CFLAGS += -DSTABILIZATION_ATTITUDE_REF_TYPE_H=\"stabilization/stabilization_attitude_ref_quat_int.h\"
-    nps.srcs += $(SRC_FIRMWARE)/stabilization/stabilization_attitude_ref_quat_int.c
-    nps.srcs += $(SRC_FIRMWARE)/stabilization/stabilization_attitude_quat_int.c
-  endif
-else ifeq ($(NUM_TYPE), float)
-  nps.CFLAGS += -DSTABILIZATION_ATTITUDE_TYPE_FLOAT
-  nps.CFLAGS += -DSTABILIZATION_ATTITUDE_TYPE_H=\"stabilization/stabilization_attitude_float.h\"
-  ifeq ($(STAB_TYPE), euler)
-    nps.CFLAGS += -DSTABILIZATION_ATTITUDE_REF_TYPE_H=\"stabilization/stabilization_attitude_ref_euler_float.h\"
-    nps.srcs += $(SRC_FIRMWARE)/stabilization/stabilization_attitude_ref_euler_float.c
-    nps.srcs += $(SRC_FIRMWARE)/stabilization/stabilization_attitude_euler_float.c
-  else ifeq ($(STAB_TYPE), quaternion)
-    nps.CFLAGS += -DSTABILIZATION_ATTITUDE_REF_TYPE_H=\"stabilization/stabilization_attitude_ref_quat_float.h\"
-    nps.srcs += $(SRC_FIRMWARE)/stabilization/stabilization_attitude_ref_quat_float.c
-    nps.srcs += $(SRC_FIRMWARE)/stabilization/stabilization_attitude_quat_float.c
-  endif
-endif
-
 nps.CFLAGS += -DUSE_NAVIGATION
 nps.srcs += $(SRC_FIRMWARE)/guidance/guidance_h.c
+nps.srcs += $(SRC_FIRMWARE)/guidance/guidance_h_ref.c
 nps.srcs += $(SRC_FIRMWARE)/guidance/guidance_v.c
+nps.srcs += $(SRC_FIRMWARE)/guidance/guidance_v_ref.c
 
 #
 # INS choice

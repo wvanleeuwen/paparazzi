@@ -24,7 +24,7 @@
 #include "mcu_periph/spi.h"
 
 // Peripherials
-#include "peripherals/mpu60X0.h"
+#include "peripherals/mpu60x0_regs.h"
 #include "peripherals/hmc58xx_regs.h"
 #include "peripherals/ms5611.h"
 
@@ -99,7 +99,7 @@ void imu_periodic(void)
   }
 }
 
-static void trans_cb( struct spi_transaction *trans ) {
+static void trans_cb(struct spi_transaction *trans __attribute__ ((unused))) {
   if ( imu_aspirin2.status != Aspirin2StatusUninit ) {
     imu_aspirin2.imu_available = TRUE;
   }

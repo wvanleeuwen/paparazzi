@@ -39,10 +39,12 @@
 #include "generated/modules.h"
 #include "generated/flight_plan.h"
 
+/* for default GUIDANCE_H_USE_REF */
+#include "firmwares/rotorcraft/guidance/guidance_h.h"
+
 #include "math/pprz_algebra_int.h"
 
 const uint8_t nb_waypoint = NB_WAYPOINT;
-struct EnuCoor_f waypoints_float[NB_WAYPOINT] = WAYPOINTS;
 struct EnuCoor_i waypoints[NB_WAYPOINT];
 
 struct EnuCoor_i navigation_target;
@@ -82,12 +84,14 @@ static inline void nav_set_altitude( void );
 #define CARROT_DIST (12 << 8)
 
 void nav_init(void) {
+  // convert to
+  const struct EnuCoor_f wp_tmp_float[NB_WAYPOINT] = WAYPOINTS;
   // init int32 waypoints
   uint8_t i = 0;
   for (i = 0; i < nb_waypoint; i++) {
-    waypoints[i].x = POS_BFP_OF_REAL(waypoints_float[i].x);
-    waypoints[i].y = POS_BFP_OF_REAL(waypoints_float[i].y);
-    waypoints[i].z = POS_BFP_OF_REAL((waypoints_float[i].z - GROUND_ALT));
+    waypoints[i].x = POS_BFP_OF_REAL(wp_tmp_float[i].x);
+    waypoints[i].y = POS_BFP_OF_REAL(wp_tmp_float[i].y);
+    waypoints[i].z = POS_BFP_OF_REAL((wp_tmp_float[i].z - GROUND_ALT));
   }
   nav_block = 0;
   nav_stage = 0;
@@ -113,8 +117,7 @@ void nav_init(void) {
 
 }
 
-void nav_run(void) {
-
+static inline void nav_advance_carrot(void) {
   /* compute a vector to the waypoint */
   struct Int32Vect2 path_to_waypoint;
   VECT2_DIFF(path_to_waypoint, navigation_target, *stateGetPositionEnu_i());
@@ -122,7 +125,6 @@ void nav_run(void) {
   /* saturate it */
   VECT2_STRIM(path_to_waypoint, -(1<<15), (1<<15));
 
-#if !GUIDANCE_H_USE_REF
   int32_t dist_to_waypoint;
   INT32_VECT2_NORM(dist_to_waypoint, path_to_waypoint);
 
@@ -135,7 +137,15 @@ void nav_run(void) {
     VECT2_SDIV(path_to_carrot, path_to_carrot, dist_to_waypoint);
     VECT2_SUM(navigation_carrot, path_to_carrot, *stateGetPositionEnu_i());
   }
+}
+
+void nav_run(void) {
+
+#if !GUIDANCE_H_USE_REF
+  PRINT_CONFIG_MSG("NOT using horizontal guidance reference :-(")
+  nav_advance_carrot();
 #else
+  PRINT_CONFIG_MSG("Using horizontal guidance reference :-)")
   // if H_REF is used, CARROT_DIST is not used
   VECT2_COPY(navigation_carrot, navigation_target);
 #endif

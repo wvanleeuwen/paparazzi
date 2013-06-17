@@ -38,6 +38,9 @@
 #include "subsystems/datalink/datalink.h"
 #include "subsystems/settings.h"
 #include "subsystems/datalink/xbee.h"
+#if DATALINK == UDP
+#include "subsystems/datalink/udp.h"
+#endif
 
 #include "subsystems/commands.h"
 #include "subsystems/actuators.h"
@@ -73,6 +76,11 @@
 
 /* if PRINT_CONFIG is defined, print some config options */
 PRINT_CONFIG_VAR(PERIODIC_FREQUENCY)
+
+#ifndef TELEMETRY_FREQUENCY
+#define TELEMETRY_FREQUENCY 60
+#endif
+PRINT_CONFIG_VAR(TELEMETRY_FREQUENCY)
 
 #ifndef MODULES_FREQUENCY
 #define MODULES_FREQUENCY 512
@@ -155,6 +163,10 @@ STATIC_INLINE void main_init( void ) {
   xbee_init();
 #endif
 
+#if DATALINK == UDP
+  udp_init();
+#endif
+
   // register the timers for the periodic functions
   main_periodic_tid = sys_time_register_timer((1./PERIODIC_FREQUENCY), NULL);
   modules_tid = sys_time_register_timer(1./MODULES_FREQUENCY, NULL);
@@ -162,7 +174,7 @@ STATIC_INLINE void main_init( void ) {
   failsafe_tid = sys_time_register_timer(0.05, NULL);
   electrical_tid = sys_time_register_timer(0.1, NULL);
   baro_tid = sys_time_register_timer(1./BARO_PERIODIC_FREQUENCY, NULL);
-  telemetry_tid = sys_time_register_timer((1./60.), NULL);
+  telemetry_tid = sys_time_register_timer((1./TELEMETRY_FREQUENCY), NULL);
 }
 
 STATIC_INLINE void handle_periodic_tasks( void ) {
@@ -190,7 +202,7 @@ STATIC_INLINE void main_periodic( void ) {
   autopilot_periodic();
   /* set actuators     */
   //actuators_set(autopilot_motors_on);
-  SetActuatorsFromCommands(commands);
+  SetActuatorsFromCommands(commands, autopilot_mode);
 
   if (autopilot_in_flight) {
     RunOnceEvery(PERIODIC_FREQUENCY, { autopilot_flight_time++; datalink_time++; });

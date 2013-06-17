@@ -28,10 +28,14 @@
 
 #include "mcu_periph/i2c.h"
 
-#include <libopencm3/stm32/f1/rcc.h>
-#include <libopencm3/stm32/f1/gpio.h>
+#include BOARD_CONFIG
+
+#include <libopencm3/stm32/rcc.h>
+#include <libopencm3/stm32/gpio.h>
+#include <libopencm3/cm3/nvic.h>
 #include <libopencm3/cm3/scb.h>
-#include <libopencm3/stm32/f1/nvic.h>
+
+#include "mcu_periph/gpio.h"
 
 
 #ifdef I2C_DEBUG_LED
@@ -859,6 +863,10 @@ I2C_SoftwareResetCmd(periph->reg_addr, DISABLE);
 */
 
 
+#ifdef USE_I2C0
+#error "The STM32 doesn't have I2C0, use I2C1 or I2C2"
+#endif
+
 #ifdef USE_I2C1
 
 /** default I2C1 clock speed */
@@ -874,8 +882,6 @@ void i2c1_hw_init(void) {
 
   i2c1.reg_addr = (void *)I2C1;
   i2c1.init_struct = NULL;
-  i2c1.scl_pin = GPIO_I2C1_SCL;
-  i2c1.sda_pin = GPIO_I2C1_SDA;
   i2c1.errors = &i2c1_errors;
   i2c1_watchdog_counter = 0;
 
@@ -904,12 +910,19 @@ void i2c1_hw_init(void) {
   /* Enable peripheral clocks -------------------------------------------------*/
   /* Enable I2C1 clock */
   rcc_peripheral_enable_clock(&RCC_APB1ENR, RCC_APB1ENR_I2C1EN);
-  /* Enable GPIOB clock */
-  rcc_peripheral_enable_clock(&RCC_APB2ENR, RCC_APB2ENR_IOPBEN);
-
-  gpio_set_mode(GPIOB, GPIO_MODE_OUTPUT_2_MHZ,
+  /* Enable GPIO clock */
+  gpio_enable_clock(I2C1_GPIO_PORT);
+#if defined(STM32F1)
+  gpio_set_mode(I2C1_GPIO_PORT, GPIO_MODE_OUTPUT_2_MHZ,
                 GPIO_CNF_OUTPUT_ALTFN_OPENDRAIN,
-                i2c1.scl_pin | i2c1.sda_pin);
+                I2C1_GPIO_SCL | I2C1_GPIO_SDA);
+#elif defined(STM32F4)
+  gpio_mode_setup(I2C1_GPIO_PORT, GPIO_MODE_AF, GPIO_PUPD_NONE,
+                  I2C1_GPIO_SCL | I2C1_GPIO_SDA);
+  gpio_set_output_options(GPIOB, GPIO_OTYPE_OD, GPIO_OSPEED_25MHZ,
+                          I2C1_GPIO_SCL | I2C1_GPIO_SDA);
+  gpio_set_af(I2C1_GPIO_PORT, GPIO_AF4, I2C1_GPIO_SCL | I2C1_GPIO_SDA);
+#endif
 
   i2c_reset(I2C1);
 
@@ -963,8 +976,6 @@ void i2c2_hw_init(void) {
 
   i2c2.reg_addr = (void *)I2C2;
   i2c2.init_struct = NULL;
-  i2c2.scl_pin = GPIO_I2C2_SCL;
-  i2c2.sda_pin = GPIO_I2C2_SDA;
   i2c2.errors = &i2c2_errors;
   i2c2_watchdog_counter = 0;
 
@@ -988,12 +999,20 @@ void i2c2_hw_init(void) {
   /* Enable peripheral clocks -------------------------------------------------*/
   /* Enable I2C2 clock */
   rcc_peripheral_enable_clock(&RCC_APB1ENR, RCC_APB1ENR_I2C2EN);
-  /* Enable GPIOB clock */
-  rcc_peripheral_enable_clock(&RCC_APB2ENR, RCC_APB2ENR_IOPBEN);
-
-  gpio_set_mode(GPIOB, GPIO_MODE_OUTPUT_2_MHZ,
+  /* Enable GPIO clock */
+  gpio_enable_clock(I2C2_GPIO_PORT);
+#if defined(STM32F1)
+  gpio_set_mode(I2C2_GPIO_PORT, GPIO_MODE_OUTPUT_2_MHZ,
                 GPIO_CNF_OUTPUT_ALTFN_OPENDRAIN,
-                i2c2.scl_pin | i2c2.sda_pin);
+                I2C2_GPIO_SCL | I2C2_GPIO_SDA);
+#elif defined(STM32F4)
+  gpio_mode_setup(I2C2_GPIO_PORT, GPIO_MODE_AF, GPIO_PUPD_NONE,
+                  I2C2_GPIO_SCL | I2C2_GPIO_SDA);
+  gpio_set_output_options(I2C2_GPIO_PORT, GPIO_OTYPE_OD, GPIO_OSPEED_25MHZ,
+                          I2C2_GPIO_SCL | I2C2_GPIO_SDA);
+  gpio_set_af(I2C2_GPIO_PORT, GPIO_AF4,
+              I2C2_GPIO_SCL | I2C2_GPIO_SDA);
+#endif
 
   i2c_reset(I2C2);
 
@@ -1030,6 +1049,94 @@ void i2c2_er_isr(void) {
 }
 
 #endif /* USE_I2C2 */
+
+
+#if defined USE_I2C3 && defined STM32F4
+
+/** default I2C3 clock speed */
+#ifndef I2C3_CLOCK_SPEED
+#define I2C3_CLOCK_SPEED 300000
+#endif
+PRINT_CONFIG_VAR(I2C3_CLOCK_SPEED)
+
+struct i2c_errors i2c3_errors;
+volatile uint32_t i2c3_watchdog_counter;
+
+void i2c3_hw_init(void) {
+
+  i2c3.reg_addr = (void *)I2C3;
+  i2c3.init_struct = NULL;
+  i2c3.errors = &i2c3_errors;
+  i2c3_watchdog_counter = 0;
+
+  /* zeros error counter */
+  ZEROS_ERR_COUNTER(i2c3_errors);
+
+  /* reset peripheral to default state ( sometimes not achieved on reset :(  ) */
+  //i2c_reset(I2C3);
+
+  /* Configure priority grouping 0 bits for pre-emption priority and 4 bits for sub-priority. */
+  scb_set_priority_grouping(SCB_AIRCR_PRIGROUP_NOGROUP_SUB16);
+
+  /* Configure and enable I2C3 event interrupt --------------------------------*/
+  nvic_set_priority(NVIC_I2C3_EV_IRQ, 0);
+  nvic_enable_irq(NVIC_I2C3_EV_IRQ);
+
+  /* Configure and enable I2C3 err interrupt ----------------------------------*/
+  nvic_set_priority(NVIC_I2C3_ER_IRQ, 1);
+  nvic_enable_irq(NVIC_I2C3_ER_IRQ);
+
+  /* Enable peripheral clocks -------------------------------------------------*/
+  /* Enable I2C3 clock */
+  rcc_peripheral_enable_clock(&RCC_APB1ENR, RCC_APB1ENR_I2C3EN);
+  /* Enable GPIO clock */
+  gpio_enable_clock(I2C3_GPIO_SCL_PORT);
+  gpio_mode_setup(I2C3_GPIO_SCL_PORT, GPIO_MODE_AF, GPIO_PUPD_NONE, I2C3_GPIO_SCL);
+  gpio_set_output_options(I2C3_GPIO_SCL_PORT, GPIO_OTYPE_OD, GPIO_OSPEED_25MHZ,
+                          I2C3_GPIO_SCL);
+  gpio_set_af(I2C3_GPIO_SCL_PORT, GPIO_AF4, I2C3_GPIO_SCL);
+
+  gpio_enable_clock(I2C3_GPIO_SDA_PORT);
+  gpio_mode_setup(I2C3_GPIO_SDA_PORT, GPIO_MODE_AF, GPIO_PUPD_NONE, I2C3_GPIO_SDA);
+  gpio_set_output_options(I2C3_GPIO_SDA_PORT, GPIO_OTYPE_OD, GPIO_OSPEED_25MHZ,
+                          I2C3_GPIO_SDA);
+  gpio_set_af(I2C3_GPIO_SDA_PORT, GPIO_AF4, I2C3_GPIO_SDA);
+
+  i2c_reset(I2C3);
+
+  // enable peripheral
+  i2c_peripheral_enable(I2C3);
+
+  /*
+   * XXX: there is a function to do that already in libopencm3 but I am not
+   * sure if it is correct, using direct register instead (esden)
+   */
+  //i2c_set_own_7bit_slave_address(I2C3, 0);
+  I2C_OAR1(I2C3) = 0 | 0x4000;
+
+  // enable error interrupts
+  I2C_CR2(I2C1) |= I2C_CR2_ITERREN;
+
+  i2c_setbitrate(&i2c3, I2C3_CLOCK_SPEED);
+}
+
+void i2c3_ev_isr(void) {
+  u32 i2c = (u32) i2c3.reg_addr;
+  I2C_CR2(i2c) &= ~I2C_CR2_ITERREN;
+  i2c_irq(&i2c3);
+  i2c3_watchdog_counter = 0;
+  I2C_CR2(i2c) |= I2C_CR2_ITERREN;
+}
+
+void i2c3_er_isr(void) {
+  u32 i2c = (u32) i2c3.reg_addr;
+  I2C_CR2(i2c) &= ~I2C_CR2_ITEVTEN;
+  i2c_irq(&i2c3);
+  i2c3_watchdog_counter = 0;
+  I2C_CR2(i2c) |= I2C_CR2_ITEVTEN;
+}
+
+#endif /* USE_I2C3 */
 
 //////////////////////////////////////////////////
 // Set Bitrate to Match your application:
@@ -1194,6 +1301,10 @@ void i2c_event(void)
       //__enable_irq();
     }
   }
+#endif
+
+#ifdef USE_I2C3
+  i2c3_watchdog_counter++;
 #endif
 }
 

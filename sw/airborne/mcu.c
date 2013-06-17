@@ -26,6 +26,7 @@
  */
 
 #include "mcu.h"
+#include "std.h"
 
 #ifdef PERIPHERALS_AUTO_INIT
 #include "mcu_periph/sys_time.h"
@@ -37,7 +38,7 @@
 #include "subsystems/radio_control.h"
 #endif
 #endif
-#if defined USE_UART0 || defined USE_UART1  || defined USE_UART2 || defined USE_UART3 || defined USE_UART4  || defined USE_UART5
+#if defined USE_UART0 || defined USE_UART1 || defined USE_UART2 || defined USE_UART3 || defined USE_UART4 || defined USE_UART5 || defined USE_UART6
 #include "mcu_periph/uart.h"
 #endif
 #if defined USE_I2C0  || defined USE_I2C1  || defined USE_I2C2
@@ -87,6 +88,9 @@ void mcu_init(void) {
 #endif
 #ifdef USE_UART5
   uart5_init();
+#endif
+#ifdef USE_UART6
+  uart6_init();
 #endif
 #ifdef USE_I2C0
   i2c0_init();
@@ -142,7 +146,7 @@ void mcu_init(void) {
   dac_init();
 #endif
 #else
-#pragma message "Info: Not auto-initializing mcu peripherals including sys_time"
+INFO("PERIPHERALS_AUTO_INIT not enabled! Peripherals (including sys_time) need explicit initialization.")
 #endif /* PERIPHERALS_AUTO_INIT */
 
 }
