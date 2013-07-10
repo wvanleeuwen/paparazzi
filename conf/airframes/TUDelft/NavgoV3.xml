@@ -195,10 +195,10 @@
     <define name="REF_MAX_R" value="90." unit="deg/s"/>
     <define name="REF_MAX_RDOT" value="RadOfDeg(900.)"/>
     <!-- feedback -->
-    <define name="PHI_PGAIN" value="1000"/>
+    <define name="PHI_PGAIN" value="700"/>
     <define name="PHI_DGAIN" value="240"/>
     <define name="PHI_IGAIN" value="200"/>
-    <define name="THETA_PGAIN" value="1000"/>
+    <define name="THETA_PGAIN" value="700"/>
     <define name="THETA_DGAIN" value="240"/>
     <define name="THETA_IGAIN" value="200"/>
     <define name="PSI_PGAIN" value="1000"/>
