@@ -100,14 +100,17 @@
     <define name="ACCEL_X_NEUTRAL" value="50"/>
     <define name="ACCEL_Y_NEUTRAL" value="24"/>
     <define name="ACCEL_Z_NEUTRAL" value="-33"/>
-    <define name="MAG_X_NEUTRAL" value="-197"/>
-    <define name="MAG_Y_NEUTRAL" value="-48"/>
-    <define name="MAG_Z_NEUTRAL" value="-130"/>
-    <define name="MAG_X_SENS" value="3.90512687291" integer="16"/>
-    <define name="MAG_Y_SENS" value="3.85058747204" integer="16"/>
-    <define name="MAG_Z_SENS" value="4.8263506035" integer="16"/>
+    <define name="MAG_X_NEUTRAL" value="-207"/>
+    <define name="MAG_Y_NEUTRAL" value="-12"/>
+    <define name="MAG_Z_NEUTRAL" value="3"/>
+    <define name="MAG_X_SENS" value="4.56598049684" integer="16"/>
+    <define name="MAG_Y_SENS" value="4.31036045135" integer="16"/>
+    <define name="MAG_Z_SENS" value="2.92559245182" integer="16"/>
+    <define name= "MAG_X_CURRENT_COEF" value="0.0930758738785"/>
+    <define name= "MAG_Y_CURRENT_COEF" value="-0.059560478523"/>
+    <define name= "MAG_Z_CURRENT_COEF" value="-0.0675345574572"/>
     <define name="BODY_TO_IMU_PHI" value="-2.5" unit="deg"/>
-    <define name="BODY_TO_IMU_THETA" value=" 1.5" unit="deg"/>
+    <define name="BODY_TO_IMU_THETA" value=" -1.5" unit="deg"/>
     <define name="BODY_TO_IMU_PSI" value="-45." unit="deg"/>
   </section>
 
@@ -167,19 +170,19 @@
     <define name="REF_MAX_R" value="1000." unit="deg/s"/>
     <define name="REF_MAX_RDOT" value="RadOfDeg(9000.)"/>
     <!-- feedback -->
-    <define name="PHI_PGAIN" value="70"/>
-    <define name="PHI_DGAIN" value="120"/>
-    <define name="PHI_IGAIN" value="70"/>
-    <define name="THETA_PGAIN" value="70"/>
-    <define name="THETA_DGAIN" value="120"/>
-    <define name="THETA_IGAIN" value="70"/>
-    <define name="PSI_PGAIN" value="300"/>
-    <define name="PSI_DGAIN" value="150"/>
-    <define name="PSI_IGAIN" value="2"/>
+    <define name="PHI_PGAIN" value="301"/>
+    <define name="PHI_DGAIN" value="65"/>
+    <define name="PHI_IGAIN" value="40"/>
+    <define name="THETA_PGAIN" value="301"/>
+    <define name="THETA_DGAIN" value="65"/>
+    <define name="THETA_IGAIN" value="40"/>
+    <define name="PSI_PGAIN" value="480"/>
+    <define name="PSI_DGAIN" value="170"/>
+    <define name="PSI_IGAIN" value="25"/>
     <!-- feedforward -->
-    <define name="PHI_DDGAIN" value="100"/>
-    <define name="THETA_DDGAIN" value="100"/>
-    <define name="PSI_DDGAIN" value="100"/>
+    <define name="PHI_DDGAIN" value="30"/>
+    <define name="THETA_DDGAIN" value="30"/>
+    <define name="PSI_DDGAIN" value="150"/>
   </section>
 
   <section name="GUIDANCE_V" prefix="GUIDANCE_V_">
@@ -189,7 +192,7 @@
     <define name="MAX_ERR_ZD" value="SPEED_BFP_OF_REAL( 10.)"/>
     <define name="MAX_SUM_ERR" value="2000000"/>
     <define name="HOVER_KP" value="80"/>
-    <define name="HOVER_KD" value="120"/>
+    <define name="HOVER_KD" value="64"/>
     <define name="HOVER_KI" value="10"/>
     <!-- 1.5m/s for full stick : BOOZ_SPEED_I_OF_F(1.5) / (MAX_PPRZ/2) -->
     <define name="RC_CLIMB_COEF" value="163"/>
@@ -201,8 +204,8 @@
 
   <section name="GUIDANCE_H" prefix="GUIDANCE_H_">
     <define name="MAX_BANK" value="20" unit="deg"/>
-    <define name="PGAIN" value="25"/>
-    <define name="DGAIN" value="150"/>
+    <define name="PGAIN" value="15"/>
+    <define name="DGAIN" value="8"/>
     <define name="IGAIN" value="10"/>
   </section>
 
@@ -219,6 +222,7 @@
     <define name="CRITIC_BAT_LEVEL" value="6.2" unit="V"/>
     <define name="LOW_BAT_LEVEL" value="6.5" unit="V"/>
     <define name="MAX_BAT_LEVEL" value="7.4" unit="V"/>
+    <define name="MILLIAMP_AT_FULL_THROTTLE" value="14000" unit="mA"/>
   </section>
 
   </airframe>
