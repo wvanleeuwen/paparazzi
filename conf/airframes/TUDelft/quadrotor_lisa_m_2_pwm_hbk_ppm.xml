@@ -106,9 +106,9 @@
     <define name="MAG_X_SENS" value="4.56598049684" integer="16"/>
     <define name="MAG_Y_SENS" value="4.31036045135" integer="16"/>
     <define name="MAG_Z_SENS" value="2.92559245182" integer="16"/>
-    <define name= "MAG_X_CURRENT_COEF" value="0.0930758738785"/>
-    <define name= "MAG_Y_CURRENT_COEF" value="-0.059560478523"/>
-    <define name= "MAG_Z_CURRENT_COEF" value="-0.0675345574572"/>
+    <define name="MAG_X_CURRENT_COEF" value="0.0930758738785"/>
+    <define name="MAG_Y_CURRENT_COEF" value="-0.059560478523"/>
+    <define name="MAG_Z_CURRENT_COEF" value="-0.0675345574572"/>
     <define name="BODY_TO_IMU_PHI" value="-2.5" unit="deg"/>
     <define name="BODY_TO_IMU_THETA" value=" -1.5" unit="deg"/>
     <define name="BODY_TO_IMU_PSI" value="-45." unit="deg"/>
@@ -204,8 +204,8 @@
 
   <section name="GUIDANCE_H" prefix="GUIDANCE_H_">
     <define name="MAX_BANK" value="20" unit="deg"/>
-    <define name="PGAIN" value="15"/>
-    <define name="DGAIN" value="8"/>
+    <define name="PGAIN" value="20"/>
+    <define name="DGAIN" value="10"/>
     <define name="IGAIN" value="10"/>
   </section>
 
