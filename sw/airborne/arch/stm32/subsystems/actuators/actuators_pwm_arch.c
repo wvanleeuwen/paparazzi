@@ -65,7 +65,7 @@ int32_t actuators_pwm_values[ACTUATORS_PWM_NB];
 
 /** Set PWM channel configuration
  */
-static inline void actuators_pwm_arch_channel_init(u32 timer_peripheral,
+static inline void actuators_pwm_arch_channel_init(uint32_t timer_peripheral,
 						enum tim_oc_id oc_id) {
 
   timer_disable_oc_output(timer_peripheral, oc_id);
@@ -80,13 +80,13 @@ static inline void actuators_pwm_arch_channel_init(u32 timer_peripheral,
 /** Set GPIO configuration
  */
 #if defined(STM32F4)
-static inline void set_servo_gpio(u32 gpioport, u16 pin, u8 af_num, u32 en) {
+static inline void set_servo_gpio(uint32_t gpioport, uint16_t pin, uint8_t af_num, uint32_t en) {
   rcc_peripheral_enable_clock(&RCC_AHB1ENR, en);
   gpio_mode_setup(gpioport, GPIO_MODE_AF, GPIO_PUPD_NONE, pin);
   gpio_set_af(gpioport, af_num, pin);
 }
 #elif defined(STM32F1)
-static inline void set_servo_gpio(u32 gpioport, u16 pin, u8 none, u32 en) {
+static inline void set_servo_gpio(uint32_t gpioport, uint16_t pin, uint8_t none, uint32_t en) {
   rcc_peripheral_enable_clock(&RCC_APB2ENR, en | RCC_APB2ENR_AFIOEN);
   gpio_set_mode(gpioport, GPIO_MODE_OUTPUT_50_MHZ,
                 GPIO_CNF_OUTPUT_ALTFN_PUSHPULL, pin);
@@ -95,7 +95,7 @@ static inline void set_servo_gpio(u32 gpioport, u16 pin, u8 none, u32 en) {
 
 /** Set Timer configuration
  */
-static inline void set_servo_timer(u32 timer, u32 period, u8 channels_mask) {
+static inline void set_servo_timer(uint32_t timer, uint32_t period, uint8_t channels_mask) {
   timer_reset(timer);
 
   /* Timer global mode:
@@ -208,6 +208,9 @@ void actuators_pwm_arch_init(void) {
 #ifdef PWM_SERVO_8
   set_servo_gpio(PWM_SERVO_8_GPIO, PWM_SERVO_8_PIN, PWM_SERVO_8_AF, PWM_SERVO_8_RCC_IOP);
 #endif
+#ifdef PWM_SERVO_9
+  set_servo_gpio(PWM_SERVO_9_GPIO, PWM_SERVO_9_PIN, PWM_SERVO_9_AF, PWM_SERVO_9_RCC_IOP);
+#endif
 
 
 #if PWM_USE_TIM1
@@ -261,6 +264,9 @@ void actuators_pwm_commit(void) {
 #endif
 #ifdef PWM_SERVO_8
   timer_set_oc_value(PWM_SERVO_8_TIMER, PWM_SERVO_8_OC, actuators_pwm_values[PWM_SERVO_8]);
+#endif
+#ifdef PWM_SERVO_9
+  timer_set_oc_value(PWM_SERVO_9_TIMER, PWM_SERVO_9_OC, actuators_pwm_values[PWM_SERVO_9]);
 #endif
 
 }
