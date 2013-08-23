@@ -1368,10 +1368,10 @@ let listen_tcas = fun a ->
                       | 3 -> "=> DESCEND"
                       | _ -> ""
       with _ -> "" in
-    log_and_say a ac.ac_name (sprintf "%s : %s %s" txt ac.ac_speech_name resolve)
+    log_and_say a ac.ac_name (sprintf "%s : %s -> %s %s" txt ac.ac_speech_name other_ac.ac_speech_name resolve)
   in
-  tele_bind "TCAS_TA" (get_alarm_tcas a "HEAR");
-  tele_bind "TCAS_RA" (get_alarm_tcas a "AVOID")
+  tele_bind "TCAS_TA" (get_alarm_tcas a "tcas TA");
+  tele_bind "TCAS_RA" (get_alarm_tcas a "TCAS RA")
 
 let listen_acs_and_msgs = fun geomap ac_notebook my_alert auto_center_new_ac alt_graph ->
   (** Probe live A/Cs *)

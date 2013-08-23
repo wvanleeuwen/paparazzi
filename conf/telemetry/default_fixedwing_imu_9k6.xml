@@ -10,7 +10,7 @@
       <message name="ATTITUDE"            period="0.7"/>
       <message name="ESTIMATOR"           period="0.6"/>
       <message name="ENERGY"              period="2.5"/>
-      <message name="WP_MOVED"            period="0.1"/>
+      <message name="WP_MOVED"            period="1.1"/>
       <message name="CIRCLE"              period="1.05"/>
       <message name="DESIRED"             period="1.05"/>
       <message name="BAT"                 period="1.1"/>
