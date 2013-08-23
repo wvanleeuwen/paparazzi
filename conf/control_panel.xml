@@ -96,7 +96,15 @@
       </program>
       <program name="Messages"/>
     </session>
-    <session name="SmartUAV">
+   <session name="ARDrone2 Flight">
+      <program name="Server"/>
+      <program name="GCS"/>
+      <program name="Data Link">
+        <arg flag="-udp"/>
+      </program>
+    </session>
+
+     <session name="SmartUAV">
       <program name="Ivy2Udp">
         <arg flag="-h" constant="127.0.0.1"/>
         <arg flag="-id" constant="8"/>
