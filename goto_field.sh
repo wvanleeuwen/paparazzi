@@ -1,3 +1,5 @@
-git fetch paparazzi
-git fetch tudelft
+git remote update
+git submodule sync
+git submodule update
+
 

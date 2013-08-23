@@ -18,7 +18,7 @@
 #git checkout master
 #cd ../gitsvnpprz/
 #git archive master | tar -x -C ../paparazzi/
-echo "Exporting TUDelft Master4 SVN To Paparazzi"
+echo "Exporting TUDelft5.0 To Paparazzi"
 git archive tudelft5.0 | tar -x -C ../paparazzi/ 
 cd ../paparazzi/
 git status -s | grep 'TUDelft' | sed 's/?? /rm -rf /' > rm.sh
