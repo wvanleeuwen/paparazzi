@@ -38,6 +38,8 @@
 /paparazzi
 
 # /conf/
+/conf/conf.xml
+/conf/conf.xml.personal
 /conf/conf.xml.20*
 /conf/%gconf.xml
 /conf/maps_data/*
