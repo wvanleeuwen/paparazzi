@@ -140,10 +140,12 @@ update_google_version:
 
 conf: conf/conf.xml conf/control_panel.xml conf/maps.xml
 
-conf/%.xml :conf/%.xml.example
-	cp $< $@.personal
-	ln -s -f ../$@.personal $@
+#conf/%.xml :conf/%.xml.example
+#	cp $< $@.personal
+#	ln -s -f ../$@.personal $@
 
+conf/%.xml :conf/%.xml.tudelft
+	ln -s -f ../$@.tudelft $@
 
 ground_segment: print_build_version update_google_version conf libpprz subdirs commands static
 ground_segment.opt: ground_segment cockpit.opt tmtc.opt
