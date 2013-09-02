@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2012  Thomas Kolb
+ * Copyright (C) 2013 Felix Ruess <felix.ruess@gmail.com>
  *
  * This file is part of paparazzi.
  *
@@ -20,17 +20,31 @@
  */
 
 /**
- * @file modules/bat_checker/bat_checker.c
+ * @file arch/omap/mcu_periph/gpio_arch.h
  *
- * Activate a buzzer/LED periodically or periodically to warn of low/critical battery level.
- * At LOW_BAT_LEVEL the buzzer will be activated periodically.
- * At CRITIC_BAT_LEVEL the buzzer will be activated permanently.
+ * GPIO helper functions for linux/omap.
+ * @todo implement gpio_set|clear
  */
 
-#ifndef BAT_CHECKER_H
-#define BAT_CHECKER_H
+#ifndef GPIO_ARCH_H
+#define GPIO_ARCH_H
 
-void init_bat_checker(void);
-void bat_checker_periodic(void);
+#include "std.h"
 
-#endif // BAT_CHECKER_H
+/**
+ * Set a gpio output to high level.
+ */
+extern void gpio_set(uint32_t port, uint16_t pin);
+
+/**
+ * Clear a gpio output to low level.
+ */
+extern void gpio_clear(uint32_t port, uint16_t pin);
+
+
+/**
+ * Read a gpio value.
+ */
+uint16_t gpio_get(uint32_t gpioport, uint16_t gpios);
+
+#endif /* GPIO_ARCH_H */
