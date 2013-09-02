@@ -3,6 +3,9 @@
 
 #define BOARD_ARDRONE2_RAW
 
+#define ARDRONE_VIDEO_PORT 2002
+#define USE_VIDEO_ARDRONE
+
 /* Default actuators driver */
 #define DEFAULT_ACTUATORS "boards/ardrone/actuators_ardrone2_raw.h"
 #define ActuatorDefaultSet(_x,_y) ActuatorArdroneSet(_x,_y)

@@ -241,6 +241,35 @@
         <arg flag="-c" constant="telemetry"/>
       </program>
     </session>
+    <session name="Kevin">
+      <program name="Server"/>
+      <program name="GCS"/>
+      <program name="Data Link">
+        <arg flag="-udp"/>
+      </program>
+      <program name="Joystick">
+        <arg flag="-ac" constant="ardrone2_raw"/>
+        <arg flag="extreme_3d_pro.xml"/>
+        <arg flag="-id" constant="2"/>
+      </program>
+    </session>
+    <session name="ARDrone2 Flight_video_vlc">
+      <program name="Server"/>
+      <program name="Data Link">
+        <arg flag="-udp"/>
+      </program>
+      <program name="Server"/>
+      <program name="GCS">
+        <arg flag="-layout" constant="left_col.xml"/>
+        <arg flag="-plugin" constant="cvlc file:///home/houjebek/svn/Aero/sdp/x86_config-h264.sdp --drawable-xid="/>
+      </program>
+    </session>
+    <session name="ARDrone2 kevin">
+      <program name="Data Link">
+        <arg flag="-udp"/>
+      </program>
+      <program name="Messages"/>
+    </session>
     <session name="Forward C172 to SkyWalker over ttyUSB1">
       <program name="IvySerialBridge">
         <arg flag="25" constant="/dev/ttyUSB1"/>

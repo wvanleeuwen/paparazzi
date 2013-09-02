@@ -91,10 +91,19 @@ endif
 	  echo "mkdir -p $(TARGET_DIR)";						\
 	} | telnet $(HOST)
 
+	#put the correct ip address in the starting up script to be run on the drone:
+	#rm $(PAPARAZZI_SRC)/sw/ext/ardrone2_video/initvideoall.sh
+	cp $(PAPARAZZI_SRC)/sw/ext/ardrone2_video/basescript.sh $(PAPARAZZI_SRC)/sw/ext/ardrone2_video/initvideoall.sh
+	sh $(PAPARAZZI_SRC)/sw/ext/ardrone2_video/generate_initvideoall.sh $(PAPARAZZI_SRC)/sw/ext/ardrone2_video/
+
 	# Upload the drivers and new application
 	{																								\
 	  echo "binary";																				\
 	  echo "put $(PAPARAZZI_SRC)/sw/ext/ardrone2_drivers/cdc-acm.ko /$(SUB_DIR)/cdc-acm.ko";		\
+	  echo "put $(PAPARAZZI_SRC)/sw/ext/ardrone2_video/initvideoall.sh /$(SUB_DIR)/initvideoall.sh";	\
+#	  echo "put $(PAPARAZZI_SRC)/sw/ext/ardrone2_video/arm_light.tgz /$(SUB_DIR)/arm_light.tgz";	\
+	  echo "put $(PAPARAZZI_SRC)/sw/ext/ardrone2_video/gst-plugin_example/libExample.so /$(SUB_DIR)/libExample.so";	\
+	  echo "put $(PAPARAZZI_SRC)/sw/ext/ardrone2_video/gst-MAVLab/libMAVLab.so /$(SUB_DIR)/libMAVLab.so";	\
 	  echo "put $(OBJDIR)/$(TARGET).elf /$(SUB_DIR)/$(TARGET).elf";									\
 	  echo "quit";																					\
 	} | ftp -n $(HOST)
@@ -103,7 +112,16 @@ endif
 	-{ 												\
 	  echo "cd $(TARGET_DIR)";						\
 	  echo "insmod cdc-acm.ko";						\
+	  echo "mkdir -p /opt/arm";						\
+	  echo "chmod 777 libExample.so";				\
+	  echo "chmod 777 libMAVLab.so";				\
+	  echo "mv libExample.so opt/arm/gst/lib/gstreamer-0.10/libExample.so";			\
+	  echo "mv libMAVLab.so opt/arm/gst/lib/gstreamer-0.10/libMAVLab.so";			\
+	  echo "mv opt/arm/tidsp opt/arm/tidsp-binaries-23.i3.8";			\
+	  echo "chmod 777 initvideoall.sh";				\
 	  echo "chmod 777 $(TARGET).elf";				\
+	  echo "./initvideoall.sh &";				\
+	  echo "sleep 3";				\
 	  echo "./$(TARGET).elf > /dev/null 2>&1 &";	\
 	} | telnet $(HOST)
 
