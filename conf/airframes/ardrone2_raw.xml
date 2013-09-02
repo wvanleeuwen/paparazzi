@@ -76,12 +76,12 @@
     <define name="ACCEL_Y_NEUTRAL" value="2060"/>
     <define name="ACCEL_Z_NEUTRAL" value="2052"/>
 
-    <define name="MAG_X_NEUTRAL" value="99"/>
-    <define name="MAG_Y_NEUTRAL" value="59"/>
-    <define name="MAG_Z_NEUTRAL" value="-65"/>
-    <define name="MAG_X_SENS" value="14.8494072406" integer="16"/>
-    <define name="MAG_Y_SENS" value="14.4187929352" integer="16"/>
-    <define name="MAG_Z_SENS" value="15.4390790318" integer="16"/>
+	<define name="MAG_X_NEUTRAL" value="5"/>
+	<define name="MAG_Y_NEUTRAL" value="7"/>
+	<define name="MAG_Z_NEUTRAL" value="-230"/>
+	<define name="MAG_X_SENS" value="13.2046456276" integer="16"/>
+	<define name="MAG_Y_SENS" value="16.3240292046" integer="16"/>
+	<define name="MAG_Z_SENS" value="16.0389874363" integer="16"/>
 	<define name= "MAG_X_CURRENT_COEF" value="0.00146642107778"/>
 	<define name= "MAG_Y_CURRENT_COEF" value="0.00116328451184"/>
 	<define name= "MAG_Z_CURRENT_COEF" value="0.000240426066192"/>
