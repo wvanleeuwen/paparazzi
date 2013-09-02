@@ -1,0 +1,49 @@
+CROSS = /opt/uClinux/bfin-elf/bin/bfin-elf-
+
+CSRCS   = init.c main.c srv.c uart.c camera.c jpeg.c i2c.c stm_m25p32.c httpd.c\
+  xmodem.c colors.c edit.c malloc.c string.c printf.c neural.c gps.c sdcard.c atan2.c\
+  interface_sky_segmentation.c sky_segmentation.c \
+  picoc/picoc.c picoc/table.c picoc/lex.c picoc/parse.c picoc/expression.c \
+  picoc/heap.c picoc/type.c picoc/variable.c picoc/clibrary.c \
+  picoc/library_surveyor.c picoc/platform.c picoc/platform_surveyor.c
+ 
+ASMSRCS = r8x8dct.asm math.asm setjmp.asm motionvect.asm
+
+CPUDEFINES = -D__ADSPBF537__ -D__ADSPLPBLACKFIN__ -DSURVEYOR_HOST
+INCLUDES = -I../include
+ASMFLAGS = -x assembler-with-cpp $(CPUDEFINES) $(INCLUDES)
+CFLAGS = $(INCLUDES) -g -O2 -Wall -fomit-frame-pointer -fno-builtin-printf -fno-builtin-puts \
+	-fno-builtin-strchr -fno-builtin-strcpy -fno-builtin-strlen -fno-builtin-strdup \
+	-fno-builtin-memset -fno-builtin-memcpy -fno-builtin-isdigit -fno-builtin-cos -fno-builtin-sin \
+	-fno-builtin-tan -fno-builtin-acos -fno-builtin-asin -fno-builtin-atan
+CFLAGS += $(CPUDEFINES)
+CFLAGS += -mfast-fp
+
+OBJS = $(CSRCS:%.c=%.o) $(ASMSRCS:%.asm=%.o) 
+
+AS = $(CROSS)as
+CC = $(CROSS)gcc
+LD = $(CROSS)ld
+LDR = $(CROSS)ldr
+
+%.o: %.asm
+	$(CC) $(ASMFLAGS) -c -o $@ $<
+
+all:  srv1.bin srv1.ldr
+
+srv1.bin: $(OBJS)
+	$(LD) -T srv1.x -Map srv1.map -O binary -o srv1.bin $(OBJS) -lbffastfp
+
+main.o:  main.c srv.h ov9655.h uart.h xmodem.h i2c.h print.h config.h
+
+srv.o:   srv.c config.h uart.h i2c.h ov9655.h camera.h jpeg.h xmodem.h  \
+         stm_m25p32.h font8x8.h colors.h malloc.h stereo.h print.h sdcard.h 
+
+uart.o:  uart.c config.h
+
+srv1.ldr: srv1.bin init.o
+	$(LDR) -f -T BF537 -c srv1.ldr --initcode init.o srv1.bin
+    
+clean:
+	rm -f *.o *.s *.bin *.ldr *.map picoc/*.o
+

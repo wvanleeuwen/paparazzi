@@ -1,0 +1,6 @@
+echo type X [enter], then control-C, to start XMODEM file transfer of $1 
+nc 192.168.0.15 10001
+sleep 1
+lsz -Xkbv --tcp-client 192.168.0.15:10001 $1
+sleep 1
+nc 192.168.0.15 10001

@@ -1,0 +1,153 @@
+<html>
+<!--
+Admin.html
+
+SRV Administration Page
+
+This code is embedded in the SRV system, not uploaded to separate flash sectors
+-->
+
+<head>
+<meta name="viewport" content="width=device-width; initial-scale=1.0; maximum-scale=1.0;">
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+<title>SRV Admin</title>
+
+
+<style type="text/css">
+
+body
+{
+    font-family: Arial;
+    font-size: 10pt;
+}
+
+</style>
+
+
+</head>
+
+
+<body>
+
+<script>
+
+var flashSectorsFirst = 4,
+    flashSectorsLast = 62,
+    flashSectorsUnit = 2;
+
+var btnXhr;
+var btnReqTimerId;
+var btnAborted;
+
+
+function onUploadSubmit (evt)
+{
+    //
+    // Validate fields
+    //
+    var file = document.getElementById ("fileItem1").value;
+    if (file == null  ||  file == "")
+    {
+        alert ("Please select a file to upload.");
+        evt.cancelBubble = true;
+        evt.returnValue = false;
+        return;
+    }
+
+    if (document.getElementById ("toSectors").checked)
+    {
+        var start = document.getElementById ("sectorStart").value;
+        if (start < flashSectorsFirst  ||  start > flashSectorsLast)
+        {
+            alert ("Starting sector must be between " + flashSectorsFirst + " and " + flashSectorsLast + ".");
+            evt.cancelBubble = true;
+            evt.returnValue = false;
+            return;
+        }
+
+    }
+
+    if (document.getElementById ("toBootLoader").checked)
+    {
+        if (!document.getElementById ("confirmBootLoader").checked)
+        {
+            alert ("Please check 'Check to confirm' to confirm boot loader flash.")
+            evt.cancelBubble = true;
+            evt.returnValue = false;
+            return;
+        }
+    }
+}
+
+
+function onResetBtn ()
+{
+    if (confirm ("DANGER!\nTo confirm SRV reset, click OK"))
+    {
+        btnXhr = new XMLHttpRequest();
+        btnXhr.open ("GET", "robot.cgi?$!&b=" + new Date().getTime(), true);
+        btnXhr.setRequestHeader ("Cache-Control", "no-cache");
+        btnXhr.setRequestHeader ("Pragma", "no-cache");
+        btnXhr.onreadystatechange = resetBtnComplete;
+        btnReqTimerId = setTimeout (resetBtnTimeout, 5000);
+        btnAborted = false;
+        btnXhr.send (null);
+    }
+}
+
+
+function resetBtnComplete ()
+{
+    if (!btnAborted  &&  btnXhr.readyState == 4)
+    {
+        clearTimeout (btnReqTimerId);
+        document.body.innerHTML = "SRV reset initiated...";
+    }
+}
+
+
+function resetBtnTimeout ()
+{
+    btnAborted = true;
+    btnXhr.abort();
+    alert ("SRV Reset timed out. No reset initiated.");
+}
+
+
+
+</script>
+
+<p style="font-variant: small-caps"><big><big>SRV Admin</big></big></p>
+
+<p style="background-color: $$statusColor$$; padding-top: 4px; padding-bottom: 4px;">$$statusMsg$$</p>
+
+<div style="font-size: 10pt">
+    <form encType="multipart/form-data" method="post" action="admin" onsubmit="onUploadSubmit(event)">
+        <p><big><b>Upload and Flash File</b></big><p>
+        <p>File to flash:<br>
+        <input id="fileItem1" type="file" name="fileItem1" size="100%" style="width: 100%" accept="*"></p>
+
+        <p><input id="toSectors" type="radio" name="uploadRadios" value="toSectors" checked>To sectors starting at:<br>
+        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<input id="sectorStart" name="sectorStart" style="width: 4em" value=""></p>
+
+        <p><input id="toBootLoader" type="radio" name="uploadRadios" value="toBootLoader">To boot loader:<br>
+        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<input id="confirmBootLoader" name="confirmBootLoader" type="checkbox">Check to confirm</p>
+    
+        <p><input type="submit" style="width: 10em" value="Flash"></p>
+    </form>
+</div>
+
+<hr>
+
+
+<div>
+
+    <p align="left"><input id="resetBtn" type="button" value="Reset SRV" onclick="onResetBtn()"
+    style="width: 7em; font-size: 8pt; color: #000000; background-color: #ff6060"></p>
+
+    <p style="font-size: 8pt">$$version$$</p>
+
+</div>
+
+</body>
+</html>

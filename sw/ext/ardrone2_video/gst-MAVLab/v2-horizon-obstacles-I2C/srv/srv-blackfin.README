@@ -1,0 +1,1024 @@
+				RELEASE NOTES
+
+SRV-1 firmware build for Blackfin - 1 April 2010 
+    http://code.google.com/p/surveyor-srv1-firmware/downloads/list
+    
+* created test4wd.c picoC script to exercise SRV-4WD drive, encoders, 
+  compass and IR
+
+============================================================================
+
+SRV-1 firmware build for Blackfin - 20 March 2010 
+    http://code.google.com/p/surveyor-srv1-firmware/downloads/list
+
+* updated picoC to version 1.0 code base
+
+* added motorx(), analogx(), compassx() and encoderx() functions to picoC 
+  to support SRV-4WD motor controller
+
+* added $e_ console function to reach cummulative pulse count from the
+  SRV-4WD encoders by channel
+
+* added firmware support for HMC5843 via console '$c' command and picoC 
+  compassx() function
+  
+* added HTTP support for SRV-4WD to existing SRV-NAV and SRV-RCM functions:
+     /robot.cgi?$a_    read SRV-4WD analog channel 0-7 
+           (0=battery, 1=5v gyro, 2=3.3v gyro, 3=IR1, 4=IR2, 6=IR3, 7=IR4)
+     /robot.cgi?$e_    read wheel encoder 1, 2, 3 or 4
+     /robot.cgi?$c     read SRV-NAV compass
+     /robot.cgi?$g     read SRV-NAV gps
+     /robot.cgi?$T_    read SRV-NAV tilt sensor 1-3 
+           (1=x, 2=y, 3=z)
+
+* console now sends '#?' in response to unrecognized commands
+  
+============================================================================
+
+SRV-1 firmware build for Blackfin - 11 February 2010 
+    http://code.google.com/p/surveyor-srv1-firmware/downloads/list
+
+* major extension to HTTPD functionality.  Added support for the following 
+  "robot.cgi?" functions:
+    V    version string
+    t    show time in millisecs since last reboot
+    $!   Blackfin reset
+
+    mxxyy    PWM motor control  xx or yy = 01 - 99, 50 = stop, 
+                 01 = max rev, 99 = max fwd
+    xxxyy    SRV-4WD motor control, same xx and yy
+    Sxxyy    channel 2/3 servos
+    sxxyy    channel 6/7 servos
+
+    $Axx    RCM analog read
+    $ax    SRV-4WD analog read
+    $g    gps
+    $Tx   SRV-NAV tilt read
+
+    l1   lasers on
+    l0   lasers off
+
+    a    160x120 capture
+    b    320x240 capture
+    c    640x480 capture
+    d    1280x1024 capture (OV9655 only)
+    qx    set jpeg quality 1-8 (1 is highest, 4 is default)
+
+    irxx    I2c commands
+    iRxx
+    iwxxyy
+    iWxxyyyy
+
+    g0   set frame differencing
+    g1   enable color segmentation display
+    g2   enable edge display
+    g3   enable horizon detect display
+    g4   enable obstacle detect display
+    g5   enable stereo disparity display (SVS only)
+    g6   enable blob detect display
+    gx   disable all special displays
+
+    va = enable/disable AGC / AWB / AEC camera controls
+    vb = find blobs matching color bin 
+    vc = set color bin ranges
+    vm = mean colors
+    vp = sample individual pixel
+    vr = recall color bin ranges
+    vs = scan for edges
+    vt = set edge detect threshold (0000-9999, default is 3200)
+    vz = zero all color settings
+
+* added /robot.cgi?idaabbccddee and iDaabbccccddeeee commands to output i2C
+  writes to two different registers in the same I2C write cycle.  this is
+  mainly useful for the SRV-RCM SD20 servo controller in setting a pair of
+  motor speeds simultaneously.  aa = device ID (hex), bb / dd = register (hex), 
+  cc / ee = 8-bit output values (hex), cccc / eeee = 16-bit output values (hex)
+   
+============================================================================
+
+SRV-1 firmware build for Blackfin - 31 January 2010 
+    http://code.google.com/p/surveyor-srv1-firmware/downloads/list
+
+* changed HTTP interface to support various motor drives, e.g. 
+    GET /robot.cgi?m55 HTTP/1.1  sets SRV-1 robot motors to stop.
+    GET /robot.cgi?m91 HTTP/1.1  causes SRV-1 to spin right at full
+  power.
+  '9' yields max forward power, '1' yields max reverse power.  
+  'm' indicates SRV-1q, 's' indicates ppm   ESC (servo signals), 
+  'x' indicates SRV-4WD controller
+
+* added support for floats via libbffastfp and printf()
+
+* changed vblob() blob search back to original algorithm to eliminate
+  "max blobs exceeded" condition.  added 2 stages of preprocessing to 
+  eliminate orphan pixels and improve search accuracy
+  
+* added 'g6x' command to graphically display vblob() search results, where
+  'x' is the color bin to display, e.g. 'g63' displays blobs matching
+  color bin 3.  'gx' disables this display.  
+
+* fixed global array access bug in picoC
+
+* updated the build of srv1.ldr.stereo to support the latest changes
+
+* added $a function to read SRV-4WD analog channels.  $a1 = 5v gyro, 
+  $a2 = 3.3v gyro, $a3 = IR1, $a4 = IR2, $a6 = IR3, $a7 = IR4, 
+  $a8 = battery
+
+============================================================================
+
+SRV-1 firmware build for Blackfin - 9 November 2009 
+    http://code.google.com/p/surveyor-srv1-firmware/downloads/list
+
+* fixed I2C timing for 5H and 5S types of uBlox5 GPS modules
+
+* added $c command to read raw data from HMC5843 3-axis compass
+
+* updated picoC to 0.93 release version
+
+* fixed firmware upload using HTTP POST in httpd.c.  Upload works from 
+  Firefox, Chrome, Safari and IE
+  
+============================================================================
+
+SRV-1 firmware build for Blackfin - 25 October 2009 
+    http://code.google.com/p/surveyor-srv1-firmware/downloads/list
+
+* added invert_video() support for OV7725
+
+* added a delay to the post-command input buffer flush at the end of the
+  main() polling loop
+  
+* removed program dump from startup of picoC
+
+* extended HTTPD functionality with motor control overlay and tested 
+  compatibility with iPhone and Google Android
+ 
+* fixed an error in the 'vb' blob search function which will dump 2^32
+  blob table entries if too many blobs were found
+
+* changed timing for ublox gps_parse()
+
+* added support for prototype SRV-4WD motor controller ('x' command)
+
+* changed uart0_init() and uart1_init() to pass baudrate as a parameter
+  instead of relying upon #DEFINE's in config.h
+
+* added vjpeg() and vsend() functions to compress and transmit a JPEG frame 
+  from picoC.  used in conjunction with vcap(), the sequence 
+      vcap(); 
+      int size = vjpeg(int quality);
+      vsend(size);
+  will capture and send a JPEG frame via UART0 / matchport without any 
+  additional headers
+
+* changed memcpy() to fix possible problem in picoC, httpd and xmodem
+
+* added HTTP POST method for upload of files - somewhat browser dependent
+  at the moment, so still work-in-progress
+
+============================================================================
+
+SRV-1 firmware build for Blackfin - 12 September 2009 
+    http://code.google.com/p/surveyor-srv1-firmware/downloads/list
+
+* changed all instances of \n\r to \r\n in printf() to conform to standards
+
+* fixed missing function to invert video on OV9655
+
+* rolled back to picoC version 0.91 to resolve some issues
+
+* updated SVS code to support new map-building functions.  '$1' console 
+  command enables mapping
+
+* eliminated most startup messages from the slave Blackfin in SVS in order to
+  solve a problem with the Matchport buffer filling and freezing the Blackfin
+  
+* fixed issue with vblob() which wasn't searching the full min-max YUV range
+  when looking for color bin matches (replaced '<' with '<=', '>' with '>=')
+ 
+* extended HTTP GET functionality with simple file system (00.html ... 09.html
+  stored in flash sectors 10/11 ... 28/29), where /00.html == /index.html and 
+  robot.cgi? is for robot control.  
+  
+============================================================================
+
+SRV-1 firmware build for Blackfin - 26 July 2009 
+    http://code.google.com/p/surveyor-srv1-firmware/downloads/list
+
+* created neuron[] output array for picoC's nntest() and nnmatchblob() 
+  functions.  also, return value from nntest() and nnmatchblob() is an index 
+  to the neuron[] entry with highest value (i.e. best match)
+
+* added support for uBlox5 gps via I2C.  gps functions now autodetect
+  Locosys gps (uart) and uBlox5 gps (i2c).
+
+* added '$Mx' and '$m' optical flow test functions.  $Mx compares consecutive
+  frames at full resolution, where x=1,2 or 3 represents +/-4, +/-8, +/-16
+  search range for 16x16 blocks.  $m scales the image to 80x64 and compares 
+  consecutive frames with 16x16 blocks over +/-16 pixel range.  still need
+  to add a display function.
+
+* added 'iMabc' i2c command to read multiple registers - ('abc' parameters 
+  sent as 8-bit binary) a is device id, b is register, c is count, xx is 
+  8-bit return values from register displayed as decimal value 
+
+* removed 'G' command - now any 'g' command that doesn't match existing
+  g commands (g0, g1, g2, g3, g4, g5), e.g. 'gx' will turn off all g functions.
+  
+* updated to picoC v0.92.  added picoC version # to SRV-1 ##Version string
+
+* added new 'G' command to support HTTP GET requests with httpd() function.  
+  delivers statically defined HTML content in httpd.c
+ 
+* added autorun() function to picoC.  if "autorun" string is found at the 
+  beginning of flash buffer #4 (user flash sector), firmware will launch
+  picoC with program stored in flash sector #4.  autorun() provides an escape
+  mechanism - it takes a parameter which tells how many seconds to wait for
+  and ESC character.  e.g. autorun(5) will listen for 5 seconds to the 
+  serial / wifi channel for an ESC character.  if no ESC is received, picoC
+  will continue execution of stored picoC program, else it will return control
+  to main() SRV-1 control loop.  note that to set up flash sector 4, use 
+  'zw' command to write the contents of the flash buffer, 'zr' to read flash
+  sector 4, and 'zc' to clear flash buffer contents
+  
+* changed vblob() to return -1 if too many blobs found
+
+* changed svs_master() and svs_slave() functions to support 2-way data transfer.
+  $X, $R, $1 and $2 test these functions.  using GPIO-H8 to synchronize capture
+  and data transfer between left (master) and right (slave) Blackfins in SVS.  
+  'g5' command to master enables stereo processing and displays stereo features.
+  'gx' turns off stereo feature display.
+
+* split SRV-1 and SVS firmare into separate builds, using Makefile.mono and
+  Makefile.stereo, along with -DSTEREO compiler flag.  Firmware images are now
+  srv1.ldr and srv1.ldr.stereo.  load0 script works for upload of srv1.ldr, 
+  load1 + load2 scripts for srv1.ldr.stereo
+
+============================================================================
+
+SRV-1 firmware build for Blackfin - 25 May 2009 
+    http://code.google.com/p/surveyor-srv1-firmware/downloads/list
+
+* updated vhorizon() and g3 to compute slope/intercept with filtering and draw a 
+  line via addline()
+  
+* added '$e' and encoders() functions to support wheel rotation counters using
+  GPIO-H14 and H15 as inputs for left and right channels
+
+* changed gps functions to compute decimal minutes combine degrees+minutes to
+  single 32-bit integer
+
+* added gps_head() and gps_dist() functions to C for waypoint navigation -
+  distance is measured in meters
+  
+* added sqrt() function to C
+
+* replaced atan(y,x) function
+
+* changed cos(), sin() and tan() to scale by 1000 rather than 100
+
+============================================================================
+
+SRV-1 firmware build for Blackfin - 17 May 2009 
+    http://code.google.com/p/surveyor-srv1-firmware/downloads/list
+
+* added sdcard.c and sdcard.h for microSD card interface.  work in progress - 
+  uses GPIO-H8 for SPI_SELECT on RCM board.  '$S' command tests presence
+  and size of microSD card.  reads and writes will follow
+  
+* fixed various problems with sonar functions
+
+* changed 'X' xmodem receive function to clear flash buffer before receiving 
+  data.  the xmodem transfer previously did not clear the buffer, so old
+  data would remain in the buffer after the end of the newly transferred file
+
+* added 'vf' console command and vfind() C function to count number of 
+  matching pixels for a given color bin in range x1, x2, y1, y2
+  
+* added 'va' console command and vcam() C function to enable/disable camera's
+  AGC, AWB and AEC functions
+  
+* added 'vs' console command and vscan() C function to use the edge detect
+  function and divide image into a specified number of columns, scanning
+  for edge pixels from top to bottom and reporting total number of edge
+  pixels found as well as distance from bottom of image to first edge pixel 
+  in each column
+
+* added 'vtxxxx' console function to set edge_thresh edge detect threshold.  
+  range is 0000-9999.  same basic functionality as 'T' console function 
+  ('T' takes a single digit and multiplies it by 800), which will eventually 
+  be eliminated)
+
+* changed input() function in C to take full range of character values instead
+  of just '0' - '9'
+  
+* added exit() function to C to allow program to bypass the interactive mode 
+  and return control to the main firmware loop
+
+* added 'g3' console function to compute and display a horizon in camera field
+  of view.  next step is to draw a line and output pitch + roll angles.  'G'
+  disables the horizon display.  core firmware function is vhorizon() in colors.c,
+  along with addvect() for display
+
+* added 'g4' console function to display edge detected obstacles in camera field
+  of view.  similar to the 'g3' console function, but searches bottom-up instead
+  of top-down.  core firmware function is vscan() in colors.c.  also works with
+  addvect()
+
+* updated picoC to correct variable initialization issue
+
+* added uart0Signal() and uart1Signal() functions to check for incoming 
+  character without emptying the serial input FIFO.  macro is print.h is
+  getsignal().  this corrects a problem with the C signal() function
+
+============================================================================
+
+SRV-1 firmware build for Blackfin - 18 April 2009 
+    http://code.google.com/p/surveyor-srv1-firmware/downloads/list
+
+* added 'm' command to control 2nd bank of timers using PWM - same syntax
+  as 'M' command (lspeed, rspeed, delay), and corresponding motors2() 
+  command to C interpreter
+
+* changed format of response from 'ir', 'iR' and 'iw' commands to show the
+  device ID, eg.  ##ir21 3450
+  
+* added iodir(), ioread() and iowrite() functions to C interpreter
+  for GPIO-H15/14/13/12/11/10 (pins 32/31/30/29/28/27)
+
+* added battery() and peek() / poke() functions to C
+
+* changed default capture rates of OV7725 for better low light performance
+
+* added 'iW' command for multi-byte I2C writes.  this can be used to 
+  reprogram the I2C address of the HMC6352 compass from 0x21 to 0x22.  
+  to do this, make certain that you don't have an OV7725 camera installed, 
+  as it operates on I2C address 0x21.   from SRV1Test, in hex command mode, 
+  send 695721770044, then power cycle the HMC6352, then test that it moved 
+  to 0x22 by sending 69522241 a couple of times, and you should be getting 
+  good data from the compass at the new address
+
+* added support for AD7998 8-channel 12-bit A/D converter via C function
+  int x = analog(channel).  Channels 1-8 correspond to i2c device 0x20, 
+  channels 11-18 correspond to i2c device 0x23 and channels 21-28 
+  correspond to i2c device 0x24
+  
+* added $Axx console command to read analog channels 01-08, 11-18, 21-28
+
+* added support for LIS3LV02DQ 3-axis accelerometer, with tilt() command
+  in the C interpreter and $Tx console command.  tilt(1) or $T1 reads x-axis,
+  tilt(2) or $T2 reads y-axis, tilt(3) or $T3 reads z-axis
+
+* added $C console command to read HMC6352 compass
+
+============================================================================
+
+SRV-1 firmware test build for Blackfin - 15 March 2009 
+    http://code.google.com/p/surveyor-srv1-firmware/downloads/list
+
+* removed chess(), lisp() and original c() 
+
+* added picoc() C-interpreter - http://code.google.com/p/picoc/
+
+* added floating point emulation libary by "Lefteris"
+
+* added initial set of robot functions to picoC -
+  motors(), delay(), laser(), servo(), servo2(), time(), rand(),
+  signal(), input(), sonar(), range(), color(), blob(), imgcap(), 
+  imgrcap(), imgdiff(), compass(), readi2c(), readi2c2(), writei2c()
+
+* added sin(), cos(), tan(), asin(), acos() atan(), vpix() and vmean()
+  functions to picoC.  renamed servo() to servos(), servo2() 
+  to servos2(), color() to vcolor(), imgcap() to vcap(), imgrcap() 
+  to vrcap(), imgdiff() to vdiff(), blob() to vblob()
+
+* added neural net functions nnset(), nnshow(), nninit(), nntrain(),
+  nntest(), nnmatchblob(), nnlearnblob() to picoc()
+  
+* added interactive mode for picoC - invoked with '!'.  once stored
+  program (launched by 'Q') completes, picoC continues in interactive
+  mode until 'ESC' character received
+  
+* added gps functions to SRV_protocol and C interpreter.  '$g' command
+  will dump and parse gps NMEA strings and initialize uart1 to 57600baud
+  for Locoys LS20031 gps module
+
+* added support for OV7725 camera module
+
+*WARNINGS*
+    OV7725 I2C address conflicts with HMC6352 compass, so compass 
+        needs to be moved to 0x22 (44/45) address. To be safe, disconnect 
+        the HMC6352 before running this version
+    Also, note that setting the OV7725 to 1280x1024 causes lockup
+
+============================================================================
+
+SRV-1 firmware test build for Blackfin - 6 February 2009 
+    http://code.google.com/p/surveyor-srv1-firmware/downloads/list
+
+* rewrote vblob() - now handles vertically overlapping blobs and is much more 
+  accurate
+  
+* added delayUS() and delayNS() microsecond and nanosecond delay functions
+
+* made small changes to the laser_range() function for new vblob()
+
+* added myfunc.c for user defined functions
+
+* integrated neural net functions for pixel pattern matching
+  np - store a new pattern
+  nd - display a stored pattern
+  ni - initialize the network with random weights
+  nt - train the network from stored patterns
+  nx - test the network with sample pattern
+
+* added neural net console functions
+  nb - match pattern against specific blob from "vb"
+  ng - use largest blob as template for new pattern
+  
+============================================================================
+
+SRV-1 firmware build for Blackfin - 29 December 2008 
+    http://code.google.com/p/surveyor-srv1-firmware/downloads/list
+
+* changed heap size to 12MB, flash buffer size to 1MB.  added
+  two 512kb buffers for SPI transfers
+  
+* changed 'g2' image segmentation/edge algorithm again.  now hosts 2 bits 
+  for gx/gy edge detect and 3 bits each for U and V in svs_segcode() and
+  svs_segview()
+  
+* added check for empty flash buffer in C interpreter
+
+* added zR and zW commands - allows read and write of specific 64kB flash 
+  sectors (02 - 63) to/from the flash buffer.  'zR05' reads sector 05 to the flash
+  buffer;  'zW22' writes the flash buffer to flash sector 22.
+  
+* fixed problem with direction bits in setPWM() - the left and right motor
+  direction bits were swapped.
+
+* added TSCP chess engine (http://www.tckerrigan.com/Chess/TSCP) - invoke 
+  with 'C' command.  before running first time, save book openings "book.txt"
+  to flash sector 5 using new zW05 command.  
+  
+* changed rand() function to resolve some non-random behaviors uncovered by 
+  the chess engine.  also fixed indexing problem with double dimensioned
+  arrays in chess.c (compiler doesn't like '**' in place of '[][]' for 
+  indexing)
+  
+* fixed problem with failsafe() functions with motor power settings of 0x00
+
+============================================================================
+
+SRV-1 firmware build for Blackfin - 26 November 2008 
+    http://www.surveyor.com/blackfin/srv-blackfin-112608.zip
+
+* added complete malloc() and free() functions
+
+* added 'g2' edge detect - predominantly horizontal edges display
+  as cyan, vertical edges display as orange.  'T' command changes
+  threshold - default is 'T4', range is 'T1' to 'T9'
+
+* subsequently modified 'g2' edge detect to display edges in
+  white without horizontal/vertical orientation and to display non-edge 
+  pixels using 16-color segmentation
+  
+* renamed prototype_spi_transmit() / prototype_spi_receive() to 
+  svs_master() / svs_slave(); changed functions to 
+  accept buffer pointer and length as parameters; added CRC check
+  for transferred data
+
+* added printf(), sprintf(), putchar(), getch() and getchar().  getch()
+  is the blocking version of getchar()
+
+* string functions now properly named strcmp(), strchr(), strcpy(),
+  strdup(), strlen(), atoi(), itoa(), memset(), memcpy()
+  
+* added setjmp()/longjmp() for error exits from c() and lisp()
+ 
+* cleaned up lots of compiler warning messages and CR/LF confusion
+
+* fixed several problems with line editor - should work properly now
+  with telnet
+
+* added new lisp interpreter - invoke from buffer with 'P' or from
+  command line with '!'
+
+* added robot commands to lisp - robot, rand, delay, time, lasers, 
+  input, compass (HMC6352), ping (Maxbotics)
+
+* fixed vblob(), which hasn't worked properly since we removed 80x64 
+  scaling. also changed the order of the 'vb' displayed values - it
+  is now blobcnt, blobx1, blobx2, bloby1, bloby1.  there is still an 
+  issue with vblob() being unable to differentiate color clusters in 
+  the same vertical column, so a 2nd pass should be added to process
+  detected blobs.
+
+* added 'R' and 'r' laser range commands ('r' shows diagnostics), along 
+  with show_laser_range() and laser_range() functions.  added range() 
+  commands to C and Lisp interpreters.  some work still needed on 
+  thresholding.
+  
+* added '(console)' command and ';' comments to Lisp.  (console) command
+  returns control to the console in a Lisp program running from the 
+  flash buffer.  added (color) function for setting color bin -
+  (color 5 '(50 255 110 145 150 255)) sets bin 5 to red (confirm with
+  'vr5' command).  also added blob search function - (blob colorbin) - 
+  returns largest blob found matching colorbin
+  
+* added '(signal)' function to Lisp - returns 't' if any character
+  has been received on incoming channel, else returns 'nil'
+
+* fixed spi.c error which prevented bidirectional transfer
+
+* fixed atoi() truncation of negative numbers (this was an issue in 
+  the Lisp interpreter)
+
+* fixed laser_range() divide-by-zero error
+
+* added Makefile dependencies for header files
+
+todo:  
+  finish first version of SVS depth map calculations
+
+============================================================================
+
+SRV-1 firmware build for Blackfin - 5 October 2008 
+    http://www.surveyor.com/blackfin/srv-blackfin-100508.zip
+
+* added interface code for Pericynthion SRV1-X IMU/GPS board -
+  x? = menu, xA = analog data, xG = GPS, xs = setup, 
+  xb = bootloader, xC = console, xf = flash
+
+* changed spi.c $X and $R commands to transfer contents of 
+  131kb flash buffer from left to right Blackfin on SVS
+
+* added crc_flash_buffer(), invoked with 'zC'.  will be used to 
+  check SPI transfer between Blackfins on SVS
+
+* fixed problem with spi.c in handling binary data
+
+* further experiments with automatic segmentation using 16 colors
+  vz0 - clears color tables
+  vz1 - combination of Y and U|V (4 Y, 2 U, 2 V)
+  vz2 - U|V only (4 levels of U x 4 levels of V)
+  vz3 - U|V only (similar to vz2, but thresholds can be adjusted)
+  vz4 - Y only (16 levels of Y)
+  
+* changed 'vh' histogram function to display data more clearly
+
+============================================================================
+
+SRV-1 firmware build for Blackfin - 6 September 2008 
+    http://www.surveyor.com/blackfin/srv-blackfin-090608.zip
+
+* added NickK1066's spi.c code for master/slave communication between 
+  two Blackfins
+
+* added 'loop' primitive to lisp - loops continuously until enclosed
+  function returns false or nil.  
+
+* fixed error in quantization tables when jpeg quality is set to 1
+ 
+* eliminated 80x64 image scaling and corresponding vs, vf, vn, vg and 
+  vx commands.  changed vp to support full 1280x1024 resolution
+
+* fixed problem with color index() function which could affect blob()
+  results
+  
+* fixed bug in initTMR4() that caused right motor to turn on after sonar() 
+  call in C interpreter
+  
+* added vd command to dump complete set of camera registers
+
+* changed camera setup for higher capture speed and better quality.  
+  capture resolutions are now 160x120, 320x240, 640x480 and 1280x1024
+  
+* eliminated interface functions for Analog Devices ADXL202 
+  accelerometers - new commands will be added for SRV-1X IMU/GPS board.
+  also removed the neural net code from the build for now - it will
+  be back later.
+
+* added logic to test PORTH3 to determine whether processor is master or
+  slave on SVS - display result in Version string.  also added logic and 
+  'D' command to check the low-battery circuit on SVS
+  
+* added vz1, vz2, vz3 commands to test various color segmentation
+  schemes - used in conjunction with 'g1' color segmentation display
+  
+* changed loader structure to locate some code in L1 memory (.L1CODE) 
+  and some code in SDRAM.  location of module is defined in bftiny.x 
+  script.  to accomplish this, we had to split the init.c code
+  (formerly startup.asm) out of the rest of the load image, since init.o
+  has to run to set up the processor clock and memory before the rest
+  of the code can be loaded.  we now have C and Lisp built into the 
+  same image, and will soon be replace the current interpreters with much 
+  more capable interpreters.  the code in SDRAM runs slower than in 
+  .L1CODE, but next release of test code should have instruction cache 
+  enabled.
+  
+* changed name of ldr script to "load";  added "load2" for 2nd 
+  Blackfin on SVS
+  
+============================================================================
+
+SRV-1 firmware build for Blackfin - 6 May 2008 
+    http://www.surveyor.com/blackfin/srv-blackfin-050608.zip
+
+* added 'vz' command to zero all color bins, and 'vx0' / 'vx1' commands
+  to disable/enable 80x64 scaling for image processing 
+
+* modified OV9655 register settings for faster "shutter" and smoother
+  gain control adjustments
+  
+* added pseudo-random number generator function - rand(), which is also
+  callable from the C interpreter.  rand() returns a value between 0 
+  and 65535 (0x0 - 0xFFFF)
+
+* added "robot" command to Lisp interpreter.  initial support for
+  forward, back, left, right, stop, and time e.g. "robot forward" sends the 
+  robot forward, "robot time" reads the robot's millisecond RTC 
+  
+* added "rand" function to Lisp interpreter, which randomly returns 
+  T or nil
+
+* changed 'g' frame differencing command to 'g0', and added 'g1' to
+  visualize color segmentation.  'G' still disables frame differencing as
+  well as color segmentation.
+  
+============================================================================
+
+SRV-1 firmware build for Blackfin - 12 April 2008 
+    http://www.surveyor.com/blackfin/srv-blackfin-041208.zip
+
+* fixed conflict between I2C and SDDB commands that caused the OV9655 to 
+  become unresponsive after 'ir', 'iR' or 'iw' commands were issued
+  
+* added Veider's code for processing images at higher resolutions
+  in vblob() and vhist(), adding resolution() and scaling() functions
+  to C interpreter
+  
+* changed caption overlay to support current development work on YARB 1.0
+  (Yet Another Robotic Blimp), which displays Honeywell HMC6352 i2c compass
+  heading and Maxbotics ultrasonic ranging
+  
+* added simplified grab_and_send_frame() function to separate grab_frame()
+  from send_frame()
+  
+* made small change to ##vhist output to support higher resolutions
+
+* added 'h' command temporarily to support on-the-fly uart0 bitrate
+  changes for tests of higher bitrates on Matchport
+
+* fixed issue in send_frame() where sending of frame header wasn't
+  processing flow control signals, causing possible loss of frame
+  
+* added bitwise XOR to C interpreter
+
+* added small lisp interpreter, which runs code from the flash buffer
+  (same as C interpreter) and invoked with 'P'
+  
+* added malloc() and began building a string library
+  
+* changed stack size from 1kb (!!!)  to 4kb.  
+
+* found bug in ldr that prevented loading code images larger the 32kb.  
+  bug has been fixed in recent version of ldr-utils, which can be downloaded 
+  from
+    svn checkout svn://sources.blackfin.uclinux.org/toolchain/trunk/ldr-utils ldr-utils
+  or 
+    http://www.surveyor.com/blackfin/ldr-utils.zip
+  or
+    http://www.surveyor.com/blackfin/ldr-for-windows.zip
+  
+* modified Makefile to split builds of srv1-lisp.ldr and srv1-c.ldr.  added 
+  stubs in c.c and lisp.c to indicate if interpreter isn't present
+  
+* moved hardware serial flow control into uart0SendChar() in uart.c to solve 
+  buffer overrun problems in 'zd' flash buffer dump and other data dumps 
+  (e.g. ##vhist)
+
+* added 'vm'  ##vmean command to compute mean values for Y, U and V
+
+* added show_stack_ptr() and show_heap_ptr() display functions
+
+* changed from Lithp interpreter to Chaitin Lisp interpreter 
+  (http://www.umcs.maine.edu/~chaitin/rov.html).  added new command '!'
+  to run interpreter from console instead of flash buffer.  the new
+  interpreter needs garbage collection and robot specific functions, but it
+  is very fast and has a lot of capability
+  
+* reorganized memory usage - allocated 13MB for heap, got rid of 'zz' command
+  which is no longer used
+  
+* started using bfin-elf-gcc toolchain version 2008R1_RC8 instead of older
+  2006R2_RC6 - this corrected issues the compiler was having with the Lisp 
+  interpreter
+  
+============================================================================
+
+SRV-1 firmware build for Blackfin - 11 March 2008 
+    http://www.surveyor.com/blackfin/srv-blackfin-031108.zip
+
+* added 'iR' command to read two bytes from i2c device ('ir' command only
+  reads single byte).  corresponding C-func is readi2c2();
+
+* added silent_console flag to disable console output during execution of
+  interpreted C programs
+  
+* changed C-func blob() to retrieve multiple blobs - blob(colorbin#, blob#).  
+  first call to blob(color, 0) will trigger new blob search, with blobs
+  sorted by size.  cnt = blob(color, 1) will retrieve the 2nd largest blob,
+  etc.
+  
+* added C-func imgrcap() to capture a reference frame and imgdiff() to 
+  compute difference between reference frame and current frame
+  
+* added bp.c backprop neural net library, but haven't connected it to any
+  inputs or outputs yet
+
+* fixed bug that turned off servo2 (timer 6/7) if PWM mode was initialized
+  on timer 2/3
+
+* added 'zc' command to clear flash buffer
+
+* added 'E' command to launch flash buffer line editor - commands are
+  (T)op (B)ottom (P)revious line (N)ext line (L)ist (I)nsert until ESC 
+  (D)elete (H)elp (X)exit
+  
+* added 'y' command to invert (flip) video feed from upside-down camera,
+ 'Y' command to restore video orientation
+  
+* changed definition of imgdiff() to enable/disable frame differencing -
+  imgdiff(1) turns on frame differencing in C, imgdiff(0) turns it off
+  
+* added 'vh' histogram function to display distributions of Y, U and V
+
+* added motion estimation code which will be used for optical flow, 
+  but haven't linked the code to any callable functions yet
+
+============================================================================
+
+SRV-1 firmware build for Blackfin - 26 February 2008 
+    http://www.surveyor.com/blackfin/srv-blackfin-022608.zip
+	
+* added 'S' and 's' commands to SRV_protocol to control PPM-based servos and
+  speed controllers.  'M' command still controls timers 2/3 in PWM mode. 'S' 
+  controls timers 2/3, corresponding to s-32 bus pins 7/8, and 's' controls 
+  timers 6/7, corresponding to bus pins 5/6
+  
+* disabled keypad commands '0' - '9' if motor controller is in 'S' PPM mode
+  rather than 'M' PWM mode.  If in PWM mode, an 'M' command is required 
+  before the keypad commands become active.
+  
+* added '+', '-', '<', '>' commands for trimming motor speeds defined by 'S' 
+  and 'M'. '+' and '-' increase/decrease speeds of both channels, while '<'
+  and '>' change the balance between the two channels
+  
+* added 'F' and 'f' commands for failsafe operation.  The 'F' command is
+  followed by two bytes representing the power level (0x00 - 0x64) for
+  each motor.  It enables failsafe mode, which sets the motors to those
+  levels in case no communication is received from host within
+  2 seconds.  'f' disables failsafe mode
+
+* added 'ir' and 'iw' commands to read and write I2C devices - syntax is
+  'irxy' - where x is device id (0x00-0x7F) and y is register, returns 
+  ##ir zz - where zz is the register value
+  'iwxyz' - write value z to register y of device x - returns ##iw
+
+* 'u' command to read ADXL 202EB accelerometers
+* 'U' command to lock 's' channel servos to accelerometers (work in progress)
+
+* added 'vp' command to sample individual YUV pixel.  format is 'vpxxyy'
+  where xx is the x coordinate (00-79) and yy is the y coordinate (00-63).
+  yy = '00' corresponds to pixels on the bottom row of the image
+
+* added 'p' command to ping Maxbotics sonar modules.  supports up to 4 modules
+  on S-32 pin 27, 28, 29, 30, with trigger signal on pin 18.  return value
+  is currently # inches * 100 (2500 = 25 inches).  return value of 0 means
+  that no module was attached to a particular channel.  we will change to 
+  metric or other scalings based on user feedback
+
+* in C interpreter, fixed blob() and scan() functions;  added color(), 
+  count(), readi2c(), writei2c(), sonar(), servo(), servo2()
+
+* added 'g' and 'G' commands for frame differencing.  'g' grabs a reference
+  frame and puts SRV-1 into frame differencing mode, so images requested
+  by the 'I' command show a computed difference of all pixels in the
+  most recent frame versus the reference frame.  'G' disables frame 
+  differencing.  Every time 'g' is sent, the reference frame is updated.
+  
+============================================================================
+
+SRV-1 firmware build for Blackfin - 16 December 2007
+	http://www.surveyor.com/blackfin/srv-blackfin-121607.zip
+
+* reorganized code structure for easier maintenance and extension - this
+  work was actually done by the Transterpreter development group -
+  http://www.transterpreter.org - who are in process of porting the
+  Transterpreter Virtual Machine and OccamPi programming language to the
+  SRV-1 Blackfin.  a source code repository has been created for svn 
+  access to the SRV-1 code - access is currently private, but public
+  checkout access is planned.
+  
+* added vision functions to firmware: 
+      vc = set colors
+      vg = grab color sample
+      vs = scan each pixel column until color mismatch
+      vf = search each pixel column until color is found
+      vn = count number of pixels that match color in each pixel column
+      vb = find blobs
+      vr = recall colors
+  parameters are now decimal instead of hex (as in ARM7 version), this
+  is less compact but a lot easier to read.  the functions are still based
+  on an 80-column model, but are independent of capture resolution.  note 
+  that with higher resolutions, we are just sub-sampling pixels, so more
+  consistent results will be achieved by reducing capture resolution, since
+  the camera averages rather than subsamples when scaling.  syntax 
+  definition for these commands is found at
+      http://www.surveyor.com/SRV_protocol_bf.html
+
+* added a couple of color functions to the C interpreter:
+      scan(color) - divides field of view into 3 overlapping groups 
+          of 40 columns, returned in _x, _y, _z
+      blob(color) - searches for blob by color, returns center point _x, _y 
+          and width _z
+
+* changed the motor settings so sufficient power is provided to motors 
+  during cw/ccw rotation commands.
+  
+* tested new version of ldr-utils that support Blackfin UART boot mode via
+  the Matchport.  to boot the Blackfin via UART, set Matchport serial 1 to
+  115200 8N1 with no flow control and jumper 7-8 on J1 needs to 
+  be removed (this jumper sets SPI flash boot mode), and ldr command is 
+  issued -
+      ldr -l srv1.ldr 192.168.0.15:10001  (SRV-1 IP address)
+  when ldr indicates autoboot, the Blackfin is reset by briefly shorting
+  pins 1-2 of J1, and program should load.  note that this only puts a
+  running version of firmware into program memory, but does not store 
+  anything to boot flash.  this requires another step, using the X command
+  for XMODEM transfer and the 'zZ' command to write the boot image to flash
+
+* linux - though on a separate development track from this firmware, code
+  has been checked into the official uClinux code repository - 
+      svn co svn://firewall-sources.blackfin.uclinux.org:80/svn/uclinux-dist/trunk uclinux-dist
+      make menuconfig, select Surveyor/SRV1
+      make
+    
+* zigbee - discovered that XBee modules are not compatible with Blackfin at
+  115kbps.  this is a problem on XBee side - their 115k is actually 112k, 
+  the Blackfin UART does not tolerate the difference (the ARM7 was more 
+  forgiving).  solution is to run the Blackfin and XBee at 57600 baud
+
+* work items:
+      range finder - if the robot isn't moving, we can look at difference 
+          between consecutive frames with lasers turned on or off.  if
+          the robot is moving, we have to search for the laser 
+          reflections.  to support this, we will likely add some frame
+          storage commands along with supporting operations
+      back-emf - the current robot motor control boards have circuits to
+          measure motor rotation speed, but no firmware support has
+          yet been added for speed control
+      serial port passthrough - we need to add protocol support for UART1
+          communication
+
+============================================================================
+
+SRV-1 firmware build for Blackfin - 5 November 2007
+	http://www.surveyor.com/blackfin/srv-blackfin-110707.zip
+
+* changed definition of 'zd' flash dump command - zd now dumps the
+  contents of the flash buffer in SDRAM, not the flash sector in SPI
+  flash. to dump the flash sector, use 'zr' to read the sector into 
+  the buffer, and then 'zd' to dump the contents.  this is useful 
+  because the 'X' command transfers data from the host to the flash
+  buffer, and the contents of the flash buffer can be confirmed before
+  the data is committed to flash storage
+
+* added zZ command to write flash boot sectors (0-1) from flash buffer.  
+  also added srv1.ldr, a version of srv1.bin that loads without u-boot. 
+  ldr-utils for building srv1.ldr are downloaded from 
+  http://www.surveyor.com/blackfin/ldr-utils.zip
+  srv1.ldr.115k and srv1.ldr.921k version of srv1.ldr are included with
+  this distribution
+
+* tested XMODEM file transfer using lsz and sx commands on Linux and 
+  OS/X, mxOSX on OS/X, and ShamCom (www.shamrock.de) on Windows.  The 
+  syntax for using sx or lsz to send srv1.ldr is 
+      sx -X -k -b --tcp-client 192.168.0.15:10001 srv1.ldr
+
+  sx has a -c option to send a command, so ideally, we could issue
+      sx -c "X" -X -k -b --tcp-client 192.168.0.15:10001 srv1.ldr
+  
+  in order to start the X command to receive a file via XMODEM, but
+  we haven't been able to get that to work, so we have to use telnet
+  to send the 'X' command, then exit to start the sx command.  If 
+  someone knows a better way to do this, we would appreciate the 
+  guidance.  unfortunately, c-kermit doesn't support 8-bit data in
+  file transfers within a telnet session
+
+* added 'l' and 'L' commands to the SRV protocol to turn lasers on and 
+  off on SRV-1 robot
+
+* fixed problem in C interpreter with processing of ^Z
+
+============================================================================
+
+SRV-1 firmware build for Blackfin - 31 October 2007
+	http://www.surveyor.com/blackfin/srv-blackfin-103107.zip
+
+* two versions of firmware built - srv1.bin.115k and srv1.bin.921k
+
+* numerous improvements to camera code - double-buffering now supported
+  (eliminates "image tearing" artifacts), problem with camera sync when
+  changing resolution is resolved, and colors are a lot more stable
+  
+* boot image (srv1.bin) can now be transferred via xmodem and written to
+  flash with the new "zz" command
+  
+* caption overlay function added - currently displays frame count, but
+  can easily be modified.  turned off with 'O', on with 'o'
+  
+* Work items:
+    - WLAN throughput is only 600kbps with 921kbps setting - need to try
+         higher baud rate on Matchport
+    - need to add adjustment for shutter speed to reduce motion blurring
+    - no image processing functions yet added (blob, scan, etc)
+    - still need to add back-emf speed control and laser ranging
+    - add character scaling, position and color to caption overlay function
+    
+============================================================================
+
+SRV-1 firmware build for Blackfin - 16 October 2007
+	http://www.surveyor.com/blackfin/srv-blackfin-101607.zip
+
+* Makefile has compiler optimizations (-O2) enabled
+
+* UART0 baud rate set to 921600 in config.h
+
+* OV9655 hardware scaling now works - support for on-the-fly resolution
+  change.  note that at higher resolutions, SRV1Console will timeout
+  on transfers taking more than 1 second or requiring more than 100kbytes.
+  this can be fixed in SRV1Console, but should be noted if testing with a
+  low UART speed
+
+* memory pointers are now #define'd instead of hardwired
+
+* flash memory and xmodem commands all work with same memory buffer - it's
+  possible to transfer a file from the host with xmodem-1k (up to 1 flash
+  sector = 65536 bytes) with 'X', write the file to the user flash segment
+  (0x00040000) with 'zw', read the flash segment back into memory with 'zr',
+  and dump the buffer contents to the console with 'zd'
+  
+* C interpreter also runs from the flash buffer, so a C program can be
+  transferred from the host, written to flash, read from flash, and/or
+  executed
+
+* Work items:
+    - need to tweak the automatic gain control settings for the OV9655
+    - "image tearing" solution is currently disabled - looking at
+        alternatives
+    - C interpreter error handling isn't quite right and can cause
+        crashes
+    - no image processing functions yet added (blob, scan, etc)
+    - still room for JPEG speedups - DCT is optimized, but huffman isn't
+    - still need to add back-emf speed control and laser ranging
+    
+    
+============================================================================
+
+SRV-1 firmware build for Blackfin - 14 October 2007 -
+	http://www.surveyor.com/blackfin/srv-blackfin-101407.zip
+
+This is work-in-progress - most core functions have been added but are not
+fully integrated into SRV_protocol command structure ...
+
+* Makefile has compiler optimizations (-O2) disabled, and includes -g gdb
+debug symbols
+
+* works with SRV1Console, though some buttons need to be redefined in
+srv.config to test various functions (e.g. lasers).
+
+* supports UYVY image capture at 1280x1024 with software scaling in even
+multiples to lower resolution.  default scaling to 320x256.  hardware scaling
+in OV9655 not yet implemented.
+
+* UART0 baud rate is set to 115200 in config.h.  runs at 921600 baud.  haven't
+tested higher rates (requires other firmware in Matchport/Wiport).
+
+* C interpreter works, but generates some error messages on set() and get()
+commands when using const values in place of pointers.
+
+* motor commands work, but back-emf speed control hasn't been added.
+
+* lasers can be switched on and off, but laser ranging function hasn't been
+added.
+
+* no image processing functions yet supported (e.g. blob, scan) besides JPEG
+compression.
+
+* Xmodem-1k file transfer and flash read/write are implemented, but not
+fully integrated into the command structure.
+
+

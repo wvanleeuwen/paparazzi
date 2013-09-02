@@ -1,0 +1,9 @@
+echo type X [enter], then control-C, to start XMODEM transfer of srv1.ldr.stereo:
+nc 192.168.0.15 10002
+sleep 1
+lsz -Xkbv --tcp-client 192.168.0.15:10002 srv1.ldr.stereo
+sleep 1
+echo
+echo make certain that file transfer successfully completed, then
+echo type zZ [enter] to write srv1.ldr.stereo to the flash boot sector:
+nc 192.168.0.15 10002
