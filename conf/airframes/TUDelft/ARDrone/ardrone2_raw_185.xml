@@ -1,4 +1,4 @@
-<!DOCTYPE airframe SYSTEM "../airframe.dtd">
+<!DOCTYPE airframe SYSTEM "../../airframe.dtd">
 
 <airframe name="ardrone2_raw">
 
@@ -70,9 +70,23 @@
     <set servo="BOTTOM_RIGHT" value="motor_mixing.commands[SERVO_BOTTOM_RIGHT]"/>
   </command_laws>
 
-    <include href="conf/airframes/TUDelft/ardrone2_raw_185_calib.xml"/>
-
   <section name="IMU" prefix="IMU_">
+    <define name="ACCEL_X_NEUTRAL" value="2056"/>
+    <define name="ACCEL_Y_NEUTRAL" value="2060"/>
+    <define name="ACCEL_Z_NEUTRAL" value="2052"/>
+
+    <define name="MAG_X_NEUTRAL" value="16"/>
+    <define name="MAG_Y_NEUTRAL" value="-11"/>
+    <define name="MAG_Z_NEUTRAL" value="-131"/>
+    <define name="MAG_X_SENS" value="17.206234987" integer="16"/>
+    <define name="MAG_Y_SENS" value="16.4124010821" integer="16"/>
+    <define name="MAG_Z_SENS" value="13.6629556861" integer="16"/>
+    <define name= "MAG_X_CURRENT_COEF" value="0.00202964254187"/>
+    <define name= "MAG_Y_CURRENT_COEF" value="-0.000446794092786"/>
+    <define name= "MAG_Z_CURRENT_COEF" value="-0.000974773119924"/>
+
+
+
     <!-- roll -->
     <define name="BODY_TO_IMU_PHI" value="0." unit="deg"/>
     <!-- pitch -->
