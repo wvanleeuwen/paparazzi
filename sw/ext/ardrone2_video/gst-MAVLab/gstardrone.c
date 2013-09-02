@@ -60,13 +60,13 @@ enum
 static GstStaticPadTemplate sink_factory = GST_STATIC_PAD_TEMPLATE ("sink",
     GST_PAD_SINK,
     GST_PAD_ALWAYS,
-    GST_STATIC_CAPS ("ANY")
+    GST_STATIC_CAPS ("video/x-raw-yuv, format=(fourcc)UYVY"	)
     );
 
 static GstStaticPadTemplate src_factory = GST_STATIC_PAD_TEMPLATE ("src",
     GST_PAD_SRC,
     GST_PAD_ALWAYS,
-    GST_STATIC_CAPS ("ANY")
+    GST_STATIC_CAPS ("video/x-raw-yuv, format=(fourcc)UYVY"	)
     );
 
 GST_BOILERPLATE (Gstmavlab, gst_mavlab, GstElement,
@@ -202,6 +202,9 @@ gst_mavlab_set_caps (GstPad * pad, GstCaps * caps)
   gst_object_unref (filter);
 
 
+  
+  
+  
   //make the image size known
    const GstStructure *str;
 	str = gst_caps_get_structure (caps, 0);
@@ -214,7 +217,7 @@ gst_mavlab_set_caps (GstPad * pad, GstCaps * caps)
 
   skipFrames=0;
   img_uncertainty= (unsigned char *) calloc(imgWidth*imgHeight*2,sizeof(unsigned char)); //TODO: find place to put: free(img_uncertainty);
-   
+   printf("Pointer: %d\n",img_uncertainty);
   return gst_pad_set_caps (otherpad, caps);
 }
 
@@ -228,13 +231,9 @@ static GstFlowReturn gst_mavlab_chain (GstPad * pad, GstBuffer * buf)
 	filter = GST_MAVLAB (GST_OBJECT_PARENT (pad));
 
 	unsigned char * img = GST_BUFFER_DATA(buf);   
-  img_uncertainty= (unsigned char *) calloc(imgWidth*imgHeight*2,sizeof(unsigned char));
-
-	if (skipFrames>10) //first frame crashes the algorithm... depending on adjust_factor even more than one frame... weird 
-		segment_no_yco_AdjustTree(img,img_uncertainty,adjust_factor);
-	else
-		skipFrames++;
-	free(img_uncertainty);
+	
+	//if GST_BUFFER_SIZE(buf) <> imgheight*imgwidth*2 -> wrong color space!!!
+	segment_no_yco_AdjustTree(img,img_uncertainty,adjust_factor);
 	if (filter->silent == FALSE) {
 		g_print(".");
 	}
