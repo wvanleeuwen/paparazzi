@@ -82,6 +82,13 @@
         <arg flag="8" constant="/dev/ttyUSB1"/>
       </program>
     </session>
+    <session name="ARDrone2 Flight">
+      <program name="Server"/>
+      <program name="GCS"/>
+      <program name="Data Link">
+        <arg flag="-udp"/>
+      </program>
+    </session>
     <session name="[OBC] USB0: xTend Transparent @38400 with FLOW CONTROL">
       <program name="Data Link">
         <arg flag="-d" constant="/dev/ttyUSB0"/>
@@ -96,15 +103,7 @@
       </program>
       <program name="Messages"/>
     </session>
-   <session name="ARDrone2 Flight">
-      <program name="Server"/>
-      <program name="GCS"/>
-      <program name="Data Link">
-        <arg flag="-udp"/>
-      </program>
-    </session>
-
-     <session name="SmartUAV">
+    <session name="SmartUAV">
       <program name="Ivy2Udp">
         <arg flag="-h" constant="127.0.0.1"/>
         <arg flag="-id" constant="8"/>
@@ -227,6 +226,12 @@
         <arg flag="-c" constant="telemetry"/>
       </program>
     </session>
+    <session name="ARDrone2 kevin">
+      <program name="Data Link">
+        <arg flag="-udp"/>
+      </program>
+      <program name="Messages"/>
+    </session>
     <session name="USB: 868MHz Transparant @ 9600">
       <program name="Data Link">
         <arg flag="-d" constant="/dev/ttyUSB0"/>
@@ -248,27 +253,10 @@
         <arg flag="-udp"/>
       </program>
       <program name="Joystick">
-        <arg flag="-ac" constant="ardrone2_raw"/>
+        <arg flag="-ac" constant="ardrone2_raw_sirf"/>
         <arg flag="extreme_3d_pro.xml"/>
         <arg flag="-id" constant="2"/>
       </program>
-    </session>
-    <session name="ARDrone2 Flight_video_vlc">
-      <program name="Server"/>
-      <program name="Data Link">
-        <arg flag="-udp"/>
-      </program>
-      <program name="Server"/>
-      <program name="GCS">
-        <arg flag="-layout" constant="left_col.xml"/>
-        <arg flag="-plugin" constant="cvlc file:///home/houjebek/svn/Aero/sdp/x86_config-h264.sdp --drawable-xid="/>
-      </program>
-    </session>
-    <session name="ARDrone2 kevin">
-      <program name="Data Link">
-        <arg flag="-udp"/>
-      </program>
-      <program name="Messages"/>
     </session>
     <session name="Forward C172 to SkyWalker over ttyUSB1">
       <program name="IvySerialBridge">
@@ -294,6 +282,17 @@
         <arg flag="-t" constant="sim"/>
         <arg flag="--boot"/>
         <arg flag="--norc"/>
+      </program>
+    </session>
+    <session name="ARDrone2 Flight_video_vlc">
+      <program name="Server"/>
+      <program name="Data Link">
+        <arg flag="-udp"/>
+      </program>
+      <program name="Server"/>
+      <program name="GCS">
+        <arg flag="-layout" constant="left_col.xml"/>
+        <arg flag="-plugin" constant="cvlc file:///home/houjebek/svn/Aero/sdp/x86_config-h264.sdp --drawable-xid="/>
       </program>
     </session>
     <session name="Vert plot USB0: XBee API @57600">
