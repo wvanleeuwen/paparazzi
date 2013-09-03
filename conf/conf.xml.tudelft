@@ -10,6 +10,16 @@
    gui_color="red"
   />
   <aircraft
+   name="ChouChou"
+   ac_id="6"
+   airframe="airframes/examples/microjet.xml"
+   radio="radios/cockpitSX.xml"
+   telemetry="telemetry/default_fixedwing.xml"
+   flight_plan="flight_plans/basic.xml"
+   settings=" settings/fixedwing_basic.xml"
+   gui_color="blue"
+  />
+  <aircraft
    name="Discovery"
    ac_id="99"
    airframe="airframes/TUDelft/openuas_discovery.xml"
@@ -186,7 +196,7 @@
    radio="radios/cockpitSX.xml"
    telemetry="telemetry/default_rotorcraft.xml"
    flight_plan="flight_plans/rotorcraft_basic.xml"
-   settings="settings/rotorcraft_basic.xml settings/control/rotorcraft_guidance.xml settings/control/stabilization_att_int.xml settings/control/stabilization_rate.xml"
+   settings=" settings/rotorcraft_basic.xml settings/control/rotorcraft_guidance.xml settings/control/stabilization_att_int.xml settings/control/stabilization_rate.xml"
    gui_color="blue"
   />
   <aircraft
