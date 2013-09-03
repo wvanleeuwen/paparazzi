@@ -19,6 +19,7 @@
 
 #include <stdlib.h>     /* calloc, exit, free */
 #include <unistd.h>		//usleep
+#include <stdio.h> /* printf */
 
 #include <gst/gst.h>
 
@@ -217,7 +218,6 @@ gst_mavlab_set_caps (GstPad * pad, GstCaps * caps)
 
   skipFrames=0;
   img_uncertainty= (unsigned char *) calloc(imgWidth*imgHeight*2,sizeof(unsigned char)); //TODO: find place to put: free(img_uncertainty);
-   printf("Pointer: %d\n",img_uncertainty);
   return gst_pad_set_caps (otherpad, caps);
 }
 

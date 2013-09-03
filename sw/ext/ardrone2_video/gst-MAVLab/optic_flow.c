@@ -735,11 +735,11 @@ void getGradientPatch(int* Patch, int* DX, int* DY, int half_window_size)
 
 int getSumPatch(int* Patch, int size)
 {
-	int x, y, sum, threshold;
+	int x, y, sum; // , threshold
 	unsigned int ix;
 	
 	// in order to keep the sum within range:
-	threshold = 50000; // typical values are far below this threshold
+	//threshold = 50000; // typical values are far below this threshold
 
 	sum = 0;
 	for(x = 0; x < size; x++)
