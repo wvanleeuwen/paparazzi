@@ -10,5 +10,5 @@ export DSP_PATH=/opt/arm/tidsp-binaries-23.i3.8/
 
 
 #gst-launch v4l2src device=/dev/video2 ! videorate ! 'video/x-raw-yuv,framerate=15/1' ! videoscale ! video/x-raw-yuv, width=320, height=240 ! example tcp_port=2002 threshtune=99 ! dspmp4venc ! rtpmp4vpay config-interval=2 ! udpsink host=192.168.1.3 port=5000
-#gst-launch v4l2src device=/dev/video2 ! videorate ! 'video/x-raw-yuv,framerate=15/1' ! videoscale ! video/x-raw-yuv, width=320, height=240 ! ffmpegcolorspace ! zbar ! dspmp4venc ! rtpmp4vpay config-interval=2 ! udpsink host=192.168.1.3 port=5000
-gst-launch v4l2src device=/dev/video1 ! videorate ! 'video/x-raw-yuv,framerate=15/1' ! videoscale ! video/x-raw-yuv, width=160, height=96 ! mavlab adjust=6 ! queue ! dspmp4venc ! rtpmp4vpay config-interval=2 ! udpsink host=192.168.1.3 port=5000
+gst-launch v4l2src device=/dev/video2 ! videorate ! 'video/x-raw-yuv,framerate=15/1' ! videoscale ! video/x-raw-yuv, width=320, height=240 ! ffmpegcolorspace ! zbar ! dspmp4venc ! rtpmp4vpay config-interval=2 ! udpsink host=192.168.1.3 port=5000
+#gst-launch v4l2src device=/dev/video1 ! videorate ! 'video/x-raw-yuv,framerate=15/1' ! videoscale ! video/x-raw-yuv, width=160, height=96 ! mavlab adjust=6 ! queue ! dspmp4venc ! rtpmp4vpay config-interval=2 ! udpsink host=192.168.1.3 port=5000
