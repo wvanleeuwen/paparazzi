@@ -36,7 +36,7 @@
     <program name="Messages" command="sw/ground_segment/tmtc/messages">
       <arg flag="-b" variable="ivy_bus"/>
     </program>
-	<program name="Video" command="sw/ground_segment/video/startvideo.sh"/>
+    <program name="Video" command="sw/ground_segment/video/startvideo.sh"/>
     <program name="Settings" command="sw/ground_segment/tmtc/settings">
       <arg flag="-b" variable="ivy_bus"/>
     </program>
@@ -254,7 +254,7 @@
         <arg flag="-udp"/>
       </program>
       <program name="Joystick">
-        <arg flag="-ac" constant="ardrone2_raw_sirf"/>
+        <arg flag="-ac" constant="ardrone2_raw_181"/>
         <arg flag="extreme_3d_pro.xml"/>
         <arg flag="-id" constant="2"/>
       </program>

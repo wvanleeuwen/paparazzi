@@ -21,6 +21,10 @@ extern void segmentSkyUncertainty2(unsigned char *frame_buf, unsigned char *fram
 extern void segment_no_yco(unsigned char *frame_buf, unsigned char *frame_buf2);
 extern void segment_no_yco_AdjustTree(unsigned char *frame_buf, unsigned char *frame_buf2, int adjust_factor);
 
+void getObstacles(unsigned int* obstacles, unsigned int n_bins, unsigned char *frame_buf, unsigned int* max_bin, unsigned int* obstacle_total, int MAX_SIGNAL);
+void getUncertainty(unsigned int* uncertainty, unsigned int n_bins, unsigned char *frame_buf);
+void getObstacles2Way(unsigned int* obstacles, unsigned int n_bins, unsigned char *frame_buf, unsigned int* max_bin, unsigned int* obstacle_total, int MAX_SIGNAL, int pitch_pixels, int roll_angle);
+
 void skyseg_interface_i(unsigned char *frame_buf, unsigned char *frame_buf2, char adjust_factor, unsigned int counter);
 
 #endif /* GUIDO */

@@ -162,9 +162,9 @@ void video_receive(void) {
 	//read the data from the video tcp socket
 
 	if (Read_msg_socket((char *) &gst2ppz,sizeof(gst2ppz))>=0) {
-		printf("Received data. x: %d, y: %d, counter: %d\n",gst2ppz.blob_x1,gst2ppz.blob_y1,gst2ppz.counter);
-		printf("pos.x: %d, pos.y: %d, pos.z: %d\n",stateGetPositionEnu_f()->x,stateGetPositionEnu_f()->y,stateGetPositionEnu_f()->z);
-		printf("speed.x: %d, speed.y: %d, speed.z: %d\n",stateGetSpeedEnu_f()->x,stateGetSpeedEnu_f()->y,stateGetSpeedEnu_f()->z);
+		//printf("Received data. x: %d, y: %d, counter: %d\n",gst2ppz.blob_x1,gst2ppz.blob_y1,gst2ppz.counter);
+		//printf("pos.x: %d, pos.y: %d, pos.z: %d\n",stateGetPositionEnu_f()->x,stateGetPositionEnu_f()->y,stateGetPositionEnu_f()->z);
+		//printf("speed.x: %d, speed.y: %d, speed.z: %d\n",stateGetSpeedEnu_f()->x,stateGetSpeedEnu_f()->y,stateGetSpeedEnu_f()->z);
 		video_impl.counter = gst2ppz.counter;
 
     	DOWNLINK_SEND_VIDEO_TELEMETRY( DefaultChannel, DefaultDevice, &gst2ppz.blob_x1, &gst2ppz.blob_y1,&gst2ppz.blob_x2, &gst2ppz.blob_y2,&gst2ppz.blob_x3, &gst2ppz.blob_y3,&gst2ppz.blob_x4, &gst2ppz.blob_y4);  

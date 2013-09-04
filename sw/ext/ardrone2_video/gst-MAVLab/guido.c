@@ -4,6 +4,11 @@
 #include <stdlib.h>     /* abs */
 #include <stdio.h> /* printf */
 
+#define N_BINS 10
+const int MAX_ROLL_ANGLE = 60;
+const int MAX_PITCH_ANGLE = 40;
+const int MAX_I2C_BYTE = 254;
+
 // *****************
 // INLINE FUNCTIONS:
 // *****************
@@ -954,9 +959,219 @@ extern void segment_no_yco_AdjustTree(unsigned char *frame_buf, unsigned char *f
 	}
 }
 
+void getObstacles(unsigned int* obstacles, unsigned int n_bins, unsigned char *frame_buf, unsigned int* max_bin, unsigned int* obstacle_total, int MAX_SIGNAL)
+{
+    unsigned int x,y,ix,GRND, bin_size, bin, HALF_HEIGHT, bin_surface;	
+    // reset obstacles values
+    for(bin = 0; bin < n_bins; bin++)
+    {
+		obstacles[bin] = 0;
+    }
+    bin_size = imgWidth / n_bins;
+    HALF_HEIGHT = imgHeight / 2;
+	bin_surface = bin_size * HALF_HEIGHT;	
+    GRND = 0x00;
+    // frame_buf contains the segmented image. All non-zero elements are sky.
+    // This function assumes no pitch and roll. 
+    for(x = 0; x < imgWidth; x++)
+    {
+		for(y = 0; y < HALF_HEIGHT; y++)
+		{
+		    ix = image_index(x,y);
+		    if(frame_buf[ix] == GRND) // Of course, the original image could also use black pixels - of which probably few in the sky
+		    {
+				bin = x / bin_size;
+				if(bin >= n_bins) 
+				{	
+					bin = n_bins-1;
+				}
+				obstacles[bin]++;
+		    }
+		}
+    }
+    // obstacles[bin] should have a maximum corresponding to MAX_SIGNAL
+	(*max_bin) = 0;
+	(*obstacle_total) = 0;
+
+    for(bin = 0; bin < n_bins; bin++)
+    {
+		obstacles[bin] *= MAX_SIGNAL;
+		obstacles[bin] /= bin_surface;
+		if(obstacles[bin] > (*max_bin))
+		{
+			(*max_bin) = obstacles[bin];
+		}
+		(*obstacle_total) += obstacles[bin];
+    }
+	(*obstacle_total) /= n_bins;
+}
 /*
+void getObstacles2Way(unsigned int* obstacles, unsigned int n_bins, unsigned char *frame_buf, unsigned int* max_bin, unsigned int* obstacle_total, int MAX_SIGNAL, int pitch_pixels, int roll_angle)
+{
+	// procedure:
+	// 1) determine the horizon line on the basis of pitch and roll
+	// 2) determine the central point projected on the horizon line
+	// 3) determine the step_x in order to retain the same bin_size along the horizon line
+	// 4) run over the image from left to right in lines parallel to the horizon line
+	unsigned int ix,bin;
+	int a, b, halfWidth, halfHeight;
+	int i, x, y;
+	int x1, y1, x2, y2, RESOLUTION;
+	int a2, b2, x12, y12, bin_size, step_x;
+	int xx, yy, x_start;
+	int bin_surface, total_pixels;
+	int start_bin, stop_bin;
+	int CENTER_BINS = 1;
+	halfWidth = imgWidth / 2;
+	halfHeight = imgHeight / 2;
+	bin_size = imgWidth / n_bins;
+
+	// initialize bins:
+    for(bin = 0; bin < n_bins; bin++)
+    {
+		obstacles[bin] = 0;
+    }
+
+	// 1) determine the horizon line on the basis of pitch and roll
+	RESOLUTION = 1000;
+	horizonToLineParameters(pitch_pixels, roll_angle, &a, &b);
+
+	// 2) determine the central point projected on the horizon line:
+	x1 = -halfWidth;
+	y1 = (b + a * x1) / RESOLUTION;
+	x2 = halfWidth;
+	y2 = (b + a * x2) / RESOLUTION;
+		
+
+	if(a == 0) a = 1;
+	a2 = (RESOLUTION / a) * RESOLUTION; // slope orthogonal to a
+	b2 = halfHeight * RESOLUTION; // goes through the center
+	x12 = (100*(b2 - b)) / (a + a2); // RESOLUTION factor disappears
+	x12 /= 100;
+	y12 = (a * x12 + b) / RESOLUTION;
+	
+	// only further process the image if the horizon line is entirely visible
+	if(y1 >= 0 && y1 < imgHeight && y2 >= 0 && y2 < imgHeight)
+	{
+		// 3) determine the step_x in order to retain the same bin_size along the horizon line
+		step_x = (int)isqrt(
+			(unsigned int) (bin_size * bin_size) / (((a*a) / (RESOLUTION*RESOLUTION)) + 1)
+		);
+
+		// 4) run over the image from left to right in lines parallel to the horizon line
+		x_start = x12 - (n_bins / 2) * step_x;
+		
+		for(i = 0; i > -halfHeight; i--)
+		{
+			for(x = x_start; x < halfWidth; x++)
+			{
+				// determine the appropriate bin:
+				bin = (x - x_start) / step_x;
+				if(bin >= n_bins) bin = n_bins - 1;
+				y = (a * x + b) / RESOLUTION + i;
+				// transform to image coordinates:
+				xx = x + halfWidth;
+				yy = y;
+				
+				if(xx >= 0 && xx < imgWidth && yy >= 0 && yy < imgHeight)
+				{
+					ix = image_index(xx,yy);
+					if(isGroundPixel(frame_buf, ix))
+					{
+						// make pixel red
+						redPixel(frame_buf, ix);
+						// add pixel to obstacle bin:
+						obstacles[bin]++;						
+					}
+				}
+			}
+		}
+
+		// get the variables of interest and transform them to output form
+		bin_surface = bin_size * halfHeight;
+		total_pixels = imgWidth * halfHeight;
+	    // obstacles[bin] should have a maximum corresponding to MAX_SIGNAL
+		(*max_bin) = 0;
+		(*obstacle_total) = 0;
+		if(!CENTER_BINS)
+		{
+			start_bin = 0; stop_bin = n_bins;
+		}
+		else
+		{
+			start_bin = 2; stop_bin = n_bins - 2;
+		}
+	    for(bin = 0; bin < n_bins; bin++)
+	    {
+			obstacles[bin] *= MAX_SIGNAL;
+			obstacles[bin] /= bin_surface;
+			if(obstacles[bin] > (*max_bin))
+			{
+				(*max_bin) = obstacles[bin];
+			}
+			(*obstacle_total) += obstacles[bin];
+	    }
+		(*obstacle_total) /= n_bins;	
+
+	}
+	else
+	{
+		(*max_bin) = 0;
+		(*obstacle_total) = 0;
+	}
+	// 1000 is the resolution of the tan-function
+	drawLine((unsigned char *)FRAME_BUF, a, y1*RESOLUTION, RESOLUTION);
+	blackDot((unsigned char *)FRAME_BUF, x12+halfWidth, y12);
+}
+
+*/
+
+void getUncertainty(unsigned int* uncertainty, unsigned int n_bins, unsigned char *frame_buf)
+{
+    unsigned int x,y, ix, bin_size, bin, HALF_HEIGHT, uncertainty_line, last_bin;
+    // reset uncertainty values
+    for(bin = 0; bin < n_bins; bin++)
+    {
+	uncertainty[bin] = 0;
+    }
+    bin_size = imgWidth / n_bins;
+    HALF_HEIGHT = imgHeight / 2;
+    // frame_buf contains the uncertainties in the range [0,50] with 50 maximally uncertain.
+    // (if higher, the other class should be chosen).
+    // This function assumes no pitch and roll. 
+    last_bin = 0;
+
+    for(x = 0; x < imgWidth; x++)
+    {
+	bin = x / bin_size;
+	if(bin >= n_bins) bin = n_bins - 1;
+	if(bin > last_bin) 
+	{
+	    // the final value in uncertainty[bin] is an average per pixel in the bin
+	    uncertainty[bin-1] /= bin_size;
+	    last_bin = bin;
+	}
+	// sum the uncertainty value over one vertical line:
+	uncertainty_line = 0;
+	for(y = 0; y < HALF_HEIGHT; y++)
+	{
+	    ix = image_index(x,y);
+	    uncertainty_line += frame_buf[ix+1]; // Y-channel contains the uncertainty
+	}
+	uncertainty[bin] += uncertainty_line / HALF_HEIGHT; // per vertical line, the average uncertainty value per pixel is added to uncertainty[bin]
+    }
+    // the final value in uncertainty[bin] is an average per pixel in the bin
+    uncertainty[n_bins-1] /= bin_size;
+}
+
 void skyseg_interface_i(unsigned char *frame_buf, unsigned char *frame_buf2, char adjust_factor, unsigned int counter) {
 //	case 'n': // with adjustable tree:
+		
+		//TODO: change  below to be done global or atleast outside the loop
+		int MAX_BIN_VALUE = MAX_I2C_BYTE;
+		unsigned int obstacles[N_BINS];
+		unsigned int uncertainty[N_BINS];
+		unsigned int bin, max_bin, bin_total; 
 		
 		if(adjust_factor < 3)
 		{
@@ -1003,4 +1218,4 @@ void skyseg_interface_i(unsigned char *frame_buf, unsigned char *frame_buf2, cha
 		}
 		
 	}
-	*/
+	

@@ -419,7 +419,7 @@ unsigned char getThreshold(unsigned int * OneDHist) {
 		if (tmptotal> total)
 			return i;
 	}
-	return 0;
+	return 255;
 }
 
 void createBinaryImage(unsigned char threshold, unsigned char * frame_buf) {

@@ -301,7 +301,7 @@
   />
   <aircraft
    name="ardrone2_raw_183"
-   ac_id="181"
+   ac_id="183"
    airframe="airframes/TUDelft/ARDrone/ardrone2_raw_183.xml"
    radio="radios/cockpitSX.xml"
    telemetry="telemetry/default_ardrone.xml"
@@ -311,7 +311,7 @@
   />
   <aircraft
    name="ardrone2_raw_185"
-   ac_id="182"
+   ac_id="185"
    airframe="airframes/TUDelft/ARDrone/ardrone2_raw_185.xml"
    radio="radios/cockpitSX.xml"
    telemetry="telemetry/default_ardrone.xml"
@@ -321,7 +321,7 @@
   />
   <aircraft
    name="ardrone2_raw_187"
-   ac_id="181"
+   ac_id="187"
    airframe="airframes/TUDelft/ARDrone/ardrone2_raw_187.xml"
    radio="radios/cockpitSX.xml"
    telemetry="telemetry/default_ardrone.xml"
