@@ -19,7 +19,7 @@
     <define name="USE_INS_NAV_INIT"/>
     <!--define name="GUIDANCE_H_USE_REF"/-->
     <target name="ap" board="lisa_m_2.0">
-      <define name="FAILSAFE_GROUND_DETECT"/>
+    <!--  <define name="FAILSAFE_GROUND_DETECT"/>-->
       <define name="USE_GPS_ACC4R"/>
       <define name="ACTUATORS_START_DELAY" value="3"/>
     </target>
@@ -157,18 +157,21 @@
     <define name="DEADBAND_E" value="0"/>
     <define name="DEADBAND_R" value="250"/>
     <!-- reference -->
-    <define name="REF_OMEGA_P" value="800" unit="deg/s"/>
+   <define name="REF_OMEGA_P" value="1500" unit="deg/s"/>
     <define name="REF_ZETA_P" value="0.85"/>
     <define name="REF_MAX_P" value="400." unit="deg/s"/>
     <define name="REF_MAX_PDOT" value="RadOfDeg(8000.)"/>
-    <define name="REF_OMEGA_Q" value="800" unit="deg/s"/>
+
+    <define name="REF_OMEGA_Q" value="1500" unit="deg/s"/>
     <define name="REF_ZETA_Q" value="0.85"/>
     <define name="REF_MAX_Q" value="400." unit="deg/s"/>
     <define name="REF_MAX_QDOT" value="RadOfDeg(8000.)"/>
+
     <define name="REF_OMEGA_R" value="1000" unit="deg/s"/>
-    <define name="REF_ZETA_R" value="0.87"/>
-    <define name="REF_MAX_R" value="800." unit="deg/s"/>
-    <define name="REF_MAX_RDOT" value="RadOfDeg(7000.)"/>
+    <define name="REF_ZETA_R" value="0.85"/>
+    <define name="REF_MAX_R" value="180." unit="deg/s"/>
+    <define name="REF_MAX_RDOT" value="RadOfDeg(2000.)"/>
+
     <!-- feedback -->
     <define name="PHI_PGAIN" value="301"/>
     <define name="PHI_DGAIN" value="65"/>
