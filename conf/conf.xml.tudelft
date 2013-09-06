@@ -327,7 +327,7 @@
    telemetry="telemetry/default_ardrone.xml"
    flight_plan="flight_plans/rotorcraft_basic.xml"
    settings=" settings/rotorcraft_basic.xml settings/control/rotorcraft_guidance.xml settings/control/stabilization_rate.xml settings/control/stabilization_att_int.xml"
-   gui_color="red"
+   gui_color="#ffffffffffff"
   />
   <aircraft
    name="ardrone2_raw_187"
