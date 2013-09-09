@@ -197,12 +197,4 @@
     <define name="LOW_BAT_LEVEL" value="9.7" unit="V"/>
     <define name="MAX_BAT_LEVEL" value="12.4" unit="V"/>
   </section>
-  
-  <makefile>
-all:
-echo "Compiling gst-example_plugin"
-sb2 make -C ../ext/ardrone2_video/gst-plugin_example/ clean all
-echo "Compiling gst-MAVLab plugin"
-sb2 make -C ../ext/ardrone2_video/gst-MAVLab/ clean all
-  </makefile>
 </airframe>
