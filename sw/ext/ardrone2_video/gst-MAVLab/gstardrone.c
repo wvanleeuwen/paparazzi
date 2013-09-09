@@ -31,6 +31,7 @@
 #include "gstardrone.h"
 #include "guido.h"
 #include "optic_flow.h"
+#include "gps.h"
 
 unsigned int imgWidth, imgHeight;
 int mode;
@@ -311,8 +312,7 @@ static GstFlowReturn gst_mavlab_chain (GstPad * pad, GstBuffer * buf)
 {
 	Gstmavlab *filter;
 
-	filter = GST_MAVLAB (GST_OBJECT_PARENT (pad));
-
+	filter = GST_MAVLAB (GST_OBJECT_PARENT (pad));	
 	unsigned char * img = GST_BUFFER_DATA(buf);   
 	
 	//if GST_BUFFER_SIZE(buf) <> imgheight*imgwidth*2 -> wrong color space!!!
@@ -361,6 +361,19 @@ static GstFlowReturn gst_mavlab_chain (GstPad * pad, GstBuffer * buf)
 		{
 			error = opticFlowLK(img, old_img, x, y, n_found_points, imgWidth, imgHeight, new_x, new_y, status, 5, MAX_POINTS);	
 			
+			
+			//calculate roll and pitch diff:
+			int diff_roll = (current_roll- old_roll)/36;
+			int diff_pitch = (current_pitch- old_pitch)/36;
+			
+			//calculate mean altitude between the to samples:
+			int mean_alt;
+			if (current_alt>old_alt)
+				mean_alt = (current_alt-old_alt)/2 + old_alt;
+			else
+				mean_alt = (old_alt-current_alt)/2 + current_alt;			
+			
+			
 			//remember the frame and meta info
 			memcpy(old_img,img,imgHeight*imgWidth*2);
 			old_pitch = current_pitch;
@@ -380,11 +393,32 @@ static GstFlowReturn gst_mavlab_chain (GstPad * pad, GstBuffer * buf)
 					tot_y = tot_y+(new_y[i]-y[i]);		
 					//g_print("x: %d, y: %d.....new_x: %d, new_y: %d\n",x[i],y[i],new_x[i],new_y[i]);					
 				}
-				g_print("Optic flow: x: %d, y: %d, Pitch: %d, Roll: %d, Height: %d\n",tot_x,tot_y,current_pitch,current_roll,current_alt);
+				//g_print("Optic flow: x: %d, y: %d, Pitch: %d, Roll: %d, Height: %d\n",tot_x,tot_y,current_pitch,current_roll,current_alt);
+				
+
+								
+				//convert pixels/frame to centimeter/frame
+				float cmfactor = 1.322*mean_alt; // view angle of 64 degrees (2x tan(32) = 1.322) (vertial camera!)
+				float opt_x = (float)tot_x / (float)imgWidth  * (float)cmfactor;
+				float opt_y = (float)tot_y / (float)imgHeight  * (float)cmfactor;
+				
+
+				
+				
+				
+				
+				
+				g_print("Optic flow1: x: %f, y: %f, Pitch: %d, Roll: %d, Height: %d\n",opt_x,opt_y,current_pitch,current_roll,current_alt);
+				
+				//compensate optic flow for attitude change:
+				opt_x -=  tan_zelf(diff_roll) * mean_alt/1000;
+				opt_y -= tan_zelf(diff_pitch) * mean_alt/1000;
+				
+				g_print("Optic flow2: x: %f, y: %f, Pitch: %d, Roll: %d, Height: %d\n",opt_x,opt_y,diff_pitch,diff_roll,mean_alt);
+			
 				
 				if (tcpport>0) { 	//if network was enabled by user
 					if (socketIsReady) { 
-						//gst2ppz.blob_x1 = blobP[0];
 						gst2ppz.counter = counter;
 						gst2ppz.optic_flow_x = tot_x;
 						gst2ppz.optic_flow_y = tot_y;
@@ -410,48 +444,11 @@ static GstFlowReturn gst_mavlab_chain (GstPad * pad, GstBuffer * buf)
 	
 	}
 		
-	if (filter->silent == FALSE) {
-		g_print(".");
-	}
-	
-
 	counter++; // to keep track of data through ppz communication
-	
-	//	GST_BUFFER_DATA(buf) = img_uncertainty;
-	
-	
 	
 	  
   return gst_pad_push (filter->srcpad, buf);
 }
-
-
-void makeCross(unsigned char * img, int x,int y, int imw, int imh) {
-
-
-	int tmpm = (y*imw+x)*2;
-	int tmpl = tmpm-1;
-	int tmpr = tmpm+1;
-	int tmpu = ((y-1)*imw+x)*2;
-	int tmpd = ((y+1)*imw+x)*2;
-
-	int ims = imw*imh*2;
-	img[tmpm]=255;
-	if (tmpl>0)
-		img[tmpl] = 255;
-	if (tmpu>0)
-		img[tmpu] = 255;
-	if (tmpr<ims)
-		img[tmpr] = 255;
-	if (tmpd<ims)
-		img[tmpr] = 255;
-
-
-
-
-}
-
-
 
 /* entry point to initialize the plug-in
  * initialize the plug-in itself

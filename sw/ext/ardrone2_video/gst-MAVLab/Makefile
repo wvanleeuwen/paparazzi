@@ -8,7 +8,7 @@ else
 	override CFLAGS += -std=c99 -D_GNU_SOURCE -DGST_DISABLE_DEPRECATED -mcpu=cortex-a8 -mfpu=neon -mfloat-abi=softfp -ftree-vectorize 
 	override CFLAGS += -DDSP_API=$(DSP_API) -DSN_API=$(SN_API)
 endif
-override CFLAGS += -fno-builtin-cos -fno-builtin-sin -fno-builtin-tan -fno-builtin-acos -fno-builtin-asin -fno-builtin-atan
+override CFLAGS += -lm -fno-builtin-cos -fno-builtin-sin -fno-builtin-acos -fno-builtin-asin -fno-builtin-atan 
 
 all:
 
