@@ -121,7 +121,8 @@ int acos(int x, int hyp)
         return ix;
 }
 
-int atan(int y, int x)
+ //atan_zelf(y/x) in degrees
+int atan_zelf(int y, int x)
 {
     int angle, flip, t, xy;
 
@@ -164,7 +165,7 @@ int gps_head(int lat1, int lon1, int lat2, int lon2)
     x = ((lon2 - lon1) * cos(ll / 1000000)) / 1000;
     if (x < 0) { sx = 1; x = -x; }
     
-    ang = atan(y, x);
+    ang = atan_zelf(y, x);
     if ((sx==0) && (sy==0))
         ang = 90 - ang;
     if ((sx==0) && (sy==1))

@@ -363,7 +363,7 @@ static GstFlowReturn gst_mavlab_chain (GstPad * pad, GstBuffer * buf)
 			
 			
 			//calculate roll and pitch diff:
-			int diff_roll = (current_roll- old_roll)/36;
+			int diff_roll = (current_roll- old_roll)/36; // 36 factor is to convert to degrees
 			int diff_pitch = (current_pitch- old_pitch)/36;
 			
 			//calculate mean altitude between the to samples:
@@ -397,24 +397,21 @@ static GstFlowReturn gst_mavlab_chain (GstPad * pad, GstBuffer * buf)
 				
 
 								
-				//convert pixels/frame to centimeter/frame
-				float cmfactor = 1.322*mean_alt; // view angle of 64 degrees (2x tan(32) = 1.322) (vertial camera!)
-				float opt_x = (float)tot_x / (float)imgWidth  * (float)cmfactor;
-				float opt_y = (float)tot_y / (float)imgHeight  * (float)cmfactor;
+				//convert pixels/frame to degrees/frame
+								
+				//float scale_x = 1.0090; //tan(320/400 *32) * 2; 	//64/2 = 32 is vertical camera diagonal view angle
+				//float scale_y = 0.7311; //tan(240/400 *32) * 2
 				
-
+				float opt_x = -atan_zelf(tot_x , mean_alt);  //->degrees/frame
+				float opt_y = -atan_zelf(tot_y , mean_alt);	//->degrees/frame
+								
+				g_print("Optic flow_raw: x: %f, y: %f, Pitch: %d, Roll: %d, Height: %d\n",opt_x,opt_y,current_pitch,current_roll,current_alt);
 				
+				//compensate optic flow for attitude (roll,pitch) change:
+				opt_x -=  diff_roll; 
+				opt_y -= diff_pitch; 
 				
-				
-				
-				
-				g_print("Optic flow1: x: %f, y: %f, Pitch: %d, Roll: %d, Height: %d\n",opt_x,opt_y,current_pitch,current_roll,current_alt);
-				
-				//compensate optic flow for attitude change:
-				opt_x -=  tan_zelf(diff_roll) * mean_alt/1000;
-				opt_y -= tan_zelf(diff_pitch) * mean_alt/1000;
-				
-				g_print("Optic flow2: x: %f, y: %f, Pitch: %d, Roll: %d, Height: %d\n",opt_x,opt_y,diff_pitch,diff_roll,mean_alt);
+				g_print("Optic flow_com: x: %f, y: %f, Pitch: %d, Roll: %d, Height: %d\n",opt_x,opt_y,diff_pitch,diff_roll,mean_alt);
 			
 				
 				if (tcpport>0) { 	//if network was enabled by user

@@ -6,7 +6,7 @@ int sin(int);
 int tan_zelf(int);
 int acos(int, int);
 int asin(int, int);
-int atan(int, int);
+int atan_zelf(int, int);
 int gps_head(int, int, int, int);
 int gps_dist(int, int, int, int);
 unsigned int isqrt(unsigned int);
