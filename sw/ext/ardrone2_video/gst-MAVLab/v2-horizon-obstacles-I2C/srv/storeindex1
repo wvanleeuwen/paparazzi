@@ -1,0 +1,10 @@
+trap "" 2
+echo type X [enter], then control-C, to start XMODEM file transfer of www/index.html to the master
+nc 169.254.0.10 10001
+sleep 1
+sx -Xkbv --tcp-client 169.254.0.10:10001 www/index.html
+sleep 1
+echo
+echo make certain that file transfer successfully completed, then
+echo type zB10 [enter] to write the file to flash sector 10:
+nc 169.254.0.10 10001

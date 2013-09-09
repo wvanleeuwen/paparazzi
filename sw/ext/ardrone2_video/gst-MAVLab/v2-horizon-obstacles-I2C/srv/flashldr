@@ -1,0 +1,2 @@
+sudo ../bfloader/flashload --eraseall --backend=../bfloader/boards/spi_flash/bfloader.dxe --program=srv1.ldr
+

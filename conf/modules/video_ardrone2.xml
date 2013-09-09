@@ -1,0 +1,26 @@
+<!DOCTYPE module SYSTEM "module.dtd">
+
+<module name="video">
+  <doc>
+    <description>Video ARDone 2</description>
+  </doc>
+  <header>
+    <file name="video.h"/>
+  </header>
+  <init fun="video_init()"/>
+  <periodic fun="video_receive()" freq="200" start="video_start()" stop="video_stop()" autorun="FALSE"/>
+  <makefile>
+    <define name="ARDRONE_VIDEO_PORT" value="2002" />
+    <define name="USE_ARDRONE_VIDEO" />
+    <file name="video.c"/>
+    <file name="video_ardrone2.c"/>
+    <raw>
+all:
+echo "Compiling gst-example_plugin"
+sb2 make -C ../ext/ardrone2_video/gst-plugin_example/ clean all
+echo "Compiling gst-MAVLab plugin"
+sb2 make -C ../ext/ardrone2_video/gst-MAVLab/ clean all
+    </raw>
+  </makefile>
+</module>
+

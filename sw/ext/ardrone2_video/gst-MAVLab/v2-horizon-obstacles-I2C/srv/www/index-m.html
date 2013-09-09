@@ -1,0 +1,141 @@
+<html>
+<head>
+<meta name="viewport" content="width=device-width; initial-scale=1.0; maximum-scale=1.0;">
+<title>SRV-1 Robot</title>
+
+<script>
+var frameRate = 15;
+var reqPending = false;
+var btnPending = null;
+var btnXhr;
+var btnReqTimerId;
+var imgPending = false;
+var imgIndex = 0;
+
+var btnsVisible = true;
+
+function bodyOnLoad () {
+    setInterval ('nextImage()', 1000 / frameRate);
+}
+
+function nextImage () {
+    if (!reqPending) {
+        reqPending = true;
+        document.getElementById ("camera").src = "robot.jpg?i=" + new Date().getTime() + imgIndex.toString(10);
+        ++imgIndex;
+    }
+}
+
+function cameraOnLoad ()
+{
+    reqPending = false;
+    if (btnPending != null) {
+        var temp = btnPending;
+        btnPending = null;
+        btnClick (temp);
+    }
+}
+
+function btnClick (btn) {
+    if (!reqPending)     {
+        reqPending = true;
+        btnXhr = new XMLHttpRequest();
+        btnXhr.open ("GET", "robot.cgi?" + btn + "&b=" + new Date().getTime(), true);
+        btnXhr.setRequestHeader ("Cache-Control", "no-cache");
+        btnXhr.setRequestHeader ("Pragma", "no-cache");
+        btnXhr.onreadystatechange = btnClickComplete;
+        btnReqTimerId = setTimeout (btnClickTimeout, 2000);
+        btnXhr.send (null);
+    }
+    else
+        btnPending = btn;
+}
+
+
+function btnClickComplete () {
+    if (btnXhr.readyState == 4) {
+        reqPending = false;
+        clearTimeout (btnReqTimerId);
+    }
+}
+
+function btnClickTimeout () {
+    btnXhr.abort();
+    reqPending = false;
+}
+
+function toggleBtnDisplay () {
+    btnsVisible = !btnsVisible;
+    coll = document.body.getElementsByTagName ("DIV");
+    for (i = 0; i < coll.length; ++i) {
+        if (coll[i].className == "btn") {
+            coll[i].style.opacity = btnsVisible ? 0.5 : 0;
+            coll[i].style.MozOpacity = btnsVisible ? 0.5 : 0;
+        }
+    }
+    document.getElementById ("toggleBtnBtn").value = btnsVisible ? String.fromCharCode (216) : "O";
+}
+</script>
+
+<style type="text/css">
+.btn {
+    position: absolute;
+
+    border-width: 0px 2px 2px 0px;
+    border-style: groove;
+    border-color: #ffffff;
+
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: 8pt;
+    font-weight: bold;
+    color: #ffffff;
+    text-align: center;
+
+    z-index: 100;
+    filter:progid:DXImageTransform.Microsoft.Alpha(opacity=50);
+    -moz-opacity: 0.5;
+    opacity: 0.5;
+}
+
+.btnText {
+    background-color: #000000;
+    filter:progid:DXImageTransform.Microsoft.Alpha(opacity=100);
+    -moz-opacity: 1;
+    opacity: 1;
+}
+</style>
+</head>
+
+<body onload="bodyOnLoad()">
+<div class="btn" style="left: 0px; top: 0px; width: 24px; height: 120px" onclick="btnClick('l1')"><span class="btnText">&nbsp; l &nbsp;</span></div>
+<div class="btn" style="left: 296px; top: 0px; width: 24px; height: 120px" onclick="btnClick('l0')"><span class="btnText">&nbsp; L &nbsp;</span></div>
+
+<div class="btn" style="left: 0px; top: 120px; width: 24px; height: 120px" onclick="btnClick('+')"><span class="btnText">&nbsp; + &nbsp;</span></div>
+<div class="btn" style="left: 296px; top: 120px; width: 24px; height: 120px" onclick="btnClick('-')"><span class="btnText">&nbsp; - &nbsp;</span></div>
+
+<div class="btn" style="left: 24px; top: 0px; width: 76px; height: 80px" onclick="btnClick('m6090')"><span class="btnText">&nbsp;&lt;--&nbsp;</span></div>
+<div class="btn" style="left: 100px; top: 0px; width: 120px; height: 80px" onclick="btnClick('m8080')"><span class="btnText">&nbsp;forward&nbsp;</span></div>
+<div class="btn" style="left: 220px; top: 0px; width: 76px; height: 80px" onclick="btnClick('m9060')"><span class="btnText">&nbsp;--&gt;&nbsp;</span></div>
+
+<div class="btn" style="left: 24px; top: 80px; width: 76px; height: 80px" onclick="btnClick('m1090')"><span class="btnText">&nbsp;spin left&nbsp;</span></div>
+<div class="btn" style="left: 100px; top: 80px; width: 120px; height: 80px" onclick="btnClick('m5050')"><span class="btnText">&nbsp;STOP&nbsp;</span></div>
+<div class="btn" style="left: 220px; top: 80px; width: 76px; height: 80px" onclick="btnClick('m9010')"><span class="btnText">&nbsp;spin right&nbsp;</span></div>
+
+<div class="btn" style="left: 24px; top: 160px; width: 76px; height: 80px" onclick="btnClick('m4010')"><span class="btnText">&nbsp;back left&nbsp;</span></div>
+<div class="btn" style="left: 100px; top: 160px; width: 120px; height: 80px" onclick="btnClick('m2020')"><span class="btnText">&nbsp;back&nbsp;</span></div>
+<div class="btn" style="left: 220px; top: 160px; width: 76px; height: 80px" onclick="btnClick('m1040')"><span class="btnText">&nbsp;back right&nbsp;</span></div>
+
+<input type="button" id="toggleBtnBtn" value="&#216;" style="position: absolute; left: 328px; top: 105; width: 30px; height: 30px"
+    onclick="toggleBtnDisplay()">
+
+<img id="camera" onload="cameraOnLoad()" src="robot.jpg"   style="position: absolute; left: 0px; top: 0px;" />
+<!--
+<br>
+<a href="/index.html">reload</a>
+<br>
+-->
+
+</body>
+</html>
+
+
