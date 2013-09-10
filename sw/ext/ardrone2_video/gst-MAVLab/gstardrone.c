@@ -50,7 +50,8 @@ unsigned int tcpport;
 struct gst2ppz_message_struct_sky gst2ppz;
 struct ppz2gst_message_struct_sky ppz2gst;
 
-
+float opt_angle_y_prev;
+float opt_angle_x_prev;
 void makeCross(unsigned char * img, int x,int y, int imw, int imh);
 void *TCP_threat( void *ptr);
 
@@ -264,6 +265,8 @@ gst_mavlab_set_caps (GstPad * pad, GstCaps * caps)
 	old_alt=0;
 	ppz2gst.pitch = 0;
 	ppz2gst.roll = 0;
+	opt_angle_y_prev = 0;
+	opt_angle_x_prev=0;
   
   
   	if (tcpport>0) {
@@ -332,12 +335,13 @@ static GstFlowReturn gst_mavlab_chain (GstPad * pad, GstBuffer * buf)
 			}
 		}
 	}
-	else if (mode==2 && counter % 3 == 0)
+	else if (mode==2)
 	{	
 		int MAX_POINTS, error;
 		int n_found_points,mark_points;
 		int *x, *y, *new_x, *new_y, *status;
-		
+		mark_points = 0;
+				
 		//save most recent values of attitude for the currently available frame
 		int current_pitch = ppz2gst.pitch;
 		int current_roll = ppz2gst.roll;
@@ -363,17 +367,17 @@ static GstFlowReturn gst_mavlab_chain (GstPad * pad, GstBuffer * buf)
 		
 		//active corner:
 		int *active;
-		active =(int *) calloc(40,sizeof(int));
-		mark_points = 0;		
+		active =(int *) calloc(40,sizeof(int));		
 		int GRID_ROWS = 5;
 		int ONLY_STOPPED = 0;		
 		error = findActiveCorners(img, GRID_ROWS, ONLY_STOPPED, x, y, active, &n_found_points, mark_points,imgWidth,imgHeight);
 		
-		
+		/*
 		//normal corner:
-		//int suppression_distance_squared;
-		//suppression_distance_squared = 3 * 3;
-		//error = findCorners(img, MAX_POINTS, x, y, suppression_distance_squared, &n_found_points, mark_points,imgWidth,imgHeight);
+		int suppression_distance_squared;
+		suppression_distance_squared = 3 * 3;
+		error = findCorners(img, MAX_POINTS, x, y, suppression_distance_squared, &n_found_points, mark_points,imgWidth,imgHeight);
+		*/
 		
 		if(error == 0)
 		{
@@ -381,8 +385,8 @@ static GstFlowReturn gst_mavlab_chain (GstPad * pad, GstBuffer * buf)
 			
 			
 			//calculate roll and pitch diff:
-			int diff_roll = (current_roll- old_roll)/36; // 36 factor is to convert to degrees
-			int diff_pitch = (current_pitch- old_pitch)/36;
+			float diff_roll = (float)(current_roll- old_roll)/36.0; // 72 factor is to convert to degrees
+			float diff_pitch = (float)(current_pitch- old_pitch)/36.0;
 			
 			//calculate mean altitude between the to samples:
 			int mean_alt;
@@ -409,7 +413,6 @@ static GstFlowReturn gst_mavlab_chain (GstPad * pad, GstBuffer * buf)
 				for (int i=0; i<n_found_points;i++) {
 					tot_x = tot_x+(new_x[i]-x[i]);
 					tot_y = tot_y+(new_y[i]-y[i]);		
-					//g_print("x: %d, y: %d.....new_x: %d, new_y: %d\n",x[i],y[i],new_x[i],new_y[i]);					
 				}
 								
 				//convert pixels/frame to degrees/frame									
@@ -417,20 +420,31 @@ static GstFlowReturn gst_mavlab_chain (GstPad * pad, GstBuffer * buf)
 				float opt_angle_x = tot_x*scalef; //= (tot_x/imgWidth) * (scalef*imgWidth); //->degrees/frame				
 				float opt_angle_y = tot_y*scalef;
 				
-											
-				g_print("Optic flow_raw_a: x: %f, y: %f, Pitch: %d, Roll: %d, Height: %d\n",opt_angle_x,opt_angle_y,current_pitch,current_roll,current_alt);
+				if (abs(opt_angle_x-opt_angle_x_prev)> 3.0) {
+					opt_angle_x = opt_angle_x_prev;					
+				} else	{				
+					opt_angle_x_prev = opt_angle_x;
+				}
+			
+				if (abs(opt_angle_y-opt_angle_y_prev)> 3.0) {
+					opt_angle_y = opt_angle_y_prev;					
+				} else	{				
+					opt_angle_y_prev = opt_angle_y;
+				}
 				
+				
+				//g_print("Opt_angle x: %f, diff_roll: %d; result: %f. Opt_angle_y: %f, diff_pitch: %d; result: %f. Height: %d\n",opt_angle_x,diff_roll,opt_angle_x-diff_roll,opt_angle_y,diff_pitch,opt_angle_y-diff_pitch,mean_alt);
+				
+
 				//compensate optic flow for attitude (roll,pitch) change:
 				opt_angle_x -=  diff_roll; 
 				opt_angle_y -= diff_pitch; 
-				
-				g_print("Optic flow_com_a: x: %f, y: %f, Pitch: %d, Roll: %d, Height: %d\n",opt_angle_x,opt_angle_y,diff_pitch,diff_roll,mean_alt);
-				
+								
 				//calculate translation in cm/frame from optical flow in degrees/frame
-				float opt_trans_x = (float)tan_zelf(opt_angle_x)/1000.0*mean_alt;
+				float opt_trans_x = (float)tan_zelf(opt_angle_x)/1000.0*(float)mean_alt;
 				float opt_trans_y = (float)tan_zelf(opt_angle_y)/1000.0*(float)mean_alt;
 				
-				g_print("Optic flow_trans: x: %f, y: %f\n",opt_trans_x,opt_trans_y);
+				g_print("%f;%f;%f;%f;%f;%f;%d;%f;%f\n",opt_angle_x+diff_roll,diff_roll,opt_angle_x,opt_angle_y+diff_pitch,diff_pitch,opt_angle_y,mean_alt,opt_trans_x,opt_trans_y);
 				
 				if (tcpport>0) { 	//if network was enabled by user
 					if (socketIsReady) { 
@@ -454,9 +468,9 @@ static GstFlowReturn gst_mavlab_chain (GstPad * pad, GstBuffer * buf)
 			
 
 		
-		if (filter->silent == FALSE) {
-			g_print("Errorh: %d, n_found_points: %d\n",error,n_found_points);
-		}
+//		if (filter->silent == FALSE) {
+//			g_print("Errorh: %d, n_found_points: %d\n",error,n_found_points);
+//		}
 	
 	}
 		
