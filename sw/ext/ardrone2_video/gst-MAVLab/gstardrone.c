@@ -338,6 +338,7 @@ static GstFlowReturn gst_mavlab_chain (GstPad * pad, GstBuffer * buf)
 		int n_found_points,mark_points;
 		int *x, *y, *new_x, *new_y, *status;
 		
+		//save most recent values of attitude for the currently available frame
 		int current_pitch = ppz2gst.pitch;
 		int current_roll = ppz2gst.roll;
 		int current_alt = ppz2gst.alt;
@@ -345,8 +346,7 @@ static GstFlowReturn gst_mavlab_chain (GstPad * pad, GstBuffer * buf)
 		x = (int *) calloc(40,sizeof(int));
 		new_x = (int *) calloc(40,sizeof(int));
 		y = (int *) calloc(40,sizeof(int));
-		new_y = (int *) calloc(40,sizeof(int));
-		
+		new_y = (int *) calloc(40,sizeof(int));		
 		status = (int *) calloc(40,sizeof(int));
 
 		
@@ -367,9 +367,9 @@ static GstFlowReturn gst_mavlab_chain (GstPad * pad, GstBuffer * buf)
 		mark_points = 0;		
 		int GRID_ROWS = 5;
 		int ONLY_STOPPED = 0;		
-		//error = findActiveCorners(img, GRID_ROWS, ONLY_STOPPED, x, y, active, &n_found_points, mark_points,imgWidth,imgHeight);
+		error = findActiveCorners(img, GRID_ROWS, ONLY_STOPPED, x, y, active, &n_found_points, mark_points,imgWidth,imgHeight);
 		
-		n_found_points = 10; //testing!
+		
 		//normal corner:
 		//int suppression_distance_squared;
 		//suppression_distance_squared = 3 * 3;
@@ -411,31 +411,26 @@ static GstFlowReturn gst_mavlab_chain (GstPad * pad, GstBuffer * buf)
 					tot_y = tot_y+(new_y[i]-y[i]);		
 					//g_print("x: %d, y: %d.....new_x: %d, new_y: %d\n",x[i],y[i],new_x[i],new_y[i]);					
 				}
-				//g_print("Optic flow: x: %d, y: %d, Pitch: %d, Roll: %d, Height: %d\n",tot_x,tot_y,current_pitch,current_roll,current_alt);
-				
-				
-				//testing:
-				tot_x = 160;
-				tot_y=-120;
 								
-				//convert pixels/frame to degrees/frame
-								
-				//float scale_x = 1.0090; //tan(320/400 *32) * 2; 	//64/2 = 32 is vertical camera diagonal view angle
-				//float scale_y = 0.7311; //tan(240/400 *32) * 2
-				
+				//convert pixels/frame to degrees/frame									
 				float scalef = 64.0/400.0; //64 is vertical camera diagonal view angle (sqrt(320²+240²)=400)
-				float opt_x = tot_x*scalef; //= (tot_x/imgWidth) * (scalef*imgWidth); //->degrees/frame				
-				float opt_y = tot_y*scalef;
+				float opt_angle_x = tot_x*scalef; //= (tot_x/imgWidth) * (scalef*imgWidth); //->degrees/frame				
+				float opt_angle_y = tot_y*scalef;
 				
 											
-				g_print("Optic flow_raw: x: %f, y: %f, Pitch: %d, Roll: %d, Height: %d\n",opt_x,opt_y,current_pitch,current_roll,current_alt);
+				g_print("Optic flow_raw_a: x: %f, y: %f, Pitch: %d, Roll: %d, Height: %d\n",opt_angle_x,opt_angle_y,current_pitch,current_roll,current_alt);
 				
 				//compensate optic flow for attitude (roll,pitch) change:
-				opt_x -=  diff_roll; 
-				opt_y -= diff_pitch; 
+				opt_angle_x -=  diff_roll; 
+				opt_angle_y -= diff_pitch; 
 				
-				g_print("Optic flow_com: x: %f, y: %f, Pitch: %d, Roll: %d, Height: %d\n",opt_x,opt_y,diff_pitch,diff_roll,mean_alt);
-			
+				g_print("Optic flow_com_a: x: %f, y: %f, Pitch: %d, Roll: %d, Height: %d\n",opt_angle_x,opt_angle_y,diff_pitch,diff_roll,mean_alt);
+				
+				//calculate translation in cm/frame from optical flow in degrees/frame
+				float opt_trans_x = (float)tan_zelf(opt_angle_x)/1000.0*mean_alt;
+				float opt_trans_y = (float)tan_zelf(opt_angle_y)/1000.0*(float)mean_alt;
+				
+				g_print("Optic flow_trans: x: %f, y: %f\n",opt_trans_x,opt_trans_y);
 				
 				if (tcpport>0) { 	//if network was enabled by user
 					if (socketIsReady) { 
