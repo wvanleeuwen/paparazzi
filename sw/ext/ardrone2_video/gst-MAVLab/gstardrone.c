@@ -335,7 +335,7 @@ static GstFlowReturn gst_mavlab_chain (GstPad * pad, GstBuffer * buf)
 	else if (mode==2 && counter % 3 == 0)
 	{	
 		int MAX_POINTS, error;
-		int suppression_distance_squared,n_found_points,mark_points;
+		int n_found_points,mark_points;
 		int *x, *y, *new_x, *new_y, *status;
 		
 		int current_pitch = ppz2gst.pitch;
@@ -348,14 +348,32 @@ static GstFlowReturn gst_mavlab_chain (GstPad * pad, GstBuffer * buf)
 		new_y = (int *) calloc(40,sizeof(int));
 		
 		status = (int *) calloc(40,sizeof(int));
+
 		
-		
+		if (tcpport==0) {
+			//test code if no network ppz communication is available
+			current_alt = 100;
+			current_pitch=0;
+			current_roll=0;				
+		}
 		
 		
 		MAX_POINTS = 40;
-		suppression_distance_squared = 3 * 3;
-		mark_points = 0;
-		error = findCorners(img, MAX_POINTS, x, y, suppression_distance_squared, &n_found_points, mark_points,imgWidth,imgHeight);
+
+		
+		//active corner:
+		int *active;
+		active =(int *) calloc(40,sizeof(int));
+		mark_points = 0;		
+		int GRID_ROWS = 5;
+		int ONLY_STOPPED = 0;		
+		//error = findActiveCorners(img, GRID_ROWS, ONLY_STOPPED, x, y, active, &n_found_points, mark_points,imgWidth,imgHeight);
+		
+		n_found_points = 10; //testing!
+		//normal corner:
+		//int suppression_distance_squared;
+		//suppression_distance_squared = 3 * 3;
+		//error = findCorners(img, MAX_POINTS, x, y, suppression_distance_squared, &n_found_points, mark_points,imgWidth,imgHeight);
 		
 		if(error == 0)
 		{
@@ -395,16 +413,21 @@ static GstFlowReturn gst_mavlab_chain (GstPad * pad, GstBuffer * buf)
 				}
 				//g_print("Optic flow: x: %d, y: %d, Pitch: %d, Roll: %d, Height: %d\n",tot_x,tot_y,current_pitch,current_roll,current_alt);
 				
-
+				
+				//testing:
+				tot_x = 160;
+				tot_y=-120;
 								
 				//convert pixels/frame to degrees/frame
 								
 				//float scale_x = 1.0090; //tan(320/400 *32) * 2; 	//64/2 = 32 is vertical camera diagonal view angle
 				//float scale_y = 0.7311; //tan(240/400 *32) * 2
 				
-				float opt_x = -atan_zelf(tot_x , mean_alt);  //->degrees/frame
-				float opt_y = -atan_zelf(tot_y , mean_alt);	//->degrees/frame
-								
+				float scalef = 64.0/400.0; //64 is vertical camera diagonal view angle (sqrt(320²+240²)=400)
+				float opt_x = tot_x*scalef; //= (tot_x/imgWidth) * (scalef*imgWidth); //->degrees/frame				
+				float opt_y = tot_y*scalef;
+				
+											
 				g_print("Optic flow_raw: x: %f, y: %f, Pitch: %d, Roll: %d, Height: %d\n",opt_x,opt_y,current_pitch,current_roll,current_alt);
 				
 				//compensate optic flow for attitude (roll,pitch) change:
@@ -432,6 +455,7 @@ static GstFlowReturn gst_mavlab_chain (GstPad * pad, GstBuffer * buf)
 		free(y);
 		free(new_y);
 		free(status);
+		free(active);
 			
 
 		

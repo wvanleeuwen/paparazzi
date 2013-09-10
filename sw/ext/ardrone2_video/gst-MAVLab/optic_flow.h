@@ -16,6 +16,7 @@
  void excludeArea(unsigned int* Mask, int x, int y, int suppression_distance_squared);
  void thresholdImage(int* Harris, int max_val, int max_factor);
  int findCorners(unsigned char *frame_buf, int MAX_POINTS, int *x, int *y, int suppression_distance_squared, int* n_found_points, int mark_points, int imW, int imH);
+ int findActiveCorners(unsigned char *frame_buf, unsigned int GRID_ROWS, int ONLY_STOPPED, int *x, int *y, int* active, int* n_found_points, int mark_points, int imW, int imH);
  void getSubPixel(int* Patch, unsigned char* buf, int center_x, int center_y, int half_window_size, int subpixel_factor);
  int calculateG(int* G, int* DX, int* DY, int half_window_size);
  void getGradientPatch(int* Patch, int* DX, int* DY, int half_window_size);

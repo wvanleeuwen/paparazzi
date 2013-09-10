@@ -7,8 +7,15 @@
 #define uint_index(xx, yy) (((yy * IMG_WIDTH + xx) * 2) & 0xFFFFFFFC)
 #define NO_MEMORY -1
 #define OK 0
+#define N_VISUAL_INPUTS 51
+#define N_ACTIONS 3
 
 unsigned int IMG_WIDTH, IMG_HEIGHT;
+int weights[153] = {-78, -46, 18, 59, 0, 100, 0, 0, 100, -29, -45, 0, 15, -30, 59, -100, -99, -100, -47, 0, -100, -100, 2, -78, 0, 10, -68, 53, 0, 0, -61, -28, 51, 0, -86, -73, 10, -65, -100, 98, -19, 63, -100, -42, -83, 21, 0, 3, 7, 0, -100, 24, -100, -99, -40, -100, 91, 0, 0, 54, 0, -90, -22, 13, 6, 31, 0, 100, -58, -31, 100, 5, 21, -100, 37, -100, 57, 100, -96, -3, -74, -3, -64, -68, 6, -100, -71, -81, 100, 13, 100, 0, -100, -57, 77, -100, -61, -100, 0, 37, -100, -100, -100, 10, -36, -100, 62, 8, 0, 21, 2, -61, -5, 32, -64, 15, -100, -90, -74, -18, -22, -28, 42, -92, 0, 3, -3, -13, 100, -5, 88, 0, 7, -100, 90, 73, -53, 100, 0, 2, 0, -95, -60, -62, 0, -6, 82, 0, -79, -69, 73, -38, 100};
+
+void getVisualInputs(unsigned char *frame_buf, int x, int y, int* visual_inputs, unsigned int half_patch);
+void applyNeuralNetwork(int* visual_inputs, int* actions, int RESOLUTION);
+
 
 static inline void bluePixel(unsigned char *frame_buf, unsigned int ip)
 {
@@ -598,6 +605,276 @@ int findCorners(unsigned char *frame_buf, int MAX_POINTS, int *x, int *y, int su
 	// routine successful:
 	return OK;
 }
+
+int findActiveCorners(unsigned char *frame_buf, unsigned int GRID_ROWS, int ONLY_STOPPED, int *x, int *y, int* active, int* n_found_points, int mark_points, int imW, int imH)
+{
+	// Algorithmic steps:
+	// 1) initialize the agents' positions
+	// 2) let the agents search in the image
+	// 3) select the points to be returned
+
+	unsigned int grid_step_x, grid_step_y, border, n_agents, gr, gc, a;
+	unsigned int t, n_time_steps, n_active, finished, active_agents;
+	int visual_inputs[N_VISUAL_INPUTS];
+	int actions[N_ACTIONS];
+	int dx, dy, MAX_JUMP;
+	unsigned int RESOLUTION, half_patch;
+	int p, i, j;
+	unsigned int ix;
+
+	// copy image parameters:
+	IMG_WIDTH = imW;
+	IMG_HEIGHT = imH;
+
+	// The resolution will allow subpixel positions:
+	RESOLUTION = 100;
+	
+	// ***********************************
+	// 1) initialize the agents' positions
+	// ***********************************
+
+	n_agents = GRID_ROWS * GRID_ROWS;
+	border = 10;
+	grid_step_x = (imW - 2 * border) / (GRID_ROWS-1);
+	grid_step_y = (imH - 2 * border) / (GRID_ROWS-1);
+
+	a = 0;
+	for(gr = 0; gr < GRID_ROWS; gr++)
+	{
+		for(gc = 0; gc < GRID_ROWS; gc++)
+		{
+			x[a] = (border + gr * grid_step_x) * RESOLUTION;
+			y[a] = (border + gc * grid_step_y) * RESOLUTION;
+			active[a] = 1;
+			a++;
+			if(a == n_agents) break;
+		}
+
+		if(a == n_agents) break;
+	}
+
+	// *************************************
+	// 2) let the agents search in the image
+	// *************************************
+
+	MAX_JUMP = 10;
+	half_patch = 2;
+	n_time_steps = 20;
+	t = 0;
+	finished = 0;
+	while(finished == 0)
+	{
+		// number of agents still active:
+		n_active = 0;
+		
+		// loop over the agents:
+		for(a = 0; a < n_agents; a++)
+		{
+			// only extract inputs and move if still active:
+			if(active[a] == 1)
+			{
+				// printf("Agent %d at (%d,%d)\n\r", a, x[a], y[a]);
+				n_active++;
+
+				// sensing, inputs in [0,255]:
+				getVisualInputs(frame_buf, x[a] / RESOLUTION, y[a] / RESOLUTION, visual_inputs, half_patch);
+
+				// determining actions, in [-RESOLUTION, RESOLUTION]:
+				applyNeuralNetwork(visual_inputs, actions, RESOLUTION);
+
+				// printf("Actions = (%d, %d, %d)\n\r", actions[0], actions[1], actions[2]);
+
+				// possibly stopping:
+				if(actions[2] < 0)
+				{
+					// printf("Agent %d stopped.\n\r", a);
+					active[a] = 0;
+				}
+
+				// if moving:
+				if(active[a] == 1)
+				{
+					dx = (actions[0] * MAX_JUMP);
+					dy = (actions[1] * MAX_JUMP);
+					
+					x[a] += dx;
+					y[a] += dy;
+
+					// checking the limits, making the agents go round the image when they leave the image:
+					if(x[a] / RESOLUTION < half_patch + 1) // the + 1 is necessary for the convolution with image filters
+					{
+						x[a] = (IMG_WIDTH - half_patch - 2) * RESOLUTION;
+					}
+					else if(x[a] / RESOLUTION > IMG_WIDTH - half_patch - 2)
+					{
+						x[a] = (half_patch + 1) * RESOLUTION;
+					}
+					if(y[a] / RESOLUTION < half_patch + 1) // the + 1 is necessary for the convolution with image filters
+					{
+						y[a] = (IMG_HEIGHT - half_patch - 2) * RESOLUTION;
+					}
+					else if(y[a] / RESOLUTION > IMG_HEIGHT - half_patch - 2)
+					{
+						y[a] = (half_patch + 1) * RESOLUTION;
+					}
+
+				}
+			}
+		}
+
+		// update time and check end conditions:
+		// printf("Time = %d / %d\n\r", t, n_time_steps);
+		t++;
+		if(t == n_time_steps || n_active == 0)
+		{
+			finished = 1;
+		}
+	}
+
+	// ***********************************
+	// 3) select the points to be returned
+	// ***********************************
+
+	if(!ONLY_STOPPED)
+	{
+		for(a = 0; a < n_agents; a++)
+		{
+			x[a] = x[a] / RESOLUTION;
+			y[a] = y[a] / RESOLUTION;
+		}
+		(*n_found_points) = n_agents;
+	}
+	else
+	{
+
+		active_agents = 0;
+
+		for(a = 0; a < n_agents; a++)
+		{
+			if(active[a] == 0)
+			{
+				x[active_agents] = x[a] / RESOLUTION;
+				y[active_agents] = y[a] / RESOLUTION;
+				active_agents++;
+			}
+		}
+
+		(*n_found_points) = active_agents;
+	}
+
+	// ********************************
+	// (4) mark the points in the image
+	// ********************************
+
+	if(mark_points > 0)
+	{
+		//printf("Mark points\n\r");
+		// printf("IMG_WIDTH = %d, IMG_HEIGHT = %d\n\r", IMG_WIDTH, IMG_HEIGHT);
+
+		for(p = 0; p < (*n_found_points); p++)
+		{
+			if(x[p] >= 1 && y[p] >= 1 && x[p] < (int)IMG_WIDTH - 1 && y[p] < (int)IMG_HEIGHT - 1)
+			{
+				//printf("(x,y) = (%d,%d)\n\r", x[p],y[p]);
+				for(i = -1; i <= 1; i++)
+				{
+					for(j = -1; j <= 1; j++)
+					{
+						// printf("(x+i,y+j) = (%d,%d)\n\r", x[p]+i,y[p]+j);
+						ix = uint_index((unsigned int) (x[p]+i), (unsigned int) (y[p]+j));
+						// printf("ix = %d, ixx = %d\n\r", ix, (((y[p]+j) * IMG_WIDTH + (x[p]+i)) * 2) & 0xFFFFFFFC); 
+						redPixel(frame_buf, ix); 
+					}
+				}
+			}
+		}
+	}
+
+
+	return 0;
+}
+
+void getVisualInputs(unsigned char *frame_buf, int x, int y, int* visual_inputs, unsigned int half_patch)
+{
+	int i, dx, dy, half_inputs, xx, yy;
+	// will round off correctly (bias is counted as visual input):
+	half_inputs = N_VISUAL_INPUTS / 2;
+	i = 0;
+	for(xx = x - (int)half_patch; xx <= x + (int)half_patch; xx++)
+	{
+		for(yy = y - (int)half_patch; yy <= y + (int)half_patch; yy++)
+		{
+			//printf("gp(%d, %d), ", xx, yy);
+			getGradientPixelWH(frame_buf, xx, yy, &dx, &dy);
+			visual_inputs[i] = dx;
+			visual_inputs[half_inputs+i] = dy;
+			i++;
+		}
+	}
+	// bias, scaled to the input range:
+	visual_inputs[N_VISUAL_INPUTS-1] = 255;
+
+	/*printf("Visual inputs:\n");
+	for(i = 0; i < N_VISUAL_INPUTS; i++)
+	{
+		printf("%d, ", visual_inputs[i]);
+	}
+	printf("\n\r");*/
+
+	return;
+}
+
+void applyNeuralNetwork(int* visual_inputs, int* actions, int RESOLUTION)
+{
+
+	int a, i, w, factor;
+
+	//printf("NN\n\r");
+
+	// inputs in [0,255] weights in [-100,100] 
+	// 51 weights per neuron
+	// 25500 * 51 = 1,300,500 (max)
+	// float point:
+	// inputs in [-1, 1] weights in [-1, 1]
+	// 51 weights, 51 (max) (* RESOLUTION = 5100)
+	// but the max are very unlikely, so:
+	factor = 25500 / RESOLUTION;
+	w = 0;
+	// Perceptron neural network:
+	for(a = 0; a < N_ACTIONS; a++)
+	{
+		actions[a] = 0;
+
+		for(i = 0; i < N_VISUAL_INPUTS; i++)
+		{
+			actions[a] += weights[w] * visual_inputs[i];
+			w++;
+		}
+		
+		//printf("actions[%d] after summing: %d\n\r", a, actions[a]);
+
+		// account for changes in value ranges (25500 vs. 1 -> 1*RESOLUTION)
+		actions[a] /= factor;
+
+		//printf("actions[%d] after factor: %d\n\r", a, actions[a]);
+
+		// activation function:
+		actions[a] /= 2;
+
+		//printf("actions[%d] after /2: %d\n\r", a, actions[a]);
+
+		// saturate at RESOLUTION / -RESOLUTION:
+		actions[a] = (actions[a] > RESOLUTION) ? RESOLUTION : actions[a];
+		actions[a] = (actions[a] < -RESOLUTION) ? -RESOLUTION : actions[a];
+
+		//printf("actions[%d] after saturation: %d\n\r", a, actions[a]);
+
+	}
+
+	return;
+}
+
+
 
 void getSubPixel(int* Patch, unsigned char* frame_buf, int center_x, int center_y, int half_window_size, int subpixel_factor)
 {
