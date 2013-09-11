@@ -1,5 +1,175 @@
 <conf>
   <aircraft
+   name="Ardrone2_raw_180"
+   ac_id="180"
+   airframe="airframes/TUDelft/IMAV2013/ardrone2_raw.xml"
+   radio="radios/cockpitSX.xml"
+   telemetry="telemetry/default_ardrone.xml"
+   flight_plan="flight_plans/rotorcraft_basic.xml"
+   settings=" settings/rotorcraft_basic.xml settings/control/rotorcraft_guidance.xml settings/control/stabilization_rate.xml settings/control/stabilization_att_int.xml"
+   gui_color="red"
+  />
+  <aircraft
+   name="Ardrone2_raw_181"
+   ac_id="181"
+   airframe="airframes/TUDelft/IMAV2013/ardrone2_raw.xml"
+   radio="radios/cockpitSX.xml"
+   telemetry="telemetry/default_ardrone.xml"
+   flight_plan="flight_plans/rotorcraft_basic.xml"
+   settings=" settings/rotorcraft_basic.xml settings/control/rotorcraft_guidance.xml settings/control/stabilization_rate.xml settings/control/stabilization_att_int.xml"
+   gui_color="red"
+  />
+  <aircraft
+   name="Ardrone2_raw_182"
+   ac_id="182"
+   airframe="airframes/TUDelft/IMAV2013/ardrone2_raw.xml"
+   radio="radios/cockpitSX.xml"
+   telemetry="telemetry/default_ardrone.xml"
+   flight_plan="flight_plans/rotorcraft_basic.xml"
+   settings=" settings/rotorcraft_basic.xml settings/control/rotorcraft_guidance.xml settings/control/stabilization_rate.xml settings/control/stabilization_att_int.xml"
+   gui_color="red"
+  />
+  <aircraft
+   name="Ardrone2_raw_183"
+   ac_id="183"
+   airframe="airframes/TUDelft/IMAV2013/ardrone2_raw.xml"
+   radio="radios/cockpitSX.xml"
+   telemetry="telemetry/default_ardrone.xml"
+   flight_plan="flight_plans/rotorcraft_basic.xml"
+   settings=" settings/rotorcraft_basic.xml settings/control/rotorcraft_guidance.xml settings/control/stabilization_rate.xml settings/control/stabilization_att_int.xml"
+   gui_color="red"
+  />
+  <aircraft
+   name="Ardrone2_raw_184"
+   ac_id="184"
+   airframe="airframes/TUDelft/IMAV2013/ardrone2_raw.xml"
+   radio="radios/cockpitSX.xml"
+   telemetry="telemetry/default_ardrone.xml"
+   flight_plan="flight_plans/rotorcraft_basic.xml"
+   settings=" settings/rotorcraft_basic.xml settings/control/rotorcraft_guidance.xml settings/control/stabilization_rate.xml settings/control/stabilization_att_int.xml"
+   gui_color="red"
+  />
+  <aircraft
+   name="Ardrone2_raw_185"
+   ac_id="185"
+   airframe="airframes/TUDelft/IMAV2013/ardrone2_raw.xml"
+   radio="radios/cockpitSX.xml"
+   telemetry="telemetry/default_ardrone.xml"
+   flight_plan="flight_plans/rotorcraft_basic.xml"
+   settings=" settings/rotorcraft_basic.xml settings/control/rotorcraft_guidance.xml settings/control/stabilization_rate.xml settings/control/stabilization_att_int.xml"
+   gui_color="red"
+  />
+  <aircraft
+   name="Ardrone2_raw_186"
+   ac_id="186"
+   airframe="airframes/TUDelft/IMAV2013/ardrone2_raw.xml"
+   radio="radios/cockpitSX.xml"
+   telemetry="telemetry/default_ardrone.xml"
+   flight_plan="flight_plans/rotorcraft_basic.xml"
+   settings=" settings/rotorcraft_basic.xml settings/control/rotorcraft_guidance.xml settings/control/stabilization_rate.xml settings/control/stabilization_att_int.xml"
+   gui_color="red"
+  />
+  <aircraft
+   name="Ardrone2_raw_187"
+   ac_id="187"
+   airframe="airframes/TUDelft/IMAV2013/ardrone2_raw.xml"
+   radio="radios/cockpitSX.xml"
+   telemetry="telemetry/default_ardrone.xml"
+   flight_plan="flight_plans/rotorcraft_basic.xml"
+   settings=" settings/rotorcraft_basic.xml settings/control/rotorcraft_guidance.xml settings/control/stabilization_rate.xml settings/control/stabilization_att_int.xml"
+   gui_color="red"
+  />
+  <aircraft
+   name="Ardrone2_raw_188"
+   ac_id="188"
+   airframe="airframes/TUDelft/IMAV2013/ardrone2_raw.xml"
+   radio="radios/cockpitSX.xml"
+   telemetry="telemetry/default_ardrone.xml"
+   flight_plan="flight_plans/rotorcraft_basic.xml"
+   settings=" settings/rotorcraft_basic.xml settings/control/rotorcraft_guidance.xml settings/control/stabilization_rate.xml settings/control/stabilization_att_int.xml"
+   gui_color="red"
+  />
+  <aircraft
+   name="Ardrone2_raw_189"
+   ac_id="189"
+   airframe="airframes/TUDelft/IMAV2013/ardrone2_raw.xml"
+   radio="radios/cockpitSX.xml"
+   telemetry="telemetry/default_ardrone.xml"
+   flight_plan="flight_plans/rotorcraft_basic.xml"
+   settings=" settings/rotorcraft_basic.xml settings/control/rotorcraft_guidance.xml settings/control/stabilization_rate.xml settings/control/stabilization_att_int.xml"
+   gui_color="red"
+  />
+  <aircraft
+   name="Ardrone2_raw_190"
+   ac_id="190"
+   airframe="airframes/TUDelft/IMAV2013/ardrone2_raw.xml"
+   radio="radios/cockpitSX.xml"
+   telemetry="telemetry/default_ardrone.xml"
+   flight_plan="flight_plans/rotorcraft_basic.xml"
+   settings=" settings/rotorcraft_basic.xml settings/control/rotorcraft_guidance.xml settings/control/stabilization_rate.xml settings/control/stabilization_att_int.xml"
+   gui_color="red"
+  />
+  <aircraft
+   name="Ardrone2_raw_191"
+   ac_id="191"
+   airframe="airframes/TUDelft/IMAV2013/ardrone2_raw.xml"
+   radio="radios/cockpitSX.xml"
+   telemetry="telemetry/default_ardrone.xml"
+   flight_plan="flight_plans/rotorcraft_basic.xml"
+   settings=" settings/rotorcraft_basic.xml settings/control/rotorcraft_guidance.xml settings/control/stabilization_rate.xml settings/control/stabilization_att_int.xml"
+   gui_color="red"
+  />
+  <aircraft
+   name="Ardrone2_raw_192"
+   ac_id="192"
+   airframe="airframes/TUDelft/IMAV2013/ardrone2_raw.xml"
+   radio="radios/cockpitSX.xml"
+   telemetry="telemetry/default_ardrone.xml"
+   flight_plan="flight_plans/rotorcraft_basic.xml"
+   settings=" settings/rotorcraft_basic.xml settings/control/rotorcraft_guidance.xml settings/control/stabilization_rate.xml settings/control/stabilization_att_int.xml"
+   gui_color="red"
+  />
+  <aircraft
+   name="Ardrone2_raw_193"
+   ac_id="193"
+   airframe="airframes/TUDelft/IMAV2013/ardrone2_raw.xml"
+   radio="radios/cockpitSX.xml"
+   telemetry="telemetry/default_ardrone.xml"
+   flight_plan="flight_plans/rotorcraft_basic.xml"
+   settings=" settings/rotorcraft_basic.xml settings/control/rotorcraft_guidance.xml settings/control/stabilization_rate.xml settings/control/stabilization_att_int.xml"
+   gui_color="red"
+  />
+  <aircraft
+   name="Ardrone2_raw_194"
+   ac_id="194"
+   airframe="airframes/TUDelft/IMAV2013/ardrone2_raw.xml"
+   radio="radios/cockpitSX.xml"
+   telemetry="telemetry/default_ardrone.xml"
+   flight_plan="flight_plans/rotorcraft_basic.xml"
+   settings=" settings/rotorcraft_basic.xml settings/control/rotorcraft_guidance.xml settings/control/stabilization_rate.xml settings/control/stabilization_att_int.xml"
+   gui_color="red"
+  />
+  <aircraft
+   name="Ardrone2_raw_195"
+   ac_id="195"
+   airframe="airframes/TUDelft/IMAV2013/ardrone2_raw.xml"
+   radio="radios/cockpitSX.xml"
+   telemetry="telemetry/default_ardrone.xml"
+   flight_plan="flight_plans/rotorcraft_basic.xml"
+   settings=" settings/rotorcraft_basic.xml settings/control/rotorcraft_guidance.xml settings/control/stabilization_rate.xml settings/control/stabilization_att_int.xml"
+   gui_color="red"
+  />
+  <aircraft
+   name="Ardrone2_raw_196"
+   ac_id="196"
+   airframe="airframes/TUDelft/IMAV2013/ardrone2_raw.xml"
+   radio="radios/cockpitSX.xml"
+   telemetry="telemetry/default_ardrone.xml"
+   flight_plan="flight_plans/rotorcraft_basic.xml"
+   settings=" settings/rotorcraft_basic.xml settings/control/rotorcraft_guidance.xml settings/control/stabilization_rate.xml settings/control/stabilization_att_int.xml"
+   gui_color="red"
+  />
+  <aircraft
    name="C172"
    ac_id="25"
    airframe="airframes/TUDelft/c172.xml"
@@ -196,7 +366,7 @@
    radio="radios/cockpitSX.xml"
    telemetry="telemetry/default_rotorcraft.xml"
    flight_plan="flight_plans/rotorcraft_basic.xml"
-   settings="settings/rotorcraft_basic.xml settings/control/rotorcraft_guidance.xml settings/control/stabilization_att_int.xml settings/control/stabilization_rate.xml"
+   settings=" settings/rotorcraft_basic.xml settings/control/rotorcraft_guidance.xml settings/control/stabilization_att_int.xml settings/control/stabilization_rate.xml"
    gui_color="blue"
   />
   <aircraft
@@ -276,7 +446,7 @@
    radio="radios/cockpitSX.xml"
    telemetry="telemetry/default_rotorcraft.xml"
    flight_plan="flight_plans/rotorcraft_basic.xml"
-   settings="settings/rotorcraft_basic.xml settings/control/rotorcraft_guidance.xml settings/control/stabilization_att_int.xml settings/control/stabilization_rate.xml"
+   settings=" settings/rotorcraft_basic.xml settings/control/rotorcraft_guidance.xml settings/control/stabilization_att_int.xml settings/control/stabilization_rate.xml"
    gui_color="orange"
   />
   <aircraft
@@ -286,58 +456,8 @@
    radio="radios/cockpitSX.xml"
    telemetry="telemetry/default_rotorcraft.xml"
    flight_plan="flight_plans/rotorcraft_basic.xml"
-   settings="settings/rotorcraft_basic.xml settings/control/rotorcraft_guidance.xml settings/control/stabilization_att_int.xml settings/control/stabilization_rate.xml"
+   settings=" settings/rotorcraft_basic.xml settings/control/rotorcraft_guidance.xml settings/control/stabilization_att_int.xml settings/control/stabilization_rate.xml"
    gui_color="green"
-  />
-  <aircraft
-   name="ardrone2_raw_180"
-   ac_id="180"
-   airframe="airframes/TUDelft/ARDrone/ardrone2_raw_180.xml"
-   radio="radios/cockpitSX.xml"
-   telemetry="telemetry/default_ardrone.xml"
-   flight_plan="flight_plans/rotorcraft_basic.xml"
-   settings=" settings/rotorcraft_basic.xml settings/control/rotorcraft_guidance.xml settings/control/stabilization_rate.xml settings/control/stabilization_att_int.xml"
-   gui_color="red"
-  />
-  <aircraft
-   name="ardrone2_raw_181"
-   ac_id="181"
-   airframe="airframes/TUDelft/ARDrone/ardrone2_raw_181.xml"
-   radio="radios/cockpitSX.xml"
-   telemetry="telemetry/default_ardrone.xml"
-   flight_plan="flight_plans/rotorcraft_basic.xml"
-   settings=" settings/rotorcraft_basic.xml settings/control/rotorcraft_guidance.xml settings/control/stabilization_rate.xml settings/control/stabilization_att_int.xml"
-   gui_color="red"
-  />
-  <aircraft
-   name="ardrone2_raw_183"
-   ac_id="183"
-   airframe="airframes/TUDelft/ARDrone/ardrone2_raw_183.xml"
-   radio="radios/cockpitSX.xml"
-   telemetry="telemetry/default_ardrone.xml"
-   flight_plan="flight_plans/rotorcraft_basic.xml"
-   settings=" settings/rotorcraft_basic.xml settings/control/rotorcraft_guidance.xml settings/control/stabilization_rate.xml settings/control/stabilization_att_int.xml"
-   gui_color="red"
-  />
-  <aircraft
-   name="ardrone2_raw_185"
-   ac_id="185"
-   airframe="airframes/TUDelft/ARDrone/ardrone2_raw_185.xml"
-   radio="radios/cockpitSX.xml"
-   telemetry="telemetry/default_ardrone.xml"
-   flight_plan="flight_plans/rotorcraft_basic.xml"
-   settings=" settings/rotorcraft_basic.xml settings/control/rotorcraft_guidance.xml settings/control/stabilization_rate.xml settings/control/stabilization_att_int.xml"
-   gui_color="red"
-  />
-  <aircraft
-   name="ardrone2_raw_187"
-   ac_id="187"
-   airframe="airframes/TUDelft/ARDrone/ardrone2_raw_187.xml"
-   radio="radios/cockpitSX.xml"
-   telemetry="telemetry/default_ardrone.xml"
-   flight_plan="flight_plans/rotorcraft_basic.xml"
-   settings=" settings/rotorcraft_basic.xml settings/control/rotorcraft_guidance.xml settings/control/stabilization_rate.xml settings/control/stabilization_att_int.xml"
-   gui_color="red"
   />
   <aircraft
    name="ardrone2_raw_paparazzi_example"
