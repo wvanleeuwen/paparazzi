@@ -77,7 +77,6 @@ static inline void actuators_ardrone_reset_flipflop(void)
 }
 
 
-
 void actuators_ardrone_init(void)
 {
   led_hw_values = 0;

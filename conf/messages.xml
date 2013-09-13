@@ -48,6 +48,7 @@
      <field name="my" type="int16" />
      <field name="mz" type="int16" />
      <field name="chksum" type="uint16" />
+     <field name="checksum_errors" type="uint32" />
    </message>
 
    <message name="ATTITUDE" id="6">
