@@ -2,7 +2,9 @@
 <!-- TU Delft next to LR: lat0="51.991009" lon0="4.378288" -->
 <!-- IMAV2013 location: lat0="43.449546" lon0="1.263386" -->
 <flight_plan lat0="51.991009" lon0="4.378288" ground_alt="180" alt="195" max_dist_from_home="500" name="IMAV2013_ROTORCRAFT" qfu="190" security_height="2.5">
-  <header/>
+  <header>
+#include "subsystems/ahrs.h"
+  </header>
   <waypoints>
     <waypoint name="HOME" x="0" y="0"/>
     <waypoint name="STDBY" x="0" y="0" height="10"/>
@@ -20,9 +22,9 @@
   <exceptions/>
   <blocks>
 <!-- Establish GPS fix -->
-    <block name="Wait GPS">
+    <block name="Wait GPS and AHRS">
       <call fun="NavKillThrottle()"/>
-      <while cond="!GpsFixValid() || gps.pacc > 500"/>
+      <while cond="!GpsFixValid() || gps.pacc > 500 || !(ahrs.status == AHRS_RUNNING)"/>
     </block>
 <!-- Update local waypoints with respect to MAV -->
     <block name="Geo init">
