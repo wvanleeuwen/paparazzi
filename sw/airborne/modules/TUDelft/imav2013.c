@@ -1,0 +1,74 @@
+/*
+ * Copyright (C) 2013 Freek van Tienen
+ *
+ * This file is part of paparazzi.
+ *
+ * paparazzi is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2, or (at your option)
+ * any later version.
+ *
+ * paparazzi is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with paparazzi; see the file COPYING.  If not, write to
+ * the Free Software Foundation, 59 Temple Place - Suite 330,
+ * Boston, MA 02111-1307, USA.
+ *
+ */
+
+#include "std.h"
+#include "generated/settings.h"
+#include "generated/airframe.h"
+#include "generated/flight_plan.h"
+#include "messages.h"
+#include "subsystems/datalink/downlink.h"
+#ifndef DOWNLINK_DEVICE
+#define DOWNLINK_DEVICE DOWNLINK_AP_DEVICE
+#endif
+
+#include "imav2013.h"
+#define EXPLAIN_NAME        0
+#define EXPLAIN_IMAV2013    4
+
+static inline void imav2013_send_imav2013(void);
+static inline void imav2013_send_name(void);
+
+void imav2013_periodic(void) {
+  RunOnceEvery(3, imav2013_send_imav2013());
+  RunOnceEvery(10, imav2013_send_name());
+}
+
+static inline void imav2013_send_imav2013(void) {
+  uint8_t type = EXPLAIN_IMAV2013;
+  uint8_t id = 1;
+  uint8_t string[15];
+
+  string[0]     = SETTINGS_kill_throttle;
+  string[1]     = SETTINGS_flight_altitude;
+  string[2]     = SETTINGS_time_until_land;
+  string[4]     = BLOCK_Start_Engine;
+  string[5]     = BLOCK_Safety_Land_Here;
+  string[6]     = BLOCK_Land;
+  string[7]     = BLOCK_Standby;
+  string[8]     = WP_TD;
+  string[9]     = WP_STDBY;
+  string[10]    = WP_HOME;
+  string[11]    = WP__FA1;
+  string[12]    = WP__FA2;
+  string[13]    = WP__FA3;
+  string[14]    = WP__FA4;
+
+  DOWNLINK_SEND_EXPLAIN(DefaultChannel, DefaultDevice, &type, &id, 15, string);
+}
+
+static inline void imav2013_send_name(void) {
+  uint8_t type = EXPLAIN_NAME;
+  uint8_t id = 1;
+  uint8_t string[] = AIRFRAME_NAME;
+
+  DOWNLINK_SEND_EXPLAIN(DefaultChannel, DefaultDevice, &type, &id, sizeof(string), string);
+}
