@@ -50,12 +50,12 @@
     <define name="ACCEL_Z_NEUTRAL" value="0"/>
 
     <!-- From delft MAVLab (TODO) -->
-    <define name="MAG_X_NEUTRAL" value="396"/>
-    <define name="MAG_Y_NEUTRAL" value="-260"/>
-    <define name="MAG_Z_NEUTRAL" value="-91"/>
-    <define name="MAG_X_SENS" value="3.71635905504" integer="16"/>
-    <define name="MAG_Y_SENS" value="3.5526454063" integer="16"/>
-    <define name="MAG_Z_SENS" value="3.52339566014" integer="16"/>
+    <define name="MAG_X_NEUTRAL" value="-638"/>
+    <define name="MAG_Y_NEUTRAL" value="-101"/>
+    <define name="MAG_Z_NEUTRAL" value="-307"/>
+    <define name="MAG_X_SENS" value="3.61215021824" integer="16"/>
+    <define name="MAG_Y_SENS" value="4.23407732206" integer="16"/>
+    <define name="MAG_Z_SENS" value="4.28237277804" integer="16"/>
   </section>
 
  <section name="AUTOPILOT">
