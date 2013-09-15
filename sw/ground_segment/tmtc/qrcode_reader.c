@@ -6,9 +6,20 @@
 #include <Ivy/ivyglibloop.h>
 
 
-static void on_Debug(IvyClientPtr app, void *user_data, int argc, char *argv[]){
+static void on_Debug(IvyClientPtr app, void *user_data, int argc, char *argv[])
+{
+  int i;
   guint ac_id = atoi(argv[0]);
-  printf("QRCODE AC=%d len=%d\n",ac_id,argc);
+  printf("QRCODE AC=%d len=%d ",ac_id,argc);
+  for (i=1;i<argc;i++)
+  {
+    int v = atoi(argv[i]);
+    char c =  (char) v;
+    printf("%c",c);
+  }
+  printf("\n");
+
+  fflush(stdout);
 }
 
 
