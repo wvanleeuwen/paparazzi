@@ -76,7 +76,7 @@
 
  <section name="BAT">
    <define name="MILLIAMP_AT_FULL_THROTTLE" value="14000"/>
-   <define name="CATASTROPHIC_BAT_LEVEL" value="4.3" unit="V"/>
+   <define name="CATASTROPHIC_BAT_LEVEL" value="3.0" unit="V"/>
  </section>
 
 
@@ -122,12 +122,12 @@
     <define name="REF_MAX_RDOT" value="RadOfDeg(900.)"/>
 
     <!-- feedback -->
-    <define name="PHI_PGAIN" value="150"/>
-    <define name="PHI_DGAIN" value="100"/>
+    <define name="PHI_PGAIN" value="180"/>
+    <define name="PHI_DGAIN" value="140"/>
     <define name="PHI_IGAIN" value="20"/>
 
-    <define name="THETA_PGAIN" value="150"/>
-    <define name="THETA_DGAIN" value="100"/>
+    <define name="THETA_PGAIN" value="180"/>
+    <define name="THETA_DGAIN" value="140"/>
     <define name="THETA_IGAIN" value="20"/>
 
     <define name="PSI_PGAIN" value="500"/>
