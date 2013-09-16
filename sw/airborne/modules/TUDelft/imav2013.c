@@ -40,10 +40,11 @@
 
 // Flight plans
 #define FLIGHT_PLAN_162             {BLOCK_VTOL, BLOCK_Dropzone_4, BLOCK_Dropzone_3, BLOCK_Dropzone_2, BLOCK_Dropzone_1, BLOCK_Arch, BLOCK_Land}
-#define _IMAV2013_FLIGHT_PLAN(i)    i
-#define IMAV2013_FLIGHT_PLAN(id)    _IMAV2013_FLIGHT_PLAN(FLIGHT_PLAN_ ## id)
 
-static uint8_t flight_plan[] = IMAV2013_FLIGHT_PLAN(162);
+
+#define _FLIGHT_PLAN(id)    FLIGHT_PLAN_ ## id
+#define IMAV2013_FLIGHT_PLAN(id)    _FLIGHT_PLAN(id)
+static uint8_t flight_plan[] = IMAV2013_FLIGHT_PLAN( AC_ID );
 static uint8_t flight_plan_idx = 0;
 
 static inline void imav2013_send_imav2013(void);
@@ -81,8 +82,9 @@ static inline void imav2013_send_name(void) {
   uint8_t type = EXPLAIN_NAME;
   uint8_t id = 1;
   uint8_t string[] = AIRFRAME_NAME;
+  uint8_t size = sizeof(string);
 
-  DOWNLINK_SEND_EXPLAIN(DefaultChannel, DefaultDevice, &type, &id, sizeof(string), string);
+  DOWNLINK_SEND_EXPLAIN(DefaultChannel, DefaultDevice, &type, &id, size, string);
 }
 
 bool_t imav2013_dropball(void) {
