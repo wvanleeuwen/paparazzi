@@ -11,10 +11,10 @@
     <waypoint name="Pole1" lat="43.4491928" lon="1.2621898"/>
     <waypoint name="Pole2" lat="43.4477844" lon="1.2660354"/>
     <waypoint name="Start" lat="43.4493798" lon="1.2625281"/>
-    <waypoint name="QR1" lat="43.4490810" lon="1.2612933"/>
-    <waypoint name="QR2" lat="43.4497230" lon="1.2595940"/>
-    <waypoint name="QR3" lat="43.4513822" lon="1.2609753"/>
-    <waypoint name="QR4" lat="43.4507515" lon="1.2626668"/>
+    <waypoint name="_QR1" lat="43.4490810" lon="1.2612933"/>
+    <waypoint name="_QR2" lat="43.4497230" lon="1.2595940"/>
+    <waypoint name="_QR3" lat="43.4513822" lon="1.2609753"/>
+    <waypoint name="_QR4" lat="43.4507515" lon="1.2626668"/>
     <waypoint name="_TZ1" lat="43.4497286" lon="1.2648588"/>
     <waypoint name="_TZ4" lat="43.4495064" lon="1.2646922"/>
     <waypoint name="_TZ2" lat="43.4494196" lon="1.2656797"/>
@@ -37,10 +37,10 @@
 
   <sectors>
     <sector color="green" name="QR_Area">
-      <corner name="QR1"/>
-      <corner name="QR2"/>
-      <corner name="QR3"/>
-      <corner name="QR4"/>
+      <corner name="_QR1"/>
+      <corner name="_QR2"/>
+      <corner name="_QR3"/>
+      <corner name="_QR4"/>
     </sector>
     <sector color="yellow" name="Team_Zone">
       <corner name="_TZ1"/>

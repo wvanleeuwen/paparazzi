@@ -20,6 +20,10 @@
  *
  */
 
+#ifdef ARDRONE2_RAW
+#include <stdio.h>
+#endif
+
 #include "std.h"
 #include "generated/settings.h"
 #include "generated/airframe.h"
@@ -33,6 +37,14 @@
 #include "imav2013.h"
 #define EXPLAIN_NAME        0
 #define EXPLAIN_IMAV2013    4
+
+// Flight plans
+#define FLIGHT_PLAN_162             {BLOCK_VTOL, BLOCK_Dropzone_4, BLOCK_Dropzone_3, BLOCK_Dropzone_2, BLOCK_Dropzone_1, BLOCK_Arch, BLOCK_Land}
+#define _IMAV2013_FLIGHT_PLAN(i)    i
+#define IMAV2013_FLIGHT_PLAN(id)    _IMAV2013_FLIGHT_PLAN(FLIGHT_PLAN_ ## id)
+
+static uint8_t flight_plan[] = IMAV2013_FLIGHT_PLAN(162);
+static uint8_t flight_plan_idx = 0;
 
 static inline void imav2013_send_imav2013(void);
 static inline void imav2013_send_name(void);
@@ -53,7 +65,7 @@ static inline void imav2013_send_imav2013(void) {
   string[4]     = BLOCK_Start_Engine;
   string[5]     = BLOCK_Safety_Land_Here;
   string[6]     = BLOCK_Land;
-  string[7]     = BLOCK_Standby;
+  string[7]     = BLOCK_Safety_Standby;
   string[8]     = WP_TD;
   string[9]     = WP_STDBY;
   string[10]    = WP_HOME;
@@ -71,4 +83,17 @@ static inline void imav2013_send_name(void) {
   uint8_t string[] = AIRFRAME_NAME;
 
   DOWNLINK_SEND_EXPLAIN(DefaultChannel, DefaultDevice, &type, &id, sizeof(string), string);
+}
+
+bool_t imav2013_dropball(void) {
+#ifdef ARDRONE2_RAW
+ printf("<Drop_Paintball_Now>");
+#endif
+ return FALSE;
+}
+
+bool_t imav2013_goto_mission(void) {
+  nav_goto_block(flight_plan[flight_plan_idx]);
+  flight_plan_idx = (flight_plan_idx + 1) % sizeof(flight_plan);
+  return TRUE;
 }

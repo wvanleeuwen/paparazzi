@@ -24,5 +24,7 @@
 #define IMAV2013_H
 
 void imav2013_periodic(void);
+bool_t imav2013_dropball(void);
+bool_t imav2013_goto_mission(void);
 
 #endif /* IMAV2013_H */
