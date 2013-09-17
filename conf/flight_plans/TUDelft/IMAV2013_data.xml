@@ -3,7 +3,7 @@
   <waypoints>
     <waypoint name="Arch1" lat="43.4490384" lon="1.2650034"/>
     <waypoint name="Arch2" lat="43.4494471" lon="1.2638720"/>
-    <waypoint name="VTOL" lat="43.4488021" lon="1.2656911"/>
+    <waypoint name="VTOL" x="-10" y="0"/> <!--   lat="43.4488021" lon="1.2656911"/ -->
     <waypoint name="DZ1" lat="43.4500248" lon="1.2624849"/>
     <waypoint name="DZ2" lat="43.4490765" lon="1.2631868"/>
     <waypoint name="DZ3" lat="43.4483113" lon="1.2647993"/>

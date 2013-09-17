@@ -1,14 +1,19 @@
-<!-- ARDrone calibration file -->
+<!-- ARDrone calibration file (done toulouse)-->
 
 <airframe>
   <section name="IMU" prefix="IMU_">
+    <!-- Accelor -->
+    <define name="ACCEL_X_NEUTRAL" value="2056"/>
+    <define name="ACCEL_Y_NEUTRAL" value="2072"/>
+    <define name="ACCEL_Z_NEUTRAL" value="2048"/>
+  
     <!-- Magneto calibration -->
-    <define name="MAG_X_NEUTRAL" value="16"/>
-    <define name="MAG_Y_NEUTRAL" value="-11"/>
-    <define name="MAG_Z_NEUTRAL" value="-131"/>
-    <define name="MAG_X_SENS" value="17.206234987" integer="16"/>
-    <define name="MAG_Y_SENS" value="16.4124010821" integer="16"/>
-    <define name="MAG_Z_SENS" value="13.6629556861" integer="16"/>
+    <define name="MAG_X_NEUTRAL" value="-4"/>
+	<define name="MAG_Y_NEUTRAL" value="-15"/>
+	<define name="MAG_Z_NEUTRAL" value="-108"/>
+	<define name="MAG_X_SENS" value="14.654530282" integer="16"/>
+	<define name="MAG_Y_SENS" value="14.6359917209" integer="16"/>
+	<define name="MAG_Z_SENS" value="15.6087764792" integer="16"/>
     
     <!-- Magneto current calibration -->
     <define name= "MAG_X_CURRENT_COEF" value="0.00202964254187"/>

@@ -1,111 +1,121 @@
 <!DOCTYPE flight_plan SYSTEM "../flight_plan.dtd">
-<!-- TU Delft next to LR: lat0="51.991009" lon0="4.378288" -->
-<!-- IMAV2013 location: lat0="43.449546" lon0="1.263386" -->
-<flight_plan lat0="43.449546" lon0="1.263386" ground_alt="180" alt="195" max_dist_from_home="500" name="IMAV2013_ROTORCRAFT" qfu="190" security_height="2.5">
+
+<flight_plan alt="195" ground_alt="180" lat0="43.533642" lon0="1.496709" max_dist_from_home="500" name="IMAV2013_ROTORCRAFT" qfu="190" security_height="2.5">
   <header>
 #include "subsystems/ahrs.h"
 #include "modules/TUDelft/imav2013.h"
-  </header>
+</header>
   <waypoints>
     <waypoint name="HOME" x="0" y="0"/>
-    <waypoint name="STDBY" x="0" y="0" height="10"/>
-    <waypoint name="TD" x="0" y="0" height="7"/>
+    <waypoint name="STDBY" x="11" y="80"/>
+    <waypoint name="TD" x="0" y="0"/>
+    <waypoint lat="43.534801" lon="1.497632" name="Arch1"/>
+    <waypoint lat="43.534355" lon="1.496377" name="Arch2"/>
+    <waypoint name="VTOL" x="45.4" y="58.0"/>
+    <waypoint lat="43.534630" lon="1.495896" name="DZ1"/>
+    <waypoint lat="43.534087" lon="1.497365" name="DZ2"/>
+    <waypoint lat="43.534582" lon="1.498288" name="DZ3"/>
+    <waypoint lat="43.535023" lon="1.497519" name="DZ4"/>
+    <waypoint lat="43.535850" lon="1.494903" name="_FA1"/>
+    <waypoint lat="43.532509" lon="1.495324" name="_FA2"/>
+    <waypoint lat="43.534212" lon="1.501711" name="_FA3"/>
+    <waypoint lat="43.536780" lon="1.499584" name="_FA4"/>
+    <waypoint lat="43.535594" lon="1.495163" name="_SFA1"/>
+    <waypoint lat="43.532720" lon="1.495488" name="_SFA2"/>
+    <waypoint lat="43.534308" lon="1.501018" name="_SFA3"/>
+    <waypoint lat="43.536452" lon="1.499374" name="_SFA4"/>
   </waypoints>
-
+  <sectors>
+    <sector color="red" name="Flight_Area">
+      <corner name="_FA4"/>
+      <corner name="_FA3"/>
+      <corner name="_FA2"/>
+      <corner name="_FA1"/>
+    </sector>
+    <sector color="orange" name="Small_Flight_Area">
+      <corner name="_SFA4"/>
+      <corner name="_SFA3"/>
+      <corner name="_SFA2"/>
+      <corner name="_SFA1"/>
+    </sector>
+  </sectors>
   <includes>
-    <include name="Data" procedure="IMAV2013_data.xml"/>
-    <!-- include name="Data" procedure="IMAV2013_data_tudelft.xml"/ -->
     <include name="Safety" procedure="IMAV2013_safety.xml">
       <with from="goto_land" to="Land"/>
       <with from="goto_mission" to="Go_Mission"/>
     </include>
   </includes>
-
   <exceptions/>
   <blocks>
-<!-- Establish GPS fix -->
     <block name="Init">
       <call fun="NavKillThrottle()"/>
-      <while cond="!GpsFixValid() || gps.pacc > 500 || !(ahrs.status == AHRS_RUNNING)"/>
+      <while cond="!GpsFixValid() || gps.pacc > 1500 || !(ahrs.status == AHRS_RUNNING)"/>
     </block>
-<!-- Update local waypoints with respect to MAV -->
     <block name="Geo_init">
       <while cond="LessThan(NavBlockTime(), 10)"/>
       <call fun="NavSetGroundReferenceHere()"/>
-      <set var="waypoints[WP_STDBY].z" value="POS_BFP_OF_REAL(WaypointAlt(WP_STDBY) + ((AC_ID%2)*5))"/>
+      <set value="POS_BFP_OF_REAL(WaypointAlt(WP_STDBY) + ((AC_ID%2)*5))" var="waypoints[WP_STDBY].z"/>
     </block>
-<!-- Start the MAV motors -->
     <block name="Start Engine" strip_button="Takeoff" strip_icon="takeoff.png">
       <call fun="NavResurrect()"/>
-      <attitude pitch="0" roll="0" throttle="0" vmode="throttle" until="TRUE"/>
+      <attitude pitch="0" roll="0" throttle="0" until="TRUE" vmode="throttle"/>
     </block>
-<!-- Takeoff to a height of 3 meters and deroute to Standby -->
     <block name="Takeoff">
       <set value="0" var="autopilot_flight_time"/>
       <exception cond="!autopilot_motors_on" deroute="Start Engine"/>
       <exception cond="stateGetPositionEnu_f()->z > 3.0" deroute="Go_Mission"/>
-      <stay vmode="climb" climb="0.7" wp="HOME"/>
+      <stay climb="0.7" vmode="climb" wp="HOME"/>
     </block>
-<!-- Goto next mission element -->
-	<block name="Go_Mission">
-	  <call fun="imav2013_goto_mission()"/>
-	</block>
-<!-- Fly to VTOL spot and land -->
+    <block name="Go_Mission">
+      <call fun="imav2013_goto_mission()"/>
+    </block>
     <block name="VTOL">
       <go wp="VTOL"/>
     </block>
     <block name="Precision Landing">
-	  <exception cond="!nav_is_in_flight()" deroute="Precision Landed"/>
-	  <stay climb="-0.8" vmode="climb" wp="VTOL"/>
-	</block>
-<!-- Wait for 12 seconds on VTOL spot -->
-	<block name="Precision Landed">
-	  <exception cond="block_time > 12" deroute="Takeoff after VTOL"/>
-	  <attitude pitch="0" roll="0" throttle="0" vmode="throttle" until="FALSE"/>
-	</block>
-<!-- Takeoff to a height of 3 meters and deroute to Standby -->
+      <exception cond="!nav_is_in_flight()" deroute="Precision Landed"/>
+      <stay climb="-0.8" vmode="climb" wp="VTOL"/>
+    </block>
+    <block name="Precision Landed">
+      <exception cond="block_time > 12" deroute="Takeoff after VTOL"/>
+      <attitude pitch="0" roll="0" throttle="0" until="FALSE" vmode="throttle"/>
+    </block>
     <block name="Takeoff after VTOL">
       <exception cond="stateGetPositionEnu_f()->z > 3.0" deroute="Go_Mission"/>
-      <stay vmode="climb" climb="0.5" wp="VTOL"/>
+      <stay climb="0.5" vmode="climb" wp="VTOL"/>
     </block>
-<!-- Drop a ball at Dropzone 1 -->
     <block name="Dropzone_1">
       <go wp="DZ1"/>
-      <stay wp="DZ1" until="stage_time>10"/>
+      <stay until="stage_time>10" wp="DZ1"/>
       <call fun="imav2013_dropball()"/>
-      <stay wp="DZ1" until="stage_time>3"/>
+      <stay until="stage_time>3" wp="DZ1"/>
       <deroute block="Go_Mission"/>
     </block>
-<!-- Drop a ball at Dropzone 2 -->
     <block name="Dropzone_2">
       <go wp="DZ2"/>
-      <stay wp="DZ2" until="stage_time>10"/>
+      <stay until="stage_time>10" wp="DZ2"/>
       <call fun="imav2013_dropball()"/>
-      <stay wp="DZ2" until="stage_time>3"/>
+      <stay until="stage_time>3" wp="DZ2"/>
       <deroute block="Go_Mission"/>
     </block>
-<!-- Drop a ball at Dropzone 3 -->
     <block name="Dropzone_3">
       <go wp="DZ3"/>
-      <stay wp="DZ3" until="stage_time>10"/>
+      <stay until="stage_time>10" wp="DZ3"/>
       <call fun="imav2013_dropball()"/>
-      <stay wp="DZ3" until="stage_time>3"/>
+      <stay until="stage_time>3" wp="DZ3"/>
       <deroute block="Go_Mission"/>
     </block>
-<!-- Drop a ball at Dropzone 4 -->
     <block name="Dropzone_4">
       <go wp="DZ4"/>
-      <stay wp="DZ4" until="stage_time>10"/>
+      <stay until="stage_time>10" wp="DZ4"/>
       <call fun="imav2013_dropball()"/>
-      <stay wp="DZ4" until="stage_time>3"/>
+      <stay until="stage_time>3" wp="DZ4"/>
       <deroute block="Go_Mission"/>
     </block>
-<!-- Arch -->
     <block name="Arch">
       <go from="Arch2" hmode="route" wp="Arch1"/>
       <deroute block="Go_Mission"/>
     </block>
-<!-- Land the MAV -->
     <block name="Land">
       <go wp="TD"/>
     </block>
@@ -113,10 +123,9 @@
       <exception cond="!nav_is_in_flight()" deroute="Landed"/>
       <stay climb="-0.8" vmode="climb" wp="TD"/>
     </block>
-<!-- The MAV is landed -->
     <block name="Landed">
       <call fun="NavKillThrottle()"/>
-      <attitude pitch="0" roll="0" throttle="0" vmode="throttle" until="FALSE"/>
+      <attitude pitch="0" roll="0" throttle="0" until="FALSE" vmode="throttle"/>
     </block>
   </blocks>
 </flight_plan>
