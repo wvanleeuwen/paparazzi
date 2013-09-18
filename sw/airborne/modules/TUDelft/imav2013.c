@@ -48,16 +48,18 @@
 // 4
 #define FLIGHT_PLAN_193             {BLOCK_Land, BLOCK_Race, BLOCK_VTOL}
 // 5
-#define FLIGHT_PLAN_187             {BLOCK_VTOL, BLOCK_Race, BLOCK_Land}
+#define FLIGHT_PLAN_184             {BLOCK_VTOL, BLOCK_Race, BLOCK_Land}
 // 6
-#define FLIGHT_PLAN_195             {BLOCK_VTOL, BLOCK_Race, BLOCK_Land}
+#define FLIGHT_PLAN_195             {BLOCK_Search, BLOCK_VTOL, BLOCK_Land}
 // 7
 #define FLIGHT_PLAN_194             {BLOCK_Race, BLOCK_Race, BLOCK_Land}
 // 8 -> Errors
 #define FLIGHT_PLAN_189             {BLOCK_Race, BLOCK_Race, BLOCK_Land}
 
-// 9
+// Visio
 #define FLIGHT_PLAN_191             {BLOCK_Search, BLOCK_VTOL}
+// Pyro
+#define FLIGHT_PLAN_185             {BLOCK_Dropzone_1, BLOCK_Dropzone_2, BLOCK_Dropzone_3, BLOCK_Dropzone_4, BLOCK_Land}
 
 
 #define _FLIGHT_PLAN(id)    FLIGHT_PLAN_ ## id

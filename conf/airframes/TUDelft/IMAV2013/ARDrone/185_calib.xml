@@ -2,12 +2,12 @@
 
 <airframe>
   <section name="IMU" prefix="IMU_">
-    <!-- Accelero -->
+    <!-- Accelero (done) -->
     <define name="ACCEL_X_NEUTRAL" value="2056"/>
     <define name="ACCEL_Y_NEUTRAL" value="2072"/>
     <define name="ACCEL_Z_NEUTRAL" value="2048"/>
   
-    <!-- Magneto calibration -->
+    <!-- Magneto calibration (done) -->
     <define name="MAG_X_NEUTRAL" value="-4"/>
 	<define name="MAG_Y_NEUTRAL" value="-15"/>
 	<define name="MAG_Z_NEUTRAL" value="-108"/>

@@ -129,6 +129,7 @@ $(OBJDIR)/%.o : %.cpp $(OBJDIR)/../Makefile.ac
 	$(Q)test -d $(dir $@) || mkdir -p $(dir $@)
 	$(Q)$(CXX) -c $(CXXFLAGS) $< -o $@
 
+
 # Listing of phony targets.
 .PHONY : all build elf clean clean_list
 
