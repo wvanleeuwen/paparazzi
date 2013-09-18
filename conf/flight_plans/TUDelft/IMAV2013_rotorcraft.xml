@@ -1,6 +1,6 @@
 <!DOCTYPE flight_plan SYSTEM "../flight_plan.dtd">
 
-<flight_plan alt="195" ground_alt="180" lat0="43.533642" lon0="1.496709" max_dist_from_home="500" name="IMAV2013_ROTORCRAFT" qfu="190" security_height="2.5">
+<flight_plan alt="195" ground_alt="180" lat0="43.449441" lon0="1.265280" max_dist_from_home="1000" name="IMAV2013_ROTORCRAFT" qfu="190" security_height="2.5">
   <header>
 #include "subsystems/ahrs.h"
 #include "modules/TUDelft/imav2013.h"
@@ -9,34 +9,50 @@
     <waypoint name="HOME" x="0" y="0"/>
     <waypoint name="STDBY" x="11" y="80"/>
     <waypoint name="TD" x="0" y="0"/>
-    <waypoint lat="43.534801" lon="1.497632" name="Arch1"/>
-    <waypoint lat="43.534355" lon="1.496377" name="Arch2"/>
-    <waypoint name="VTOL" x="45.4" y="58.0"/>
-    <waypoint lat="43.534630" lon="1.495896" name="DZ1"/>
-    <waypoint lat="43.534087" lon="1.497365" name="DZ2"/>
-    <waypoint lat="43.534582" lon="1.498288" name="DZ3"/>
-    <waypoint lat="43.535023" lon="1.497519" name="DZ4"/>
-    <waypoint lat="43.535850" lon="1.494903" name="_FA1"/>
-    <waypoint lat="43.532509" lon="1.495324" name="_FA2"/>
-    <waypoint lat="43.534212" lon="1.501711" name="_FA3"/>
-    <waypoint lat="43.536780" lon="1.499584" name="_FA4"/>
-    <waypoint lat="43.535594" lon="1.495163" name="_SFA1"/>
-    <waypoint lat="43.532720" lon="1.495488" name="_SFA2"/>
-    <waypoint lat="43.534308" lon="1.501018" name="_SFA3"/>
-    <waypoint lat="43.536452" lon="1.499374" name="_SFA4"/>
+    <waypoint name="ARCH_EAST" lat="43.44995675" lon="1.26320972"/>
+    <waypoint name="ARCH_WEST" lat="43.4495515" lon="1.26431293"/>
+    <waypoint name="VTOL" lat="43.44895808" lon="1.26539215"/>
+    <waypoint name="DZ1" lat="43.44865401" lon="1.26603716"/>
+    <waypoint name="DZ2" lat="43.44810865" lon="1.26461653"/>
+    <waypoint name="DZ3" lat="43.44874625" lon="1.26267732"/>
+    <waypoint name="DZ4" lat="43.45004011" lon="1.26232517"/>
+    <waypoint name="POLE_EAST" lat="43.44791333" lon="1.2652"/>
+    <waypoint name="POLE_WEST" lat="43.44901833" lon="1.26218666"/>
+    <!--flight area-->
+    <waypoint name="_FA1" lat="43.4510139752147" lon="1.26347022174577"/>
+    <waypoint name="_FA2" lat="43.4521047570105" lon="1.26051804068908"/>
+    <waypoint name="_FA3" lat="43.449341433369" lon="1.25853521160491"/>
+    <waypoint name="_FA4" lat="43.4466539282449" lon="1.26628088811646"/>
+    <waypoint name="_FA5" lat="43.4484458053443" lon="1.26750716346104"/>
+    <waypoint name="_FA6" lat="43.4495295907909" lon="1.26583553027094"/>
+    <waypoint name="_FA7" lat="43.4501244556801" lon="1.26423849761234"/>
+    <!--forbidden area-->
+    <waypoint name="_SFA1" lat="43.4513493296649" lon="1.26377733227803"/>
+    <waypoint name="_SFA2" lat="43.4526890787549" lon="1.2601892363434"/>
+    <waypoint name="_SFA3" lat="43.4491715729295" lon="1.25765299277696"/>
+    <waypoint name="_SFA4" lat="43.4461168338121" lon="1.2665883289167"/>
+    <waypoint name="_SFA5" lat="43.4483425357094" lon="1.26810497090376"/>
+    <waypoint name="_SFA6" lat="43.4497064227008" lon="1.26599436021769"/>
+    <waypoint name="_SFA7" lat="43.4502080829671" lon="1.26462792069584"/>
   </waypoints>
   <sectors>
     <sector color="red" name="Flight_Area">
-      <corner name="_FA4"/>
-      <corner name="_FA3"/>
-      <corner name="_FA2"/>
       <corner name="_FA1"/>
+      <corner name="_FA2"/>
+      <corner name="_FA3"/>
+      <corner name="_FA4"/>
+      <corner name="_FA5"/>
+      <corner name="_FA6"/>
+      <corner name="_FA7"/>
     </sector>
     <sector color="orange" name="Small_Flight_Area">
-      <corner name="_SFA4"/>
-      <corner name="_SFA3"/>
-      <corner name="_SFA2"/>
       <corner name="_SFA1"/>
+      <corner name="_SFA2"/>
+      <corner name="_SFA3"/>
+      <corner name="_SFA4"/>
+      <corner name="_SFA5"/>
+      <corner name="_SFA6"/>
+      <corner name="_SFA7"/>
     </sector>
   </sectors>
   <includes>
