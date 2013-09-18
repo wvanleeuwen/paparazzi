@@ -12,6 +12,13 @@
       <define name="USE_BAROMETER"/>
       <define name="AUTOPILOT_DISABLE_AHRS_KILL"/>
       
+	  <define name="LINK_HOST" value="\\\"192.168.2.255\\\""/>
+      <configure name="HOST" value="192.168.2.$(AC_ID)"/>
+      <configure name="ARDRONE2_START_PAPARAZZI" value="1"/>
+      <configure name="ARDRONE2_WIFI_MODE" value="2"/>
+      <configure name="ARDRONE2_SSID" value="tudelft_swarmhub"/>
+      <configure name="ARDRONE2_IP_ADDRESS_BASE" value="192.168.2."/>
+      <configure name="ARDRONE2_IP_ADDRESS_PROBE" value="$(AC_ID)"/> 
 
     </target>
 

@@ -39,7 +39,25 @@
 #define EXPLAIN_IMAV2013    4
 
 // Flight plans
-#define FLIGHT_PLAN_162             {BLOCK_VTOL, BLOCK_Dropzone_4, BLOCK_Dropzone_3, BLOCK_Dropzone_2, BLOCK_Dropzone_1, BLOCK_Arch, BLOCK_Land}
+// 1
+#define FLIGHT_PLAN_188             {BLOCK_Land, BLOCK_Race, BLOCK_VTOL}
+// 2
+#define FLIGHT_PLAN_186             {BLOCK_Land, BLOCK_Race, BLOCK_VTOL}
+// 3
+#define FLIGHT_PLAN_196             {BLOCK_Land, BLOCK_Race, BLOCK_VTOL}
+// 4
+#define FLIGHT_PLAN_193             {BLOCK_Land, BLOCK_Race, BLOCK_VTOL}
+// 5
+#define FLIGHT_PLAN_187             {BLOCK_VTOL, BLOCK_Race, BLOCK_Land}
+// 6
+#define FLIGHT_PLAN_195             {BLOCK_VTOL, BLOCK_Race, BLOCK_Land}
+// 7
+#define FLIGHT_PLAN_194             {BLOCK_Race, BLOCK_Race, BLOCK_Land}
+// 8 -> Errors
+#define FLIGHT_PLAN_189             {BLOCK_Race, BLOCK_Race, BLOCK_Land}
+
+// 9
+#define FLIGHT_PLAN_191             {BLOCK_Search, BLOCK_VTOL}
 
 
 #define _FLIGHT_PLAN(id)    FLIGHT_PLAN_ ## id

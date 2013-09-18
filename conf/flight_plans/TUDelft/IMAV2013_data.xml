@@ -37,34 +37,34 @@
 
   <sectors>
     <sector color="green" name="QR_Area">
-      <corner name="_QR1"/>
-      <corner name="_QR2"/>
-      <corner name="_QR3"/>
       <corner name="_QR4"/>
+      <corner name="_QR3"/>
+      <corner name="_QR2"/>
+      <corner name="_QR1"/>
     </sector>
     <sector color="yellow" name="Team_Zone">
-      <corner name="_TZ1"/>
-      <corner name="_TZ2"/>
-      <corner name="_TZ3"/>
       <corner name="_TZ4"/>
+      <corner name="_TZ3"/>
+      <corner name="_TZ2"/>
+      <corner name="_TZ1"/>
     </sector>
     <sector color="blue" name="Visitor_Zone">
-      <corner name="_VZ1"/>
-      <corner name="_VZ2"/>
+      <corner name="_VZ4"/>
+      <corner name="_VZ3"/>
       <corner name="_TZ2"/>
       <corner name="_TZ1"/>
     </sector>
     <sector color="red" name="Flight_Area">
-      <corner name="_FA1"/>
-      <corner name="_FA2"/>
-      <corner name="_FA3"/>
       <corner name="_FA4"/>
+      <corner name="_FA3"/>
+      <corner name="_FA2"/>
+      <corner name="_FA1"/>
     </sector>
     <sector color="orange" name="Small_Flight_Area">
-      <corner name="_SFA1"/>
-      <corner name="_SFA2"/>
-      <corner name="_SFA3"/>
       <corner name="_SFA4"/>
+      <corner name="_SFA3"/>
+      <corner name="_SFA2"/>
+      <corner name="_SFA1"/>
     </sector>
   </sectors>
 </procedure>

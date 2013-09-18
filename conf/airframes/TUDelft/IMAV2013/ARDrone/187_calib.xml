@@ -2,13 +2,18 @@
 
 <airframe>
   <section name="IMU" prefix="IMU_">
-    <!-- Magneto calibration -->
-    <define name="MAG_X_NEUTRAL" value="33"/>
-    <define name="MAG_Y_NEUTRAL" value="44"/>
-    <define name="MAG_Z_NEUTRAL" value="-264"/>
-    <define name="MAG_X_SENS" value="19.1984157982" integer="16"/>
-    <define name="MAG_Y_SENS" value="18.7031225235" integer="16"/>
-    <define name="MAG_Z_SENS" value="19.0380688485" integer="16"/>
+    <!-- Accelero (done) -->
+    <define name="ACCEL_X_NEUTRAL" value="2040"/>
+    <define name="ACCEL_Y_NEUTRAL" value="2060"/>
+    <define name="ACCEL_Z_NEUTRAL" value="2048"/>
+    
+    <!-- Magneto calibration (done) -->
+    <define name="MAG_X_NEUTRAL" value="15"/>
+	<define name="MAG_Y_NEUTRAL" value="4"/>
+	<define name="MAG_Z_NEUTRAL" value="-233"/>
+	<define name="MAG_X_SENS" value="15.7563191033" integer="16"/>
+	<define name="MAG_Y_SENS" value="15.7035556048" integer="16"/>
+	<define name="MAG_Z_SENS" value="16.6062003842" integer="16"/>
     
     <!-- Magneto current calibration -->
     <define name="MAG_X_CURRENT_COEF" value="0.00175105205138"/>

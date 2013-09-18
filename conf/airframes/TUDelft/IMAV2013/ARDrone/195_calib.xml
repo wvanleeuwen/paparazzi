@@ -1,7 +1,12 @@
-<!-- ARDrone calibration file -->
+	<!-- ARDrone calibration file -->
 
 <airframe>
   <section name="IMU" prefix="IMU_">
+    <!-- Accelero (done) -->
+    <define name="ACCEL_X_NEUTRAL" value="2040"/>
+    <define name="ACCEL_Y_NEUTRAL" value="2044"/>
+    <define name="ACCEL_Z_NEUTRAL" value="2048"/>
+    
     <!-- Magneto calibration -->
     <define name="MAG_X_NEUTRAL" value="33"/>
     <define name="MAG_Y_NEUTRAL" value="44"/>

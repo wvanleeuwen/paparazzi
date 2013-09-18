@@ -32,7 +32,7 @@
 uint16_t time_until_land;
 
 #ifndef FLIGHT_TIME_LEFT
-#define FLIGHT_TIME_LEFT 6000
+#define FLIGHT_TIME_LEFT 10000
 #endif
 
 void flight_time_init(void) {
