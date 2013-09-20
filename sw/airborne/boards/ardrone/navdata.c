@@ -39,6 +39,7 @@
 
 #include "std.h"
 #include "navdata.h"
+#include "subsystems/ins.h"
 
 #define NAVDATA_PACKET_SIZE 60
 #define NAVDATA_START_BYTE 0x3a
@@ -50,6 +51,9 @@ navdata_port nav_port;
 static int nav_fd = 0;
 static int16_t previousUltrasoundHeight;
 measures_t navdata;
+
+#include "subsystems/sonar.h"
+uint16_t sonar_meas = 0;
 
 
 // FIXME(ben): there must be a better home for these
@@ -312,6 +316,16 @@ void navdata_update()
         p[1] = tmp;
 
         baro_update_logic();
+
+#ifdef USE_SONAR
+        if (navdata.ultrasound < 10000)
+        {
+            sonar_meas = navdata.ultrasound;
+            ins_update_sonar();
+
+        }
+#endif
+
 
         navdata_imu_available = TRUE;
         last_checksum_wrong = FALSE;
