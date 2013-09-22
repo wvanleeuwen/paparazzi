@@ -55,17 +55,17 @@
     <define name="ACCEL_Z_NEUTRAL" value="0"/>
 
     <!-- MAGNETO CALIBRATION DELFT -->
-    <define name="MAG_X_NEUTRAL" value="-157"/>
-    <define name="MAG_Y_NEUTRAL" value="-379"/>
-    <define name="MAG_Z_NEUTRAL" value="130"/>
-    <define name="MAG_X_SENS" value="3.65789837026" integer="16"/>
-    <define name="MAG_Y_SENS" value="3.85373116155" integer="16"/>
-    <define name="MAG_Z_SENS" value="4.28038049955" integer="16"/>
+    <define name="MAG_X_NEUTRAL" value="659"/>
+    <define name="MAG_Y_NEUTRAL" value="690"/>
+    <define name="MAG_Z_NEUTRAL" value="190"/>
+    <define name="MAG_X_SENS" value="3.39402052031" integer="16"/>
+    <define name="MAG_Y_SENS" value="3.91173386296" integer="16"/>
+    <define name="MAG_Z_SENS" value="3.93055649697" integer="16"/>
 
     <!-- MAGNETO CURRENT CALIBRATION -->
-    <define name="MAG_X_CURRENT_COEF" value="0.0103422023767"/>
-    <define name="MAG_Y_CURRENT_COEF" value="0.0084568317783"/>
-    <define name="MAG_Z_CURRENT_COEF" value="-0.01935617335"/>
+    <define name= "MAG_X_CURRENT_COEF" value="0.0128687411225"/>
+    <define name= "MAG_Y_CURRENT_COEF" value="-0.00529984103499"/>
+    <define name= "MAG_Z_CURRENT_COEF" value="-0.0358479211106"/>
   </section>
 
  <section name="AUTOPILOT">
@@ -75,7 +75,7 @@
  </section>
 
  <section name="BAT">
-   <define name="MILLIAMP_AT_FULL_THROTTLE" value="14000"/>
+   <define name="MILLIAMP_AT_FULL_THROTTLE" value="4400"/>
    <define name="CATASTROPHIC_BAT_LEVEL" value="3.0" unit="V"/>
  </section>
 
