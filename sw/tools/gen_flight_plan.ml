@@ -803,6 +803,15 @@ let () =
 					lprintf "#define BLOCK_%s %d\n" (Str.global_replace (Str.regexp "[\\. ]") "_" v) !idx; incr idx) blocks;
 			lprintf "\n";
 
+      (** Print defines for blocks **)
+      lprintf "\n";
+      let idx = ref 0 in
+      List.iter
+        (fun s ->
+        let v = ExtXml.attrib s "name" in
+        lprintf "#define BLOCK_%s %d\n" (Str.global_replace (Str.regexp "[\\. ]") "_" v) !idx; incr idx) blocks;
+        lprintf "\n";
+
       let index_of_waypoints =
         let i = ref (-1) in
         List.map (fun w -> incr i; (name_of w, !i)) waypoints in

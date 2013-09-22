@@ -11,14 +11,14 @@
       <define name="INS_PROPAGATE_FREQUENCY" value="200"/>
       <define name="USE_BAROMETER"/>
       <define name="AUTOPILOT_DISABLE_AHRS_KILL"/>
-      
-	  <define name="LINK_HOST" value="\\\"192.168.2.255\\\""/>
+
+      <define name="LINK_HOST" value="\\\"192.168.2.255\\\""/>
       <configure name="HOST" value="192.168.2.$(AC_ID)"/>
       <configure name="ARDRONE2_START_PAPARAZZI" value="1"/>
       <configure name="ARDRONE2_WIFI_MODE" value="2"/>
       <configure name="ARDRONE2_SSID" value="tudelft_swarmhub"/>
       <configure name="ARDRONE2_IP_ADDRESS_BASE" value="192.168.2."/>
-      <configure name="ARDRONE2_IP_ADDRESS_PROBE" value="$(AC_ID)"/> 
+      <configure name="ARDRONE2_IP_ADDRESS_PROBE" value="$(AC_ID)"/>
 
     </target>
 
@@ -60,7 +60,7 @@
     <define name="TRIM_YAW" value="0"/>
     <define name="NB_MOTOR" value="4"/>
     <define name="SCALE" value="255"/>
-    
+
     <!-- Time cross layout (X), as documented in paparazzi -->
     <define name="ROLL_COEF" value="{   256, -256, -256,  256  }"/>
     <define name="PITCH_COEF" value="{  256,  256, -256,  -256 }"/>
