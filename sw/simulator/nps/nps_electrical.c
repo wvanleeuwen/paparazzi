@@ -20,27 +20,27 @@
  */
 
 /**
- * @file nps_atmosphere.h
- * Atmosphere model (pressure, wind) for NPS.
+ * @file nps_electrical.c
+ * Electrical status (bat voltage) for NPS.
  */
 
-#ifndef NPS_ATMOSPHERE_H
-#define NPS_ATMOSPHERE_H
+#include "nps_electrical.h"
+#include "generated/airframe.h"
+#include "subsystems/electrical.h"
 
-#include "math/pprz_algebra_double.h"
+struct NpsElectrical nps_electrical;
 
-struct NpsAtmosphere {
-  double qnh;         ///< barometric pressure at sea level in Pascal
-  double wind_speed;  ///< wind magnitude in m/s
-  double wind_dir;    ///< wind direction in radians north=0, increasing CCW
-  int turbulence_severity; ///< turbulence severity from 0-7
-};
+void nps_electrical_init(void) {
 
-extern struct NpsAtmosphere nps_atmosphere;
+#ifdef MAX_BAT_LEVEL
+  nps_electrical.supply_voltage = MAX_BAT_LEVEL;
+#else
+  nps_electrical.supply_voltage = 11.1;
+#endif
 
-extern void nps_atmosphere_init(void);
-extern void nps_atmosphere_update(double dt);
+}
 
-#endif /* NPS_ATMOSPHERE_H */
-
-
+void nps_electrical_run_step(double time __attribute__ ((unused))) {
+  // todo: auto-decrease bat voltage
+  electrical.vsupply = nps_electrical.supply_voltage * 10;
+}

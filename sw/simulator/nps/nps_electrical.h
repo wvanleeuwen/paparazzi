@@ -20,27 +20,20 @@
  */
 
 /**
- * @file nps_atmosphere.h
- * Atmosphere model (pressure, wind) for NPS.
+ * @file nps_electrical.h
+ * Electrical status (bat voltage) for NPS.
  */
 
-#ifndef NPS_ATMOSPHERE_H
-#define NPS_ATMOSPHERE_H
+#ifndef NPS_ELECTRICAL_H
+#define NPS_ELECTRICAL_H
 
-#include "math/pprz_algebra_double.h"
-
-struct NpsAtmosphere {
-  double qnh;         ///< barometric pressure at sea level in Pascal
-  double wind_speed;  ///< wind magnitude in m/s
-  double wind_dir;    ///< wind direction in radians north=0, increasing CCW
-  int turbulence_severity; ///< turbulence severity from 0-7
+struct NpsElectrical {
+  float supply_voltage;
 };
 
-extern struct NpsAtmosphere nps_atmosphere;
+extern struct NpsElectrical nps_electrical;
 
-extern void nps_atmosphere_init(void);
-extern void nps_atmosphere_update(double dt);
+extern void nps_electrical_init(void);
+extern void nps_electrical_run_step(double time);
 
-#endif /* NPS_ATMOSPHERE_H */
-
-
+#endif

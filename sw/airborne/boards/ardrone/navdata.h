@@ -67,7 +67,7 @@ typedef struct
   uint16_t flag_echo_ini;
 
   int32_t pressure;
-  int16_t temperature_pressure;
+  uint16_t temperature_pressure;
 
   int16_t my;
   int16_t mx;
@@ -108,9 +108,11 @@ typedef struct {
 extern measures_t navdata;
 extern navdata_port nav_port;
 struct bmp180_baro_calibration baro_calibration;
+navdata_port* port;
 uint16_t navdata_cks;
 uint8_t navdata_imu_available;
 uint8_t navdata_baro_available;
+int16_t previousUltrasoundHeight;
 uint8_t baro_calibrated;
 
 bool_t navdata_init(void);

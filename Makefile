@@ -100,35 +100,8 @@ ABI_MESSAGES_H=$(STATICINCLUDE)/abi_messages.h
 
 GEN_HEADERS = $(MESSAGES_H) $(MESSAGES2_H) $(UBX_PROTOCOL_H) $(MTK_PROTOCOL_H) $(XSENS_PROTOCOL_H) $(DL_PROTOCOL_H) $(DL_PROTOCOL2_H) $(ABI_MESSAGES_H)
 
-CONF ?= conf.xml.example
 
 all: ground_segment ext lpctools
-
-example:
-	ln -s -f ./conf.xml.example ./conf/conf.xml
-
-tudelft:
-	ln -s -f ./conf.xml.tudelft ./conf/conf.xml
-
-imav:
-	ln -s -f ./airframes/TUDelft/IMAV2013/conf.xml ./conf/conf.xml
-
-tri:
-	ln -s -f ./conf.xml.tri ./conf/conf.xml
-
-config:
-	ln -s -f ../$(CONF) ./conf/conf.xml
-
-help:
-	@echo "You can choose the following configurations"
-	@echo "make example"
-	@echo "make tudelft"
-	@echo "make tri"
-	@echo "make imav"
-	@echo "make config CONF=./conf/test_confs.xml"
-	@echo "===================="
-	@echo "Now you selected:"
-	ls -altr ./conf/conf.xml
 
 print_build_version:
 	@echo "------------------------------------------------------------"
@@ -141,11 +114,10 @@ update_google_version:
 conf: conf/conf.xml conf/control_panel.xml conf/maps.xml
 
 #conf/%.xml :conf/%.xml.example
-#	cp $< $@.personal
-#	ln -s -f ../$@.personal $@
+#	[ -L $@ ] || [ -f $@ ] || cp $< $@
 
-conf/%.xml :conf/%.xml.tudelft
-	ln -s -f ../$@.tudelft $@
+conf/%.xml :conf/tudelft_%.xml
+	ln -s -f ../tudelft_$@ $a
 
 ground_segment: print_build_version update_google_version conf libpprz subdirs commands static
 ground_segment.opt: ground_segment cockpit.opt tmtc.opt
