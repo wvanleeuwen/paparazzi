@@ -12,10 +12,10 @@
 <airframe name="quadrotor_lisa_s">
 <!-- 5 0 1 4-->
   <servos driver="Pwm">
-    <servo name="RIGHTFRONT" no="0" min="0" neutral="10" max="1000"/>
-    <servo name="RIGHTBACK" no="1" min="0" neutral="10" max="1000"/>
-    <servo name="LEFTBACK" no="4" min="0" neutral="10" max="1000"/>
-    <servo name="LEFTFRONT" no="5" min="0" neutral="10" max="1000"/>
+    <servo name="RIGHTFRONT" no="0" min="0" neutral="10" max="500"/>
+    <servo name="RIGHTBACK" no="1" min="0" neutral="10" max="500"/>
+    <servo name="LEFTBACK" no="4" min="0" neutral="10" max="500"/>
+    <servo name="LEFTFRONT" no="5" min="0" neutral="10" max="500"/>
   </servos>
 
   <commands>
@@ -97,8 +97,8 @@
   <section name="STABILIZATION_ATTITUDE" prefix="STABILIZATION_ATTITUDE_">
 
     <!-- setpoints -->
-    <define name="SP_MAX_PHI" value="45." unit="deg"/>
-    <define name="SP_MAX_THETA" value="45." unit="deg"/>
+    <define name="SP_MAX_PHI" value="60." unit="deg"/>
+    <define name="SP_MAX_THETA" value="60." unit="deg"/>
     <define name="SP_MAX_PSI" value="45." unit="deg"/>
     <define name="SP_MAX_R" value="90." unit="deg/s"/>
     <define name="SP_MAX_P" value="90." unit="deg/s"/>
@@ -118,21 +118,21 @@
 
     <define name="REF_OMEGA_R" value="500" unit="deg/s"/>
     <define name="REF_ZETA_R" value="0.85"/>
-    <define name="REF_MAX_R" value="180." unit="deg/s"/>
+    <define name="REF_MAX_R" value="300." unit="deg/s"/>
     <define name="REF_MAX_RDOT" value="RadOfDeg(1000.)"/>
 
     <!-- feedback -->
-    <define name="PHI_PGAIN" value="350"/>
-    <define name="PHI_DGAIN" value="350"/>
+    <define name="PHI_PGAIN" value="180"/>
+    <define name="PHI_DGAIN" value="200"/>
     <define name="PHI_IGAIN" value="0"/>
 
-    <define name="THETA_PGAIN" value="350"/>
-    <define name="THETA_DGAIN" value="350"/>
+    <define name="THETA_PGAIN" value="180"/>
+    <define name="THETA_DGAIN" value="200"/>
     <define name="THETA_IGAIN" value="0"/>
 
-    <define name="PSI_PGAIN" value="300"/>
+    <define name="PSI_PGAIN" value="900"/>
     <define name="PSI_DGAIN" value="300"/>
-    <define name="PSI_IGAIN" value="0"/>
+    <define name="PSI_IGAIN" value="30"/>
 
     <!-- feedforward -->
     <define name="PHI_DDGAIN" value="0"/>
@@ -205,7 +205,7 @@
 
     <subsystem name="motor_mixing"/>
     <subsystem name="actuators" type="pwm">
-      <define name="SERVO_HZ" value="1000"/>
+      <define name="SERVO_HZ" value="2000"/>
       <define name="USE_SERVOS_1AND2"/>
     </subsystem>
 
