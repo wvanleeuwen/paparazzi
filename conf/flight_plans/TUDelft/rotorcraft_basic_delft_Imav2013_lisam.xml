@@ -1,0 +1,106 @@
+<!DOCTYPE flight_plan SYSTEM "../flight_plan.dtd">
+
+<flight_plan alt="195" ground_alt="180" lat0="43.449441" lon0="1.265280" max_dist_from_home="1000" name="IMAV2013_ROTORCRAFT" qfu="190" security_height="15">
+  <header>
+#include "autopilot.h"
+#include "subsystems/ahrs.h"
+</header>
+  <waypoints>
+    <waypoint name="HOME" x="0" y="0"/>
+    <waypoint height="15" name="STDBY" x="11" y="80"/>
+    <waypoint name="TD" x="0" y="0"/>
+    <waypoint lat="43.450081" lon="1.262840" name="ARCH_EAST"/>
+    <waypoint lat="43.449437" lon="1.264664" name="ARCH_WEST"/>
+    <waypoint lat="43.44914086" lon="1.26544141" name="VTOL"/>
+    <waypoint lat="43.44865401" lon="1.26603716" name="DZ1"/>
+    <waypoint lat="43.44810865" lon="1.26461653" name="DZ2"/>
+    <waypoint lat="43.44874625" lon="1.26267732" name="DZ3"/>
+    <waypoint lat="43.45004011" lon="1.26232517" name="DZ4"/>
+    <waypoint lat="43.44791333" lon="1.2652" name="POLE_EAST"/>
+    <waypoint lat="43.44901833" lon="1.26218666" name="POLE_WEST"/>
+    <waypoint lat="43.4510139752147" lon="1.26347022174577" name="_FA1"/>
+    <waypoint lat="43.4521047570105" lon="1.26051804068908" name="_FA2"/>
+    <waypoint lat="43.449341433369" lon="1.25853521160491" name="_FA3"/>
+    <waypoint lat="43.4466539282449" lon="1.26628088811646" name="_FA4"/>
+    <waypoint lat="43.4484458053443" lon="1.26750716346104" name="_FA5"/>
+    <waypoint lat="43.4495295907909" lon="1.26583553027094" name="_FA6"/>
+    <waypoint lat="43.4501244556801" lon="1.26423849761234" name="_FA7"/>
+    <waypoint lat="43.4513493296649" lon="1.26377733227803" name="_SFA1"/>
+    <waypoint lat="43.4526890787549" lon="1.2601892363434" name="_SFA2"/>
+    <waypoint lat="43.4491715729295" lon="1.25765299277696" name="_SFA3"/>
+    <waypoint lat="43.4461168338121" lon="1.2665883289167" name="_SFA4"/>
+    <waypoint lat="43.4483425357094" lon="1.26810497090376" name="_SFA5"/>
+    <waypoint lat="43.4497064227008" lon="1.26599436021769" name="_SFA6"/>
+    <waypoint lat="43.4502080829671" lon="1.26462792069584" name="_SFA7"/>
+  </waypoints>
+  <sectors>
+    <sector color="red" name="Flight_Area">
+      <corner name="_FA7"/>
+      <corner name="_FA6"/>
+      <corner name="_FA5"/>
+      <corner name="_FA4"/>
+      <corner name="_FA3"/>
+      <corner name="_FA2"/>
+      <corner name="_FA1"/>
+    </sector>
+    <sector color="orange" name="Small_Flight_Area">
+      <corner name="_SFA7"/>
+      <corner name="_SFA6"/>
+      <corner name="_SFA5"/>
+      <corner name="_SFA4"/>
+      <corner name="_SFA3"/>
+      <corner name="_SFA2"/>
+      <corner name="_SFA1"/>
+    </sector>
+  </sectors>
+  <exceptions>
+    <exception cond="Or(! InsideSmall_Flight_Area(GetPosX(), GetPosY()), GetPosAlt() > ground_alt + 70) && !(nav_block == BLOCK_Init) && !(nav_block == BLOCK_Landed)" deroute="Standby"/>
+  </exceptions>
+  <blocks>
+    <block name="Init">
+      <call fun="NavKillThrottle()"/>
+      <while cond="!GpsFixValid() || gps.pacc > 500 || !(ahrs.status == AHRS_RUNNING)"/>
+    </block>
+    <block name="Geo init">
+      <call fun="NavSetAltitudeReferenceHere()"/>
+      <call fun="NavSetWaypointHere(WP_TD)"/>
+      <call fun="NavSetWaypointHere(WP_HOME)"/>
+      <call fun="NavSetWaypointHere(WP_STDBY)"/>
+    </block>
+    <block name="Start Engine" strip_button="Takeoff" strip_icon="takeoff.png">
+      <call fun="NavResurrect()"/>
+      <attitude pitch="0" roll="0" throttle="0" until="TRUE" vmode="throttle"/>
+    </block>
+    <block name="Takeoff" strip_button="Takeoff" strip_icon="takeoff.png">
+      <set value="0" var="autopilot_flight_time"/>
+      <exception cond="!autopilot_motors_on" deroute="Start Engine"/>
+      <exception cond="stateGetPositionEnu_f()->z > 3.0" deroute="Climb"/>
+      <call fun="NavSetWaypointHere(WP_STDBY)"/>
+      <attitude pitch="0" roll="0" throttle="0.5" until="FALSE" vmode="throttle"/>
+    </block>
+    <block name="Climb">
+      <exception cond="stateGetPositionEnu_f()->z > 15.0" deroute="Standby"/>
+      <stay climb="0.8" vmode="climb" wp="STDBY"/>
+    </block>
+    <block name="Standby" pre_call="if (!InsideFlight_Area(GetPosX(), GetPosY())) NavKillThrottle();">
+      <exception cond="And(InsideSmall_Flight_Area(GetPosX(),GetPosY()),ground_alt + 70 > GetPosAlt())" deroute="line_ARCH_WEST_ARCH_EAST"/>
+      <stay wp="STDBY"/>
+    </block>
+    <block name="line_ARCH_WEST_ARCH_EAST">
+      <go from="ARCH_WEST" hmode="route" wp="ARCH_EAST"/>
+      <stay until="stage_time>5" wp="ARCH_EAST"/>
+      <go from="ARCH_EAST" hmode="route" wp="ARCH_WEST"/>
+    </block>
+    <block name="Land">
+      <go wp="VTOL"/>
+    </block>
+    <block name="Flare">
+      <exception cond="!nav_is_in_flight()" deroute="Landed"/>
+      <stay climb="-0.8" vmode="climb" wp="VTOL"/>
+    </block>
+    <block name="Landed">
+      <call fun="NavKillThrottle()"/>
+      <attitude pitch="0" roll="0" throttle="0" until="FALSE" vmode="throttle"/>
+    </block>
+  </blocks>
+</flight_plan>

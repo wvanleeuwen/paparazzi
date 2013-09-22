@@ -108,15 +108,15 @@
     <!-- feedback -->
     <define name="PHI_PGAIN" value="3052"/>
     <define name="PHI_DGAIN" value="108"/>
-    <define name="PHI_IGAIN" value="0"/>
+    <define name="PHI_IGAIN" value="14"/>
 
     <define name="THETA_PGAIN" value="3052"/>
     <define name="THETA_DGAIN" value="108"/>
-    <define name="THETA_IGAIN" value="0"/>
+    <define name="THETA_IGAIN" value="14"/>
 
-    <define name="PSI_PGAIN" value="1464"/>
-    <define name="PSI_DGAIN" value="199"/>
-    <define name="PSI_IGAIN" value="0"/>
+    <define name="PSI_PGAIN" value="1099"/>
+    <define name="PSI_DGAIN" value="201"/>
+    <define name="PSI_IGAIN" value="19"/>
 
     <!-- feedforward -->
     <define name="PHI_DDGAIN" value="0"/>
