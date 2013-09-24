@@ -63,15 +63,15 @@
     <define name="MAG_Z_SENS" value="3.93055649697" integer="16"/>
 
     <!-- MAGNETO CURRENT CALIBRATION -->
-    <define name= "MAG_X_CURRENT_COEF" value="0.0128687411225"/>
-    <define name= "MAG_Y_CURRENT_COEF" value="-0.00529984103499"/>
-    <define name= "MAG_Z_CURRENT_COEF" value="-0.0358479211106"/>
+    <define name="MAG_X_CURRENT_COEF" value="0.0128687411225"/>
+    <define name="MAG_Y_CURRENT_COEF" value="-0.00529984103499"/>
+    <define name="MAG_Z_CURRENT_COEF" value="-0.0358479211106"/>
   </section>
 
  <section name="AUTOPILOT">
    <define name="MODE_MANUAL" value="AP_MODE_ATTITUDE_DIRECT"/>
-   <define name="MODE_AUTO1" value="AP_MODE_ATTITUDE_DIRECT"/>
-   <define name="MODE_AUTO2" value="AP_MODE_ATTITUDE_Z_HOLD"/>
+   <define name="MODE_AUTO1" value="AP_MODE_ATTITUDE_Z_HOLD"/>
+   <define name="MODE_AUTO2" value="AP_MODE_NAV"/>
  </section>
 
  <section name="BAT">
@@ -122,12 +122,12 @@
     <define name="REF_MAX_RDOT" value="RadOfDeg(1000.)"/>
 
     <!-- feedback -->
-    <define name="PHI_PGAIN" value="180"/>
-    <define name="PHI_DGAIN" value="200"/>
+    <define name="PHI_PGAIN" value="801"/>
+    <define name="PHI_DGAIN" value="360"/>
     <define name="PHI_IGAIN" value="0"/>
 
-    <define name="THETA_PGAIN" value="180"/>
-    <define name="THETA_DGAIN" value="200"/>
+    <define name="THETA_PGAIN" value="801"/>
+    <define name="THETA_DGAIN" value="360"/>
     <define name="THETA_IGAIN" value="0"/>
 
     <define name="PSI_PGAIN" value="900"/>
@@ -167,9 +167,9 @@
   </section>
 
  <section name="GUIDANCE_H" prefix="GUIDANCE_H_">
-   <define name="PGAIN" value="50"/>
-   <define name="DGAIN" value="50"/>
-   <define name="IGAIN" value="0"/>
+   <define name="PGAIN" value="357"/>
+   <define name="DGAIN" value="54"/>
+   <define name="IGAIN" value="178"/>
  </section>
 
  <section name="MISC">
