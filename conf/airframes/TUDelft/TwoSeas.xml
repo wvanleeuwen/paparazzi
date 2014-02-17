@@ -17,9 +17,9 @@
     <servo name="THROTTLE_LEFT"   no="0" min="1920" neutral="1920" max="720"/>
     <servo name="THROTTLE_RIGHT"   no="1" min="1920" neutral="1920" max="720"/>
     <servo name="AILERONS" no="2" min="1800" neutral="1500" max="1120"/>
-    <servo name="ELEVATORS" no="3" max="1900" neutral="1455" min="1000"/>
+    <servo name="ELEVATORS" no="3" max="1000" neutral="1455" min="1900"/>
     <servo name="RUDDER" no="4" max="1875" neutral="1555" min="1200"/>
-    <servo name="FLAPS" no="6" max="1020" neutral="1700" min="1700"/>
+    <servo name="FLAPS" no="6" max="1020" neutral="1650" min="1650"/>
   </servos>
 
   <commands>
