@@ -46,13 +46,13 @@ LiPo/LiIo-Zellen: 2-3
     <subsystem name="imu" type="aspirin_v2.1"/>
     <subsystem name="gps" type="ublox"/>
     <subsystem name="stabilization" type="int_euler"/>
-    <subsystem name="ahrs" type="int_cmpl_euler"/>
+    <subsystem name="ahrs" type="int_cmpl_quat"/>
     <subsystem name="ins" type="hff"/>
   </firmware>
 
   <section name="AUTOPILOT">
     <define name="MODE_MANUAL" value="AP_MODE_ATTITUDE_DIRECT"/>
-    <define name="MODE_AUTO1" value="AP_MODE_ATTITUDE_RC_CLIMB"/>
+    <define name="MODE_AUTO1" value="AP_MODE_RATE_DIRECT"/>
     <define name="MODE_AUTO2" value="AP_MODE_ATTITUDE_Z_HOLD"/>
   </section>
 
