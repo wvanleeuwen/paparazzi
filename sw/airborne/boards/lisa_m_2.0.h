@@ -18,7 +18,7 @@
 #define USE_LED_1 1
 #endif
 #define LED_1_GPIO GPIOA
-#define LED_1_GPIO_PIN GPIO8
+#define LED_1_GPIO_PIN GPIO6
 #define LED_1_GPIO_ON gpio_clear
 #define LED_1_GPIO_OFF gpio_set
 #define LED_1_AFIO_REMAP ((void)0)
