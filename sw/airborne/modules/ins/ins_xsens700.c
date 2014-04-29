@@ -316,7 +316,7 @@ static inline void update_fw_estimator(void) {
   };
 #else
   struct FloatEulers att = {
-    ins_phi+ins_roll_neutral,
+    -ins_phi+ins_roll_neutral,
     ins_theta+ins_pitch_neutral,
     ins_psi
   };

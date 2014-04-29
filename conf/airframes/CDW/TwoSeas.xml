@@ -193,6 +193,8 @@
 
     <load name="nav_line.xml"/>
 
+    <load name="gas_engine_idle.xml"/>
+
   </modules>
 
   <firmware name="fixedwing">
@@ -228,6 +230,7 @@
     </target>
 
     <target name="fbw" board="lisa_m_2.0">
+      <define name="OUTBACK_CHALLENGE_DANGEROUS_RULE_RC_LOST_NO_AP" value="1"/>
       <define name="LINK_MCU_LED" value="1"/>
 
       <configure name="HAS_LUFTBOOT" value="0" /> <!-- no usb -->
