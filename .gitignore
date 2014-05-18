@@ -46,7 +46,7 @@
 /conf/conf.xml
 /conf/conf.xml.20*
 /conf/conf_personal.xml.20*
-/conf/control_panel.xml
+#/conf/control_panel.xml
 /conf/%gconf.xml
 /conf/maps_data/*
 /conf/maps.xml
