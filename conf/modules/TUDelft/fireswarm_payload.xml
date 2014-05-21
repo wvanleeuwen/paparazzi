@@ -1,0 +1,29 @@
+<!DOCTYPE module SYSTEM "../module.dtd">
+
+<module name="fireswarm_payload" dir="fireswarm">
+  <doc>
+    <description>FireSwarm Payload Interface</description>
+  </doc>
+  <header>
+    <file name="fireswarm_payload.h"/>
+  </header>
+  <init fun="fireswarm_payload_init()"/>
+  <periodic fun="fireswarm_periodic()" freq="4"/>
+  <!-- called from flightplan now... periodic fun="fireswarm_periodic_nav()" freq="4"/-->
+  <event fun="fireswarm_event()" />
+  <makefile >
+    <file name="fireswarm_payload.c"/>
+  </makefile>
+  <makefile target="sim">
+    <file name="fireswarm_communication_sim.c"/>
+    <define name="FIRESWARM_PORT" value="/dev/ttyUSB0" />
+  </makefile>
+  <makefile target="ap">
+    <file name="fireswarm_communication.c"/>
+    <define name="FIRESWARM_LINK" value="UART3"/>
+    <define name="USE_UART3" value="1" />
+    <define name="UART3_BAUD" value="B9600" />
+  </makefile>
+</module>
+
+

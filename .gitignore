@@ -46,7 +46,6 @@
 /conf/conf.xml
 /conf/conf.xml.20*
 /conf/conf_personal.xml.20*
-/conf/control_panel.xml
 /conf/%gconf.xml
 /conf/maps_data/*
 /conf/maps.xml
@@ -93,6 +92,7 @@
 /sw/ground_segment/tmtc/GSM/SMS_GS
 /sw/ground_segment/tmtc/app_server
 /sw/ground_segment/tmtc/gpsd2ivy
+sw/ground_segment/tmtc/qrcode_reader
 
 # /sw/ground_segment/joystick
 /sw/ground_segment/joystick/input2ivy
@@ -140,6 +140,8 @@
 # /sw/tools/
 /sw/tools/wiki_gen/wiki_gen
 /sw/tools/mergelogs
+/sw/tools/TUDelft/photolist/build
+/sw/tools/TUDelft/photolist/cmake
 
 # /sw/ground_segment/misc
 /sw/ground_segment/misc/davis2ivy

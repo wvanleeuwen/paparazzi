@@ -12,13 +12,36 @@
     <waypoint name="p2" x="27.5" y="-48.2"/>
     <waypoint name="p3" x="16.7" y="-19.6"/>
     <waypoint name="p4" x="13.7" y="-40.7"/>
+    <waypoint name="FA1" x="200" y="200"/>
+    <waypoint name="FA2" x="200" y="-200"/>
+    <waypoint name="FA3" x="-200" y="-200"/>
+    <waypoint name="FA4" x="-200" y="200"/>
+    <waypoint name="KILL1" x="280" y="280"/>
+    <waypoint name="KILL2" x="280" y="-280"/>
+    <waypoint name="KILL3" x="-280" y="-280"/>
+    <waypoint name="KILL4" x="-280" y="280"/>
     <waypoint name="CAM" x="-20" y="-50" height="2."/>
     <waypoint name="TD" x="5.6" y="-10.9"/>
   </waypoints>
+  <sectors>
+    <sector color="red" name="Flight_Area">
+      <corner name="FA1"/>
+      <corner name="FA2"/>
+      <corner name="FA3"/>
+      <corner name="FA4"/>
+    </sector>
+    <sector color="red" name="Kill">
+      <corner name="KILL1"/>
+      <corner name="KILL2"/>
+      <corner name="KILL3"/>
+      <corner name="KILL4"/>
+    </sector>
+  </sectors>
+  <exceptions/>
   <blocks>
-    <block name="Wait GPS">
+    <block name="Init">
       <call fun="NavKillThrottle()"/>
-      <while cond="!GpsFixValid()"/>
+      <while cond="!GpsFixValid() || gps.pacc > 1500"/>
     </block>
     <block name="Geo init">
       <while cond="LessThan(NavBlockTime(), 10)"/>

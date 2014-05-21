@@ -1,0 +1,21 @@
+<!DOCTYPE module SYSTEM "../module.dtd">
+
+<module name="opticflow">
+  <header>
+    <file name="opticflow.h"/>
+  </header>
+  <init fun="init_opticflow()"/>
+  <periodic fun="periodic_opticflow()" period="0.02" start="start_opticflow()" stop="stop_opticflow()" autorun="TRUE"/>
+  <makefile>
+    <raw>
+#Exemple of RAW makefile part
+    </raw>
+    <define name="ADC_CHANNEL_OPTICFLOW_NB_SAMPLES" value="32"/>
+    <file name="opticflow.c"/>
+  </makefile>
+</module>
+
+
+
+
+

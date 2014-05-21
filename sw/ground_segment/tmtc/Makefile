@@ -140,6 +140,9 @@ app_server: app_server.c
 gpsd2ivy: gpsd2ivy.c
 	$(CC) $(GLIB_CFLAGS) $(C_LIBRARYS) $(C_INCLUDES) -o $@ $< $(GLIB_LDFLAGS) -lgps
 
+qrcode_reader: qrcode_reader.c
+	$(CC) $(GLIB_CFLAGS) $(C_LIBRARYS) $(C_INCLUDES) -o $@ $< $(GLIB_LDFLAGS)
+
 c_ivy_client_example_1: c_ivy_client_example_1.c
 	$(CC) $(GLIB_CFLAGS) $(C_LIBRARYS) $(C_INCLUDES) -o $@ $< $(GLIB_LDFLAGS)
 

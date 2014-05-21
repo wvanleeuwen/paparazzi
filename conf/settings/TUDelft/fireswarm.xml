@@ -1,0 +1,11 @@
+<!DOCTYPE settings SYSTEM "../settings.dtd">
+
+<settings>
+  <dl_settings name="fireswarm">
+    <dl_settings name="fireswarm">
+      <dl_setting max="4" min="0" step="1" var="FireSwarmMode.Mode" shortname="Mode"/>
+      <dl_setting max="6.28" min="0" step="0.01" var="FireSwarmLanding.LandHeading" shortname="LandHeading"/>
+      <dl_setting max="5" min="0" step="1" var="FireSwarmWaypoints.NumWayPoints" shortname="NrWP"/>
+    </dl_settings>
+  </dl_settings>
+</settings>

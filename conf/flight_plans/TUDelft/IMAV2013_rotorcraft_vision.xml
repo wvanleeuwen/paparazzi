@@ -1,0 +1,170 @@
+<!DOCTYPE flight_plan SYSTEM "../flight_plan.dtd">
+
+<flight_plan alt="185" ground_alt="180" lat0="43.449441" lon0="1.265280" max_dist_from_home="1000" name="IMAV2013_ROTORCRAFT" qfu="190" security_height="2.5">
+  <header>
+#include "subsystems/ahrs.h"
+#include "modules/TUDelft/imav2013.h"
+</header>
+  <waypoints>
+    <waypoint name="HOME" x="0" y="0"/>
+    <waypoint name="STDBY" x="11" y="80"/>
+    <waypoint name="TD" x="0" y="0"/>
+    <waypoint name="R1" x="19.5" y="-164.9"/>
+    <waypoint name="R2" x="3.2" y="-194.8"/>
+    <waypoint name="R3" x="-277.8" y="-47.5"/>
+    <waypoint name="R4" x="-260.3" y="-14.7"/>
+    <waypoint name="S1" x="-69.7" y="9.9"/>
+    <waypoint name="S2" x="-170.8" y="62.8"/>
+    <waypoint name="S3" x="-320.0" y="78.7"/>
+    <waypoint name="S4" x="-280.7" y="148.3"/>
+    <waypoint lat="43.44995675" lon="1.26320972" name="ARCH_EAST"/>
+    <waypoint lat="43.4495515" lon="1.26431293" name="ARCH_WEST"/>
+    <waypoint lat="43.44895808" lon="1.26539215" name="VTOL"/>
+    <waypoint lat="43.44865401" lon="1.26603716" name="DZ1"/>
+    <waypoint lat="43.44810865" lon="1.26461653" name="DZ2"/>
+    <waypoint lat="43.44874625" lon="1.26267732" name="DZ3"/>
+    <waypoint lat="43.45004011" lon="1.26232517" name="DZ4"/>
+    <waypoint lat="43.44791333" lon="1.2652" name="POLE_EAST"/>
+    <waypoint lat="43.44901833" lon="1.26218666" name="POLE_WEST"/>
+    <waypoint lat="43.4510139752147" lon="1.26347022174577" name="_FA1"/>
+    <waypoint lat="43.4521047570105" lon="1.26051804068908" name="_FA2"/>
+    <waypoint lat="43.449341433369" lon="1.25853521160491" name="_FA3"/>
+    <waypoint lat="43.4466539282449" lon="1.26628088811646" name="_FA4"/>
+    <waypoint lat="43.4484458053443" lon="1.26750716346104" name="_FA5"/>
+    <waypoint lat="43.4495295907909" lon="1.26583553027094" name="_FA6"/>
+    <waypoint lat="43.4501244556801" lon="1.26423849761234" name="_FA7"/>
+    <waypoint lat="43.4513493296649" lon="1.26377733227803" name="_SFA1"/>
+    <waypoint lat="43.4526890787549" lon="1.2601892363434" name="_SFA2"/>
+    <waypoint lat="43.4491715729295" lon="1.25765299277696" name="_SFA3"/>
+    <waypoint lat="43.4461168338121" lon="1.2665883289167" name="_SFA4"/>
+    <waypoint lat="43.4483425357094" lon="1.26810497090376" name="_SFA5"/>
+    <waypoint lat="43.4497064227008" lon="1.26599436021769" name="_SFA6"/>
+    <waypoint lat="43.4502080829671" lon="1.26462792069584" name="_SFA7"/>
+  </waypoints>
+  <sectors>
+    <sector color="red" name="Flight_Area">
+      <corner name="_FA7"/>
+      <corner name="_FA6"/>
+      <corner name="_FA5"/>
+      <corner name="_FA4"/>
+      <corner name="_FA3"/>
+      <corner name="_FA2"/>
+      <corner name="_FA1"/>
+    </sector>
+    <sector color="orange" name="Small_Flight_Area">
+      <corner name="_SFA7"/>
+      <corner name="_SFA6"/>
+      <corner name="_SFA5"/>
+      <corner name="_SFA4"/>
+      <corner name="_SFA3"/>
+      <corner name="_SFA2"/>
+      <corner name="_SFA1"/>
+    </sector>
+  </sectors>
+  <includes>
+    <include name="Safety" procedure="IMAV2013_safety.xml">
+      <with from="goto_land" to="Land"/>
+      <with from="goto_mission" to="Go_Mission"/>
+    </include>
+  </includes>
+  <exceptions/>
+  <blocks>
+    <block name="Init">
+      <call fun="NavKillThrottle()"/>
+      <while cond="!GpsFixValid() || gps.pacc > 1500 || !(ahrs.status == AHRS_RUNNING)"/>
+    </block>
+    <block name="Geo_init">
+      <while cond="LessThan(NavBlockTime(), 20)"/>
+      <call fun="NavSetAltitudeReferenceHere()"/>
+      <call fun="NavSetWaypointHere(WP_TD)"/>
+      <call fun="NavSetWaypointHere(WP_HOME)"/>
+      <call fun="NavSetWaypointHere(WP_STDBY)"/>
+      <set value="POS_BFP_OF_REAL(WaypointAlt(WP_STDBY) + ((AC_ID%2)*5))" var="waypoints[WP_STDBY].z"/>
+    </block>
+    <block name="Start Engine" strip_button="Takeoff" strip_icon="takeoff.png">
+      <call fun="NavResurrect()"/>
+      <attitude pitch="0" roll="0" throttle="0" until="TRUE" vmode="throttle"/>
+    </block>
+    <block name="Takeoff">
+      <set value="0" var="autopilot_flight_time"/>
+      <exception cond="!autopilot_motors_on" deroute="Start Engine"/>
+      <exception cond="stateGetPositionEnu_f()->z > 3.0" deroute="Go_Mission"/>
+      <attitude pitch="0" roll="0" throttle="0.93" until="TRUE" vmode="throttle"/>
+    </block>
+    <block name="Go_Mission">
+      <call fun="imav2013_goto_mission()"/>
+    </block>
+    <block name="VTOL">
+      <go wp="VTOL"/>
+    </block>
+    <block name="Precision Landing">
+      <exception cond="!nav_is_in_flight()" deroute="Precision Landed"/>
+      <stay climb="-0.8" vmode="climb" wp="VTOL"/>
+    </block>
+    <block name="Precision Landed">
+      <exception cond="block_time > 12" deroute="Takeoff after VTOL"/>
+      <attitude pitch="0" roll="0" throttle="0" until="FALSE" vmode="throttle"/>
+    </block>
+    <block name="Takeoff after VTOL">
+      <exception cond="stateGetPositionEnu_f()->z > 3.0" deroute="Go_Mission"/>
+      <stay climb="0.5" vmode="climb" wp="VTOL"/>
+    </block>
+    <block name="Dropzone_1">
+      <go wp="DZ1"/>
+      <stay until="stage_time>10" wp="DZ1"/>
+      <call fun="imav2013_dropball()"/>
+      <stay until="stage_time>3" wp="DZ1"/>
+      <deroute block="Go_Mission"/>
+    </block>
+    <block name="Dropzone_2">
+      <go wp="DZ2"/>
+      <stay until="stage_time>10" wp="DZ2"/>
+      <call fun="imav2013_dropball()"/>
+      <stay until="stage_time>3" wp="DZ2"/>
+      <deroute block="Go_Mission"/>
+    </block>
+    <block name="Dropzone_3">
+      <go wp="DZ3"/>
+      <stay until="stage_time>10" wp="DZ3"/>
+      <call fun="imav2013_dropball()"/>
+      <stay until="stage_time>3" wp="DZ3"/>
+      <deroute block="Go_Mission"/>
+    </block>
+    <block name="Dropzone_4">
+      <go wp="DZ4"/>
+      <stay until="stage_time>10" wp="DZ4"/>
+      <call fun="imav2013_dropball()"/>
+      <stay until="stage_time>3" wp="DZ4"/>
+      <deroute block="Go_Mission"/>
+    </block>
+    <block name="Arch">
+      <go from="ARCH_EAST" hmode="route" wp="ARCH_WEST"/>
+      <deroute block="Go_Mission"/>
+    </block>
+    <block name="Race">
+      <go wp="R1"/>
+      <go wp="R2"/>
+      <go wp="R3"/>
+      <go wp="R4"/>
+      <deroute block="Go_Mission"/>
+    </block>
+    <block name="Search">
+      <go wp="S1"/>
+      <go wp="S2"/>
+      <go wp="S3"/>
+      <go wp="S4"/>
+      <deroute block="Go_Mission"/>
+    </block>
+    <block name="Land">
+      <go wp="TD"/>
+    </block>
+    <block name="Flare">
+      <exception cond="!nav_is_in_flight()" deroute="Landed"/>
+      <stay climb="-0.8" vmode="climb" wp="TD"/>
+    </block>
+    <block name="Landed">
+      <call fun="NavKillThrottle()"/>
+      <attitude pitch="0" roll="0" throttle="0" until="FALSE" vmode="throttle"/>
+    </block>
+  </blocks>
+</flight_plan>

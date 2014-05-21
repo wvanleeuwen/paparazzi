@@ -1,0 +1,16 @@
+<!DOCTYPE module SYSTEM "../module.dtd">
+
+<module name="imav2013" dir="TUDelft">
+  <doc>
+    <description>
+      IMAV2013
+    </description>
+  </doc>
+  <header>
+    <file name="imav2013.h"/>
+  </header>
+  <periodic fun="imav2013_periodic()" freq="1"/>
+  <makefile>
+    <file name="imav2013.c"/>
+  </makefile>
+</module>

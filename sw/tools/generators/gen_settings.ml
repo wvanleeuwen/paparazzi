@@ -67,6 +67,16 @@ let print_dl_settings = fun settings ->
   lprintf "#include \"generated/modules.h\"\n";
   lprintf "#include \"generated/periodic_telemetry.h\"\n";
   lprintf "\n";
+	
+	(** Datalink knowing what settings mean **)
+  let idx = ref 0 in
+	lprintf "\n";
+  List.iter
+    (fun s ->
+      let v = ExtXml.attrib s "var" in
+      lprintf "#define SETTINGS_%s %d\n" (Str.global_replace (Str.regexp "\\.") "_" v) !idx; incr idx)
+    settings;
+  lprintf "\n";
 
   (** Datalink knowing what settings mean **)
   Xml2h.define "SETTINGS" "{ \\";

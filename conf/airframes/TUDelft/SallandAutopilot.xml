@@ -1,0 +1,227 @@
+<!DOCTYPE airframe SYSTEM "../airframe.dtd">
+
+<!--
+
+  Fireswarm v2.1 Board
+
+-->
+
+<airframe name="LisaAspirin2">
+  <!-- ************************* FIRMWARE ************************* -->
+
+  <firmware name="fixedwing">
+    <configure name="NO_LUFTBOOT" value="1"/>
+    <configure name="FLASH_MODE" value="SWD"/>
+    <configure name="BMP_PORT" value="/dev/ttyACM0"/>
+    <define name="USE_AIRSPEED"/>
+    <target name="ap" board="TUDelft/fireswarm_2.0">
+      <define name="AIRSPEED_ETS_I2C_DEV" value="i2c1"/>
+      <define name="USE_I2C1"/>
+      <define name="LISA_M_LONGITUDINAL_X"/>
+      <configure name="PERIODIC_FREQUENCY" value="120"/>
+      <configure name="AHRS_PROPAGATE_FREQUENCY" value="100"/>
+      <configure name="AHRS_CORRECT_FREQUENCY" value="100"/>
+      <define name="AHRS_TRIGGERED_ATTITUDE_LOOP"/>
+      <define name="USE_AHRS_GPS_ACCELERATIONS"/>
+      <configure name="AHRS_ALIGNER_LED" value="3"/>
+      <configure name="CPU_LED" value="3"/>
+      <configure name="SYS_TIME_LED" value="2"/>
+    </target>
+    <target name="sim" board="pc"/>
+    <define name="AGR_CLIMB"/>
+    <define name="TUNE_AGRESSIVE_CLIMB"/>
+    <!--    <define name="STRONG_WIND"/> -->
+    <define name="WIND_INFO"/>
+    <define name="WIND_INFO_RET"/>
+    <!-- Attitude -->
+    <subsystem name="imu" type="aspirin_v2.1"/>
+    <subsystem name="ahrs" type="float_dcm"/>
+    <!-- Communication -->
+    <subsystem name="radio_control" type="ppm"/>
+    <subsystem name="telemetry" type="xbee_api">
+      <configure name="MODEM_BAUD" value="B9600"/>
+    </subsystem>
+    <!-- Autopilot -->
+    <subsystem name="control" type="energy"/>
+    <subsystem name="navigation" type="extra"/>
+    <!-- Position -->
+    <subsystem name="gps" type="ublox">
+      <configure name="GPS_PORT" value="UART1"/>
+    </subsystem>
+    <subsystem name="ins" type="gps_passthrough"/>
+  </firmware>
+
+  <!-- ************************* MODULES ************************* -->
+
+  <modules>
+    <load name="gps_ubx_ucenter.xml"/>
+    <load name="nav_catapult.xml"/>
+    <load name="adc_generic.xml">
+      <configure name="ADC_CHANNEL_GENERIC1" value="ADC_1"/>
+    </load>
+    <load name="TUDelft/fireswarm_payload.xml">
+      <define name="FIRESWARM_READY_LED" value="4"/>
+      <define name="FIRESWARM_PAYLOAD_POWER_LED" value="5"/>
+    </load>
+  </modules>
+
+  <!-- ************************* ACTUATORS ************************* -->
+
+  <servos>
+    <servo name="THROTTLE" no="0" min="1250" neutral="1250" max="1800"/>
+    <servo name="AILEVON_LEFT" no="1" min="1200" neutral="1500" max="1800"/>
+    <servo name="AILEVON_RIGHT" no="2" min="1800" neutral="1500" max="1200"/>
+    <servo name="EXTRA1" no="3" min="1800" neutral="1500" max="1200"/>
+    <servo name="EXTRA2" no="4" min="1800" neutral="1500" max="1200"/>
+    <servo name="EXTRA3" no="5" min="1800" neutral="1500" max="1200"/>
+  </servos>
+
+  <commands>
+    <axis name="THROTTLE" failsafe_value="0"/>
+    <axis name="ROLL" failsafe_value="0"/>
+    <axis name="PITCH" failsafe_value="0"/>
+  </commands>
+
+  <rc_commands>
+    <set command="THROTTLE" value="@THROTTLE"/>
+    <set command="ROLL" value="@ROLL"/>
+    <set command="PITCH" value="@PITCH"/>
+  </rc_commands>
+
+  <section name="AUTO1" prefix="AUTO1_">
+    <define name="MAX_ROLL" value="0.8"/>
+    <define name="MAX_PITCH" value="0.7"/>
+  </section>
+
+  <command_laws>
+    <set servo="AILEVON_LEFT" value="(@ROLL * 0.6f) + @PITCH"/>
+    <set servo="AILEVON_RIGHT" value="-(@ROLL * 0.6f) + @PITCH"/>
+    <set servo="THROTTLE" value="@THROTTLE"/>
+    <set servo="EXTRA1" value="@THROTTLE"/>
+    <set servo="EXTRA2" value="@THROTTLE"/>
+    <set servo="EXTRA3" value="@THROTTLE"/>
+  </command_laws>
+
+  <section name="TRIM" prefix="COMMAND_">
+    <define name="ROLL_TRIM" value="0."/>
+    <define name="PITCH_TRIM" value="0."/>
+  </section>
+
+  <section name="FAILSAFE" prefix="FAILSAFE_">
+    <define name="DEFAULT_THROTTLE" value="0.35" unit="%"/>
+    <define name="DEFAULT_ROLL" value="0.17" unit="rad"/>
+    <define name="DEFAULT_PITCH" value="0.08" unit="rad"/>
+    <define name="HOME_RADIUS" value="DEFAULT_CIRCLE_RADIUS" unit="m"/>
+    <define name="KILL_MODE_DISTANCE" value="(MAX_DIST_FROM_HOME*1.5)"/>
+    <define name="DELAY_WITHOUT_GPS" value="4" unit="s"/>
+  </section>
+
+  <!-- ************************* SENSORS ************************* -->
+
+  <section name="IMU" prefix="IMU_">
+    <!-- SENS = 16.4 LSB/(deg/sec) * 57.6 deg/rad = 939.650 LSB/rad/sec / 12bit FRAC: 4096 / 939.65 -->
+    <define name="GYRO_P_SENS" value="4.359" integer="16"/>
+    <define name="GYRO_Q_SENS" value="4.359" integer="16"/>
+    <define name="GYRO_R_SENS" value="4.359" integer="16"/>
+    <define name="ACCEL_X_NEUTRAL" value="0"/>
+    <define name="ACCEL_Y_NEUTRAL" value="0"/>
+    <define name="ACCEL_Z_NEUTRAL" value="0"/>
+    <define name="MAG_X_NEUTRAL" value="0"/>
+    <define name="MAG_Y_NEUTRAL" value="0"/>
+    <define name="MAG_Z_NEUTRAL" value="0"/>
+    <define name="MAG_X_SENS" value="1" integer="16"/>
+    <define name="MAG_Y_SENS" value="1" integer="16"/>
+    <define name="MAG_Z_SENS" value="1" integer="16"/>
+    <define name="BODY_TO_IMU_PHI" value="0"/>
+    <define name="BODY_TO_IMU_THETA" value="0"/>
+    <define name="BODY_TO_IMU_PSI" value="0"/>
+  </section>
+
+  <section name="AHRS" prefix="AHRS_">
+    <define name="H_X" value="0.51562740288882"/>
+    <define name="H_Y" value="-0.05707735220832"/>
+    <define name="H_Z" value="0.85490967783446"/>
+  </section>
+
+  <section name="INS" prefix="INS_">
+    <define name="ROLL_NEUTRAL_DEFAULT" value="0.114591561258" unit="deg"/>
+    <define name="PITCH_NEUTRAL_DEFAULT" value="0.0572957806289" unit="deg"/>
+  </section>
+
+  <!-- ************************* GAINS ************************* -->
+
+  <section name="HORIZONTAL CONTROL" prefix="H_CTL_">
+    <define name="COURSE_PGAIN" value="1.17299997807"/>
+    <define name="COURSE_DGAIN" value="0.35"/>
+    <define name="COURSE_PRE_BANK_CORRECTION" value="0.856999993324"/>
+    <define name="ROLL_MAX_SETPOINT" value="0.505999982357" unit="radians"/>
+    <define name="PITCH_MAX_SETPOINT" value="0.5" unit="radians"/>
+    <define name="PITCH_MIN_SETPOINT" value="-0.5" unit="radians"/>
+    <define name="PITCH_PGAIN" value="9000."/>
+    <define name="PITCH_DGAIN" value="1.5"/>
+    <define name="ELEVATOR_OF_ROLL" value="400."/>
+    <define name="ROLL_ATTITUDE_GAIN" value="10400."/>
+    <define name="ROLL_RATE_GAIN" value="250."/>
+  </section>
+
+  <section name="VERTICAL CONTROL" prefix="V_CTL_">
+    <define name="POWER_CTL_BAT_NOMINAL" value="11.1" unit="volt"/>
+    <define name="ALTITUDE_PGAIN" value="0.10"/>
+    <define name="ALTITUDE_MAX_CLIMB" value="3."/>
+    <define name="AUTO_THROTTLE_NOMINAL_CRUISE_THROTTLE" value="0.746999979019"/>
+    <define name="AUTO_THROTTLE_MIN_CRUISE_THROTTLE" value="0.45"/>
+    <define name="AUTO_THROTTLE_MAX_CRUISE_THROTTLE" value="0.95"/>
+    <define name="AUTO_THROTTLE_CLIMB_THROTTLE_INCREMENT" value="0.15" unit="%/(m/s)"/>
+    <define name="AUTO_THROTTLE_PGAIN" value="0."/>
+    <define name="AUTO_THROTTLE_IGAIN" value="0."/>
+    <define name="AUTO_THROTTLE_PITCH_OF_VZ_PGAIN" value="0.15"/>
+    <define name="THROTTLE_SLEW_LIMITER" value="0.1" unit="s"/>
+  </section>
+
+  <section name="AGGRESSIVE" prefix="AGR_">
+    <define name="BLEND_START" value="20"/>
+    <define name="BLEND_END" value="10"/>
+    <define name="CLIMB_THROTTLE" value="1.00"/>
+    <define name="CLIMB_PITCH" value="0.3"/>
+    <define name="DESCENT_THROTTLE" value="0.5"/>
+    <define name="DESCENT_PITCH" value="-0.25"/>
+    <define name="CLIMB_NAV_RATIO" value="0.8"/>
+    <define name="DESCENT_NAV_RATIO" value="0.9"/>
+  </section>
+
+  <!-- ************************* MISC ************************* -->
+
+  <section name="BAT">
+    <!--    <define name="MilliAmpereOfAdc(adc)" value="((adc) - 505) * 124.0f"/> -->
+    <define name="LOW_BAT_LEVEL" value="10.5" unit="V"/>
+    <define name="CRITIC_BAT_LEVEL" value="10" unit="V"/>
+    <define name="CATASTROPHIC_BAT_LEVEL" value="9.1" unit="V"/>
+  </section>
+
+  <section name="MISC">
+    <define name="CLIMB_AIRSPEED" value="21." unit="m/s"/>
+    <define name="NOMINAL_AIRSPEED" value="22." unit="m/s"/>
+    <define name="GLIDE_AIRSPEED" value="19." unit="m/s"/>
+    <define name="RACE_AIRSPEED" value="25." unit="m/s"/>
+    <define name="CARROT" value="5." unit="s"/>
+    <define name="CONTROL_FREQUENCY" value="60" unit="Hz"/>
+    <define name="XBEE_INIT" value="&quot;ATPL4\rATID3332\r&quot;"/>
+    <define name="ALT_KALMAN_ENABLED" value="TRUE"/>
+    <define name="DEFAULT_CIRCLE_RADIUS" value="105."/>
+  </section>
+
+  <section name="CATAPULT" prefix="NAV_CATAPULT_">
+    <define name="MOTOR_DELAY" value="23"/>
+    <define name="HEADING_DELAY" value="160"/>
+    <define name="ACCELERATION_THRESHOLD" value="1.75"/>
+    <define name="INITIAL_PITCH" value="0.3"/>
+    <define name="INITIAL_THROTTLE" value="1.0"/>
+  </section>
+
+  <section name="GLS_APPROACH" prefix="APP_">
+    <define name="ANGLE" value="4"/>
+    <define name="INTERCEPT_AF_TOD" value="15"/>
+    <define name="TARGET_SPEED" value="(65.0/3.6)"/>
+  </section>
+
+  </airframe>
