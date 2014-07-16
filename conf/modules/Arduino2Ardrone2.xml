@@ -1,0 +1,24 @@
+<!DOCTYPE module SYSTEM "module.dtd">
+
+<module name="Arduino2Ardrone2">
+  <doc>
+    <description>Module arduino to ardrone</description>
+  </doc>
+  <header>
+    <file name="Arduino2Ardrone2.h"/>
+  </header>
+  <init fun="ArduInit()"/>
+  <periodic fun="Get_ADCSValues()" start="" stop="" autorun="TRUE"/>
+  <makefile  target="ap">
+
+    <raw>
+        ## If you need to be certain that the uart is well defined use the next line. (generate a lot of warnings)
+        ap.CFLAGS += -DUSE_UART1 -DUART1_DEV=/dev/ttyUSB0 -DUART1_BAUD=B57600
+        ## Else just use that next one
+        GPS_BAUD = B57600
+    </raw>
+
+    <file name="uart.c" dir="mcu_periph"/>
+    <file name="Arduino2Ardrone2.c"/>
+  </makefile>
+</module>

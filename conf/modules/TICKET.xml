@@ -1,0 +1,16 @@
+<!DOCTYPE module SYSTEM "module.dtd">
+
+<module name="TICKET" dir="autopilot_computerphotocamera_interface">
+  <doc>
+    <description>Send attitude and other relevant data to a computer based photocamera after a shootphoto command is given. And in return get certain value back from the computerbased photocamera to be able to intercat with the flightplan.</description>
+  </doc>
+  <header>
+    <file name="TICKET.h"/>
+  </header>
+  <init fun="ticket_init"/>
+  <event fun="ticket_takephotonow"/>
+  <makefile>
+    <file name="TICKET.c"/>
+  </makefile>
+</module>
+

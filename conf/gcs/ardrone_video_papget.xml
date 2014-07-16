@@ -1,0 +1,21 @@
+<!DOCTYPE layout SYSTEM "layout.dtd">
+
+<layout width="1024" height="768">
+ <columns>
+   <rows size="400">
+      <widget size="300" name="strips"/>
+      <widget name="alarms"/>
+   </rows>
+   <rows>
+   <widget name="map2d"> 
+     <papget type="video_plugin" display="mplayer" x="800" y="0">
+     <property name="video_feed" value="−nocache sdp:///home/n3yh3hnii/develop/allthings_paparazzi/ardrone2_vision/ardrone2_gstreamer/sdp/x86_config-mjpeg.sdp"/>
+     <property name="width" VALUE="320"/>
+     <property name="height" VALUE="240"/>
+     </papget>
+   </widget>
+   <widget name="aircraft"/>
+   </rows>
+ </columns>
+
+</layout>

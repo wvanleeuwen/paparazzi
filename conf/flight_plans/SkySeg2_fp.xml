@@ -1,0 +1,106 @@
+<!DOCTYPE flight_plan SYSTEM "flight_plan.dtd">
+
+<flight_plan alt="152" ground_alt="147" lat0="43 33 50.83" lon0="1 28 52.61" max_dist_from_home="150" name="Rotorcraft Basic (Enac)" security_height="2">
+  <header>
+#include "autopilot.h"
+#include "../../sw/ext/ardrone2_vision/modules/ObstacleAvoidSkySegmentation/avoid_navigation.h"
+  </header>
+  <waypoints>
+    <waypoint name="HOME" x="0.0" y="0.0"/>
+    <waypoint name="CLIMB" x="0.0" y="5.0"/>
+    <waypoint name="STDBY" x="-2.0" y="-5.0"/>
+    <waypoint name="p1" x="70" y="0"/>
+    <waypoint name="p2" x="-70" y="0"/>
+    <waypoint name="TD" x="5.6" y="-10.9"/>
+  </waypoints>
+  <blocks>
+    <block name="Wait GPS">
+      <call fun="NavKillThrottle()"/>
+      <while cond="!GpsFixValid()"/>
+    </block>
+    <block name="Geo init">
+      <while cond="LessThan(NavBlockTime(), 10)"/>
+      <call fun="NavSetGroundReferenceHere()"/>
+      <!--<call fun="NavSetAltitudeReferenceHere()"/>-->
+    </block>
+    <block name="Holding point">
+      <call fun="NavKillThrottle()"/>
+      <attitude pitch="0" roll="0" throttle="0" vmode="throttle" until="FALSE"/>
+    </block>
+    <block name="Start Engine">
+      <call fun="NavResurrect()"/>
+      <attitude pitch="0" roll="0" throttle="0" vmode="throttle" until="FALSE"/>
+    </block>
+    <block name="Takeoff" strip_button="Takeoff" strip_icon="takeoff.png">
+      <exception cond="stateGetPositionEnu_f()->z > 2.0" deroute="Standby"/>
+      <call fun="NavSetWaypointHere(WP_CLIMB)"/>
+      <stay vmode="climb" climb="0.5" wp="CLIMB"/>
+    </block>
+    <block name="Standby" strip_button="Standby" strip_icon="home.png">
+      <stay wp="STDBY"/>
+    </block>
+    <block name="stay_p1"  strip_button="Go P1 And Wait" group="nav">
+      <stay wp="p1"/>
+    </block>
+    <block name="Descend P1"  strip_button="Line 1-2-1" strip_icon="line.png" group="nav">
+      <!-- Descend again -->
+      <call fun="{navigation_SetFlightAltitude( WaypointAlt(WP_p1) + POS_FLOAT_OF_BFP(GetAltRef()) ); FALSE;}"/>
+      <stay wp="p1" until="stage_time>10"/>
+    </block>
+    <block name="Heading P2">
+      <!-- Heading -->
+      <set var="nav_heading" value="ANGLE_BFP_OF_REAL(RadOfDeg(0))" />
+      <stay wp="p1" until="stage_time>5"/>
+      <set var="nav_heading" value="ANGLE_BFP_OF_REAL(RadOfDeg(270))" />
+      <stay wp="p1" until="stage_time>5"/>
+    </block>
+    <block name="1-2 Vision Climb">
+      <!-- Set avoid nav mode = CLIMB -->
+      <set var="avoid_navigation_data.mode" value="1" />
+
+      <go from="p1" hmode="route" wp="p2"/>
+    </block>
+    <block name="stop 5s">
+      <!-- Set avoid nav mode = OK -->
+      <set var="avoid_navigation_data.mode" value="0" />
+      <stay wp="p2" until="stage_time>5"/>
+    </block>
+    <block name="descend P2" >
+      <!-- Descend again -->
+      <call fun="{navigation_SetFlightAltitude( WaypointAlt(WP_p2) + POS_FLOAT_OF_BFP(GetAltRef()) ); FALSE;}"/>
+      <stay wp="p2" until="stage_time>10"/>
+    </block>
+    <block name="heading P1" >
+      <!-- Heading -->
+      <set var="nav_heading" value="ANGLE_BFP_OF_REAL(RadOfDeg(0))" />
+      <stay wp="p2" until="stage_time>5"/>
+      <set var="nav_heading" value="ANGLE_BFP_OF_REAL(RadOfDeg(90))" />
+      <stay wp="p2" until="stage_time>5"/>
+    </block>
+    <block name="2-1 Vision Climb" >
+      <!-- Set avoid nav mode = CLIMB -->
+      <set var="avoid_navigation_data.mode" value="1" />
+
+      <go from="p2" hmode="route" wp="p1"/>
+      <!-- Set avoid nav mode = OFF -->
+      <set var="avoid_navigation_data.mode" value="0" />
+
+      <deroute block="stay_p1"/>
+    </block>
+    <block name="land here" strip_button="Land Here" strip_icon="land-right.png">
+      <call fun="NavSetWaypointHere(WP_TD)"/>
+    </block>
+    <block name="land">
+      <go wp="TD"/>
+    </block>
+    <block name="flare">
+      <exception cond="NavDetectGround()" deroute="Holding point"/>
+      <exception cond="!nav_is_in_flight()" deroute="landed"/>
+      <call fun="NavStartDetectGround()"/>
+      <stay climb="-0.8" vmode="climb" wp="TD"/>
+    </block>
+    <block name="landed">
+      <attitude pitch="0" roll="0" throttle="0" vmode="throttle" until="FALSE"/>
+    </block>
+  </blocks>
+</flight_plan>

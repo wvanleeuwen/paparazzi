@@ -1,0 +1,19 @@
+<!DOCTYPE layout SYSTEM "layout.dtd">
+
+<layout width="1024" height="768">
+ <columns>
+   <rows size="400">
+      <widget size="300" name="strips"/>
+      <widget size="300" name="alarms"/>
+      <papget type="video_plugin" display="plugin" x="30" y="50">
+        <property name="command" value="gst-launch v4l2src device=/dev/video1 ! videorate ! 'video/x-raw-yuv,framerate=15/1' ! videoscale ! video/x-raw-yuv, width=544, height=304 ! dspmp4venc ! rtpmp4vpay config-interval=1 ! udpsink host=192.168.1.5 port=5000"/>"
+        <property NAME="width" VALUE="320"/>
+        <property NAME="height" VALUE="240"/>
+      </papget>
+   </rows>
+   <rows>
+     <widget name="map2d"/>
+     <widget name="aircraft"/>
+   </rows>
+ </columns>
+</layout>

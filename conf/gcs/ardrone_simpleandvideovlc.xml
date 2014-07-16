@@ -1,0 +1,48 @@
+<layout width="800" height="600">
+  <rows>
+    <widget NAME="map2d" SIZE="300">
+      <papget type="video_plugin" display="plugin" x="30" y="50">
+        <property name="command" value="gst-launch v4l2src device=/dev/video1 ! videorate ! 'video/x-raw-yuv,framerate=15/1' ! videoscale ! video/x-raw-yuv, width=544, height=304 ! dspmp4venc ! rtpmp4vpay config-interval=1 ! udpsink host=192.168.1.5 port=5000"/>"
+        <property NAME="width" VALUE="320"/>
+        <property NAME="height" VALUE="240"/>
+      </papget>
+      <papget type="message_field" display="text" x="17" y="527">
+        <property name="scale" value="1"/>
+        <property name="field" value="ESTIMATOR:z"/>
+        <property name="format" value="Height:%.1fm"/>
+        <property name="size" value="20."/>
+        <property name="color" value="white"/>
+      </papget>
+      <papget type="goto_block" display="button" x="236" y="498">
+        <property name="block_name" value="Land"/>
+        <property name="icon" value="ardrone/ardrone_home.png"/>
+      </papget>
+      <papget type="message_field" display="text" x="119" y="3">
+        <property name="scale" value="1"/>
+        <property name="field" value="BAT:energy"/>
+        <property name="format" value="Bat: %.0fmAh"/>
+        <property name="size" value="20."/>
+        <property name="color" value="white"/>
+      </papget>
+      <papget type="goto_block" display="button" x="352" y="526">
+        <property name="block_name" value="Takeoff"/>
+        <property name="icon" value="ardrone/ardrone_takeoff.png"/>
+      </papget>
+      <papget type="goto_block" display="button" x="334" y="-1">
+        <property name="block_name" value="Land"/>
+        <property name="icon" value="ardrone/ardrone_kill.png"/>
+      </papget>
+      <papget type="goto_block" display="button" x="536" y="0">
+        <property name="block_name" value="Standby"/>
+        <property name="icon" value="ardrone/ardrone_logo.png"/>
+      </papget>
+      <papget type="expression" display="text" x="513" y="530">
+        <property name="scale" value="1"/>
+        <property name="expr" value="BlockName(NAVIGATION.cur_block)"/>
+        <property name="format" value="%.2f"/>
+        <property name="size" value="20."/>
+        <property name="color" value="white"/>
+      </papget>
+    </widget>
+  </rows>
+</layout>
