@@ -1,0 +1,253 @@
+<!DOCTYPE flight_plan SYSTEM "../flight_plan.dtd">
+<!-- This is the Flightplan of Team OpenUAS from the Netherlands for use in the
+     Australian UAV Outback Challenge of 2014. Read about this challenge here:
+    http://www.uavoutbackchallenge.com.au/
+     Thanks to all involved, specifically all the help from CDW, DD
+     TU Delft University of Technology, Aerospace any everyone who helped out.
+
+TYPE 1 OPERATION Flightplan, fully autonomous inair joe detection integration
+
+USAGE: 
+
+To use the flightplan's embedded options:
+
+# Put the Waypoint SCRUTINEERING inside the mission boundary the the SCRUTINEERING flight will be executed.
+# Put the Waypoint JOE inside the mission boundary the the RESCUE flight will be executed.
+For flight plan backup scneario B do not do that
+
+NOTES:
+
+# This flightplan contains both the SR, as default mission and the Scruteneering flight.
+# Mission boundary coodinates are for both Scrutineering and SnR the same
+# Alert boundaries are different for Scrutineer and SnRMission different
+
+TODO:
+# Laters coordinates of KMZ of 20131017
+# MUCH better exceptions
+# A working couter for times a block as called, need torough tests
+# Add AHRS Healh status value
+# Add IMU vibration level health monitor value(maybe not needed,test it)
+# Response of cam pictre if successful of not
+
+-->
+
+<!-- Test via command xmlwf yourfligtplanname.xml for welformedness of the xml document -->
+<!-- The base lat lon of the flightplan is the AIRFIELDHOME point -->
+<!-- The ground_alt will be set later on also with real testflight, mind the ground height profile please -->
+<flight_plan name="OpenUAS OBC2014" ground_alt="0" alt="200" lat0="-26.5847810000" lon0="151.8423250000" security_height="70" max_dist_from_home="10000" qfu="70">
+<!-- ******************************** HEADERS ****************************** -->
+<header>
+#include "autopilot.h"
+#include "subsystems/ahrs.h"
+#include "subsystems/electrical.h"
+#include "subsystems/nav.h"    
+#include "subsystems/navigation/nav_line.h"
+#include "subsystems/navigation/OSAMNav.h"
+#include "subsystems/navigation/bomb.h"
+#include "subsystems/datalink/datalink.h"
+#define PHOTOGRAMMETRY_SWEEP_ANGLE 53	
+#define PHOTOGRAMMETRY_OVERLAP 30
+#define PHOTOGRAMMETRY_SIDELAP 20
+#define PHOTOGRAMMETRY_RESOLUTION 50
+#include "generated/airframe.h"
+#define RCChannel(_x) ((*fbw_state).channels[_x])
+
+
+</header>
+<!-- ******************************* WAYPOINTS ***************************** -->
+  <waypoints>
+    <waypoint name="AIRFIELDHOME" lat="-26.5847810000" lon="151.8423250000" height="2."/> <!-- Note that Scrutineering AIRFIELDHOME is the same as in the SnR mission -->
+    <waypoint name="HOME" x="0." y="0." height="2."/> <!-- DEBUG ONLY -->
+    <waypoint name="THROWSPOT" x="0." y="80." height="0."/>
+    <waypoint name="STDBY" x="0." y="-130." height="95."/> <!-- DEBUG ONLY For helping out in flightplan security of states-->
+    <waypoint name="CLIMB" x="50." y="390." height="80."/> <!-- TODO make Hidded, should be dynami based on throw direction-->
+    <waypoint name="COMMSHOLD" lat="-26.6072120000" lon="151.8453890000" height="115."/>
+ <!--   <waypoint name="TESTTOOFAR" x="800." y="-100." height="115."/> --><!-- DANGER, DEBUG ONLY Disable later on, used for FDT Debugging only -->
+
+<!-- Set this and Upload for  scrutineering day --> <!-- IDEA base it on throwing spot position maybe-->
+    <waypoint name="_SCRUTINEERINGDAY" x="0." y="0." height="0."/>
+
+<!-- Set this and Upload search and rescue day -->
+<!-- <waypoint name="_SCRUTINEERINGDAY" x="-999." y="-999." height="0."/> -->
+
+    <waypoint name="MYCOUNTER" x="0" y="0" alt="0"/> <!-- TODO Hide to use for testcoms hold index counter-->
+
+<!-- MB = Mission Boundary -->
+    <waypoint name="_MB1"  lat="-26.5695640000" lon="151.8373730000" height="400."/>
+    <waypoint name="_MB2"  lat="-26.5699560000" lon="151.8394050000" height="400."/>
+    <waypoint name="_MB3"  lat="-26.5768230000" lon="151.8411420000" height="400."/>
+    <waypoint name="_MB4"  lat="-26.5769900000" lon="151.8400450000" height="400."/>
+    <waypoint name="_MB5"  lat="-26.5812271666" lon="151.8410624807" height="400."/>
+    <waypoint name="_MB6"  lat="-26.5820599087" lon="151.8425026348" height="400."/>
+    <waypoint name="_MB7"  lat="-26.5791790000" lon="151.8493290000" height="400."/>
+    <waypoint name="_MB8"  lat="-26.5900093277" lon="151.8509739535" height="400."/>
+    <waypoint name="_MB9"  lat="-26.6095740000" lon="151.8631000000" height="400."/>
+    <waypoint name="_MB10" lat="-26.6389580000" lon="151.8588390000" height="400."/>
+    <waypoint name="_MB11" lat="-26.6449723895" lon="151.8472241047" height="400."/>
+    <waypoint name="_MB12" lat="-26.6435720000" lon="151.8303500000" height="400."/>
+    <waypoint name="_MB13" lat="-26.5875990000" lon="151.8344050000" height="400."/>
+<!-- AB = Alert Boundary -->
+<!-- TODO real positions and better naming-->
+<!--
+    <waypoint name="_AB1"  lat="-26.5695640000" lon="151.8373730000" height="400."/>
+    <waypoint name="_AB2"  lat="-26.5699560000" lon="151.8394050000" height="400."/>
+    <waypoint name="_AB3"  lat="-26.5768230000" lon="151.8411420000" height="400."/>
+    <waypoint name="_AB4"  lat="-26.5769900000" lon="151.8400450000" height="400."/>
+    <waypoint name="_AB5"  lat="-26.5812271666" lon="151.8410624807" height="400."/>
+    <waypoint name="_AB6"  lat="-26.5820599087" lon="151.8425026348" height="400."/>
+    <waypoint name="_AB7"  lat="-26.5791790000" lon="151.8493290000" height="400."/>
+    <waypoint name="_AB8"  lat="-26.5900093277" lon="151.8509739535" height="400."/>
+    <waypoint name="_AB9"  lat="-26.6095740000" lon="151.8631000000" height="400."/>
+    <waypoint name="_AB10" lat="-26.6389580000" lon="151.8588390000" height="400."/>
+    <waypoint name="_AB11" lat="-26.6449723895" lon="151.8472241047" height="400."/>
+    <waypoint name="_AB12" lat="-26.6435720000" lon="151.8303500000" height="400."/>
+    <waypoint name="_AB13" lat="-26.5875990000" lon="151.8344050000" height="400."/>
+-->
+
+<!-- SA = Search Area -->
+    <waypoint name="SA1" lat="-26.6174450000" lon="151.8431840000" height="115."/>
+    <waypoint name="SA2" lat="-26.6191710000" lon="151.8555730000" height="115."/>
+    <waypoint name="SA3" lat="-26.6378430000" lon="151.8515970000" height="155."/>
+    <waypoint name="SA4" lat="-26.6388280000" lon="151.8491210000" height="155."/>
+    <waypoint name="SA5" lat="-26.6373930000" lon="151.8393860000" height="155."/>
+
+<!-- Scrutineering Course -->
+<!-- South * East
+TST-1 = -26° 34' 58.9" * 151° 50' 16.2"
+TST-2 = -26° 35' 04.1" * 151° 50' 44.5"
+TST-3 = -26° 35' 23.2" * 151° 50' 45.9"
+
+-->
+    <waypoint name="TST-1" lat="-26.5837620409" lon="151.8379376113" height="115."/>
+    <waypoint name="TST-2" lat="-26.5859618185" lon="151.8451373142" height="115."/>
+    <waypoint name="TST-3" lat="-26.5902280387" lon="151.8400929439" height="115."/>
+
+<!-- ABS = Alert Boundary scrutineering flight -->
+<!-- TODO real positions and better naming-->
+<!--
+    <waypoint name="_ABS1" lat="" lon="" height="400."/>
+    <waypoint name="_ABS2" lat="" lon="" height="400."/>
+    <waypoint name="_ABS3" lat="" lon="" height="400."/>
+-->
+
+<!-- RELATIVE COORD, not finished HINT are calculated during build based on flightplan set coordinated-->
+<!-- MB = Mission Boundary -->
+<!--
+    <waypoint name="MB1" x="-85.08" y="909.9"/>
+    <waypoint name="MB2" x="117.1" y="866.4"/>
+    <waypoint name="MB3" x="289.8" y="102.9"/>
+    <waypoint name="MB4" x="210.5" y="48.8"/>
+    <waypoint name="MB5" x="370.2" y="-418.5"/>
+    <waypoint name="MB6" x="919.0" y="-82.16"/>
+    <waypoint name="MB7" x="1458.0" y="-2418.0"/>
+    <waypoint name="MB8" x="3631.0" y="-2418.0"/>
+    <waypoint name="MB9" x="4358.0" y="-7531.0"/>
+    <waypoint name="MB10" x="-783.4" y="-7319.0"/>
+    <waypoint name="MB11" x="-380.1" y="-1096.0"/>
+    <waypoint name="MB12" x="-380.1" y="-1096.0"/>
+    <waypoint name="MB13" x="-380.1" y="-1096.0"/>
+
+-->
+
+<!-- SA = Search Area -->
+<!--
+    <waypoint name="SA1" x="492.8" y="-4414.0" height="115."/>
+    <waypoint name="SA2" x="1725.0" y="-4606.0" height="115."/>
+    <waypoint name="SA3" x="1330.0" y="-6682.0" height="155."/>
+    <waypoint name="SA4" x="1083.0" y="-6792.0" height="155."/>
+    <waypoint name="SA5" x="-115.2" y="-6632.0" height="155."/>
+-->
+
+<!-- EL = Entry and Exit Lanes -->
+    <waypoint name="EL1" lat="-26.6072120000" lon="151.8453890000" height="115."/>
+    <waypoint name="EL2" lat="-26.6174980000" lon="151.8435670000" height="115."/>
+    <waypoint name="EL3" lat="-26.6183650000" lon="151.8497880000" height="115."/>
+    <waypoint name="EL4" lat="-26.6080920000" lon="151.8516460000" height="115."/>
+
+    <waypoint name="AMAZED" lat="-26.5940360000" lon="151.8427090000" height="115."/>
+
+<!-- Additional VIA_EL2 Waypoint since we must go *via* EL2, and to have a little
+    more meters optimal for our scan strips entry, otherwhise we could miss one
+    photo and not spot Joe. So not via Paris to Rome, but Via EL2 to Joe -->
+
+    <waypoint name="VIAEL2" lat="-26.6174980000" lon="151.8435670000" height="115."/>
+
+<!-- For the Payload release -->
+    <!-- <waypoint name="WAIT" x="-70." y="-70." height="115."/> --> <!-- TODO Check is needed or better solution possible for Pre-tests -->
+    <waypoint name="BASELEG" x="-20." y="0."/>
+
+<!-- Position where Outback Joe would be located. If this waypoint is situated
+     outside search area(The default situation), by this way the flightplane
+     -knows if it should start a search phase. If it is moved inside the area it
+      will start a rescue phase, a.k.a bottledrop.  -->
+
+<!-- Note that waypoint *Height* of 0m is the OUTBACKJOE, Joe -->
+
+    <waypoint name="OUTBACKJOE" x="666." y="777." height="0."/>
+ <!-- The START from here towards target(Joe), wile dynamically calculating the RELEASE point to target the OUTBACKJOE -->
+    <waypoint name="START" x="-100" y="300" height="65."/>
+
+    <!-- Note that 70m is the release height, we are not allowed to go below
+    60 meters and need at least some GPS height fluctuation into account
+    Also if we steeply move UP from START to RELEASE the release will maybe a
+    little more accurate, hmmmm theoretically -->
+    <waypoint name="RELEASE" x="-100." y="400." height="75."/>
+
+<!-- For autonomous landing -->
+    <waypoint name="AF" x="177.4" y="45.1" height="30."/> <!-- AutoFinal -->
+    <waypoint name="TD" x="28.8" y="57.0" height="0."/> <!-- Touchdown -->
+    <waypoint name="_BASELEG" x="-100" y="350"/>
+  </waypoints>
+
+<!-- ******************************** SECTORS ****************************** -->
+<!-- Sectors are good for displaying an overlay -->
+  <sectors>
+    <sector name="MissionBoundary" color="yellow">
+      <corner name="_MB1"/>
+      <corner name="_MB2"/>
+      <corner name="_MB3"/>
+      <corner name="_MB4"/>
+      <corner name="_MB5"/>
+      <corner name="_MB6"/>
+      <corner name="_MB7"/>
+      <corner name="_MB8"/>
+      <corner name="_MB9"/>
+      <corner name="_MB10"/>
+      <corner name="_MB11"/>
+      <corner name="_MB12"/>
+      <corner name="_MB13"/>
+    </sector>
+
+<!-- <sector name="AlertMissionBoundary" color="orange">
+      <corner name="_AB1"/>
+      <corner name="_AB2"/>
+      <corner name="_AB3"/>
+      <corner name="_AB4"/>
+      <corner name="_AB5"/>
+      <corner name="_AB6"/>
+      <corner name="_AB7"/>
+      <corner name="_AB8"/>
+      <corner name="_AB9"/>
+      <corner name="_AB10"/>
+      <corner name="_AB11"/>
+      <corner name="_AB12"/>
+      <corner name="_AB13"/>
+    </sector>
+-->
+    <sector name="SurveyArea" color="green">
+      <corner name="SA1"/>
+      <corner name="SA2"/>
+      <corner name="SA3"/>
+      <corner name="SA4"/>
+      <corner name="SA5"/>
+    </sector>
+  </sectors>
+  
+<blocks>
+  <block name="WaitForGPSFix">
+    <set value="1" var="kill_throttle"/>
+    <while cond="!GpsFixValid() || gps.pacc > 1700"/>
+  </block>
+</blocks>
+</flight_plan>
+
