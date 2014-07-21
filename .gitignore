@@ -39,9 +39,11 @@
 
 #We want the log in our case so needed to include a subfolder that is tracked by git.
 /var/aircrafts/
-/var/conf/
+#conf is handy to have if other then oneself needs debugging your airframe thus also include it
+#/var/conf/
 /var/include/
 /var/replay/
+#if your maps files are in a higher sub-dir outside of the main pprz dir you can comment this
 /var/m*
 /var/boa.conf
 !/var/logs/*
