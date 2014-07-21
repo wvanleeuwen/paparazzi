@@ -80,7 +80,7 @@ static inline uint16_t obcrulesdatalinklosscounter = 0;
       <while cond="!GpsFixValid() || gps.pacc > 1700"/>
      </block>
     <block name="Initialize">  
-      <while cond="LessThan(NavBlockTime(), 10)"/>
+      <while cond="LessThan(NavBlockTime(), 12)"/>
       <call fun="NavSetGroundReferenceHere()"/>
       <!--  TODO Set QNH here based on GPS height -->
     </block>

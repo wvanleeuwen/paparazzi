@@ -593,7 +593,7 @@ Psi -109
   <section name="HORIZONTAL CONTROL" prefix="H_CTL_">
 <!-- ******************* HORIZONTAL CONTROL ******************************** -->
     <define name="COURSE_PGAIN" value="0.8"/>
-    <define name="COURSE_DGAIN" value="0.10"/>
+    <define name="COURSE_DGAIN" value="0.08"/>
     <!-- The prebank is an adjustment to the roll setting which is done when the aircraft is trying to do a circle and when it is close to the circumference of the circle. This way it does not fly straight into the circumference but instead it starts to make a roll as the one needed to fly in circles.
 There is a value in the airframe file COURSE_PRE_BANK_CORRECTION which can be used to increase o decrease the effect. If set to 1 then the normal prebank is done. If set to 0.5 then half of the additional roll is done. This causes the aircraft to not roll enough in order to fly the intended circle and it ends up flying in a larger circle.  A value > 1 makes it fly a smaller circle.  
 
@@ -616,7 +616,7 @@ https://github.com/paparazzi/paparazzi/blob/master/sw/airborne/subsystems/nav.c#
     <define name="PITCH_KFFA" value="0."/>
     <define name="PITCH_KFFD" value="0."/>
     <!-- TODO: solve without ELEVATOR_OF_ROLL etc. needs to be set still taking great smooth corners-->
-    <define name="ELEVATOR_OF_ROLL" value="500"/>
+    <define name="ELEVATOR_OF_ROLL" value="600"/>
     <!-- TODO: Make testflight with log of radical manual flight-->
     <!--   <define name="PITCH_OF_ROLL" value="RadOfDeg(1.0)"/>-->
     <define name="AILERON_OF_THROTTLE" value="0.0"/>
@@ -761,23 +761,23 @@ https://github.com/paparazzi/paparazzi/blob/master/sw/airborne/subsystems/nav.c#
 <!-- ****************************** MISC *********************************** -->
     <!-- Values here are only referred to by the flightplan m*_s*_airspeed.xml -->
     <define name="CLIMB_AIRSPEED" value="15." unit="m/s"/>
-    <define name="NOMINAL_AIRSPEED" value="19." unit="m/s"/>
+    <define name="NOMINAL_AIRSPEED" value="20." unit="m/s"/>
     <define name="GLIDE_AIRSPEED" value="13." unit="m/s"/>
     <define name="RACE_AIRSPEED" value="30." unit="m/s"/>
-    <define name="STALL_AIRSPEED" value="11." unit="m/s"/>
+    <define name="STALL_AIRSPEED" value="10." unit="m/s"/>
     <!-- to high now, H stall to test with full weight-->
-    <define name="AIRSPEED_SETPOINT_SLEW" value="0.5" unit="m/s/s"/>
+    <define name="AIRSPEED_SETPOINT_SLEW" value="0.4" unit="m/s/s"/>
     <!--default is 1 -->
     <!--TODO:  mybe not needed anymore
     <define name="GLIDE_VSPEED" value="2." unit="m/s"/>
     <define name="GLIDE_PITCH" value="10." unit="deg"/>
 -->
     <define name="NAV_GLIDE_PITCH_TRIM" value="-1.04" unit="deg"/>
-    <define name="CARROT" value="6." unit="s"/>
+    <define name="CARROT" value="5." unit="s"/>
     <define name="CONTROL_FREQUENCY" value="100." unit="Hz"/>
     <!--<define name="ALT_KALMAN_ENABLED" value="TRUE"/>-->
     <define name="DEFAULT_CIRCLE_RADIUS" value="110."/>
-    <define name="MIN_CIRCLE_RADIUS" value="80."/>
+    <define name="MIN_CIRCLE_RADIUS" value="70."/>
     <!-- Needed for spiral navigation function-->
     <!--UNLOCKED_HOME_MODE if set to TRUE means that HOME mode does not get stuck.
 If not set before when you would enter home mode you had to flip a bit via the GCS to get out. -->

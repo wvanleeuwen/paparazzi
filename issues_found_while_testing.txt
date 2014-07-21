@@ -1,1 +1,4 @@
 #ADD all isues found while testing to this file with [ISSUE] in front of every new issue found
+
+[ISSUE] if gcs is set to start first GPSD does not show up
+[ISSUE]
