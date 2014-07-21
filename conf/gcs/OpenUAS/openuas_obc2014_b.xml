@@ -1,0 +1,35 @@
+<layout width="1918" height="1097">
+  <columns>
+    <rows SIZE="420">
+      <widget NAME="alarms" SIZE="53"/>
+      <widget NAME="strips" SIZE="210"/>
+      <widget NAME="aircraft"/>
+    </rows>
+    <widget NAME="map2d">
+      <papget type="message_field" display="gauge" x="170" y="268">
+        <property name="scale" value="0.0104167"/>
+        <property name="field" value="BAT:throttle"/>
+        <property name="min" value="0."/>
+        <property name="max" value="100."/>
+        <property name="size" value="100."/>
+        <property name="text" value="Throttle(%)"/>
+      </papget>
+      <papget type="goto_block" display="button" x="42" y="137">
+        <property name="block_name" value="Takeoff"/>
+        <property name="icon" value="takeoff.png"/>
+      </papget>
+      <papget type="goto_block" display="button" x="55" y="465">
+        <property name="block_name" value="Land Right AF-TD"/>
+        <property name="icon" value="land-right.png"/>
+      </papget>
+      <papget type="message_field" display="gauge" x="80" y="869">
+        <property name="scale" value=".00485"/>
+        <property name="field" value="ADC_GENERIC:val1"/>
+        <property name="min" value="9"/>
+        <property name="max" value="12.6"/>
+        <property name="size" value="150."/>
+        <property name="text" value="BATTERY"/>
+      </papget>
+    </widget>
+  </columns>
+</layout>
