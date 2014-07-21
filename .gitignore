@@ -37,7 +37,15 @@
 # Vagrant VM files
 /.vagrant
 
-/var
+#We want the log in our case so needed to include a subfolder that is tracked by git.
+/var/aircrafts/
+/var/conf/
+/var/include/
+/var/replay/
+/var/m*
+/var/boa.conf
+!/var/logs/*
+
 /dox
 
 /paparazzi
