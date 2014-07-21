@@ -663,15 +663,15 @@ https://github.com/paparazzi/paparazzi/blob/master/sw/airborne/subsystems/nav.c#
 -->
 
   <!-- Never set THROTTLE_SLEW_LIMITER to 0 (Zero) ! -->
-    <define name="THROTTLE_SLEW_LIMITER" value="0.5" unit="m/s/s"/>
+    <define name="THROTTLE_SLEW_LIMITER" value="0.4" unit="m/s/s"/>
 
     <define name="GLIDE_RATIO" value="7"/>
     <!-- TODO: testfly with AOW full weight to get value, now unknown -->
     <!-- ENERGY_TOT="" unknown -->
-    <define name="ENERGY_TOT_PGAIN" value="0.30"/>
-    <define name="ENERGY_TOT_IGAIN" value="0.25"/>
-    <define name="ENERGY_DIFF_PGAIN" value="0.30"/>
-    <define name="ENERGY_DIFF_IGAIN" value="0.25"/>
+    <define name="ENERGY_TOT_PGAIN" value="0.40"/>
+    <define name="ENERGY_TOT_IGAIN" value="0.35"/>
+    <define name="ENERGY_DIFF_PGAIN" value="0.40"/>
+    <define name="ENERGY_DIFF_IGAIN" value="0.35"/>
   </section>
 
   <section name="AGGRESSIVE" prefix="AGR_">

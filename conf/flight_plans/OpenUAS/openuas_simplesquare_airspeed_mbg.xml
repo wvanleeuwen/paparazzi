@@ -64,8 +64,8 @@ static inline uint16_t obcrulesdatalinklosscounter = 0;
   </sectors>
   <exceptions>
 <!-- TODO: some exeption should be localblock exceptions>-->
-<!-- if datalinkloss > 10 sec automove to commshold-->
-    <exception cond="(datalink_time > 10) && !(nav_block == IndexOfBlock('WaitForGPSFix')) && !(nav_block == IndexOfBlock('Initialize')) && !(nav_block == IndexOfBlock('Set_base_location')) && !(nav_block == IndexOfBlock('Takeoff')) && !(nav_block == IndexOfBlock('AutoTakeoff')) && !(nav_block == IndexOfBlock('Land')) && !(nav_block == IndexOfBlock('Final')) && !(nav_block == IndexOfBlock('Flare'))" deroute="CommsHoldLoiter"/>
+<!-- if datalink loss > 11 sec (time is in tento of seconds) automatically move to commshold-->
+    <exception cond="(datalink_time > 110) && !(nav_block == IndexOfBlock('WaitForGPSFix')) && !(nav_block == IndexOfBlock('Initialize')) && !(nav_block == IndexOfBlock('Set_base_location')) && !(nav_block == IndexOfBlock('Takeoff')) && !(nav_block == IndexOfBlock('AutoTakeoff')) && !(nav_block == IndexOfBlock('Land')) && !(nav_block == IndexOfBlock('Final')) && !(nav_block == IndexOfBlock('Flare'))" deroute="CommsHoldLoiter"/>
  <!-- This use avarage value ove a few secs this to avoid sag during ascend manouvers> set in airframe -->
    <exception cond="electrical.bat_low && !(nav_block == IndexOfBlock('WaitForGPSFix')) && !(nav_block == IndexOfBlock('Initialize')) && !(nav_block == IndexOfBlock('Set_base_location')) && !(nav_block == IndexOfBlock('Takeoff')) && !(nav_block == IndexOfBlock('AutoTakeoff')) && !(nav_block == IndexOfBlock('Land')) && !(nav_block == IndexOfBlock('Final')) && !(nav_block == IndexOfBlock('Flare'))" deroute="Standby"/>
   <!-- test if to high -->
