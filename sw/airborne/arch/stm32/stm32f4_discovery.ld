@@ -1,7 +1,5 @@
 /*
- * Paparazzi persistent settings low level flash routines stm32
- *
- * Copyright (C) 2011 Martin Mueller <martinmm@pfump.org>
+ * Copyright (C) 2013 Gautier Hattenberger
  *
  * This file is part of Paparazzi.
  *
@@ -19,13 +17,18 @@
  * along with Paparazzi; see the file COPYING.  If not, write to
  * the Free Software Foundation, 59 Temple Place - Suite 330,
  * Boston, MA 02111-1307, USA.
- *
  */
 
+/* Linker script for ST STM32F4DISCOVERY (STM32F407VG, 1024K flash, 128K RAM). */
 
-#ifndef STM32_SUBSYSTEMS_SETTINGS_H
-#define STM32_SUBSYSTEMS_SETTINGS_H
+/* Define memory regions. */
+MEMORY
+{
+	ram (rwx) : ORIGIN = 0x20000000, LENGTH = 128K
+	/* Leaving 2k of space at the end of rom for stored settings */
+	rom (rx) : ORIGIN = 0x08000000, LENGTH = 1022K
+}
 
+/* Include the common ld script. */
+INCLUDE libopencm3_stm32f4.ld
 
-
-#endif /* STM32_SUBSYSTEMS_SETTINGS_H */
