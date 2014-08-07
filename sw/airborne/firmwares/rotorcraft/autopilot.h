@@ -53,6 +53,7 @@
 #define AP_MODE_RC_DIRECT         14	// Safety Pilot Direct Commands for helicopter direct control
 #define AP_MODE_CARE_FREE_DIRECT  15
 #define AP_MODE_FORWARD           16
+#define AP_MODE_OPTIC_FLOW		   17
 
 extern uint8_t autopilot_mode;
 extern uint8_t autopilot_mode_auto2;
@@ -84,7 +85,7 @@ extern uint16_t autopilot_flight_time;
 #define MODE_AUTO1 AP_MODE_HOVER_Z_HOLD
 #endif
 #ifndef MODE_AUTO2
-#define MODE_AUTO2 AP_MODE_NAV
+#define MODE_AUTO2 AP_MODE_OPTIC_FLOW //AP_MODE_NAV
 #endif
 
 

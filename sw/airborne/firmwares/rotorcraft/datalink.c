@@ -146,19 +146,27 @@ void dl_parse_msg(void) {
 
     // Parse the GPS
     parse_gps_datalink(
-      DL_REMOTE_GPS_numsv(dl_buffer),
-      DL_REMOTE_GPS_ecef_x(dl_buffer),
-      DL_REMOTE_GPS_ecef_y(dl_buffer),
-      DL_REMOTE_GPS_ecef_z(dl_buffer),
-      DL_REMOTE_GPS_lat(dl_buffer),
-      DL_REMOTE_GPS_lon(dl_buffer),
-      DL_REMOTE_GPS_alt(dl_buffer),
-      DL_REMOTE_GPS_hmsl(dl_buffer),
-      DL_REMOTE_GPS_ecef_xd(dl_buffer),
-      DL_REMOTE_GPS_ecef_yd(dl_buffer),
-      DL_REMOTE_GPS_ecef_zd(dl_buffer),
-      DL_REMOTE_GPS_tow(dl_buffer),
-      DL_REMOTE_GPS_course(dl_buffer));
+		DL_REMOTE_GPS_numsv(dl_buffer),
+		DL_REMOTE_GPS_ecef_x(dl_buffer),
+		DL_REMOTE_GPS_ecef_y(dl_buffer),
+		DL_REMOTE_GPS_ecef_z(dl_buffer),
+		DL_REMOTE_GPS_lat(dl_buffer),
+		DL_REMOTE_GPS_lon(dl_buffer),
+		DL_REMOTE_GPS_alt(dl_buffer),
+		DL_REMOTE_GPS_hmsl(dl_buffer),
+		DL_REMOTE_GPS_ecef_xd(dl_buffer),
+		DL_REMOTE_GPS_ecef_yd(dl_buffer),
+		DL_REMOTE_GPS_ecef_zd(dl_buffer),
+		DL_REMOTE_GPS_tow(dl_buffer),
+		DL_REMOTE_GPS_course(dl_buffer)
+#if OPTITRACK_POS
+		,
+    	DL_REMOTE_GPS_Optitrack_x(dl_buffer),
+    	DL_REMOTE_GPS_Optitrack_y(dl_buffer),
+    	DL_REMOTE_GPS_Optitrack_z(dl_buffer));
+#else
+    	);
+#endif
     break;
 #endif
   default:

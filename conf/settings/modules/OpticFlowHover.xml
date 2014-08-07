@@ -1,0 +1,10 @@
+<!DOCTYPE settings SYSTEM "../settings.dtd">
+
+<settings>
+  <dl_settings>
+    <dl_settings NAME="OPTIC FLOW HOVER">
+      <dl_setting var="OF_P_HOVER" MIN="0" STEP="1" MAX="50" module="../../../sw/ext/ardrone2_vision/modules/OpticFlowDSP/opticflowdsp_module"/>
+      <dl_setting var="OF_I_HOVER" MIN="0" STEP="1" MAX="50" module="../../../sw/ext/ardrone2_vision/modules/OpticFlowDSP/opticflowdsp_module"/>
+    </dl_settings>
+  </dl_settings>
+</settings>

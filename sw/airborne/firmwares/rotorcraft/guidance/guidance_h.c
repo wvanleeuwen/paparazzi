@@ -216,6 +216,7 @@ void guidance_h_mode_changed(uint8_t new_mode) {
       stabilization_attitude_reset_care_free_heading();
     case GUIDANCE_H_MODE_FORWARD:
     case GUIDANCE_H_MODE_ATTITUDE:
+    case GUIDANCE_H_MODE_OPTIC_FLOW:
 #if NO_ATTITUDE_RESET_ON_MODE_CHANGE
       /* reset attitude stabilization if previous mode was not using it */
       if (guidance_h_mode == GUIDANCE_H_MODE_KILL ||
@@ -319,6 +320,7 @@ void guidance_h_run(bool_t  in_flight) {
       }
     case GUIDANCE_H_MODE_CARE_FREE:
     case GUIDANCE_H_MODE_ATTITUDE:
+    case GUIDANCE_H_MODE_OPTIC_FLOW:
       stabilization_attitude_run(in_flight);
       break;
 

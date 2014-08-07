@@ -87,6 +87,12 @@ struct GpsState {
   uint32_t last_msg_ticks;       ///< cpu time ticks at last received GPS message
   uint32_t last_msg_time;        ///< cpu time in sec at last received GPS message
   uint16_t reset;                ///< hotstart, warmstart, coldstart
+
+#if OPTITRACK_POS
+  int32_t optitrack_x;
+  int32_t optitrack_y;
+  int32_t optitrack_z;
+#endif
 };
 
 /** data structure for GPS time sync */

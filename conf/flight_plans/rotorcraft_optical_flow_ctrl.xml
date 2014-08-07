@@ -1,0 +1,40 @@
+<!DOCTYPE flight_plan SYSTEM "flight_plan.dtd">
+
+<flight_plan alt="152" ground_alt="147" lat0="43 33 50.83" lon0="1 28 52.61" max_dist_from_home="400" name="Optical Flow Control Test" security_height="1">
+  <header>
+#include "autopilot.h"
+  </header>
+  <waypoints>
+    <waypoint name="HOME" x="0.0" y="0.0"/>
+    <waypoint name="STDBY" x="0.0" y="0.0" height="3"/>
+  </waypoints>
+  <blocks>
+  	<!--<block name="Wait GPS">
+      <call fun="NavKillThrottle()"/>
+      <while cond="!GpsFixValid()"/>
+    </block>-->
+    <block name="Holding point">
+      <call fun="NavKillThrottle()"/>
+      <call fun="NavSetGroundReferenceHere()"/>
+      <attitude pitch="0" roll="0" throttle="0" vmode="throttle" until="FALSE"/>
+    </block>
+    <block name="Takeoff" strip_button="Takeoff" strip_icon="takeoff.png">
+      <exception cond="stateGetPositionEnu_f()->z > 2.0" deroute="Standby"/>
+      <stay vmode="climb" climb="0.5" wp="HOME"/>
+    </block>
+    <!--pre_call="autopilot_set_mode(AP_MODE_ATTITUDE_Z_HOLD)"-->
+    <block name="Standby"  strip_button="Standby" strip_icon="home.png">
+	<while cond="TRUE">
+	</while>
+    </block>
+    <block name="flare">
+      <exception cond="NavDetectGround()" deroute="Holding point"/>
+      <exception cond="!nav_is_in_flight()" deroute="landed"/>
+      <call fun="NavStartDetectGround()"/>
+      <stay climb="-0.2" vmode="climb" wp="HOME"/>
+    </block>
+    <block name="landed">
+      <attitude pitch="0" roll="0" throttle="0" vmode="throttle" until="FALSE"/>
+    </block>
+  </blocks>
+</flight_plan>

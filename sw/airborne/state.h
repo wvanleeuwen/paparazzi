@@ -891,7 +891,13 @@ static inline bool_t stateIsAccelValid(void) {
 /************************ Set functions ****************************/
 
 /// Set acceleration in NED coordinates (int).
+#if OPTIC_FLOW_DSP
+extern void OpticFlowPropagateAcceleration_i(struct NedCoor_i* ned_accel );
+#endif
 static inline void stateSetAccelNed_i(struct NedCoor_i* ned_accel) {
+#if OPTIC_FLOW_DSP
+	OpticFlowPropagateAcceleration_i(ned_accel);
+#endif
   INT32_VECT3_COPY(state.ned_accel_i, *ned_accel);
   /* clear bits for all accel representations and only set the new one */
   state.accel_status = (1 << ACCEL_NED_I);
@@ -905,7 +911,13 @@ static inline void stateSetAccelEcef_i(struct EcefCoor_i* ecef_accel) {
 }
 
 /// Set acceleration in NED coordinates (float).
+#ifdef OPTIC_FLOW_DSP
+extern void OpticFlowPropagateAcceleration_f(struct NedCoor_f* ned_accel );
+#endif
 static inline void stateSetAccelNed_f(struct NedCoor_f* ned_accel) {
+#ifdef OPTIC_FLOW_DSP
+	OpticFlowPropagateAcceleration_f(ned_accel);
+#endif
   VECT3_COPY(state.ned_accel_f, *ned_accel);
   /* clear bits for all accel representations and only set the new one */
   state.accel_status = (1 << ACCEL_NED_F);
@@ -1050,17 +1062,28 @@ static inline bool_t stateIsRateValid(void) {
 }
 
 /************************ Set functions ****************************/
-
+#if OPTIC_FLOW_DSP
+extern void opticFlowPropagateRates_i(struct Int32Rates* body_rate);
+#endif
 /// Set vehicle body angular rate (int).
 static inline void stateSetBodyRates_i(struct Int32Rates* body_rate) {
   RATES_COPY(state.body_rates_i, *body_rate);
+#if OPITC_FLOW_DSP
+  opticFlowPropagateRates_i(body_rate);
+#endif
   /* clear bits for all attitude representations and only set the new one */
   state.rate_status = (1 << RATE_I);
 }
 
+#if OPTIC_FLOW_DSP
+extern void opticFlowPropagateRates_f(struct FloatRates* body_rate);
+#endif
 /// Set vehicle body angular rate (float).
 static inline void stateSetBodyRates_f(struct FloatRates* body_rate) {
   RATES_COPY(state.body_rates_f, *body_rate);
+#if OPTIC_FLOW_DSP
+  opticFlowPropagateRates_f(body_rate);
+#endif
   /* clear bits for all attitude representations and only set the new one */
   state.rate_status = (1 << RATE_F);
 }

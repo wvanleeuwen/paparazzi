@@ -60,6 +60,7 @@ struct InsInt {
   bool_t baro_initialized;
 
 #if USE_SONAR
+	int sonar_z;	//Sonar measured altitude in mm
   bool_t update_on_agl; ///< use sonar to update agl if available
 #endif
 };

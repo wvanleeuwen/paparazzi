@@ -39,10 +39,18 @@ void gps_impl_init(void) {
   gps.cacc = 0; // To enable course setting
 }
 
+#if OPTITRACK_POS && OPTIC_FLOW_DSP
+extern void OptiFlowNotifyNewOptitrackPos(int, int, int);
+#endif
+
 /** Parse the REMOTE_GPS datalink packet */
+#if OPTITRACK_POS
+void parse_gps_datalink(uint8_t numsv, int32_t ecef_x, int32_t ecef_y, int32_t ecef_z, int32_t lat, int32_t lon, int32_t alt,
+  int32_t hmsl, int32_t ecef_xd, int32_t ecef_yd, int32_t ecef_zd, uint32_t tow, int32_t course, int32_t x, int32_t y, int32_t z) {
+#else
 void parse_gps_datalink(uint8_t numsv, int32_t ecef_x, int32_t ecef_y, int32_t ecef_z, int32_t lat, int32_t lon, int32_t alt,
   int32_t hmsl, int32_t ecef_xd, int32_t ecef_yd, int32_t ecef_zd, uint32_t tow, int32_t course) {
-
+#endif
   gps.lla_pos.lat = RadOfDeg(lat);
   gps.lla_pos.lon = RadOfDeg(lon);
   gps.lla_pos.alt = alt;
@@ -76,6 +84,15 @@ void parse_gps_datalink(uint8_t numsv, int32_t ecef_x, int32_t ecef_y, int32_t e
   gps.utm_pos.north = utm_f.north*100;
   gps.utm_pos.alt = gps.lla_pos.alt;
   gps.utm_pos.zone = nav_utm_zone0;
+#endif
+
+#if OPTITRACK_POS
+  gps.optitrack_x = x;
+  gps.optitrack_y = y;
+  gps.optitrack_z = z;
+#if OPTIC_FLOW_DSP
+  OptiFlowNotifyNewOptitrackPos(gps.optitrack_x, gps.optitrack_y, gps.optitrack_z);
+#endif
 #endif
 }
 

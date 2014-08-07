@@ -1999,26 +1999,74 @@
      <field name="ground_distance" type="float" unit="m"/>
    </message>
 
-  <message name="OPTICFLOW" id="234">
+  <!--<message name="OPTICFLOW" id="234">
     <field name="flow" type="uint16"></field>
     <field name="ref_alt" type="float"></field>
+  </message>-->
+  <message name="OPTICFLOWDSP" id="234">
+    <field name="Tx" type="float"></field>
+    <field name="Ty" type="float"></field>
+    <!--<field name="vx" type="float"></field>-->
+    <!--<field name="vy" type="float"></field>-->
+    <field name="threshold" type="int32"></field>
+    <field name="FPS" type="float"></field>
+    <!--<field name="gps_vx" type="int32"></field>-->
+    <!--<field name="gps_vy" type="int32"></field>-->
+    <!--<field name="gps_vz" type="int32"></field>-->
+    <field name="optitrack_x" type="int32"></field>
+    <field name="optitrack_y" type="int32"></field>
+    <field name="optitrack_z" type="int32"></field>
+    <field name="sonar_z" type="int32"></field>
+    <!--<field name="heading" type="float"></field>-->
+    <!--<field name="acc_x" type="float"></field>-->
+    <!--<field name="acc_y" type="float"></field>-->
+  </message>
+  <message name="OPTIC_FLOW" id="235">
+    <field name="Tx" type="float"></field>
+    <field name="Ty" type="float"></field>
+    <field name="count" type="int32"></field>
+    <field name="FPS" type="float"></field>
+    <field name="gps_vx" type="int32"></field>
+    <field name="gps_vy" type="int32"></field>
+    <field name="gps_vz" type="int32"></field>
+    <field name="optitrack_z" type="int32"></field>
   </message>
 
-  <message name="VISUALTARGET" id="235">
+  <!--<message name="VISUALTARGET" id="235">
     <field name="x" type="uint16"></field>
     <field name="y" type="uint16"></field>
-  </message>
+  </message>-->
 
  <message name="SONAR" id="236">
     <field name="sonar_meas" type="uint16"/>
     <field name="sonar_distance" type="float" unit="m"/>
   </message>
 
-  <message name="PAYLOAD_FLOAT" id="237">
-    <field name="values" type="float[]"/>
+  <message name="OPTICFLOW3D_DSP" id="237">
+    <field name="Tx" type="float"></field>
+    <field name="Ty" type="float"></field>
+    <field name="Tz" type="float"></field>
+    <field name="threshold" type="int32"></field>
+    <field name="FPS" type="float"></field>
+    <field name="gps_vx" type="int32"></field>
+    <field name="gps_vy" type="int32"></field>
+    <field name="gps_vz" type="int32"></field>
+    <field name="optitrack_z" type="int32"></field>
+    <field name="sonar_z" type="int32"></field>
+    <field name="V_GPS" type="float"></field>
+    <field name="V_OpF" type="float"></field>
+  </message>
+  
+  <message name="OPTICFLOW_CTRL" id="238">
+    <field name="cmd_phi" type="int32"></field>
+    <field name="cmd_theta" type="int32"></field>
   </message>
 
-  <message name="NPS_POS_LLH" id="238">
+  <!--<message name="PAYLOAD_FLOAT" id="237">
+    <field name="values" type="float[]"/>
+  </message>-->
+
+  <!--<message name="NPS_POS_LLH" id="238">
     <field name="pprz_lat"   type="float" unit="rad" alt_unit="deg" alt_unit_coef="57.29578"/>
     <field name="lat_geod"   type="float" unit="rad" alt_unit="deg" alt_unit_coef="57.29578"/>
     <field name="lat_geoc"   type="float" unit="rad" alt_unit="deg" alt_unit_coef="57.29578"/>
@@ -2028,7 +2076,7 @@
     <field name="alt_geod"   type="float" unit="m"/>
     <field name="agl"        type="float" unit="m"/>
     <field name="asl"        type="float" unit="m"/>
-  </message>
+  </message>-->
 
   <message name="NPS_RPMS" id="239">
     <field name="front"    type="float" unit="RPM"/>
@@ -2450,6 +2498,9 @@
     <field name="ecef_zd" type="int32" unit="cm/s" alt_unit="m/s"/>
     <field name="tow"     type="uint32"/>
     <field name="course"  type="int32"  alt_unit="deg" alt_unit_coef="0.0000057296"/>
+    <field name="Optitrack_x" type="int32" unit="mm"/>
+    <field name="Optitrack_y" type="int32" unit="mm"/>
+    <field name="Optitrack_z" type="int32" unit="mm"/>
   </message>
 
   <message name="KITE_COMMAND" id="96">
