@@ -1,0 +1,409 @@
+<!DOCTYPE flight_plan SYSTEM "../flight_plan.dtd">
+
+<flight_plan alt="413" ground_alt="293" lat0="50.726999" lon0="7.567305" max_dist_from_home="1100" name="opennuas simplesquare airspeed" qfu="310" security_height="100">
+  <header>
+#include "subsystems/electrical.h"
+#include "subsystems/datalink/datalink.h"
+#include "firmwares/fixedwing/guidance/energy_ctrl.h"
+
+// PHOTOGRAMMETRY settings
+
+    #define PHOTOGRAMMETRY_SWEEP_ANGLE 53		// Degrees from the North
+    #define PHOTOGRAMMETRY_OVERLAP 30		// 1-99 Procent
+    #define PHOTOGRAMMETRY_SIDELAP 20		// 1-99 Procent
+    #define PHOTOGRAMMETRY_RESOLUTION 50		// mm pixel projection size
+    
+// Automatic include of Camera trigger if camera is present and only take pictures inside polygon
+
+//To be able to cound how many times we had a linkloss to interactivly react to commshold block
+static inline uint16_t obcrulesdatalinklosscounter = 0;
+static inline uint16_t obcrulespossiblyfoundjoecounter = 0;
+
+  </header>
+  <waypoints>
+    <waypoint name="AIRFIELDHOME" x="-51.5" y="19.5"/>
+    <waypoint name="HOME" x="0.0" y="0.0"/>
+    <waypoint name="STDBY" x="42.1" y="64.0"/>
+    <waypoint name="COMMSHOLD" x="20.0" y="44.0"/>
+    <waypoint name="CLIMB" x="-155.4" y="65.2"/>
+    <waypoint name="TESTTOOFAR" x="34.8" y="377.0"/>
+    <waypoint name="MOB" x="79.6" y="179.2"/>
+    <waypoint name="1" x="236.2" y="51.2"/>
+    <waypoint name="2" x="-120.0" y="41.8"/>
+    <waypoint name="3" x="-105.9" y="240.1"/>
+    <waypoint name="4" x="228.8" y="246.4"/>
+    
+    <waypoint name="AF" x="-34.7" y="91.3" height="30"/>
+    <waypoint name="SD" x="-1600." y="-36."/><!-- When landing via GLS -->
+    <waypoint name="TOD" x="-1600." y="-36."/><!-- When landing via GLS -->
+    <waypoint name="TD" x="-130.2" y="-17.7" height="0.0"/>
+    <waypoint name="_BASELEG" x="41.5" y="113.7" height="200.0"/><!--height?-->
+    
+ <!-- Set this and Upload search and rescue day -->
+    <waypoint name="_SCRUTINEERINGDAY" x="-999." y="-999." height="0."/> 
+
+<!-- Additional VIA_EL2 Waypoint since we must go *via* EL2, and to have a little
+    more meters optimal for our scan strips entry, otherwhise we could miss one
+    photo and not spot Joe. So not via Paris to Rome, but Via EL2 to Joe -->
+    <waypoint name="VIAEL2" lat="50.72824244635161" lon="7.561744907733510" height="115."/>
+  
+<!-- MB = Mission Boundary -->
+<!--    <waypoint name="MB1" lon="7.561744907733510" lat="50.72824244635161" height="500."/>
+    <waypoint name="MB13" lon="7.561873992747308" lat="50.72532704041279" height="500."/>
+	<waypoint name="MB12" lon="7.574318550527154" lat="50.72585908177108" height="500."/>
+	<waypoint name="MB11" lon="7.575308839026698" lat="50.73217885790369" height="500."/>
+	<waypoint name="MB10" lon="7.569604382125952" lat="50.73237397497693" height="500."/>
+	<waypoint name="MB9" lon="7.567516672134229" lat="50.73269167637003" height="500."/>
+	<waypoint name="MB8" lon="7.567800540573984" lat="50.73371317202304" height="500."/>
+	<waypoint name="MB7" lon="7.565082527955489" lat="50.73410269903428" height="500."/>
+	<waypoint name="MB6" lon="7.564824111800594" lat="50.73481271874201" height="500."/>
+	<waypoint name="MB5" lon="7.562231091364624" lat="50.73576021116935" height="500."/>
+	<waypoint name="MB4" lon="7.560776618370959" lat="50.73283825676224" height="500."/>
+	<waypoint name="MB3" lon="7.566326977870366" lat="50.73069339317502" height="500."/>
+	<waypoint name="MB2" lon="7.565250793279383" lat="50.72808122859549" height="500."/>-->
+	
+	<!--  
+<waypoint name="MB1" lon="7.561926021509007" lat="50.72535621589052" height="115."/>
+<waypoint name="MB13" lon="7.580895249727268" lat="50.72614170553925" height="115."/>
+<waypoint name="MB12" lon="7.578931162785003" lat="50.73034286751847" height="115."/>
+<waypoint name="MB11" lon="7.574475443140676" lat="50.73078844108352" height="115."/>
+<waypoint name="MB10" lon="7.574496611565669" lat="50.73214684324072" height="115."/>
+<waypoint name="MB9" lon="7.567616588678687" lat="50.73276486608604" height="115."/>
+<waypoint name="MB8" lon="7.567713754599856" lat="50.73380447777800" height="115."/>
+<waypoint name="MB7" lon="7.565167319444179" lat="50.73419223070123" height="115."/>
+<waypoint name="MB6" lon="7.564658640156647" lat="50.73487023014207" height="115."/>
+<waypoint name="MB5" lon="7.562409831545899" lat="50.73544961730358" height="115."/>
+<waypoint name="MB4" lon="7.560555225359016" lat="50.73251344684186" height="115."/>
+<waypoint name="MB3" lon="7.563465190714855" lat="50.73148850654343" height="115."/>
+<waypoint name="MB2" lon="7.561859777003646" lat="50.72822895956884" height="115."/>-->
+
+<!-- SA = Search Area -->
+   
+   <!-- 
+    <waypoint name="SA1" lon="7.567457404518394" lat="50.73127488467417" height="115."/>
+    <waypoint name="SA2" lon="7.572428265536000" lat="50.73047743215844" height="115."/>
+    <waypoint name="SA3" lon="7.571801695249665" lat="50.72780681475378" height="115."/>
+    <waypoint name="SA4" lon="7.570512110900419" lat="50.72697043654821" height="115."/>
+    <waypoint name="SA5" lon="7.566115694736997" lat="50.72695817672011" height="115."/>    -->
+    
+<!-- TST = Scrutineering Course -->
+<!--  
+    <waypoint name="TST-1" x="40.0" y="50.0" height="115."/>
+    <waypoint name="TST-2" x="60.0" y="70.0" height="115."/>
+    <waypoint name="TST-3" x="80.0" y="90.0" height="115."/>-->
+
+<!-- RELATIVE COORD, not finished HINT are calculated during build based on flightplan set lat long coordinates so grab-->
+<!-- MB = Mission Boundary -->
+<!--
+    <waypoint name="MB1" x="-85.08" y="909.9"/>
+    <waypoint name="MB2" x="117.1" y="866.4"/>
+    <waypoint name="MB3" x="289.8" y="102.9"/>
+    <waypoint name="MB4" x="210.5" y="48.8"/>
+    <waypoint name="MB5" x="370.2" y="-418.5"/>
+    <waypoint name="MB6" x="919.0" y="-82.16"/>
+    <waypoint name="MB7" x="1458.0" y="-2418.0"/>
+    <waypoint name="MB8" x="3631.0" y="-2418.0"/>
+    <waypoint name="MB9" x="4358.0" y="-7531.0"/>
+    <waypoint name="MB10" x="-783.4" y="-7319.0"/>
+    <waypoint name="MB11" x="-380.1" y="-1096.0"/>
+    <waypoint name="MB12" x="-380.1" y="-1096.0"/>
+    <waypoint name="MB13" x="-380.1" y="-1096.0"/>
+-->
+
+<!-- SA = Search(survey) Area -->
+<!--
+    <waypoint name="SA1" x="492.8" y="-4414.0" height="115."/>
+    <waypoint name="SA2" x="1725.0" y="-4606.0" height="115."/>
+    <waypoint name="SA3" x="1330.0" y="-6682.0" height="155."/>
+    <waypoint name="SA4" x="1083.0" y="-6792.0" height="155."/>
+    <waypoint name="SA5" x="-115.2" y="-6632.0" height="155."/>
+-->
+
+	<waypoint name="MB1" x="-383.2" y="-175.3" height="115."/>
+	<waypoint name="MB13" x="957.3" y="-113.8" height="115."/>
+	<waypoint name="MB12" x="827.7" y="356.0" height="115."/>
+	<waypoint name="MB11" x="514.2" y="411.6" height="115."/>
+	<waypoint name="MB10" x="518.6" y="562.6" height="115."/>
+	<waypoint name="MB9" x="34.4" y="640.7" height="115."/>
+	<waypoint name="MB8" x="43.5" y="756.1" height="115."/>
+	<waypoint name="MB7" x="-135.4" y="802.8" height="115."/>
+	<waypoint name="MB6" x="-169.8" y="878.8" height="115."/>
+	<waypoint name="MB5" x="-327.2" y="946.3" height="115."/>
+	<waypoint name="MB4" x="-464.4" y="622.4" height="115."/>
+	<waypoint name="MB3" x="-261.3" y="504.4" height="115."/>
+	<waypoint name="MB2" x="-381.6" y="144.2" height="115."/>
+
+	<waypoint name="SA1" x="20.0" y="475.2" height="115."/>
+	<waypoint name="SA2" x="369.0" y="379.8" height="115."/>
+	<waypoint name="SA3" x="319.1" y="83.7" height="115."/>
+	<waypoint name="SA4" x="226.3" y="-7.5" height="115."/>
+	<waypoint name="SA5" x="-84.0" y="-2.9" height="115."/>
+
+  </waypoints>
+
+  <sectors>
+    <sector name="MissionBoundary" color="yellow">
+      <corner name="MB1"/>
+      <corner name="MB2"/>
+      <corner name="MB3"/>
+      <corner name="MB4"/>
+      <corner name="MB5"/>
+      <corner name="MB6"/>
+      <corner name="MB7"/>
+      <corner name="MB8"/>
+      <corner name="MB9"/>
+      <corner name="MB10"/>
+      <corner name="MB11"/>
+      <corner name="MB12"/>
+      <corner name="MB13"/>             
+    </sector>
+
+    <sector name="SurveyArea" color="green">
+      <corner name="SA1"/>
+      <corner name="SA2"/>
+      <corner name="SA3"/>
+      <corner name="SA4"/>
+      <corner name="SA5"/>
+    </sector>
+  </sectors>
+
+
+  <exceptions>
+<!-- TODO: some exeption should be localblock exceptions>-->
+<!-- if datalink loss > 11 sec (time is in tento of seconds) automatically move to commshold-->
+    <exception cond="(datalink_time > 110) && !(nav_block == IndexOfBlock('WaitForGPSFix')) && !(nav_block == IndexOfBlock('Initialize')) && !(nav_block == IndexOfBlock('Set_base_location')) && !(nav_block == IndexOfBlock('Takeoff')) && !(nav_block == IndexOfBlock('AutoTakeoff')) && !(nav_block == IndexOfBlock('Land')) && !(nav_block == IndexOfBlock('Final')) && !(nav_block == IndexOfBlock('Flare'))" deroute="CommsHoldLoiter"/>
+ <!-- This use avarage value ove a few secs this to avoid sag during ascend manouvers> set in airframe -->
+   <exception cond="electrical.bat_low && !(nav_block == IndexOfBlock('WaitForGPSFix')) && !(nav_block == IndexOfBlock('Initialize')) && !(nav_block == IndexOfBlock('Set_base_location')) && !(nav_block == IndexOfBlock('Takeoff')) && !(nav_block == IndexOfBlock('AutoTakeoff')) && !(nav_block == IndexOfBlock('Land')) && !(nav_block == IndexOfBlock('Final')) && !(nav_block == IndexOfBlock('Flare'))" deroute="Standby"/>
+  <!-- test if to high -->
+ <!--  <exception cond="(GetPosAlt() > ground_alt+300) && !(nav_block == IndexOfBlock('WaitForGPSFix')) && !(nav_block == IndexOfBlock('Initialize')) && !(nav_block == IndexOfBlock('Set_base_location')) && !(nav_block == IndexOfBlock('Takeoff')) && !(nav_block == IndexOfBlock('AutoTakeoff'))" deroute="Standby"/>-->
+     <exception cond="!(InsideMissionBoundary(GetPosX(), GetPosY())) && !(nav_block == IndexOfBlock('WaitForGPSFix')) && !(nav_block == IndexOfBlock('Initialize')) && !(nav_block == IndexOfBlock('Set_base_location')) && !(nav_block == IndexOfBlock('Takeoff')) && !(nav_block == IndexOfBlock('AutoTakeoff')) && !(nav_block == IndexOfBlock('Land')) && !(nav_block == IndexOfBlock('Final')) && !(nav_block == IndexOfBlock('Flare'))" deroute="CommsHoldLoiter"/>
+<!--<TODO: Add somethin like pre_call="if (!InsideRed(GetPosX(), GetPosY())) NavKillThrottle();-->
+  </exceptions>
+  <blocks>
+    <block name="WaitForGPSFix">
+      <set value="1" var="kill_throttle"/>
+      <!-- Wait when there is no 3d fix or accuracy is not good enough -->
+      <while cond="!GpsFixValid() || gps.pacc > 1700"/>
+     </block>
+    <block name="Initialize">  
+      <while cond="LessThan(NavBlockTime(), 12)"/>
+      <call fun="NavSetGroundReferenceHere()"/>
+      <!--  TODO Set QNH here based on GPS height -->
+    </block>
+    <block name="Set_base_location">
+      <set  var="obcrulesdatalinklosscounter" value="0"/>
+      <call fun="NavSetWaypointHere(WP_HOME)"/>
+      <call fun="NavSetGroundReferenceHere()"/>
+      <while cond="LessThan(NavBlockTime(), 8)"/>
+      <call fun="NavSetWaypointHere(WP_AIRFIELDHOME)"/>
+      <!-- We must have RC at least once switched on just to test, this check can be deleted if everything works 100% in Auto2 -->
+      <while cond="RCLost()"/> <!-- to make sure we do not hop to AUTO2 and engine starts running , at least switch on then maybe off if you wantto -->
+      <deroute block="AutoTakeoff"/>
+    </block>
+    <block name="Takeoff" strip_button="Takeoff (wp CLIMB)" strip_icon="takeoff.png">
+      <!--   <set value="0" var="ap_state->commands[COMMAND_BRAKE]"/> -->
+      <exception cond="GetPosAlt() > ground_alt+30" deroute="Standby"/>
+      <set value="0" var="kill_throttle"/>
+      
+      <while cond="LessThan(NavBlockTime(), 2)"/> 
+     <!-- <set value="1" var="launch"/>-->
+      <set value="0" var="autopilot_flight_time"/>
+      <set value="CLIMB_AIRSPEED" var="v_ctl_auto_airspeed_setpoint"/>
+      <go wp="CLIMB"/>
+    </block>
+    <block name="AutoTakeoff"> 
+      <!--   <set value="0" var="ap_state->commands[COMMAND_BRAKE]"/> --> 
+      <exception cond="GetPosAlt() > ground_alt+30" deroute="SimpleSquareRoute"/>
+      <set value="0" var="kill_throttle"/>   
+      <set value="1" var="launch"/>
+      <set value="0" var="autopilot_flight_time"/>
+      <!--  <exception cond="pprz_mode == PPRZ_MODE_MANUAL || pprz_mode == PPRZ_MODE_AUTO1" deroute="Standby"/>-->
+      <exception cond="pprz_mode == PPRZ_MODE_MANUAL" deroute="Standby"/>
+      <!--  <exception cond= RCLost() TODO, engine off and glide in a circle maybe-->
+      <attitude pitch="20" roll="0" throttle="1" until="GetPosAlt() > ground_alt+40" vmode="throttle"/>
+    </block>
+    <block key="a" name="Standby" strip_button="Standby" strip_icon="home.png">
+      <!--<exception cond="!InsideMissionBoundary(GetPosX(), GetPosY())" deroute="Constant Slope Land Left AF-TD"/>--> 
+      <set value="NOMINAL_AIRSPEED" var="v_ctl_auto_airspeed_setpoint"/>
+      <circle radius="nav_radius" wp="STDBY"/>
+    </block>
+    <block name="CommsHoldLoiter" strip_button="CommsHold" strip_icon="recenter.png">   
+      <!-- TODO: Make this block correct it is NOT YET FINISHED now -->
+      <set value="NOMINAL_AIRSPEED" var="v_ctl_auto_airspeed_setpoint"/>
+      <exception cond="(stage_time > 120) || (obcrulesdatalinklosscounter > 2)" deroute="AirfieldHomeLoiter"/>
+      <!-- resume if datalink is regained-->   
+      <!--TODO If the data link is regained prior to the conclusion of 2 minutes of loiter at
+      Comms Hold the mission maybe continued otherwise any subsequent  TODO -->
+      <exception cond="datalink_time == 0" deroute="Standby"/>      <!-- TODO as soon as if has link again Go EL2 > -->
+      <!-- Since it arrived we must raise a counter by one. it's not alowed by rules to occur  more than twice, then we must move to airfieldhome -->
+      <!-- TODO: set only after aircraft arrive in the loiter -->
+       <set var="obcrulesdatalinklosscounter" value="obcrulesdatalinklosscounter+1"/>
+      <!-- <while no link then -->
+       <circle wp="COMMSHOLD" radius="nav_radius"/>
+    </block>
+    <block name="AirfieldHomeLoiter">
+    <!-- rules state: ...the aircraft must be programmed to return directly to waypoint “Airfield Home”. On arriving at “Airfield Home”, the aircraft must enter a loiter centred on that waypoint... -->
+      <!-- TODO: make sure it does not cross a boundary going there so add maybe a helper point, an the term "arriving At is unclear.."-->
+     <go wp="AIRFIELDHOME" hmode="route" approaching_time="0"/>
+      <!-- <exception cond="stage_time > 120" deroute="AirfieldHomeSoftlyDown"/> -->
+      <circle wp="AIRFIELDHOME" radius="nav_radius"/>
+    </block>
+    <block key="8" name="Figure 8 around wp 1" strip_button="Figure 8 (wp 1-2)" strip_icon="eight.png">
+      <eight center="1" radius="nav_radius" turn_around="2"/>
+    </block>
+    <block key="o" name="Oval 1-2" strip_button="Oval (wp 1-2)" strip_icon="oval.png">
+      <oval p1="1" p2="2" radius="nav_radius"/>
+    </block>
+    <block key="m" name="MOB" strip_button="Circle around here" strip_icon="mob.png">
+      <call fun="NavSetWaypointHere(WP_MOB)"/>
+      <circle radius="100" wp="MOB"/>
+    </block>
+    <block key="s" name="SimpleSquareRoute">
+      <!-- keep flying this block untile batter power is to low -->
+    <!--  <exception cond="electrical.bat_low == TRUE"  deroute="Standby"/>-->
+      <set value="NOMINAL_AIRSPEED" var="v_ctl_auto_airspeed_setpoint"/>
+      <while cond="TRUE">
+        <go from="1" hmode="route" wp="2"/>
+        <go from="2" hmode="route" wp="3"/>
+        <go from="3" hmode="route" wp="4"/>
+        <go from="4" hmode="route" wp="1"/>
+      </while >
+    </block>
+
+    <block name="SearchForJoe">
+      <exception cond="PolySurveySweepBackNum >= 1" deroute="Standby"/>
+      <!-- Parameters
+      The orientation of the sweeps can ranges from north south to east west and
+       any where in between (-90 <-> 90 degrees respectively).
+       The side of the polygon the aircraft starts on (ex. north or south) is
+       determined by the side of the polygon the entry point is located.-->
+
+       <!-- SweepWidth  max photo with at height - 20 pct overlap 180- etc-->
+<!--  
+In the flight plan, the survey blocks call init and run functions:
+1. Initialize the variables needed for the survey to start, with nav_survey_polygon_setup(first_wp, size, angle, sweep_width, shot_dist, min_rad, altitude):
+  - first_wp      the first Waypoint of the polygon (WP_waypoint_name)
+  - size          the number of points that make up the polygon
+  - angle         angle in which to do the flyovers
+  - sweep_width   distance between the sweeps
+  - shot_dist     distance between the shots
+  - min_rad       minimal radius when navigating
+  - altitude      the altitude that must be reached before the flyover starts -->
+       
+     <!--   TODO: No height only altitude? Size? -->
+     <!--  to set anle depending on main wind direction dianmically?   SA5 later to WP_VIAEL2, note the 68meters seach needt to be 144 later just a min radiun of 60 -->
+    <!--    <call fun="nav_survey_polygon_setup(WP_SA2, 5, 10, 50, 72, 40, ground_alt+115)"/>--> <!-- TODO correct angle of how we want to search -->
+    <!--  <call fun="nav_survey_polygon_run()"/> --> 
+      
+      <call fun="nav_survey_poly_osam_setup(WP_SA2, 5, 100, 45)"/>
+      <call fun="nav_survey_poly_osam_run()"/> 
+    </block>
+
+<!-- GLS landings 
+    <block name="land">
+      <call fun="gls_init(WP_AF,WP_SD, WP_TOD, WP_TD)"/>
+      <call fun="nav_compute_baseleg(WP_AF, WP_TD, WP__BASELEG, nav_radius)"/>
+      <circle radius="nav_radius" until="NavCircleCount() > 0.5" wp="_BASELEG"/>
+      <circle radius="nav_radius" until="And(NavQdrCloseTo(DegOfRad(baseleg_out_qdr)-(nav_radius/fabs(nav_radius))*10), 10 > fabs(GetPosAlt() - WaypointAlt(WP__BASELEG)))" wp="_BASELEG"/>
+    </block>
+    <block name="final">
+      <exception cond="ground_alt + 10 > estimator_z" deroute="final2"/>
+      <call fun="gls(WP_AF,WP_SD, WP_TOD, WP_TD)"/>
+    </block>
+    <block name="final2">
+      <exception cond="(2 > sonar_distance)" deroute="flare"/>
+      <call fun="gls(WP_AF,WP_SD, WP_TOD, WP_TD)"/>
+    </block>
+-->
+    <block key="l" name="Constant Slope Land Right AF-TD" strip_button="Land right (wp AF-TD)" strip_icon="land-right.png">
+      <call fun="nav_compute_final_from_glide(WP_AF, WP_TD, 15.)"/>
+      <set value="DEFAULT_CIRCLE_RADIUS" var="nav_radius"/>
+      <deroute block="Land"/>
+    </block>
+    <block name="Constant Slope Land Left AF-TD" strip_button="Land left (wp AF-TD)" strip_icon="land-left.png">
+      <call fun="nav_compute_final_from_glide(WP_AF, WP_TD, 15.)"/>
+      <set value="-DEFAULT_CIRCLE_RADIUS" var="nav_radius"/>
+      <deroute block="Land"/>
+    </block>
+    <block name="Land">
+      <set value="NOMINAL_AIRSPEED" var="v_ctl_auto_airspeed_setpoint"/>
+      <set value="80" var="nav_radius"/>
+      <call fun="nav_compute_baseleg(WP_AF, WP_TD, WP__BASELEG, nav_radius)"/>
+      <circle radius="nav_radius" until="NavCircleCount() > 0.5" wp="_BASELEG"/>
+      <set value="GLIDE_AIRSPEED" var="v_ctl_auto_airspeed_setpoint"/>
+      <circle radius="nav_radius" until="NavQdrCloseTo(DegOfRad(baseleg_out_qdr)-(nav_radius/fabs(nav_radius))*10) && 15 > fabs(GetPosAlt() - WaypointAlt(WP__BASELEG))" wp="_BASELEG"/>
+    </block>
+   <!-- todo add brake value depending on groundspeed value-->
+    <block name="Final">
+    <!-->  <set value="MAX_PPRZ" var="ap_state->commands[COMMAND_BRAKE]"/> TODO different value maybe-->
+      <go approaching_time="5" from="AF" hmode="route" vmode="glide" wp="TD"/>
+      <set var="v_ctl_auto_airspeed_setpoint" value="(GLIDE_AIRSPEED*10.0/12.0)"/> 
+    </block>   
+    <block name="Flare">
+   <!-- 80pct brakeing, never more than 100pct possible-->
+    <!-- <set value="MAX_PPRZ*.8" var="ap_state->commands[COMMAND_BRAKE]"/> <!-- TODO different break value maybe-->
+      <go approaching_time="0" from="AF" hmode="route" throttle="0.0" vmode="glide" wp="TD"/>
+      <attitude roll="0.0" throttle="0.0" until="FALSE" vmode="throttle"/>
+   <!-- TODO: retract brake after landed is true (with +3seconds margin) better a sensor(witch) that detects IsAircraftOnSolidGround -->
+    </block>
+    <block key="<Control>t" name="TestToFar" strip_button="To Far" strip_icon="OpenUAS/openuas_return.png">
+      <go wp="TESTTOOFAR"/>
+    </block>
+  </blocks>
+</flight_plan>
+
+<!--
+5.5.2 Loss of Data Link
+All teams must implement a method to establish the status (existence) of a command and control data link between the GCS and the UAV. This status must be
+updated at a rate of at least 1 Hz and if the data link is lost a data link flight mode must be entered.
+Teams must implement a system that behaves as follows:
+ > This flight mode must be activated if the data link is lost for 10 seconds or greater.
+2014 UAV Challenge Outback Rescue Page 21 of 48
+v1.2
+Search and Rescue Challenge Rules
+
+This flight mode, once activated, must return the aircraft directly to the
+waypoint “Comms Hold” 
+
+(no time limit for transit, but it must be direct to the waypoint) 
+
+and enter a loiter centred on that waypoint.
+
+* After a maximum of 2 minutes of loitering, if the data link has not
+been re-established, the aircraft must be programmed to return
+directly to waypoint “Airfield Home” 
+
+ where the RC link may be re-established for a manual recovery. There is no time
+limit for the transit, but it must be direct to the waypoint. (Note: The
+Range Safety Officer must be informed that the aircraft is making its
+way back to Kingaroy to ensure appropriate notification is given to
+other airspace users. This information may come from observers,
+officials, or team members and is not a requirement on the competing
+team.)
+
+* On arriving at “Airfield Home”, the aircraft must enter a loiter centred
+on that waypoint. If after 2 minutes, RC contact has not been re-
+established, an autopilot initiated and controlled flight termination
+mode must be activated. A controlled flight termination mode may be
+(but not limited to) an autonomous landing or entering the flight
+termination mode (Section 5.6).
+This flight mode must be able to be activated from the ground by the UAV
+Controller at the command of the judges or range safety personnel.
+
+If the data link is regained prior to the conclusion of 2 minutes (maximum) of
+loiter at “Comms Hold” the mission maybe continued, otherwise any
+subsequent regain of data link still requires return to the competition airfield
+and land.
+Each team is allowed a maximum of two loss of data link failures. The third
+(or additional) loss of data link failure, the Loss of Data Link mode must be
+entered and the mission terminated with a return to the competition airfield
+and landing or flight termination (Section 5.6).
+If there is a loss of GPS while experiencing a loss of data link whilst in
+Autonomous mode(s), the flight termination (Section 5.6) must be
+activated immediately. This behaviour must be documented in the D2
+document.
+
+* If there is a mission boundary crossing whilst experiencing a loss of data
+link, the flight termination (Section 5.6) must be activated immediately.
+This behaviour must be documented in the D2 document.
+-->

@@ -2,31 +2,33 @@
 <!-- This is the Flightplan of Team OpenUAS from the Netherlands for use in the
      Australian UAV Outback Challenge of 2014. Read about this challenge here:
     http://www.uavoutbackchallenge.com.au/
-     Thanks to all involved, specifically all the help from CDW, DD
-     TU Delft University of Technology, Aerospace any everyone who helped out.
+     Thanks to all involved, specifically all the help from CdW, DD, BR, GdC, AvdL
+     TU Delft University of Technology, Aerospace and everyone else who helped out.
 
-TYPE 1 OPERATION Flightplan, fully autonomous inair joe detection integration
+TYPE 1 OPERATION Flightplan, fully autonomous in-air joe detection integration
+
+Now with integrated TYPE2 operations option (soon...)
+TYPE 2 OPERATION Flightplan, fully autonomous search, but on ground joe detection integration
 
 USAGE: 
 
 To use the flightplan's embedded options:
 
 # Put the Waypoint SCRUTINEERING inside the mission boundary the the SCRUTINEERING flight will be executed.
-# Put the Waypoint JOE inside the mission boundary the the RESCUE flight will be executed.
-For flight plan backup scneario B do not do that
+# Put the Waypoint JOE inside the mission boundary the the RESCUE only part of the flight will be executed.(TYPE2)
 
 NOTES:
 
 # This flightplan contains both the SR, as default mission and the Scruteneering flight.
 # Mission boundary coodinates are for both Scrutineering and SnR the same
-# Alert boundaries are different for Scrutineer and SnRMission different
+# Alert boundaries are different for Scrutineering and SnR Missions
 
 TODO:
 # Laters coordinates of KMZ of 20131017
 # MUCH better exceptions
-# A working couter for times a block as called, need torough tests
-# Add AHRS Healh status value
-# Add IMU vibration level health monitor value(maybe not needed,test it)
+# A working counter for times a block as called, need torough tests
+##   There is already one counter, for datalink los
+## we need one for if found joe is not withing 100m range 
 # Response of cam pictre if successful of not
 
 -->
@@ -34,7 +36,8 @@ TODO:
 <!-- Test via command xmlwf yourfligtplanname.xml for welformedness of the xml document -->
 <!-- The base lat lon of the flightplan is the AIRFIELDHOME point -->
 <!-- The ground_alt will be set later on also with real testflight, mind the ground height profile please -->
-<flight_plan name="OpenUAS OBC2014" ground_alt="0" alt="200" lat0="-26.5847810000" lon0="151.8423250000" security_height="70" max_dist_from_home="10000" qfu="70">
+<!-- WARNING: max_dist_from_home very very likely never be reached due to boundary crossing first -->
+<flight_plan name="OpenUAS OBC2014" ground_alt="0" alt="120" lat0="-26.5847810000" lon0="151.8423250000" security_height="70" max_dist_from_home="10000" qfu="70">
 <!-- ******************************** HEADERS ****************************** -->
 <header>
 //Set Generic options
@@ -45,11 +48,13 @@ TODO:
     #include "subsystems/electrical.h"
 //Enable extra nav functionality
 <!--
-Now done in module
+Now done in modules
     #include "subsystems/nav.h"    
     #include "subsystems/navigation/nav_line.h"
     #include "subsystems/navigation/OSAMNav.h"
-    #include "subsystems/navigation/bomb.h"
+
+
+    #include "subsystems/navigation/drop.h"
 -->
 //Enable datalink tests
     #include "subsystems/datalink/datalink.h"
@@ -79,25 +84,37 @@ Now done in module
 
 //DANGER WARNING
 // define ACTIVATED_FTD 0
+
+//Enable energy control commands from within flightplan
+#include "firmwares/fixedwing/guidance/energy_ctrl.h"
+
+//To be able to cound how many times we had a linkloss to interactivly react to commshold block
+static inline uint16_t obcrulesdatalinklosscounter = 0;
+//To be able to cound how many times we had a possible joe found but not approved to interactivly react to come back after 2 times
+//So we can perform an on the ground search in photos
+static inline uint16_t obcrulesjoetimepossiblefoendcounter = 0;
+
+//Needed for the DROP function
+static inline uint16_t G = 9.81;
+
   </header>
 <!-- ******************************* WAYPOINTS ***************************** -->
   <waypoints>
     <waypoint name="AIRFIELDHOME" lat="-26.5847810000" lon="151.8423250000" height="2."/> <!-- Note that Scrutineering AIRFIELDHOME is the same as in the SnR mission -->
-    <waypoint name="HOME" x="0." y="0." height="2."/> <!-- DEBUG ONLY -->
-    <waypoint name="THROWSPOT" x="0." y="80." height="0."/>
+    <waypoint name="HOME" x="0." y="0." height="2."/> <!-- NEEDED FOR DEBUG ONLY -->
+    <waypoint name="THROWSPOT" x="0." y="30." height="0."/>
     <waypoint name="STDBY" x="0." y="-130." height="95."/> <!-- DEBUG ONLY For helping out in flightplan security of states-->
-    <waypoint name="CLIMB" x="50." y="390." height="80."/> <!-- TODO make Hidded, should be dynami based on throw direction-->
+    <waypoint name="CLIMB" x="50." y="390." height="80."/> <!-- TODO make Hidden, should be dynamic based on throw direction-->
     <waypoint name="COMMSHOLD" lat="-26.6072120000" lon="151.8453890000" height="115."/>
  <!--   <waypoint name="TESTTOOFAR" x="800." y="-100." height="115."/> --><!-- DANGER, DEBUG ONLY Disable later on, used for FDT Debugging only -->
 
-<!-- Set this and Upload for  scrutineering day --> <!-- IDEA base it on throwing spot position maybe-->
+<!-- Set this and Upload for  scrutineering day --> <!-- OR,  IDEA base it on throwing spot position maybe-->
 <!--      <waypoint name="_SCRUTINEERINGDAY" x="0." y="0." height="0."/> -->
-
-<!-- Set this and Upload search and rescue day -->
+<!-- Set inside and it will mean a scrutineer flight day -->
     <waypoint name="_SCRUTINEERINGDAY" x="-999." y="-999." height="0."/> 
 
 <!-- MB = Mission Boundary -->
-    <waypoint name="_MB1"  lat="-26.5695640000" lon="151.8373730000" height="400."/>
+    <waypoint name="_MB1"  lat="-26.5695640000" lon="151.8373730000" height="400."/><!-- Todo set boundary to the QNH baro top boundary height of 1500ft AMSL? AGL-->
     <waypoint name="_MB2"  lat="-26.5699560000" lon="151.8394050000" height="400."/>
     <waypoint name="_MB3"  lat="-26.5768230000" lon="151.8411420000" height="400."/>
     <waypoint name="_MB4"  lat="-26.5769900000" lon="151.8400450000" height="400."/>
@@ -147,6 +164,7 @@ OK?
     <waypoint name="TST-2" lat="-26.5859618185" lon="151.8451373142" height="115."/>
     <waypoint name="TST-3" lat="-26.5902280387" lon="151.8400929439" height="115."/>
 
+<!-- extra boundary maybe add it -->
 <!-- ABS = Alert Boundary scrutineering flight -->
 <!-- TODO real positions and better naming-->
 <!--
@@ -155,7 +173,7 @@ OK?
     <waypoint name="_ABS3" lat="" lon="" height="400."/>
 -->
 
-<!-- RELATIVE COORD, not finished HINT are calculated during build based on flightplan set coordinated-->
+<!-- RELATIVE COORD, not finished HINT are calculated during build based on flightplan set lat long coordinates so grab-->
 <!-- MB = Mission Boundary -->
 <!--
     <waypoint name="MB1" x="-85.08" y="909.9"/>
@@ -243,6 +261,7 @@ OK?
       <corner name="_MB13"/>
     </sector>
 
+<!--  maybe add an additional allert boundary -->
 <!-- <sector name="AlertMissionBoundary" color="orange">
       <corner name="_AB1"/>
       <corner name="_AB2"/>
@@ -366,6 +385,7 @@ OK?
 
 <!-- TODO test needed pitch value -->
     <block name="Climbout">
+      <!--<exception cond="rc_status==RC_REALLY_LOST" after 3 seconds and no IMU deroute="softlydown">if using RC stil on with a Auto2 mode switch-->
       <attitude pitch="10" roll="0" throttle="1.0" until="GetPosAlt() > ground_alt+40" vmode="throttle"/>
     </block>
 
@@ -418,7 +438,8 @@ best to perform many real life tests with the CAM
 *********** -->
 
     <block name="SearchForJoe">
-      <exception cond="PolySurveySweepBackNum >= 1" deroute="ReturnToBase"/>
+      <exception cond="NavPolySurveySweepBackNum >= 1" deroute="ReturnToBase"/> <!-- ? TODO decide to search in reverse again on until battery < volts needed to return home? if nothing found, go back?-->
+      <!-- <exception cond="FoundJoe" deroute="WaitForJugesDropApprovale"/> -->
       <!-- Parameters
       The orientation of the sweeps can ranges from north south to east west and
        any where in between (-90 <-> 90 degrees respectively).
@@ -427,9 +448,15 @@ best to perform many real life tests with the CAM
        call fun="InitializePolygonSurvey(WP_S1, NumOfCorners, SweepWidth, Orientation)"/> -->
 
        <!-- SweepWidth  max photo with at height - 20 pct overlap 180- etc-->
-      <call fun="InitializePolygonSurvey(WP_VIAEL2, 5, 144, 70)"/> <!-- TODO correct angle of how we want to search -->
-      <call fun="PolygonSurvey()"/>
+      <call fun="NavInitializePolygonSurvey(WP_VIAEL2, 5, 144, 70)"/> <!-- TODO correct angle of how we want to search -->
+      <call fun="NavPolygonSurvey()"/>
     </block>
+
+<!--WaitForJugesDropApproval if we do a Type 1 search otherwise it would be approved already Warning then never enter this block -->
+<block name="WaitForJugesDropApproval">
+<!-- circle with circle border already alligend with Drop align route, or maybe some better ideas... -->
+<!-- TODO: if blocktime approval takes to long do what? -->
+</block>
 
 <!-- *********************************************************
      *********** Search Area Departure Procedure *************
@@ -468,30 +495,33 @@ best to perform many real life tests with the CAM
 
     <block name="RescueJoe">
       <!-- <go wp="VIAEL2" hmode="route"/>--> <!-- TODO maybe not needed -->
-      <deroute block="bomb"/>
+      <deroute block="drop"/>
     </block>
 
-<!-- *********** Release Compute Approach *********** -->
-    <block name="bomb" strip_button="Bomb"> <!-- rename to release -->
+<!-- *********** Drop Compute Approach *********** -->
+    <block name="drop" strip_button="Drop">
  <!-- TODO determine what still success and is fastest value for 100  -->
       <set var="waypoints[WP_START].x" value="WaypointX(WP_OUTBACKJOE) + 100"/>
       <set var="waypoints[WP_START].y" value="WaypointY(WP_OUTBACKJOE) + 100"/>
 
-      <set value="BombComputeApproach(WP_OUTBACKJOE, WP_START, nav_radius)" var="unit"/>
-      <circle radius="nav_radius" until="NavQdrCloseTo(DegOfRad(bomb_start_qdr)-15)" wp="BASELEG"/>
+      <set value="DropComputeApproach(WP_OUTBACKJOE, WP_START, nav_radius)" var="unit"/>
+      <circle radius="nav_radius" until="NavQdrCloseTo(DegOfRad(nav_drop_start_qdr)-15)" wp="BASELEG"/>
     </block>
 
 <!-- *********** Align on release path *********** -->
     <block name="align">
+  <!-- TODO set AIRSPEED_AT_RELEASE-->
+  <!--TODO set HEIGHT to 60m -->
       <!-- After Payload is released, back via EL3 -->
-      <exception cond="BombUpdateRelease(WP_OUTBACKJOE)" deroute="ExitSearchAreaViaEL3"/>
-      <go approaching_time="bomb_trigger_delay" from="START" hmode="route" wp="RELEASE"/>
-      <!-- just in case add it maybe deroute="ExitSearchAreaViaEL3"/> -->
+      <exception cond="DropUpdateRelease(WP_OUTBACKJOE)" deroute="ExitSearchAreaViaEL3"/>
+      <go approaching_time="nav_drop_trigger_delay" from="START" hmode="route" wp="RELEASE"/>
     </block>
+
 <!-- *********** Release Payload *********** -->
     <block name="shoot">
-      <!-- TODO is electrcal plane and almost there maybe stop proppelor from spinning for a second -->
-      <set value="BombShoot()" var="unit"/>
+      <!-- TODO is electrcal plane and almost there maybe stop proppelor from spinning for a few seconds -->
+
+      <set value="DropShoot()" var="unit"/>
       <!-- TODO add maxspeed again -->
       <go from="RELEASE" hmode="route" wp="EL3"/>
       <!-- Maybe better not to close, more chance of delivery, TODO maybe even add a sensor to detect release if not try again -->
@@ -605,7 +635,7 @@ termination mode (Section 5.6).
 
     <block name="AirfieldHomeLoiter">
       <exception cond="stage_time > 120" deroute="AirfieldHomeSoftlyDown"/>
-      <circle wp="AIRFIELDHOME" radius="nav_radius"/>
+      <circle wp="AIRFIELDHOME" radius="nav_radius*1.5"/><!-- 1.5 x  mean it will be a bit bigger circle -->
     </block>
 
 <!-- circle smootly down -->
@@ -668,7 +698,7 @@ to “Airfield Home” and orbit for either a landing or regain of Data Link. --
       </for>
     </block>
 
-    <block name="Scrutineering Autonomy Square">
+    <block name="Scrutineering Autonomy Triangle">
      <!-- TODO: while we are up there take some pictures anyhow :) -->
       <for from="0" to="3" var="i"> <!-- TODO: make it depending on battry energy left -->
         <go from="TST-3" hmode="route" wp="TST-1"/>
@@ -704,12 +734,12 @@ to “Airfield Home” and orbit for either a landing or regain of Data Link. --
     </block>
 <!--
     <block name="TestHatch">
-      <set value="BombCloseHatch()" var="unit"/>
-      <set value="BombShoot()" var="unit"/>
-      <set value="BombCloseHatch()" var="unit"/>
-      <set value="BombShoot()" var="unit"/>
-      <set value="BombCloseHatch()" var="unit"/>
-      <set value="BombShoot()" var="unit"/>
+      <set value="DropCloseHatch()" var="unit"/>
+      <set value="DropShoot()" var="unit"/>
+      <set value="DropCloseHatch()" var="unit"/>
+      <set value="DropShoot()" var="unit"/>
+      <set value="DropCloseHatch()" var="unit"/>
+      <set value="DropShoot()" var="unit"/>
     </block>
 -->
   </blocks>
