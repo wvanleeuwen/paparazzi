@@ -24,7 +24,10 @@ NOTES:
 # Alert boundaries are different for Scrutineering and SnR Missions
 
 TODO:
-# Laters coordinates of KMZ of 20131017
+# Later coordinates of KMZ of 20131017
+# TODO: add times to blocks to prefent to early forcecrash. e.,g after 2 second border cannot be crossed, so if triggered don't do it
+# TODO AF-TD dependand on mesured wind direction
+# but if scrutineering day, than it can be since we test it closeby mission boundary
 # MUCH better exceptions
 # A working counter for times a block as called, need torough tests
 ##   There is already one counter, for datalink los
@@ -52,7 +55,6 @@ Now done in modules
     #include "subsystems/nav.h"    
     #include "subsystems/navigation/nav_line.h"
     #include "subsystems/navigation/OSAMNav.h"
-
 
     #include "subsystems/navigation/drop.h"
 -->
@@ -106,7 +108,8 @@ static inline uint16_t G = 9.81;
     <waypoint name="STDBY" x="0." y="-130." height="95."/> <!-- DEBUG ONLY For helping out in flightplan security of states-->
     <waypoint name="CLIMB" x="50." y="390." height="80."/> <!-- TODO make Hidden, should be dynamic based on throw direction-->
     <waypoint name="COMMSHOLD" lat="-26.6072120000" lon="151.8453890000" height="115."/>
- <!--   <waypoint name="TESTTOOFAR" x="800." y="-100." height="115."/> --><!-- DANGER, DEBUG ONLY Disable later on, used for FDT Debugging only -->
+    <!-- DANGER, DEBUG ONLY Disable later on, used for FDT Debugging only -->
+    <waypoint name="TESTTOOFAR" x="800." y="-100." height="115."/><!-- DANGER, DEBUG ONLY Disable later on, used for FDT Debugging only -->
 
 <!-- Set this and Upload for  scrutineering day --> <!-- OR,  IDEA base it on throwing spot position maybe-->
 <!--      <waypoint name="_SCRUTINEERINGDAY" x="0." y="0." height="0."/> -->
@@ -292,12 +295,11 @@ OK?
 <!-- WARNING these are Global Exeption, bettersome to stuff in a flightplan block-->
     <!-- If datalink is lost for more than 10 seconds and we are in launched state -->
 
-    <exception cond="And(datalink_time > 10, launch > 0)" deroute="AirfieldHomeLoiter"/>
-    <!-- below for the real SnR -->
-    <!-- <exception cond="And(datalink_time > 10, launch > 0)" deroute="CommsHoldLoiter"/>-->
+    <!-- below for the real SnR --> <!--  TODO: if datalinkloss but still closeby move to commhold? strane better airfiledhome loiter -->
+    <exception cond="And(datalink_time > 10, launch > 0)" deroute="CommsHoldLoiter"/> <!-- deroute="AirfieldHomeLoiter"/> -->
     <!-- Case of loss of GPS AND loss of datalink -->
     <!-- <exception cond="And(datalink_time > 10, !GpsFixValid())" deroute="ForcedCrash"/> -->
-    <!-- <exception cond="Or(! InsideMissionBoundary(GetPosX(), GetPosY()), GetPosAlt() > ground_alt + 921)" deroute="ForcedCrash"/>-->
+    <exception cond="Or(! InsideMissionBoundary(GetPosX(), GetPosY()), GetPosAlt() > ground_alt + 921)" deroute="ForcedCrash"/>
 
     <!--  If we are allowed to fly higher otherwise to do rules do not state to crash if heigher then 400m -->
     <!-- <exception cond="datalink_time > 1330" deroute="Standby"/> --> <!-- A loss of link set to max calculated mission time, unlikely to ever occur befor voltage level drop exeption -->
@@ -319,12 +321,13 @@ OK?
 <!-- *********** Wait for GPS fix, 3D by default *********** -->
   <blocks>
     <block name="Startup">
-      <!-- IDEA Close the hatch so not able to insert payload before there is a 3D fix -->
+      <!-- IDEA Close the hatch so not able to insert payload before there is a 3D fix , however maybe not so handy anyhow since we need to wat be fre we can insert-->
       <!--  <set value="BombCloseHatch()" var="unit"/> -->
       <set value="1" var="kill_throttle"/>
 <!-- if no valid fix or gps accuracy> 15m or no AHRS , it a no-go wait-->
       <while cond="!GpsFixValid() || gps.pacc > 1500 || !(ahrs.status == AHRS_RUNNING)"/>
     </block>
+    
 <!-- *********** Set the ground reference height and the home position *********** -->
 <!-- a second init will follow since the plane thrower will still walk to launchpoint -->
 
@@ -347,6 +350,9 @@ OK?
 
 <!-- *********** Throttle off holdingpoint *********** -->
     <block name="Holding point">
+     <!--  TODO: make some movements on all defelctros as a sign we are in holding and to see if all works -->
+      <!--  <set value="0" var="ap_state->commands[COMMAND_BRAKE]"/> -->
+     
       <!--Just to make sure in case of flightplan mishap, it is no too far away -->
       <!-- <set var="waypoints[WP_START].x" value="WaypointX(WP_EL2) + 50"/> -->
       <!-- <set var="waypoints[WP_START].y" value="WaypointY(WP_EL2) + 50"/> -->
@@ -710,9 +716,11 @@ to “Airfield Home” and orbit for either a landing or regain of Data Link. --
     <!-- Just make sure it somehow stops in case of flightplan mishap or no being able to take over -->
     <block key="a" name="Airfieldhome" strip_button="Airfieldhome" strip_icon="home.png">
       <!--<circle radius="nav_radius" wp="AIRFIELDHOME"/> -->
+      <!-- TODO have two landing stratigy, one with circle down one with a streight line maybe a thir depending on measured windspeed -->
       <deroute block="InitiateLandingApproach"/>
     </block>
 
+ <!-- For easy testing r -->
     <block name="Standby" strip_button="Standby" strip_icon="home.png">
    <!--   <set value="0" var="ap_state->commands[COMMAND_BRAKE]"/> -->
       <circle alt="WaypointAlt(WP_STDBY)" radius="nav_radius" wp="STDBY"/>
