@@ -118,7 +118,7 @@ The $GPGGA Sentence (Fix data)
 */
 
 #include <glib.h>
-#include <gtk/gtk.h>
+//#include <gtk/gtk.h>
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -192,9 +192,9 @@ The $GPGGA Sentence (Fix data)
  */
 long delay = 1000;/* Serial Repeat Rate */
 
-GtkWidget *status_ivy;
-GtkWidget *status_serial;
-GtkWidget *status;
+//GtkWidget *status_ivy;
+//GtkWidget *status_serial;
+//GtkWidget *status;
 
 char status_str[256];
 char status_ivy_str[256];
@@ -298,7 +298,7 @@ typedef struct _nmeaINFO_of_UAV //Where data is stored to be saved via NMA out
 
 } nmeaINFO_of_UAV;
 
-void nmea_zero_INFO(nmeaINFO_of_UAV *info)
+void nmea_zero_INFO(nmeaINFO_of_UAV *info);
 
 volatile unsigned char new_ivy_data = 0;
 volatile unsigned char new_serial_data = 0;
@@ -566,7 +566,7 @@ TODO: ad allo same for on_Gps_Int
   nmeaINFO_of_UAV info;
   char buff[2048];
   int gen_sz;
-  int it;
+//  int it;
 
 //Clean it
   nmea_zero_INFO(&info);
@@ -675,8 +675,8 @@ void nmea_send_sentence_to_port(void)
 
   count_ivy++;
 
-  //sprintf(status_ivy_str, "Received %d from IVY: forwarding to '%s' [%ld] {Tx=%ld}", ac_id, port, count_ivy, tx_bytes);
-  gtk_label_set_text( GTK_LABEL(status_ivy), status_ivy_str );
+  //printf(status_ivy_str, "Received %d from IVY: forwarding to '%s' [%ld] {Tx=%ld}", ac_id, port, count_ivy, tx_bytes);
+  //gtk_label_set_text( GTK_LABEL(status_ivy), status_ivy_str );
 }
 
 
@@ -711,7 +711,7 @@ gboolean timeout_callback(gpointer data)
 
 /**
  * \brief GTK delete_event
- */
+ *
 gint delete_event( GtkWidget *widget,
                    GdkEvent  *event,
                    gpointer   data )
@@ -726,6 +726,8 @@ gint delete_event( GtkWidget *widget,
   return(FALSE); // false = delete window, FALSE = keep active
 }
 
+*/
+
 /**
  * \brief MAIN
  */
@@ -733,7 +735,7 @@ int main ( int argc, char** argv)
 {
   int s = sizeof(nmeaINFO_of_UAV);
 
-  gtk_init(&argc, &argv);
+  //gtk_init(&argc, &argv);
 
   if (argc < 2)
   {
@@ -758,10 +760,12 @@ int main ( int argc, char** argv)
   //IvyBindMsg(on_Gps_Int, NULL, "^%d GPS (\\S*) (\\S*) (\\S*) (\\S*) (\\S*) (\\S*) (\\S*) (\\S*) (\\S*) (\\S*) (\\S*)",ac_id);
   IvyStart("127.255.255.255");//FIXME make compliant
 
-  /* Add Timer */
+  /*
+
+  // Add Timer
   gtk_timeout_add(delay / 4, timeout_callback, NULL);
 
-  /* GTK Window */
+  // GTK Window
   GtkWidget *window = gtk_window_new (GTK_WINDOW_TOPLEVEL);
   gtk_window_set_title (GTK_WINDOW (window), "IVY_to_NMEA_serial_out");
 
@@ -793,8 +797,20 @@ int main ( int argc, char** argv)
 
   gtk_main();
 
+  */
+
+  for (;;);
+
   /* Clean up */
   fprintf(stderr,"Stopping\n");
+
+  g_print ("CLEAN STOP\n");
+
+  close_port();
+  IvyStop();
+
+  exit(0); //FIXME rela return values from previous Ivytop etc.
+
 
   return 0;//FIXME posix const compliant return
 }
