@@ -166,9 +166,7 @@ void write_port(char* buff, int len);
  * Distance units
  */
 
-#define NMEA_TUD_YARDS      (1.0936)        /**< Yeards, meter * NMEA_TUD_YARDS = yard */
-#define NMEA_TUD_KNOTS      (1.852)         /**< Knots, kilometer / NMEA_TUD_KNOTS = knot */
-#define NMEA_TUD_MILES      (1.609)         /**< Miles, kilometer / NMEA_TUD_MILES = mile */
+#define NMEA_MS_TO_KNOTS      (3.6 / 1.852)         /**< Knots, kilometer / NMEA_TUD_KNOTS = knot */
 
 /*
  * Fixed for conversion
@@ -259,11 +257,15 @@ typedef struct _nmeaGPRMC
 typedef struct _nmeaINFO_of_UAV //Where data is stored to be saved via NMA out
 {
 	  unsigned char ac_id; /**< the Aircraft ID of the data */
-    double  lat;         /**< Latitude in NDEG - +/-[degree][min].[sec/60] */
-    double  lon;         /**< Longitude in NDEG - +/-[degree][min].[sec/60] */
+    double  lat;         /**< Latitude in deg */
+    double  lon;         /**< Longitude in deg */
     double  elv;         /**< Antenna altitude above/below mean sea level (geoid) in meters */
     double  speed;       /**< Speed over the ground in kilometers/hour */
     double  direction;   /**< Track angle in degrees True */
+    double  pitch;       /**< degrees */
+    double  roll;
+    double  heading;
+    double  agl;          /**< Altitude above ground [m] */
 } nmeaINFO_of_UAV;
 
 /*************************************************************************/
@@ -419,7 +421,7 @@ void nmea_zero_GPRMC(nmeaGPRMC *pack)
 {
     memset(pack, 0, sizeof(nmeaGPRMC));
     nmea_time_now(&pack->utc);
-    pack->status = 'V';
+    pack->status = 'V'; // Void
     pack->ns = 'N';
     pack->ew = 'E';
 }
@@ -431,8 +433,8 @@ void nmea_zero_GPRMC(nmeaGPRMC *pack)
 int nmea_gen_GPGGA(char *buff, int buff_sz, nmeaGPGGA *pack)
 {
     return nmea_printf(buff, buff_sz,
-        "$GPGGA,%02d%02d%02d.%02d,%07.4f,%C,%07.4f,%C,%1d,%02d,%03.1f,%03.1f,%C,,,,",
-        pack->utc.hour, pack->utc.min, pack->utc.sec, pack->utc.hsec,
+        "$GPGGA,%02d%02d%02d,%010.5f,%C,%011.5f,%C,%1d,%02d,%03.1f,%03.1f,%C,,,,,",
+        pack->utc.hour, pack->utc.min, pack->utc.sec,
         pack->lat, pack->ns, pack->lon, pack->ew,
         pack->sig, pack->satinuse, pack->HDOP, pack->elv, pack->elv_units);
 }
@@ -443,7 +445,7 @@ int nmea_gen_GPGGA(char *buff, int buff_sz, nmeaGPGGA *pack)
 int nmea_gen_GPRMC(char *buff, int buff_sz, nmeaGPRMC *pack)
 {
     return nmea_printf(buff, buff_sz,
-        "$GPRMC,%02d%02d%02d.%02d,%C,%07.4f,%C,%07.4f,%C,%03.1f,%03.1f,%02d%02d%02d,,,",
+        "$GPRMC,%02d%02d%02d.%02d,%C,%010.5f,%C,%011.5f,%C,%03.1f,%03.1f,%02d%02d%02d,,,",
         pack->utc.hour, pack->utc.min, pack->utc.sec, pack->utc.hsec,
         pack->status, pack->lat, pack->ns, pack->lon, pack->ew,
         pack->speed, pack->direction,
@@ -457,13 +459,13 @@ void nmea_info2GPGGA(const nmeaINFO_of_UAV *info, nmeaGPGGA *pack)
 {
     nmea_zero_GPGGA(pack);
 
-    pack->lat = fabs(info->lat);
+    pack->lat = nmea_degree2ndeg(fabs(info->lat));
     pack->ns = ((info->lat > 0)?'N':'S');
-    pack->lon = fabs(info->lon);
+    pack->lon = nmea_degree2ndeg(fabs(info->lon));
     pack->ew = ((info->lon > 0)?'E':'W');
     pack->sig = 1;
     pack->satinuse = 7;
-    pack->HDOP = 3;
+    pack->HDOP = 1.0;
     pack->elv = info->elv;
 }
 
@@ -474,12 +476,12 @@ void nmea_info2GPRMC(const nmeaINFO_of_UAV *info, nmeaGPRMC *pack)
 {
     nmea_zero_GPRMC(pack);
 
-    pack->status = 'V';
-    pack->lat = fabs(info->lat);
+    pack->status = 'A'; // Active
+    pack->lat = nmea_degree2ndeg(fabs(info->lat));
     pack->ns = ((info->lat > 0)?'N':'S');
-    pack->lon = fabs(info->lon);
+    pack->lon = nmea_degree2ndeg(fabs(info->lon));
     pack->ew = ((info->lon > 0)?'E':'W');
-    pack->speed = info->speed / NMEA_TUD_KNOTS;
+    pack->speed = info->speed * NMEA_MS_TO_KNOTS;
     pack->direction = info->direction;
 }
 
@@ -499,37 +501,38 @@ static void on_Gps(IvyClientPtr app, void *user_data, int argc, char *argv[])
 
   if (argc != 13)
   {
-    fprintf(stderr,"ERROR: ivy2nmea invalid message length FLIGHT_PARAM\n");
+    fprintf(stderr,"ERROR: IVY2NMEA: invalid message length FLIGHT_PARAM\n");
   }
-
-  //if (verbose)
-  //  printf("%s %s\n", argv[3], argv[4]);
 
 /*
   <message name="FLIGHT_PARAM" id="11">
     <field name="ac_id"  type="string"/>
-    <field name="roll"   type="float" unit="deg"/>
-    <field name="pitch"  type="float" unit="deg"/>
-    <field name="heading" type="float" unit="deg"/>
-    <field name="lat"    type="float" unit="deg"/>
-    <field name="long"   type="float" unit="deg"/>
-    <field name="speed"  type="float" unit="m/s"/>
-    <field name="course" type="float" unit="deg" format="%.1f"/>
-    <field name="alt"    type="float" unit="m"/>
-    <field name="climb"  type="float" unit="m/s"/>
-    <field name="agl"    type="float" unit="m"/>
-    <field name="unix_time"    type="float" unit="s (Unix time)"/>
-    <field name="itow"   type="uint32" unit="ms"/>
-    <field name="airspeed" type="float" unit="m/s"/>
+    <field 0 name="roll"   type="float" unit="deg"/>
+    <field 1 name="pitch"  type="float" unit="deg"/>
+    <field 2 name="heading" type="float" unit="deg"/>
+    <field 3 name="lat"    type="float" unit="deg"/>
+    <field 4 name="long"   type="float" unit="deg"/>
+    <field 5 name="speed"  type="float" unit="m/s"/>
+    <field 6 name="course" type="float" unit="deg" format="%.1f"/>
+    <field 7 name="alt"    type="float" unit="m"/>
+    <field 8 name="climb"  type="float" unit="m/s"/>
+    <field 9 name="agl"    type="float" unit="m"/>
+    <field 10 name="unix_time"    type="float" unit="s (Unix time)"/>
+    <field 11 name="itow"   type="uint32" unit="ms"/>
+    <field 12 name="airspeed" type="float" unit="m/s"/>
   </message>
 */
 
   nmeaINFO_of_UAV info;
-  info.direction = atof(argv[6]);
-  info.elv = atof(argv[7]);
+  info.roll = atof(argv[0]);  // deg
+  info.pitch = atof(argv[1]);  // deg
+  info.heading = atof(argv[2]);  // deg
   info.lat = atof(argv[3]);
   info.lon = atof(argv[4]);
   info.speed = atof(argv[5]);
+  info.direction = atof(argv[6]);
+  info.elv = atof(argv[7]);
+  info.agl = atof(argv[9]);
 
   nmeaGPGGA gga;
   nmea_info2GPGGA(&info, &gga);
@@ -589,7 +592,7 @@ void open_port(const char* device)
 {
   fd = open(device, O_RDWR | O_NOCTTY | O_NDELAY);
   if (fd == -1) {
-    fprintf(stderr, "open_port: unable to open device %s - ", device);
+    fprintf(stderr, "ERROR: IVY2NMEA: open_port: unable to open device %s - ", device);
     perror(NULL);
     exit(EXIT_FAILURE);
   }
@@ -617,8 +620,7 @@ void open_port(const char* device)
 
 void write_port(char* buff, int len)
 {
-  printf("%s", buff);
-  //fwrite(buff,1,len,fd);
+  write(fd, buff,len);
 }
 
 /**
@@ -716,6 +718,7 @@ int main ( int argc, char** argv)
   if (!parse_args(argc, argv))
       return 1;
 
+  printf("IVY2NMEA v%s\n",IVY2NMEA_VERSION);
   printf("Listening to AC=%s, NMEA0184 out on = %s\n",ac_id, port);
 
   open_port(port);
