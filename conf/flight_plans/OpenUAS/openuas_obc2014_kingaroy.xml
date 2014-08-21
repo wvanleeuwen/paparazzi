@@ -1,14 +1,24 @@
 <!DOCTYPE flight_plan SYSTEM "../flight_plan.dtd">
 <!-- This is the Flightplan of Team OpenUAS from the Netherlands for use in the
-     Australian UAV Outback Challenge of 2014. Read about this challenge here:
-    http://www.uavoutbackchallenge.com.au/
+     Australian UAV Outback Challenge of 2014. 
+     
+     Read about this challenge here:
+     http://www.uavoutbackchallenge.com.au/
+     
      Thanks to all involved, specifically all the help from CdW, DD, BR, GdC, AvdL
-     TU Delft University of Technology, Aerospace and everyone else who helped out.
+     * TU Delft University of Technology, L&R http://www.tudelft.nl
+     * MAVLab - http://mavlab.info
+     * 1 bit squared http://1bitsquesred.com
+     * everyone else who helped out
 
 TYPE 1 OPERATION Flightplan, fully autonomous in-air joe detection integration
 
 Now with integrated TYPE2 operations option (soon...)
 TYPE 2 OPERATION Flightplan, fully autonomous search, but on ground joe detection integration
+
+STRATEGY: 
+
+# Have one flightplan which does it all, no need to upload anything!
 
 USAGE: 
 
@@ -24,13 +34,16 @@ NOTES:
 # Alert boundaries are different for Scrutineering and SnR Missions
 
 TODO:
-# Later coordinates of KMZ of 20131017
-# TODO: add times to blocks to prefent to early forcecrash. e.,g after 2 second border cannot be crossed, so if triggered don't do it
-# TODO AF-TD dependand on mesured wind direction
+# Latest coordinates of KMZ of 20131017, a 100% validationcheck.
+# TODO: 
+# add times to blocks to prevent to early forcedcrash. e.g after 2 second from tkeof border cannot be crossed in reality, so if triggered do a softcircledown or so
+# or mabye calculate distance and look at airframe REAL max ground speed(with wind in backeve) and deduct time it would take, if within < margin it cannot be missionborder
 # but if scrutineering day, than it can be since we test it closeby mission boundary
-# MUCH better exceptions
+# TODO autonomous calculation AF-TD dependand on measured wind direction
+#
+# add even **better** exceptions
 # A working counter for times a block as called, need torough tests
-##   There is already one counter, for datalink los
+##   There is already one counter, for datalink loss occurence
 ## we need one for if found joe is not withing 100m range 
 # Response of cam pictre if successful of not
 
@@ -47,7 +60,7 @@ TODO:
     #include "autopilot.h"
 //Enable AHRS Health test functions
     #include "subsystems/ahrs.h"
-//Enable advanced power functions 
+//Enable advanced electrical power functions 
     #include "subsystems/electrical.h"
 //Enable extra nav functionality
 <!--
@@ -91,10 +104,10 @@ Now done in modules
 #include "firmwares/fixedwing/guidance/energy_ctrl.h"
 
 //To be able to cound how many times we had a linkloss to interactivly react to commshold block
-static inline uint16_t obcrulesdatalinklosscounter = 0;
-//To be able to cound how many times we had a possible joe found but not approved to interactivly react to come back after 2 times
-//So we can perform an on the ground search in photos
-static inline uint16_t obcrulesjoetimepossiblefoendcounter = 0;
+static inline uint16_t datalinkloss_occurence_counter = 0;
+//To be able to count how many times we had a possible "Outback Joe" found but not approved to interactivly react to come back after two(2) times incorrect
+//Then we can perform an on the ground search in photos and reland to drop bottle (TYPE2 mission stage)
+static inline uint16_t outbackjoe_possibly_found_occurence_counter = 0;
 
 //Needed for the DROP function
 static inline uint16_t G = 9.81;
@@ -312,6 +325,7 @@ OK?
     <!-- not used yet maybe switch it on <exception cond="11.0 > vsupply" deroute="Standby"/> -->
  <!--  is less safe and has less chance of AC recovery. It states battery LOW, not battery critical -->
 <!--  <exception cond="electrical.bat_low && !(nav_block == IndexOfBlock('Setting_home_location')) && !(nav_block == IndexOfBlock('Holding_point') && !(nav_block == IndexOfBlock('Land')))" deroute="Land"/>-->
+<!--<TODO: Add somethin like pre_call="if (!InsideRed(GetPosX(), GetPosY())) NavKillThrottle();-->
   </exceptions>
 
 <!-- *********************************************************************** -->
@@ -444,7 +458,8 @@ best to perform many real life tests with the CAM
 *********** -->
 
     <block name="SearchForJoe">
-      <exception cond="NavPolySurveySweepBackNum >= 1" deroute="ReturnToBase"/> <!-- ? TODO decide to search in reverse again on until battery < volts needed to return home? if nothing found, go back?-->
+    <!--  was NavPolySurveySweepBackNum -->
+      <exception cond="PolySurveySweepBackNum >= 1" deroute="ReturnToBase"/> <!-- ? TODO decide to search in reverse again on until battery < volts needed to return home? if nothing found, go back?-->
       <!-- <exception cond="FoundJoe" deroute="WaitForJugesDropApprovale"/> -->
       <!-- Parameters
       The orientation of the sweeps can ranges from north south to east west and
@@ -454,8 +469,8 @@ best to perform many real life tests with the CAM
        call fun="InitializePolygonSurvey(WP_S1, NumOfCorners, SweepWidth, Orientation)"/> -->
 
        <!-- SweepWidth  max photo with at height - 20 pct overlap 180- etc-->
-      <call fun="NavInitializePolygonSurvey(WP_VIAEL2, 5, 144, 70)"/> <!-- TODO correct angle of how we want to search -->
-      <call fun="NavPolygonSurvey()"/>
+      <call fun="nav_survey_poly_osam_setup(WP_VIAEL2, 5, 144, 70)"/> <!-- TODO correct angle of how we want to search -->
+      <call fun="nav_survey_poly_osam_run()"/>
     </block>
 
 <!--WaitForJugesDropApproval if we do a Type 1 search otherwise it would be approved already Warning then never enter this block -->
@@ -503,31 +518,50 @@ best to perform many real life tests with the CAM
       <!-- <go wp="VIAEL2" hmode="route"/>--> <!-- TODO maybe not needed -->
       <deroute block="drop"/>
     </block>
+    
+ <!--  AS REMINDER 
+ extern unit_t nav_drop_compute_approach( uint8_t wp_target, uint8_t wp_start, float radius );
+extern unit_t nav_drop_update_release( uint8_t wp_target );
+extern unit_t nav_drop_shoot( void );
+extern float nav_drop_trigger_delay, nav_drop_start_qdr;
+extern bool_t compute_alignment(uint8_t w1, uint8_t w2, uint8_t start, uint8_t end, float d_before, float d_after);
+
+#define NavDropComputeApproach(_target, _start, _radius) nav_drop_compute_approach(_target, _start, _radius)
+#define NavDropUpdateRelease(_wp) nav_drop_update_release(_wp)
+#define NavDropShoot() nav_drop_shoot()
+#define NavDropCloseHatch() ({ ap_state->commands[COMMAND_HATCH] = MIN_PPRZ; })
+#define NavDropAligned() Qdr(DegOfRad(nav_drop_qdr_aligned)) -->
+
 
 <!-- *********** Drop Compute Approach *********** -->
     <block name="drop" strip_button="Drop">
- <!-- TODO determine what still success and is fastest value for 100  -->
+ <!-- TODO set Height to minimum height AGL allowed by commitee ?60M -->   
+ <!-- TODO determine what still is success and is fastest value for this 100  -->
       <set var="waypoints[WP_START].x" value="WaypointX(WP_OUTBACKJOE) + 100"/>
       <set var="waypoints[WP_START].y" value="WaypointY(WP_OUTBACKJOE) + 100"/>
 
-      <set value="DropComputeApproach(WP_OUTBACKJOE, WP_START, nav_radius)" var="unit"/>
+      <set value="nav_drop_compute_approach(WP_OUTBACKJOE, WP_START, nav_radius)" var="unit"/><!-- TODO maybe adifferent radius to set than default nav radius, bigger? -->
       <circle radius="nav_radius" until="NavQdrCloseTo(DegOfRad(nav_drop_start_qdr)-15)" wp="BASELEG"/>
     </block>
 
 <!-- *********** Align on release path *********** -->
     <block name="align">
-  <!-- TODO set AIRSPEED_AT_RELEASE-->
-  <!--TODO set HEIGHT to 60m -->
-      <!-- After Payload is released, back via EL3 -->
-      <exception cond="DropUpdateRelease(WP_OUTBACKJOE)" deroute="ExitSearchAreaViaEL3"/>
+ 
+
+ <!-- TODO set AIRSPEED_AT_RELEASE-->
+ <!--TODO set HEIGHT to 60m -->
+    <!-- After Payload is released, back via EL3 -->
+     
+      <exception cond="nav_drop_update_release(WP_OUTBACKJOE)" deroute="ExitSearchAreaViaEL3"/>
       <go approaching_time="nav_drop_trigger_delay" from="START" hmode="route" wp="RELEASE"/>
     </block>
 
 <!-- *********** Release Payload *********** -->
     <block name="shoot">
+    <!-- TODO maybe extend crowbreak 80%? for slowes possible speed? -->
+     <!--   <set value="0" var="ap_state->commands[COMMAND_BRAKE]"/> -->
       <!-- TODO is electrcal plane and almost there maybe stop proppelor from spinning for a few seconds -->
-
-      <set value="DropShoot()" var="unit"/>
+      <set value="nav_drop_shoot()" var="unit"/>
       <!-- TODO add maxspeed again -->
       <go from="RELEASE" hmode="route" wp="EL3"/>
       <!-- Maybe better not to close, more chance of delivery, TODO maybe even add a sensor to detect release if not try again -->
@@ -541,7 +575,7 @@ best to perform many real life tests with the CAM
      ***************************************************** -->
 
 <!-- *********** Initiate landing *********** -->
-<!--TODO better routing iCW wind direction-->
+<!--TODO better routing in combination with calced wind direction-->
     <block name="InitiateLandingApproach">
       <set var="v_ctl_auto_throttle_cruise_throttle" value="V_CTL_AUTO_THROTTLE_NOMINAL_CRUISE_THROTTLE"/><!-- TODO Test and deiscuss the stop dashing speedy flight here in this part of the block -->
     
@@ -585,6 +619,9 @@ then to WP touchdown
     -->
 
     <block name="flare">
+ <!--    <exception cond="NavDetectGround()" deroute="Holding point"/> -->
+<!--  <exception cond="!nav_is_in_flight()" deroute="landed"/> --> <!-- todo maybe global? -->
+<!--  <call fun="NavStartDetectGround()"/> -->
     <!-->  <set value="MAX_PPRZ" var="ap_state->commands[COMMAND_BRAKE]"/> TODO different value maybe-->
       <go approaching_time="0" from="AF" hmode="route" throttle="0.0" vmode="throttle" wp="TD"/>
        <!-- ?make sure manual throttle is still possible in case of manual laning override ?-->
@@ -620,23 +657,21 @@ mode must be activated. A controlled flight termination mode may be
 termination mode (Section 5.6).
 -->
 
-    <block name="CommsHoldLoiter">
-      <!-- TODO: Make te routine correct it is NOT FINISHED YET now -->
-      <!-- Since it arrived we must set a counter, it may not happen more thant twice -->
-     <!--  <set var="obcrulesdatalinklosscounter" value="obcrulesdatalinklosscounter + 1"/> -->
-      <!-- TODO and  obcrulesdatalinklosscounter > 2 -->
-
-<!-- this for SnR -->
-      <!-- TODO if has link again Go EL2 > -->
-      <!-- <exception cond="block_time > 120" deroute="AirfieldHomeLoiter" /> -->
-      <exception cond="stage_time > 120" deroute="AirfieldHomeLoiter"/>
-
+    <block name="CommsHoldLoiter" strip_button="CommsHold" strip_icon="recenter.png">  <!-- TODO other ICON --> 
+      <!-- TODO: maybe set a little lower speed ? max endurence speed? -->
+      <set value="NOMINAL_AIRSPEED" var="v_ctl_auto_airspeed_setpoint"/>
+      <!-- Rules 2014 state a loiter of maximum 2 minutes = 120seconds is allowed -->
+      <exception cond="(stage_time > 120) || (datalinkloss_occurence_counter > 2)" deroute="AirfieldHomeLoiter"/>
+      <!-- resume if datalink is regained-->   
       <!--TODO If the data link is regained prior to the conclusion of 2 minutes of loiter at
       Comms Hold the mission maybe continued otherwise any subsequent  TODO -->
-
+      <exception cond="datalink_time < 10" deroute="EL2"/>      <!-- As soon as we have a link again Go EL2 and continue mission> -->
+      <!-- TODO: better continue where we had our last telemerty still OK point if possible -->
+      <!-- Since it arrived we must raise a counter by one. it's not alowed by rules to occur  more than twice, then we must move to airfieldhome -->
+      <!-- TODO: set only after aircraft **arrived!** in the loiter not before the ETA < 1sec -->
+       <set var="obcrulesdatalinklosscounter" value="obcrulesdatalinklosscounter+1"/>
       <!-- <while no link then -->
-      <!-- exception cond="datalink_time < 10" deroute="EL2" -->
-      <!-- <circle wp="COMMSHOLD" radius="nav_radius"/> -->
+       <circle wp="COMMSHOLD" radius="nav_radius"/> <!-- TODO maybe bigger than default radius -->
     </block>
 
     <block name="AirfieldHomeLoiter">

@@ -112,12 +112,12 @@
     </session>
     <session name="OBC2014 Simulation FG">
       <program name="GCS">
-        <arg flag="-layout" constant="./OpenUAS/openuas_obc2014_kingaroy.xml"/>
+        <arg flag="-layout" constant="./OpenUAS/openuas_obc2014_gcs.xml"/>
         <arg flag="-maps_fill"/>
-        <arg flag="-zoom" constant=".5"/>
-        <arg flag="-track_size" constant="200"/>
         <arg flag="-speech"/>
         <arg flag="-maps_no_http"/>
+        <arg flag="-zoom" constant=".5"/>
+        <arg flag="-track_size" constant="200"/>
       </program>
       <program name="Server">
         <arg flag="-n"/>
@@ -126,11 +126,18 @@
         <arg flag="-a" constant="VivifyMK1"/>
         <arg flag="-t" constant="sim"/>
         <arg flag="--boot"/>
-        <arg flag="--norc"/>
         <arg flag="--fg_host" constant="127.0.0.1"/>
         <arg flag="--fg_time_offset" constant="21600"/>
       </program>
-      <program name="Environment Simulator"/>
+      <program name="Environment Simulator">
+        <arg flag="-t" constant="1"/>
+        <arg flag="-w" constant="1"/>
+        <arg flag="-d" constant="160"/>
+      </program>
+      <program name="Ivy2Nmea">
+        <arg flag="-id" constant="217"/>
+        <arg flag="--port" constant="/dev/ttyS0"/>
+      </program>
     </session>
     <session name="HITL">
       <program name="Hardware in the Loop">
@@ -191,6 +198,10 @@
         <arg flag="-zoom" constant="0.5"/>
       </program>
       <program name="Messages"/>
+      <program name="Ivy2Nmea">
+        <arg flag="--id" constant="217"/>
+        <arg flag="--port" constant="dev/ttyS0"/>
+      </program>
     </session>
   </section>
 </control_panel>
