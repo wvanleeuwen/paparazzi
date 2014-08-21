@@ -665,7 +665,7 @@ termination mode (Section 5.6).
       <!-- resume if datalink is regained-->   
       <!--TODO If the data link is regained prior to the conclusion of 2 minutes of loiter at
       Comms Hold the mission maybe continued otherwise any subsequent  TODO -->
-      <exception cond="datalink_time < 10" deroute="EL2"/>      <!-- As soon as we have a link again Go EL2 and continue mission> -->
+      <exception cond="datalink_time < 10" deroute="TrackToEL2"/>      <!-- As soon as we have a link again Go EL2 and continue mission> -->
       <!-- TODO: better continue where we had our last telemerty still OK point if possible -->
       <!-- Since it arrived we must raise a counter by one. it's not alowed by rules to occur  more than twice, then we must move to airfieldhome -->
       <!-- TODO: set only after aircraft **arrived!** in the loiter not before the ETA < 1sec -->
