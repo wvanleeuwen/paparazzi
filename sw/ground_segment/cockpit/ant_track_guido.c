@@ -55,6 +55,64 @@
 #define MANUAL 0
 #define AUTO 1
 
+#include <sys/types.h>
+#include <fcntl.h>
+#include <termios.h>
+#include <stdio.h>
+#include <string.h>
+#include <sys/termios.h>
+#include <sys/ioctl.h>
+
+#include <caml/mlvalues.h>
+#include <caml/fail.h>
+#include <caml/alloc.h>
+
+static int baudrates[] = { B0, B50, B75, B110, B134, B150, B200, B300, B600, B1200, B1800, B2400, B4800, B9600, B19200, B38400, B57600, B115200, B230400 };
+
+
+/****************************************************************************/
+/* Open serial device for requested protocoll */
+/****************************************************************************/
+int fd; /* File descriptor for the port */
+int c_init_serial()
+{
+  struct termios orig_termios, cur_termios;
+
+  int br = B38400;
+
+  fd = open("/dev/ttyUSB0", O_RDWR|O_NOCTTY|O_NONBLOCK);
+
+  if (fd == -1) printf("opening modem serial device : fd < 0");
+
+  if (tcgetattr(fd, &orig_termios)) printf("getting modem serial device attr");
+  cur_termios = orig_termios;
+
+  /* input modes - turn off input processing */
+  cur_termios.c_iflag &= ~(IGNBRK|BRKINT|IGNPAR|PARMRK|INPCK|ISTRIP|INLCR|IGNCR
+			    |ICRNL |IXON|IXANY|IXOFF|IMAXBEL);
+  /* pas IGNCR sinon il vire les 0x0D */
+  cur_termios.c_iflag |= BRKINT;
+
+  /* output_flags - turn off output processing */
+  cur_termios.c_oflag  &=~(OPOST|ONLCR|OCRNL|ONOCR|ONLRET);
+
+  /* control modes */
+  cur_termios.c_cflag &= ~(CSIZE|CSTOPB|CREAD|PARENB|PARODD|HUPCL|CLOCAL);
+  cur_termios.c_cflag |= CREAD|CS8|CLOCAL;
+  cur_termios.c_cflag &= ~(CRTSCTS);
+
+  /* local modes */
+  cur_termios.c_lflag &= ~(ISIG|ICANON|IEXTEN|ECHO|FLUSHO|PENDIN);
+  cur_termios.c_lflag |= NOFLSH;
+
+  if (cfsetspeed(&cur_termios, br)) printf("setting modem serial device speed");
+
+  if (tcsetattr(fd, TCSADRAIN, &cur_termios)) printf("setting modem serial device attr");
+
+  return (fd);
+}
+
+
 
 struct pprz_servo_msg_struct
 {
@@ -87,7 +145,6 @@ static char servo_acceleration = 3;
 static char psi_servo_address = 1;
 static char theta_servo_address = 0;
 
-int fd; /* File descriptor for the port */
 volatile int serial_error = 0;
 
 double hfov = 180., vfov = 180.;
@@ -102,12 +159,8 @@ GtkWidget *elev_scale;
 
 void on_mode_changed(GtkRadioButton *radiobutton, gpointer user_data) {
 
-
   mode = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(radiobutton)) ? MANUAL : AUTO;
 
-
-	//IvySendMsg("1ME RAW_DATALINK 80 SETTING;0;0;%d", mode);
-	//g_message("Mode changed to %d" , mode);
 }
 
 void on_azimuth_changed(GtkAdjustment *hscale, gpointer user_data) {
@@ -117,8 +170,6 @@ if (mode == MANUAL) {
    ant_elev = gtk_range_get_value(GTK_RANGE (elev_scale));
    set_servos();
    }
-	//IvySendMsg("1ME RAW_DATALINK 80 SETTING;0;0;%d", mode);
-	//g_message("Mode changed to %d" , mode);
 }
 
 //void on_elevation_changed(GtkRange *elev_scale, gpointer user_data) {
@@ -129,10 +180,6 @@ if (mode == MANUAL) {
    ant_elev = gtk_range_get_value(GTK_RANGE (elev_scale));
    set_servos();
  }
-
-
-	//IvySendMsg("1ME RAW_DATALINK 80 SETTING;0;0;%d", mode);
-	//g_message("Mode changed to %d" , mode);
 }
 
 
@@ -269,8 +316,8 @@ GtkWidget* build_gui(void) {
 void set_servos(void)
 {
 
-double hpos, vpos;
-int hservo = theta_servo_center_pw, vservo = psi_servo_center_pw;
+        double hpos, vpos;
+        int hservo = theta_servo_center_pw, vservo = psi_servo_center_pw;
 
 	// The magic is done here
 
@@ -346,14 +393,6 @@ int hservo = theta_servo_center_pw, vservo = psi_servo_center_pw;
 
                    hservo = ant_azim / 180 * 8196;  //The pololu Maestro uses 0.25 microsecond increments so we need to multiply microseconds by 4.
 		vservo = (ant_elev -40) / 50 * 8196; //The pololu Maestro uses 0.25 microsecond increments so we need to multiply microseconds by 4.
-	//g_message("home_alt %f gps_alt %f azim %f elev %f", home_alt, gps_alt, ant_azim, ant_elev);
-
-	// Send servo position.
-	/*char buffer1[]={ POLOLU_PROTOCOL_START, pololu_board_id, SET_SERVO_POSITION_COMMAND, psi_servo_address, vservo%128, vservo/128,
-						 POLOLU_PROTOCOL_START, pololu_board_id, SET_SERVO_POSITION_COMMAND, theta_servo_address, hservo%128, hservo/128*/
-		//			   };
-
-	//serial_error = write(fd, buffer1, 12);
 
 	g_message("vservo %i hservo %i", (int)(vservo), (int)(hservo)); //Divide by 4 so we can have the servo PW with 1 microsecond resolution.
 
@@ -407,53 +446,23 @@ int open_port(char* port ) {
 	struct termios options;
 
 	// would probably be good to set the port up as an arg.
-		// The Pololu micro maestro registers two ports /dev/ttyACM0 and /dev/ttyACM1, /dev/ttyACM0 is the data port.
+	// The Pololu micro maestro registers two ports /dev/ttyACM0 and /dev/ttyACM1, /dev/ttyACM0 is the data port.
 	fd = open(port, O_RDWR | O_NOCTTY | O_NDELAY);
 	if (fd == -1) {
 		//perror("open_port: Unable to open /dev/ttyUSB1");
-				printf ("open_port: Unable to open %s \n", port);
-				serial_error = fd;
-
+	        printf ("open_port: Unable to open %s \n", port);
+	        serial_error = fd;
 	} else
-				printf("Success %s %s \n", port, "opened");
+		printf("Success %s %s \n", port, "opened");
 		fcntl(fd, F_SETFL, 0);
 
 	tcgetattr(fd, &options);
-
-	// Set the baud rates to 19200. This can be between 2,000 to 40,000
 
 	cfsetispeed(&options, B38400);
 	cfsetospeed(&options, B38400);
 
 	options.c_cflag |= (CLOCAL | CREAD);
 
-	/*tcsetattr(fd, TCSANOW, &options);
-
-	// Send initialisation to the pololu micro maestro board.
-	// if "speed" is nonzero then 1 is the slowest 127 is the fastest. 0 = no speed restriction
-	char buffer_0[] = { POLOLU_PROTOCOL_START, pololu_board_id, SET_SERVO_SPEED_COMMAND, psi_servo_address, 0x00, 0x00,
-				POLOLU_PROTOCOL_START, pololu_board_id, SET_SERVO_SPEED_COMMAND, theta_servo_address, 0x00, 0x00
-						  };
-
-	serial_error = write(fd, buffer_0, 12);
-	// Set servo acceleration to 3 for protecting the servo gears. Fastest = 0, slowest = 255
-	char buffer_1[] = { POLOLU_PROTOCOL_START, pololu_board_id, SET_SERVO_ACCELERATION_COMMAND, psi_servo_address, (servo_acceleration%128),
-							(servo_acceleration/128),
-						POLOLU_PROTOCOL_START, pololu_board_id, SET_SERVO_ACCELERATION_COMMAND, theta_servo_address, (servo_acceleration%128),
-							(servo_acceleration/128)
-						  };
-
-	serial_error = write(fd, buffer_1, 12);
-		// Set the two servos to their neutral position, Azimuth = 1500us = EAST = 0 degrees & Elevation = 1000 = parallel to ground.
-	char buffer_2[] = { POLOLU_PROTOCOL_START, pololu_board_id, SET_SERVO_POSITION_COMMAND, theta_servo_address,
-							(((int)theta_servo_center_pw*4) % 128), (((int)theta_servo_center_pw*4) / 128),
-						POLOLU_PROTOCOL_START, pololu_board_id, SET_SERVO_POSITION_COMMAND, psi_servo_address,
-							(((int)psi_servo_center_pw*4) % 128), (((int)psi_servo_center_pw*4) / 128)
-						  };
-
-	serial_error = write(fd, buffer_2, 12);
-
-*/
 	return (fd);
 }
 
@@ -461,285 +470,24 @@ int main(int argc, char** argv) {
 
 	gtk_init(&argc, &argv);
 
+        int x = 0, y = 0, z = 0;
+        char buffer[20];
+        char serial_open = 0;
+        printf ("Antenna Tracker for the Paparazzi autopilot, Chris Efstathiou 2010 \n");
 
-		int x = 0, y = 0, z = 0;
-		char buffer[20];
-		char serial_open = 0;
-		printf ("Antenna Tracker for the Paparazzi autopilot, Chris Efstathiou 2010 \n");
-
-		if(serial_open == 0){ printf ("Trying to open /dev/ttyUSB1 \n");  open_port("/dev/ttyUSB1"); }
-
-	        //}
-        //        return 0;
-
-		if (argc > 1){
-			char arg_string1[] = "--help";
-			for (x=1; x < argc; x++){
-			   if ( (strncmp(argv[x], arg_string1, (sizeof(arg_string1)-1))) == 0 ){
-				  printf ("OPTIONS \n");
-				  printf ("-------------------------------------------------------------------------------- \n");
-				  printf ("'--help' displays this screen \n");
-				  printf ("'--port=xxx..x' opens port xxx..x, example --port=/dev/ttyACM0 (Default) \n");
-				  printf ("'--pan=xxx' sets pan mode to 180 or 360 degrees. Example --pan=180 (Default) \n");
-				  printf ("'--zero_angle=xxx' set the mechanical zero angle. Default is 0 (North)\n");
-				  printf ("'--id=xx' sets the Pololu board id. Example --id=12 (Default)\n");
-				  printf ("'--servo_acc=xxx' sets the servo acceleration. Example --servo_acc=3 (Default)\n");
-				  printf ("'--pan_servo=x' sets the pan (Theta) servo number. Example --pan_servo=0 (Default)\n");
-				  printf ("'--tilt_servo=x' sets the tilt (Psi) servo number.Example --tilt_servo=1 (Default) \n");
-				  printf ("'--pan_epa=xx..x' sets the Azimuth servo's max travel (Default is 1100us) \n");
-				  printf ("'--tilt_epa=xx..x' sets the elevation servo's max travel (Default is 1100us). \n");
-				  printf ("HINT a negative value EPA value reverses the servo direction \n");
-				  printf ("'--pan_servo_center_pw=xx..x' sets the Azimuth servo's center position (Default is 1500us) \n");
-				  printf ("'--tilt_servo_center_pw=xx..x' sets the elevation servo's center position (Default is 1500us) \n");
-				  printf ("WARNING: The pololu board limit servo travel to 1000-2000 microseconds. \n");
-				  printf ("WARNING: Use the pololu board setup program to change the above limits. \n");
-				  printf ("Example --tilt_epa=1100 sets the PW from 950 to 2050 microseconds \n");
-				  printf ("Example --pan_epa=-1000 sets the PW from 1000 to 2000 microseconds and reverses the servo direction \n");
-				  printf ("An EPA of 1100 sets the servo travel from 1500+(1100/2)=2050us to 1500-(1100/2)=950us. \n");
-				  printf ("Use programmable servos like the Hyperion Atlas. \n");
-				  printf ("You can also use the proportional 360 degree GWS S125-1T as the Theta (Azimuth) \n");
-				  printf ("servo or the mighty but expensive Futaba S5801 \n");
-				  printf (" \n");
-				  printf ("FOR THE 360 DEGREE PAN MODE: \n");
-				  printf ("Mechanical zero (0 degrees or 1500 ms) is to the NORTH, 90 = EAST, +-180 = SOUTH and -90 = WEST. \n");
-				  printf ("Elevation center is 45 degrees up (1500ms), 0 degrees = horizontal, 90 degrees is vertical (up) \n");
-				  printf ("Of course use this mode if your PAN servo can do a full 360 degrees rotation (GWS S125-1T for example) \n");
-				  printf (" \n");
-				  printf ("FOR THE 180 DEGREE PAN MODE: \n");
-				  printf ("Mechanical zero (0 degrees or 1500 ms) is to the NORTH, 90 = EAST, -90 = WEST. \n");
-				  printf ("Elevation center is 90 degrees up (1500ms), 0 degrees = horizontal, 180 degrees is horizontal to the opposite side \n");
-				  printf ("When the azimuth is > 90 or < -90 the azimuth and elevation servos swap sides to obtain the full 360 degree coverage. \n");
-				  printf ("Of course your PAN and TILT servos must be true 180 degrees servos like the Hyperion ATLAS servos for example. \n");
-				  printf (" \n");
-				  printf ("-------------------------------------------------------------------------------- \n");
-				  printf ("Antenna Tracker V1.2 for the Paparazzi autopilot 28/June/2010 \n");
-				  printf ("-------------------------------------------------------------------------------- \n");
-				  return 0;
-			   }
-			}
-		   printf ("Type '--help' for help \n");
-/*
-		   for(z=0; z < sizeof(buffer); z++){ buffer[z] = '\0'; } //Reset the buffer.
-		   char arg_string2[] = "--port=";
-		   for (x=1; x < argc; x++){
-
-			   if ( (strncmp(argv[x], arg_string2, (sizeof(arg_string2)-1))) == 0 ){
-				  y=sizeof(arg_string2)-1;
-				  z=0;
-				  while (1){
-						buffer[z] = argv[x][y];
-					   if(buffer[z] != '\0'){ y++; z++; }else{ break; }
-				  }
-				  printf ("Trying to open %s \n", buffer);
-				  open_port(buffer);
-			   }
-		   }
-		   for(z=0; z<sizeof(buffer); z++){ buffer[z] = '\0'; } //Reset the buffer.
-		   char arg_string3[] = "--pan=";
-		   for (x=1; x < argc; x++){
-			   if ( (strncmp(argv[x], arg_string3, (sizeof(arg_string3)-1))) == 0 ){
-				  y=(sizeof(arg_string3)-1);
-				  z=0;
-				  while (1){
-						buffer[z] = argv[x][y];
-						if(buffer[z] != '\0'){ y++; z++; }else{ break; }
-				  }
-				  ant_tracker_pan_mode = atoi(buffer);
-				  if (ant_tracker_pan_mode == 180 || ant_tracker_pan_mode == 360){
-					 printf ("PAN mode set to %i %s \n", ant_tracker_pan_mode, "degrees");
-					 if(ant_tracker_pan_mode == 360){ hfov = 360; vfov = 90; }else{ hfov = 180; vfov = 180; }
-
-				  }else{
-						  perror("ERROR: Pan mode can be either 180 or 360 degrees");
-						  ant_tracker_pan_mode = 180;
-						  hfov = 180;
-						  vfov = 180;
-						  printf ("PAN servo set to %i %s \n", ant_tracker_pan_mode, "degrees");
-					  }
-			   }
-		   }
-
-			  for(z=0; z < sizeof(buffer); z++){ buffer[z] = '\0'; } //Reset the buffer.
-			  char arg_string4[] = "--pan_epa=";
-			  for (x=1; x < argc; x++){
-				  if ( (strncmp(argv[x], arg_string4, (sizeof(arg_string4)-1))) == 0 ){
-					 y=(sizeof(arg_string4)-1);
-					 z=0;
-					 while (1){
-						   buffer[z] = argv[x][y];
-						   if(buffer[z] != '\0'){ y++; z++; }else{ break; }
-					 }
-					 theta_servo_pw_span = atoi(buffer);
-					 printf ("THETA servo EPA set to  %i \n", atoi(buffer));
-					 if (abs(theta_servo_pw_span) > 1000){
-						printf ("REMEMBER TO SET THE MIN/MAX SERVO LIMITS WITH THE POLOLU SETUP PROGRAM \n");
-						printf ("OTHERWISE THE MAX SERVO MOVEMENT WILL BE RESTRAINED TO 1000 MICROSECONDS \n");
-					 }
-				  }
-			  }
-
-			  for(z=0; z < sizeof(buffer); z++){ buffer[z] = '\0'; } //Reset the buffer.
-			  char arg_string5[] = "--tilt_epa=";
-			  for (x=1; x < argc; x++){
-				  if ( (strncmp(argv[x], arg_string5, (sizeof(arg_string5)-1))) == 0 ){
-					 y=(sizeof(arg_string5)-1);
-					 z=0;
-					 while (1){
-						   buffer[z] = argv[x][y];
-						   if(buffer[z] != '\0'){ y++; z++; }else{ break; }
-					 }
-					 psi_servo_pw_span = atoi(buffer);
-					 printf ("PSI servo EPA set to  %i \n", atoi(buffer));
-					 if (abs(psi_servo_pw_span) > 1000){
-						printf ("REMEMBER TO SET THE MIN/MAX SERVO LIMITS WITH THE POLOLU SETUP PROGRAM \n");
-						printf ("OTHERWISE THE MAX SERVO MOVEMENT WILL BE RESTRAINED TO 1000 MICROSECONDS \n");
-					 }
-				  }
-			   }
-			  for(z=0; z < sizeof(buffer); z++){ buffer[z] = '\0'; } //Reset the buffer.
-			  char arg_string8[] = "--id=";
-			  for (x=1; x < argc; x++){
-				  if ( (strncmp(argv[x], arg_string8, (sizeof(arg_string8)-1))) == 0 ){
-					 y=(sizeof(arg_string8)-1);
-					 z=0;
-					 while (1){
-						   buffer[z] = argv[x][y];
-						   if(buffer[z] != '\0'){ y++; z++; }else{ break; }
-					 }
-					 pololu_board_id = (char)atoi(buffer);
-					 printf ("Pololu Board id set to  %i \n", atoi(buffer));
-				  }
-			   }
-			  for(z=0; z < sizeof(buffer); z++){ buffer[z] = '\0'; } //Reset the buffer.
-			  char arg_string9[] = "--servo_acc=";
-			  for (x=1; x < argc; x++){
-				  if ( (strncmp(argv[x], arg_string9, (sizeof(arg_string9)-1))) == 0 ){
-					 y=(sizeof(arg_string9)-1);
-					 z=0;
-					 while (1){
-						   buffer[z] = argv[x][y];
-						   if(buffer[z] != '\0'){ y++; z++; }else{ break; }
-					 }
-					 servo_acceleration = (char)atoi(buffer);
-					 printf ("Servo acceleration set to  %i \n", atoi(buffer));
-				  }
-			   }
-		   for(z=0; z < sizeof(buffer); z++){ buffer[z] = '\0'; } //Reset the buffer.
-		   char arg_string10[] = "--pan_servo=";
-		   for (x=1; x < argc; x++){
-			   if ( (strncmp(argv[x], arg_string10, (sizeof(arg_string10)-1))) == 0 ){
-				  y=(sizeof(arg_string10)-1);
-				  z=0;
-				  while (1){
-						buffer[z] = argv[x][y];
-						if(buffer[z] != '\0'){ y++; z++; }else{ break; }
-				  }
-				  theta_servo_address = (char)atoi(buffer);
-				  printf ("Pan (Theta) servo number set to  %i \n", atoi(buffer));
-			   }
-		   }
-
-		   for(z=0; z < sizeof(buffer); z++){ buffer[z] = '\0'; } //Reset the buffer.
-		   char arg_string11[] = "--tilt_servo=";
-		   for (x=1; x < argc; x++){
-			   if ( (strncmp(argv[x], arg_string11, (sizeof(arg_string11)-1))) == 0 ){
-				  y=(sizeof(arg_string11)-1);
-				  z=0;
-				  while (1){
-						buffer[z] = argv[x][y];
-						if(buffer[z] != '\0'){ y++; z++; }else{ break; }
-				  }
-				  psi_servo_address = (char)atoi(buffer);
-				  printf ("Tilt (Psi) servo number set to  %i \n", atoi(buffer));
-			   }
-		   }
-
-		   for(z=0; z < sizeof(buffer); z++){ buffer[z] = '\0'; } //Reset the buffer.
-		   char arg_string12[] = "--zero_angle=";
-		   for (x=1; x < argc; x++){
-			   if ( (strncmp(argv[x], arg_string12, (sizeof(arg_string12)-1))) == 0 ){
-				  y=(sizeof(arg_string12)-1);
-				  z=0;
-				  while (1){
-						buffer[z] = argv[x][y];
-						if(buffer[z] != '\0'){ y++; z++; }else{ break; }
-				  }
-				  hnp = (double)atoi(buffer);
-				  printf ("Zero angle is set to %i %s \n", atoi(buffer), "degrees");
-			   }
-		   }
-		   for(z=0; z < sizeof(buffer); z++){ buffer[z] = '\0'; } //Reset the buffer.
-		   char arg_string13[] = "--tilt_servo_center_pw=";
-		   for (x=1; x < argc; x++){
-			   if ( (strncmp(argv[x], arg_string13, (sizeof(arg_string13)-1))) == 0 ){
-				  y=(sizeof(arg_string13)-1);
-				  z=0;
-				  while (1){
-						buffer[z] = argv[x][y];
-						if(buffer[z] != '\0'){ y++; z++; }else{ break; }
-				  }
-				  psi_servo_center_pw = atoi(buffer);
-				  printf ("PSI servo center pulse width set to  %i \n", atoi(buffer));
-			   }
-		   }
-		   for(z=0; z < sizeof(buffer); z++){ buffer[z] = '\0'; } //Reset the buffer.
-		   char arg_string14[] = "--pan_servo_center_pw=";
-		   for (x=1; x < argc; x++){
-			   if ( (strncmp(argv[x], arg_string14, (sizeof(arg_string14)-1))) == 0 ){
-				  y=(sizeof(arg_string14)-1);
-				  z=0;
-				  while (1){
-						buffer[z] = argv[x][y];
-						if(buffer[z] != '\0'){ y++; z++; }else{ break; }
-				  }
-				  theta_servo_center_pw = atoi(buffer);
-				  printf ("THETA servo center pulse width set to  %i \n", atoi(buffer));
-			   }
-		   }
-		   for(z=0; z<sizeof(buffer); z++){ buffer[z] = '\0'; } //Reset the buffer.
-		   char arg_string15[] = "--hfov=";
-		   for (x=1; x < argc; x++){
-			   if ( (strncmp(argv[x], arg_string15, (sizeof(arg_string15)-1))) == 0 ){
-				  y=(sizeof(arg_string15)-1);
-				  z=0;
-				  while (1){
-						buffer[z] = argv[x][y];
-						if(buffer[z] != '\0'){ y++; z++; }else{ break; }
-				  }
-				  hfov = atoi(buffer);
-				  printf ("Horizontal field of view set to %i %s \n", (int)hfov, "degrees");
-			   }
-		   }
-		   for(z=0; z<sizeof(buffer); z++){ buffer[z] = '\0'; } //Reset the buffer.
-		   char arg_string16[] = "--vfov=";
-		   for (x=1; x < argc; x++){
-			   if ( (strncmp(argv[x], arg_string16, (sizeof(arg_string16)-1))) == 0 ){
-				  y=(sizeof(arg_string16)-1);
-				  z=0;
-				  while (1){
-						buffer[z] = argv[x][y];
-						if(buffer[z] != '\0'){ y++; z++; }else{ break; }
-				  }
-				  vfov = atoi(buffer);
-				  printf ("Vertical field of view set to %i %s \n", (int)vfov, "degrees");
-			   }
-		   }*/
-		}
-
-		//if(serial_open == 0){ printf ("Trying to open /dev/ttyUSB1 \n");  open_port("/dev/ttyUSB1"); }
+        if(serial_open == 0){ printf ("Trying to open /dev/ttyUSB0 \n");  c_init_serial(); }
 
 	GtkWidget* window = build_gui();
 	gtk_widget_show_all(window);
 
-		if (mode == MANUAL) {
-		   ant_azim = gtk_range_get_value(GTK_RANGE (azim_scale));
-		   ant_elev = gtk_range_get_value(GTK_RANGE (elev_scale));
-		   set_servos();
-		}
+	if (mode == MANUAL) {
+	   ant_azim = gtk_range_get_value(GTK_RANGE (azim_scale));
+	   ant_elev = gtk_range_get_value(GTK_RANGE (elev_scale));
+	   set_servos();
+	}
 
-//	struct pprz_servo_msg_struct servos = { 80,80,80,80,80,80 };
-
-        //ubxSend(100, 5, &servos);
+	struct pprz_servo_msg_struct servos = { 0,0,0,0,0,0 };
+        ubxSend(100, 5, &servos);
 
 	IvyInit("AntennaTracker", "AntennaTracker READY", NULL, NULL, NULL, NULL);
 	IvyBindMsg(
@@ -771,7 +519,8 @@ void ubxSend(unsigned int cls, unsigned int id, struct pprz_servo_msg_struct * s
 
 		memcpy(h+6,(char*)s,sizeof(struct pprz_servo_msg_struct));
 
-		unsigned char CK_A = 0, CK_B = 0;
+		unsigned char CK_A = 0;
+                unsigned char CK_B = 0;
 		int i;
 		for(i=2;i<(sizeof(struct pprz_servo_msg_struct)+6);i++)
 		{
@@ -784,6 +533,7 @@ void ubxSend(unsigned int cls, unsigned int id, struct pprz_servo_msg_struct * s
 
 		for (i=0;i<20;i++)
 		  printf("%X ", h[i]);
+                printf("\n");
 
 		write(fd, (char*)h, sizeof(struct pprz_servo_msg_struct)+8);
 		return;
@@ -794,3 +544,6 @@ void ubxSend(unsigned int cls, unsigned int id, struct pprz_servo_msg_struct * s
 		return;
 	}
 }
+
+
+
