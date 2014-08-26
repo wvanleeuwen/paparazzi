@@ -1,5 +1,17 @@
-Paparazzi UAS
+OpenUAS
 =============
+
+Sparse checkout
+
+mkdir myrepo
+cd myrepo
+git init
+git config core.sparseCheckout true
+git remote add -f origin git://...
+echo path/to/subdir/*> .git/info/sparse-checkout
+git checkout [branchname]
+
+
 
 Paparazzi is an attempt to develop a free software Unmanned (Air) Vehicle System.
  As of today the system is being used successfuly by a number of hobyists, universities and companies all over the world, on vehicle of various size ( 100g to 25Kg ) and of various nature ( fixed wing, rotorcrafts, boats and surface vehicles).
