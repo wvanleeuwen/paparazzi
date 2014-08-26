@@ -3,13 +3,13 @@ OpenUAS
 
 Sparse checkout
 
-mkdir myrepo
-cd myrepo
-git init
-git config core.sparseCheckout true
-git remote add -f origin git://...
-echo path/to/subdir/*> .git/info/sparse-checkout
-git checkout [branchname]
+    mkdir myrepo
+    cd myrepo 
+    git init
+    git config core.sparseCheckout true
+    git remote add -f origin git://...
+    echo path/to/subdir/*> .git/info/sparse-checkout
+    git checkout [branchname]
 
 
 
