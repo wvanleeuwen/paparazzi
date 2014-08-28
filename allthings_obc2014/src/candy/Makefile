@@ -2,4 +2,4 @@
 
 
 all:
-	gcc -static serial.c hello.c -o hello
+	gcc -static serial.c candy.c -o candy
