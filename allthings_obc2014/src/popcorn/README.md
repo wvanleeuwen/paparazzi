@@ -1,1 +1,5 @@
-Purely Onboard Photo Collecting Open Resident Nucleus, POPCORN the trusty onboard image collecting application
+# POPCORN
+
+**P** urely  **O** nboard  **P** hoto  **C** ollecting  **O** pen **R** esident **N** ucleus
+
+The trusty onboard image collecting application
