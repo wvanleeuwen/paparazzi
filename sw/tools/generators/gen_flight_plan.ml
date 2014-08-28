@@ -118,12 +118,21 @@ let print_waypoint = fun default_alt waypoint ->
   check_altitude (float_of_string alt) waypoint;
   printf " {%.1f, %.1f, %s},\\\n" x y alt
 
+let print_waypoint_enu = fun utm0 default_alt waypoint ->
+  let (x, y) = (float_attrib waypoint "x", float_attrib waypoint "y")
+  and alt = try sof (float_attrib waypoint "height" +. !ground_alt) with _ -> default_alt in
+  let alt = try Xml.attrib waypoint "alt" with _ -> alt in
+  let ecef0 = Latlong.ecef_of_geo Latlong.WGS84 (Latlong.of_utm Latlong.WGS84 utm0) !ground_alt in
+  let ecef = Latlong.ecef_of_geo Latlong.WGS84 (Latlong.of_utm Latlong.WGS84 (Latlong.utm_add utm0 (x, y))) (float_of_string alt) in
+  let ned = Latlong.array_of_ned (Latlong.ned_of_ecef ecef0 ecef) in
+  printf " {%.2f, %.2f, %.2f}, /* ENU in meters  */ \\\n" ned.(1) ned.(0) (-.ned.(2))
+
 let convert_angle = fun rad -> Int64.of_float (1e7 *. (Rad>>Deg)rad)
 
 let print_waypoint_lla = fun utm0 default_alt waypoint ->
-  let x = float_attrib waypoint "x"
-  and y = float_attrib waypoint "y"
-  and alt = try Xml.attrib waypoint "alt" with _ -> default_alt in
+  let (x, y) = (float_attrib waypoint "x", float_attrib waypoint "y")
+  and alt = try sof (float_attrib waypoint "height" +. !ground_alt) with _ -> default_alt in
+  let alt = try Xml.attrib waypoint "alt" with _ -> alt in
   let wgs84 = Latlong.of_utm Latlong.WGS84 (Latlong.utm_add utm0 (x, y)) in
   printf " {%Ld, %Ld, %.0f}, /* 1e7deg, 1e7deg, cm (hmsl=%.2fm) */ \\\n" (convert_angle wgs84.posn_lat) (convert_angle wgs84.posn_long) (100. *. float_of_string alt) (Egm96.of_wgs84 wgs84)
 
@@ -800,6 +809,9 @@ let () =
 
       Xml2h.define "WAYPOINTS" "{ \\";
       List.iter (print_waypoint alt) waypoints;
+      lprintf "};\n";
+      Xml2h.define "WAYPOINTS_ENU" "{ \\";
+      List.iter (print_waypoint_enu utm0 alt) waypoints;
       lprintf "};\n";
       Xml2h.define "WAYPOINTS_LLA" "{ \\";
       List.iter (print_waypoint_lla utm0 alt) waypoints;

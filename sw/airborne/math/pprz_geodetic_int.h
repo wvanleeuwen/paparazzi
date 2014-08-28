@@ -52,8 +52,8 @@ struct EcefCoor_i {
  * @brief vector in Latitude, Longitude and Altitude
  */
 struct LlaCoor_i {
-  int32_t lon; ///< in radians*1e7
-  int32_t lat; ///< in radians*1e7
+  int32_t lon; ///< in degrees*1e7
+  int32_t lat; ///< in degrees*1e7
   int32_t alt; ///< in millimeters above WGS84 reference ellipsoid
 };
 
@@ -125,6 +125,8 @@ extern void ecef_of_ned_vect_i(struct EcefCoor_i* ecef, struct LtpDef_i* def, st
 #define M_OF_MM(_mm) ((_mm)/1e3)
 #define EM7RAD_OF_RAD(_r) ((_r)*1e7)
 #define RAD_OF_EM7RAD(_r) ((_r)/1e7)
+#define EM7DEG_OF_RAD(_r) (DegOfRad(_r)*1e7)
+#define RAD_OF_EM7DEG(_r) (RadOfDeg(_r)/1e7)
 
 #define HIGH_RES_TRIG_FRAC  20
 
@@ -150,18 +152,28 @@ extern void ecef_of_ned_vect_i(struct EcefCoor_i* ecef, struct LtpDef_i* def, st
     (_o).z = (float)M_OF_CM((_i).z);          \
   }
 
+#define ECEF_DOUBLE_OF_BFP(_o, _i) {           \
+    (_o).x = (double)M_OF_CM((_i).x);          \
+    (_o).y = (double)M_OF_CM((_i).y);          \
+    (_o).z = (double)M_OF_CM((_i).z);          \
+  }
 #define LLA_BFP_OF_REAL(_o, _i) {                \
-    (_o).lat = (int32_t)EM7RAD_OF_RAD((_i).lat); \
-    (_o).lon = (int32_t)EM7RAD_OF_RAD((_i).lon); \
+    (_o).lat = (int32_t)EM7DEG_OF_RAD((_i).lat); \
+    (_o).lon = (int32_t)EM7DEG_OF_RAD((_i).lon); \
     (_o).alt = (int32_t)MM_OF_M((_i).alt);       \
   }
 
-#define LLA_FLOAT_OF_BFP(_o, _i) {                   \
-    (_o).lat = (float)RAD_OF_EM7RAD((_i).lat);    \
-    (_o).lon = (float)RAD_OF_EM7RAD((_i).lon);    \
-    (_o).alt = (float)M_OF_MM((_i).alt);          \
+#define LLA_FLOAT_OF_BFP(_o, _i) {                \
+    (_o).lat = RAD_OF_EM7DEG((float)(_i).lat);   \
+    (_o).lon = RAD_OF_EM7DEG((float)(_i).lon);   \
+    (_o).alt = M_OF_MM((float)(_i).alt);   \
   }
 
+#define LLA_DOUBLE_OF_BFP(_o, _i) {                \
+    (_o).lat = RAD_OF_EM7DEG((double)(_i).lat); \
+    (_o).lon = RAD_OF_EM7DEG((double)(_i).lon); \
+    (_o).alt = M_OF_MM((double)(_i).alt);       \
+  }
 #define NED_BFP_OF_REAL(_o, _i) {       \
     (_o).x = POS_BFP_OF_REAL((_i).x);   \
     (_o).y = POS_BFP_OF_REAL((_i).y);   \
@@ -207,6 +219,18 @@ extern void ecef_of_ned_vect_i(struct EcefCoor_i* ecef, struct LtpDef_i* def, st
     (_ef).m[6] = FLOAT_OF_BFP((_ei).m[6], HIGH_RES_TRIG_FRAC); \
     (_ef).m[7] = FLOAT_OF_BFP((_ei).m[7], HIGH_RES_TRIG_FRAC); \
     (_ef).m[8] = FLOAT_OF_BFP((_ei).m[8], HIGH_RES_TRIG_FRAC); \
+  }
+
+#define HIGH_RES_RMAT_DOUBLE_OF_BFP(_ef, _ei) {                 \
+    (_ef).m[0] = DOUBLE_OF_BFP((_ei).m[0], HIGH_RES_TRIG_FRAC); \
+    (_ef).m[1] = DOUBLE_OF_BFP((_ei).m[1], HIGH_RES_TRIG_FRAC); \
+    (_ef).m[2] = DOUBLE_OF_BFP((_ei).m[2], HIGH_RES_TRIG_FRAC); \
+    (_ef).m[3] = DOUBLE_OF_BFP((_ei).m[3], HIGH_RES_TRIG_FRAC); \
+    (_ef).m[4] = DOUBLE_OF_BFP((_ei).m[4], HIGH_RES_TRIG_FRAC); \
+    (_ef).m[5] = DOUBLE_OF_BFP((_ei).m[5], HIGH_RES_TRIG_FRAC); \
+    (_ef).m[6] = DOUBLE_OF_BFP((_ei).m[6], HIGH_RES_TRIG_FRAC); \
+    (_ef).m[7] = DOUBLE_OF_BFP((_ei).m[7], HIGH_RES_TRIG_FRAC); \
+    (_ef).m[8] = DOUBLE_OF_BFP((_ei).m[8], HIGH_RES_TRIG_FRAC); \
   }
 
 #endif /* PPRZ_GEODETIC_INT_H */

@@ -1,6 +1,7 @@
-OpenUAS
+Paparazzi UAS
 =============
 
+[![Build Status](https://travis-ci.org/paparazzi/paparazzi.png?branch=master)](https://travis-ci.org/paparazzi/paparazzi)
 Sparse checkout
 
     mkdir myrepo
