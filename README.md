@@ -2,15 +2,6 @@ Paparazzi UAS
 =============
 
 [![Build Status](https://travis-ci.org/paparazzi/paparazzi.png?branch=master)](https://travis-ci.org/paparazzi/paparazzi)
-Sparse checkout
-
-    mkdir myrepo
-    cd myrepo 
-    git init
-    git config core.sparseCheckout true
-    git remote add -f origin git://...
-    echo path/to/subdir/*> .git/info/sparse-checkout
-    git checkout [branchname]
 
 
 
