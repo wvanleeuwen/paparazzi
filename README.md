@@ -1,7 +1,7 @@
 Paparazzi UAS
 =============
 
-[![Build Status](https://travis-ci.org/paparazzi/paparazzi.png?branch=master)](https://travis-ci.org/paparazzi/paparazzi)
+[![Build Status](https://travis-ci.org/paparazzi/paparazzi.png?branch=v5.2)](https://travis-ci.org/paparazzi/paparazzi)
 
 
 

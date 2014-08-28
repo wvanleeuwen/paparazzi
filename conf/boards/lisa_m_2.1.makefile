@@ -1,12 +1,12 @@
 # Hey Emacs, this is a -*- makefile -*-
 #
-# lia1.1.makefile
+# lisa_m_2.1.makefile
 #
-# http://wiki.paparazziuav.org/wiki/Lia
+# http://wiki.paparazziuav.org/wiki/Lisa/M_v21
 #
 
-BOARD=lia
-BOARD_VERSION=1.1
+BOARD=lisa_m
+BOARD_VERSION=2.1
 BOARD_CFG=\"boards/$(BOARD)_$(BOARD_VERSION).h\"
 
 ARCH=stm32
