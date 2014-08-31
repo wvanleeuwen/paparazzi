@@ -42,6 +42,7 @@
 
 #ifndef STM32F1
 #error "CAN is currently only implemented for STM32F1"
+#warning "CAN error recovery is not implemented yet"
 #endif
 
 #ifdef RTOS_PRIO
