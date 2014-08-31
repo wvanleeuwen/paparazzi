@@ -47,6 +47,7 @@
 /var/m*
 /var/boa.conf
 !/var/logs/*
+/var/conf/
 
 /dox
 

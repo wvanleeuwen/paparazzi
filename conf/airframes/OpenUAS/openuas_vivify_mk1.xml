@@ -172,10 +172,11 @@ I am as of yet not sure if the weird info byte is because of a failed bind proce
       <define name="OUTBACK_CHALLENGE_VERY_DANGEROUS_RULE_AP_CAN_FORCE_FAILSAFE" value="FALSE" />
 
       <subsystem name="actuators" type="pwm"/>
-      <subsystem name="intermcu" type="uart">
+      <subsystem name="intermcu" type="can"/>
+      <!--subsystem name="intermcu" type="uart">
         <configure name="INTERMCU_PORT" value="UART2" />
         <configure name="INTERMCU_BAUD" value="B57600"/>
-      </subsystem>
+      </subsystem-->
     </target>
 
     <!-- ****************************** SIM *********************************-->
