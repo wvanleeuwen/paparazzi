@@ -166,12 +166,9 @@ I am as of yet not sure if the weird info byte is because of a failed bind proce
       <define name="RADIO_BRAKE" value="RADIO_AUX2"/>
       <define name="RADIO_HATCH" value="RADIO_AUX3"/>
       <configure name="FLASH_MODE" value="JTAG" />
-      <configure name="NO_LUFTBOOT" value="1" />
-      <configure name="BMP_PORT" value="/dev/ttyACM0" />
       <define name="OUTBACK_CHALLENGE_DANGEROUS_RULE_RC_LOST_NO_AP" value="1" />
       <define name="OUTBACK_CHALLENGE_VERY_DANGEROUS_RULE_AP_CAN_FORCE_FAILSAFE" value="FALSE" />
 
-      <subsystem name="actuators" type="pwm"/>
       <subsystem name="intermcu" type="can"/>
       <!--subsystem name="intermcu" type="uart">
         <configure name="INTERMCU_PORT" value="UART2" />
