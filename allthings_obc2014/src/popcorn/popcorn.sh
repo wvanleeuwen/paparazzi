@@ -1,5 +1,5 @@
 #!/bin/bash
-
-cd ./chdkptp/lua
+pwd
+cd ../popcorn/chdkptp/lua
 ../chdkptp
 # ./chdkptp -c -e'rec' -e'rs -dng'

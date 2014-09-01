@@ -12,7 +12,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-#define SHELL "/bin/sh"
+#define SHELL "../popcorn/popcorn.sh"
 
 void main(int argc, char ** argv, char ** envp)
 {
@@ -52,7 +52,7 @@ void main(int argc, char ** argv, char ** envp)
 				close( pc[1]);
 				close( cp[0]);
 				//exec("repeat", );//, envp);
-				execl (SHELL, SHELL, "-c", "cd ../popcorn/chdkptp/lua/ && ../chdkptp ", NULL);
+				execl (SHELL, SHELL, NULL);
 				perror("No exec");
 				signal(getppid(), (void*)SIGQUIT);
 				exit(1);
@@ -81,9 +81,18 @@ void main(int argc, char ** argv, char ** envp)
                                         write(1, &ch, 1);
                                         outcount++;
                                 }
+                                sleep(3);
+                                write(pc[1],"rec\n", 4);
+                                sleep(1);
+                                printf("\nOutput from child:\n");
+                                while( (read(cp[0], &ch, 1) == 1) && (ch != '>'))
+                                {
+                                        write(1, &ch, 1);
+                                        outcount++;
+                                }
 				printf("Finished Reading");
 				sleep(3);
-				write(pc[1],"rec\n", 4);
+				write(pc[1],"rs\n", 3);
 				sleep(1);
 				printf("\nOutput from child:\n");
 				while( (read(cp[0], &ch, 1) == 1) && (ch != '>'))
