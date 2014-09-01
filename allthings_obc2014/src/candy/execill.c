@@ -70,8 +70,10 @@ void main(int argc, char ** argv, char ** envp)
 				}
 
 */
-                                sleep(3);
+                                sleep(5);
                                 write(pc[1],"connect\n", 8);
+
+				fcntl(cp[0], F_SETFL, FNDELAY);
 
                                 printf("\nOutput from child:\n");
                                 while( (read(cp[0], &ch, 1) == 1) && (ch != '>'))
@@ -91,6 +93,10 @@ void main(int argc, char ** argv, char ** envp)
 				}
 				printf("\n\nTotal characters in: %d\n",incount);
 				printf("Total characters out: %d\n", outcount);
+				
+
+				write(pc[1],"quit\n",5);
+
 				close(pc[1]);
 				close(cp[1]);
 				exit(0);
