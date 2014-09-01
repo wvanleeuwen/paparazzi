@@ -13,3 +13,6 @@
 [submodule "sw/ext/ardrone2_vision"]
 	path = sw/ext/ardrone2_vision
 	url = https://github.com/tudelft/ardrone2_vision.git
+[submodule "allthings_obc2014/src/popcorn/chdkptp"]
+	path = allthings_obc2014/src/popcorn/chdkptp
+	url = https://github.com/tudelft/chdkptp.git
