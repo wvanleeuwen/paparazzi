@@ -1,6 +1,6 @@
 <!DOCTYPE flight_plan SYSTEM "../flight_plan.dtd">
 
-<flight_plan alt="395" ground_alt="292" lat0="50.726999" lon0="7.567305" max_dist_from_home="580" name="opennuas simplesquare airspeed" qfu="310" security_height="120">
+<flight_plan alt="395" ground_alt="292" lat0="50.726999" lon0="7.567305" max_dist_from_home="580" name="opennuas simplesquare airspeed" qfu="310" security_height="45" home_mode_height="120">
   <header>
 #include "subsystems/electrical.h"
 #include "subsystems/datalink/datalink.h"
