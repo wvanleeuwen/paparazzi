@@ -7,9 +7,7 @@
 #include <sys/types.h>
 #include <unistd.h>
 #include <signal.h>
-#include <stdio.h>
 #include <unistd.h>
-#include <stdlib.h>
 #include <string.h>
 
 #define SHELL "../popcorn/popcorn.sh"
@@ -103,6 +101,7 @@ void main(int argc, char ** argv, char ** envp)
 				printf("\n\nTotal characters in: %d\n",incount);
 				printf("Total characters out: %d\n", outcount);
 				
+				sleep(5);
 
 				write(pc[1],"quit\n",5);
 
