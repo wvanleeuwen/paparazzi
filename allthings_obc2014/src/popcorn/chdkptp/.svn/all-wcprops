@@ -3,48 +3,6 @@ svn:wc:ra_dav:version-url
 V 31
 /svn/chdkptp/!svn/ver/655/trunk
 END
-README-RASPI.TXT
-K 25
-svn:wc:ra_dav:version-url
-V 48
-/svn/chdkptp/!svn/ver/508/trunk/README-RASPI.TXT
-END
-config-sample-linux.mk
-K 25
-svn:wc:ra_dav:version-url
-V 54
-/svn/chdkptp/!svn/ver/589/trunk/config-sample-linux.mk
-END
-ptp.h
-K 25
-svn:wc:ra_dav:version-url
-V 37
-/svn/chdkptp/!svn/ver/555/trunk/ptp.h
-END
-include.mk
-K 25
-svn:wc:ra_dav:version-url
-V 42
-/svn/chdkptp/!svn/ver/511/trunk/include.mk
-END
-config.h
-K 25
-svn:wc:ra_dav:version-url
-V 38
-/svn/chdkptp/!svn/ver/2/trunk/config.h
-END
-luautil.c
-K 25
-svn:wc:ra_dav:version-url
-V 41
-/svn/chdkptp/!svn/ver/558/trunk/luautil.c
-END
-ptp-pack.c
-K 25
-svn:wc:ra_dav:version-url
-V 40
-/svn/chdkptp/!svn/ver/2/trunk/ptp-pack.c
-END
 luautil.h
 K 25
 svn:wc:ra_dav:version-url
@@ -147,11 +105,11 @@ svn:wc:ra_dav:version-url
 V 47
 /svn/chdkptp/!svn/ver/427/trunk/libptp-endian.h
 END
-liveimg.c
+properties.c
 K 25
 svn:wc:ra_dav:version-url
-V 41
-/svn/chdkptp/!svn/ver/594/trunk/liveimg.c
+V 42
+/svn/chdkptp/!svn/ver/2/trunk/properties.c
 END
 ptpip.c
 K 25
@@ -159,17 +117,17 @@ svn:wc:ra_dav:version-url
 V 39
 /svn/chdkptp/!svn/ver/445/trunk/ptpip.c
 END
-properties.c
+liveimg.c
+K 25
+svn:wc:ra_dav:version-url
+V 41
+/svn/chdkptp/!svn/ver/594/trunk/liveimg.c
+END
+sockutil.c
 K 25
 svn:wc:ra_dav:version-url
 V 42
-/svn/chdkptp/!svn/ver/2/trunk/properties.c
-END
-README-RASPI-LIBS.TXT
-K 25
-svn:wc:ra_dav:version-url
-V 53
-/svn/chdkptp/!svn/ver/589/trunk/README-RASPI-LIBS.TXT
+/svn/chdkptp/!svn/ver/497/trunk/sockutil.c
 END
 chdkptp.c
 K 25
@@ -177,11 +135,11 @@ svn:wc:ra_dav:version-url
 V 41
 /svn/chdkptp/!svn/ver/595/trunk/chdkptp.c
 END
-sockutil.c
+README-RASPI-LIBS.TXT
 K 25
 svn:wc:ra_dav:version-url
-V 42
-/svn/chdkptp/!svn/ver/497/trunk/sockutil.c
+V 53
+/svn/chdkptp/!svn/ver/589/trunk/README-RASPI-LIBS.TXT
 END
 liveimg.h
 K 25
@@ -218,4 +176,46 @@ K 25
 svn:wc:ra_dav:version-url
 V 37
 /svn/chdkptp/!svn/ver/555/trunk/ptp.c
+END
+README-RASPI.TXT
+K 25
+svn:wc:ra_dav:version-url
+V 48
+/svn/chdkptp/!svn/ver/508/trunk/README-RASPI.TXT
+END
+config-sample-linux.mk
+K 25
+svn:wc:ra_dav:version-url
+V 54
+/svn/chdkptp/!svn/ver/589/trunk/config-sample-linux.mk
+END
+ptp.h
+K 25
+svn:wc:ra_dav:version-url
+V 37
+/svn/chdkptp/!svn/ver/555/trunk/ptp.h
+END
+include.mk
+K 25
+svn:wc:ra_dav:version-url
+V 42
+/svn/chdkptp/!svn/ver/511/trunk/include.mk
+END
+config.h
+K 25
+svn:wc:ra_dav:version-url
+V 38
+/svn/chdkptp/!svn/ver/2/trunk/config.h
+END
+luautil.c
+K 25
+svn:wc:ra_dav:version-url
+V 41
+/svn/chdkptp/!svn/ver/558/trunk/luautil.c
+END
+ptp-pack.c
+K 25
+svn:wc:ra_dav:version-url
+V 40
+/svn/chdkptp/!svn/ver/2/trunk/ptp-pack.c
 END
