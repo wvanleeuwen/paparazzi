@@ -1,0 +1,155 @@
+K 25
+svn:wc:ra_dav:version-url
+V 35
+/svn/chdkptp/!svn/ver/655/trunk/lua
+END
+tests.lua
+K 25
+svn:wc:ra_dav:version-url
+V 45
+/svn/chdkptp/!svn/ver/646/trunk/lua/tests.lua
+END
+gui_tree.lua
+K 25
+svn:wc:ra_dav:version-url
+V 48
+/svn/chdkptp/!svn/ver/592/trunk/lua/gui_tree.lua
+END
+gui_live.lua
+K 25
+svn:wc:ra_dav:version-url
+V 48
+/svn/chdkptp/!svn/ver/580/trunk/lua/gui_live.lua
+END
+fsutil.lua
+K 25
+svn:wc:ra_dav:version-url
+V 46
+/svn/chdkptp/!svn/ver/630/trunk/lua/fsutil.lua
+END
+ustime.lua
+K 25
+svn:wc:ra_dav:version-url
+V 46
+/svn/chdkptp/!svn/ver/586/trunk/lua/ustime.lua
+END
+cli.lua
+K 25
+svn:wc:ra_dav:version-url
+V 43
+/svn/chdkptp/!svn/ver/655/trunk/lua/cli.lua
+END
+dng.lua
+K 25
+svn:wc:ra_dav:version-url
+V 43
+/svn/chdkptp/!svn/ver/605/trunk/lua/dng.lua
+END
+varsubst.lua
+K 25
+svn:wc:ra_dav:version-url
+V 48
+/svn/chdkptp/!svn/ver/598/trunk/lua/varsubst.lua
+END
+exposure.lua
+K 25
+svn:wc:ra_dav:version-url
+V 48
+/svn/chdkptp/!svn/ver/286/trunk/lua/exposure.lua
+END
+multicam.lua
+K 25
+svn:wc:ra_dav:version-url
+V 48
+/svn/chdkptp/!svn/ver/650/trunk/lua/multicam.lua
+END
+rlibs.lua
+K 25
+svn:wc:ra_dav:version-url
+V 45
+/svn/chdkptp/!svn/ver/655/trunk/lua/rlibs.lua
+END
+util.lua
+K 25
+svn:wc:ra_dav:version-url
+V 44
+/svn/chdkptp/!svn/ver/645/trunk/lua/util.lua
+END
+prefs.lua
+K 25
+svn:wc:ra_dav:version-url
+V 45
+/svn/chdkptp/!svn/ver/535/trunk/lua/prefs.lua
+END
+gui_live_stats.lua
+K 25
+svn:wc:ra_dav:version-url
+V 54
+/svn/chdkptp/!svn/ver/586/trunk/lua/gui_live_stats.lua
+END
+gui_user.lua
+K 25
+svn:wc:ra_dav:version-url
+V 48
+/svn/chdkptp/!svn/ver/463/trunk/lua/gui_user.lua
+END
+camtests.lua
+K 25
+svn:wc:ra_dav:version-url
+V 48
+/svn/chdkptp/!svn/ver/582/trunk/lua/camtests.lua
+END
+gui.lua
+K 25
+svn:wc:ra_dav:version-url
+V 43
+/svn/chdkptp/!svn/ver/614/trunk/lua/gui.lua
+END
+main.lua
+K 25
+svn:wc:ra_dav:version-url
+V 44
+/svn/chdkptp/!svn/ver/640/trunk/lua/main.lua
+END
+errutil.lua
+K 25
+svn:wc:ra_dav:version-url
+V 47
+/svn/chdkptp/!svn/ver/588/trunk/lua/errutil.lua
+END
+lbufutil.lua
+K 25
+svn:wc:ra_dav:version-url
+V 48
+/svn/chdkptp/!svn/ver/356/trunk/lua/lbufutil.lua
+END
+gui_sched.lua
+K 25
+svn:wc:ra_dav:version-url
+V 49
+/svn/chdkptp/!svn/ver/614/trunk/lua/gui_sched.lua
+END
+gui_icon.lua
+K 25
+svn:wc:ra_dav:version-url
+V 48
+/svn/chdkptp/!svn/ver/429/trunk/lua/gui_icon.lua
+END
+chdku.lua
+K 25
+svn:wc:ra_dav:version-url
+V 45
+/svn/chdkptp/!svn/ver/650/trunk/lua/chdku.lua
+END
+rsint.lua
+K 25
+svn:wc:ra_dav:version-url
+V 45
+/svn/chdkptp/!svn/ver/653/trunk/lua/rsint.lua
+END
+dngcli.lua
+K 25
+svn:wc:ra_dav:version-url
+V 46
+/svn/chdkptp/!svn/ver/582/trunk/lua/dngcli.lua
+END
