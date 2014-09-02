@@ -1,4 +1,5 @@
 monitor jtag_scan
 attach 1
+set debug remote 1
 load
 kill
