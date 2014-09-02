@@ -43,12 +43,26 @@ void ticket_periodic( void )
   dc_periodic_4Hz();
 }
 
+
+#define __CameraLink(dev, _x) dev##_x
+#define _CameraLink(dev, _x)  __CameraLink(dev, _x)
+#define CameraLink(_x) _CameraLink(CAMERA_LINK, _x)
+
+#define CameraBuffer() CameraLink(ChAvailable())
+
+#define ReadCameraBuffer() {                  \
+    while (CameraLink(ChAvailable()))         \
+      ticket_parse(CameraLink(Getch()));      \
+  }
+
+
 /* Command The Camera */
 void dc_send_command(uint8_t cmd)
 {
   switch (cmd)
   {
     case DC_SHOOT:
+      CameraLink(Transmit(cmd));
       dc_send_shot_position();
       break;
     case DC_TALLER:

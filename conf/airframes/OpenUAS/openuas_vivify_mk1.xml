@@ -284,6 +284,8 @@ I am as of yet not sure if the weird info byte is because of a failed bind proce
 
   <!-- ************************* MODULES ************************* -->
   <modules>
+    <load name="safety_timers.xml" />
+
     <!-- Disable uCenter in the future, setup the hardware itself -->
     <load name="gps_ubx_ucenter.xml"/><!-- TODO: add parameter to disable SBAS CAREFUL about SBAS, disable it for Australia -->
     <!-- to test, analyze performance etc.-->
@@ -360,6 +362,7 @@ I am as of yet not sure if the weird info byte is because of a failed bind proce
     <load name="TICKET.xml">
       <define name="SHUTTER_DELAY" value="1" unit="quarter_second"/>
       <define name="xIMAGE_BUFFER" value="65000" />
+      <configure name="CAMERA_PORT" value="UART5" />
     </load>
 
     <load name="baro_sim.xml"/>

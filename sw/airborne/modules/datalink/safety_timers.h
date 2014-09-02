@@ -20,22 +20,22 @@
  *
  */
 
-/** \file demo_module.h
+/** \file safety_timers.h
  *
  * demo module with blinking LEDs
  */
 
-#ifndef DEMO_MODULE_H
-#define DEMO_MODULE_H
+#ifndef SAFETY_TIMERS_H
+#define SAFETY_TIMERS_H
 
-#ifndef DEMO_MODULE_LED
-#define DEMO_MODULE_LED 2
-#endif
+#include "std.h"
 
-void init_demo(void);
-void periodic_1Hz_demo(void);
-void periodic_10Hz_demo(void);
-void start_demo(void);
-void stop_demo(void);
+extern uint16_t obcrulesdatalinklosscounter;
+
+//void init_demo(void);
+//void periodic_1Hz_demo(void);
+//void periodic_10Hz_demo(void);
+//void start_demo(void);
+//void stop_demo(void);
 
 #endif
