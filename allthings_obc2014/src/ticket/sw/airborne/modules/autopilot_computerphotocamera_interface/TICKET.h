@@ -1,8 +1,8 @@
 /*
  * Copyright (C) OpenUAS
  *
- * This file is part of paparazzi
-
+ * This file is part of paparazzi.
+ *
  * paparazzi is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2, or (at your option)
@@ -17,28 +17,23 @@
  * along with paparazzi; see the file COPYING.  If not, write to
  * the Free Software Foundation, 59 Temple Place - Suite 330,
  * Boston, MA 02111-1307, USA.
+ */
+
+/** @file modules/digital_cam/ticket/TICKET.h
+ *  @brief Digital Camera Control Over UART
  *
+ * Provides the control of the shutter and the zoom of a digital camera
+ * through standard binary IOs of the board.
+ *
+ * The required initialization (dc_init()) and periodic (4Hz) process.
  */
 
 #ifndef TICKET_H
 #define TICKET_H
 
-//#define TICKET_SHOOT 0x01
+extern void ticket_init(void);
 
-extern void ticket_init;
-extern void ticket_takephotonow;
-//extern void ticket_get_device_capability;
-//extern void ticket_set_device_physical_orientation;
-//extern void ticket_periodic( void );
+/** 4Hz Periodic */
+extern void ticket_periodic(void);
 
-//#ifdef TEST_TICKET
-extern float test_ticket_estimator_x;
-extern float test_ticket_estimator_y;
-extern float test_ticket_estimator_z;
-extern float test_ticket_estimator_phi;
-extern float test_ticket_estimator_theta;
-extern float test_ticket_estimator_hspeed_dir;
-#endif // TEST_TICKET
-
-#endif
-
+#endif // GPIO_CAM_CTRL_H

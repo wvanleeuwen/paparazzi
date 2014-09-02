@@ -1,15 +1,22 @@
 <!DOCTYPE module SYSTEM "module.dtd">
-<module name="TICKET" dir="autopilot_computerphotocamera_interface">
+<module name="TICKET" dir="digital_cam">
   <doc>
     <description>Send attitude and other relevant data to a computer based photocamera after a shootphoto command is given. And in return get certain value back from the computerbased photocamera to be able to intercat with the flightplan.</description>
+    <define name="DC_SHOOT_ON_BUTTON_RELEASE" description="if defined, call dc_send_shot_postion on button release instead of on push"/>
+    <define name="DC_AUTOSHOOT_QUARTERSEC_PERIOD" value="6" description="quarter_second"/>
+    <define name="DC_AUTOSHOOT_METER_GRID" value="50" description="grid in meters"/>
   </doc>
   <header>
-    <file name="TICKET.h"/>
+    <file name="ticket/TICKET.h"/>
   </header>
-  <init fun="ticket_init"/>
-  <event fun="ticket_takephotonow"/>
+  <init fun="ticket_init()"/>
+  <periodic fun="ticket_periodic()" freq="4" autorun="TRUE"/>
+  <!-- event fun="ticket_takephotonow"/-->
   <makefile>
-    <file name="TICKET.c"/>
+    <define name="DIGITAL_CAM" />
+    <file name="ticket/TICKET.c"/>
+    <file name="dc.c"/>
+    <define name="SENSOR_SYNC_SEND" value="1"/>
   </makefile>
 </module>
 
