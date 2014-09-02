@@ -357,16 +357,9 @@ I am as of yet not sure if the weird info byte is because of a failed bind proce
     <!-- TODO: make new module which send data over e.g. SERIAL, SPI or I2C to MORA())-->
     <!-- TODO: Give it a better name -->
     <!-- AKA TICKET -->
-   <!--
- <load name="TICKET.xml">
+    <load name="TICKET.xml">
       <define name="SHUTTER_DELAY" value="1" unit="quarter_second"/>
       <define name="xIMAGE_BUFFER" value="65000" />
-    </load>
--->
-
-<!-- DC addedto just test various nav routines-->
-    <load name="digital_cam.xml">
-      <define name="DC_SHUTTER_GPIO" value="GPIOC,GPIO12"/>
     </load>
 
     <load name="baro_sim.xml"/>
