@@ -31,8 +31,8 @@
 // INTERMCU CAN MESSAGES
 
 // Commands
-#define MSG_INTERMCU_COMMAND_MASTER_ID 0x00
-#define MSG_INTERMCU_COMMAND_EXTRA_ID 0x01
+#define MSG_INTERMCU_COMMAND_MASTER_ID 0x01
+#define MSG_INTERMCU_COMMAND_EXTRA_ID 0x02
 // Channels
 #define MSG_INTERMCU_RADIO_LOW_ID 0x04
 #define MSG_INTERMCU_RADIO_HIGH_ID 0x05
@@ -61,7 +61,7 @@ union {
   struct imcu_fbw_status_struct status;
 } imcu_status;
 
-#define INTERMCU_COMMAND(_intermcu_payload, nr) (pprz_t)((uint16_t)(*((uint8_t*)_intermcu_payload+0+(2*(nr)))|*((uint8_t*)_intermcu_payload+1+(2*(nr)))<<8))
+#define INTERMCU_COMMAND(_intermcu_payload, nr) (pprz_t)((uint16_t)(*((uint8_t*)_intermcu_payload+1+(2*(nr)))|*((uint8_t*)_intermcu_payload+0+(2*(nr)))<<8))
 
 #define MSG_INTERMCU_FBW_MOD(_intermcu_payload) (uint8_t)(*((uint8_t*)_intermcu_payload+0))
 #define MSG_INTERMCU_FBW_STAT(_intermcu_payload) (uint8_t)(*((uint8_t*)_intermcu_payload+1))

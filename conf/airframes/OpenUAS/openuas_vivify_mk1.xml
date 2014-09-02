@@ -68,9 +68,10 @@ http://paparazzi.enac.fr/w/index.php?title=Theory_of_Operation
   <firmware name="fixedwing">
    <!-- <define name="R0"/>-->
     <target name="ap" board="lisa_m_2.0"> 
-
-      <define name="RADIO_BRAKE" value="RADIO_KILL"/>
-      <define name="RADIO_HATCH" value="RADIO_AUX3"/>
+      <configure name="FLASH_MODE" value="SWD"/>
+      <define name="RADIO_MODE" value="RADIO_GEAR"/>
+      <define name="RADIO_BRAKE" value="RADIO_AUX1"/>
+      <define name="RADIO_HATCH" value="RADIO_AUX2"/>
       <define name="SEPARATE_FBW" value="1" />
       <!-- define name="RADIO_CONTROL_LED" value="4"/-->
       <define name="LINK_MCU_LED" value="4"/>
@@ -143,11 +144,9 @@ http://paparazzi.enac.fr/w/index.php?title=Theory_of_Operation
     <!-- not used, determin benefit and test -->
     </subsystem>
 
-    <subsystem name="actuators" type="dummy"></subsystem>
+    <subsystem name="actuators" type="dummy"/>
     <subsystem name="intermcu" type="can"/>
 
-    <!-- * We want to use all servos, so we need to let the AP board know * -->
-    <define name="USE_SERVOS_7AND8"/>
     <!-- * Communication * -->
     <subsystem name="telemetry" type="transparent">
       <!-- or use type="xbee_api"> -->
@@ -182,6 +181,7 @@ http://paparazzi.enac.fr/w/index.php?title=Theory_of_Operation
       </target>
 
     <target name="fbw" board="lisa_m_2.0">
+      <configure name="FLASH_MODE" value="SWD"/>
       <configure name="SYS_TIME_LED" value="1" />
       <define name="RADIO_CONTROL_LED" value="4"/>
       <define name="LINK_MCU_LED" value="3"/>
@@ -210,8 +210,8 @@ RADIO_AUX7       11
       <!-- ... but if you want to make an "alias" for one of the names, e.g. use AUX2 as a kill switch, define it-->
       <!-- a three way switch -->
       <define name="RADIO_MODE" value="RADIO_GEAR"/>
-      <define name="RADIO_BRAKE" value="RADIO_AUX2"/>
-      <define name="RADIO_HATCH" value="RADIO_AUX3"/>
+      <define name="RADIO_BRAKE" value="RADIO_AUX1"/>
+      <define name="RADIO_HATCH" value="RADIO_AUX2"/>
       <!-- TODO: diable the kill switch value altogether, a kill switch is surely not wanted on a electric RC plane -->
       <!-- <define name="RADIO_KILL_SWITCH" value="RADIO_FLAP"/> -->
       <!-- <define name=<define name="RADIO_BRAKE" value="RADIO_AUX2"/>"RADIO_CONTROL_NB_CHANNEL" value="7"/> -->
@@ -735,7 +735,7 @@ https://github.com/paparazzi/paparazzi/blob/master/sw/airborne/subsystems/nav.c#
     <!-- DISABLE in FINAL Autonomous mode , for now used to test auto2 braked landing tuning-->
     <set command="BRAKE" value="@BRAKE"/>
     <!-- DISABLE in FINAL tests otherwise it won't work in Autonomous mode -->
-    <set command="HATCH" value="@AUX3"/>
+    <set command="HATCH" value="@AUX2"/>
     <!--@AUX3 or MANUALRELEASE-->
     <!-- <set command="LIGHT" value="@AUX4"/> -->
     <!--@AUX4 -->

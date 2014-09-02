@@ -56,6 +56,10 @@
 #include "link_mcu_usart.h"
 #endif
 
+#ifdef MCU_CAN_LINK
+#include "link_mcu_can.h"
+#endif
+
 uint8_t fbw_mode;
 
 #include "inter_mcu.h"
