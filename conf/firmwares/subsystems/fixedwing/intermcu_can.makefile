@@ -9,3 +9,4 @@ $(TARGET).srcs += ./mcu_periph/can.c
 $(TARGET).srcs += $(SRC_ARCH)/mcu_periph/can_arch.c
 endif
 
+SEPARATE_FBW=1

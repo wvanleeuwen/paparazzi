@@ -61,29 +61,19 @@ http://paparazzi.enac.fr/w/index.php?title=Theory_of_Operation
 <!-- * Official name and not codename, used since some video footage must use the official name and display should be correct, as also the GCS speech * -->
 <airframe name="Vivify">
   <!-- ************************* FIRMWARE ************************* -->
-  <firmware name="test_progs">
-    <target name="test_can" board="lisa_m_2.0"/>
-  </firmware>
-
   <firmware name="fixedwing">
    <!-- <define name="R0"/>-->
     <target name="ap" board="lisa_m_2.0"> 
+      <define name="LINK_MCU_LED" value="5"/>
+      <configure name="AHRS_ALIGNER_LED" value="2"/>
+      <configure name="CPU_LED" value="1"/>
       <configure name="FLASH_MODE" value="SWD"/>
       <define name="RADIO_MODE" value="RADIO_GEAR"/>
       <define name="RADIO_BRAKE" value="RADIO_AUX1"/>
       <define name="RADIO_HATCH" value="RADIO_AUX2"/>
-      <define name="SEPARATE_FBW" value="1" />
-      <!-- define name="RADIO_CONTROL_LED" value="4"/-->
-      <define name="LINK_MCU_LED" value="4"/>
-      <!-- <define name="LISA_M_LONGITUDINAL_X"/>--> <!-- todo check conectors to the back maybe not needed -->
-     
-      <!-- ONLY if flashing via JTAG cable with older PPRZ software-->
-      <!-- <configure name="FLASH_MODE" value="JTAG"/>-->
-      <!--  <configure name="NO_LUFTBOOT" value="1"/>-->
-      <!-- <configure name="BMP_PORT" value="/dev/ttyACM1"/>-->
+      <configure name="SEPARATE_FBW" value="1" />
       <!-- <define name="ADC_CHANNEL_VSUPPLY" value="4"/> -->
       <define name="autopilot_motors_on" value="FALSE"/> <!-- temp fix for geomag, normally only used for rotorcraft -->
-      
       <define name="SENSOR_SYNC_SEND"/>
 <!-- PERIODIC_FREQUENCY should be least equal or greater than AHRS_PROPAGATE_FREQUENCY -->
      <!---->
@@ -108,8 +98,6 @@ http://paparazzi.enac.fr/w/index.php?title=Theory_of_Operation
       <!-- obsolete with ABI ?-->
       <configure name="USE_BARO_BOARD" value="TRUE"/>
       <!--   <define name="USE_BAROMETER" value="TRUE"/> -->
-      <configure name="AHRS_ALIGNER_LED" value="1"/>
-      <configure name="CPU_LED" value="1"/>
       <define name="BAT_CHECKER_DELAY" value="80"/><!-- amount of time it take for the bat to check --><!-- to avoid bat low spike detection when strong pullup withch draws short sudden power-->      
       <!-- <define name="LOW_BATTERY_KILL_DELAY" value="80"/>-->      
       <define name="CATASTROPHIC_BATTERY_KILL_DELAY" value="80"/><!-- in seconds-->
@@ -182,12 +170,15 @@ http://paparazzi.enac.fr/w/index.php?title=Theory_of_Operation
 
     <target name="fbw" board="lisa_m_2.0">
       <configure name="FLASH_MODE" value="SWD"/>
+
       <configure name="SYS_TIME_LED" value="1" />
-      <define name="RADIO_CONTROL_LED" value="4"/>
       <define name="LINK_MCU_LED" value="3"/>
+      <configure name="RADIO_CONTROL_LED" value="5"/>
+
+      <configure name="PERIODIC_FREQUENCY" value="120"/>
 
       <subsystem name="radio_control" type="spektrum">
-      <!-- note that the radio xml file is only used for PPM based systems.
+      <!-- note that the radio xml is needed for intermcu but MUST contain the same channels as the spektrum defines in the code:
 The spektrum models have fixed names for the channels/functions: https://github.com/paparazzi/paparazzi/blob/v4.0/sw/airborne/arch/stm32/subsystems/radio_control/spektrum_arch.h
 -->
       <!--
@@ -232,7 +223,7 @@ I am as of yet not sure if the weird info byte is because of a failed bind proce
       <!--<define name="RADIO_CONTROL_SPEKTRUM_SIGNS" value="\{1,-1,-1,-1,1,-1,1,1,1,1,1,1\}"/>-->
       </subsystem>
 
-      <define name="OUTBACK_CHALLENGE_DANGEROUS_RULE_RC_LOST_NO_AP" value="1" />
+      <define name="OUTBACK_CHALLENGE_DANGEROUS_RULE_RC_LOST_NO_AP" value="FALSE" />
       <define name="OUTBACK_CHALLENGE_VERY_DANGEROUS_RULE_AP_CAN_FORCE_FAILSAFE" value="FALSE" />
 
       <subsystem name="actuators" type="pwm"/>
@@ -285,6 +276,10 @@ I am as of yet not sure if the weird info byte is because of a failed bind proce
     <!-- **************************** set for all *******************************-->
     <define name="RADIO_CONTROL_AUTO1"/> 
 
+  </firmware>
+
+  <firmware name="test_progs">
+    <target name="test_can" board="lisa_m_2.0"/>
   </firmware>
 
   <!-- ************************* MODULES ************************* -->

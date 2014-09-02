@@ -47,26 +47,7 @@ union {
   pprz_t cmd[4];
 } imcu_cmd_mstr, imcu_cmd_ext, imcu_chan1, imcu_chan2, imcu_trim;
 
-
-struct __attribute__ ((__packed__)) imcu_fbw_status_struct
-{
-  uint8_t ppm_cpt;
-  uint8_t status;
-  uint8_t nb_err;
-  uint16_t vsupply; ///< 1e-1 V
-} status;
-
-union {
-  uint8_t data[5];
-  struct imcu_fbw_status_struct status;
-} imcu_status;
-
-#define INTERMCU_COMMAND(_intermcu_payload, nr) (pprz_t)((uint16_t)(*((uint8_t*)_intermcu_payload+1+(2*(nr)))|*((uint8_t*)_intermcu_payload+0+(2*(nr)))<<8))
-
-#define MSG_INTERMCU_FBW_MOD(_intermcu_payload) (uint8_t)(*((uint8_t*)_intermcu_payload+0))
-#define MSG_INTERMCU_FBW_STAT(_intermcu_payload) (uint8_t)(*((uint8_t*)_intermcu_payload+1))
-#define MSG_INTERMCU_FBW_ERR(_intermcu_payload) (uint8_t)(*((uint8_t*)_intermcu_payload+2))
-#define MSG_INTERMCU_FBW_VOLT(_intermcu_payload) (uint16_t)(*((uint8_t*)_intermcu_payload+3)|*((uint8_t*)_intermcu_payload+1+3)<<8)
+#define INTERMCU_COMMAND(_intermcu_payload, nr) (pprz_t)((uint16_t)(*((uint8_t*)_intermcu_payload+0+(2*(nr)))|*((uint8_t*)_intermcu_payload+1+(2*(nr)))<<8))
 
 //////////////////////////////////////////////////////////////////////////////////////////////
 // READ MESSAGES
@@ -86,8 +67,9 @@ void link_mcu_on_can_msg(uint32_t id, uint8_t *data, int len)
   if (id == MSG_INTERMCU_COMMAND_MASTER_ID)
   {
     for (int i=0; (i<4) && (i<COMMANDS_NB); i++)
+    {
       ap_state->commands[i] = INTERMCU_COMMAND(data, i);
-
+    }
 #ifdef LINK_MCU_LED
     LED_TOGGLE(LINK_MCU_LED);
 #endif
@@ -97,17 +79,11 @@ void link_mcu_on_can_msg(uint32_t id, uint8_t *data, int len)
   if (id ==  MSG_INTERMCU_COMMAND_EXTRA_ID)
   {
     for (int i=0; (i<4) && (i<(COMMANDS_NB-4)); i++)
-      ap_state->commands[4+i] = INTERMCU_COMMAND(data, i);
-  }
-
-
-  if (id == MSG_INTERMCU_RADIO_LOW_ID)
-  {
-    for (int i=0; i< RADIO_CONTROL_NB_CHANNEL; i++)
     {
-      fbw_state->channels[i] = ((pprz_t)INTERMCU_COMMAND(data, i));
+      ap_state->commands[4+i] = INTERMCU_COMMAND(data, i);
     }
   }
+
 
   if (id == MSG_INTERMCU_TRIM_ID)
   {
@@ -115,13 +91,29 @@ void link_mcu_on_can_msg(uint32_t id, uint8_t *data, int len)
     ap_state->command_pitch_trim = ((pprz_t) INTERMCU_COMMAND(data,1));
   }
 
-  if (id == MSG_INTERMCU_FBW_STATUS_ID)
+  if (id == MSG_INTERMCU_RADIO_LOW_ID)
   {
-    fbw_state->ppm_cpt = MSG_INTERMCU_FBW_MOD(data);
-    fbw_state->status = MSG_INTERMCU_FBW_STAT(data);
-    fbw_state->nb_err = MSG_INTERMCU_FBW_ERR(data);
-    fbw_state->vsupply = MSG_INTERMCU_FBW_VOLT(data);
-    fbw_state->current = 0; // SG_INTERMCU_FBW_CURRENT(data);
+    for (int i=0; (i<4) && (i< RADIO_CONTROL_NB_CHANNEL); i++)
+    {
+      fbw_state->channels[i] = ((pprz_t)INTERMCU_COMMAND(data, i));
+    }
+  }
+
+  if (id == MSG_INTERMCU_RADIO_HIGH_ID)
+  {
+    for (int i=0; (i<4) && (i< (RADIO_CONTROL_NB_CHANNEL-4)); i++)
+    {
+      fbw_state->channels[4+i] = ((pprz_t)INTERMCU_COMMAND(data, i));
+    }
+  }
+
+  if ((id == MSG_INTERMCU_FBW_STATUS_ID) && (len == 5))
+  {
+    fbw_state->ppm_cpt = data[0];
+    fbw_state->status = data[1];
+    fbw_state->nb_err = data[2];
+    fbw_state->vsupply = data[3] + (data[4] << 8);
+    fbw_state->current = 0;
 
 #ifdef LINK_MCU_LED
     LED_TOGGLE(LINK_MCU_LED);
@@ -155,15 +147,17 @@ void link_mcu_send( void )
 #ifdef FBW
 void link_mcu_periodic_task( void )
 {
-  // 20 Hz
-  inter_mcu_fill_fbw_state(); /** Prepares the next message for AP */
+  // Import: Prepare the next message for AP
+  inter_mcu_fill_fbw_state();
 
-  imcu_status.status.ppm_cpt = fbw_state->ppm_cpt;
-  imcu_status.status.status  = fbw_state->status;
-  imcu_status.status.nb_err  = fbw_state->nb_err;
-  imcu_status.status.vsupply = fbw_state->vsupply;
-  // fbw_state->current);
-  ppz_can_transmit(MSG_INTERMCU_FBW_STATUS_ID, imcu_status.data, 5);
+  // Transmit Status
+  uint8_t intermcu_tx_buff[8];
+  intermcu_tx_buff[0] = fbw_state->ppm_cpt;
+  intermcu_tx_buff[1] = fbw_state->status;
+  intermcu_tx_buff[2] = fbw_state->nb_err;
+  intermcu_tx_buff[3] = (uint8_t) fbw_state->vsupply;
+  intermcu_tx_buff[4] = (uint8_t) ((fbw_state->vsupply & 0xff00) >> 8);
+  ppz_can_transmit(MSG_INTERMCU_FBW_STATUS_ID, intermcu_tx_buff, 5);
 
 #if defined RADIO_CONTROL || RADIO_CONTROL_AUTO1
   // Copy the CHANNELS to the 2 CAN buffers
@@ -172,10 +166,12 @@ void link_mcu_periodic_task( void )
   for (int i=0; (i<(RADIO_CONTROL_NB_CHANNEL-4)) && (i<4);i++)
     imcu_chan2.cmd[i] = fbw_state->channels[4+i];
 
-  ppz_can_transmit(MSG_INTERMCU_RADIO_LOW_ID,  imcu_chan1.data, 8);
-  ppz_can_transmit(MSG_INTERMCU_RADIO_HIGH_ID, imcu_chan2.data, 8);
+  if (bit_is_set(fbw_state->status, RC_OK))
+  {
+    ppz_can_transmit(MSG_INTERMCU_RADIO_LOW_ID,  imcu_chan1.data, 8);
+    ppz_can_transmit(MSG_INTERMCU_RADIO_HIGH_ID, imcu_chan2.data, 8);
+  }
 #endif
-
 }
 #endif
 
