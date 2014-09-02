@@ -2,7 +2,7 @@
 
 <flight_plan alt="395" ground_alt="292" lat0="50.726999" lon0="7.567305" max_dist_from_home="580" name="opennuas simplesquare airspeed" qfu="310" security_height="45" home_mode_height="120">
   <header>
-#include "subsystems/electrical.h"
+#include "inter_mcu.h"
 #include "subsystems/datalink/datalink.h"
 #include "firmwares/fixedwing/guidance/energy_ctrl.h"
 static inline uint16_t obcrulesdatalinklosscounter = 0;
@@ -67,7 +67,7 @@ static inline uint16_t obcrulesdatalinklosscounter = 0;
 <!-- if datalink loss > 11 sec (time is in tento of seconds) automatically move to commshold-->
     <exception cond="(datalink_time > 110) && !(nav_block == IndexOfBlock('WaitForGPSFix')) && !(nav_block == IndexOfBlock('Initialize')) && !(nav_block == IndexOfBlock('Set_base_location')) && !(nav_block == IndexOfBlock('Takeoff')) && !(nav_block == IndexOfBlock('AutoTakeoff')) && !(nav_block == IndexOfBlock('Land')) && !(nav_block == IndexOfBlock('Final')) && !(nav_block == IndexOfBlock('Flare'))" deroute="CommsHoldLoiter"/>
  <!-- This use avarage value ove a few secs this to avoid sag during ascend manouvers> set in airframe -->
-   <exception cond="electrical.bat_low && !(nav_block == IndexOfBlock('WaitForGPSFix')) && !(nav_block == IndexOfBlock('Initialize')) && !(nav_block == IndexOfBlock('Set_base_location')) && !(nav_block == IndexOfBlock('Takeoff')) && !(nav_block == IndexOfBlock('AutoTakeoff')) && !(nav_block == IndexOfBlock('Land')) && !(nav_block == IndexOfBlock('Final')) && !(nav_block == IndexOfBlock('Flare'))" deroute="Standby"/>
+   <exception cond="LessThan(fbw_state->vsupply,94) && !(nav_block == IndexOfBlock('WaitForGPSFix')) && !(nav_block == IndexOfBlock('Initialize')) && !(nav_block == IndexOfBlock('Set_base_location')) && !(nav_block == IndexOfBlock('Takeoff')) && !(nav_block == IndexOfBlock('AutoTakeoff')) && !(nav_block == IndexOfBlock('Land')) && !(nav_block == IndexOfBlock('Final')) && !(nav_block == IndexOfBlock('Flare'))" deroute="Standby"/>
   <!-- test if to high -->
  <!--  <exception cond="(GetPosAlt() > ground_alt+300) && !(nav_block == IndexOfBlock('WaitForGPSFix')) && !(nav_block == IndexOfBlock('Initialize')) && !(nav_block == IndexOfBlock('Set_base_location')) && !(nav_block == IndexOfBlock('Takeoff')) && !(nav_block == IndexOfBlock('AutoTakeoff'))" deroute="Standby"/>-->
    <exception cond="!(InsideMissionBoundary(GetPosX(), GetPosY())) && !(nav_block == IndexOfBlock('WaitForGPSFix')) && !(nav_block == IndexOfBlock('Initialize')) && !(nav_block == IndexOfBlock('Set_base_location')) && !(nav_block == IndexOfBlock('Takeoff')) && !(nav_block == IndexOfBlock('AutoTakeoff')) && !(nav_block == IndexOfBlock('Land')) && !(nav_block == IndexOfBlock('Final')) && !(nav_block == IndexOfBlock('Flare'))" deroute="Standby"/>
