@@ -61,13 +61,20 @@ http://paparazzi.enac.fr/w/index.php?title=Theory_of_Operation
 <!-- * Official name and not codename, used since some video footage must use the official name and display should be correct, as also the GCS speech * -->
 <airframe name="Vivify">
   <!-- ************************* FIRMWARE ************************* -->
+  <firmware name="test_progs">
+    <target name="test_can" board="lisa_m_2.0"/>
+  </firmware>
 
   <firmware name="fixedwing">
    <!-- <define name="R0"/>-->
     <target name="ap" board="lisa_m_2.0"> 
 
-      <define name="RADIO_CONTROL_LED" value="4"/>
-        <!-- <define name="LISA_M_LONGITUDINAL_X"/>--> <!-- todo check conectors to the back maybe not needed -->
+      <define name="RADIO_BRAKE" value="RADIO_KILL"/>
+      <define name="RADIO_HATCH" value="RADIO_AUX3"/>
+      <define name="SEPARATE_FBW" value="1" />
+      <!-- define name="RADIO_CONTROL_LED" value="4"/-->
+      <define name="LINK_MCU_LED" value="4"/>
+      <!-- <define name="LISA_M_LONGITUDINAL_X"/>--> <!-- todo check conectors to the back maybe not needed -->
      
       <!-- ONLY if flashing via JTAG cable with older PPRZ software-->
       <!-- <configure name="FLASH_MODE" value="JTAG"/>-->
@@ -109,51 +116,6 @@ http://paparazzi.enac.fr/w/index.php?title=Theory_of_Operation
       <!-- <define name="USE_ADC_1"/>??-->
       <!--  <configure name="ADC_CURRENT_SENSOR" value="ADC_1"/>-->
       <!--</subsystem>-->
-      <subsystem name="radio_control" type="spektrum">
-      <!-- note that the radio xml file is only used for PPM based systems.
-The spektrum models have fixed names for the channels/functions: https://github.com/paparazzi/paparazzi/blob/v4.0/sw/airborne/arch/stm32/subsystems/radio_control/spektrum_arch.h
--->
-      <!--
-Also fixed index values by default
-
-RADIO_THROTTLE   0
-RADIO_ROLL       1
-RADIO_PITCH      2
-RADIO_YAW        3
-RADIO_GEAR       4
-RADIO_FLAP       5
-RADIO_AUX1       5
-RADIO_AUX2       6
-RADIO_AUX3       7
-RADIO_AUX4       8
-RADIO_AUX5       9
-RADIO_AUX6     jtag  10
-RADIO_AUX7       11
--->
-      <!-- ... but if you want to make an "alias" for one of the names, e.g. use AUX2 as a kill switch, define it-->
-      <!-- a three way switch -->
-      <define name="RADIO_MODE" value="RADIO_GEAR"/>
-      <define name="RADIO_BRAKE" value="RADIO_AUX2"/>
-      <define name="RADIO_HATCH" value="RADIO_AUX3"/>
-      <!-- TODO: diable the kill switch value altogether, a kill switch is surely not wanted on a electric RC plane -->
-      <!-- <define name="RADIO_KILL_SWITCH" value="RADIO_FLAP"/> -->
-      <!-- <define name=<define name="RADIO_BRAKE" value="RADIO_AUX2"/>"RADIO_CONTROL_NB_CHANNEL" value="7"/> -->
-      <!--	<configure name="USE_SECONDARY_SPEKTRUM_RECEIVER"/> -->
-      <!--
-Marek wrote:
-I had the same thing and while I haven't fixed it,
-I identified the issue in my case as the satellite sending a transmitter info byte of 0xA2.
-This is DSMX even though my transmitter is set to DSM2.
-
-Since the decoder code treats the 2 to extect two frames, but receives only one,
- the second one is initialize<define name="RADIO_MODE" value="RADIO_GEAR"/>d to all 0s and so the 0 channel is overwritten
-
-I am as of yet not sure if the weird info byte is because of a failed bind procedure
- or something changed in the actuall hardware
-  (I don't know how old my transmitter is (DX6i) bc I got it from my lab, but the receivers I just ordered from HobbyKing)-->
-      <!-- If you want to reverse a channel change the sign of the channel you want to reverse -->
-      <!--<define name="RADIO_CONTROL_SPEKTRUM_SIGNS" value="\{1,-1,-1,-1,1,-1,1,1,1,1,1,1\}"/>-->
-      </subsystem>
 
     <!--   <define name="DC_IMAGE_BUFFER" value="65000"/> -->
     <!-- set USE_AIRSPEED to use ets_airspeed in control loop -->
@@ -180,6 +142,10 @@ I am as of yet not sure if the weird info byte is because of a failed bind proce
     <!-- <define name="AHRS_MAG_UPDATE_ALL_AXES"/>-->
     <!-- not used, determin benefit and test -->
     </subsystem>
+
+    <subsystem name="actuators" type="dummy"></subsystem>
+    <subsystem name="intermcu" type="can"/>
+
     <!-- * We want to use all servos, so we need to let the AP board know * -->
     <define name="USE_SERVOS_7AND8"/>
     <!-- * Communication * -->
@@ -220,14 +186,52 @@ I am as of yet not sure if the weird info byte is because of a failed bind proce
       <define name="RADIO_CONTROL_LED" value="4"/>
       <define name="LINK_MCU_LED" value="3"/>
 
-      <subsystem name="radio_control" type="spektrum"/>
+      <subsystem name="radio_control" type="spektrum">
+      <!-- note that the radio xml file is only used for PPM based systems.
+The spektrum models have fixed names for the channels/functions: https://github.com/paparazzi/paparazzi/blob/v4.0/sw/airborne/arch/stm32/subsystems/radio_control/spektrum_arch.h
+-->
+      <!--
+Also fixed index values by default
 
+RADIO_THROTTLE   0
+RADIO_ROLL       1
+RADIO_PITCH      2
+RADIO_YAW        3
+RADIO_GEAR       4
+RADIO_FLAP       5
+RADIO_AUX1       5
+RADIO_AUX2       6
+RADIO_AUX3       7
+RADIO_AUX4       8
+RADIO_AUX5       9
+RADIO_AUX6     jtag  10
+RADIO_AUX7       11
+-->
+      <!-- ... but if you want to make an "alias" for one of the names, e.g. use AUX2 as a kill switch, define it-->
+      <!-- a three way switch -->
       <define name="RADIO_MODE" value="RADIO_GEAR"/>
       <define name="RADIO_BRAKE" value="RADIO_AUX2"/>
       <define name="RADIO_HATCH" value="RADIO_AUX3"/>
-      <configure name="FLASH_MODE" value="JTAG" />
-      <configure name="NO_LUFTBOOT" value="1" />
-      <configure name="BMP_PORT" value="/dev/ttyACM0" />
+      <!-- TODO: diable the kill switch value altogether, a kill switch is surely not wanted on a electric RC plane -->
+      <!-- <define name="RADIO_KILL_SWITCH" value="RADIO_FLAP"/> -->
+      <!-- <define name=<define name="RADIO_BRAKE" value="RADIO_AUX2"/>"RADIO_CONTROL_NB_CHANNEL" value="7"/> -->
+      <!--  <configure name="USE_SECONDARY_SPEKTRUM_RECEIVER"/> -->
+      <!--
+Marek wrote:
+I had the same thing and while I haven't fixed it,
+I identified the issue in my case as the satellite sending a transmitter info byte of 0xA2.
+This is DSMX even though my transmitter is set to DSM2.
+
+Since the decoder code treats the 2 to extect two frames, but receives only one,
+ the second one is initialize<define name="RADIO_MODE" value="RADIO_GEAR"/>d to all 0s and so the 0 channel is overwritten
+
+I am as of yet not sure if the weird info byte is because of a failed bind procedure
+ or something changed in the actuall hardware
+  (I don't know how old my transmitter is (DX6i) bc I got it from my lab, but the receivers I just ordered from HobbyKing)-->
+      <!-- If you want to reverse a channel change the sign of the channel you want to reverse -->
+      <!--<define name="RADIO_CONTROL_SPEKTRUM_SIGNS" value="\{1,-1,-1,-1,1,-1,1,1,1,1,1,1\}"/>-->
+      </subsystem>
+
       <define name="OUTBACK_CHALLENGE_DANGEROUS_RULE_RC_LOST_NO_AP" value="1" />
       <define name="OUTBACK_CHALLENGE_VERY_DANGEROUS_RULE_AP_CAN_FORCE_FAILSAFE" value="FALSE" />
 
@@ -246,7 +250,7 @@ I am as of yet not sure if the weird info byte is because of a failed bind proce
 
       <!--  * To be able to compile make sure to set to PPM even in real life a spektrum receiver is used * -->
       <subsystem name="radio_control" type="ppm">
-        <define name="RADIO_AUX2" value="0"/>
+        <define name="RADIO_KILL" value="0"/>
         <define name="RADIO_AUX4" value="0"/>
         <!-- <define ="RADIO_MODE" value="0"/>-->
         <define name="RADIO_BRAKE" value="0"/>
