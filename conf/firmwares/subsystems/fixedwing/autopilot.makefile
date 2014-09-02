@@ -69,14 +69,17 @@ $(TARGET).srcs 		+= $(SRC_FIXEDWING)/inter_mcu.c
 #
 # Math functions
 #
+ifneq ($(TARGET),fbw)
 $(TARGET).srcs += math/pprz_geodetic_int.c math/pprz_geodetic_float.c math/pprz_geodetic_double.c math/pprz_trig_int.c math/pprz_orientation_conversion.c
+endif
 
 #
 # I2C
 #
+ifneq ($(TARGET),fbw)
 $(TARGET).srcs += mcu_periph/i2c.c
 $(TARGET).srcs += $(SRC_ARCH)/mcu_periph/i2c_arch.c
-
+endif
 
 ######################################################################
 ##
@@ -162,8 +165,9 @@ ap_srcs 		+= $(SRC_ARCH)/subsystems/settings_arch.c
 ap_srcs += subsystems/air_data.c
 
 # BARO
+ifneq ($(TARGET),fbw)
 include $(CFG_SHARED)/baro_board.makefile
-
+endif
 
 ######################################################################
 ##
