@@ -130,8 +130,10 @@ void init_fbw( void ) {
 #ifdef INTER_MCU
   inter_mcu_init();
 #endif
-#ifdef MCU_SPI_LINK
+#if defined MCU_SPI_LINK || defined MCU_CAN_LINK
   link_mcu_init();
+#endif
+#ifdef MCU_SPI_LINK
   link_mcu_restart();
 #endif
 
@@ -297,6 +299,11 @@ set_failsafe_mode();
 #endif
 
 #ifdef MCU_UART_LINK
+  inter_mcu_fill_fbw_state();
+  link_mcu_periodic_task();
+#endif
+
+#ifdef MCU_CAN_LINK
   inter_mcu_fill_fbw_state();
   link_mcu_periodic_task();
 #endif

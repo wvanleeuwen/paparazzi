@@ -16,7 +16,9 @@ typedef int16_t pprz_t; /* type of commands */
                                     pprz))
 
 #if defined FBW && defined AP
+#ifndef SEPARATE_FBW
 #define SINGLE_MCU 1
+#endif
 #endif
 
 #endif /* PAPARAZZI_H */

@@ -34,8 +34,8 @@
 #define MSG_INTERMCU_COMMAND_MASTER_ID 0x00
 #define MSG_INTERMCU_COMMAND_EXTRA_ID 0x01
 // Channels
-#define MSG_INTERMCU_RADIO_LOW_ID 0x02
-#define MSG_INTERMCU_RADIO_HIGH_ID 0x03
+#define MSG_INTERMCU_RADIO_LOW_ID 0x04
+#define MSG_INTERMCU_RADIO_HIGH_ID 0x05
 // Trim
 #define MSG_INTERMCU_TRIM_ID 0x09
 // Status
@@ -81,7 +81,7 @@ void link_mcu_on_can_msg(uint32_t id, uint8_t *data, int len)
 #if RADIO_CONTROL_NB_CHANNEL > 8
 #warning "INTERMCU_CAN CAN ONLY SEND 8 RADIO CHANNELS: CHANNELS 9 and higher will not be sent"
 #endif
-
+  if (len){}//Remove compile warning
 
   if (id == MSG_INTERMCU_COMMAND_MASTER_ID)
   {
@@ -172,10 +172,8 @@ void link_mcu_periodic_task( void )
   for (int i=0; (i<(RADIO_CONTROL_NB_CHANNEL-4)) && (i<4);i++)
     imcu_chan2.cmd[i] = fbw_state->channels[4+i];
 
-  RunOnceEvery(2, {
-    ppz_can_transmit(MSG_INTERMCU_RADIO_LOW_ID,  imcu_chan1.data, 8);
-    ppz_can_transmit(MSG_INTERMCU_RADIO_HIGH_ID, imcu_chan2.data, 8);
-  } );
+  ppz_can_transmit(MSG_INTERMCU_RADIO_LOW_ID,  imcu_chan1.data, 8);
+  ppz_can_transmit(MSG_INTERMCU_RADIO_HIGH_ID, imcu_chan2.data, 8);
 #endif
 
 }
