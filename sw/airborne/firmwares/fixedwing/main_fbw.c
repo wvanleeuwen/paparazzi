@@ -292,6 +292,10 @@ void event_task_fbw( void) {
 /************* PERIODIC ******************************************************/
 void periodic_task_fbw( void ) {
 
+#ifdef FBW_DATALINK
+  FbwDataLinkPeriodic();
+#endif
+
 #ifdef RADIO_CONTROL
   radio_control_periodic_task();
   if (fbw_mode == FBW_MODE_MANUAL && radio_control.status == RC_REALLY_LOST) {

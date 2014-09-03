@@ -23,13 +23,11 @@
 static inline void autopilot_parse(char c)
 {
   ModemLink(Transmit(c));
-  RunOnceEvery(100,LED_TOGGLE(2));
 }
 
 static inline void modem_parse(char c)
 {
   AutopilotLink(Transmit(c));
-  RunOnceEvery(10,LED_TOGGLE(4));
 }
 
 #define ReadAutopilotBuffer() {                  \
@@ -42,10 +40,20 @@ static inline void modem_parse(char c)
       modem_parse(ModemLink(Getch()));      \
   }
 
-
+void FbwDataLinkPeriodic(void)
+{
+  LED_OFF(2);
+  LED_OFF(4);
+}
 
 void FbwDataLinkEvent(void)
 {
+  if (ModemLink(ChAvailable()))
+    LED_ON(2);
+
+  if (AutopilotLink(ChAvailable()))
+    LED_ON(4);
+
   ReadModemBuffer();
   ReadAutopilotBuffer();
 }
