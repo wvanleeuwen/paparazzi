@@ -66,12 +66,16 @@ void dc_send_command(uint8_t cmd)
       dc_send_shot_position();
       break;
     case DC_TALLER:
+      CameraLink(Transmit(cmd));
       break;
     case DC_WIDER:
+      CameraLink(Transmit(cmd));
       break;
     case DC_ON:
+      CameraLink(Transmit(cmd));
       break;
     case DC_OFF:
+      CameraLink(Transmit(cmd));
       break;
     default:
       break;
