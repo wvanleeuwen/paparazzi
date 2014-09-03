@@ -27,6 +27,6 @@
 #ifndef FBW_DATALINK_EVENT
 #define FBW_DATALINK_EVENT
 
-extern void FbwDatalinkEvent(void);
+extern void FbwDataLinkEvent(void);
 
 #endif

@@ -177,6 +177,11 @@ http://paparazzi.enac.fr/w/index.php?title=Theory_of_Operation
 
       <configure name="PERIODIC_FREQUENCY" value="120"/>
 
+      <subsystem name="fbw_datalink">
+        <configure name="AUTOPILOT_PORT" value="UART2" />
+        <configure name="MODEM_PORT" value="UART3" />
+        <configure name="MODEM_BAUD" value="B9600"/>
+        </subsystem>
       <subsystem name="radio_control" type="spektrum">
       <!-- note that the radio xml is needed for intermcu but MUST contain the same channels as the spektrum defines in the code:
 The spektrum models have fixed names for the channels/functions: https://github.com/paparazzi/paparazzi/blob/v4.0/sw/airborne/arch/stm32/subsystems/radio_control/spektrum_arch.h
