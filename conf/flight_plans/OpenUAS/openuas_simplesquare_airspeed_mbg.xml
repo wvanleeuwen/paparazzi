@@ -96,8 +96,8 @@
     <block name="Takeoff" strip_button="Takeoff (wp CLIMB)" strip_icon="takeoff.png">
       <exception cond="GetPosAlt() > ground_alt+30" deroute="Standby"/>
       <set value="0" var="kill_throttle"/>
-      <while cond="LessThan(NavBlockTime(), 4)"/> 
-     <!-- <set value="1" var="launch"/>-->
+      <!-- <while cond="LessThan(NavBlockTime(), 4)"/>-->
+      <set value="1" var="launch"/>
       <set value="0" var="autopilot_flight_time"/>
       <set value="CLIMB_AIRSPEED" var="v_ctl_auto_airspeed_setpoint"/>
       <go wp="CLIMB"/>

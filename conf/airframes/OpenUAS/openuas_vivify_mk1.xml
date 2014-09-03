@@ -437,7 +437,7 @@ For a blended wing this will translate best to
     <!-- * Yaw, since we have and option via ELEVON UP FLAPPERON DOWN MIX * -->
     <axis name="YAW" failsafe_value="0"/>
     <!-- * Maybe set to open position, to be able to simply insert the payload * -->
-    <axis name="HATCH" failsafe_value="9599"/>
+    <axis name="HATCH" failsafe_value="-9599"/>
     <axis name="BRAKE" failsafe_value="-6000"/>
     <axis name="FORCECRASH" failsafe_value="0"/>
     <!-- maybe set to 9600 -->
