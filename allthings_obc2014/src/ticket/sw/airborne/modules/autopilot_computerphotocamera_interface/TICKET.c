@@ -31,16 +31,38 @@
 // Include Standard Camera Control Interface
 #include "modules/digital_cam/dc.h"
 
+// Telemetry
+#include "mcu_periph/uart.h"
+#include "messages.h"
+#include "subsystems/datalink/downlink.h"
+#include "generated/periodic_telemetry.h"
+#include BOARD_CONFIG
+
+
+int ticket_thumbnails = 0;
+#define THUMB_MSG_SIZE  (80-8-2)
+static uint8_t thumb[THUMB_MSG_SIZE];
+
 void ticket_init(void)
 {
   // Call common DC init
   dc_init();
+  ticket_thumbnails = 0;
+  for (int i=0;i<THUMB_MSG_SIZE;i++)
+    thumb[i] = 0;
 }
 
 void ticket_periodic( void )
 {
   // Common DC Periodic task
   dc_periodic_4Hz();
+
+  if (ticket_thumbnails > 0)
+  {
+    for (int i=0;i<THUMB_MSG_SIZE;i++)
+      thumb[i]++;
+    DOWNLINK_SEND_PAYLOAD(DefaultChannel, DefaultDevice, THUMB_MSG_SIZE, thumb);
+  }
 }
 
 

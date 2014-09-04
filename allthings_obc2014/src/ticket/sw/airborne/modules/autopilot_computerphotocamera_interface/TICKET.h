@@ -36,4 +36,6 @@ extern void ticket_init(void);
 /** 4Hz Periodic */
 extern void ticket_periodic(void);
 
+extern int ticket_thumbnails;
+
 #endif // GPIO_CAM_CTRL_H
