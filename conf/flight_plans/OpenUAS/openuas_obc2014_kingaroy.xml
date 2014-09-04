@@ -6,19 +6,16 @@
      http://www.uavoutbackchallenge.com.au/     
 -->
 
-<flight_plan name="OpenUAS OBC2014" ground_alt="0" alt="120" lat0="-26.5847810000" lon0="151.8423250000" security_height="70" max_dist_from_home="10000" qfu="70">
-<!-- ******************************** HEADERS ****************************** -->
-
-
+<flight_plan name="OpenUAS OBC2014" ground_alt="0" alt="120" home_mode_height="120" lat0="-26.584781" lon0="151.842325" max_dist_from_home="10000" qfu="70" security_height="70">
 <!-- ******************************* WAYPOINTS ***************************** -->
   <waypoints>
     <waypoint name="HOME" x="0" y="0" />
 
-    <waypoint name="AIRFIELDHOME" lat="-26.5847810000" lon="151.8423250000" height="2."/> <!-- Note that Scrutineering AIRFIELDHOME is the same as in the SnR mission -->
+    <waypoint name="AIRFIELDHOME" lat="-26.5847810000" lon="151.8423250000" height="2."/>
     <waypoint name="COMMSHOLD" lat="-26.6072120000" lon="151.8453890000" height="115."/>
 
 <!-- MB = Mission Boundary -->
-    <waypoint name="_MB1"  lat="-26.5695640000" lon="151.8373730000" height="400."/><!-- Todo set boundary to the QNH baro top boundary height of 1500ft AMSL? AGL-->
+    <waypoint name="_MB1"  lat="-26.5695640000" lon="151.8373730000" height="400."/>
     <waypoint name="_MB2"  lat="-26.5699560000" lon="151.8394050000" height="400."/>
     <waypoint name="_MB3"  lat="-26.5768230000" lon="151.8411420000" height="400."/>
     <waypoint name="_MB4"  lat="-26.5769900000" lon="151.8400450000" height="400."/>
@@ -52,20 +49,15 @@
 
     <waypoint name="AMAZED" lat="-26.5940360000" lon="151.8427090000" height="115."/>
 
-<!-- Additional VIA_EL2 Waypoint since we must go *via* EL2, and to have a little
-    more meters optimal for our scan strips entry, otherwhise we could miss one
-    photo and not spot Joe. So not via Paris to Rome, but Via EL2 to Joe -->
-
-    <waypoint name="VIAEL2" lat="-26.6174980000" lon="151.8435670000" height="115."/>
-
   </waypoints>
 
   <includes>
+    <include name="Safety" procedure="include_obc2014_safety.xml" />
     <include name="Testing" procedure="include_obc2014_testing.xml" />
   </includes>
 
   <blocks>
-    <block name="Boot" />
+    <block name="Boot"/>
   </blocks>
 
 </flight_plan>

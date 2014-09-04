@@ -1,9 +1,9 @@
 <!DOCTYPE flight_plan SYSTEM "../flight_plan.dtd">
 
 <procedure>
-<flight_plan name="OpenUAS OBC2014" ground_alt="0" alt="120" lat0="-26.5847810000" lon0="151.8423250000" security_height="70" max_dist_from_home="10000" qfu="70">
+
 <!-- ******************************** HEADERS ****************************** -->
-<header>
+  <header>
 //Set Generic options
     #include "autopilot.h"
 //Enable AHRS Health test functions
@@ -103,15 +103,14 @@ termination mode (Section 5.6).
       <!-- TODO: maybe set a little lower speed ? max endurence speed? -->
       <set value="NOMINAL_AIRSPEED" var="v_ctl_auto_airspeed_setpoint"/>
       <!-- Rules 2014 state a loiter of maximum 2 minutes = 120seconds is allowed -->
-      <exception cond="(stage_time > 120) || (datalinkloss_occurence_counter > 2)" deroute="AirfieldHomeLoiter"/>
+      <exception cond="(stage_time > 120)" deroute="AirfieldHomeLoiter"/>
       <!-- resume if datalink is regained-->   
       <!--TODO If the data link is regained prior to the conclusion of 2 minutes of loiter at
       Comms Hold the mission maybe continued otherwise any subsequent  TODO -->
-      <exception cond="datalink_time < 10" deroute="TrackToEL2"/>      <!-- As soon as we have a link again Go EL2 and continue mission> -->
+      <!--exception cond="LessThan(datalink_time0, 10)" deroute="TrackToEL2"/-->      <!-- As soon as we have a link again Go EL2 and continue mission> -->
       <!-- TODO: better continue where we had our last telemerty still OK point if possible -->
       <!-- Since it arrived we must raise a counter by one. it's not alowed by rules to occur  more than twice, then we must move to airfieldhome -->
       <!-- TODO: set only after aircraft **arrived!** in the loiter not before the ETA < 1sec -->
-       <set var="obcrulesdatalinklosscounter" value="obcrulesdatalinklosscounter+1"/>
       <!-- <while no link then -->
        <circle wp="COMMSHOLD" radius="nav_radius"/> <!-- TODO maybe bigger than default radius -->
     </block>
@@ -124,12 +123,12 @@ termination mode (Section 5.6).
 <!-- circle smootly down -->
 <!-- TODO: Make te routine correct it is NOT correct now -->
     <block name="AirfieldHomeSoftlyDown">
+        <circle radius="nav_radius" wp="AIRFIELDHOME" until="NavCircleCount() > 1"/>
       <!--
       <for from="0" to="8" var="i">
-        <circle radius="DEFAULT_CIRCLE_RADIUS - $i*10" wp="AIRFIELDHOME" until="NavCircleCount() > 1"/>
       </for>
       -->
-      <deroute block="InitiateLandingApproach"/>
+      <!--deroute block="InitiateLandingApproach"/-->
     </block>
 
 <!-- TO make sure it somehow stop in case of lightplan mishap -->
@@ -160,9 +159,9 @@ Q:
 
     <!-- Just make sure it somehow stops in case of flightplan mishap or no being able to take over -->
     <block key="a" name="Airfieldhome" strip_button="Airfieldhome" strip_icon="home.png">
-      <!--<circle radius="nav_radius" wp="AIRFIELDHOME"/> -->
+      <circle radius="nav_radius" wp="AIRFIELDHOME"/>
       <!-- TODO have two landing stratigy, one with circle down one with a streight line maybe a thir depending on measured windspeed -->
-      <deroute block="InitiateLandingApproach"/>
+      <!--deroute block="InitiateLandingApproach"/-->
     </block>
 
 

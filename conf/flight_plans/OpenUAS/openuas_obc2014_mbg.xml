@@ -6,66 +6,58 @@
      http://www.uavoutbackchallenge.com.au/     
 -->
 
-<flight_plan name="OpenUAS OBC2014" ground_alt="0" alt="120" lat0="-26.5847810000" lon0="151.8423250000" security_height="70" max_dist_from_home="10000" qfu="70">
-<!-- ******************************** HEADERS ****************************** -->
-
-
+<flight_plan name="OpenUAS OBC2014" ground_alt="292" alt="395" home_mode_height="120" lat0="50.726999" lon0="7.567305" max_dist_from_home="1500" qfu="310" security_height="45">
 <!-- ******************************* WAYPOINTS ***************************** -->
   <waypoints>
     <waypoint name="HOME" x="0" y="0" />
 
-    <waypoint name="AIRFIELDHOME" lat="-26.5847810000" lon="151.8423250000" height="2."/> <!-- Note that Scrutineering AIRFIELDHOME is the same as in the SnR mission -->
-    <waypoint name="COMMSHOLD" lat="-26.6072120000" lon="151.8453890000" height="115."/>
+    <waypoint lat="50.728414" lon="7.567299" name="AIRFIELDHOME"/>
+    <waypoint lat="50.728111" lon="7.570276" name="COMMSHOLD"/>
 
 <!-- MB = Mission Boundary -->
-    <waypoint name="_MB1"  lat="-26.5695640000" lon="151.8373730000" height="400."/><!-- Todo set boundary to the QNH baro top boundary height of 1500ft AMSL? AGL-->
-    <waypoint name="_MB2"  lat="-26.5699560000" lon="151.8394050000" height="400."/>
-    <waypoint name="_MB3"  lat="-26.5768230000" lon="151.8411420000" height="400."/>
-    <waypoint name="_MB4"  lat="-26.5769900000" lon="151.8400450000" height="400."/>
-    <waypoint name="_MB5"  lat="-26.5812271666" lon="151.8410624807" height="400."/>
-    <waypoint name="_MB6"  lat="-26.5820599087" lon="151.8425026348" height="400."/>
-    <waypoint name="_MB7"  lat="-26.5791790000" lon="151.8493290000" height="400."/>
-    <waypoint name="_MB8"  lat="-26.5900093277" lon="151.8509739535" height="400."/>
-    <waypoint name="_MB9"  lat="-26.6095740000" lon="151.8631000000" height="400."/>
-    <waypoint name="_MB10" lat="-26.6389580000" lon="151.8588390000" height="400."/>
-    <waypoint name="_MB11" lat="-26.6449723895" lon="151.8472241047" height="400."/>
-    <waypoint name="_MB12" lat="-26.6435720000" lon="151.8303500000" height="400."/>
-    <waypoint name="_MB13" lat="-26.5875990000" lon="151.8344050000" height="400."/>
+    <waypoint lat="50.730154" lon="7.558596" name="_MB1"/>
+    <waypoint lat="50.726070" lon="7.558415" name="_MB2"/>
+    <waypoint lat="50.722546" lon="7.560182" name="_MB3"/>
+    <waypoint lat="50.720965" lon="7.566782" name="_MB4"/>
+    <waypoint lat="50.721343" lon="7.571988" name="_MB5"/>
+    <waypoint lat="50.723466" lon="7.576374" name="_MB6"/>
+    <waypoint lat="50.723375" lon="7.582823" name="_MB7"/>
+    <waypoint lat="50.726047" lon="7.586578" name="_MB8"/>
+    <waypoint lat="50.728415" lon="7.586297" name="_MB9"/>
+    <waypoint lat="50.729932" lon="7.576870" name="_MB10"/>
+    <waypoint lat="50.731949" lon="7.571991" name="_MB11"/>
+    <waypoint lat="50.731992" lon="7.565551" name="_MB12"/>
+    <waypoint lat="50.730805" lon="7.563538" name="_MB13"/>
 
 <!-- SA = Search Area -->
-    <waypoint name="SA1" lat="-26.6174450000" lon="151.8431840000" height="115."/>
-    <waypoint name="SA2" lat="-26.6191710000" lon="151.8555730000" height="115."/>
-    <waypoint name="SA3" lat="-26.6378430000" lon="151.8515970000" height="155."/>
-    <waypoint name="SA4" lat="-26.6388280000" lon="151.8491210000" height="155."/>
-    <waypoint name="SA5" lat="-26.6373930000" lon="151.8393860000" height="155."/>
+    <waypoint lat="50.729831" lon="7.574541" name="SA1"/>
+    <waypoint lat="50.730068" lon="7.564475" name="SA2"/>
+    <waypoint lat="50.723886" lon="7.562947" name="SA3"/>
+    <waypoint lat="50.724341" lon="7.575741" name="SA4"/>
+    <waypoint lat="50.727658" lon="7.576903" name="SA5"/>
 
 <!-- Scrutineering Course -->
-    <waypoint name="TST-1" lat="-26.5837620409" lon="151.8379376113" height="115."/>
-    <waypoint name="TST-2" lat="-26.5859618185" lon="151.8451373142" height="115."/>
-    <waypoint name="TST-3" lat="-26.5902280387" lon="151.8400929439" height="115."/>
+    <waypoint lat="50.727306" lon="7.562861" name="TST-1"/>
+    <waypoint lat="50.724289" lon="7.567803" name="TST-2"/>
+    <waypoint lat="50.728229" lon="7.573673" name="TST-3"/>
 
 <!-- EL = Entry and Exit Lanes -->
-    <waypoint name="EL1" lat="-26.6072120000" lon="151.8453890000" height="115."/>
-    <waypoint name="EL2" lat="-26.6174980000" lon="151.8435670000" height="115."/>
-    <waypoint name="EL3" lat="-26.6183650000" lon="151.8497880000" height="115."/>
-    <waypoint name="EL4" lat="-26.6080920000" lon="151.8516460000" height="115."/>
+    <waypoint lat="50.728104" lon="7.573908" name="EL1"/>
+    <waypoint lat="50.727140" lon="7.563109" name="EL2"/>
+    <waypoint lat="50.724135" lon="7.568084" name="EL3"/>
+    <waypoint lat="50.727348" lon="7.565080" name="EL4"/>
 
-    <waypoint name="AMAZED" lat="-26.5940360000" lon="151.8427090000" height="115."/>
-
-<!-- Additional VIA_EL2 Waypoint since we must go *via* EL2, and to have a little
-    more meters optimal for our scan strips entry, otherwhise we could miss one
-    photo and not spot Joe. So not via Paris to Rome, but Via EL2 to Joe -->
-
-    <waypoint name="VIAEL2" lat="-26.6174980000" lon="151.8435670000" height="115."/>
+    <waypoint lat="50.723077" lon="7.565581" name="AMAZED"/>
 
   </waypoints>
 
   <includes>
+    <include name="Safety" procedure="include_obc2014_safety.xml" />
     <include name="Testing" procedure="include_obc2014_testing.xml" />
   </includes>
 
   <blocks>
-    <block name="Boot" />
+    <block name="Boot"/>
   </blocks>
 
 </flight_plan>
