@@ -83,6 +83,8 @@ TODO:
 //Needed for the DROP function
 static inline uint16_t G = 9.81;
 
+
+
 #endif
 
   </header>
@@ -196,11 +198,12 @@ OK?
       <call fun="NavSetGroundReferenceHere()"/>
       <call fun="NavSetAltitudeReferenceHere()" />
       <call fun="NavSetWaypointHere(WP_HOME)"/>
--->
-      <while cond="gps.pacc > 1000"/><!--at least 10m precision needed  TODO  continue if not within 10 seconds --><!-- TODO better flow-->
+
+      <while cond="gps.pacc > 1000"/>
+at least 10m precision needed  TODO  continue if not within 10 seconds --><!-- TODO better flow
       <call fun="NavSetGroundReferenceHere()"/>
       <call fun="NavSetWaypointHere(WP_HOME)"/>
-      <!--  TODO Set QNH here based on GPS height if allowed from commitee -->
+-->      <!--  TODO Set QNH here based on GPS height if allowed from commitee -->
     </block>
 
     <!-- *********** Set the ground reference height and the home position *********** -->
@@ -222,8 +225,10 @@ OK?
       <!--Just to make sure in case of flightplan mishap, it is no too far away -->
       <!-- <set var="waypoints[WP_START].x" value="WaypointX(WP_EL2) + 50"/> -->
       <!-- <set var="waypoints[WP_START].y" value="WaypointY(WP_EL2) + 50"/> -->
+      <!-- <set value="0" var="ap_state->commands[COMMAND_CAMBER]"/> -->
+      <!-- <set value="0" var="ap_state->commands[COMMAND_BRAKE]"/> -->
       <call fun="NavKillThrottle()"/>
-      <set value="1" var="kill_throttle"/> <!-- maybe replace with <call fun="NavKillThrottle()"/> -->
+      <call fun="AirbrakesOff()"/>
       <attitude pitch="0" roll="0" throttle="0" vmode="throttle" until="FALSE"/><!-- maybe not moving the plane would still make a test of defelction possible -->
 <!-- If over 50% throttleis given auto2 takeoff is initiated, it is not an RC steering method, just a trigger, make sure transmiter is set in auto2 mode, or else switched off -->
       <!-- <exception cond="RCChannel(RADIO_THROTTLE) > 1600" deroute="Takeoff"/> --><!-- Todo ACtivate if everything works-->
@@ -235,18 +240,13 @@ OK?
 
     <block key="t" name="Takeoff" strip_button="Takeoff" strip_icon="takeoff.png">
       <call fun="NavSetWaypointHere(WP_THROWSPOT)"/>
-    <!--  <set value="0" var="ap_state->commands[COMMAND_BRAKE]"/> -->
-    <!--  <set value="3000" var="ap_state->commands[COMMAND_CAMBER]"/> -->
-      <!--<exception cond="estimator_z > ground_alt+60" deroute="determineflighttype"/>-->
-
+      <!-- <set value="0" var="ap_state->commands[COMMAND_BRAKE]"/> -->
+      <!-- <set value="3000" var="ap_state->commands[COMMAND_CAMBER]"/> -->
+      <!-- <exception cond="estimator_z > ground_alt+60" deroute="determineflighttype"/> -->
       <set value="0" var="kill_throttle"/>
       <set value="1" var="launch"/>
       <set value="0" var="autopilot_flight_time"/>
-      <deroute block="Climbout"/>
-    </block>
 
-<!-- TODO test needed pitch value -->
-    <block name="Climbout">
       <!--<exception cond="rc_status==RC_REALLY_LOST" after 3 seconds and no IMU deroute="softlydown">if using RC stil on with a Auto2 mode switch-->
       <attitude pitch="35" roll="0" throttle="1.0" until="GetPosAlt() > ground_alt+40" vmode="throttle"/>
       <set var="v_ctl_auto_throttle_nominal_cruise_throttle" value="1.0" />
@@ -271,18 +271,13 @@ All emergency and failure requirements of the Challenge must be met,
 with the exception that for Loss of Data Link the procedure will be track direct
 to “Airfield Home” and orbit for either a landing or regain of Data Link. -->
 
-    <block name="Scrutineering Autonomy Start" strip_button="Square" strip_icon="path.png">
-      <!--  <set value="0" var="ap_state->commands[COMMAND_CAMBER]"/> -->
-      <!--   <set value="0" var="ap_state->commands[COMMAND_BRAKE]"/> -->
-      <!--first a little standby then onto the simple square -->
-      <circle radius="nav_radius"  wp="STDBY" until="NavCircleCount() > 1"/>      <!--  <circle alt="WaypointAlt(WP_STDBY)" radius="nav_radius" wp="STDBY"/> -->
-    </block>
-
     <block name="Scrutineering Autonomy Triangle">
       <!-- TODO: while we are up there take some pictures anyhow :) -->
+      <while cond="TRUE">
         <go from="TST-3" hmode="route" wp="TST-1"/>
         <go from="TST-1" hmode="route" wp="TST-2"/>
         <go from="TST-2" hmode="route" wp="TST-3"/>
+      </while>
     </block>
 
 <!-- *********************************************************

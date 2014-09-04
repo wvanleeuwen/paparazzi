@@ -52,8 +52,8 @@
   </waypoints>
 
   <includes>
+    <include name="Mission" procedure="include_obc2014_mission.xml" />
     <include name="Safety" procedure="include_obc2014_safety.xml" />
-    <include name="Testing" procedure="include_obc2014_testing.xml" />
   </includes>
 
   <blocks>

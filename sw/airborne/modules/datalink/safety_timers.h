@@ -32,6 +32,9 @@
 
 extern uint16_t obcrulesdatalinklosscounter;
 
+#define AirbrakesOff() {ap_state->commands[COMMAND_BRAKE]=0;}
+#define AirbrakesOn() {ap_state->commands[COMMAND_BRAKE]=9600;}
+
 //void init_demo(void);
 //void periodic_1Hz_demo(void);
 //void periodic_10Hz_demo(void);

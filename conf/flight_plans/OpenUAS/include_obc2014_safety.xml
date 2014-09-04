@@ -45,7 +45,7 @@
     <!-- If datalink is lost for more than 10 seconds and we are in launched state -->
 
     <!-- below for the real SnR --> <!--  TODO: if datalinkloss but still closeby move to commhold? strange better airfiledhome loiter IMHO -->
-    <exception cond="And(datalink_time > 10, launch > 0)" deroute="CommsHoldLoiter"/> <!-- deroute="AirfieldHomeLoiter"/> -->
+    <exception cond="And(datalink_time > 110, launch > 0)" deroute="CommsHoldLoiter"/> <!-- deroute="AirfieldHomeLoiter"/> -->
 
     <!-- Case of loss of GPS AND loss of datalink -->
     <!-- <exception cond="And(datalink_time > 10, !GpsFixValid())" deroute="ForcedCrash"/> --><!--921 1500f TODO add margin?-->
@@ -177,7 +177,7 @@ Q:
       <!-- <set value="MAX_PPRZ" var="ap_state->commands[COMMAND_FORCECRASH]"/> -->
       <!--</exception> -->
 
-      <go wp="STDBY" vmode="throttle" throttle="0"/> <!-- todo add a dynamic TDFORCEDCRASH point so to notify and have it in the log  -->
+      <circle radius="nav_radius" wp="STDBY"/> <!-- todo add a dynamic TDFORCEDCRASH point so to notify and have it in the log  -->
     </block>
 
   </blocks>
