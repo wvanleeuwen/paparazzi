@@ -1,0 +1,72 @@
+<!DOCTYPE flight_plan SYSTEM "../flight_plan.dtd">
+<!-- This is the Flightplan of Team OpenUAS from the Netherlands for use in the
+     Australian UAV Outback Challenge of 2014. 
+     
+     Read about this challenge here:
+     http://www.uavoutbackchallenge.com.au/     
+-->
+
+<flight_plan name="OpenUAS OBC2014" ground_alt="0" alt="120" lat0="-26.5847810000" lon0="151.8423250000" security_height="70" max_dist_from_home="10000" qfu="70">
+<!-- ******************************** HEADERS ****************************** -->
+
+
+<!-- ******************************* WAYPOINTS ***************************** -->
+  <waypoints>
+    <waypoint name="HOME" x="0" y="0" />
+
+    <waypoint name="AIRFIELDHOME" lat="-26.5847810000" lon="151.8423250000" height="2."/> <!-- Note that Scrutineering AIRFIELDHOME is the same as in the SnR mission -->
+    <waypoint name="COMMSHOLD" lat="-26.6072120000" lon="151.8453890000" height="115."/>
+
+<!-- MB = Mission Boundary -->
+    <waypoint name="_MB1"  lat="-26.5695640000" lon="151.8373730000" height="400."/><!-- Todo set boundary to the QNH baro top boundary height of 1500ft AMSL? AGL-->
+    <waypoint name="_MB2"  lat="-26.5699560000" lon="151.8394050000" height="400."/>
+    <waypoint name="_MB3"  lat="-26.5768230000" lon="151.8411420000" height="400."/>
+    <waypoint name="_MB4"  lat="-26.5769900000" lon="151.8400450000" height="400."/>
+    <waypoint name="_MB5"  lat="-26.5812271666" lon="151.8410624807" height="400."/>
+    <waypoint name="_MB6"  lat="-26.5820599087" lon="151.8425026348" height="400."/>
+    <waypoint name="_MB7"  lat="-26.5791790000" lon="151.8493290000" height="400."/>
+    <waypoint name="_MB8"  lat="-26.5900093277" lon="151.8509739535" height="400."/>
+    <waypoint name="_MB9"  lat="-26.6095740000" lon="151.8631000000" height="400."/>
+    <waypoint name="_MB10" lat="-26.6389580000" lon="151.8588390000" height="400."/>
+    <waypoint name="_MB11" lat="-26.6449723895" lon="151.8472241047" height="400."/>
+    <waypoint name="_MB12" lat="-26.6435720000" lon="151.8303500000" height="400."/>
+    <waypoint name="_MB13" lat="-26.5875990000" lon="151.8344050000" height="400."/>
+
+<!-- SA = Search Area -->
+    <waypoint name="SA1" lat="-26.6174450000" lon="151.8431840000" height="115."/>
+    <waypoint name="SA2" lat="-26.6191710000" lon="151.8555730000" height="115."/>
+    <waypoint name="SA3" lat="-26.6378430000" lon="151.8515970000" height="155."/>
+    <waypoint name="SA4" lat="-26.6388280000" lon="151.8491210000" height="155."/>
+    <waypoint name="SA5" lat="-26.6373930000" lon="151.8393860000" height="155."/>
+
+<!-- Scrutineering Course -->
+    <waypoint name="TST-1" lat="-26.5837620409" lon="151.8379376113" height="115."/>
+    <waypoint name="TST-2" lat="-26.5859618185" lon="151.8451373142" height="115."/>
+    <waypoint name="TST-3" lat="-26.5902280387" lon="151.8400929439" height="115."/>
+
+<!-- EL = Entry and Exit Lanes -->
+    <waypoint name="EL1" lat="-26.6072120000" lon="151.8453890000" height="115."/>
+    <waypoint name="EL2" lat="-26.6174980000" lon="151.8435670000" height="115."/>
+    <waypoint name="EL3" lat="-26.6183650000" lon="151.8497880000" height="115."/>
+    <waypoint name="EL4" lat="-26.6080920000" lon="151.8516460000" height="115."/>
+
+    <waypoint name="AMAZED" lat="-26.5940360000" lon="151.8427090000" height="115."/>
+
+<!-- Additional VIA_EL2 Waypoint since we must go *via* EL2, and to have a little
+    more meters optimal for our scan strips entry, otherwhise we could miss one
+    photo and not spot Joe. So not via Paris to Rome, but Via EL2 to Joe -->
+
+    <waypoint name="VIAEL2" lat="-26.6174980000" lon="151.8435670000" height="115."/>
+
+  </waypoints>
+
+  <includes>
+    <include name="Testing" procedure="include_obc2014_testing.xml" />
+  </includes>
+
+  <blocks>
+    <block name="Boot" />
+  </blocks>
+
+</flight_plan>
+
