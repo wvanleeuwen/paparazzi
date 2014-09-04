@@ -78,7 +78,7 @@
       <!-- Wait when there is no 3d fix or accuracy is not good enough -->
       <while cond="!GpsFixValid() || gps.pacc > 1700"/>
      </block>
-    <block name="Initialize">  
+    <block name="Initialize">
       <while cond="LessThan(NavBlockTime(), 12)"/>
       <call fun="NavSetGroundReferenceHere()"/>
       <!--  TODO Set QNH here based on GPS height -->
@@ -102,9 +102,9 @@
       <set value="CLIMB_AIRSPEED" var="v_ctl_auto_airspeed_setpoint"/>
       <go wp="CLIMB"/>
     </block>
-    <block name="AutoTakeoff">  
+    <block name="AutoTakeoff">
       <exception cond="GetPosAlt() > ground_alt+30" deroute="SimpleSquareRoute"/>
-      <set value="0" var="kill_throttle"/>   
+      <set value="0" var="kill_throttle"/>
       <set value="1" var="launch"/>
       <set value="0" var="autopilot_flight_time"/>
       <!--  <exception cond="pprz_mode == PPRZ_MODE_MANUAL || pprz_mode == PPRZ_MODE_AUTO1" deroute="Standby"/>-->
@@ -113,15 +113,15 @@
       <attitude pitch="20" roll="0" throttle="1" until="GetPosAlt() > ground_alt+40" vmode="throttle"/>
     </block>
     <block key="a" name="Standby" strip_button="Standby" strip_icon="home.png">
-      <!--<exception cond="!InsideMissionBoundary(GetPosX(), GetPosY())" deroute="Constant Slope Land Left AF-TD"/>--> 
+      <!--<exception cond="!InsideMissionBoundary(GetPosX(), GetPosY())" deroute="Constant Slope Land Left AF-TD"/>-->
       <set value="NOMINAL_AIRSPEED" var="v_ctl_auto_airspeed_setpoint"/>
       <circle radius="nav_radius" wp="STDBY"/>
     </block>
-    <block name="CommsHoldLoiter" strip_button="CommsHold" strip_icon="recenter.png">   
+    <block name="CommsHoldLoiter" strip_button="CommsHold" strip_icon="recenter.png">
       <!-- TODO: Make this block correct it is NOT YET FINISHED now -->
       <set value="NOMINAL_AIRSPEED" var="v_ctl_auto_airspeed_setpoint"/>
       <exception cond="(stage_time > 120) || (obcrulesdatalinklosscounter > 2)" deroute="AirfieldHomeLoiter"/>
-      <!-- resume if datalink is regained-->   
+      <!-- resume if datalink is regained-->
       <!--TODO If the data link is regained prior to the conclusion of 2 minutes of loiter at
       Comms Hold the mission maybe continued otherwise any subsequent  TODO -->
       <exception cond="datalink_time == 0" deroute="Standby"/>      <!-- TODO as soon as if has link again Go EL2 > -->
@@ -160,7 +160,7 @@
       </while >
     </block>
 
-<!-- GLS landings 
+<!-- GLS landings
     <block name="land">
       <call fun="gls_init(WP_AF,WP__SD, WP__TOD, WP_TD)"/>
       <call fun="nav_compute_baseleg(WP_AF, WP_TD, WP__BASELEG, nav_radius)"/>
@@ -197,8 +197,8 @@
    <!-- todo add brake value depending on groundspeed value-->
     <block name="Final">
       <go approaching_time="5" from="AF" hmode="route" vmode="glide" wp="TD"/>
-      <set var="v_ctl_auto_airspeed_setpoint" value="(GLIDE_AIRSPEED*10.0/12.0)"/> 
-    </block>   
+      <set var="v_ctl_auto_airspeed_setpoint" value="(GLIDE_AIRSPEED*10.0/12.0)"/>
+    </block>
     <block name="Flare">
       <go approaching_time="0" from="AF" hmode="route" throttle="0.0" vmode="glide" wp="TD"/>
       <attitude roll="0.0" throttle="0.0" until="FALSE" vmode="throttle"/>
@@ -221,15 +221,15 @@ v1.2
 Search and Rescue Challenge Rules
 
 This flight mode, once activated, must return the aircraft directly to the
-waypoint “Comms Hold” 
+waypoint “Comms Hold”
 
-(no time limit for transit, but it must be direct to the waypoint) 
+(no time limit for transit, but it must be direct to the waypoint)
 
 and enter a loiter centred on that waypoint.
 
 * After a maximum of 2 minutes of loitering, if the data link has not
 been re-established, the aircraft must be programmed to return
-directly to waypoint “Airfield Home” 
+directly to waypoint “Airfield Home”
 
  where the RC link may be re-established for a manual recovery. There is no time
 limit for the transit, but it must be direct to the waypoint. (Note: The

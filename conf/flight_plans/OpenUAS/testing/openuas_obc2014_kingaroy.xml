@@ -1,10 +1,10 @@
 <!DOCTYPE flight_plan SYSTEM "../flight_plan.dtd">
 <!-- This is the Flightplan of Team OpenUAS from the Netherlands for use in the
-     Australian UAV Outback Challenge of 2014. 
-     
+     Australian UAV Outback Challenge of 2014.
+
      Read about this challenge here:
      http://www.uavoutbackchallenge.com.au/
-     
+
      Thanks to all involved, specifically all the help from CdW, DD, BR, GdC, AvdL
      * TU Delft University of Technology, L&R http://www.tudelft.nl
      * MAVLab - http://mavlab.info
@@ -16,11 +16,11 @@ TYPE 1 OPERATION Flightplan, fully autonomous in-air joe detection integration
 Now with integrated TYPE2 operations option (soon...)
 TYPE 2 OPERATION Flightplan, fully autonomous search, but on ground joe detection integration
 
-STRATEGY: 
+STRATEGY:
 
 # Have one flightplan which does it all, no need to upload anything!
 
-USAGE: 
+USAGE:
 
 To use the flightplan's embedded options:
 
@@ -35,7 +35,7 @@ NOTES:
 
 TODO:
 # Latest coordinates of KMZ of 20131017, a 100% validationcheck.
-# TODO: 
+# TODO:
 # add times to blocks to prevent to early forcedcrash. e.g after 2 second from tkeof border cannot be crossed in reality, so if triggered do a softcircledown or so
 # or mabye calculate distance and look at airframe REAL max ground speed(with wind in backeve) and deduct time it would take, if within < margin it cannot be missionborder
 # but if scrutineering day, than it can be since we test it closeby mission boundary
@@ -57,12 +57,12 @@ TODO:
     #include "autopilot.h"
 //Enable AHRS Health test functions
     #include "subsystems/ahrs.h"
-//Enable advanced electrical power functions 
+//Enable advanced electrical power functions
     #include "subsystems/electrical.h"
 //Enable extra nav functionality
 <!--
 Now done in modules
-    #include "subsystems/nav.h"    
+    #include "subsystems/nav.h"
     #include "subsystems/navigation/nav_line.h"
     #include "subsystems/navigation/OSAMNav.h"
 
@@ -77,10 +77,10 @@ Now done in modules
     #define PHOTOGRAMMETRY_OVERLAP 30		// 1-99 Procent
     #define PHOTOGRAMMETRY_SIDELAP 20		// 1-99 Procent
     #define PHOTOGRAMMETRY_RESOLUTION 50		// mm pixel projection size
-    
+
 // Automatic include of Camera trigger if camera is present and only take pictures inside polygon
 
-// Incluse airframe.h To be able to use specific variables 
+// Incluse airframe.h To be able to use specific variables
     #include "generated/airframe.h"
 
 // Completly replace with onboard recon copmpter interface
@@ -91,7 +91,7 @@ Now done in modules
     #define LINE_STOP_FUNCTION dc_autoshoot = DC_AUTOSHOOT_STOP;
     #endif
 
-//For interaction with the Flight termination Device (FTD) 
+//For interaction with the Flight termination Device (FTD)
     #define RCChannel(_x) ((*fbw_state).channels[_x])
 
 //DANGER WARNING
@@ -124,7 +124,7 @@ static inline uint16_t G = 9.81;
 <!-- Set this and Upload for  scrutineering day --> <!-- OR,  IDEA base it on throwing spot position maybe-->
 <!--      <waypoint name="_SCRUTINEERINGDAY" x="0." y="0." height="0."/> -->
 <!-- Set inside and it will mean a scrutineer flight day -->
-    <waypoint name="_SCRUTINEERINGDAY" x="-999." y="-999." height="0."/> 
+    <waypoint name="_SCRUTINEERINGDAY" x="-999." y="-999." height="0."/>
 
 <!-- MB = Mission Boundary -->
     <waypoint name="_MB1"  lat="-26.5695640000" lon="151.8373730000" height="400."/><!-- Todo set boundary to the QNH baro top boundary height of 1500ft AMSL? AGL-->
@@ -310,7 +310,7 @@ OK?
     <!-- Case of loss of GPS AND loss of datalink -->
     <!-- <exception cond="And(datalink_time > 10, !GpsFixValid())" deroute="ForcedCrash"/> --><!--921 1500f TODO add margin?-->
     <exception cond="Or(!InsideMissionBoundary(GetPosX(), GetPosY()), GetPosAlt() > ground_alt + 921)" deroute="ForcedCrash"/>
-    
+
  <!--   <exception cond="if Joefoundandretunvalformticket deroute="Waitforjudges"/>-->
 
     <!--  If we are allowed to fly higher otherwise to do rules do not state to crash if heigher then 400m -->
@@ -340,7 +340,7 @@ OK?
 <!-- if no valid fix or gps accuracy> 15m or no AHRS , it a no-go wait-->
       <while cond="!GpsFixValid() || gps.pacc > 1500 || !(ahrs.status == AHRS_RUNNING)"/>
     </block>
-    
+
 <!-- *********** Set the ground reference height and the home position *********** -->
 <!-- a second init will follow since the plane thrower will still walk to launchpoint -->
 
@@ -370,7 +370,7 @@ OK?
     <block name="Holding point">
      <!--  TODO: make some movements on all defelctros as a sign we are in holding and to see if all works Maybe a separate testblock-->
       <!--  <set value="0" var="ap_state->commands[COMMAND_BRAKE]"/> -->
-     
+
       <!--Just to make sure in case of flightplan mishap, it is no too far away -->
       <!-- <set var="waypoints[WP_START].x" value="WaypointX(WP_EL2) + 50"/> -->
       <!-- <set var="waypoints[WP_START].y" value="WaypointY(WP_EL2) + 50"/> -->
@@ -448,7 +448,7 @@ OK?
      ** Rescue means the payload dropping phase. ("Type 1" operation)
      -->
      <!-- TODO: if defined TYPE2 then -->
-<!--  
+<!--
     <block name="determine_search_or_rescue_phase">
       <exception cond="InsideSurveyArea(WaypointX(WP_OUTBACKJOE), WaypointY(WP_OUTBACKJOE))" deroute="RescueJoe"/>
     </block>-->
@@ -522,8 +522,8 @@ best to perform many real life tests with the CAM
       <!-- <go wp="VIAEL2" hmode="route"/>--> <!-- TODO maybe not needed -->
       <deroute block="drop"/>
     </block>
-    
- <!--  AS REMINDER 
+
+ <!--  AS REMINDER
  extern unit_t nav_drop_compute_approach( uint8_t wp_target, uint8_t wp_start, float radius );
 extern unit_t nav_drop_update_release( uint8_t wp_target );
 extern unit_t nav_drop_shoot( void );
@@ -539,7 +539,7 @@ extern bool_t compute_alignment(uint8_t w1, uint8_t w2, uint8_t start, uint8_t e
 
 <!-- *********** Drop Compute Approach *********** -->
     <block name="drop" strip_button="Drop">
- <!-- TODO set Height to minimum height AGL allowed by commitee ?60M -->   
+ <!-- TODO set Height to minimum height AGL allowed by commitee ?60M -->
  <!-- TODO determine what still is success and is fastest value for this 100  -->
       <set var="waypoints[WP_START].x" value="WaypointX(WP_OUTBACKJOE) + 100"/>
       <set var="waypoints[WP_START].y" value="WaypointY(WP_OUTBACKJOE) + 100"/>
@@ -550,12 +550,12 @@ extern bool_t compute_alignment(uint8_t w1, uint8_t w2, uint8_t start, uint8_t e
 
 <!-- *********** Align on release path *********** -->
     <block name="align">
- 
+
 
  <!-- TODO set AIRSPEED_AT_RELEASE-->
  <!--TODO set HEIGHT to 60m -->
     <!-- After Payload is released, back via EL3 -->
-     
+
       <exception cond="nav_drop_update_release(WP_OUTBACKJOE)" deroute="ExitSearchAreaViaEL3"/>
       <go approaching_time="nav_drop_trigger_delay" from="START" hmode="route" wp="RELEASE"/>
     </block>
@@ -582,7 +582,7 @@ extern bool_t compute_alignment(uint8_t w1, uint8_t w2, uint8_t start, uint8_t e
 <!--TODO better routing in combination with calced wind direction-->
     <block name="InitiateLandingApproach">
       <set var="v_ctl_auto_throttle_cruise_throttle" value="V_CTL_AUTO_THROTTLE_NOMINAL_CRUISE_THROTTLE"/><!-- TODO Test and deiscuss the stop dashing speedy flight here in this part of the block -->
-    
+
 <!--
 To Waypoint runway align WP1 to WP2
 then to WP touchdown
@@ -661,12 +661,12 @@ mode must be activated. A controlled flight termination mode may be
 termination mode (Section 5.6).
 -->
 
-    <block name="CommsHoldLoiter" strip_button="CommsHold" strip_icon="recenter.png">  <!-- TODO other ICON --> 
+    <block name="CommsHoldLoiter" strip_button="CommsHold" strip_icon="recenter.png">  <!-- TODO other ICON -->
       <!-- TODO: maybe set a little lower speed ? max endurence speed? -->
       <set value="NOMINAL_AIRSPEED" var="v_ctl_auto_airspeed_setpoint"/>
       <!-- Rules 2014 state a loiter of maximum 2 minutes = 120seconds is allowed -->
       <exception cond="(stage_time > 120) || (datalinkloss_occurence_counter > 2)" deroute="AirfieldHomeLoiter"/>
-      <!-- resume if datalink is regained-->   
+      <!-- resume if datalink is regained-->
       <!--TODO If the data link is regained prior to the conclusion of 2 minutes of loiter at
       Comms Hold the mission maybe continued otherwise any subsequent  TODO -->
       <exception cond="datalink_time < 10" deroute="TrackToEL2"/>      <!-- As soon as we have a link again Go EL2 and continue mission> -->
@@ -725,9 +725,9 @@ Q:
 
 <!-- As part of the scrutineering the Search and Rescue entrants of the UAV Challenge
 Outback Rescue will be required to take off, track TST-1, TST-2, TST-3, TST-1... Until
-requested to land. 
+requested to land.
 
-All emergency and failure requirements of the Challenge must be met, 
+All emergency and failure requirements of the Challenge must be met,
 
 with the exception that for Loss of Data Link the procedure will be track direct
 to “Airfield Home” and orbit for either a landing or regain of Data Link. -->
@@ -770,9 +770,9 @@ to “Airfield Home” and orbit for either a landing or regain of Data Link. --
 
     <block name="ForcedCrash">
       <!-- TODO Maybe ADD aditional exception with 2 sec timer here just to be sure to avoid position GPS spikes or some other jitter issues -->
-      <!-- <exception cond="Or(! InsideMissionBoundary(estimator_x, estimator_y), estimator_z > ground_alt + 921)"> --> 
+      <!-- <exception cond="Or(! InsideMissionBoundary(estimator_x, estimator_y), estimator_z > ground_alt + 921)"> -->
       <!-- TODO use Baro QNH Height -->
-      
+
       <!-- <set value="MAX_PPRZ" var="ap_state->commands[COMMAND_FORCECRASH]"/> -->
       <!--</exception> -->
 

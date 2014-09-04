@@ -1,9 +1,9 @@
 <!DOCTYPE flight_plan SYSTEM "../flight_plan.dtd">
 <!-- This is the Flightplan of Team OpenUAS from the Netherlands for use in the
-     Australian UAV Outback Challenge of 2014. 
-     
+     Australian UAV Outback Challenge of 2014.
+
      Read about this challenge here:
-     http://www.uavoutbackchallenge.com.au/     
+     http://www.uavoutbackchallenge.com.au/
 -->
 
 <flight_plan alt="395" ground_alt="292" home_mode_height="120" lat0="50.726999" lon0="7.567305" max_dist_from_home="1500" name="OpenUAS OBC2014" qfu="310" security_height="45">
