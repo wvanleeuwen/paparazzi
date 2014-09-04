@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<data>
+  <profile>
+    <description_file>226e_03.xml</description_file>
+    <settings>
+      <setting command="ID">3332</setting>
+      <setting command="HP">8</setting>
+      <setting command="DT">B33F</setting>
+      <setting command="MY">FFFF</setting>
+      <setting command="MK">FFFF</setting>
+      <setting command="RR">0</setting>
+      <setting command="MT">0</setting>
+      <setting command="RN">0</setting>
+      <setting command="TT">9E</setting>
+      <setting command="KY">0</setting>
+      <setting command="MD">0</setting>
+      <setting command="PD">64</setting>
+      <setting command="PB">0</setting>
+      <setting command="PE">0</setting>
+      <setting command="BD">3</setting>
+      <setting command="NB">0</setting>
+      <setting command="SB">0</setting>
+      <setting command="RO">3</setting>
+      <setting command="PK">4F</setting>
+      <setting command="CS">0</setting>
+      <setting command="RT">2</setting>
+      <setting command="CD">2</setting>
+      <setting command="FL">0</setting>
+      <setting command="FT">2F</setting>
+      <setting command="AP">0</setting>
+      <setting command="BR">0</setting>
+      <setting command="PL">3</setting>
+      <setting command="TX">0</setting>
+      <setting command="FS">0</setting>
+      <setting command="RP">20</setting>
+      <setting command="SM">0</setting>
+      <setting command="ST">64</setting>
+      <setting command="HT">FFFF</setting>
+      <setting command="LH">1</setting>
+      <setting command="PW">0</setting>
+      <setting command="BT">A</setting>
+      <setting command="CC">2B</setting>
+      <setting command="AT">A</setting>
+      <setting command="CT">C8</setting>
+    </settings>
+  </profile>
+</data>
