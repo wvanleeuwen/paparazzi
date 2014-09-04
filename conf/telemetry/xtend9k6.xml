@@ -22,7 +22,7 @@
       <message name="ALIVE"          period="4."	phase="1.2"/>    <!-- size = 16 -->
       <!-- Only one of the following is active at the same time: give them same time stamp -->
       <message name="SEGMENT"        period="4."	phase="2.2"/>    <!-- size = 16 -->
-      <message name="CIRCLE"         period="4."	phase="2.2"/>
+      <message name="CIRCLE"         period="2."	phase="0.2"/>
       <message name="SURVEY"         period="4."	phase="2.2"/>
 
       <message name="CALIBRATION"    period="8."	phase="0.8"/>
