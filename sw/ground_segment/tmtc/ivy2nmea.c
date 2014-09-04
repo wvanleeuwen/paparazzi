@@ -1,6 +1,6 @@
 /*
  * Name: IVY2NMEA
- * Author: OpenUAS (Thanks to CDW for basis and Tim for NMEA library work) 
+ * Author: OpenUAS (Thanks to CDW for basis and Tim for NMEA library work)
  * URL: http://ivy2nmea.openuas.org
  * License: http://www.gnu.org/licenses/lgpl.html
  * Info: IVY AC messages to NMEA GPRMC and GPGGA sentences out to serial port but clearly for *Position only*
@@ -602,7 +602,7 @@ void open_port(const char* device)
   /* get the current options */
   tcgetattr(fd, &options);
 
-  /*  
+  /*
    set local mode, enable receiver, set comm. options:
    NMEA Defines, where bit rate (typically 4800)
    8 data bits, 1 stop bit, no parity, 4800 Baud, no handshake
