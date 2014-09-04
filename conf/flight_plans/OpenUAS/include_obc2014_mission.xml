@@ -95,9 +95,6 @@ TODO:
 //Enable energy control commands from within flightplan
 #include "firmwares/fixedwing/guidance/energy_ctrl.h"
 
-//Needed for the DROP function
-static inline uint16_t G = 9.81;
-
 
 
 #endif
@@ -169,8 +166,6 @@ OK?
     <waypoint name="RELEASE" x="-100." y="400." height="75."/>
 
 <!-- For autonomous landing -->
-    <waypoint name="AF" x="177.4" y="45.1" height="30."/> <!-- AutoFinal -->
-    <waypoint name="TD" x="28.8" y="57.0" height="0."/> <!-- Touchdown -->
     <waypoint name="_BASELEG" x="-100" y="350"/>
   </waypoints>
 
@@ -240,7 +235,7 @@ OK?
       <!-- IDEA Close the hatch so not able to insert payload before there is a 3D fix , however maybe not so handy anyhow since we need to wat be fre we can insert-->
       <!--  <set value="NavDropCloseHatch" var="unit"/> -->
       <set value="1" var="kill_throttle"/>
-<!-- if no valid fix or gps accuracy> 15m or no AHRS , it a no-go wait-->
+      <!-- if no valid fix or gps accuracy> 15m or no AHRS , it a no-go wait-->
       <while cond="!GpsFixValid() || gps.pacc > 1500 || !(ahrs.status == AHRS_RUNNING)"/>
     </block>
     
@@ -248,17 +243,13 @@ OK?
 <!-- a second init will follow since the plane thrower will still walk to launchpoint -->
 
     <block name="Geo Init">
+      <while cond="LessThan(NavBlockTime(), 3)"/>
 <!--
-      <while cond="LessThan(NavBlockTime(), 8)"/>
       <call fun="NavSetGroundReferenceHere()"/>
       <call fun="NavSetAltitudeReferenceHere()" />
+-->
+      <!--  TODO Set QNH here based on GPS height if allowed from commitee -->
       <call fun="NavSetWaypointHere(WP_HOME)"/>
-
-      <while cond="gps.pacc > 1000"/>
-at least 10m precision needed  TODO  continue if not within 10 seconds --><!-- TODO better flow
-      <call fun="NavSetGroundReferenceHere()"/>
-      <call fun="NavSetWaypointHere(WP_HOME)"/>
--->      <!--  TODO Set QNH here based on GPS height if allowed from commitee -->
     </block>
 
     <!-- *********** Set the ground reference height and the home position *********** -->
@@ -266,7 +257,6 @@ at least 10m precision needed  TODO  continue if not within 10 seconds --><!-- T
 <!-- a second init will follow since the plane thrower will still walk to launchpoint-->
 
     <block name="Wait for RC">
-
       <!-- We must have RC at least once switched on just to test, this check can be deleted if everything works 100% in Auto2 -->
       <while cond="RCLost()"/> <!-- to make sure we do not hop to AUTO2 and engine starts running , at least switch on then maybe off if you wantto -->
       <!-- TODO maybe switch on ACL blick as soon as we are ready to go  -->
@@ -275,8 +265,6 @@ at least 10m precision needed  TODO  continue if not within 10 seconds --><!-- T
 <!-- *********** Throttle off holdingpoint *********** -->
     <block name="Holding Point">
      <!--  TODO: make some movements on all defelctros as a sign we are in holding and to see if all works Maybe a separate testblock-->
-      <!--  <set value="0" var="ap_state->commands[COMMAND_BRAKE]"/> -->
-     
       <!--Just to make sure in case of flightplan mishap, it is no too far away -->
       <!-- <set var="waypoints[WP_START].x" value="WaypointX(WP_EL2) + 50"/> -->
       <!-- <set var="waypoints[WP_START].y" value="WaypointY(WP_EL2) + 50"/> -->
