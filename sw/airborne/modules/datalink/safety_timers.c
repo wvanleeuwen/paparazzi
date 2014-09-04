@@ -22,4 +22,4 @@
 
 #include "safety_timers.h"
 
-uint16_t obcrulesdatalinklosscounter = 0;
+int obc_flight_mode = SCRUTENEERING_FLIGHT;

@@ -31,18 +31,16 @@
 #include "std.h"
 #include "generated/airframe.h"
 
-extern uint16_t obcrulesdatalinklosscounter;
+#define SCRUTENEERING_FLIGHT  0
+#define SEARCH_FLIGHT 1
+#define DROP_FLIGHT 2
+extern int obc_flight_mode;
 
 #define AirbrakesOff() {ap_state->commands[COMMAND_BRAKE]=0;}
 #define AirbrakesOn() {ap_state->commands[COMMAND_BRAKE]=SERVO_BRAKE_FULL;}
 
-#define AircraftIsBooting() ((nav_block < 3))
+#define AircraftIsBooting() ((nav_block <= 3))
 
 
-//void init_demo(void);
-//void periodic_1Hz_demo(void);
-//void periodic_10Hz_demo(void);
-//void start_demo(void);
-//void stop_demo(void);
 
 #endif
