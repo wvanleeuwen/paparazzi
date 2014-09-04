@@ -57,6 +57,21 @@ TODO:
 #ifndef FLIGHTPLAN_HEADER_DEFINES
 #define FLIGHTPLAN_HEADER_DEFINES
 
+//Set Generic options
+    #include "autopilot.h"
+//Enable AHRS Health test functions
+    #include "subsystems/ahrs.h"
+//Enable advanced electrical power functions 
+    #include "subsystems/electrical.h"
+//Enable datalink tests
+    #include "subsystems/datalink/datalink.h"
+//For interaction with the Flight termination Device (FTD) 
+    #define RCChannel(_x) ((*fbw_state).channels[_x])
+
+//DANGER WARNING
+// define ACTIVATED_FTD 0
+
+
 // PHOTOGRAMMETRY settings
 
     #define PHOTOGRAMMETRY_SWEEP_ANGLE 53		// Degrees from the North
@@ -162,6 +177,22 @@ OK?
 <!-- ******************************** SECTORS ****************************** -->
 <!-- Sectors are good for displaying an overlay -->
   <sectors>
+    <sector name="MissionBoundary" color="yellow">
+      <corner name="_MB1"/>
+      <corner name="_MB2"/>
+      <corner name="_MB3"/>
+      <corner name="_MB4"/>
+      <corner name="_MB5"/>
+      <corner name="_MB6"/>
+      <corner name="_MB7"/>
+      <corner name="_MB8"/>
+      <corner name="_MB9"/>
+      <corner name="_MB10"/>
+      <corner name="_MB11"/>
+      <corner name="_MB12"/>
+      <corner name="_MB13"/>
+    </sector>
+
     <sector name="SurveyArea" color="green">
       <corner name="SA1"/>
       <corner name="SA2"/>
@@ -173,6 +204,30 @@ OK?
 
 <!-- ****************************** EXCEPTIONS ***************************** -->
   <exceptions>
+<!-- WARNING these are Global Exeption, bettersome to stuff in a flightplan block-->
+    <!-- If datalink is lost for more than 10 seconds and we are in launched state -->
+
+    <!-- below for the real SnR --> <!--  TODO: if datalinkloss but still closeby move to commhold? strange better airfiledhome loiter IMHO -->
+    <exception cond="And(datalink_time > 110, launch > 0) && (!AircraftIsBooting())" deroute="CommsHoldLoiter"/> <!-- deroute="AirfieldHomeLoiter"/> -->
+
+    <!-- Case of loss of GPS AND loss of datalink -->
+    <!-- <exception cond="And(datalink_time > 10, !GpsFixValid())" deroute="ForcedCrash"/> --><!--921 1500f TODO add margin?-->
+    <exception cond="Or(!InsideMissionBoundary(GetPosX(), GetPosY()), GetPosAlt() > ground_alt + 921) && (!AircraftIsBooting())" deroute="ForcedCrash"/>
+    
+ <!--   <exception cond="if Joefoundandretunvalformticket deroute="Waitforjudges"/>-->
+
+    <!--  If we are allowed to fly higher otherwise to do rules do not state to crash if heigher then 400m -->
+    <!-- <exception cond="datalink_time > 1330" deroute="Standby"/> --> <!-- A loss of link set to max calculated mission time, unlikely to ever occur befor voltage level drop exeption -->
+
+    <!-- Optional check, if at seconds of launch GPS is lost -->
+    <!-- <exception cond="And(launch, gps_lost)" deroute="killengine" or test for heighht 40M or so/> -->
+    <!-- see if we can get correct AP voltage -->
+
+    <!-- not used yet maybe switch it on <exception cond="10.0 > PowerVoltage()" deroute="Standby"/> -->
+    <!-- not used yet maybe switch it on <exception cond="11.0 > vsupply" deroute="Standby"/> -->
+ <!--  is less safe and has less chance of AC recovery. It states battery LOW, not battery critical -->
+<!--  <exception cond="electrical.bat_low && !(nav_block == IndexOfBlock('Setting_home_location')) && !(nav_block == IndexOfBlock('Holding_point') && !(nav_block == IndexOfBlock('Land')))" deroute="Land"/>-->
+<!--<TODO: Add somethin like pre_call="if (!InsideRed(GetPosX(), GetPosY())) NavKillThrottle();-->
   </exceptions>
 
 <!-- *********************************************************************** -->
@@ -181,7 +236,7 @@ OK?
 
 <!-- *********** Wait for GPS fix, 3D by default *********** -->
   <blocks>
-    <block name="Wait GPS and AHRS">
+    <block name="WaitForGPS">
       <!-- IDEA Close the hatch so not able to insert payload before there is a 3D fix , however maybe not so handy anyhow since we need to wat be fre we can insert-->
       <!--  <set value="NavDropCloseHatch" var="unit"/> -->
       <set value="1" var="kill_throttle"/>
@@ -496,7 +551,116 @@ then to WP touchdown
     </block>
 
 
+<!-- *********************************************************
+     ********** Loss of Data Link – Rally Point **************
+     ***************************************************** -->
+<!--
+TODO: get OBC2014Rules in 5.5.2.1 Loss of Data Link – Rally Point
 
+* This flight mode must be activated if the data link is lost for 10 seconds.
+
+* This flight mode, once activated, must return the aircraft directly to the
+waypoint “Comms Hold” (Figure 1, Table 1) (no time limit for transit, but it
+must be direct to the waypoint)
+
+* and enter a loiter centred on that waypoint.
+* After 2 minutes of loitering,
+
+* if the data link has not been re-established, the aircraft must be programmed to return directly to
+waypoint “Airfield Home” (Figure 1, Table 1), where the RC link
+maybe re-established for a manual recovery. There is no time limit for
+the transit, but it must be direct to the waypoint.
+
+* On arriving at “Airfield Home”, the aircraft must enter a loiter centred
+on that waypoint.
+
+* If after 2 minutes, RC contact has not been re-established, an autopilot initiated and controlled flight termination
+mode must be activated. A controlled flight termination mode may be
+(but not limited to) an autonomous landing or entering the flight
+termination mode (Section 5.6).
+-->
+
+    <block name="CommsHoldLoiter" strip_button="CommsHold" strip_icon="recenter.png">  <!-- TODO other ICON --> 
+      <!-- TODO: maybe set a little lower speed ? max endurence speed? -->
+      <set value="NOMINAL_AIRSPEED" var="v_ctl_auto_airspeed_setpoint"/>
+      <!-- Rules 2014 state a loiter of maximum 2 minutes = 120seconds is allowed -->
+      <exception cond="(stage_time > 120)" deroute="AirfieldHomeLoiter"/>
+      <!-- resume if datalink is regained-->   
+      <!--TODO If the data link is regained prior to the conclusion of 2 minutes of loiter at
+      Comms Hold the mission maybe continued otherwise any subsequent  TODO -->
+      <!--exception cond="LessThan(datalink_time0, 10)" deroute="TrackToEL2"/-->      <!-- As soon as we have a link again Go EL2 and continue mission> -->
+      <!-- TODO: better continue where we had our last telemerty still OK point if possible -->
+      <!-- Since it arrived we must raise a counter by one. it's not alowed by rules to occur  more than twice, then we must move to airfieldhome -->
+      <!-- TODO: set only after aircraft **arrived!** in the loiter not before the ETA < 1sec -->
+      <!-- <while no link then -->
+       <circle wp="COMMSHOLD" radius="nav_radius"/> <!-- TODO maybe bigger than default radius -->
+    </block>
+
+    <block name="AirfieldHomeLoiter">
+      <exception cond="stage_time > 120" deroute="AirfieldHomeSoftlyDown"/>
+      <circle wp="AIRFIELDHOME" radius="nav_radius*1.5"/><!-- 1.5 x  mean it will be a bit bigger circle -->
+    </block>
+
+<!-- circle smootly down -->
+<!-- TODO: Make te routine correct it is NOT correct now -->
+    <block name="AirfieldHomeSoftlyDown">
+        <circle radius="nav_radius" wp="AIRFIELDHOME" until="NavCircleCount() > 1"/>
+      <!--
+      <for from="0" to="8" var="i">
+      </for>
+      -->
+      <!--deroute block="InitiateLandingApproach"/-->
+    </block>
+
+<!-- TO make sure it somehow stop in case of lightplan mishap -->
+
+<!--Engine Failure
+
+Q:
+ Procedure to be followed declared by the team in Deliverable 2.
+ Follows from other rules, no working engine = decending till hit the ground but stll following regular flightplan, and if passing with no moterpower geofence rule will be adhered to also thus then switched to a forcedcrash
+-->
+
+<!--Below routes that are handy for testing only when in the field and performing several tests -->
+<!--
+    <block name="Oval 1-2" strip_button="Oval (wp 1-2)" strip_icon="oval.png">
+      <oval p1="1" p2="2" radius="60"/>
+    </block>
+-->
+
+<!-- WARNING: LOSS OF AIRFRAME if FTD is fully operational and tested in real life-->
+<!--
+    <block name="go too far">
+      <go wp="TOOFAR"/>
+      <circle wp="TOOFAR" radius="50"/>
+     TODO: extra comman in case exeption does not trigger? like  <GO STDBY>
+    </block>
+-->
+
+
+    <!-- Just make sure it somehow stops in case of flightplan mishap or no being able to take over -->
+    <block key="a" name="Airfieldhome" strip_button="Airfieldhome" strip_icon="home.png">
+      <circle radius="nav_radius" wp="AIRFIELDHOME"/>
+      <!-- TODO have two landing stratigy, one with circle down one with a streight line maybe a thir depending on measured windspeed -->
+      <!--deroute block="InitiateLandingApproach"/-->
+    </block>
+
+
+<!-- *********************************************************
+     ************ The routines used for the FTD **************
+     ***************************************************** -->
+
+    <block name="ForcedCrash">
+      <!-- TODO Maybe ADD aditional exception with 2 sec timer here just to be sure to avoid position GPS spikes or some other jitter issues -->
+      <!-- <exception cond="Or(! InsideMissionBoundary(estimator_x, estimator_y), estimator_z > ground_alt + 921)"> --> 
+      <!-- TODO use Baro QNH Height -->
+      
+      <!-- <set value="MAX_PPRZ" var="ap_state->commands[COMMAND_FORCECRASH]"/> -->
+      <!--</exception> -->
+
+      <circle radius="nav_radius" wp="STDBY"/> <!-- todo add a dynamic TDFORCEDCRASH point so to notify and have it in the log  -->
+    </block>
+    
 
   </blocks>
 </procedure>
