@@ -1,5 +1,7 @@
 <!DOCTYPE airframe SYSTEM "../airframe.dtd">
-<!-- * Vivify MK1 codename Vidya (http://www.openuas.org/)
+
+<!--
+     * Vivify MK1 codename Vidya (http://www.openuas.org/)
      Lisa M v2.0 (http://paparazzi.enac.fr/wiki/index.php/)
      With modified power routing by setting Jumper J1
      + Aspirin v2.2 inclusive MS5611
@@ -7,7 +9,7 @@
      + uBlox LEA5H and Sarantel helix GPS antenna
      + Spektrum RX DSMX clone - optional mission demanding a R16Scan40MHZ RX
      + Eagletree Airspeed sensor via I2C
-     
+
      NOTES:
      + Using Total Energy control as control loop
      + LisaM with servo pins to the front of plane !
@@ -17,14 +19,14 @@
      + Make sure v5.1x master or higher of PPRZ sourcecode is used
      + Used mac06a.xml airframe as starting point for payload release settings
 
-+ OBC2014: Make sure that in link.ml
+     + OBC2014: Make sure that in link.ml
 
- link.ml - Paparazzi/sw/ground_segment/tmtc
+     link.ml - Paparazzi/sw/ground_segment/tmtc
 
- let ping_msg_period = 750 (** ms  CHANGED FOR OUTBACK CHALLENGE *)
+     let ping_msg_period = 750 (** ms  CHANGED FOR OUTBACK CHALLENGE *)
 
-+ OBC2014 TELEMETRY
-  Add to "Link" the param  "-hfc" for hardware handshaking
+     + OBC2014 TELEMETRY
+     Add to "Link" the param  "-hfc" for hardware handshaking
 
     Modules to activate:
      + Current sensor on battery wires going to motor
@@ -34,7 +36,6 @@
 
      Near Future
      + MK2 Second LisaM as FTD, plus additional power measurement for this board
-     ++ FTD
      ++ Lisa M v2.0 board ID: ? (http://paparazzi.enac.fr/wiki/index.php/)
      ++ Modified power routing by closing Jumper J1
      ++ No IMU response action
@@ -49,20 +50,11 @@
      + ACL lights
      + A new scanline command, on straight scanning line no roll and direction ony by yawing (maybe via thrustvector)
      + APPD Accidental Power-on Prevention Device
+-->
 
-     FINAL:
-     + 40Mhz R16 Scan for RC Backup link
-     + Xtend for telemetry
-
-READ this first
-http://paparazzi.enac.fr/w/index.php?title=Theory_of_Operation
-* -->
-
-<!-- * Official name and not codename, used since some video footage must use the official name and display should be correct, as also the GCS speech * -->
 <airframe name="Vivify">
   <!-- ************************* FIRMWARE ************************* -->
   <firmware name="fixedwing">
-   <!-- <define name="R0"/>-->
     <target name="ap" board="lisa_m_2.0"> 
       <define name="LINK_MCU_LED" value="5"/>
       <configure name="AHRS_ALIGNER_LED" value="2"/>
@@ -75,22 +67,17 @@ http://paparazzi.enac.fr/w/index.php?title=Theory_of_Operation
       <!-- <define name="ADC_CHANNEL_VSUPPLY" value="4"/> -->
       <define name="autopilot_motors_on" value="FALSE"/> <!-- temp fix for geomag, normally only used for rotorcraft -->
       <define name="SENSOR_SYNC_SEND"/>
-<!-- PERIODIC_FREQUENCY should be least equal or greater than AHRS_PROPAGATE_FREQUENCY -->
-     <!---->
+      <!-- PERIODIC_FREQUENCY should be least equal or greater than AHRS_PROPAGATE_FREQUENCY -->
       <configure name="PERIODIC_FREQUENCY" value="120"/>
       <configure name="AHRS_PROPAGATE_FREQUENCY" value="100"/>
       <configure name="AHRS_CORRECT_FREQUENCY" value="100"/>
-<!---->
-<!-- value belowcrash the imu !!-->
-   <!--   <configure name="PERIODIC_FREQUENCY" value="512"/>-->
-      <!-- 960 future?-->
       <!-- 
       <define name="ASPIRIN_2_LOWPASS_FILTER"/> 
       define name="ASPIRIN_2_SMPLRT_DIV"/>-->
       <!--
       <configure name="AHRS_PROPAGATE_FREQUENCY" value="256"/>
       <configure name="AHRS_CORRECT_FREQUENCY" value="256"/>
--->
+      -->
       <define name="AHRS_TRIGGERED_ATTITUDE_LOOP"/>
       <!--define name="USE_I2C2"/-->
       <define name="USE_AHRS_GPS_ACCELERATIONS"/>
@@ -151,22 +138,18 @@ http://paparazzi.enac.fr/w/index.php?title=Theory_of_Operation
 -->
 
     <subsystem name="control" type="energy"/>
+
     <!-- * Sensors * -->
     <subsystem name="gps" type="ublox">
       <configure name="GPS_PORT" value="UART3"/>
       <configure name="GPS_BAUD" value="B38400"/> <!--see if 57600 does anything sensible improvment in real life later on-->
     </subsystem>
+
     <!-- * Add Navigation routines -->
     <subsystem name="navigation"/>
     <subsystem name="ins" type="alt_float"/>
 
-<!-- TODO: ACTIVATE When XTEND Used and FTD is used -->
-<!--    <subsystem name="ins" type="xsens">
-      <configure name="XTEND_UART_NR" value="1"/>
-    </subsystem>
--->
-
-      </target>
+    </target>
 
     <target name="fbw" board="lisa_m_2.0">
       <configure name="FLASH_MODE" value="SWD"/>
@@ -186,7 +169,8 @@ http://paparazzi.enac.fr/w/index.php?title=Theory_of_Operation
       <!-- note that the radio xml is needed for intermcu but MUST contain the same channels as the spektrum defines in the code:
 The spektrum models have fixed names for the channels/functions: https://github.com/paparazzi/paparazzi/blob/v4.0/sw/airborne/arch/stm32/subsystems/radio_control/spektrum_arch.h
 -->
-      <!--
+
+<!--
 Also fixed index values by default
 
 RADIO_THROTTLE   0
@@ -794,6 +778,7 @@ https://github.com/paparazzi/paparazzi/blob/master/sw/airborne/subsystems/nav.c#
     <define name="CONTROL_FREQUENCY" value="100." unit="Hz"/>
     <!--<define name="ALT_KALMAN_ENABLED" value="TRUE"/>-->
     <define name="DEFAULT_CIRCLE_RADIUS" value="110."/>
+    <define name="LANDING_CIRCLE_RADIUS" value="80."/>
     <define name="MIN_CIRCLE_RADIUS" value="70."/>
     <!-- Needed for spiral navigation function-->
     <!--UNLOCKED_HOME_MODE if set to TRUE means that HOME mode does not get stuck.
@@ -807,20 +792,8 @@ If not set before when you would enter home mode you had to flip a bit via the G
 
 <!-- ********************* HAND AND CATAPULT LAUNCH ************************ -->
 
-<!--
-    name: NAV_CATAPULT_ACCELERATION_THRESHOLD value: 1.5
-    Description: acceleration threshold in multiples of g
-    name: NAV_CATAPULT_MOTOR_DELAY value: 0.75
-    Description: delay until motor is turned on in seconds
-    name: NAV_CATAPULT_HEADING_DELAY value: 3.0
-    Description: delay until heading is unlocked in seconds
-    name: NAV_CATAPULT_INITAL_PITCH value: 0.175
-    Description: inital pitch in radians (default 10deg)
-    name: NAV_CATAPULT_INITIAL_THROTTLE value: 1.0
-    Description: initial throttle (0.0 to 1.0)
--->
 <!-- value setup according to values derived from a manual flight and it belonig log with values -->
-  <!-- the "CATAPULT" in some cases is a Human throwing the plane, and to protect the hands agains a prop strike
+<!-- the "CATAPULT" in some cases is a Human throwing the plane, and to protect the hands agains a prop strike
 we had an option to use glovs, or start up spinning the prop after a throw. If this works out well, lets use it 
  Makes the life of autotakeoff much more safe and simple -->
 <!--
@@ -829,9 +802,9 @@ we had an option to use glovs, or start up spinning the prop after a throw. If t
   <!-- TODO:  determine best value, first set to very small or 0 so engine start immidiatlely -->
   <!-- make sre you ESC has no startup delay -->
   <!-- 120 or 512 should be repalced by the PERIODIC_FREQUENCY -->
-   <!--   <define name="HEADING_DELAY" value="(120*3)" unit="seconds"/> <!-- 3 seconds, thus -->
+  <!--   <define name="HEADING_DELAY" value="(120*3)" unit="seconds"/> <!-- 3 seconds, thus -->
   <!-- 3 seconds, thus -->
-   <!--  <define name="ACCELERATION_THRESHOLD" value="1.3" unit="g"/>-->
+  <!--  <define name="ACCELERATION_THRESHOLD" value="1.3" unit="g"/>-->
   <!--TODO: unit and tune this with final weight in airframe! not to high otherwise engine will never run, must after all go over the threshold-->
   <!--        <define name="INITIAL_PITCH" value="0.52" unit="rad"/><!-- 30 deg -->
   <!--TODO: tune this, look at graphs from manual flights-->
@@ -881,10 +854,10 @@ we had an option to use glovs, or start up spinning the prop after a throw. If t
      <define name="SENSOR_HEIGHT" value="5.32" unit="mm"/> 
   <!-- In direction of the plane's nose -->
       <define name="PIXELS_WIDTH" value="4000"/>  
-  <!-- Photogrammetry Parameters. Can also be defined in a flightplan instead-->
+  <!-- Photogrammetry Parameters. Can also be defined in a flightplan instead
      <define name="OVERLAP" value="0.3" unit="%"/> 
      <define name="SIDELAP" value="0.2" unit="%"/> 
-     <define name="RESOLUTION" value="50" unit="mm pixel projection"/>
+     <define name="RESOLUTION" value="50" unit="mm pixel projection"/>-->
   <!-- Flight Safety Parameters -->
      <define name="HEIGHT_MIN" value="50" unit="m"/>
      <define name="HEIGHT_MAX" value="220" unit="m"/>
