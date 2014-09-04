@@ -39,6 +39,8 @@
 #define TRIGGER_DELAY 1.
 #endif
 
+#define G 9.81f
+
 #ifndef ALPHA
 #define ALPHA 6.26e-5
 #endif

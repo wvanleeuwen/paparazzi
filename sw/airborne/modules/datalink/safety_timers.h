@@ -29,13 +29,15 @@
 #define SAFETY_TIMERS_H
 
 #include "std.h"
+#include "generated/airframe.h"
 
 extern uint16_t obcrulesdatalinklosscounter;
 
 #define AirbrakesOff() {ap_state->commands[COMMAND_BRAKE]=0;}
-#define AirbrakesOn() {ap_state->commands[COMMAND_BRAKE]=9600;}
+#define AirbrakesOn() {ap_state->commands[COMMAND_BRAKE]=SERVO_BRAKE_FULL;}
 
 #define AircraftIsBooting() ((nav_block < 3))
+
 
 //void init_demo(void);
 //void periodic_1Hz_demo(void);
