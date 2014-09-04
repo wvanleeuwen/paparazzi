@@ -15,26 +15,26 @@
     <waypoint lat="50.728111" lon="7.570276" name="COMMSHOLD"/>
 
 <!-- MB = Mission Boundary -->
-    <waypoint lat="50.730154" lon="7.558596" name="_MB1"/>
-    <waypoint lat="50.726070" lon="7.558415" name="_MB2"/>
-    <waypoint lat="50.722546" lon="7.560182" name="_MB3"/>
-    <waypoint lat="50.720965" lon="7.566782" name="_MB4"/>
-    <waypoint lat="50.721343" lon="7.571988" name="_MB5"/>
-    <waypoint lat="50.723466" lon="7.576374" name="_MB6"/>
+    <waypoint lat="50.730154" lon="7.558596" name="_MB13"/>
+    <waypoint lat="50.726070" lon="7.558415" name="_MB12"/>
+    <waypoint lat="50.722546" lon="7.560182" name="_MB11"/>
+    <waypoint lat="50.720965" lon="7.566782" name="_MB10"/>
+    <waypoint lat="50.721343" lon="7.571988" name="_MB9"/>
+    <waypoint lat="50.723466" lon="7.576374" name="_MB8"/>
     <waypoint lat="50.723375" lon="7.582823" name="_MB7"/>
-    <waypoint lat="50.726047" lon="7.586578" name="_MB8"/>
-    <waypoint lat="50.728415" lon="7.586297" name="_MB9"/>
-    <waypoint lat="50.729932" lon="7.576870" name="_MB10"/>
-    <waypoint lat="50.731949" lon="7.571991" name="_MB11"/>
-    <waypoint lat="50.731992" lon="7.565551" name="_MB12"/>
-    <waypoint lat="50.730805" lon="7.563538" name="_MB13"/>
+    <waypoint lat="50.726047" lon="7.586578" name="_MB6"/>
+    <waypoint lat="50.728415" lon="7.586297" name="_MB5"/>
+    <waypoint lat="50.729932" lon="7.576870" name="_MB4"/>
+    <waypoint lat="50.731949" lon="7.571991" name="_MB3"/>
+    <waypoint lat="50.731992" lon="7.565551" name="_MB2"/>
+    <waypoint lat="50.730805" lon="7.563538" name="_MB1"/>
 
 <!-- SA = Search Area -->
-    <waypoint lat="50.729831" lon="7.574541" name="SA1"/>
-    <waypoint lat="50.730068" lon="7.564475" name="SA2"/>
+    <waypoint lat="50.729831" lon="7.574541" name="SA5"/>
+    <waypoint lat="50.730068" lon="7.564475" name="SA4"/>
     <waypoint lat="50.723886" lon="7.562947" name="SA3"/>
-    <waypoint lat="50.724341" lon="7.575741" name="SA4"/>
-    <waypoint lat="50.727658" lon="7.576903" name="SA5"/>
+    <waypoint lat="50.724341" lon="7.575741" name="SA2"/>
+    <waypoint lat="50.727658" lon="7.576903" name="SA1"/>
 
 <!-- Scrutineering Course -->
     <waypoint lat="50.728229" lon="7.573673" name="TST-1"/>
