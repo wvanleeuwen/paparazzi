@@ -39,7 +39,6 @@
 #define TRIGGER_DELAY 1.
 #endif
 
-#define G 9.81f
 
 #ifndef ALPHA
 #define ALPHA 6.26e-5
@@ -91,7 +90,7 @@ static void integrate( uint8_t wp_target ) {
     /* Euler integration */
     nav_drop_vx += airx * beta * DT;
     nav_drop_vy += airy * beta * DT;
-    nav_drop_vz += (airz * beta - G) * DT;
+    nav_drop_vz += (airz * beta - NAV_GRAVITY) * DT;
 
     nav_drop_x += nav_drop_vx * DT;
     nav_drop_y += nav_drop_vy * DT;
