@@ -119,7 +119,7 @@ let update_status = fun ?udp_peername ac_id buf_size is_pong ->
   if is_pong then
     status.last_pong <- Unix.gettimeofday ();;
 
-let status_msg_period = 10000 (** ms *)
+let status_msg_period = 1000 (** ms *)
 let ping_msg_period = 1000 (** ms  *)
 let status_ping_diff = 1000 (* ms *)
 
