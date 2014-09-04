@@ -3,6 +3,7 @@
 #include "mcu_periph/uart.h"
 #include "messages.h"
 #include "subsystems/datalink/downlink.h"
+#include "generated/periodic_telemetry.h"
 #include BOARD_CONFIG
 
 uint16_t adc_generic_val1;
@@ -27,12 +28,22 @@ static struct adc_buf buf_generic1;
 static struct adc_buf buf_generic2;
 #endif
 
+#if PERIODIC_TELEMETRY
+static void send_adc_generic(void)
+{
+  DOWNLINK_SEND_ADC_GENERIC(DefaultChannel, DefaultDevice, &adc_generic_val1, &adc_generic_val2);
+}
+#endif
+
 void adc_generic_init( void ) {
 #ifdef ADC_CHANNEL_GENERIC1
   adc_buf_channel(ADC_CHANNEL_GENERIC1, &buf_generic1, 8);
 #endif
 #ifdef ADC_CHANNEL_GENERIC2
   adc_buf_channel(ADC_CHANNEL_GENERIC2, &buf_generic2, ADC_CHANNEL_GENERIC_NB_SAMPLES);
+#endif
+#if PERIODIC_TELEMETRY
+  register_periodic_telemetry(&telemetry_Ap, "ADC_GENERIC", send_adc_generic);
 #endif
 }
 
@@ -43,7 +54,5 @@ void adc_generic_periodic( void ) {
 #ifdef ADC_CHANNEL_GENERIC2
   adc_generic_val2 = buf_generic2.sum / buf_generic2.av_nb_sample;
 #endif
-
-  RunOnceEvery(30,{ DOWNLINK_SEND_ADC_GENERIC(DefaultChannel, DefaultDevice, &adc_generic_val1, &adc_generic_val2);});
 }
 
