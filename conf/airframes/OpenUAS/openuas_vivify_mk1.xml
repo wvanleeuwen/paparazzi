@@ -307,8 +307,8 @@ I am as of yet not sure if the weird info byte is because of a failed bind proce
     <!-- Airspeed sensor -->
     <load name="airspeed_adc.xml">
       <configure name="ADC_AIRSPEED" value="ADC_1"/>
-      <define name="ADC_CHANNEL_AIRSPEED_NB_SAMPLES" value="8"/>
-      <define name="AIRSPEED_QUADRATIC_SCALE" value="0.73"/>
+      <define name="ADC_CHANNEL_AIRSPEED_NB_SAMPLES" value="16"/>
+      <define name="AIRSPEED_QUADRATIC_SCALE" value="0.85"/>
       <define name="AIRSPEED_BIAS" value="254"/>
     </load>
     <!--load name="airspeed_ets.xml">
@@ -419,6 +419,13 @@ I am as of yet not sure if the weird info byte is because of a failed bind proce
     <servo name="LIGHTS" no="6" min="1100" neutral="1500" max="1900"/>
   </servos>
 
+  <section name="ServoPositions">
+    <define name="SERVO_BRAKE_FULL" value="-6000" />
+    <define name="SERVO_HATCH_OPEN" value="0" />
+    <define name="SERVO_HATCH_CLOSED" value="-9600" />
+    <define name="AGR_CLIMB_PITCH" value="35" unit="deg" />
+  </section>
+
   <commands>
 
 <!-- OBC2014 Rules for FTD
@@ -442,7 +449,7 @@ For a blended wing this will translate best to
     <!-- * Yaw, since we have and option via ELEVON UP FLAPPERON DOWN MIX * -->
     <axis name="YAW" failsafe_value="0"/>
     <!-- * Maybe set to open position, to be able to simply insert the payload * -->
-    <axis name="HATCH" failsafe_value="-9599"/>
+    <axis name="HATCH" failsafe_value="-9600"/>
     <axis name="BRAKE" failsafe_value="-6000"/>
     <axis name="FORCECRASH" failsafe_value="0"/>
     <!-- maybe set to 9600 -->
@@ -646,10 +653,8 @@ https://github.com/paparazzi/paparazzi/blob/master/sw/airborne/subsystems/nav.c#
     <define name="PITCH_MIN_SETPOINT" value="-60" unit="deg"/>
     <define name="PITCH_PGAIN" value="10000."/>
     <define name="PITCH_DGAIN" value="5"/>
-    <!-- <define name="PITCH_IGAIN" value="10."/>-->
     <define name="PITCH_KFFA" value="0."/>
     <define name="PITCH_KFFD" value="0."/>
-    <!-- TODO: solve without ELEVATOR_OF_ROLL etc. needs to be set still taking great smooth corners-->
     <define name="ELEVATOR_OF_ROLL" value="837"/>
     <!-- TODO: Make testflight with log of radical manual flight-->
     <!--   <define name="PITCH_OF_ROLL" value="RadOfDeg(1.0)"/>-->
@@ -662,7 +667,6 @@ https://github.com/paparazzi/paparazzi/blob/master/sw/airborne/subsystems/nav.c#
   <section name="VERTICAL CONTROL" prefix="V_CTL_">  
 <!-- ******************* VERTICAL CONTROL ********************************** -->
     <define name="POWER_CTL_BAT_NOMINAL" value="11.2" unit="volt"/>
-    <!-- HUH to throttle? -->
     <!-- outer loop proportional gain -->
     <define name="ALTITUDE_PGAIN" value="0.15"/>
     <!-- outer loop saturation -->
@@ -689,7 +693,6 @@ https://github.com/paparazzi/paparazzi/blob/master/sw/airborne/subsystems/nav.c#
     <define name="AUTO_PITCH_OF_AIRSPEED_PGAIN" value="0.0"/>
     <define name="AUTO_PITCH_OF_AIRSPEED_IGAIN" value="0.0"/>
     <define name="AUTO_PITCH_OF_AIRSPEED_DGAIN" value="0.0"/>
-    <!-- TODO: unknown values yet, see MORA camscan documentation -->
     <!--
     <define name="AUTO_GROUNDSPEED_SETPOINT" value="16." unit="m/s"/>
     <define name="AUTO_GROUNDSPEED_PGAIN" value="0.7"/>
@@ -702,31 +705,11 @@ https://github.com/paparazzi/paparazzi/blob/master/sw/airborne/subsystems/nav.c#
     <define name="GLIDE_RATIO" value="7"/>
     <!-- TODO: testfly with AOW full weight to get value, now unknown -->
     <!-- ENERGY_TOT="" unknown -->
-    <define name="ENERGY_TOT_PGAIN" value="0.29"/>
-    <define name="ENERGY_TOT_IGAIN" value="0.29"/>
+    <define name="ENERGY_TOT_PGAIN" value="0.35"/>
+    <define name="ENERGY_TOT_IGAIN" value="0.30"/>
     <define name="ENERGY_DIFF_PGAIN" value="0.40"/>
     <define name="ENERGY_DIFF_IGAIN" value="0.35"/>
   </section>
-
-  <section name="AGGRESSIVE" prefix="AGR_">
-<!-- ***************************** AGGRESIVE ******************************* -->
-    <define name="BLEND_START" value="20"/>
-    <!-- Altitude Error to Initiate Aggressive Climb CANNOT BE ZERO!!-->
-    <define name="BLEND_END" value="10"/>
-    <!-- Altitude Error to Blend Aggressive to Regular Climb Modes  CANNOT BE ZERO!!-->
-    <define name="CLIMB_THROTTLE" value=".999"/>
-    <!-- Gaz for Aggressive Climb -->
-    <define name="CLIMB_PITCH" value=".4" unit="rad"/>
-    <!-- Pitch for Aggressive Climb TODO: unit="rad"-->
-    <define name="DESCENT_THROTTLE" value="0.2"/>
-    <!-- Gaz for Aggressive Decent -->
-    <define name="DESCENT_PITCH" value="-0.3"/>
-    <!-- Pitch for Aggressive Decent -->
-    <define name="CLIMB_NAV_RATIO" value="0.8"/>
-    <!-- Percent Navigation for Altitude Error Equal to Start Altitude -->
-    <define name="DESCENT_NAV_RATIO" value="0.99"/>
-  </section>
-
 
 <!-- ************************ AUTO RC COMMANDS ***************************** -->
   <auto_rc_commands>
