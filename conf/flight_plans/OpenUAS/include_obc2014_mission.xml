@@ -533,18 +533,12 @@ extern bool_t compute_alignment(uint8_t w1, uint8_t w2, uint8_t start, uint8_t e
     <block name="Final">
       <call fun="AirbrakesOn()" until="TRUE" vmode="glide" />
       <go approaching_time="5" from="AF" hmode="route" wp="TD"/>
-      <set var="v_ctl_auto_airspeed_setpoint" value="(GLIDE_AIRSPEED*10.0/12.0)"/>
     </block>
 
     <block name="Flare">
       <go approaching_time="0" from="AF" hmode="route" throttle="0.0" vmode="throttle" wp="TD"/>
-      <attitude roll="0.0" throttle="0.0" until="FALSE" vmode="throttle"/>
+      <attitude roll="0.0" pitch="20.0" throttle="0.0" until="FALSE" vmode="throttle"/>
       <!-- TODO: retract brake after landed is true (with +3seconds margin) better a sensor(witch) that detects IsAircraftOnSolidGround -->
-    </block>
-
-    <block name="flare">
-      <go approaching_time="0" from="AF" hmode="route" throttle="0.0" vmode="throttle" wp="TD"/>
-      <attitude roll="0.0" throttle="0.0" until="FALSE" vmode="throttle"/>
     </block>
 
 
