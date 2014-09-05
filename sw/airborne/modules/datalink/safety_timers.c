@@ -23,3 +23,8 @@
 #include "safety_timers.h"
 
 int obc_flight_mode = SCRUTENEERING_FLIGHT;
+
+#ifdef SITL
+float v_ctl_auto_throttle_nominal_cruise_pitch = 0;
+float v_ctl_auto_airspeed_setpoint = 0;
+#endif

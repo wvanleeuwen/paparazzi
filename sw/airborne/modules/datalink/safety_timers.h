@@ -36,11 +36,5 @@
 #define DROP_FLIGHT 2
 extern int obc_flight_mode;
 
-#define AirbrakesOff() {ap_state->commands[COMMAND_BRAKE]=0;}
-#define AirbrakesOn() {ap_state->commands[COMMAND_BRAKE]=SERVO_BRAKE_FULL;}
-
-#define AircraftIsBooting() ((nav_block <= 3))
-
-
 
 #endif
