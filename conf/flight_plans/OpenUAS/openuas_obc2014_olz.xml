@@ -20,11 +20,11 @@
     <waypoint lat="50.779131" lon="7.665717" name="_MB3"/>
     <waypoint lat="50.789853" lon="7.631373" name="_MB2"/>
     <waypoint lat="50.790669" lon="7.577522" name="_MB1"/>
-    <waypoint lat="50.747020" lon="7.600780" name="SA5"/>
-    <waypoint lat="50.745056" lon="7.594285" name="SA4"/>
-    <waypoint lat="50.739885" lon="7.593886" name="SA3"/>
-    <waypoint lat="50.740194" lon="7.609298" name="SA2"/>
     <waypoint lat="50.746924" lon="7.609676" name="SA1"/>
+    <waypoint lat="50.740194" lon="7.609298" name="SA2"/>
+    <waypoint lat="50.739885" lon="7.593886" name="SA3"/>
+    <waypoint lat="50.745056" lon="7.594285" name="SA4"/>
+    <waypoint lat="50.747020" lon="7.600780" name="SA5"/>
     <waypoint lat="50.733274" lon="7.604422" name="TST-1"/>
     <waypoint lat="50.739706" lon="7.601584" name="TST-2"/>
     <waypoint lat="50.738065" lon="7.611032" name="TST-3"/>
