@@ -279,18 +279,21 @@ OK?
      ***************************************************** -->
     <block name="Start Scruteneering Flight" strip_button="Scrut" group="TO">
       <call fun="NavSetWaypointHere(WP_TD)"/>
+      <call fun="SetAltitudeForFinalFromTo(WP_TD,WP_AF)" />
       <set value="SCRUTENEERING_FLIGHT" var="obc_flight_mode" />
       <deroute block="Takeoff"/>
     </block>
 
     <block name="Start Search Flight" strip_button="Search" group="TO">
       <call fun="NavSetWaypointHere(WP_TD)"/>
+      <call fun="SetAltitudeForFinalFromTo(WP_TD,WP_AF)" />
       <set value="SEARCH_FLIGHT" var="obc_flight_mode" />
       <deroute block="Takeoff"/>
     </block>
 
     <block name="Start Drop Flight" strip_button="Drop" group="TO">
       <call fun="NavSetWaypointHere(WP_TD)"/>
+      <call fun="SetAltitudeForFinalFromTo(WP_TD,WP_AF)" />
       <set value="DROP_FLIGHT" var="obc_flight_mode" />
       <deroute block="Takeoff"/>
     </block>

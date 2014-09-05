@@ -43,4 +43,6 @@ extern float set_takeoff_pitch;
 extern float set_flare_pitch;
 
 
+#define SetAltitudeForFinalFromTo(X,Y) {waypoints[Y].a=(waypoints[X].a+35);FALSE;}
+
 #endif
