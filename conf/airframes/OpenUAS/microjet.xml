@@ -90,7 +90,10 @@
 
   <section name="MISC">
     <define name="NOMINAL_AIRSPEED" value="20." unit="m/s"/>
+    <define name="TRACKING_AIRSPEED" value="20." unit="m/s"/>
     <define name="GLIDE_AIRSPEED" value="15." unit="m/s"/>
+    <define name="TAKEOFF_PITCH_ANGLE" value="30."/>
+    <define name="FLARE_PITCH_ANGLE" value="15."/>
     <define name="LANDING_CIRCLE_RADIUS" value="90" />
     <define name="CARROT" value="5." unit="s"/>
     <define name="KILL_MODE_DISTANCE" value="(1.5*MAX_DIST_FROM_HOME)"/>
