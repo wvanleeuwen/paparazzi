@@ -21,8 +21,16 @@
  */
 
 #include "safety_timers.h"
+#include "generated/airframe.h"
 
 int obc_flight_mode = SCRUTENEERING_FLIGHT;
+
+float set_airspeed_nominal = NOMINAL_AIRSPEED;
+float set_airspeed_tracking = TRACKING_AIRSPEED;
+float set_airspeed_glide = GLIDE_AIRSPEED;
+float set_takeoff_pitch = TAKEOFF_PITCH_ANGLE;
+float set_flare_pitch = FLARE_PITCH_ANGLE;
+
 
 #ifdef SITL
 float v_ctl_auto_throttle_nominal_cruise_pitch = 0;

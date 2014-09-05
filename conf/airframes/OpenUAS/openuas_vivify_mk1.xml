@@ -754,11 +754,12 @@ https://github.com/paparazzi/paparazzi/blob/master/sw/airborne/subsystems/nav.c#
   <section name="MISC">
 <!-- ****************************** MISC *********************************** -->
     <!-- Values here are only referred to by the flightplan m*_s*_airspeed.xml -->
-    <define name="CLIMB_AIRSPEED" value="16." unit="m/s"/>
+    <define name="TRACKING_AIRSPEED" value="22." unit="m/s"/>
     <define name="NOMINAL_AIRSPEED" value="20." unit="m/s"/>
-    <define name="GLIDE_AIRSPEED" value="13." unit="m/s"/>
-    <define name="RACE_AIRSPEED" value="32." unit="m/s"/><!-- measue limit of plane in testflight and set 90% from this -->
+    <define name="GLIDE_AIRSPEED" value="15." unit="m/s"/>
     <define name="STALL_AIRSPEED" value="10." unit="m/s"/> <!-- measue limit of plane in testflight and set 80% from this -->
+    <define name="TAKEOFF_PITCH_ANGLE" value="35" unit="deg" />
+    <define name="FLARE_PITCH_ANGLE" value="20" unit="deg" />
     <!-- to high now, H stall to test with full weight-->
     <define name="AIRSPEED_SETPOINT_SLEW" value="0.4" unit="m/s/s"/>
     <!--default is 1 -->

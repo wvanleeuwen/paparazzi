@@ -36,5 +36,11 @@
 #define DROP_FLIGHT 2
 extern int obc_flight_mode;
 
+extern float set_airspeed_nominal;
+extern float set_airspeed_tracking;
+extern float set_airspeed_glide;
+extern float set_takeoff_pitch;
+extern float set_flare_pitch;
+
 
 #endif
