@@ -96,7 +96,9 @@ TODO:
 #include "firmwares/fixedwing/guidance/energy_ctrl.h"
 
 // States
-    #define AircraftIsBooting()  LessThan(nav_block,4)
+//    #define AircraftIsBooting()  LessThan(nav_block,4)
+// Debugging: skip safety rules
+    #define AircraftIsBooting()  TRUE
 
 #endif
 
@@ -268,7 +270,7 @@ OK?
       <!-- <set value="0" var="ap_state->commands[COMMAND_CAMBER]"/> -->
       <!-- <set value="0" var="ap_state->commands[COMMAND_BRAKE]"/> -->
       <call fun="NavKillThrottle()"/>
-      <call fun="AirbrakesOff()" until="TRUE" />
+      <call fun="AirbrakesOff()"/>
       <attitude pitch="0" roll="0" throttle="0" vmode="throttle" until="FALSE"/><!-- maybe not moving the plane would still make a test of defelction possible -->
 <!-- If over 50% throttleis given auto2 takeoff is initiated, it is not an RC steering method, just a trigger, make sure transmiter is set in auto2 mode, or else switched off -->
       <!-- <exception cond="RCChannel(RADIO_THROTTLE) > 1600" deroute="Takeoff"/> --><!-- Todo ACtivate if everything works-->
@@ -278,18 +280,21 @@ OK?
      *********** Search Area Entry Procedure Start ***********
      ***************************************************** -->
     <block name="Start Scruteneering Flight" strip_button="Scrut" group="TO">
-        <set value="SCRUTENEERING_FLIGHT" var="obc_flight_mode" />
-        <deroute block="Takeoff"/>
+      <call fun="NavSetWaypointHere(WP_HOME)"/>
+      <set value="SCRUTENEERING_FLIGHT" var="obc_flight_mode" />
+      <deroute block="Takeoff"/>
     </block>
 
     <block name="Start Search Flight" strip_button="Search" group="TO">
-        <set value="SEARCH_FLIGHT" var="obc_flight_mode" />
-        <deroute block="Takeoff"/>
+      <call fun="NavSetWaypointHere(WP_HOME)"/>
+      <set value="SEARCH_FLIGHT" var="obc_flight_mode" />
+      <deroute block="Takeoff"/>
     </block>
 
     <block name="Start Drop Flight" strip_button="Drop" group="TO">
-        <set value="DROP_FLIGHT" var="obc_flight_mode" />
-        <deroute block="Takeoff"/>
+      <call fun="NavSetWaypointHere(WP_HOME)"/>
+      <set value="DROP_FLIGHT" var="obc_flight_mode" />
+      <deroute block="Takeoff"/>
     </block>
 
     <block key="t" name="Takeoff" strip_button="Takeoff" strip_icon="takeoff.png">
