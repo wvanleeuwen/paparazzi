@@ -367,7 +367,7 @@ I am as of yet not sure if the weird info byte is because of a failed bind proce
     <!-- **************************** DROP STORE ******************************* -->
     <!-- TODO set fastest possible loop rate-->
     <load name="nav_drop.xml">
-      <define name="TRIGGER_DELAY" value="1" unit="s"/> <!--TODO get correct value;  time it take from shoot command till actual release of payload -->
+      <define name="TRIGGER_DELAY" value="6" unit="s"/> <!--TODO get correct value;  time it take from shoot command till actual release of payload -->
       <define name="VELOCITY_AT_RELEASE" value="14" unit="m/s"/><!-- TODO not implemented - to set to min airspeed-->
       <!-- TODO: These values are for a OBJEXT X not the real on yet  -->
       <define name="ALPHA" value="44.18e-4"/><!-- TODO: adjust it for the 500ML bottle -->
