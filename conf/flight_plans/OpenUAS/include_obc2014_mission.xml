@@ -100,6 +100,7 @@ TODO:
 // Debugging: skip safety rules
     #define AircraftIsBooting()  TRUE
 
+
 #endif
 
   </header>
@@ -260,12 +261,12 @@ OK?
       <!-- TODO maybe switch on ACL blick as soon as we are ready to go  -->
     </block>
 
-    <block name="Set TakeOff Position" pre_call="NavKillThrottle()">
+    <block name="Set Landing Position" pre_call="NavKillThrottle()">
       <call fun="AirbrakesOff()"/>
       <attitude pitch="0" roll="0" throttle="0" vmode="throttle" until="FALSE"/><!-- maybe not moving the plane would still make a test of defelction possible -->
     </block>
 
-    <block name="TakeOff Position Stored" pre_call="NavKillThrottle()" strip_button="Store" strip_icon="recenter.png">
+    <block name="Landing Position Stored" pre_call="NavKillThrottle()" strip_button="Store" strip_icon="recenter.png">
       <call fun="NavSetWaypointHere(WP_TD)"/>
       <call fun="SetAltitudeForFinalFromTo(WP_TD,WP_AF)" />
       <deroute block="HoldingPoint"/>
@@ -282,7 +283,6 @@ OK?
       <call fun="AirbrakesOff()"/>
       <attitude pitch="0" roll="0" throttle="0" vmode="throttle" until="FALSE"/><!-- maybe not moving the plane would still make a test of defelction possible -->
 <!-- If over 50% throttleis given auto2 takeoff is initiated, it is not an RC steering method, just a trigger, make sure transmiter is set in auto2 mode, or else switched off -->
-      <!-- <exception cond="RCChannel(RADIO_THROTTLE) > 1600" deroute="Takeoff"/> --><!-- Todo ACtivate if everything works-->
     </block>
 
 <!-- *********************************************************
@@ -290,17 +290,22 @@ OK?
      ***************************************************** -->
     <block name="Start Scruteneering Flight" strip_button="Scrut" group="TO">
       <set value="SCRUTENEERING_FLIGHT" var="obc_flight_mode" />
-      <deroute block="Takeoff"/>
+      <deroute block="ReadyForDeparture"/>
     </block>
 
     <block name="Start Search Flight" strip_button="Search" group="TO">
       <set value="SEARCH_FLIGHT" var="obc_flight_mode" />
-      <deroute block="Takeoff"/>
+      <deroute block="ReadyForDeparture"/>
     </block>
 
     <block name="Start Drop Flight" strip_button="Drop" group="TO">
       <set value="DROP_FLIGHT" var="obc_flight_mode" />
-      <deroute block="Takeoff"/>
+      <deroute block="ReadyForDeparture"/>
+    </block>
+
+    <block name="ReadyForDeparture" >
+      <exception cond="ThrottleHigh()" deroute="Takeoff"/>
+      <attitude pitch="DegOfRad(set_takeoff_pitch)" roll="0" throttle="0.0" until="FALSE" vmode="throttle"/>
     </block>
 
     <block key="t" name="Takeoff" strip_button="Takeoff" strip_icon="takeoff.png">

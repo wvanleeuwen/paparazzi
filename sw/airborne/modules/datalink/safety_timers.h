@@ -45,4 +45,9 @@ extern float set_flare_pitch;
 
 #define SetAltitudeForFinalFromTo(X,Y) {waypoints[Y].a=(waypoints[X].a+35);FALSE;}
 
+#include "inter_mcu.h"
+
+#define ThrottleHigh() MoreThan(fbw_state->channels[RADIO_THROTTLE],4000)
+
+
 #endif
