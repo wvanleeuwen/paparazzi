@@ -232,8 +232,9 @@ I am as of yet not sure if the weird info byte is because of a failed bind proce
       <subsystem name="radio_control" type="ppm">
         <define name="RADIO_KILL" value="0"/>
         <define name="RADIO_AUX4" value="0"/>
-        <!-- <define ="RADIO_MODE" value="0"/>-->
+        <define name="RADIO_MODE" value="0"/>
         <define name="RADIO_BRAKE" value="0"/>
+        <define name="RADIO_HATCH" value="0"/>
         <define name="BAT_CHECKER_DELAY" value="900"/>
         <!-- -->
         <define name="CATASTROPHIC_BATTERY_KILL_DELAY" value="900"/>
@@ -347,7 +348,6 @@ I am as of yet not sure if the weird info byte is because of a failed bind proce
     <!--   <configure name="ADC_CHANNEL_GENERIC2" value="ADC_4"/>-->
     </load>
     <load name="photogrammetry_calculator.xml"/>
-    <!-- Set launch to 1 and place your bets ;) not in use at the moment -->
    <!--  <load name="nav_catapult.xml"/> -->
      <!-- <load name="geo_mag.xml"/> --> <!-- simplify the setup of magneto in various part of the world TODO needs fixing now aircarft in flight (strange)rule-->
 
@@ -375,8 +375,6 @@ I am as of yet not sure if the weird info byte is because of a failed bind proce
       <define name="SAFE_CLIMB" value="10" unit="m"/><!-- TODO: define  what?-->
       <define name="CLIMB_TIME" value="3" unit="s"/><!-- TODO: define what?-->
     </load>
-
-   <!--   <load name="nav_gls.xml"/> -->
 
 <!-- needed to be able to survey an aerea -->
      <load name="nav_survey_polygon.xml"/>
@@ -408,6 +406,9 @@ I am as of yet not sure if the weird info byte is because of a failed bind proce
     <define name="SERVO_HATCH_OPEN" value="0" />
     <define name="SERVO_HATCH_CLOSED" value="-9600" />
     <define name="AGR_CLIMB_PITCH" value="35" unit="deg" />
+
+    <define name="AirbrakesOff()" value="{ap_state->commands[COMMAND_BRAKE]=0;FALSE;}" />
+    <define name="AirbrakesOn()" value="{ap_state->commands[COMMAND_BRAKE]=SERVO_BRAKE_FULL;FALSE;}" />
   </section>
 
   <commands>
@@ -506,7 +507,7 @@ For a blended wing this will translate best to
 
   <section name="TRIM" prefix="COMMAND_">
 <!-- ******************************* TRIM ********************************** -->
-    <define name="ROLL_TRIM" value="0" unit="deg"/>
+    <define name="ROLL_TRIM" value="0"/>
     <define name="PITCH_TRIM" value="0"/>
   </section>
 
@@ -819,6 +820,7 @@ we had an option to use glovs, or start up spinning the prop after a throw. If t
   <section name="GCS">
     <define name="SPEECH_NAME" value="Vivify"/>
     <!--TODO:  rather see this in <airframe name="Vivify" spokenname="sayitnow"> as optional parameter-->
+    <define name="AC_ICON" value="flyingwing"/>
   </section>
 
 <!-- ****************** FAKE MORA DIGITAL_CAMERA *************************** -->
