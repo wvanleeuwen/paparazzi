@@ -22,6 +22,7 @@
 
 #include "safety_timers.h"
 #include "generated/airframe.h"
+#include "firmwares/fixedwing/autopilot.h"
 
 int obc_flight_mode = SCRUTENEERING_FLIGHT;
 
@@ -36,3 +37,15 @@ float set_flare_pitch = FLARE_PITCH_ANGLE;
 float v_ctl_auto_throttle_nominal_cruise_pitch = 0;
 float v_ctl_auto_airspeed_setpoint = 0;
 #endif
+
+void periodic_safety_timers(void)
+{
+  if (pprz_mode == PPRZ_MODE_AUTO1)
+  {
+    ap_state->commands[COMMAND_HATCH] = fbw_state->channels[RADIO_HATCH];
+    ap_state->commands[COMMAND_BRAKE] = fbw_state->channels[RADIO_BRAKE];
+  }
+}
+
+
+

@@ -49,5 +49,8 @@ extern float set_flare_pitch;
 
 #define ThrottleHigh() MoreThan(fbw_state->channels[RADIO_THROTTLE],4000)
 
+extern void periodic_safety_timers(void);
+
+
 
 #endif

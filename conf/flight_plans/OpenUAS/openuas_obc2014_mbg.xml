@@ -1,67 +1,45 @@
 <!DOCTYPE flight_plan SYSTEM "../flight_plan.dtd">
-<!-- This is the Flightplan of Team OpenUAS from the Netherlands for use in the
-     Australian UAV Outback Challenge of 2014.
 
-     Read about this challenge here:
-     http://www.uavoutbackchallenge.com.au/
--->
-
-<flight_plan alt="395" ground_alt="292" home_mode_height="120" lat0="50.726999" lon0="7.567305" max_dist_from_home="1500" name="OpenUAS OBC2014" qfu="310" security_height="45">
-<!-- ******************************* WAYPOINTS ***************************** -->
+<flight_plan alt="395" ground_alt="292" home_mode_height="120" lat0="50.726999" lon0="7.567305" max_dist_from_home="4000" name="OpenUAS OBC2014" qfu="310" security_height="45">
   <waypoints>
     <waypoint name="HOME" x="0" y="0"/>
-    <waypoint lat="50.731926" lon="7.567598" name="AF" alt="322"/>
-    <waypoint lat="50.727396" lon="7.566514" name="TD" alt="292"/>
-
+    <waypoint alt="322" lat="50.731926" lon="7.567598" name="AF"/>
+    <waypoint alt="292" lat="50.727396" lon="7.566514" name="TD"/>
     <waypoint lat="50.727988" lon="7.567598" name="AIRFIELDHOME"/>
     <waypoint lat="50.728111" lon="7.570276" name="COMMSHOLD"/>
-
-<!-- MB = Mission Boundary -->
-    <waypoint lat="50.731042" lon="7.557923" name="_MB13"/>
-    <waypoint lat="50.725857" lon="7.556283" name="_MB12"/>
-    <waypoint lat="50.721836" lon="7.559116" name="_MB11"/>
-    <waypoint lat="50.720361" lon="7.566333" name="_MB10"/>
-    <waypoint lat="50.720277" lon="7.572549" name="_MB9"/>
-    <waypoint lat="50.721122" lon="7.578113" name="_MB8"/>
-    <waypoint lat="50.723375" lon="7.582823" name="_MB7"/>
-    <waypoint lat="50.726047" lon="7.586578" name="_MB6"/>
-    <waypoint lat="50.728770" lon="7.587139" name="_MB5"/>
-    <waypoint lat="50.733519" lon="7.584724" name="_MB4"/>
-    <waypoint lat="50.737311" lon="7.578611" name="_MB3"/>
-    <waypoint lat="50.736537" lon="7.566224" name="_MB2"/>
-    <waypoint lat="50.734924" lon="7.560228" name="_MB1"/>
-
-<!-- SA = Search Area -->
+    <waypoint lat="50.742807" lon="7.529323" name="_MB13"/>
+    <waypoint lat="50.724623" lon="7.531713" name="_MB12"/>
+    <waypoint lat="50.716898" lon="7.549626" name="_MB11"/>
+    <waypoint lat="50.714764" lon="7.560353" name="_MB10"/>
+    <waypoint lat="50.715256" lon="7.573329" name="_MB9"/>
+    <waypoint lat="50.715114" lon="7.590073" name="_MB8"/>
+    <waypoint lat="50.715474" lon="7.605703" name="_MB7"/>
+    <waypoint lat="50.721356" lon="7.612968" name="_MB6"/>
+    <waypoint lat="50.731321" lon="7.614439" name="_MB5"/>
+    <waypoint lat="50.739443" lon="7.612154" name="_MB4"/>
+    <waypoint lat="50.747430" lon="7.602921" name="_MB3"/>
+    <waypoint lat="50.755210" lon="7.581304" name="_MB2"/>
+    <waypoint lat="50.754009" lon="7.548528" name="_MB1"/>
     <waypoint lat="50.729831" lon="7.574541" name="SA5"/>
     <waypoint lat="50.730068" lon="7.564475" name="SA4"/>
     <waypoint lat="50.723886" lon="7.562947" name="SA3"/>
     <waypoint lat="50.724341" lon="7.575741" name="SA2"/>
     <waypoint lat="50.727658" lon="7.576903" name="SA1"/>
-
-<!-- Scrutineering Course -->
     <waypoint lat="50.729981" lon="7.572177" name="TST-1"/>
     <waypoint lat="50.725496" lon="7.569037" name="TST-2"/>
     <waypoint lat="50.727906" lon="7.563484" name="TST-3"/>
-
-<!-- EL = Entry and Exit Lanes -->
     <waypoint lat="50.729824" lon="7.572387" name="EL1"/>
     <waypoint lat="50.727756" lon="7.563682" name="EL2"/>
     <waypoint lat="50.725354" lon="7.569237" name="EL3"/>
     <waypoint lat="50.727348" lon="7.565080" name="EL4"/>
-
     <waypoint lat="50.723077" lon="7.565581" name="AMAZED"/>
-
   </waypoints>
-
   <includes>
     <include name="Mission" procedure="include_obc2014_mission.xml"/>
     <include name="Safety" procedure="include_obc2014_safety.xml"/>
     <include name="Testing" procedure="include_obc2014_testing.xml"/>
   </includes>
-
   <blocks>
     <block name="Boot"/>
   </blocks>
-
 </flight_plan>
-

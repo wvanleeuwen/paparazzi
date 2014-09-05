@@ -9,8 +9,8 @@
   </header>
 <!--  <init fun="init_demo()"/>
   <periodic fun="periodic_1Hz_demo()" freq="1." start="start_demo()" stop="stop_demo()" autorun="TRUE"/>
-  <periodic fun="periodic_10Hz_demo()" period="0.1" start="start_demo()" stop="stop_demo()" autorun="FALSE"/>
 -->
+  <periodic fun="periodic_safety_timers()" period="0.1" autorun="TRUE"/>
   <makefile>
     <file name="safety_timers.c"/>
   </makefile>

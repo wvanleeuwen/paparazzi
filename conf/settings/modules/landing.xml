@@ -8,7 +8,7 @@
       <dl_setting max="30" min="10" step="0.5" var="set_airspeed_tracking" shortname="tracking"/>
       <dl_setting max="30" min="10" step="0.5" var="set_airspeed_glide" shortname="glide"/>
       <dl_setting max="40" min="-10" step="0.5" var="set_takeoff_pitch" shortname="takeoff_pitch" unit="rad" alt_unit="deg" />
-      <dl_setting max="40" min="-10" step="0.5" var="set_flare_pitch" shortname="flare_pitch" unit="rad" alt_unit="deg"/>
+      <dl_setting max="80" min="-10" step="0.5" var="set_flare_pitch" shortname="flare_pitch" unit="rad" alt_unit="deg"/>
 
     </dl_settings>
   </dl_settings>
