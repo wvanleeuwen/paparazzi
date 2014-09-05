@@ -96,9 +96,9 @@ TODO:
 #include "firmwares/fixedwing/guidance/energy_ctrl.h"
 
 // States
-//    #define AircraftIsBooting()  LessThan(nav_block,4)
+    #define AircraftIsBooting()  LessThan(nav_block,4)
 // Debugging: skip safety rules
-    #define AircraftIsBooting()  TRUE
+//    #define AircraftIsBooting()  TRUE
 
 
 #endif
@@ -347,11 +347,12 @@ to “Airfield Home” and orbit for either a landing or regain of Data Link. --
 
     <block name="ScrutineeringAutonomyTriangle" strip_button="Triangle" strip_icon="path.png" group="Mission">
       <!-- TODO: while we are up there take some pictures anyhow :) -->
-      <while cond="TRUE">
+      <for var="i" from="1" to="5">
         <go from="TST-3" hmode="route" wp="TST-1"/>
         <go from="TST-1" hmode="route" wp="TST-2"/>
         <go from="TST-2" hmode="route" wp="TST-3"/>
-      </while>
+      </for>
+      <deroute block="InitiateLandingApproach" />
     </block>
 
 <!-- *********************************************************
