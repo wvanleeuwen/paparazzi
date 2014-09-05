@@ -10,8 +10,8 @@
 <!-- ******************************* WAYPOINTS ***************************** -->
   <waypoints>
     <waypoint name="HOME" x="0" y="0"/>
-    <waypoint lat="50.731926" lon="7.567598" name="AF"/>
-    <waypoint lat="50.727396" lon="7.566514" name="TD"/>
+    <waypoint lat="50.731926" lon="7.567598" name="AF" alt="322"/>
+    <waypoint lat="50.727396" lon="7.566514" name="TD" alt="292"/>
 
     <waypoint lat="50.727988" lon="7.567598" name="AIRFIELDHOME"/>
     <waypoint lat="50.728111" lon="7.570276" name="COMMSHOLD"/>
