@@ -8,7 +8,7 @@ int main(int argc, char* argv[])
   int i;
   char* buff = "This is a nice demo\n";
 
-  //printf("Start Shoot\n");
+  printf("Start Shoot Server\n");
   //system("cd ../popcorn/chdkptp/lua/ && ../chdkptp -c -e'rec' -e'rs'");
   //for (i=0;i<10;i++)
   //  system("cd ../popcorn/chdkptp/lua/ && ../chdkptp -c -e'rs'");

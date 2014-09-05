@@ -1,1 +1,1 @@
-./candy/candy &
+~/run/candy/candy &

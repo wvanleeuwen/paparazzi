@@ -9,9 +9,9 @@
 # Description:       Enable service provided by daemon.
 ### END INIT INFO
 
-dir="~/run"
+dir="/root/run/candy"
 user="root"
-cmd="run.sh"
+cmd="/root/run/candy/candy"
 
 name=`basename $0`
 pid_file="/var/run/$name.pid"
@@ -33,7 +33,7 @@ case "$1" in
     else
         echo "Starting $name"
         cd "$dir"
-        sudo -u "$user" $cmd >> "$stdout_log" 2>> "$stderr_log" &
+        $cmd >> "$stdout_log" 2>> "$stderr_log" &
         echo $! > "$pid_file"
         if ! is_running; then
             echo "Unable to start, see $stdout_log and $stderr_log"
