@@ -402,7 +402,7 @@ I am as of yet not sure if the weird info byte is because of a failed bind proce
   </servos>
 
   <section name="ServoPositions">
-    <define name="SERVO_BRAKE_FULL" value="-6000" />
+    <define name="SERVO_BRAKE_FULL" value="-MAX_PPRZ" />
     <define name="SERVO_HATCH_OPEN" value="0" />
     <define name="SERVO_HATCH_CLOSED" value="-9600" />
     <define name="AGR_CLIMB_PITCH" value="35" unit="deg" />
@@ -476,7 +476,7 @@ For a blended wing this will translate best to
     <define name="BRAKE_ENABLED_SLOWDOWN_FACTOR_RETRACT" value="420"/>
     <!-- no unit yet, be warned test with var frequencies -->
     <!-- If we would set to much brake pct then the elevons and flaperons have not enought authoity to make the AC roll n pitch, not so handy in landing phase -->
-    <define name="BRAKE_MAX_PCT" value="0.55f"/>
+    <define name="BRAKE_MAX_PCT" value="0.75f"/>
     <define name="BRAKE_PITCH_COMPENSATION" value="0.1f"/>
     <!-- Set up/down deflection differences, needs many in flight tests to find acceptable values-->
     <define name="AILERON_DIFF" value="0.3f"/>
@@ -498,10 +498,10 @@ For a blended wing this will translate best to
     <let var="rudderleft" value="(@YAW * $leftyaw) * ELEVON_YAW_FACTOR"/>
     <let var="rudderright" value="(@YAW * $rightyaw) * ELEVON_YAW_FACTOR"/>
     <set servo="MOTOR" value="@THROTTLE"/>
-    <set servo="ELEVON_LEFT" value="-$elevator + $aileron + $crowbrake + $rudderleft"/>
-    <set servo="ELEVON_RIGHT" value="$elevator + $aileron - $crowbrake + $rudderright"/>
-    <set servo="FLAPPERON_LEFT" value="-$elevator + $aileron - $crowbrake - $rudderleft"/>
-    <set servo="FLAPPERON_RIGHT" value="$elevator + $aileron + $crowbrake - $rudderright"/>
+    <set servo="ELEVON_LEFT" value="-$elevator + $aileron - $crowbrake + $rudderleft"/>
+    <set servo="ELEVON_RIGHT" value="$elevator + $aileron + $crowbrake + $rudderright"/>
+    <set servo="FLAPPERON_LEFT" value="-$elevator + $aileron + $crowbrake - $rudderleft"/>
+    <set servo="FLAPPERON_RIGHT" value="$elevator + $aileron - $crowbrake - $rudderright"/>
     <set servo="HATCH" value="@HATCH"/>
   </command_laws>
 
@@ -701,14 +701,6 @@ https://github.com/paparazzi/paparazzi/blob/master/sw/airborne/subsystems/nav.c#
     <!-- To still be able to use virtual rudder, which is handy with sidewind landing in auto1 stabilization mode only YAW
      Handy if in auto1 for sidewind stabilized crabbing landing, also for steering if someting not OK with course gains in Autonomous flight-->
     <set command="YAW" value="@YAW"/>
-    <!-- Also brakes are possible to assist landings -->
-    <!-- DISABLE in FINAL Autonomous mode , for now used to test auto2 braked landing tuning-->
-    <set command="BRAKE" value="@BRAKE"/>
-    <!-- DISABLE in FINAL tests otherwise it won't work in Autonomous mode -->
-    <set command="HATCH" value="@AUX2"/>
-    <!--@AUX3 or MANUALRELEASE-->
-    <!-- <set command="LIGHT" value="@AUX4"/> -->
-    <!--@AUX4 -->
   </auto_rc_commands>
 
 <!-- ************************* MISC ************************* -->
