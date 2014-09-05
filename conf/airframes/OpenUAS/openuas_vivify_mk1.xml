@@ -355,8 +355,7 @@ I am as of yet not sure if the weird info byte is because of a failed bind proce
     <!-- TODO: Give it a better name -->
     <!-- AKA TICKET -->
     <load name="TICKET.xml">
-      <define name="SHUTTER_DELAY" value="1" unit="quarter_second"/>
-      <define name="xIMAGE_BUFFER" value="65000"/>
+      <define name="AUTOSHOOT_QUARTERSEC_PERIOD" value="22" unit="quarter_second"/>
       <configure name="CAMERA_PORT" value="UART5"/>
     </load>
 
