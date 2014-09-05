@@ -260,8 +260,19 @@ OK?
       <!-- TODO maybe switch on ACL blick as soon as we are ready to go  -->
     </block>
 
+    <block name="Set TakeOff Position" pre_call="NavKillThrottle()">
+      <call fun="AirbrakesOff()"/>
+      <attitude pitch="0" roll="0" throttle="0" vmode="throttle" until="FALSE"/><!-- maybe not moving the plane would still make a test of defelction possible -->
+    </block>
+
+    <block name="TakeOff Position Stored" pre_call="NavKillThrottle()" strip_button="Store" strip_icon="recenter.png">
+      <call fun="NavSetWaypointHere(WP_TD)"/>
+      <call fun="SetAltitudeForFinalFromTo(WP_TD,WP_AF)" />
+      <deroute block="HoldingPoint"/>
+    </block>
+
 <!-- *********** Throttle off holdingpoint *********** -->
-    <block name="Holding Point" pre_call="NavKillThrottle()" >
+    <block name="HoldingPoint" pre_call="NavKillThrottle()" >
      <!--  TODO: make some movements on all defelctros as a sign we are in holding and to see if all works Maybe a separate testblock-->
       <!--Just to make sure in case of flightplan mishap, it is no too far away -->
       <!-- <set var="waypoints[WP_START].x" value="WaypointX(WP_EL2) + 50"/> -->
@@ -278,22 +289,16 @@ OK?
      *********** Search Area Entry Procedure Start ***********
      ***************************************************** -->
     <block name="Start Scruteneering Flight" strip_button="Scrut" group="TO">
-      <call fun="NavSetWaypointHere(WP_TD)"/>
-      <call fun="SetAltitudeForFinalFromTo(WP_TD,WP_AF)" />
       <set value="SCRUTENEERING_FLIGHT" var="obc_flight_mode" />
       <deroute block="Takeoff"/>
     </block>
 
     <block name="Start Search Flight" strip_button="Search" group="TO">
-      <call fun="NavSetWaypointHere(WP_TD)"/>
-      <call fun="SetAltitudeForFinalFromTo(WP_TD,WP_AF)" />
       <set value="SEARCH_FLIGHT" var="obc_flight_mode" />
       <deroute block="Takeoff"/>
     </block>
 
     <block name="Start Drop Flight" strip_button="Drop" group="TO">
-      <call fun="NavSetWaypointHere(WP_TD)"/>
-      <call fun="SetAltitudeForFinalFromTo(WP_TD,WP_AF)" />
       <set value="DROP_FLIGHT" var="obc_flight_mode" />
       <deroute block="Takeoff"/>
     </block>
@@ -335,7 +340,7 @@ All emergency and failure requirements of the Challenge must be met,
 with the exception that for Loss of Data Link the procedure will be track direct
 to “Airfield Home” and orbit for either a landing or regain of Data Link. -->
 
-    <block name="ScrutineeringAutonomyTriangle" strip_button="Triangle" group="Mission">
+    <block name="ScrutineeringAutonomyTriangle" strip_button="Triangle" strip_icon="path" group="Mission">
       <!-- TODO: while we are up there take some pictures anyhow :) -->
       <while cond="TRUE">
         <go from="TST-3" hmode="route" wp="TST-1"/>
@@ -352,7 +357,7 @@ to “Airfield Home” and orbit for either a landing or regain of Data Link. --
       <set value="0" var="ap_state->commands[COMMAND_CAMBER]"/>
 
 <!-- *********** Track to EL-1 *********** -->
-    <block name="TrackToEL1" strip_button="Joe" group="Mission">
+    <block name="TrackToEL1" strip_button="Joe" strip_icon="lookdown.png" group="Mission">
       <set value="set_airspeed_tracking" var="v_ctl_auto_airspeed_setpoint"/>
       <go from="AIRFIELDHOME" wp="EL1" hmode="route"/>
     </block>
@@ -448,7 +453,7 @@ best to perform many real life tests with the CAM
      **************** Deliver the Payload ********************
      ***************************************************** -->
 
-    <block name="RescueJoe" strip_button="Drop"  group="Mission">
+    <block name="RescueJoe" strip_button="Drop" strip_icon="parachute.png" group="Mission">
       <!-- <go wp="VIAEL2" hmode="route"/>--> <!-- TODO maybe not needed -->
       <deroute block="drop"/>
     </block>

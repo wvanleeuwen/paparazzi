@@ -1,37 +1,37 @@
 <!DOCTYPE flight_plan SYSTEM "../flight_plan.dtd">
 
-<flight_plan alt="395" ground_alt="292" home_mode_height="120" lat0="50.733524" lon0="7.606258" max_dist_from_home="7000" name="OpenUAS OBC2014" qfu="310" security_height="45">
+<flight_plan alt="495" ground_alt="375" home_mode_height="495" lat0="50.733524" lon0="7.606258" max_dist_from_home="7000" name="OpenUAS OBC2014" qfu="310" security_height="45">
   <waypoints>
-    <waypoint name="HOME" x="0" y="0"/>
-    <waypoint alt="322.0" lat="50.735252" lon="7.604715" name="AF"/>
-    <waypoint alt="292.0" lat="50.732663" lon="7.604617" name="TD"/>
-    <waypoint lat="50.735126" lon="7.609095" name="AIRFIELDHOME"/>
-    <waypoint lat="50.734418" lon="7.593050" name="COMMSHOLD"/>
-    <waypoint lat="50.766720" lon="7.574292" name="_MB13"/>
-    <waypoint lat="50.752465" lon="7.572706" name="_MB12"/>
-    <waypoint lat="50.731609" lon="7.580686" name="_MB11"/>
-    <waypoint lat="50.728332" lon="7.585603" name="_MB10"/>
-    <waypoint lat="50.726238" lon="7.591929" name="_MB9"/>
-    <waypoint lat="50.725314" lon="7.598542" name="_MB8"/>
-    <waypoint lat="50.726252" lon="7.608989" name="_MB7"/>
-    <waypoint lat="50.728324" lon="7.617751" name="_MB6"/>
-    <waypoint lat="50.731047" lon="7.625107" name="_MB5"/>
-    <waypoint lat="50.744214" lon="7.637013" name="_MB4"/>
-    <waypoint lat="50.761488" lon="7.627060" name="_MB3"/>
-    <waypoint lat="50.777507" lon="7.614236" name="_MB2"/>
-    <waypoint lat="50.777315" lon="7.589079" name="_MB1"/>
-    <waypoint lat="50.750756" lon="7.594797" name="SA5"/>
-    <waypoint lat="50.749539" lon="7.587358" name="SA4"/>
-    <waypoint lat="50.738440" lon="7.591524" name="SA3"/>
-    <waypoint lat="50.739795" lon="7.615596" name="SA2"/>
-    <waypoint lat="50.748169" lon="7.616210" name="SA1"/>
-    <waypoint lat="50.730882" lon="7.593856" name="TST-1"/>
-    <waypoint lat="50.740326" lon="7.603088" name="TST-2"/>
-    <waypoint lat="50.732064" lon="7.615930" name="TST-3"/>
-    <waypoint lat="50.757261" lon="7.610928" name="EL1"/>
-    <waypoint lat="50.752839" lon="7.616894" name="EL2"/>
-    <waypoint lat="50.752101" lon="7.604383" name="EL3"/>
-    <waypoint lat="50.757072" lon="7.600445" name="EL4"/>
+    <waypoint name="HOME" x="41.3" y="35.4"/>
+    <waypoint alt="322.0" lat="50.736935" lon="7.608167" name="AF"/>
+    <waypoint alt="292.0" lat="50.734051" lon="7.607882" name="TD"/>
+    <waypoint lat="50.735436" lon="7.608430" name="AIRFIELDHOME"/>
+    <waypoint lat="50.736500" lon="7.610019" name="COMMSHOLD"/>
+    <waypoint lat="50.774029" lon="7.538026" name="_MB13"/>
+    <waypoint lat="50.754986" lon="7.519702" name="_MB12"/>
+    <waypoint lat="50.707639" lon="7.524494" name="_MB11"/>
+    <waypoint lat="50.687195" lon="7.561692" name="_MB10"/>
+    <waypoint lat="50.678281" lon="7.597907" name="_MB9"/>
+    <waypoint lat="50.679882" lon="7.633612" name="_MB8"/>
+    <waypoint lat="50.691173" lon="7.664384" name="_MB7"/>
+    <waypoint lat="50.705867" lon="7.687094" name="_MB6"/>
+    <waypoint lat="50.733065" lon="7.698435" name="_MB5"/>
+    <waypoint lat="50.763628" lon="7.684836" name="_MB4"/>
+    <waypoint lat="50.779131" lon="7.665717" name="_MB3"/>
+    <waypoint lat="50.789853" lon="7.631373" name="_MB2"/>
+    <waypoint lat="50.790669" lon="7.577522" name="_MB1"/>
+    <waypoint lat="50.747020" lon="7.600780" name="SA5"/>
+    <waypoint lat="50.745056" lon="7.594285" name="SA4"/>
+    <waypoint lat="50.739885" lon="7.593886" name="SA3"/>
+    <waypoint lat="50.740194" lon="7.609298" name="SA2"/>
+    <waypoint lat="50.746924" lon="7.609676" name="SA1"/>
+    <waypoint lat="50.733274" lon="7.604422" name="TST-1"/>
+    <waypoint lat="50.739706" lon="7.601584" name="TST-2"/>
+    <waypoint lat="50.738065" lon="7.611032" name="TST-3"/>
+    <waypoint lat="50.744012" lon="7.617619" name="EL1"/>
+    <waypoint lat="50.747012" lon="7.614139" name="EL2"/>
+    <waypoint lat="50.743882" lon="7.610602" name="EL3"/>
+    <waypoint lat="50.742229" lon="7.614142" name="EL4"/>
     <waypoint lat="50.739155" lon="7.583537" name="AMAZED"/>
   </waypoints>
   <includes>

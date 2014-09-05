@@ -111,7 +111,6 @@
       <program name="Server"/>
       <program name="GCS">
         <arg flag="-speech"/>
-        <arg flag="-maps_fill"/>
         <arg flag="-mercator"/>
         <arg flag="-maps_no_http"/>
         <arg flag="-track_size" constant="300"/>
