@@ -61,7 +61,7 @@
  *
  */
 
-#pragma message "CAUTION! Using TOTAL ENERGY CONTROLLER: Experimental!"
+//#pragma message "CAUTION! Using TOTAL ENERGY CONTROLLER: Experimental!"
 
 #include "firmwares/fixedwing/guidance/energy_ctrl.h"
 #include "state.h"
