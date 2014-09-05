@@ -19,7 +19,7 @@
     <axis name="THROTTLE" failsafe_value="0"/>
     <axis name="ROLL"     failsafe_value="0"/>
     <axis name="PITCH"    failsafe_value="0"/>
-    <axis name="SHUTTER"    failsafe_value="0"/>
+    <axis name="BRAKE"    failsafe_value="0"/>
     <axis name="HATCH"      failsafe_value="0"/>
   </commands>
 
@@ -102,6 +102,8 @@
 <!--    <define name="NO_XBEE_API_INIT" value="TRUE"/> -->
 
     <define name="DEFAULT_CIRCLE_RADIUS" value="80."/>
+    <define name="RADIO_HATCH" value="RADIO_GAIN1" />
+    <define name="RADIO_BRAKE" value="RADIO_UNUSED" />
 
   </section>
 
@@ -214,7 +216,7 @@
     <load name="nav_bungee_takeoff.xml"/>
     <load name="infrared_adc.xml"/>
     <load name="digital_cam_servo.xml">
-      <define name="DC_SHUTTER_SERVO" value="COMMAND_SHUTTER" />
+      <define name="DC_SHUTTER_SERVO" value="COMMAND_HATCH" />
     </load>
     <load name="nav_drop.xml">
       <define name="TRIGGER_DELAY" value="1" unit="s"/> <!--TODO get correct value;  time it take from shoot command till actual release of payload -->
