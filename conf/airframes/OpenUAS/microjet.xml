@@ -126,6 +126,8 @@
     <define name="AUTO_THROTTLE_PITCH_OF_VZ_PGAIN" value="0.05"/>
 
     <define name="THROTTLE_SLEW_LIMITER" value="2" unit="s"/>
+
+    <define name="GLIDE_RATIO" value="15." />
   </section>
 
   <section name="HORIZONTAL CONTROL" prefix="H_CTL_">

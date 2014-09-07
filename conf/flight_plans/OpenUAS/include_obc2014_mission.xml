@@ -242,8 +242,9 @@ OK?
     </block>
 
     <block name="Landing Position Stored" pre_call="NavKillThrottle()" strip_button="Store" strip_icon="recenter.png">
-      <call fun="NavSetWaypointHere(WP_TD)"/>
+      <call fun="NavSetWaypointPosAndAltHere(WP_TD)"/>
       <call fun="SetAltitudeForFinalFromTo(WP_TD,WP_AF)" />
+      <call fun="nav_compute_final_from_glide(WP_AF, WP_TD, V_CTL_GLIDE_RATIO)"/>
       <deroute block="HoldingPoint"/>
     </block>
 
@@ -322,12 +323,12 @@ to “Airfield Home” and orbit for either a landing or regain of Data Link. --
 
     <block name="ScrutineeringAutonomyTriangle" strip_button="Triangle" strip_icon="path.png" group="Mission">
       <!-- TODO: while we are up there take some pictures anyhow :) -->
-      <for var="i" from="1" to="5">
+      <for var="i" from="1" to="3">
         <go from="TST-3" hmode="route" wp="TST-1"/>
         <go from="TST-1" hmode="route" wp="TST-2"/>
         <go from="TST-2" hmode="route" wp="TST-3"/>
       </for>
-      <deroute block="InitiateLandingApproach" />
+      <deroute block="ComputeLandingApproach" />
     </block>
 
 <!-- *********************************************************
@@ -427,7 +428,7 @@ best to perform many real life tests with the CAM
     <block name="ReturnToBase">
       <set value="set_airspeed_tracking" var="v_ctl_auto_airspeed_setpoint"/>
       <go from="EL4" wp="AIRFIELDHOME" hmode="route"/>
-      <deroute block="InitiateLandingApproach"/>
+      <deroute block="ComputeLandingApproach"/>
     </block>
 
 <!-- *********************************************************
@@ -500,16 +501,16 @@ extern bool_t compute_alignment(uint8_t w1, uint8_t w2, uint8_t start, uint8_t e
 
     <block key="r" name="Constant Slope Land Right AF-TD" strip_button="Land right (wp AF-TD)" strip_icon="land-right.png"  group="Land">
       <set value="LANDING_CIRCLE_RADIUS" var="nav_radius"/>
-      <deroute block="InitiateLandingApproach"/>
+      <deroute block="ComputeLandingApproach"/>
     </block>
 
     <block key="l" name="Constant Slope Land Left AF-TD" strip_button="Land left (wp AF-TD)" strip_icon="land-left.png"  group="Land">
       <set value="-LANDING_CIRCLE_RADIUS" var="nav_radius"/>
-      <deroute block="InitiateLandingApproach"/>
+      <deroute block="ComputeLandingApproach"/>
     </block>
 
-    <block name="InitiateLandingApproach" >
-       <call fun="nav_compute_final_from_glide(WP_AF, WP_TD, 15.)"/>
+    <block name="ComputeLandingApproach" >
+       <call fun="nav_compute_final_from_glide(WP_AF, WP_TD, V_CTL_GLIDE_RATIO)"/>
     </block>
 
     <block name="Land">
@@ -589,7 +590,7 @@ termination mode (Section 5.6).
       <for from="0" to="8" var="i">
       </for>
       -->
-      <!--deroute block="InitiateLandingApproach"/-->
+      <!--deroute block="ComputeLandingApproach"/-->
     </block>
 
 <!--Engine Failure
@@ -610,7 +611,7 @@ Q:
     <block key="a" name="Airfieldhome" strip_button="Airfieldhome" strip_icon="home.png" group="Safety">
       <circle radius="nav_radius" wp="AIRFIELDHOME"/>
       <!-- TODO have two landing stratigy, one with circle down one with a streight line maybe a thir depending on measured windspeed -->
-      <!--deroute block="InitiateLandingApproach"/-->
+      <!--deroute block="ComputeLandingApproach"/-->
     </block>
 
 
