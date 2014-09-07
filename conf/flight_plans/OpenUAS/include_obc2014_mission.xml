@@ -106,9 +106,6 @@ TODO:
   </header>
 <!-- ******************************* WAYPOINTS ***************************** -->
   <waypoints>
-    <waypoint name="THROWSPOT" x="0." y="30."/>
-    <waypoint name="VIAEL2" x="0." y="-130." height="95."/> <!-- Point of entry-->
-    <waypoint name="CLIMB" x="0." y="-130." height="95."/>
 
 <!-- Scrutineering Course -->
 <!-- South * East
@@ -145,16 +142,13 @@ OK?
 
 <!-- For the Payload release -->
     <!-- <waypoint name="WAIT" x="-70." y="-70." height="115."/> --> <!-- TODO Check is needed or better solution possible for Pre-tests -->
-    <waypoint name="BASELEG" x="-20." y="0."/>
 
 <!-- Position where Outback Joe would be located. If this waypoint is situated
      outside search area(The default situation), by this way the flightplane
      -knows if it should start a search phase. If it is moved inside the area it
       will start a rescue phase, a.k.a bottledrop.  -->
 
-<!-- Note that waypoint *Height* of 0m is the OUTBACKJOE, Joe -->
-
-    <waypoint name="OUTBACKJOE" x="666." y="777."/>
+    <waypoint name="OUTBACKJOE" x="222." y="333."/>
  <!-- The START from here towards target(Joe), wile dynamically calculating the RELEASE point to target the OUTBACKJOE -->
     <waypoint name="START" x="-100" y="300"/>
 
@@ -162,31 +156,16 @@ OK?
     60 meters and need at least some GPS height fluctuation into account
     Also if we steeply move UP from START to RELEASE the release will maybe a
     little more accurate, hmmmm theoretically -->
-    <waypoint name="RELEASE" x="-100." y="400." height="75."/>
+    <waypoint name="RELEASE" x="-100." y="400." height="61."/>
 
-<!-- For autonomous landing -->
-    <waypoint name="_BASELEG" x="-100" y="350"/>
-  </waypoints>
+<!-- For autonomous landing and drop -->
+    <waypoint name="_BASELEG" x="100" y="300"/>
+    <waypoint name="_CLIMB" x="100" y="300"/>
+    </waypoints>
 
 <!-- ******************************** SECTORS ****************************** -->
 <!-- Sectors are good for displaying an overlay -->
   <sectors>
-    <sector name="MissionBoundary" color="yellow">
-      <corner name="_MB1"/>
-      <corner name="_MB2"/>
-      <corner name="_MB3"/>
-      <corner name="_MB4"/>
-      <corner name="_MB5"/>
-      <corner name="_MB6"/>
-      <corner name="_MB7"/>
-      <corner name="_MB8"/>
-      <corner name="_MB9"/>
-      <corner name="_MB10"/>
-      <corner name="_MB11"/>
-      <corner name="_MB12"/>
-      <corner name="_MB13"/>
-    </sector>
-
     <sector name="SurveyArea" color="green">
       <corner name="SA1"/>
       <corner name="SA2"/>
@@ -203,10 +182,6 @@ OK?
 
     <!-- below for the real SnR --> <!--  TODO: if datalinkloss but still closeby move to commhold? strange better airfiledhome loiter IMHO -->
     <exception cond="And(datalink_time > 110, launch > 0) && (!AircraftIsBooting())" deroute="CommsHoldLoiter"/> <!-- deroute="AirfieldHomeLoiter"/> -->
-
-    <!-- Case of loss of GPS AND loss of datalink -->
-    <!-- <exception cond="And(datalink_time > 10, !GpsFixValid())" deroute="ForcedCrash"/> --><!--921 1500f TODO add margin?-->
-    <exception cond="Or(!InsideMissionBoundary(GetPosX(), GetPosY()), GetPosAlt() > ground_alt + 921) && (!AircraftIsBooting())" deroute="ForcedCrash"/>
 
  <!--   <exception cond="if Joefoundandretunvalformticket deroute="Waitforjudges"/>-->
 
@@ -485,13 +460,12 @@ extern bool_t compute_alignment(uint8_t w1, uint8_t w2, uint8_t start, uint8_t e
       <!--set var="waypoints[WP_START].x" value="WaypointX(WP_OUTBACKJOE) + 100"/-->
       <!--set var="waypoints[WP_START].y" value="WaypointY(WP_OUTBACKJOE) + 100"/-->
 
-      <set value="nav_drop_compute_approach(WP_OUTBACKJOE, WP_START, nav_radius)" var="unit"/><!-- TODO maybe adifferent radius to set than default nav radius, bigger? -->
-      <circle radius="nav_radius" until="NavQdrCloseTo(DegOfRad(nav_drop_start_qdr)-15)" wp="BASELEG"/>
+      <set value="nav_drop_compute_approach(WP_OUTBACKJOE, WP_START, WP__BASELEG, WP__CLIMB, nav_radius)" var="unit"/>
+      <circle radius="nav_radius" until="NavQdrCloseTo(DegOfRad(nav_drop_start_qdr)-15)" wp="_BASELEG"/>
     </block>
 
 <!-- *********** Align on release path *********** -->
     <block name="align">
-
 
  <!-- TODO set AIRSPEED_AT_RELEASE-->
  <!--TODO set HEIGHT to 60m -->
@@ -639,20 +613,6 @@ Q:
       <!--deroute block="InitiateLandingApproach"/-->
     </block>
 
-<!-- *********************************************************
-     ************ The routines used for the FTD **************
-     ***************************************************** -->
-
-    <block name="ForcedCrash">
-      <!-- TODO Maybe ADD aditional exception with 2 sec timer here just to be sure to avoid position GPS spikes or some other jitter issues -->
-      <!-- <exception cond="Or(! InsideMissionBoundary(estimator_x, estimator_y), estimator_z > ground_alt + 921)"> -->
-      <!-- TODO use Baro QNH Height -->
-
-      <!-- <set value="MAX_PPRZ" var="ap_state->commands[COMMAND_FORCECRASH]"/> -->
-      <!--</exception> -->
-
-      <circle radius="nav_radius" wp="STDBY"/> <!-- todo add a dynamic TDFORCEDCRASH point so to notify and have it in the log  -->
-    </block>
 
   </blocks>
 </procedure>

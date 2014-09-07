@@ -2,5 +2,58 @@
 
 <procedure>
 
+  <sectors>
+    <sector name="MissionBoundary" color="yellow">
+      <corner name="_MB1"/>
+      <corner name="_MB2"/>
+      <corner name="_MB3"/>
+      <corner name="_MB4"/>
+      <corner name="_MB5"/>
+      <corner name="_MB6"/>
+      <corner name="_MB7"/>
+      <corner name="_MB8"/>
+      <corner name="_MB9"/>
+      <corner name="_MB10"/>
+      <corner name="_MB11"/>
+      <corner name="_MB12"/>
+      <corner name="_MB13"/>
+    </sector>
+  </sectors>
+
+<!-- ****************************** EXCEPTIONS ***************************** -->
+  <exceptions>
+    <!-- RC-Loss -->
+    <!-- Handled in FTD-Radio-Control -->
+
+    <!-- Datalink-Loss: -->
+    <!-- Handled in Mission Navigation -->
+
+    <!-- GPS-Failure: -->
+    <!-- Handled in Mission Navigation -->
+
+    <!-- Baro-Failure: -->
+    <!-- Inform Operator, Fly lower, keep flying on GPS -->
+
+    <!-- Hard GeoFence -->
+    <!-- TODO Maybe ADD aditional exception with 2 sec timer here just to be sure to avoid position GPS spikes or some other jitter issues -->
+    <exception cond="(!InsideMissionBoundary(GetPosX(), GetPosY())) && (!AircraftIsBooting())" deroute="ForcedCrash"/>
+
+    <!-- Hard Altitude GeoFence -->
+    <!-- TODO-MUST Use MSL altitude -->
+    <exception cond="MoreThan(GetPosAlt(), 1500) && (!AircraftIsBooting())" deroute="ForcedCrash" />
+
+    <!-- Case of loss of GPS AND loss of datalink -->
+    <exception cond="And(datalink_time > 10, !GpsFixValid())" deroute="ForcedCrash"/>
+  </exceptions>
+
+  <blocks>
+    <!-- ******* Activate the irreversible Forced Crash Command to the Flight Termination Device ******** -->
+    <block name="ForcedCrash">
+
+      <!-- <set value="MAX_PPRZ" var="ap_state->commands[COMMAND_FORCECRASH]"/> -->
+
+      <circle radius="nav_radius" wp="STDBY"/> <!-- todo add a dynamic TDFORCEDCRASH point so to notify and have it in the log  -->
+    </block>
+  </blocks>
 </procedure>
 
