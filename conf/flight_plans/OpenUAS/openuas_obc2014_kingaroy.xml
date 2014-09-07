@@ -39,9 +39,9 @@
     <waypoint lat="-26.6373930000" lon="151.8393860000" name="SA5"/>
 
 <!-- Scrutineering Course -->
-    <waypoint lat="-26.5837620409" lon="151.8379376113" name="TST-1"/>
-    <waypoint lat="-26.5859618185" lon="151.8451373142" name="TST-2"/>
-    <waypoint lat="-26.5902280387" lon="151.8400929439" name="TST-3"/>
+    <waypoint lat="-26.5902280387" lon="151.8400929439" name="TST-1"/>
+    <waypoint lat="-26.5837620409" lon="151.8379376113" name="TST-2"/>
+    <waypoint lat="-26.5859618185" lon="151.8451373142" name="TST-3"/>
 
 <!-- EL = Entry and Exit Lanes -->
     <waypoint lat="-26.6072120000" lon="151.8453890000" name="EL1"/>
