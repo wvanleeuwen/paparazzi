@@ -82,6 +82,20 @@
       </program>
       <program name="Environment Simulator"/>
     </session>
+    <session name="Fast Simulation">
+      <program name="Simulator">
+        <arg flag="-a" constant="Tester"/>
+        <arg flag="-t" constant="sim"/>
+        <arg flag="--boot"/>
+      </program>
+      <program name="GCS"/>
+      <program name="Server">
+        <arg flag="-n"/>
+      </program>
+      <program name="Environment Simulator">
+        <arg flag="-t" constant="6"/>
+      </program>
+    </session>
     <session name="OpenUAS Forward AC via UDP">
       <program name="Ivy2Udp">
         <arg flag="-b" constant="127:2010"/>
