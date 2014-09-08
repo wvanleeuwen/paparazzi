@@ -96,7 +96,7 @@ TODO:
 #include "firmwares/fixedwing/guidance/energy_ctrl.h"
 
 // States
-    #define AircraftIsBooting()  LessThan(nav_block,4)
+    #define AircraftIsBooting()  LessThan(nav_block,4)  // LessThan(nav_block,IndexOfBlock('Mission.ReadyForDeparture'))
 // Debugging: skip safety rules
 //    #define AircraftIsBooting()  TRUE
 
