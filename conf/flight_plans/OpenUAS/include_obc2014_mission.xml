@@ -561,6 +561,8 @@ termination mode (Section 5.6).
 -->
 
     <block name="CommsHoldLoiter" strip_button="CommsHold" strip_icon="recenter.png" group="Safety" >  <!-- TODO other ICON -->
+      <!-- stop streaming thumbnails -->
+      <set value="0" var="ticket_thumbnails"/>
       <!-- TODO: maybe set a little lower speed ? max endurence speed? -->
       <set value="set_airspeed_nominal" var="v_ctl_auto_airspeed_setpoint"/>
       <!-- Rules 2014 state a loiter of maximum 2 minutes = 120seconds is allowed -->

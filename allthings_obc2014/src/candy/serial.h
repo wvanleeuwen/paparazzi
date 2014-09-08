@@ -18,5 +18,3 @@ static inline bool ttyUSB0ChAvailable(void)
 }
 
 #define ttyUSB0Getch() ({char c;int ret=read(fd, &c,1);c;})
-
-
