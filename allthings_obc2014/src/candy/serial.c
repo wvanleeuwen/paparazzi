@@ -25,13 +25,13 @@
 
 int fd; /* File descriptor for the port */
 
-int serial_init()
+int serial_init(char *port_name)
 {
   struct termios orig_termios, cur_termios;
 
   int br = B115200;
 
-  fd = open("/dev/ttySAC0", O_RDWR|O_NOCTTY|O_NONBLOCK);
+  fd = open(port_name, O_RDWR|O_NOCTTY|O_NONBLOCK);
 
   if (fd == -1)
   {

@@ -15,7 +15,7 @@ int main(int argc, char* argv[])
   //printf("Ready\n");
 
   // Open
-  serial_init();
+  serial_init("/dev/ttySAC0");
 
   // Send
   write(fd, buff, 10);
