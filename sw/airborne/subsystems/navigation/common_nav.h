@@ -81,7 +81,7 @@ void common_nav_periodic_task_4Hz(void);
 #define NavSetWaypointPosAndAltHere(_wp) ({ \
     waypoints[_wp].x = stateGetPositionEnu_f()->x; \
     waypoints[_wp].y = stateGetPositionEnu_f()->y; \
-    waypoints[_wp].a = stateGetPositionEnu_f()->z; \
+    waypoints[_wp].a = stateGetPositionEnu_f()->z + ground_alt; \
     FALSE; \
   })
 
