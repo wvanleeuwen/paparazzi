@@ -217,6 +217,7 @@ OK?
     <block name="Geo Init">
       <while cond="LessThan(NavBlockTime(), 3)"/>
 <!--
+      <while cond="LessThan(nav_block,IndexOfBlock('Mission.ReadyForDeparture'))"/>
       <call fun="NavSetGroundReferenceHere()"/>
       <call fun="NavSetAltitudeReferenceHere()" />
 -->
@@ -389,7 +390,7 @@ best to perform many real life tests with the CAM
        call fun="InitializePolygonSurvey(WP_S1, NumOfCorners, SweepWidth, Orientation)"/> -->
 
        <!-- SweepWidth  max photo with at height - 20 pct overlap 180- etc-->
-      <call fun="nav_survey_poly_osam_setup(WP_SA1, 5, 144, 82)"/> <!-- TODO correct angle of how we want to search -->
+      <call fun="nav_survey_poly_osam_setup(WP_SA1, 5, 144, CourseFromToEnuDeg(WP_SA1, WP_SA5))"/> <!-- TODO correct angle of how we want to search -->
       <call fun="nav_survey_poly_osam_run()"/>
     </block>
 
