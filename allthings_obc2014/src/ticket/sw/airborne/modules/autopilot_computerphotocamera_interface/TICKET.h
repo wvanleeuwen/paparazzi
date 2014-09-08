@@ -31,6 +31,8 @@
 #ifndef TICKET_H
 #define TICKET_H
 
+#include "modules/digital_cam/dc.h"
+
 extern void ticket_init(void);
 
 /** 4Hz Periodic */

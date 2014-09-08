@@ -12,15 +12,18 @@
   <init fun="ticket_init()"/>
   <periodic fun="ticket_periodic()" freq="4" autorun="TRUE"/>
   <!-- event fun="ticket_takephotonow"/-->
+  <makefile target="sim">
+    <file name="candy/serial.c"/>
+  </makefile>
   <makefile>
     <define name="DIGITAL_CAM" />
     <file name="ticket/TICKET.c"/>
     <file name="dc.c"/>
     <define name="SENSOR_SYNC_SEND" value="1"/>
     <raw>
-ap.CFLAGS += -DCAMERA_LINK=$(CAMERA_PORT)
-ap.CFLAGS += -DUSE_$(CAMERA_PORT)
-ap.CFLAGS += -D$(CAMERA_PORT)_BAUD=B115200
+$(TARGET).CFLAGS += -DCAMERA_LINK=$(CAMERA_PORT)
+$(TARGET).CFLAGS += -DUSE_$(CAMERA_PORT)
+$(TARGET).CFLAGS += -D$(CAMERA_PORT)_BAUD=B115200
     </raw>
   </makefile>
 </module>

@@ -86,7 +86,6 @@ TODO:
 
 // Completly replace with onboard recon copmpter interface
     #ifdef DC_AUTOSHOOT_QUARTERSEC_PERIOD
-    #include "modules/digital_cam/led_cam_ctrl.h"
     //TODO make shooting distance not periodic
     #define LINE_START_FUNCTION dc_autoshoot = DC_AUTOSHOOT_PERIODIC;
     #define LINE_STOP_FUNCTION dc_autoshoot = DC_AUTOSHOOT_STOP;

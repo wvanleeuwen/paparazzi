@@ -38,6 +38,22 @@
 #include "generated/periodic_telemetry.h"
 #include BOARD_CONFIG
 
+#ifdef SITL
+#include "modules/digital_cam/candy/serial.h"
+#endif
+
+#define __CameraLink(dev, _x) dev##_x
+#define _CameraLink(dev, _x)  __CameraLink(dev, _x)
+#define CameraLink(_x) _CameraLink(CAMERA_LINK, _x)
+
+#define CameraBuffer() CameraLink(ChAvailable())
+
+#define ReadCameraBuffer() {                  \
+    while (CameraLink(ChAvailable()))         \
+      ticket_parse(CameraLink(Getch()));      \
+  }
+
+
 
 int ticket_thumbnails = 0;
 #define THUMB_MSG_SIZE  (80-8-2)
@@ -75,6 +91,10 @@ void ticket_init(void)
 #if PERIODIC_TELEMETRY
   register_periodic_telemetry(&telemetry_Ap, "PAYLOAD", send_thumbnails);
 #endif
+
+#ifdef SITL
+  serial_init("/dev/ttyUSB0");
+#endif
 }
 
 void ticket_periodic( void )
@@ -82,18 +102,6 @@ void ticket_periodic( void )
   // Common DC Periodic task
   dc_periodic_4Hz();
 }
-
-
-#define __CameraLink(dev, _x) dev##_x
-#define _CameraLink(dev, _x)  __CameraLink(dev, _x)
-#define CameraLink(_x) _CameraLink(CAMERA_LINK, _x)
-
-#define CameraBuffer() CameraLink(ChAvailable())
-
-#define ReadCameraBuffer() {                  \
-    while (CameraLink(ChAvailable()))         \
-      ticket_parse(CameraLink(Getch()));      \
-  }
 
 
 /* Command The Camera */
