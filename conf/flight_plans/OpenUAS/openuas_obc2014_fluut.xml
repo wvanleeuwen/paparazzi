@@ -1,0 +1,45 @@
+<!DOCTYPE flight_plan SYSTEM "../flight_plan.dtd">
+
+<flight_plan alt="120" ground_alt="0" home_mode_height="120" lat0="51.980082" lon0="4.3623" max_dist_from_home="10000" name="OpenUAS OBC2014" qfu="170" security_height="70">
+  <waypoints>
+    <waypoint name="HOME" x="0" y="0"/>
+    <waypoint alt="35.0" lat="51.980275" lon="4.362962" name="AF"/>
+    <waypoint alt="0.0" lat="51.980082" lon="4.361670" name="TD"/>
+    <waypoint lat="51.979849" lon="4.362502" name="AIRFIELDHOME"/>
+    <waypoint lat="51.979509" lon="4.361368" name="COMMSHOLD"/>
+    <waypoint lat="51.981019" lon="4.361478" name="_MB1"/>
+    <waypoint lat="51.981538" lon="4.367202" name="_MB2"/>
+    <waypoint lat="51.980240" lon="4.369928" name="_MB3"/>
+    <waypoint lat="51.978546" lon="4.371464" name="_MB4"/>
+    <waypoint lat="51.976150" lon="4.371142" name="_MB5"/>
+    <waypoint lat="51.975005" lon="4.370498" name="_MB6"/>
+    <waypoint lat="51.973769" lon="4.369135" name="_MB7"/>
+    <waypoint lat="51.973295" lon="4.366855" name="_MB8"/>
+    <waypoint lat="51.973112" lon="4.363956" name="_MB9"/>
+    <waypoint lat="51.973524" lon="4.360140" name="_MB10"/>
+    <waypoint lat="51.975448" lon="4.356993" name="_MB11"/>
+    <waypoint lat="51.977432" lon="4.356398" name="_MB12"/>
+    <waypoint lat="51.979218" lon="4.357067" name="_MB13"/>
+    <waypoint lat="51.979431" lon="4.359000" name="SA1"/>
+    <waypoint lat="51.978623" lon="4.359347" name="SA2"/>
+    <waypoint lat="51.979218" lon="4.363560" name="SA3"/>
+    <waypoint lat="51.979676" lon="4.364650" name="SA4"/>
+    <waypoint lat="51.980376" lon="4.364421" name="SA5"/>
+    <waypoint lat="51.979903" lon="4.360828" name="TST-1"/>
+    <waypoint lat="51.979062" lon="4.362469" name="TST-2"/>
+    <waypoint lat="51.980296" lon="4.363416" name="TST-3"/>
+    <waypoint lat="51.979462" lon="4.362205" name="EL1"/>
+    <waypoint lat="51.978885" lon="4.363648" name="EL2"/>
+    <waypoint lat="51.978892" lon="4.359319" name="EL3"/>
+    <waypoint lat="51.979659" lon="4.360101" name="EL4"/>
+    <waypoint lat="51.978974" lon="4.361247" name="AMAZED"/>
+  </waypoints>
+  <includes>
+    <include name="Mission" procedure="include_obc2014_mission.xml"/>
+    <include name="Safety" procedure="include_obc2014_safety.xml"/>
+    <include name="Testing" procedure="include_obc2014_testing.xml"/>
+  </includes>
+  <blocks>
+    <block name="Boot"/>
+  </blocks>
+</flight_plan>
