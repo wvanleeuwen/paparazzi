@@ -208,8 +208,10 @@ TST-3 = -26° 35' 23.2" * 151° 50' 45.9"
 
     <block name="Landing Position Stored" pre_call="NavKillThrottle()" strip_button="Store" strip_icon="recenter.png">
       <call fun="NavSetWaypointPosAndAltHere(WP_TD)"/>
+      <set value="DownlinkSendWpNr(WP_TD)" var="unit"/>
       <set value="SetAltitudeForFinalFromTo(WP_TD,WP_AF)" var="unit"/>
       <call fun="nav_compute_final_from_glide(WP_AF, WP_TD, V_CTL_GLIDE_RATIO)"/>
+      <set value="DownlinkSendWpNr(WP_AF)" var="unit"/>
       <deroute block="HoldingPoint"/>
     </block>
 
@@ -419,7 +421,7 @@ extern bool_t compute_alignment(uint8_t w1, uint8_t w2, uint8_t start, uint8_t e
       <!--set var="waypoints[WP_START].y" value="WaypointY(WP_OUTBACKJOE) + 100"/-->
 
       <set value="nav_drop_compute_approach(WP_OUTBACKJOE, WP_START, WP__BASELEG, WP__CLIMB, nav_radius)" var="unit"/>
-      <set value="DownlinkSendWp(WP_RELEASE)" var="unit"/>
+      <set value="DownlinkSendWpNr(WP_RELEASE)" var="unit"/>
       <circle radius="nav_radius" until="NavQdrCloseTo(DegOfRad(nav_drop_start_qdr)-15)" wp="_BASELEG"/>
     </block>
 
@@ -465,7 +467,8 @@ extern bool_t compute_alignment(uint8_t w1, uint8_t w2, uint8_t start, uint8_t e
     </block>
 
     <block name="ComputeLandingApproach" >
-       <call fun="nav_compute_final_from_glide(WP_AF, WP_TD, V_CTL_GLIDE_RATIO)"/>
+      <call fun="nav_compute_final_from_glide(WP_AF, WP_TD, V_CTL_GLIDE_RATIO)"/>
+      <set value="DownlinkSendWpNr(WP_AF)" var="unit"/>
     </block>
 
     <block name="Land">
