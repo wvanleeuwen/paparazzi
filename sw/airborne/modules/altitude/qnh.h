@@ -30,6 +30,12 @@
 
 extern float qnh;
 
+void compute_qnh(void);
+
+#define qnh_ComputeQNH(_x) {  \
+  compute_qnh();              \
+}
+
 void init_qnh(void);
 void periodic_qnh(void);
 

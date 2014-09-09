@@ -4,7 +4,8 @@
   <dl_settings name="control">
     <dl_settings name="qnh">
 
-      <dl_setting max="1300" min="10" step="1" module="altitude/qnh" var="qnh" shortname="QNH"/>
+      <dl_setting max="1200" min="800" step="1" module="altitude/qnh" var="qnh" shortname="QNH"/>
+      <dl_setting max="1" min="0" step="1" var="qnh" module="altitude/qnh" handler="ComputeQNH"/>
 
     </dl_settings>
   </dl_settings>
