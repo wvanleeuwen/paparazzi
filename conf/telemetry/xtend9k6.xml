@@ -9,6 +9,7 @@
       <message name="PAYLOAD"        period="1."    phase="0.8"/>    <!-- size = 72 -->
 
       <message name="GPS"            period="1."    phase="0.0"/>    <!-- size = 27 -->
+      <message name="AMSL"           period="2."	phase="0.2"/>    <!-- size = 8 -->
       <message name="ESTIMATOR"      period="2."	phase="0.2"/>    <!-- size = 8 -->
       <message name="BAT"            period="2."	phase="1.2"/>    <!-- size = 14 -->
       <message name="NAVIGATION"     period="2."	phase="0.4"/>    <!-- size = 20 -->

@@ -230,6 +230,7 @@
       <define name="SAFE_CLIMB" value="10" unit="m"/><!-- TODO: define  what?-->
       <define name="CLIMB_TIME" value="3" unit="s"/><!-- TODO: define what?-->
     </load>
+    <load name="qnh.xml"/>
   </modules>
 
 

@@ -2,7 +2,7 @@
 
 <module name="altitude">
   <doc>
-    <description>Demo module</description>
+    <description>Altitude</description>
   </doc>
   <header>
     <file name="qnh.h"/>
