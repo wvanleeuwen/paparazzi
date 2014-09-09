@@ -124,6 +124,7 @@ extern void nav_circle_XY(float x, float y, float radius);
   while (x >= 360 && ++dont_loop_forever) x -= 360; \
 }
 
+inline float CourseFromToEnuDeg(int wp_x, int wp_y);
 inline float CourseFromToEnuDeg(int wp_x, int wp_y)
 {
   float dx = waypoints[wp_y].x - waypoints[wp_x].x;
