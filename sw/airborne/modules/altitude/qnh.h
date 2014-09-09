@@ -28,6 +28,8 @@
 #ifndef QNH_MODULE_H
 #define QNH_MODULE_H
 
+extern float qnh;
+
 void init_qnh(void);
 void periodic_qnh(void);
 

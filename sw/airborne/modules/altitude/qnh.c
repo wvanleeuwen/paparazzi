@@ -22,11 +22,19 @@
 
 #include "qnh.h"
 #include "state.h"
+#include "subsystems/abi.h"
 #include "subsystems/sensors/baro.h"
 #include "generated/airframe.h"
 
 float qnh = 0;
 float amsl = 0;
+abi_event qnh_baro_event = {0, 0, 0};
+
+void received_abs_baro_for_qnh(uint8_t sender_id, const float * pressure);
+void received_abs_baro_for_qnh(__attribute__((__unused__)) uint8_t sender_id, const float * pressure)
+{
+  qnh = *pressure;
+}
 
 #if PERIODIC_TELEMETRY
 #include "subsystems/datalink/telemetry.h"
@@ -43,6 +51,12 @@ void init_qnh(void) {
   register_periodic_telemetry(&telemetry_Ap, "AMSL", send_amsl);
 #endif
   qnh = 1013.00;
+  AbiBindMsgBARO_ABS(BARO_BOARD_SENDER_ID, &qnh_baro_event, &received_abs_baro_for_qnh);
+}
+
+void compute_qnh(void);
+void compute_qnh(void) {
+
 }
 
 void periodic_qnh(void) {
@@ -62,6 +76,15 @@ void periodic_qnh(void) {
   const float MeterPerFeet = 0.3048;
 
   float h = stateGetPositionLla_f()->alt;
+/*
+  float pressure = 0;
+  float temperture = 0;
+  if (baro_ms5611.data_available)
+  {
+    pressure   = (float) baro_ms5611.data.pressure;
+    temperture = (float) baro_ms5611.data.temperature;
+  }
+*/
 
   float Trel = 1 - L*h/T0;
   float Expo = g * M / R / L;
