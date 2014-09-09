@@ -22,11 +22,6 @@ STRATEGY:
 
 USAGE:
 
-To use the flightplan's embedded options:
-
-# Put the Waypoint SCRUTINEERING inside the mission boundary the the SCRUTINEERING flight will be executed.
-# Put the Waypoint JOE inside the mission boundary the the RESCUE only part of the flight will be executed.(TYPE2)
-
 NOTES:
 
 # This flightplan contains both the SR, as default mission and the Scruteneering flight.
@@ -39,9 +34,8 @@ TODO:
 # add times to blocks to prevent to early forcedcrash. e.g after 2 second from tkeof border cannot be crossed in reality, so if triggered do a softcircledown or so
 # or mabye calculate distance and look at airframe REAL max ground speed(with wind in backeve) and deduct time it would take, if within < margin it cannot be missionborder
 # but if scrutineering day, than it can be since we test it closeby mission boundary
-# TODO autonomous calculation AF-TD dependand on measured wind direction
-# add even **better** exceptions
-# Response of cam picture if successful of not via TICKET module
+
+TESTS:
 #If we set the air crowbrake make sure it is retracted again when contining normal ops (maybe or above a certain airspeed?)
 
 -->
@@ -49,7 +43,6 @@ TODO:
 <!-- Test via command xmlwf yourfligtplanname.xml for welformedness of the xml document -->
 <!-- The base lat lon of the flightplan is the AIRFIELDHOME point -->
 <!-- The ground_alt will be set later on also with real testflight, mind the ground height profile please -->
-<!-- WARNING: max_dist_from_home very very likely never be reached due to boundary crossing first -->
 <procedure>
 <!-- ******************************** HEADERS ****************************** -->
 <header>
@@ -73,13 +66,9 @@ TODO:
 
 
 // PHOTOGRAMMETRY settings
-
-    #define PHOTOGRAMMETRY_SWEEP_ANGLE 53		// Degrees from the North
     #define PHOTOGRAMMETRY_OVERLAP 30		// 1-99 Procent
     #define PHOTOGRAMMETRY_SIDELAP 20		// 1-99 Procent
     #define PHOTOGRAMMETRY_RESOLUTION 50		// mm pixel projection size
-
-// Automatic include of Camera trigger if camera is present and only take pictures inside polygon
 
 // Incluse airframe.h To be able to use specific variables
     #include "generated/airframe.h"
@@ -92,12 +81,10 @@ TODO:
     #endif
 
 //Enable energy control commands from within flightplan
-#include "firmwares/fixedwing/guidance/energy_ctrl.h"
+    #include "firmwares/fixedwing/guidance/energy_ctrl.h"
 
 // States
     #define AircraftIsBooting()  LessThan(nav_block,4)  // LessThan(nav_block,IndexOfBlock('Mission.ReadyForDeparture'))
-// Debugging: skip safety rules
-//    #define AircraftIsBooting()  TRUE
 
 
 #endif
@@ -111,8 +98,6 @@ TODO:
 TST-1 = -26° 34' 58.9" * 151° 50' 16.2"
 TST-2 = -26° 35' 04.1" * 151° 50' 44.5"
 TST-3 = -26° 35' 23.2" * 151° 50' 45.9"
-
-OK?
 -->
 <!-- extra boundary maybe add it -->
 <!-- ABS = Alert Boundary scrutineering flight -->
@@ -123,34 +108,18 @@ OK?
     <waypoint name="_ABS3" lat="" lon="" height="400."/>
 -->
 
-
-<!-- SA = Search Area -->
-<!--
-    <waypoint name="SA1" x="492.8" y="-4414.0" height="115."/>
-    <waypoint name="SA2" x="1725.0" y="-4606.0" height="115."/>
-    <waypoint name="SA3" x="1330.0" y="-6682.0" height="155."/>
-    <waypoint name="SA4" x="1083.0" y="-6792.0" height="155."/>
-    <waypoint name="SA5" x="-115.2" y="-6632.0" height="155."/>
--->
-
-
 <!-- Additional VIA_EL2 Waypoint since we must go *via* EL2, and to have a little
     more meters optimal for our scan strips entry, otherwhise we could miss one
-    photo and not spot Joe. So not via Paris to Rome, but Via EL2 to Joe -->
-
-
-<!-- For the Payload release -->
-    <!-- <waypoint name="WAIT" x="-70." y="-70." height="115."/> --> <!-- TODO Check is needed or better solution possible for Pre-tests -->
+    photo and not spot Joe. -->
 
 <!-- Position where Outback Joe would be located. If this waypoint is situated
      outside search area(The default situation), by this way the flightplane
      -knows if it should start a search phase. If it is moved inside the area it
       will start a rescue phase, a.k.a bottledrop.  -->
 
-    <waypoint name="OUTBACKJOE" x="222." y="333."/>
  <!-- The START from here towards target(Joe), wile dynamically calculating the RELEASE point to target the OUTBACKJOE -->
     <waypoint name="START" x="-100" y="300"/>
-
+    <waypoint name="OUTBACKJOE" x="222." y="333."/>
     <!-- Note that 70m is the release height, we are not allowed to go below
     60 meters and need at least some GPS height fluctuation into account
     Also if we steeply move UP from START to RELEASE the release will maybe a
@@ -183,9 +152,6 @@ OK?
     <exception cond="And(datalink_time > 110, launch > 0) && (!AircraftIsBooting())" deroute="CommsHoldLoiter"/> <!-- deroute="AirfieldHomeLoiter"/> -->
 
  <!--   <exception cond="if Joefoundandretunvalformticket deroute="Waitforjudges"/>-->
-
-    <!--  If we are allowed to fly higher otherwise to do rules do not state to crash if heigher then 400m -->
-    <!-- <exception cond="datalink_time > 1330" deroute="Standby"/> --> <!-- A loss of link set to max calculated mission time, unlikely to ever occur befor voltage level drop exeption -->
 
     <!-- Optional check, if at seconds of launch GPS is lost -->
     <!-- <exception cond="And(launch, gps_lost)" deroute="killengine" or test for heighht 40M or so/> -->
@@ -453,6 +419,7 @@ extern bool_t compute_alignment(uint8_t w1, uint8_t w2, uint8_t start, uint8_t e
       <!--set var="waypoints[WP_START].y" value="WaypointY(WP_OUTBACKJOE) + 100"/-->
 
       <set value="nav_drop_compute_approach(WP_OUTBACKJOE, WP_START, WP__BASELEG, WP__CLIMB, nav_radius)" var="unit"/>
+      <set value="DownlinkSendWp(WP_RELEASE)" var="unit"/>
       <circle radius="nav_radius" until="NavQdrCloseTo(DegOfRad(nav_drop_start_qdr)-15)" wp="_BASELEG"/>
     </block>
 
