@@ -2,11 +2,13 @@
 
 extern int fd;
 
-
+#ifndef FALSE
+#define FALSE (1==2)
+#endif
 
 int serial_init(char* port_name);
 
-static inline bool ttyUSB0ChAvailable(void)
+static inline int ttyUSB0ChAvailable(void)
 {
   return FALSE;
 }
