@@ -274,6 +274,7 @@ I am as of yet not sure if the weird info byte is because of a failed bind proce
 
   <!-- ************************* MODULES ************************* -->
   <modules>
+    <load name="qnh.xml"/>
     <load name="safety_timers.xml"/>
 
     <!-- Disable uCenter in the future, setup the hardware itself -->
