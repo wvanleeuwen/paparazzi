@@ -26,17 +26,13 @@
 #include "subsystems/sensors/baro.h"
 #include "generated/airframe.h"
 
-float qnh = 0;
-float amsl_baro = 0;
-float amsl_gps = 0;
-float baro_pressure = 1;
-
+struct qnh_struct qnh;
 abi_event qnh_baro_event = {0, 0, 0};
 
 void received_abs_baro_for_qnh(uint8_t sender_id, const float * pressure);
 void received_abs_baro_for_qnh(__attribute__((__unused__)) uint8_t sender_id, const float * pressure)
 {
-  baro_pressure = *pressure;
+  qnh.baro_pressure = *pressure;
   const float L = 0.0065; // [K/m]
   const float T0 = 288.15; // [K]
   const float g = 9.80665; // [m/s^2]
@@ -44,8 +40,9 @@ void received_abs_baro_for_qnh(__attribute__((__unused__)) uint8_t sender_id, co
   const float R = 8.31447; // [J/(mol*K)]
   const float InvExpo = R * L / g / M;
   const float MeterPerFeet = 0.3048;
-  float prel = baro_pressure / (qnh * 100.0f);
-  amsl_baro = (1 - pow(prel,InvExpo)    ) * T0/L / MeterPerFeet;
+  float prel = qnh.baro_pressure / (qnh.qnh * 100.0f);
+  qnh.amsl_baro = (1 - pow(prel,InvExpo)    ) * T0/L / MeterPerFeet;
+  qnh.baro_counter = 10;
 }
 
 #if PERIODIC_TELEMETRY
@@ -53,7 +50,7 @@ void received_abs_baro_for_qnh(__attribute__((__unused__)) uint8_t sender_id, co
 
 static void send_amsl(void)
 {
-  DOWNLINK_SEND_AMSL(DefaultChannel, DefaultDevice, &amsl_baro, &amsl_gps);
+  DOWNLINK_SEND_AMSL(DefaultChannel, DefaultDevice, &qnh.amsl_baro, &qnh.amsl_gps);
 }
 #endif
 
@@ -62,7 +59,11 @@ void init_qnh(void) {
 #if PERIODIC_TELEMETRY
   register_periodic_telemetry(&telemetry_Ap, "AMSL", send_amsl);
 #endif
-  qnh = 1013.25;
+  qnh.qnh = 1013.25;
+  qnh.amsl_baro = 0;
+  qnh.baro_counter = 0;
+  qnh.amsl_gps = 0;
+  qnh.baro_pressure = 0;
   AbiBindMsgBARO_ABS(0, &qnh_baro_event, &received_abs_baro_for_qnh);
 }
 
@@ -76,7 +77,16 @@ void compute_qnh(void)
   const float Expo = g * M / R / L;
   float h = stateGetPositionLla_f()->alt;
   float Trel = 1 - L*h/T0;
-  qnh = round(baro_pressure / pow(Trel,Expo) / 100.0f);
+  qnh.qnh = round(qnh.baro_pressure / pow(Trel,Expo) / 100.0f);
+}
+
+float GetAmsl(void)
+{
+  // If baro is OK
+  if (qnh.baro_counter > 0)
+    return qnh.amsl_baro;
+  // Otherwise use GPS
+  return qnh.amsl_gps;
 }
 
 void periodic_qnh(void)
@@ -91,6 +101,11 @@ void periodic_qnh(void)
   float p = qnh * pow(Trel,Expo);
 */
   float h = stateGetPositionLla_f()->alt;
-  amsl_gps = h / MeterPerFeet;
-}
+  qnh.amsl_gps = h / MeterPerFeet;
 
+  // Watchdog on baro
+  if (qnh.baro_counter > 0)
+    qnh.baro_counter--;
+  else
+    qnh.amsl_baro = 0.0;
+}

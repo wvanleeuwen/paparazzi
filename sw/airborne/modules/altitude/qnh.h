@@ -28,9 +28,19 @@
 #ifndef QNH_MODULE_H
 #define QNH_MODULE_H
 
-extern float qnh;
+struct qnh_struct
+{
+  float qnh;
+  float amsl_baro;
+  float amsl_gps;
+  float baro_pressure;
+  int baro_counter;
+};
 
-void compute_qnh(void);
+extern struct qnh_struct qnh;
+
+extern float GetAmsl(void);
+extern void compute_qnh(void);
 
 #define qnh_ComputeQNH(_x) {  \
   compute_qnh();              \
