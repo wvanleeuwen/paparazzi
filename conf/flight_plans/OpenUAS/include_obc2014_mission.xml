@@ -219,11 +219,10 @@ OK?
 <!--
       <while cond="LessThan(nav_block,IndexOfBlock('Mission.ReadyForDeparture'))"/>
       <call fun="NavSetGroundReferenceHere()"/>
-      <call fun="NavSetAltitudeReferenceHere()" />
+      <call fun="NavSetWaypointHere(WP_HOME)"/>
 -->
       <!--  TODO Set QNH here based on GPS height if allowed from commitee -->
       <call fun="NavSetAltitudeReferenceHere()" />
-      <call fun="NavSetWaypointHere(WP_HOME)"/>
     </block>
 
     <!-- *********** Set the ground reference height and the home position *********** -->
@@ -237,28 +236,27 @@ OK?
     </block>
 
     <block name="Set Landing Position" pre_call="NavKillThrottle()">
-      <call fun="AirbrakesOff()"/>
+      <set value="AirbrakesOff()" var="unit"/>
       <attitude pitch="0" roll="0" throttle="0" vmode="throttle" until="FALSE"/><!-- maybe not moving the plane would still make a test of defelction possible -->
     </block>
 
     <block name="Landing Position Stored" pre_call="NavKillThrottle()" strip_button="Store" strip_icon="recenter.png">
       <call fun="NavSetWaypointPosAndAltHere(WP_TD)"/>
-      <call fun="SetAltitudeForFinalFromTo(WP_TD,WP_AF)" />
+      <set value="SetAltitudeForFinalFromTo(WP_TD,WP_AF)" var="unit"/>
       <call fun="nav_compute_final_from_glide(WP_AF, WP_TD, V_CTL_GLIDE_RATIO)"/>
       <deroute block="HoldingPoint"/>
     </block>
 
 <!-- *********** Throttle off holdingpoint *********** -->
     <block name="HoldingPoint" pre_call="NavKillThrottle()" >
-     <!--  TODO: make some movements on all defelctros as a sign we are in holding and to see if all works Maybe a separate testblock-->
-      <!--Just to make sure in case of flightplan mishap, it is no too far away -->
+      <!--  TODO: make some movements on all defelctros as a sign we are in holding and to see if all works Maybe a separate testblock-->
       <!-- <set var="waypoints[WP_START].x" value="WaypointX(WP_EL2) + 50"/> -->
       <!-- <set var="waypoints[WP_START].y" value="WaypointY(WP_EL2) + 50"/> -->
       <!-- <set value="0" var="ap_state->commands[COMMAND_CAMBER]"/> -->
       <!-- <set value="0" var="ap_state->commands[COMMAND_BRAKE]"/> -->
-      <call fun="AirbrakesOff()"/>
+      <set value="AirbrakesOff()" var="unit"/>
       <attitude pitch="0" roll="0" throttle="0" vmode="throttle" until="FALSE"/><!-- maybe not moving the plane would still make a test of defelction possible -->
-<!-- If over 50% throttleis given auto2 takeoff is initiated, it is not an RC steering method, just a trigger, make sure transmiter is set in auto2 mode, or else switched off -->
+      <!-- If over 50% throttleis given auto2 takeoff is initiated, it is not an RC steering method, just a trigger, make sure transmiter is set in auto2 mode, or else switched off -->
     </block>
 
 <!-- *********************************************************
@@ -285,19 +283,18 @@ OK?
     </block>
 
     <block key="t" name="Takeoff" strip_button="Takeoff" strip_icon="takeoff.png">
-      <!-- call fun="NavSetWaypointHere(WP_THROWSPOT)"/ -->
       <!-- <set value="3000" var="ap_state->commands[COMMAND_CAMBER]"/> -->
       <set value="0" var="kill_throttle"/>
       <set value="1" var="launch"/>
       <set value="0" var="autopilot_flight_time"/>
-      <call fun="AirbrakesOff()"/>
+      <set var="unit" value="AirbrakesOff()"/>
       <set value="set_airspeed_nominal" var="v_ctl_auto_airspeed_setpoint"/>
       <attitude pitch="DegOfRad(set_takeoff_pitch)" roll="0" throttle="1.0" until="MoreThan(NavBlockTime(), 2)" vmode="throttle"/>
     </block>
 
     <block name="Climb-Out">
       <!--<exception cond="rc_status==RC_REALLY_LOST" after 3 seconds and no IMU deroute="softlydown">if using RC stil on with a Auto2 mode switch-->
-      <attitude pitch="35" roll="0" throttle="1.0" until="GetPosAlt() > ground_alt+40" vmode="throttle"/>
+      <attitude pitch="DegOfRad(set_takeoff_pitch)" roll="0" throttle="1.0" until="GetPosAlt() > ground_alt+40" vmode="throttle"/>
       <set var="v_ctl_auto_throttle_nominal_cruise_throttle" value="1.0" />
       <set var="v_ctl_auto_throttle_nominal_cruise_pitch" value="set_takeoff_pitch" />
     </block>
@@ -305,21 +302,23 @@ OK?
     <block name="determineflighttype">
       <exception cond="(obc_flight_mode == SCRUTENEERING_FLIGHT)" deroute="ScrutineeringAutonomyTriangle"/>
       <!-- otherwise goto search area via entry lane -->
-      <deroute block="TrackToEL1"/>
+      <deroute block="EntryLane1"/>
     </block>
 
 <!-- *********************************************************
      **************** Scrutineering Flight *******************
      ***************************************************** -->
 
-<!-- As part of the scrutineering the Search and Rescue entrants of the UAV Challenge
+<!--
+As part of the scrutineering the Search and Rescue entrants of the UAV Challenge
 Outback Rescue will be required to take off, track TST-1, TST-2, TST-3, TST-1... Until
 requested to land.
 
 All emergency and failure requirements of the Challenge must be met,
 
 with the exception that for Loss of Data Link the procedure will be track direct
-to “Airfield Home” and orbit for either a landing or regain of Data Link. -->
+to “Airfield Home” and orbit for either a landing or regain of Data Link.
+-->
 
     <block name="ScrutineeringAutonomyTriangle" strip_button="Triangle" strip_icon="path.png" group="Mission">
       <!-- TODO: while we are up there take some pictures anyhow :) -->
@@ -339,14 +338,14 @@ to “Airfield Home” and orbit for either a landing or regain of Data Link. --
       <set value="0" var="ap_state->commands[COMMAND_CAMBER]"/>
 
 <!-- *********** Track to EL-1 *********** -->
-    <block name="TrackToEL1" strip_button="Joe" strip_icon="lookdown.png" group="Mission">
+    <block name="EntryLane1" strip_button="Joe" strip_icon="lookdown.png" group="Mission">
       <set value="set_airspeed_tracking" var="v_ctl_auto_airspeed_setpoint"/>
       <go from="AIRFIELDHOME" wp="EL1" hmode="route"/>
     </block>
     <!--  maybe add other waypoint to enterarea in a better way -->
 
 <!-- *********** Track Direct to EL-2, Entry to Search Area only via EL-2 *********** -->
-    <block name="TrackToEL2">
+    <block name="EntryLane2">
       <set value="set_airspeed_tracking" var="v_ctl_auto_airspeed_setpoint"/>
       <go from="EL1" wp="EL2" hmode="route" approaching_time="10" />
     </block>
@@ -404,28 +403,20 @@ best to perform many real life tests with the CAM
      *********** Search Area Departure Procedure *************
      ***************************************************** -->
 
-<!-- Todo add dashing speed if batter is above certain voltage level -->
-
-<!-- Generic way to leave search area for both search and rescue missions -->
-    <block name="ExitSearchArea">
-      <set value="set_airspeed_tracking" var="v_ctl_auto_airspeed_setpoint"/>
-      <go wp="EL3"/>
-    </block>
-
 <!-- *********** Exit Search Area only via EL-3 *********** -->
-    <block name="ExitSearchAreaViaEL3">
+    <block name="ReturnToBase">
       <set value="set_airspeed_tracking" var="v_ctl_auto_airspeed_setpoint"/>
       <go wp="EL3"/>
     </block>
 
 <!-- *********** Track Direct to EL-4 *********** -->
-    <block name="GoToEL4">
+    <block name="ExitLane3">
       <set value="set_airspeed_tracking" var="v_ctl_auto_airspeed_setpoint"/>
       <go from="EL3" wp="EL4" hmode="route"/>
     </block>
 
 <!-- ************ Track to Kingaroy Airport *********** -->
-    <block name="ReturnToBase">
+    <block name="ExitLane4">
       <set value="set_airspeed_tracking" var="v_ctl_auto_airspeed_setpoint"/>
       <go from="EL4" wp="AIRFIELDHOME" hmode="route"/>
       <deroute block="ComputeLandingApproach"/>
@@ -467,19 +458,16 @@ extern bool_t compute_alignment(uint8_t w1, uint8_t w2, uint8_t start, uint8_t e
 
 <!-- *********** Align on release path *********** -->
     <block name="align">
-
- <!-- TODO set AIRSPEED_AT_RELEASE-->
- <!--TODO set HEIGHT to 60m -->
-    <!-- After Payload is released, back via EL3 -->
-
-      <exception cond="nav_drop_update_release(WP_OUTBACKJOE)" deroute="ExitSearchAreaViaEL3"/>
+      <!-- TODO set AIRSPEED_AT_RELEASE-->
+      <!--TODO set HEIGHT to 60m -->
+      <exception cond="nav_drop_update_release(WP_OUTBACKJOE)" deroute="ReturnToBase"/>
       <go approaching_time="nav_drop_trigger_delay" from="START" hmode="route" wp="RELEASE"/>
     </block>
 
 <!-- *********** Release Payload *********** -->
     <block name="shoot">
-    <!-- TODO maybe extend crowbreak 80%? for slowes possible speed? -->
-     <!--   <set value="0" var="ap_state->commands[COMMAND_BRAKE]"/> -->
+      <!-- TODO maybe extend crowbreak 80%? for slowes possible speed? -->
+      <!-- <set value="0" var="ap_state->commands[COMMAND_BRAKE]"/> -->
       <!-- TODO is electrcal plane and almost there maybe stop proppelor from spinning for a few seconds -->
       <set value="NavDropShoot()" var="unit"/>
       <!-- TODO add maxspeed again -->
@@ -487,7 +475,7 @@ extern bool_t compute_alignment(uint8_t w1, uint8_t w2, uint8_t start, uint8_t e
       <!-- Maybe better not to close, more chance of delivery, TODO maybe even add a sensor to detect release if not try again -->
       <!-- <set value="NavDropCloseHatch" var="unit"/> -->
 
-      <deroute block="ExitSearchAreaViaEL3"/><!-- Just To Make Sure -->
+      <deroute block="ReturnToBase"/><!-- Just To Make Sure -->
     </block>
 
 <!-- *********************************************************
@@ -522,7 +510,7 @@ extern bool_t compute_alignment(uint8_t w1, uint8_t w2, uint8_t start, uint8_t e
     </block>
 
     <block name="Final">
-      <call fun="AirbrakesOn()" until="TRUE" vmode="glide" />
+      <set value="AirbrakesOn()" var="unit"/>
       <go approaching_time="5" from="AF" hmode="route" wp="TD"/>
     </block>
 
@@ -571,7 +559,7 @@ termination mode (Section 5.6).
       <!-- resume if datalink is regained-->
       <!--TODO If the data link is regained prior to the conclusion of 2 minutes of loiter at
       Comms Hold the mission maybe continued otherwise any subsequent  TODO -->
-      <!--exception cond="LessThan(datalink_time0, 10)" deroute="TrackToEL2"/-->      <!-- As soon as we have a link again Go EL2 and continue mission> -->
+      <!--exception cond="LessThan(datalink_time0, 10)" deroute="EntryLane2"/-->      <!-- As soon as we have a link again Go EL2 and continue mission> -->
       <!-- TODO: better continue where we had our last telemerty still OK point if possible -->
       <!-- Since it arrived we must raise a counter by one. it's not alowed by rules to occur  more than twice, then we must move to airfieldhome -->
       <!-- TODO: set only after aircraft **arrived!** in the loiter not before the ETA < 1sec -->
