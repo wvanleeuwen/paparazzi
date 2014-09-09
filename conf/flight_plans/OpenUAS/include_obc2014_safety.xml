@@ -36,11 +36,10 @@
 
     <!-- Hard GeoFence -->
     <!-- TODO Maybe ADD aditional exception with 2 sec timer here just to be sure to avoid position GPS spikes or some other jitter issues -->
-    <exception cond="(!InsideMissionBoundary(GetPosX(), GetPosY())) && (!AircraftIsBooting())" deroute="ForcedCrash"/>
+    <exception cond="(!InsideMissionBoundary(GetPosX(), GetPosY())) && (!AircraftIsBooting())" deroute="GeoFence"/>
 
-    <!-- Hard Altitude GeoFence -->
-    <!-- TODO-MUST Use MSL altitude -->
-    <exception cond="MoreThan(GetPosAlt(), 1500) && (!AircraftIsBooting())" deroute="ForcedCrash" />
+    <!-- Hard Altitude GeoFence 3000ft MSL-->
+    <exception cond="MoreThan(GetAmsl(), 3000) && (!AircraftIsBooting())" deroute="HeightViolation" />
 
     <!-- Case of loss of GPS AND loss of datalink -->
     <exception cond="And(datalink_time > 10, !GpsFixValid())" deroute="ForcedCrash"/>
@@ -48,12 +47,22 @@
 
   <blocks>
     <!-- ******* Activate the irreversible Forced Crash Command to the Flight Termination Device ******** -->
-    <block name="ForcedCrash">
 
+    <block name="GeoFence">
       <!-- <set value="MAX_PPRZ" var="ap_state->commands[COMMAND_FORCECRASH]"/> -->
-
       <circle radius="nav_radius" wp="STDBY"/> <!-- todo add a dynamic TDFORCEDCRASH point so to notify and have it in the log  -->
     </block>
+
+    <block name="HeightViolation">
+      <!-- <set value="MAX_PPRZ" var="ap_state->commands[COMMAND_FORCECRASH]"/> -->
+      <circle radius="nav_radius" wp="STDBY"/> <!-- todo add a dynamic TDFORCEDCRASH point so to notify and have it in the log  -->
+    </block>
+
+    <block name="ForcedCrash">
+      <!-- <set value="MAX_PPRZ" var="ap_state->commands[COMMAND_FORCECRASH]"/> -->
+      <circle radius="nav_radius" wp="STDBY"/> <!-- todo add a dynamic TDFORCEDCRASH point so to notify and have it in the log  -->
+    </block>
+
   </blocks>
 </procedure>
 
