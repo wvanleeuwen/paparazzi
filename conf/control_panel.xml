@@ -48,6 +48,12 @@
     <program name="Environment Simulator" command="sw/simulator/gaia">
       <arg flag="-b" variable="ivy_bus"/>
     </program>
+    <program name="App Server" command="sw/ground_segment/tmtc/app_server">
+      <arg flag="-b" variable="ivy_bus"/>
+    </program>
+    <program name="Ivy2Udp" command="sw/ground_segment/tmtc/ivy2udp">
+      <arg flag="-b" variable="ivy_bus"/>
+    </program>
     <program name="Http Server" command="sw/ground_segment/tmtc/boa"/>
     <program name="Plot Meteo Profile" command="sw/logalizer/plotprofile"/>
     <program name="Weather Station" command="sw/ground_segment/misc/davis2ivy">
