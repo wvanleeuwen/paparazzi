@@ -23,7 +23,7 @@
 <!-- ****************************** EXCEPTIONS ***************************** -->
   <exceptions>
     <!-- RC-Loss -->
-    <!-- Handled in FTD-Radio-Control -->
+    <!-- Handled by FTD-Radio-Control -->
 
     <!-- Datalink-Loss: -->
     <!-- Handled in Mission Navigation -->
@@ -36,13 +36,19 @@
 
     <!-- Hard GeoFence -->
     <!-- TODO Maybe ADD aditional exception with 2 sec timer here just to be sure to avoid position GPS spikes or some other jitter issues -->
-    <exception cond="(!InsideMissionBoundary(GetPosX(), GetPosY())) && (!AircraftIsBooting())" deroute="GeoFence"/>
+    <exception cond="(!InsideMissionBoundary(GetPosX(), GetPosY())) && gps_has_been_good()" deroute="GeoFence"/>
+
+    <!-- Failure of Autopilot -->
+    <!-- FTD will failsafe if no commands arrive during 100ms -->
+
+    <!-- Failure of Geofence detection processor -->
+    <!-- FTD will failsafe if no heartbeat arrives from AP (with GPS) during 100ms -->
 
     <!-- Hard Altitude GeoFence 3000ft MSL-->
-    <exception cond="MoreThan(GetAmsl(), 3000) && (!AircraftIsBooting())" deroute="HeightViolation" />
+    <exception cond="MoreThan(GetAmsl(), 3000) && gps_has_been_good()" deroute="HeightViolation" />
 
     <!-- Case of loss of GPS AND loss of datalink -->
-    <exception cond="And(datalink_time > 10, !GpsFixValid())" deroute="ForcedCrash"/>
+    <exception cond="And(datalink_time > 10, !GpsFixValid())" deroute="DatalinkAndGpsFailure"/>
   </exceptions>
 
   <blocks>
@@ -58,7 +64,7 @@
       <circle radius="nav_radius" wp="STDBY"/> <!-- todo add a dynamic TDFORCEDCRASH point so to notify and have it in the log  -->
     </block>
 
-    <block name="ForcedCrash">
+    <block name="DatalinkAndGpsFailure">
       <!-- <set value="MAX_PPRZ" var="ap_state->commands[COMMAND_FORCECRASH]"/> -->
       <circle radius="nav_radius" wp="STDBY"/> <!-- todo add a dynamic TDFORCEDCRASH point so to notify and have it in the log  -->
     </block>
