@@ -207,7 +207,7 @@
   </section>
 
   <modules>
-    <load name="safety_timers.xml"/>
+    <load name="obc2014.xml"/>
     <load name="openlog.xml"/>
     <load name="nav_survey_polygon.xml"/>
     <load name="nav_line_border.xml"/>

@@ -256,7 +256,7 @@ I am as of yet not sure if the weird info byte is because of a failed bind proce
       <define name="MS5611_SLAVE_IDX" value="SPI_SLAVE3"/>
     </load>
     <load name="qnh.xml"/>
-    <load name="safety_timers.xml"/>
+    <load name="obc2014.xml"/>
 
     <!-- Disable uCenter in the future, setup the hardware itself -->
     <load name="gps_ubx_ucenter.xml"/><!-- TODO: add parameter to disable SBAS CAREFUL about SBAS, disable it for Australia -->

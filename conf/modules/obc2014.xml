@@ -1,18 +1,18 @@
 <!DOCTYPE module SYSTEM "module.dtd">
 
-<module name="datalink">
+<module name="obc">
   <doc>
-    <description>Safety Timers for OUTBACK</description>
+    <description>OUTBACK Features</description>
   </doc>
   <header>
-    <file name="safety_timers.h"/>
+    <file name="obc2014.h"/>
   </header>
 <!--  <init fun="init_demo()"/>
   <periodic fun="periodic_1Hz_demo()" freq="1." start="start_demo()" stop="stop_demo()" autorun="TRUE"/>
 -->
-  <periodic fun="periodic_safety_timers()" period="0.1" autorun="TRUE"/>
+  <periodic fun="periodic_obc()" period="0.1" autorun="TRUE"/>
   <makefile>
-    <file name="safety_timers.c"/>
+    <file name="obc2014.c"/>
   </makefile>
 </module>
 

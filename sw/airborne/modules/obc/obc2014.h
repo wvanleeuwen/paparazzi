@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2009  Gautier Hattenberger
+ * Copyright (C) 2014 OpenUAS
  *
  * This file is part of paparazzi.
  *
@@ -20,9 +20,9 @@
  *
  */
 
-/** \file safety_timers.h
+/** \file obc2014.h
  *
- * demo module with blinking LEDs
+ * OUTBACK Challenge Stuff
  */
 
 #ifndef SAFETY_TIMERS_H
@@ -49,8 +49,7 @@ extern float set_flare_pitch;
 
 #define ThrottleHigh() MoreThan(fbw_state->channels[RADIO_THROTTLE],4000)
 
-extern void periodic_safety_timers(void);
-
-
+extern void periodic_obc(void);
+extern bool_t gps_has_been_good(void);
 
 #endif

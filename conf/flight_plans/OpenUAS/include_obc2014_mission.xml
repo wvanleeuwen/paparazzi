@@ -164,6 +164,14 @@ TST-3 = -26° 35' 23.2" * 151° 50' 45.9"
 <!--<TODO: Add somethin like pre_call="if (!InsideRed(GetPosX(), GetPosY())) NavKillThrottle();-->
   </exceptions>
 
+
+
+
+
+
+
+
+
 <!-- *********************************************************************** -->
 <!-- ********************** FLIGHTPLAN STARTINGPOINT *********************** -->
 <!-- *********************************************************************** -->
@@ -224,7 +232,6 @@ TST-3 = -26° 35' 23.2" * 151° 50' 45.9"
       <!-- <set value="0" var="ap_state->commands[COMMAND_BRAKE]"/> -->
       <set value="AirbrakesOff()" var="unit"/>
       <attitude pitch="0" roll="0" throttle="0" vmode="throttle" until="FALSE"/><!-- maybe not moving the plane would still make a test of defelction possible -->
-      <!-- If over 50% throttleis given auto2 takeoff is initiated, it is not an RC steering method, just a trigger, make sure transmiter is set in auto2 mode, or else switched off -->
     </block>
 
 <!-- *********************************************************

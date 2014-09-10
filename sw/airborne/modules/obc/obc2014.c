@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2009  Gautier Hattenberger
+ * Copyright (C) 2014 OpenUAS
  *
  * This file is part of paparazzi.
  *
@@ -20,7 +20,7 @@
  *
  */
 
-#include "safety_timers.h"
+#include "obc2014.h"
 #include "generated/airframe.h"
 #include "firmwares/fixedwing/autopilot.h"
 
@@ -38,8 +38,9 @@ float v_ctl_auto_throttle_nominal_cruise_pitch = 0;
 float v_ctl_auto_airspeed_setpoint = 0;
 #endif
 
-void periodic_safety_timers(void)
+void periodic_obc(void)
 {
+  // Copy Radio commands in AUTO1
   if (pprz_mode == PPRZ_MODE_AUTO1)
   {
     ap_state->commands[COMMAND_HATCH] = fbw_state->channels[RADIO_HATCH];
@@ -47,5 +48,15 @@ void periodic_safety_timers(void)
   }
 }
 
+#include "subsystems/gps.h"
 
+bool_t gps_has_been_good(void)
+{
+  static bool_t gps_has_been_good = FALSE;
+  if (GpsFixValid())
+  {
+    gps_has_been_good = TRUE;
+  }
+  return gps_has_been_good;
+}
 
