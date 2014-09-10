@@ -48,12 +48,24 @@
 
 #define CameraBuffer() CameraLink(ChAvailable())
 
+void ticket_parse(char c);
+
 #define ReadCameraBuffer() {                  \
     while (CameraLink(ChAvailable()))         \
       ticket_parse(CameraLink(Getch()));      \
   }
 
+void ticket_event(void)
+{
+  ReadCameraBuffer();
+}
 
+char last_char = 0;
+
+void ticket_parse(char c)
+{
+  last_char = c;
+}
 
 int ticket_thumbnails = 0;
 #define THUMB_MSG_SIZE  (80-8-2)
@@ -75,7 +87,7 @@ static void send_thumbnails(void)
       }
     }
     for (int i=0;i<THUMB_MSG_SIZE;i++)
-      thumb[i]++;
+      thumb[i]=last_char;
     DOWNLINK_SEND_PAYLOAD(DefaultChannel, DefaultDevice, THUMB_MSG_SIZE, thumb);
   }
 }

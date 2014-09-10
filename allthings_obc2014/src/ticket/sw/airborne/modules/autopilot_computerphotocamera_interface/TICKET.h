@@ -37,6 +37,7 @@ extern void ticket_init(void);
 
 /** 4Hz Periodic */
 extern void ticket_periodic(void);
+extern void ticket_event(void);
 
 extern int ticket_thumbnails;
 

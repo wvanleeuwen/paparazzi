@@ -11,7 +11,7 @@
   </header>
   <init fun="ticket_init()"/>
   <periodic fun="ticket_periodic()" freq="4" autorun="TRUE"/>
-  <!-- event fun="ticket_takephotonow"/-->
+  <event fun="ticket_event()"/>
   <makefile target="sim">
     <file name="candy/serial.c"/>
   </makefile>
