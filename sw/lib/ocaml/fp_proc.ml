@@ -144,7 +144,7 @@ let transform_stage = fun prefix reroutes env xml ->
               assert (children=[]);
               let attribs = transform_values ["wp"; "vmode"] env attribs in
               Xml.Element (tag, attribs, children)
-            | "call" | "set" ->
+            | "call" | "set" | "handler" ->
               let attribs = transform_values [] env attribs in
               Xml.Element (tag, attribs, children)
             | _ -> failwith (sprintf "Fp_proc: Unexpected tag: '%s'" tag)
