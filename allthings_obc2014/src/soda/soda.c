@@ -19,7 +19,7 @@ int main(int argc, char* argv[])
 
   strcpy(filename, "/root/IMG_0200.jpg");
 
-  printf("Start Superb Onboard Recognition Application\n");
+  printf("SODA: Superb Onboard Recognition Application\n");
 
   //////////////////////////////////////////////
   // Load Jpeg
@@ -32,11 +32,11 @@ int main(int argc, char* argv[])
   int ret = loadJpg(filename, buff);
   if (ret <= 0)
   {
-    fprintf(stderr, "Failed to load '%s'\n",filename);
+    fprintf(stderr, "SODA: Failed to load '%s'\n",filename);
     return -1;
   }
 
-  printf("JPEG '%s' Loaded\n",filename);
+  printf("SODA: JPEG '%s' Loaded\n",filename);
 
   //////////////////////////////////////////////
   // Convert to HSV
@@ -71,12 +71,10 @@ int main(int argc, char* argv[])
 
   strcpy(outfile,filename);
   strcat(outfile,".txt");
-
   FILE* fp = fopen(outfile, "w+b");
   fprintf(fp, "processed  %s \n", filename);
   fclose(fp);
 
-  printf("Ready!\n");
   return 0;
 }
 
