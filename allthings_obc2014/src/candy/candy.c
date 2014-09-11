@@ -16,7 +16,7 @@
 static void *handle_msg_shoot(void *ptr);
 static void *handle_msg_buffer_empty(void *ptr);
 
-static int is_shootin, image_idx, image_count;
+static volatile int is_shooting, image_idx, image_count;
 static pthread_mutex_t mut = PTHREAD_MUTEX_INITIALIZER;
 
 int main(int argc, char* argv[])
