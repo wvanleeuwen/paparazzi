@@ -1235,7 +1235,7 @@ function chdku.rc_handler_file(dir,filename_base,ext)
 		if not filename then
 			return false, err
 		end
-		cli.dbgmsg('rc file %s %d\n',filename,hdata.id)
+		cli.infomsg('##%s##\n',filename)
 		
 		local fh,err = io.open(filename,'wb')
 		if not fh then
