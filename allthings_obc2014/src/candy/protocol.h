@@ -27,10 +27,10 @@
  *
  * where checksum is computed over length and payload:
  * @code
- * ck_A = ck_B = length
+ * mora_ck_a = mora_ck_b = length
  * for each byte b in payload
- *     ck_A += b;
- *     ck_b += ck_A;
+ *     mora_ck_a += b;
+ *     mora_ck_b += mora_ck_a;
  * @endcode
  */
 
@@ -40,59 +40,81 @@
 #include <inttypes.h>
 #include "std.h"
 
-
 /////////////////////////////////////////////////////////////////////
 // MESSAGES
 
 #define MORA_SHOOT          1
+#define MORA_SHOOT_MSG_SIZE (4*7)
 
+// 7 * 4 bytes int32_t
 // nr, lat, lon, h, phi, theta, psi
+
+union dc_shot_union
+{
+  struct
+  {
+    int32_t nr;
+    int32_t lat;
+    int32_t lon;
+    int32_t alt;
+    int32_t phi;
+    int32_t theta;
+    int32_t psi;
+  } data;
+  uint8_t bin[MORA_SHOOT_MSG_SIZE];
+};
 
 #define MORA_BUFFER_EMPTY   2
 
-// null
+// 0 bytes payload: null
 
 #define MORA_PAYLOAD        3
 
-// 70 bytes
+
+// 72 bytes
 
 #define MORA_STATUS         4
 
-// int cpu
-// int threads
-// int shots
-// int extra
-
+// 4*2 bytes
+struct mora_status_struct
+{
+  uint16_t cpu;
+  uint16_t threads;
+  uint16_t shots;
+  uint16_t extra;
+};
 
 /////////////////////////////////////////////////////////////////////
 // SENDING
 
-extern uint8_t ck_a, ck_b;
+extern uint8_t mora_ck_a, mora_ck_b;
 
 #define STX  0x99
 
-#define MoraSizeOf(_dev, _payload) (_payload+4)
-#define MoraHeader(_dev, payload_len) {             \
-  CameraLink(Transmit( STX));                       \
-  uint8_t msg_len = MoraSizeOf(_dev, payload_len);  \
-  CameraLink(Transmit(_dev, msg_len));              \
-  ck_a = msg_len; ck_b = msg_len;                   \
-}
-
-#define MoraTrailer(_dev) {        \
-  CameraLink(Transmit(ck_a));      \
-  CameraLink(Transmit(ck_b));      \
-}
+#define MoraSizeOf(_payload) (_payload+5)
 
 #define MoraPutUint8( _byte) {     \
-  ck_a += _byte;                   \
-  ck_b += ck_a;                    \
+  mora_ck_a += _byte;                   \
+  mora_ck_b += mora_ck_a;                    \
   CameraLink(Transmit(_byte));     \
 }
 
-#define MoraPut1ByteByAddr(_dev, _byte) {  \
-  uint8_t _x = *(_byte);                   \
-  MoraPutUint8(_dev, _x);                  \
+#define MoraHeader(msg_id, payload_len) {           \
+  CameraLink(Transmit( STX));                       \
+  uint8_t msg_len = MoraSizeOf( payload_len);       \
+  CameraLink(Transmit( msg_len));              \
+  mora_ck_a = msg_len; mora_ck_b = msg_len;                   \
+  MoraPutUint8(msg_id);                             \
+}
+
+#define MoraTrailer() {            \
+  CameraLink(Transmit(mora_ck_a));      \
+  CameraLink(Transmit(mora_ck_b));      \
+}
+
+#define MoraPut1ByteByAddr( _byte) {  \
+  uint8_t _x = *(_byte);              \
+  MoraPutUint8( _x);                  \
 }
 
 /////////////////////////////////////////////////////////////////////
@@ -102,6 +124,7 @@ struct mora_transport {
   // generic interface
   uint8_t payload[256];
   uint8_t error;
+  uint8_t msg_id;
   uint8_t msg_received;
   uint8_t payload_len;
   // specific pprz transport variables
@@ -112,7 +135,7 @@ struct mora_transport {
 
 extern struct mora_transport mora_protocol;
 
-void parse_pprz(struct mora_transport * t, uint8_t c );
+void parse_mora(struct mora_transport * t, uint8_t c );
 
 /*
 static inline void pprz_parse_payload(struct pprz_transport * t) {
