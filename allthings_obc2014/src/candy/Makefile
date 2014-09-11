@@ -6,8 +6,5 @@ all:	candy
 candy:	serial.c chdk_pipe.c socket.c protocol.c candy.c
 	gcc -static serial.c chdk_pipe.c socket.c protocol.c candy.c -o candy -lpthread
 
-popcorn: chdk_pipe.c
-	gcc -static chdk_pipe.c -o popcorn
-
 clean:
 	rm -rf ./candy ./popcorn

@@ -37,22 +37,25 @@ int main(int argc, char* argv[])
   {
 
     // Read the serial
-    if (read(fd, &c, 1) != -1)
+    if (read(fd, &c, 1) > 0)
       parse_mora(&mora_protocol, c);
 
     // Parse serial commands
     if (mora_protocol.msg_received)
     {
+      // Process Only Once
+      mora_protocol.msg_received = FALSE;
+
       // Shoot an image if not busy
       pthread_mutex_lock(&mut);
-      if (mora_protocol.payload[0] == MORA_SHOOT && !is_shooting)
+      if (mora_protocol.msg_id == MORA_SHOOT && !is_shooting)
         pthread_create(&shooting_threads[(shooting_idx++ % MAX_PROCESSING_THREADS)], NULL, handle_msg_shoot, NULL);
-      else if(mora_protocol.payload[0] == MORA_SHOOT)
+      else if(mora_protocol.msg_id == MORA_SHOOT)
         printf("Shooting: busy\n");
       pthread_mutex_unlock(&mut);
 
       // Fill the image buffer
-      if (mora_protocol.payload[0] == MORA_BUFFER_EMPTY)
+      if (mora_protocol.msg_id == MORA_BUFFER_EMPTY)
         pthread_create(&buffer_thread, NULL, handle_msg_buffer_empty, NULL);
     }
 
