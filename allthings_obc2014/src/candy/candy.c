@@ -2,17 +2,18 @@
 #include <stdlib.h>
 
 #include "serial.h"
+#include "chdk_pipe.h"
+
+#define MAX_FILENAME 512
 
 int main(int argc, char* argv[])
 {
   int i;
+  char filename[MAX_FILENAME];
   char* buff = "This is a nice demo\n";
 
   printf("Start Shoot Server\n");
-  //system("cd ../popcorn/chdkptp/lua/ && ../chdkptp -c -e'rec' -e'rs'");
-  //for (i=0;i<10;i++)
-  //  system("cd ../popcorn/chdkptp/lua/ && ../chdkptp -c -e'rs'");
-  //printf("Ready\n");
+  chdk_pipe_init();
 
   // Open
   serial_init("/dev/ttySAC0");
@@ -27,14 +28,18 @@ int main(int argc, char* argv[])
     if (ret != -1)
     {
       if (c == 0x20)
-        system("cd ../popcorn/chdkptp/lua/ && ../chdkptp -c -e'rec' -e'rs'");
-      printf("%02X,(%d)\n",c, ret);
+      {
+        chdk_pipe_shoot(filename);
+        printf("Shot image: %s\n", filename);
+      }
+      //printf("%02X,(%d)\n",c, ret);
     }
   }
 
 
   // Close
   close(fd);
+  chdk_pipe_deinit();
 
   printf("Ready!\n");
   return 0;

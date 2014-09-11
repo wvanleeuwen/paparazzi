@@ -10,104 +10,161 @@
 #include <unistd.h>
 #include <string.h>
 
-#define SHELL "../popcorn/popcorn.sh"
+#include "chdk_pipe.h"
 
-void main(int argc, char ** argv, char ** envp)
+#define READ 0
+#define WRITE 1
+#define MAX_FILENAME 255
+#define SHELL "/root/develop/allthings_obc2014/src/popcorn/popcorn.sh"
+
+static int fo, fi;
+static void wait_for_cmd(int timeout);
+static void wait_for_img(char* filename, int timeout);
+static pid_t popen2(const char *command, int *infp, int *outfp);
+
+/*void main(int argc, char ** argv, char ** envp)
 {
-	int pid;
-	int pc[2]; /* Parent to child pipe */
-	int cp[2]; /* Child to parent pipe */
-	char ch;
-	int incount = 0, outcount = 0;
+	int i;
+	char filename[MAX_FILENAME];
 
-	/* Make pipes */
-	if( pipe(pc) < 0)
+	// Initialize chdk pipe
+	chdk_pipe_init();
+
+	// Start taking photos
+	for(i=0; i < 3; i++) {
+		chdk_pipe_shoot(filename);
+		printf("Shot image: %s\n", filename);
+	}
+
+	// Initialize chdk pipe
+	chdk_pipe_deinit();
+}*/
+
+/**
+ * Initialize the CHDK pipe
+ */
+void chdk_pipe_init(void)
+{
+	/* Check if SHELL is started */
+	if(popen2(SHELL, &fi, &fo) <= 0)
 	{
-		perror("Can't make pipe");
+		perror("Can't start SHELL");
 		exit(1);
 	}
-	if( pipe(cp) < 0)
+	wait_for_cmd(10);
+
+	/* Connect to the camera */
+	write(fi, "connect\n", 8);
+	wait_for_cmd(10);
+
+	/* Kill all running scripts */
+	write(fi, "killscript\n", 11);
+	wait_for_cmd(10);
+
+	/* Start recording mode */
+	write(fi, "rec\n", 4);
+	wait_for_cmd(10);
+
+	/* Start rsint mode */
+	write(fi, "rsint /root\n", 12);
+	wait_for_cmd(10);
+}
+
+/**
+ * Deinitialize CHDK pipe
+ */
+void chdk_pipe_deinit(void)
+{
+	/* Stop rsint mode */
+	write(fi, "q\n", 2);
+	wait_for_cmd(10);
+
+	/* Quit SHELL */
+	write(fi, "quit\n", 3);
+}
+
+/**
+ * Shoot an image
+ */
+void chdk_pipe_shoot(char *filename)
+{
+	write(fi, "s\n", 2);
+	wait_for_img(filename, 10);
+}
+
+/**
+ * Wait for the image to be available
+ * TODO: add timeout
+ */
+static void wait_for_img(char* filename, int timeout)
+{
+	int hash_cnt = 0;
+	char ch = NULL;
+	int filename_idx = 0;
+
+	while(hash_cnt < 4)
 	{
-		perror("Can't make pipe");
-		exit(1);
+		if(read(fo, &ch, 1))
+		{
+			if(ch == '#')
+				hash_cnt++;
+			else if(hash_cnt >= 2 && ch != '#')
+				filename[filename_idx++] = ch;
+		}
 	}
 
+	filename[filename_idx] = 0;
+	wait_for_cmd(timeout);
+}
 
-	/* Create a child to run command. */
-	switch( pid = fork() )
-	{
-		case -1: 
-				perror("Can't fork");
-				exit(1);
-		case 0:
-				/* Child. */
-				close(1); /* Close current stdout. */
-				dup( cp[1]); /* Make stdout go to write
-						   end of pipe. */
-				close(0); /* Close current stdin. */
-				dup( pc[0]); /* Make stdin come from read
-						   end of pipe. */
-				close( pc[1]);
-				close( cp[0]);
-				//exec("repeat", );//, envp);
-				execl (SHELL, SHELL, NULL);
-				perror("No exec");
-				signal(getppid(), (void*)SIGQUIT);
-				exit(1);
-		default:
-				/* Parent. */
-				/* Close what we don't need. */
-				
-/*
-				printf("Input to child:\n");
-				while( ( read(0, &ch, 1) > 0) && (ch != '\n') )
-				{
-					write(pc[1],&ch, 1);
-					write(1, &ch, 1);
-					incount ++;
-				}
+/**
+ * Wait for the commandline to be available
+ * TODO: add timeout
+ */
+static void wait_for_cmd(int timeout)
+{
+	char ch = NULL;
+	do {
+		read(fo, &ch, 1);
+	} while(ch != '>');
+}
 
-*/
-                                sleep(5);
-                                write(pc[1],"connect\n", 8);
+/**
+ * Open a process with stdin and stdout
+ */
+static pid_t popen2(const char *command, int *infp, int *outfp)
+{
+    int p_stdin[2], p_stdout[2];
+    pid_t pid;
 
-				fcntl(cp[0], F_SETFL, FNDELAY);
+    if (pipe(p_stdin) != 0 || pipe(p_stdout) != 0)
+        return -1;
 
-                                printf("\nOutput from child:\n");
-                                while( (read(cp[0], &ch, 1) == 1) && (ch != '>'))
-                                {
-                                        write(1, &ch, 1);
-                                        outcount++;
-                                }
-                                sleep(3);
-                                write(pc[1],"rec\n", 4);
-                                sleep(1);
-                                printf("\nOutput from child:\n");
-                                while( (read(cp[0], &ch, 1) == 1) && (ch != '>'))
-                                {
-                                        write(1, &ch, 1);
-                                        outcount++;
-                                }
-				printf("Finished Reading");
-				sleep(3);
-				write(pc[1],"rs\n", 3);
-				sleep(1);
-				printf("\nOutput from child:\n");
-				while( (read(cp[0], &ch, 1) == 1) && (ch != '>'))
-				{
-					write(1, &ch, 1);
-					outcount++;
-				}
-				printf("\n\nTotal characters in: %d\n",incount);
-				printf("Total characters out: %d\n", outcount);
-				
-				sleep(5);
+    pid = fork();
 
-				write(pc[1],"quit\n",5);
+    if (pid < 0)
+        return pid;
+    else if (pid == 0)
+    {
+        close(p_stdin[WRITE]);
+        dup2(p_stdin[READ], READ);
+        close(p_stdout[READ]);
+        dup2(p_stdout[WRITE], WRITE);
 
-				close(pc[1]);
-				close(cp[1]);
-				exit(0);
-	}
+        execl("/bin/sh", "sh", "-c", command, NULL);
+        perror("execl");
+        exit(1);
+    }
 
+    if (infp == NULL)
+        close(p_stdin[WRITE]);
+    else
+        *infp = p_stdin[WRITE];
+
+    if (outfp == NULL)
+        close(p_stdout[READ]);
+    else
+        *outfp = p_stdout[READ];
+
+    return pid;
 }
