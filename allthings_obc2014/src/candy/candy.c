@@ -14,15 +14,16 @@
 #define SODA "/root/develop/allthings_obc2014/src/soda/soda"
 
 static void *handle_msg_shoot(void *ptr);
-static void *handle_msg_buffer_empty(void *ptr);
+static inline void handle_msg_buffer(void);
 
 static volatile int is_shooting, image_idx, image_count;
+static char image_buffer[MAX_IMAGE_BUFFERS][IMAGE_SIZE];
 static pthread_mutex_t mut = PTHREAD_MUTEX_INITIALIZER;
 
 int main(int argc, char* argv[])
 {
-  pthread_t shooting_threads[MAX_PROCESSING_THREADS], buffer_thread;
-  char c, image_buffer[MAX_IMAGE_BUFFERS][IMAGE_SIZE];
+  pthread_t shooting_threads[MAX_PROCESSING_THREADS];
+  char c;
   int shooting_idx = 0;
 
   // Initialization
@@ -58,22 +59,18 @@ int main(int argc, char* argv[])
       if (mora_protocol.msg_id == MORA_SHOOT)
         pthread_create(&shooting_threads[(shooting_idx++ % MAX_PROCESSING_THREADS)], NULL, handle_msg_shoot, NULL);
 
-      // Fill the image buffer
+      // Fill the image buffer (happens busy because needs fd anyway)
       if (mora_protocol.msg_id == MORA_BUFFER_EMPTY)
-        pthread_create(&buffer_thread, NULL, handle_msg_buffer_empty, NULL);
-
-      mora_protocol.msg_received = FALSE;
+        handle_msg_buffer();
     }
 
     // Read the socket
-    pthread_mutex_lock(&mut);
     if (socket_recv(image_buffer[image_idx], IMAGE_SIZE) == IMAGE_SIZE) {
       image_idx = (image_idx + 1) % MAX_IMAGE_BUFFERS;
 
       if(image_count < MAX_IMAGE_BUFFERS)
         image_count++;
     }
-    pthread_mutex_unlock(&mut);
   }
 
   // Close
@@ -113,23 +110,21 @@ static void *handle_msg_shoot(void *ptr)
   printf("Shooting: soda return %d of image %s\n", ret, filename);
 }
 
-static void *handle_msg_buffer_empty(void *ptr)
+static inline void handle_msg_buffer(void)
 {
-  pthread_mutex_lock(&mut);
-  int saved_img_idx = image_idx;
+  int i;
+
   // Check if image is available
   if(image_count <= 0)
-  {
-    pthread_mutex_unlock(&mut);
     printf("Buffer: no image available\n");
-    return NULL;
+  else {
+    // Send the image
+    image_idx = (MAX_IMAGE_BUFFERS + image_idx - 1) % MAX_IMAGE_BUFFERS;
+    image_count--;
+    
+    MoraHeader(MORA_PAYLOAD, MORA_PAYLOAD_MSG_SIZE);
+    for(i = 0; i < IMAGE_SIZE; i++)
+      MoraPutUint8(image_buffer[image_idx][i]);
+    MoraTrailer();
   }
-  pthread_mutex_unlock(&mut);
-
-  // Need to send the image here
-
-  pthread_mutex_lock(&mut);
-  image_idx = (MAX_IMAGE_BUFFERS + image_idx - 1) % MAX_IMAGE_BUFFERS;
-  image_count--;
-  pthread_mutex_unlock(&mut);
 }

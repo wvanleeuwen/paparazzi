@@ -69,6 +69,7 @@ union dc_shot_union
 // 0 bytes payload: null
 
 #define MORA_PAYLOAD        3
+#define MORA_PAYLOAD_MSG_SIZE 70
 
 
 // 72 bytes
@@ -94,22 +95,24 @@ extern uint8_t mora_ck_a, mora_ck_b;
 #define MoraSizeOf(_payload) (_payload+5)
 
 #define MoraPutUint8( _byte) {     \
-  mora_ck_a += _byte;                   \
-  mora_ck_b += mora_ck_a;                    \
-  CameraLink(Transmit(_byte));     \
+  mora_ck_a += _byte;              \
+  mora_ck_b += mora_ck_a;          \
+  write(fd, &_byte, 1);            \
 }
 
 #define MoraHeader(msg_id, payload_len) {           \
-  CameraLink(Transmit( STX));                       \
-  uint8_t msg_len = MoraSizeOf( payload_len);       \
-  CameraLink(Transmit( msg_len));              \
-  mora_ck_a = msg_len; mora_ck_b = msg_len;                   \
-  MoraPutUint8(msg_id);                             \
+  uint8_t s_c = STX;                                \
+  write(fd, &s_c, 1);                               \
+  s_c = MoraSizeOf( payload_len);                   \
+  write(fd, &s_c, 1);                               \
+  mora_ck_a = s_c; mora_ck_b = s_c;                 \
+  s_c = msg_id;                                     \
+  MoraPutUint8(s_c);                                \
 }
 
 #define MoraTrailer() {            \
-  CameraLink(Transmit(mora_ck_a));      \
-  CameraLink(Transmit(mora_ck_b));      \
+  write(fd, &mora_ck_a, 1);        \
+  write(fd, &mora_ck_b, 1);        \
 }
 
 #define MoraPut1ByteByAddr( _byte) {  \
