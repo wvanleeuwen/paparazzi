@@ -23,7 +23,7 @@ int main(int argc, char* argv[])
   }
 
   int ret = loadJpg(filename, buff);
-  if (ret < 0)
+  if (ret <= 0)
   {
     fprintf(stderr, "Failed to load '%s'\n",filename);
     return -1;
