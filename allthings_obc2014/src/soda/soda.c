@@ -54,11 +54,20 @@ int main(int argc, char* argv[])
   q = hsv;
   end = hsv + 4000*3000*3;
   unsigned char* yellow = prob_yellow;
-  for(;q < end; q +=3, yellow++)
+  unsigned char* blue = prob_blue;
+  for(;q < end; q +=3, yellow++, blue++)
   {
     (*yellow) = get_prob_color(q, probabilities_yellow, sat_yellow, val_yellow, threshold_saturation_yellow, threshold_value_low_yellow, threshold_value_high_yellow);
+    (*blue) = get_prob_color(q, probabilities_blue, sat_blue, val_blue, threshold_saturation_blue, threshold_value_low_blue, threshold_value_high_blue);
+
   }
 
+  //////////////////////////////////////////////
+  // Sum probabilities over a Joe-sized window:
+  
+  // first make an integral image of blue and yellow
+  // then determine the window sums with a certain step size
+  
 
   strcpy(outfile,filename);
   strcat(outfile,".txt");
