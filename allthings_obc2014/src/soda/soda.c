@@ -3,6 +3,8 @@
 #include <string.h>
 #include "jpeg_decode.h"
 #include "rgb2hsv.h"
+#include "color_probs.h"
+
 
 int main(int argc, char* argv[])
 {
@@ -41,6 +43,8 @@ int main(int argc, char* argv[])
     RgbToHsvP( p, q);
     q+=3;
   }
+
+
 
   strcpy(outfile,filename);
   strcat(outfile,".txt");
