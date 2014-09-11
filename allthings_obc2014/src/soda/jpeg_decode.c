@@ -28,14 +28,14 @@ int loadJpg(const char* Name, unsigned char* pDummy)
   if ((height>3000) || (width>4000))
   {
     fprintf(stderr, "Buffer too small");
-    return 0;
+    return -1;
   }
   
   unsigned char * pTest=pDummy;
   if (!pDummy)
   {
     printf("NO MEM FOR JPEG CONVERT!\n");
-    return 0;
+    return -1;
   }
   row_stride = width * cinfo.output_components ;
   pJpegBuffer = (*cinfo.mem->alloc_sarray)
@@ -67,4 +67,5 @@ int loadJpg(const char* Name, unsigned char* pDummy)
   //BMap = (int*)pTest; 
   printf("W x H = %d x %d\n", width, height);
   //Depht = 32;
+  return 1;
 }
