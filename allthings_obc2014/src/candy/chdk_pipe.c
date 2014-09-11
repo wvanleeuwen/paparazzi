@@ -99,7 +99,7 @@ void chdk_pipe_shoot(char *filename)
 static void wait_for_img(char* filename, int timeout)
 {
 	int hash_cnt = 0;
-	char ch = NULL;
+	char ch;
 	int filename_idx = 0;
 
 	while(hash_cnt < 4)
@@ -123,7 +123,7 @@ static void wait_for_img(char* filename, int timeout)
  */
 static void wait_for_cmd(int timeout)
 {
-	char ch = NULL;
+	char ch;
 	do {
 		read(fo, &ch, 1);
 	} while(ch != '>');

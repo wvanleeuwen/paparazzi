@@ -2,9 +2,7 @@
 
 extern int fd;
 
-#ifndef FALSE
-#define FALSE (1==2)
-#endif
+#include "std.h"
 
 int serial_init(char* port_name);
 

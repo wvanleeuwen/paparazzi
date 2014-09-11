@@ -30,7 +30,7 @@ int main(int argc, char* argv[])
   pthread_mutex_init(&mut, NULL);
   socket_init(1);
   is_shooting = 0;
-  mora_protocol.status = UNINIT;
+  mora_protocol.status = 0;
 
   // MAIN loop
   while (1)
