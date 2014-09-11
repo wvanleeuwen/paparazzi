@@ -11,7 +11,6 @@
 #
 # By default this script does nothing.
 
-cd /root/develop/allthings_obs2014/src/candy
-./candy >> /root/candy.log 2>> /root/candyerr.log &
+cd /root/develop/allthings_obc2014/src/candy; ./candy >> /root/candy.log 2>> /root/candyerr.log &
 
 exit 0
