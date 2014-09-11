@@ -36,6 +36,8 @@ float set_flare_pitch = FLARE_PITCH_ANGLE;
 #ifdef SITL
 float v_ctl_auto_throttle_nominal_cruise_pitch = 0;
 float v_ctl_auto_airspeed_setpoint = 0;
+float airspeed_quadratic_scale = 0;
+float airspeed_offset = 0;
 #endif
 
 void periodic_obc(void)
