@@ -1,47 +1,89 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <pthread.h>
 
 #include "serial.h"
 #include "chdk_pipe.h"
 
 #define MAX_FILENAME 512
+#define MAX_PROCESSING_THREADS 5
+
+static void *handle_msg_shoot(void *ptr);
+static void *handle_msg_buffer_empty(void *ptr);
+
+static int is_shooting;
+static pthread_mutex_t mut = PTHREAD_MUTEX_INITIALIZER;
 
 int main(int argc, char* argv[])
 {
-  int i;
+  pthread_t shooting_threads[MAX_PROCESSING_THREADS], buffer_thread;
   char filename[MAX_FILENAME];
-  char* buff = "This is a nice demo\n";
+  int i;
+  char c;
 
-  printf("Start Shoot Server\n");
+  // Initialization
+  printf("Starting\n");
   chdk_pipe_init();
-
-  // Open
   serial_init("/dev/ttySAC0");
+  pthread_mutex_init(&mut, NULL);
+  is_shooting = 0;
 
-  // Send
-  write(fd, buff, 10);
-
-  for (;;)
+  // MAIN loop
+  while (1)
   {
-    char c;
-    int ret = read(fd, &c, 1);
-    if (ret != -1)
+    if (read(fd, &c, 1) != -1)
     {
-      if (c == 0x20)
+
+      // Shoot an image if not busy
+      pthread_mutex_lock(&mut);
+      if (c == 0x20 && !is_shooting)
       {
-        chdk_pipe_shoot(filename);
-        printf("Shot image: %s\n", filename);
+        for(i=0; i <MAX_PROCESSING_THREADS; i++)
+        {
+          if(pthread_kill(shooting_threads[i], 0) == 0)
+          {
+            pthread_create(&shooting_threads[i], NULL, handle_msg_shoot, NULL);
+            break;
+          }
+        }
       }
-      //printf("%02X,(%d)\n",c, ret);
+      pthread_mutex_unlock(&mut);
+
+      // Fill the image buffer
+      if (c == 0x60)
+        pthread_create(&buffer_thread, NULL, handle_msg_buffer_empty, NULL);
     }
   }
-
 
   // Close
   close(fd);
   chdk_pipe_deinit();
 
-  printf("Ready!\n");
+  printf("Shutdown\n");
   return 0;
 }
 
+static void *handle_msg_shoot(void *ptr)
+{
+  char filename[MAX_FILENAME];
+
+  // Shoot the image
+  pthread_mutex_lock(&mut);
+  is_shooting = 1;
+  pthread_mutex_unlock(&mut);
+
+  printf("Shooting: start\n");
+  chdk_pipe_shoot((char *)filename);
+  printf("Shooting: got image %s\n", (char *)filename);
+
+  pthread_mutex_lock(&mut);
+  is_shooting = 0;
+  pthread_mutex_unlock(&mut);
+
+  //Parse the image
+}
+
+static void *handle_msg_buffer_empty(void *ptr)
+{
+  printf("Buffer: empty\n");
+}

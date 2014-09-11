@@ -13,13 +13,11 @@
 
 #define SOCKET_PORT 32000
 
-static int socket_fd, socket_is_server;
+static int socket_fd;
 static struct sockaddr_in socket_server, socket_client;
 
 void socket_init(int is_server)
 {
-   socket_is_server = is_server;
-
    // Initialize socket
    if((socket_fd = socket(AF_INET, SOCK_DGRAM, 0)) <= 0)
    {
@@ -44,16 +42,12 @@ void socket_init(int is_server)
 
 int socket_recv(char *buffer, int len)
 {
-   if(socket_is_server)
-      return recvfrom(socket_fd, buffer, len, 0, (struct sockaddr*)&socket_client, sizeof(socket_client));
-
-   return recvfrom(socket_fd, buffer, len, 0, (struct sockaddr*)&socket_Server, sizeof(socket_server));
+   socklen_t slen = sizeof(socket_server);
+   return recvfrom(socket_fd, buffer, len, 0, (struct sockaddr*)&socket_server, &slen);
 }
 
-int socket_send(char *buffer, int len)
+void socket_send(char *buffer, int len)
 {
-   if(socket_is_server)
-      return sendto(socket_fd, buffer, len, 0, (struct sockaddr*)&socket_client, sizeof(socket_client));
-
-   return sendto(socket_fd, buffer, len, 0, (struct sockaddr*)&socket_server, sizeof(socket_server));
+   socklen_t slen = sizeof(socket_server);
+   sendto(socket_fd, buffer, len, 0, (struct sockaddr*)&socket_server, slen);
 }
