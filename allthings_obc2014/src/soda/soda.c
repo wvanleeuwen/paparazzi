@@ -8,7 +8,7 @@
 
 int main(int argc, char* argv[])
 {
-  char* filename = "/root/IMG_0200.jpg";
+  char filename[512];
 
   unsigned char* buff = new unsigned char [4000*3000*3];
   unsigned char* hsv = new unsigned char [4000*3000*3];
@@ -16,6 +16,9 @@ int main(int argc, char* argv[])
   unsigned char* prob_blue = new unsigned char [4000*3000];
 
   char  outfile[1024];
+
+  strcpy(filename, "/root/IMG_0200.jpg");
+
   printf("Start Superb Onboard Recognition Application\n");
 
   //////////////////////////////////////////////
@@ -23,7 +26,7 @@ int main(int argc, char* argv[])
 
   if (argc >= 2)
   {
-    filename = argv[1];
+    strcpy(filename, argv[1]);
   }
 
   int ret = loadJpg(filename, buff);
