@@ -10,19 +10,24 @@ int main(int argc, char* argv[])
 
   printf("Start Superb Onboard Recognition Application\n");
 
-  loadJpg("/root/IMG_0263.jpg", buff);
+  loadJpg("/root/IMG_0269.jpg", buff);
 
   printf("JPEG Loaded\n");
 
   for (int i=0;i<10;i++)
   {
     printf("%d:\n",i);
-    for (int x=0;x<4000;x++)
+    unsigned char* p = buff;
+    unsigned char* q = hsv;
+    unsigned char* end = buff + 4000*3000*3;
+    //for (int x=0;x<(4000*3000*3);x+=3)
+    for (;p<end;p+=3)
     {
-      for (int y=0;y<3000;y++)
-      {
-        RgbToHsvP( buff+12000*y+3*x, hsv+12000*y+3*x);
-      }
+      //for (int y=0;y<3000;y++)
+      //{
+        RgbToHsvP( p, q);
+        q+=3;
+      //}
     }
   }
 
