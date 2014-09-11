@@ -70,6 +70,8 @@ extern bool_t dc_probing;
 
 extern uint8_t dc_buffer_timer;
 
+extern uint16_t dc_photo_nr;
+
 /* camera angle */
 extern float dc_cam_angle;
 extern uint8_t dc_cam_tracing;

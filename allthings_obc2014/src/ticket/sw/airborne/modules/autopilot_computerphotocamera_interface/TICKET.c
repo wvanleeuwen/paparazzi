@@ -38,15 +38,22 @@
 #include "generated/periodic_telemetry.h"
 #include BOARD_CONFIG
 
+// Communication
+#include "modules/digital_cam/candy/protocol.h"
+
 #ifdef SITL
 #include "modules/digital_cam/candy/serial.h"
 #endif
+
+#include "state.h"
 
 #define __CameraLink(dev, _x) dev##_x
 #define _CameraLink(dev, _x)  __CameraLink(dev, _x)
 #define CameraLink(_x) _CameraLink(CAMERA_LINK, _x)
 
 #define CameraBuffer() CameraLink(ChAvailable())
+
+union dc_shot_union dc_shot_msg;
 
 void ticket_parse(char c);
 
@@ -122,20 +129,28 @@ void dc_send_command(uint8_t cmd)
   switch (cmd)
   {
     case DC_SHOOT:
-      CameraLink(Transmit(cmd));
+      // Send Photo Position To Camera
+      dc_shot_msg.data.nr = dc_photo_nr + 1;
+      dc_shot_msg.data.lat = stateGetPositionLla_i()->lat;
+      dc_shot_msg.data.lon = stateGetPositionLla_i()->lon;
+      dc_shot_msg.data.alt = stateGetPositionLla_i()->alt;
+      dc_shot_msg.data.phi = stateGetNedToBodyEulers_i()->phi;
+      dc_shot_msg.data.theta = stateGetNedToBodyEulers_i()->theta;
+      dc_shot_msg.data.psi = stateGetNedToBodyEulers_i()->psi;
+
+      MoraHeader(MORA_SHOOT,MORA_SHOOT_MSG_SIZE);
+      for (int i=0; i< (MORA_SHOOT_MSG_SIZE); i++)
+        MoraPutUint8(dc_shot_msg.bin[i]);
+      MoraTrailer();
       dc_send_shot_position();
       break;
     case DC_TALLER:
-      CameraLink(Transmit(cmd));
       break;
     case DC_WIDER:
-      CameraLink(Transmit(cmd));
       break;
     case DC_ON:
-      CameraLink(Transmit(cmd));
       break;
     case DC_OFF:
-      CameraLink(Transmit(cmd));
       break;
     default:
       break;
