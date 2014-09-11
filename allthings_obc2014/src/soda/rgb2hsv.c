@@ -1,16 +1,5 @@
-typedef struct RgbColor
-{
-    unsigned char r;
-    unsigned char g;
-    unsigned char b;
-} RgbColor;
 
-typedef struct HsvColor
-{
-    unsigned char h;
-    unsigned char s;
-    unsigned char v;
-} HsvColor;
+#include "rgb2hsv.h"
 
 RgbColor HsvToRgb(HsvColor hsv)
 {
@@ -89,3 +78,36 @@ HsvColor RgbToHsv(RgbColor rgb)
 
     return hsv;
 }
+
+
+void RgbToHsvP(unsigned char* src, unsigned char* dst)
+{
+    unsigned char rgbMin, rgbMax;
+
+    rgbMin = src[0] < src[1] ? (src[0] < src[2] ? src[0] : src[2]) : (src[1] < src[2] ? src[1] : src[2]);
+    rgbMax = src[0] > src[1] ? (src[0] > src[2] ? src[0] : src[2]) : (src[1] > src[2] ? src[1] : src[2]);
+
+    dst[2] = rgbMax;
+    if (dst[2] == 0)
+    {
+        dst[0] = 0;
+        dst[1] = 0;
+        return;
+    }
+
+    dst[1] = 255 * long(rgbMax - rgbMin) / dst[2];
+    if (dst[1] == 0)
+    {
+        dst[0] = 0;
+        return;
+    }
+
+    if (rgbMax == src[0])
+        dst[0] = 0 + 43 * (src[1] - src[2]) / (rgbMax - rgbMin);
+    else if (rgbMax == src[1])
+        dst[0] = 85 + 43 * (src[2] - src[0]) / (rgbMax - rgbMin);
+    else
+        dst[0] = 171 + 43 * (src[0] - src[1]) / (rgbMax - rgbMin);
+
+}
+

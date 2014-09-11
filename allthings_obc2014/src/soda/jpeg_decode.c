@@ -2,9 +2,9 @@
 #include <string.h>
 #include <jpeglib.h>
 
-int loadJpg(const char* Name)
+int loadJpg(const char* Name, unsigned char* pDummy)
 {
-  unsigned char a,r,g,b;
+  unsigned char r,g,b;
   int width, height;
   struct jpeg_decompress_struct cinfo;
   struct jpeg_error_mgr jerr;
@@ -25,7 +25,12 @@ int loadJpg(const char* Name)
   width = cinfo.output_width;
   height = cinfo.output_height;
 
-  unsigned char * pDummy = new unsigned char [width*height*4];
+  if ((height>3000) || (width>4000))
+  {
+    fprintf(stderr, "Buffer too small");
+    return 0;
+  }
+  
   unsigned char * pTest=pDummy;
   if (!pDummy)
   {
@@ -41,20 +46,18 @@ int loadJpg(const char* Name)
     (void) jpeg_read_scanlines(&cinfo, pJpegBuffer, 1);
     for (int x=0;x<width;x++)
     {
-      a = 0; // alpha value is not supported on jpg
       r = pJpegBuffer[0][cinfo.output_components*x];
-      if (cinfo.output_components>2)
-      {
-        g = pJpegBuffer[0][cinfo.output_components*x+1];
-        b = pJpegBuffer[0][cinfo.output_components*x+2];
-      } else {
-        g = r;
-        b = r;
-     }
-     *(pDummy++) = b;
-     *(pDummy++) = g;
+      //if (cinfo.output_components>2)
+      //{
+      g = pJpegBuffer[0][cinfo.output_components*x+1];
+      b = pJpegBuffer[0][cinfo.output_components*x+2];
+      //} else {
+      //  g = r;
+      //  b = r;
+      //}
      *(pDummy++) = r;
-     *(pDummy++) = a;
+     *(pDummy++) = g;
+     *(pDummy++) = b;
     }
   }
   fclose(infile);

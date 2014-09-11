@@ -1,4 +1,4 @@
 
 
 
-int loadJpg(const char* Name);
+int loadJpg(const char* Name, unsigned char* buff);
