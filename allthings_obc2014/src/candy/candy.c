@@ -7,6 +7,7 @@
 
 #define MAX_FILENAME 512
 #define MAX_PROCESSING_THREADS 5
+#define SODA "/root/develop/allthings_obc2014/src/soda/soda"
 
 static void *handle_msg_shoot(void *ptr);
 static void *handle_msg_buffer_empty(void *ptr);
@@ -17,8 +18,7 @@ static pthread_mutex_t mut = PTHREAD_MUTEX_INITIALIZER;
 int main(int argc, char* argv[])
 {
   pthread_t shooting_threads[MAX_PROCESSING_THREADS], buffer_thread;
-  char filename[MAX_FILENAME];
-  int i;
+  int shooting_idx = 0;
   char c;
 
   // Initialization
@@ -37,16 +37,9 @@ int main(int argc, char* argv[])
       // Shoot an image if not busy
       pthread_mutex_lock(&mut);
       if (c == 0x20 && !is_shooting)
-      {
-        for(i=0; i <MAX_PROCESSING_THREADS; i++)
-        {
-          if(pthread_kill(shooting_threads[i], 0) == 0)
-          {
-            pthread_create(&shooting_threads[i], NULL, handle_msg_shoot, NULL);
-            break;
-          }
-        }
-      }
+        pthread_create(&shooting_threads[(shooting_idx++ % MAX_PROCESSING_THREADS)], NULL, handle_msg_shoot, NULL);
+      else if(c == 0x20)
+        printf("Shooting: busy\n");
       pthread_mutex_unlock(&mut);
 
       // Fill the image buffer
@@ -65,7 +58,7 @@ int main(int argc, char* argv[])
 
 static void *handle_msg_shoot(void *ptr)
 {
-  char filename[MAX_FILENAME];
+  char filename[MAX_FILENAME], soda_call[512];
 
   // Shoot the image
   pthread_mutex_lock(&mut);
@@ -73,14 +66,17 @@ static void *handle_msg_shoot(void *ptr)
   pthread_mutex_unlock(&mut);
 
   printf("Shooting: start\n");
-  chdk_pipe_shoot((char *)filename);
-  printf("Shooting: got image %s\n", (char *)filename);
+  chdk_pipe_shoot(filename);
+  printf("Shooting: got image %s\n", filename);
 
   pthread_mutex_lock(&mut);
   is_shooting = 0;
   pthread_mutex_unlock(&mut);
 
   //Parse the image
+  sprintf(soda_call, "%s %s", SODA, filename);
+  int ret = system(soda_call);
+  printf("Shooting: soda return %d of image %s\n", ret, filename);
 }
 
 static void *handle_msg_buffer_empty(void *ptr)
