@@ -1,5 +1,5 @@
 // generated with MATLAB script in SmartUAV
-unsigned int get_prob_color(char* hsv, unsigned int* P, unsigned int sat, unsigned int val, unsigned int threshold_saturation, unsigned int threshold_value_low, unsigned int threshold_value_high);
+unsigned int get_prob_color(unsigned char* hsv, unsigned int* P, unsigned int sat, unsigned int val, unsigned int threshold_saturation, unsigned int threshold_value_low, unsigned int threshold_value_high);
 
 // thresholds colors, etc.
 unsigned int threshold_saturation_yellow = 102;

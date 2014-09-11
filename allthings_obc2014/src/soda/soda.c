@@ -12,6 +12,8 @@ int main(int argc, char* argv[])
 
   unsigned char* buff = new unsigned char [4000*3000*3];
   unsigned char* hsv = new unsigned char [4000*3000*3];
+  unsigned char* prob_yellow = new unsigned char [4000*3000];
+  unsigned char* prob_blue = new unsigned char [4000*3000];
 
   char  outfile[1024];
   printf("Start Superb Onboard Recognition Application\n");
@@ -44,6 +46,15 @@ int main(int argc, char* argv[])
     q+=3;
   }
 
+  //////////////////////////////////////////////
+  // Fill two additional images with probabilities
+  q = hsv;
+  end = hsv + 4000*3000*3;
+  unsigned char* yellow = prob_yellow;
+  for(;q < end; q +=3, yellow++)
+  {
+    (*yellow) = get_prob_color(q, probabilities_yellow, sat_yellow, val_yellow, threshold_saturation_yellow, threshold_value_low_yellow, threshold_value_high_yellow);
+  }
 
 
   strcpy(outfile,filename);
