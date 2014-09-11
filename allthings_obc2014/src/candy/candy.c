@@ -10,19 +10,20 @@
 #define MAX_FILENAME 512
 #define MAX_PROCESSING_THREADS 25
 #define MAX_IMAGE_BUFFERS 25
+#define IMAGE_SIZE 70
 #define SODA "/root/develop/allthings_obc2014/src/soda/soda"
 
 static void *handle_msg_shoot(void *ptr);
 static void *handle_msg_buffer_empty(void *ptr);
 
-static int is_shooting;
+static int is_shootin, image_idx, image_count;
 static pthread_mutex_t mut = PTHREAD_MUTEX_INITIALIZER;
 
 int main(int argc, char* argv[])
 {
   pthread_t shooting_threads[MAX_PROCESSING_THREADS], buffer_thread;
+  char c, image_buffer[MAX_IMAGE_BUFFERS][IMAGE_SIZE];
   int shooting_idx = 0;
-  char c, image_buffer[MAX_IMAGE_BUFFERS+1][70];
 
   // Initialization
   printf("Starting\n");
@@ -30,8 +31,12 @@ int main(int argc, char* argv[])
   serial_init("/dev/ttySAC0");
   pthread_mutex_init(&mut, NULL);
   socket_init(1);
+
+  // Initial settings
   is_shooting = 0;
   mora_protocol.status = 0;
+  image_idx = 0;
+  image_count = 0;
 
   // MAIN loop
   while (1)
@@ -39,36 +44,36 @@ int main(int argc, char* argv[])
 
     // Read the serial
     if (read(fd, &c, 1) > 0)
-    {
       parse_mora(&mora_protocol, c);
-    }
     else if (errno != 11)
-    {
-      printf("Error: %d\n" ,errno);
-    }
+      printf("Serial error: %d\n" ,errno);
 
     // Parse serial commands
     if (mora_protocol.msg_received)
     {
-      printf("Received a MSG from AP\n");
       // Process Only Once
       mora_protocol.msg_received = FALSE;
 
       // Shoot an image if not busy
-      pthread_mutex_lock(&mut);
-      if (mora_protocol.msg_id == MORA_SHOOT && !is_shooting)
+      if (mora_protocol.msg_id == MORA_SHOOT)
         pthread_create(&shooting_threads[(shooting_idx++ % MAX_PROCESSING_THREADS)], NULL, handle_msg_shoot, NULL);
-      else if(mora_protocol.msg_id == MORA_SHOOT)
-        printf("Shooting: busy\n");
-      pthread_mutex_unlock(&mut);
 
       // Fill the image buffer
       if (mora_protocol.msg_id == MORA_BUFFER_EMPTY)
         pthread_create(&buffer_thread, NULL, handle_msg_buffer_empty, NULL);
+
+      mora_protocol.msg_received = FALSE;
     }
 
     // Read the socket
-    //if (socket_recv(image_buffer[MAX_IMAGE_BUFFERS], 70))
+    pthread_mutex_lock(&mut);
+    if (socket_recv(image_buffer[image_idx], IMAGE_SIZE) == IMAGE_SIZE) {
+      image_idx = (image_idx + 1) % MAX_IMAGE_BUFFERS;
+
+      if(image_count < MAX_IMAGE_BUFFERS)
+        image_count++;
+    }
+    pthread_mutex_unlock(&mut);
   }
 
   // Close
@@ -83,8 +88,14 @@ static void *handle_msg_shoot(void *ptr)
 {
   char filename[MAX_FILENAME], soda_call[512];
 
-  // Shoot the image
+  // Test if can shoot
   pthread_mutex_lock(&mut);
+  if(is_shooting)
+  {
+    printf("Shooting: too fast\n");
+    return NULL;
+  }
+
   is_shooting = 1;
   pthread_mutex_unlock(&mut);
 
@@ -104,5 +115,21 @@ static void *handle_msg_shoot(void *ptr)
 
 static void *handle_msg_buffer_empty(void *ptr)
 {
-  printf("Buffer: empty\n");
+  pthread_mutex_lock(&mut);
+  int saved_img_idx = image_idx;
+  // Check if image is available
+  if(image_count <= 0)
+  {
+    pthread_mutex_unlock(&mut);
+    printf("Buffer: no image available\n");
+    return NULL;
+  }
+  pthread_mutex_unlock(&mut);
+
+  // Need to send the image here
+
+  pthread_mutex_lock(&mut);
+  image_idx = (MAX_IMAGE_BUFFERS + image_idx - 1) % MAX_IMAGE_BUFFERS;
+  image_count--;
+  pthread_mutex_unlock(&mut);
 }
