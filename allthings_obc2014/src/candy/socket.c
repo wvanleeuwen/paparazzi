@@ -19,7 +19,7 @@ static struct sockaddr_in socket_server, socket_client;
 void socket_init(int is_server)
 {
    // Initialize socket
-   if((socket_fd = socket(AF_INET, SOCK_DGRAM, 0)) <= 0)
+   if((socket_fd = socket(AF_INET, SOCK_DGRAM, 0)) == -1)
    {
       perror("Socket: socket");
       exit(1);
@@ -32,7 +32,7 @@ void socket_init(int is_server)
 
    if(is_server)
    {
-      if(bind(socket_fd, (struct sockaddr *)&socket_server, sizeof(socket_server)) <= 0)
+      if(bind(socket_fd, (struct sockaddr *)&socket_server, sizeof(socket_server)) != 0)
       {
          perror("Socket: bind");
          exit(1);

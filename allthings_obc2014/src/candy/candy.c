@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <pthread.h>
+#include <errno.h>
 
 #include "serial.h"
 #include "chdk_pipe.h"
@@ -38,11 +39,18 @@ int main(int argc, char* argv[])
 
     // Read the serial
     if (read(fd, &c, 1) > 0)
+    {
       parse_mora(&mora_protocol, c);
+    }
+    else if (errno != 11)
+    {
+      printf("Error: %d\n" ,errno);
+    }
 
     // Parse serial commands
     if (mora_protocol.msg_received)
     {
+      printf("Received a MSG from AP\n");
       // Process Only Once
       mora_protocol.msg_received = FALSE;
 

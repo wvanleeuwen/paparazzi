@@ -18,6 +18,8 @@ uint8_t mora_ck_a, mora_ck_b;
 struct mora_transport mora_protocol;
 
 void parse_mora(struct mora_transport * t, uint8_t c ) {
+//printf("%02X %d %d\n",c, t->status, t->error);
+
   switch (t->status) {
   case UNINIT:
     if (c == STX)
@@ -28,7 +30,7 @@ void parse_mora(struct mora_transport * t, uint8_t c ) {
       t->error++;
       goto error;
     }
-    t->payload_len = c-4; /* Counting STX, LENGTH and CRC1 and CRC2 */
+    t->payload_len = c-5; /* Counting STX, LENGTH and CRC1 and CRC2 */
     t->ck_a = t->ck_b = c;
     t->status++;
     t->payload_idx = 0;
