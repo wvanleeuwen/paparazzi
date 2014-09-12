@@ -39,6 +39,8 @@ void parse_mora(struct mora_transport * t, uint8_t c ) {
     t->msg_id = c;
     t->ck_a += c; t->ck_b += t->ck_a;
     t->status++;
+    if (t->payload_len == 0)
+      t->status++;
     break;
   case GOT_MSGID:
     t->payload[t->payload_idx] = c;
