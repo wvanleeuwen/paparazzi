@@ -62,13 +62,20 @@ int main(int argc, char* argv[])
 
       // Shoot an image if not busy
       if (mora_protocol.msg_id == MORA_SHOOT)
+      {
+        int i;
+        union dc_shot_union shoot;
+        for (i=0; i<MORA_SHOOT_MSG_SIZE;i++)
+          shoot.bin[i] = mora_protocol.payload[i];
+        printf("CANDY:\tSHOT %d,%d\n",shoot.data.nr,shoot.data.phi);
         pthread_create(&shooting_threads[(shooting_idx++ % MAX_PROCESSING_THREADS)], NULL, handle_msg_shoot, (void*)shooting_idx);
+      }
 
       // Fill the image buffer (happens busy because needs fd anyway)
       if (mora_protocol.msg_id == MORA_BUFFER_EMPTY)
         handle_msg_buffer();
     }
-/*
+
     // Read the socket
     if (socket_recv(image_buffer[image_idx], IMAGE_SIZE) == IMAGE_SIZE) {
       image_idx = (image_idx + 1) % MAX_IMAGE_BUFFERS;
@@ -76,7 +83,7 @@ int main(int argc, char* argv[])
       if(image_count < MAX_IMAGE_BUFFERS)
         image_count++;
     }
-*/
+
   }
 
   // Close
@@ -89,6 +96,7 @@ int main(int argc, char* argv[])
 
 static void *handle_msg_shoot(void *ptr)
 {
+  printf("CANDY:\thandle_msg_shoot\n");
   char filename[MAX_FILENAME], soda_call[512];
 
   // Test if can shoot
@@ -120,6 +128,7 @@ static void *handle_msg_shoot(void *ptr)
 
 static inline void handle_msg_buffer(void)
 {
+  printf("CANDY:\thandle_msg_buffer\n");
   int i;
 
   // Check if image is available
