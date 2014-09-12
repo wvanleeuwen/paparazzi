@@ -109,8 +109,8 @@ static void send_thumbnails(void)
         return;
       }
     }
-    for (int i=0;i<THUMB_MSG_SIZE;i++)
-      thumb[i]++;
+//    for (int i=0;i<THUMB_MSG_SIZE;i++)
+//      thumb[i]++;
     DOWNLINK_SEND_PAYLOAD(DefaultChannel, DefaultDevice, THUMB_MSG_SIZE, thumb);
 
     MoraHeader(MORA_BUFFER_EMPTY,0);
