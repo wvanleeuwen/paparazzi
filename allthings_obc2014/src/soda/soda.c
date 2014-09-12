@@ -78,7 +78,7 @@ int main(int argc, char* argv[])
   int joe_x = 2000;
   int joe_y = 1500;
 
-  #define THUMB_W  32
+  #define THUMB_W  8
   #define THUMB_SIZE	(THUMB_W*THUMB_W*3)
 
   //////////////////////////////////////////////
@@ -107,8 +107,12 @@ int main(int argc, char* argv[])
     for (int y=0;y<THUMB_W;y++)
     {
       // Copy thumbnail
-      *q = *p;
-      q++;p++;
+      // Convert to 256 colors web pallete
+      unsigned char web = *p++ * 6 / 256 * 36;
+      web += *p++ * 6 / 256 * 6;
+      web += *p++ * 6 / 256;
+      *q = web;
+      q++;
     }
     // Skip remainder of the source line
     p += (IMG_WIDTH-THUMB_W) * 3;
@@ -121,8 +125,10 @@ int main(int argc, char* argv[])
   // Send resulting thumbnail to CANDY:
 
   socket_init(0);
-
   socket_send((char*)thumb, 70);
+
+  //////////////////////////////////////////////
+  // Log onboard:
 
   strcpy(outfile,filename);
   strcat(outfile,".txt");
