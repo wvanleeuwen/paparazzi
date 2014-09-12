@@ -185,6 +185,19 @@
       </program>
       <program name="Messages"/>
     </session>
+    <session name="OpenUAS OBC2014 GCS NOCRASH">
+      <program name="Data Link">
+        <arg flag="-d" constant="/dev/ttyACM0"/>
+        <arg flag="-uplink"/>
+        <arg flag="-s" constant="9600"/>
+      </program>
+      <program name="Server"/>
+      <program name="GCS">
+        <arg flag="-speech"/>
+        <arg flag="-maps_zoom" constant="17"/>
+      </program>
+      <program name="Messages"/>
+    </session>
     <session name="OpenUAS Fieldtest">
       <program name="Data Link">
         <arg flag="-d" constant="/dev/ttyUSB0"/>
