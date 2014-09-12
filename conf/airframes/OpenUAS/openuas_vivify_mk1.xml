@@ -275,8 +275,8 @@ I am as of yet not sure if the weird info byte is because of a failed bind proce
     <load name="airspeed_adc.xml">
       <configure name="ADC_AIRSPEED" value="ADC_1"/>
       <define name="ADC_CHANNEL_AIRSPEED_NB_SAMPLES" value="16"/>
-      <define name="AIRSPEED_QUADRATIC_SCALE" value="0.85"/>
-      <define name="AIRSPEED_BIAS" value="254"/>
+      <define name="AIRSPEED_QUADRATIC_SCALE" value="0.355"/>
+      <define name="AIRSPEED_BIAS" value="413"/>
     </load>
 
     <load name="adc_generic.xml">
