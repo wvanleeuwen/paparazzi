@@ -43,8 +43,8 @@
 /////////////////////////////////////////////////////////////////////
 // MESSAGES
 
-#define MORA_SHOOT          1
-#define MORA_SHOOT_MSG_SIZE (4*7)
+#define MORA_SHOOT              1
+#define MORA_SHOOT_MSG_SIZE     (4*7)
 
 // 7 * 4 bytes int32_t
 // nr, lat, lon, h, phi, theta, psi
@@ -64,25 +64,30 @@ union dc_shot_union
   uint8_t bin[MORA_SHOOT_MSG_SIZE];
 };
 
-#define MORA_BUFFER_EMPTY   2
+#define MORA_BUFFER_EMPTY       2
 
 // 0 bytes payload: null
 
-#define MORA_PAYLOAD        3
-#define MORA_PAYLOAD_MSG_SIZE 70
+#define MORA_PAYLOAD            3
+#define MORA_PAYLOAD_MSG_SIZE   70
 
 
 // 72 bytes
 
-#define MORA_STATUS         4
+#define MORA_STATUS             4
+#define MORA_STATUS_MSG_SIZE    (4*2)
 
 // 4*2 bytes
-struct mora_status_struct
+union mora_status_union
 {
-  uint16_t cpu;
-  uint16_t threads;
-  uint16_t shots;
-  uint16_t extra;
+  struct mora_status_struct
+  {
+    uint16_t cpu;
+    uint16_t threads;
+    uint16_t shots;
+    uint16_t extra;
+  } data;
+  uint8_t bin[MORA_STATUS_MSG_SIZE];
 };
 
 /////////////////////////////////////////////////////////////////////

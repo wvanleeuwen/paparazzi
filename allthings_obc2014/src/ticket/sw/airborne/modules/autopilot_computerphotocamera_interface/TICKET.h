@@ -40,5 +40,6 @@ extern void ticket_periodic(void);
 extern void ticket_event(void);
 
 extern int ticket_thumbnails;
+extern int ticket_status;
 
 #endif // GPIO_CAM_CTRL_H

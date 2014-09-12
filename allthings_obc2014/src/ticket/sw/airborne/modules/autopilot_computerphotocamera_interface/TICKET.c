@@ -54,8 +54,14 @@
 #define CameraBuffer() CameraLink(ChAvailable())
 
 union dc_shot_union dc_shot_msg;
+union mora_status_union mora_status_msg;
+int ticket_status = 0;
 
-void ticket_parse(char c);
+int ticket_thumbnails = 0;
+#define THUMB_MSG_SIZE  MORA_PAYLOAD_MSG_SIZE
+static uint8_t thumb[THUMB_MSG_SIZE];
+
+
 
 #define ReadCameraBuffer() {                  \
     while (CameraLink(ChAvailable()))         \
@@ -64,19 +70,29 @@ void ticket_parse(char c);
 
 void ticket_event(void)
 {
-  ReadCameraBuffer();
+  while (CameraLink(ChAvailable()))
+  {
+    parse_mora(&mora_protocol, CameraLink(Getch()));
+    if (mora_protocol.msg_received)
+    {
+      switch (mora_protocol.msg_id)
+      {
+      case MORA_STATUS:
+        for (int i=0; i< MORA_STATUS_MSG_SIZE;i++)
+          mora_status_msg.bin[i] = mora_protocol.payload[i];
+        ticket_status = mora_status_msg.data.shots;
+        break;
+      case MORA_PAYLOAD:
+        for (int i=0; i< MORA_PAYLOAD_MSG_SIZE;i++)
+          thumb[i] = mora_protocol.payload[i];
+        break;
+      default:
+        break;
+      }
+      mora_protocol.msg_received = 0;
+    }
+  }
 }
-
-char last_char = 0;
-
-void ticket_parse(char c)
-{
-  last_char = c;
-}
-
-int ticket_thumbnails = 0;
-#define THUMB_MSG_SIZE  (80-8-2)
-static uint8_t thumb[THUMB_MSG_SIZE];
 
 #if PERIODIC_TELEMETRY
 static void send_thumbnails(void)
@@ -94,7 +110,7 @@ static void send_thumbnails(void)
       }
     }
     for (int i=0;i<THUMB_MSG_SIZE;i++)
-      thumb[i]=last_char;
+      thumb[i]++;
     DOWNLINK_SEND_PAYLOAD(DefaultChannel, DefaultDevice, THUMB_MSG_SIZE, thumb);
 
     MoraHeader(MORA_BUFFER_EMPTY,0);
