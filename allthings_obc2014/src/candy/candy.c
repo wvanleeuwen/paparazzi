@@ -139,9 +139,9 @@ static inline void send_msg_image_buffer(void)
   int i;
 
   // Check if image is available
-  if(image_count <= 0)
-    printf("CANDY:\tBuffer: no image available\n");
-  else {
+  if(image_count > 0)
+  {
+    printf("CANDY:\thandle_msg_buffer: Send %d\n",image_idx);
     // Send the image
     image_idx = (MAX_IMAGE_BUFFERS + image_idx - 1) % MAX_IMAGE_BUFFERS;
     image_count--;
