@@ -14,9 +14,10 @@
 #define SODA "/root/develop/allthings_obc2014/src/soda/soda"
 
 static void *handle_msg_shoot(void *ptr);
-static inline void handle_msg_buffer(void);
+static inline void send_msg_image_buffer(void);
+static inline void send_msg_status(void);
 
-static volatile int is_shooting, image_idx, image_count;
+static volatile int is_shooting, image_idx, image_count, shooting_idx, shooting_count, shooting_thread_count;
 static char image_buffer[MAX_IMAGE_BUFFERS][IMAGE_SIZE];
 static pthread_mutex_t mut = PTHREAD_MUTEX_INITIALIZER;
 
@@ -24,7 +25,6 @@ int main(int argc, char* argv[])
 {
   pthread_t shooting_threads[MAX_PROCESSING_THREADS];
   char c;
-  int shooting_idx = 0;
 
   // Initialization
   printf("CANDY:\tStarting\n");
@@ -43,6 +43,9 @@ int main(int argc, char* argv[])
   mora_protocol.status = 0;
   image_idx = 0;
   image_count = 0;
+  shooting_idx = 0;
+  shooting_count = 0;
+  shooting_thread_count = 0;
 
   // MAIN loop
   while (1)
@@ -69,11 +72,12 @@ int main(int argc, char* argv[])
           shoot.bin[i] = mora_protocol.payload[i];
         printf("CANDY:\tSHOT %d,%d\n",shoot.data.nr,shoot.data.phi);
         pthread_create(&shooting_threads[(shooting_idx++ % MAX_PROCESSING_THREADS)], NULL, handle_msg_shoot, (void*)shooting_idx);
+        send_msg_status();
       }
 
       // Fill the image buffer (happens busy because needs fd anyway)
       if (mora_protocol.msg_id == MORA_BUFFER_EMPTY)
-        handle_msg_buffer();
+        send_msg_image_buffer();
     }
 
     // Read the socket
@@ -96,20 +100,20 @@ int main(int argc, char* argv[])
 
 static void *handle_msg_shoot(void *ptr)
 {
-  printf("CANDY:\thandle_msg_shoot\n");
   char filename[MAX_FILENAME], soda_call[512];
 
   // Test if can shoot
   pthread_mutex_lock(&mut);
   if(is_shooting)
   {
-    printf("CANDY-%p:\tShooting: too fast\n",ptr);
     pthread_mutex_unlock(&mut);
+    printf("CANDY-%p:\tShooting: too fast\n",ptr);
     return NULL;
   }
 
-
   is_shooting = 1;
+  shooting_count++;
+  shooting_thread_count++;
   pthread_mutex_unlock(&mut);
 
   printf("CANDY-%p:\tShooting: start\n",ptr);
@@ -124,16 +128,20 @@ static void *handle_msg_shoot(void *ptr)
   sprintf(soda_call, "%s %s", SODA, filename);
   int ret = system(soda_call);
   printf("CANDY-%p:\tShooting: soda return %d of image %s\n", ptr, ret, filename);
+
+  pthread_mutex_lock(&mut);
+  shooting_thread_count--;
+  pthread_mutex_unlock(&mut);
 }
 
-static inline void handle_msg_buffer(void)
+static inline void send_msg_image_buffer(void)
 {
   int i;
 
   // Check if image is available
-  if(image_count > 0)
-  {
-    printf("CANDY:\thandle_msg_buffer: Send %d\n",image_idx);
+  if(image_count <= 0)
+    printf("CANDY:\tBuffer: no image available\n");
+  else {
     // Send the image
     image_idx = (MAX_IMAGE_BUFFERS + image_idx - 1) % MAX_IMAGE_BUFFERS;
     image_count--;
@@ -143,4 +151,23 @@ static inline void handle_msg_buffer(void)
       MoraPutUint8(image_buffer[image_idx][i]);
     MoraTrailer();
   }
+}
+
+static inline void send_msg_status(void)
+{
+  int i;
+  struct mora_status_struct status_msg;
+  char *buffer = (char *) &status_msg;
+
+  pthread_mutex_lock(&mut);
+  status_msg.cpu = 0;
+  status_msg.threads = shooting_thread_count;
+  status_msg.shots = shooting_count;
+  status_msg.extra = 0;
+  pthread_mutex_unlock(&mut);
+
+  MoraHeader(MORA_STATUS, MORA_STATUS_MSG_SIZE);
+  for(i = 0; i < MORA_STATUS_MSG_SIZE; i++)
+      MoraPutUint8(buffer[i]);
+  MoraTrailer();
 }
