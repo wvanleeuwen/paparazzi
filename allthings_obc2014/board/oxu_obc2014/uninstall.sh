@@ -1,1 +1,3 @@
-sudo update-rc.d -f init.mora.d remove
+#!/bin/sh
+
+cp ./local.rc.stop /etc/rc.local

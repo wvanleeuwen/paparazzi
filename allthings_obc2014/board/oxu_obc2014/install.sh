@@ -1,2 +1,3 @@
-sudo cp ./init.mora.d /etc/init.d/
-sudo update-rc.d init.mora.d defaults
+#!/bin/sh
+
+cp ./local.rc.start /etc/rc.local
