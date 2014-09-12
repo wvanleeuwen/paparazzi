@@ -128,13 +128,12 @@ static void *handle_msg_shoot(void *ptr)
 
 static inline void handle_msg_buffer(void)
 {
-  printf("CANDY:\thandle_msg_buffer\n");
   int i;
 
   // Check if image is available
-  if(image_count <= 0)
-    printf("CANDY:\tBuffer: no image available\n");
-  else {
+  if(image_count > 0)
+  {
+    printf("CANDY:\thandle_msg_buffer: Send %d\n",image_idx);
     // Send the image
     image_idx = (MAX_IMAGE_BUFFERS + image_idx - 1) % MAX_IMAGE_BUFFERS;
     image_count--;
