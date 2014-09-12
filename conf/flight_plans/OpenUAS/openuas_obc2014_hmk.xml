@@ -3,7 +3,7 @@
 <flight_plan alt="120" ground_alt="0" home_mode_height="120" lat0="52.478633" lon0="4.691908" max_dist_from_home="10000" name="OpenUAS OBC2014" qfu="30" security_height="70">
   <waypoints>
     <waypoint name="HOME" x="0" y="0"/>
-    <waypoint alt="35.0" lat="52.476310" lon="4.688594" name="AF"/>
+    <waypoint alt="35.0" lat="52.476415" lon="4.689697" name="AF"/>
     <waypoint alt="0.0" lat="52.478633" lon="4.691908" name="TD"/>
     <waypoint lat="52.478338" lon="4.691546" name="AIRFIELDHOME"/>
     <waypoint lat="52.477820" lon="4.693346" name="COMMSHOLD"/>
@@ -20,18 +20,18 @@
     <waypoint lat="52.455641" lon="4.702848" name="_MB11"/>
     <waypoint lat="52.454230" lon="4.667427" name="_MB12"/>
     <waypoint lat="52.464382" lon="4.646003" name="_MB13"/>
-    <waypoint lat="52.476917" lon="4.689501" name="SA1"/>
-    <waypoint lat="52.475362" lon="4.693014" name="SA2"/>
+    <waypoint lat="52.477056" lon="4.690990" name="SA1"/>
+    <waypoint lat="52.475850" lon="4.693515" name="SA2"/>
     <waypoint lat="52.479223" lon="4.698211" name="SA3"/>
     <waypoint lat="52.480094" lon="4.696819" name="SA4"/>
     <waypoint lat="52.480541" lon="4.694304" name="SA5"/>
     <waypoint lat="52.480401" lon="4.694081" name="TST-1"/>
     <waypoint lat="52.477660" lon="4.696948" name="TST-2"/>
-    <waypoint lat="52.476965" lon="4.692040" name="TST-3"/>
-    <waypoint lat="52.477974" lon="4.689770" name="EL1"/>
-    <waypoint lat="52.477377" lon="4.688643" name="EL2"/>
-    <waypoint lat="52.476403" lon="4.690451" name="EL3"/>
-    <waypoint lat="52.477439" lon="4.691099" name="EL4"/>
+    <waypoint lat="52.477061" lon="4.692269" name="TST-3"/>
+    <waypoint lat="52.478026" lon="4.690686" name="EL1"/>
+    <waypoint lat="52.477438" lon="4.690132" name="EL2"/>
+    <waypoint lat="52.476682" lon="4.692126" name="EL3"/>
+    <waypoint lat="52.477736" lon="4.692001" name="EL4"/>
     <waypoint lat="52.477207" lon="4.694080" name="AMAZED"/>
   </waypoints>
   <includes>
