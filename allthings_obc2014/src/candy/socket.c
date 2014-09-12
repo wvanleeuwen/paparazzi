@@ -43,11 +43,11 @@ void socket_init(int is_server)
 int socket_recv(char *buffer, int len)
 {
    socklen_t slen = sizeof(socket_server);
-   return recvfrom(socket_fd, buffer, len, 0, (struct sockaddr*)&socket_server, &slen);
+   return recvfrom(socket_fd, buffer, len, MSG_DONTWAIT, (struct sockaddr*)&socket_server, &slen);
 }
 
 void socket_send(char *buffer, int len)
 {
    socklen_t slen = sizeof(socket_server);
-   sendto(socket_fd, buffer, len, 0, (struct sockaddr*)&socket_server, slen);
+   sendto(socket_fd, buffer, len, MSG_DONTWAIT, (struct sockaddr*)&socket_server, slen);
 }
