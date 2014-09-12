@@ -96,8 +96,10 @@ static void *handle_msg_shoot(void *ptr)
   if(is_shooting)
   {
     printf("CANDY-%p:\tShooting: too fast\n",ptr);
+    pthread_mutex_unlock(&mut);
     return NULL;
   }
+
 
   is_shooting = 1;
   pthread_mutex_unlock(&mut);
