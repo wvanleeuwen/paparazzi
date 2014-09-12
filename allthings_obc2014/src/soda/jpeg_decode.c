@@ -2,10 +2,9 @@
 #include <string.h>
 #include <jpeglib.h>
 
-int loadJpg(const char* Name, unsigned char* pDummy)
+int loadJpg(const char* Name, unsigned char* pDummy, int* w, int* h)
 {
   unsigned char r,g,b;
-  int width, height;
   struct jpeg_decompress_struct cinfo;
   struct jpeg_error_mgr jerr;
 
@@ -14,7 +13,7 @@ int loadJpg(const char* Name, unsigned char* pDummy)
   int row_stride;   	/* physical row width in output buffer */
   if ((infile = fopen(Name, "rb")) == NULL) 
   {
-    fprintf(stderr, "can't open %s\n", Name);
+    fprintf(stderr, "SODA:\tcan't open %s\n", Name);
     return 0;
   }
   cinfo.err = jpeg_std_error(&jerr);
@@ -22,29 +21,29 @@ int loadJpg(const char* Name, unsigned char* pDummy)
   jpeg_stdio_src(&cinfo, infile);
   (void) jpeg_read_header(&cinfo, TRUE);
   (void) jpeg_start_decompress(&cinfo);
-  width = cinfo.output_width;
-  height = cinfo.output_height;
+  *w = cinfo.output_width;
+  *h = cinfo.output_height;
 
-  if ((height>3000) || (width>4000))
+  if ((*h != 3000) || (*w != 4000))
   {
-    fprintf(stderr, "Buffer too small");
+    fprintf(stderr, "SODA:\tIMG wrong size\n");
     return -1;
   }
   
   unsigned char * pTest=pDummy;
   if (!pDummy)
   {
-    printf("NO MEM FOR JPEG CONVERT!\n");
+    printf("SODA:\tNO MEM FOR JPEG CONVERT!\n");
     return -1;
   }
-  row_stride = width * cinfo.output_components ;
+  row_stride = *w * cinfo.output_components ;
   pJpegBuffer = (*cinfo.mem->alloc_sarray)
     ((j_common_ptr) &cinfo, JPOOL_IMAGE, row_stride, 1);
 
   while (cinfo.output_scanline < cinfo.output_height)
   {
     (void) jpeg_read_scanlines(&cinfo, pJpegBuffer, 1);
-    for (int x=0;x<width;x++)
+    for (int x=0;x<*w;x++)
     {
       r = pJpegBuffer[0][cinfo.output_components*x];
       //if (cinfo.output_components>2)
@@ -64,8 +63,5 @@ int loadJpg(const char* Name, unsigned char* pDummy)
   (void) jpeg_finish_decompress(&cinfo);
   jpeg_destroy_decompress(&cinfo);
 
-  //BMap = (int*)pTest; 
-  printf("W x H = %d x %d\n", width, height);
-  //Depht = 32;
   return 1;
 }

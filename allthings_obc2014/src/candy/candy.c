@@ -27,9 +27,14 @@ int main(int argc, char* argv[])
   int shooting_idx = 0;
 
   // Initialization
-  printf("Starting\n");
+  printf("CANDY:\tStarting\n");
   chdk_pipe_init();
-  serial_init("/dev/ttySAC0");
+  int ret = serial_init("/dev/ttySAC0");
+  if (ret < 0)
+  {
+    printf("CANDY:\tfailed to open /dev/ttySAC0\n");
+    return -1;
+  }
   pthread_mutex_init(&mut, NULL);
   socket_init(1);
 
@@ -47,7 +52,7 @@ int main(int argc, char* argv[])
     if (read(fd, &c, 1) > 0)
       parse_mora(&mora_protocol, c);
     else if (errno != 11)
-      printf("Serial error: %d\n" ,errno);
+      printf("CANDY:\nSerial error: %d\n" ,errno);
 
     // Parse serial commands
     if (mora_protocol.msg_received)
@@ -57,13 +62,13 @@ int main(int argc, char* argv[])
 
       // Shoot an image if not busy
       if (mora_protocol.msg_id == MORA_SHOOT)
-        pthread_create(&shooting_threads[(shooting_idx++ % MAX_PROCESSING_THREADS)], NULL, handle_msg_shoot, NULL);
+        pthread_create(&shooting_threads[(shooting_idx++ % MAX_PROCESSING_THREADS)], NULL, handle_msg_shoot, (void*)shooting_idx);
 
       // Fill the image buffer (happens busy because needs fd anyway)
       if (mora_protocol.msg_id == MORA_BUFFER_EMPTY)
         handle_msg_buffer();
     }
-
+/*
     // Read the socket
     if (socket_recv(image_buffer[image_idx], IMAGE_SIZE) == IMAGE_SIZE) {
       image_idx = (image_idx + 1) % MAX_IMAGE_BUFFERS;
@@ -71,13 +76,14 @@ int main(int argc, char* argv[])
       if(image_count < MAX_IMAGE_BUFFERS)
         image_count++;
     }
+*/
   }
 
   // Close
   close(fd);
   chdk_pipe_deinit();
 
-  printf("Shutdown\n");
+  printf("CANDY:\tShutdown\n");
   return 0;
 }
 
@@ -89,16 +95,16 @@ static void *handle_msg_shoot(void *ptr)
   pthread_mutex_lock(&mut);
   if(is_shooting)
   {
-    printf("Shooting: too fast\n");
+    printf("CANDY-%p:\tShooting: too fast\n",ptr);
     return NULL;
   }
 
   is_shooting = 1;
   pthread_mutex_unlock(&mut);
 
-  printf("Shooting: start\n");
+  printf("CANDY-%p:\tShooting: start\n",ptr);
   chdk_pipe_shoot(filename);
-  printf("Shooting: got image %s\n", filename);
+  printf("CANDY-%p:\tShooting: got image %s\n", ptr, filename);
 
   pthread_mutex_lock(&mut);
   is_shooting = 0;
@@ -107,7 +113,7 @@ static void *handle_msg_shoot(void *ptr)
   //Parse the image
   sprintf(soda_call, "%s %s", SODA, filename);
   int ret = system(soda_call);
-  printf("Shooting: soda return %d of image %s\n", ret, filename);
+  printf("CANDY-%p:\tShooting: soda return %d of image %s\n", ptr, ret, filename);
 }
 
 static inline void handle_msg_buffer(void)
@@ -116,7 +122,7 @@ static inline void handle_msg_buffer(void)
 
   // Check if image is available
   if(image_count <= 0)
-    printf("Buffer: no image available\n");
+    printf("CANDY:\tBuffer: no image available\n");
   else {
     // Send the image
     image_idx = (MAX_IMAGE_BUFFERS + image_idx - 1) % MAX_IMAGE_BUFFERS;
