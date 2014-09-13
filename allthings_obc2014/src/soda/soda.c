@@ -5,6 +5,7 @@
 #include "rgb2hsv.h"
 #include "color_probs.h"
 #include "../candy/socket.h"
+#include "integral_image.h"
 
 #define IMG_HEIGHT 3000
 #define IMG_WIDTH 4000
@@ -18,7 +19,9 @@ int main(int argc, char* argv[])
   unsigned char* rgb = new unsigned char [IMG_SIZE];
   unsigned char* hsv = new unsigned char [IMG_SIZE];
   unsigned char* prob_yellow = new unsigned char [IMG_SIZE_BW];
-  unsigned char* prob_blue = new unsigned char [IMG_SIZE_BW];;
+  unsigned char* prob_blue = new unsigned char [IMG_SIZE_BW];
+  unsigned long* integral_yellow = new unsigned long [IMG_SIZE_BW];
+  unsigned long* integral_blue = new unsigned long [IMG_SIZE_BW];
 
   char  outfile[1024];
 
@@ -70,7 +73,15 @@ int main(int argc, char* argv[])
 
   //////////////////////////////////////////////
   // Sum probabilities over a Joe-sized window:
+
+  int joe_size = 60; // @Christophe: should best come from autopilot!
+
+  // Get integral images, which allow to make window sums with 4 operations:
+  get_integral_image(prob_yellow, integral_yellow, IMG_HEIGHT, IMG_WIDTH);
+  get_integral_image(prob_blue, integral_blue, IMG_HEIGHT, IMG_WIDTH);
+
   
+ 
   // first make an integral image of blue and yellow
   // then determine the window sums with a certain step size
   
