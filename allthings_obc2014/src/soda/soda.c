@@ -22,7 +22,10 @@ int main(int argc, char* argv[])
   unsigned char* prob_blue = new unsigned char [IMG_SIZE_BW];
   unsigned long* integral_yellow = new unsigned long [IMG_SIZE_BW];
   unsigned long* integral_blue = new unsigned long [IMG_SIZE_BW];
-
+  unsigned long* sum_yellow = new unsigned long [IMG_SIZE_BW];
+  unsigned long* sum_blue = new unsigned long [IMG_SIZE_BW];
+  unsigned long* prob_joe = new unsigned long [IMG_SIZE_BW];
+  
   char  outfile[1024];
 
   strcpy(filename, "/root/IMG_0200.jpg");
@@ -58,6 +61,8 @@ int main(int argc, char* argv[])
     q+=3;
   }
 
+  // @Christophe: code is not yet optimized for memory / speed... but let's first see if it works.
+
   //////////////////////////////////////////////
   // Fill two additional images with probabilities
   q = hsv;
@@ -80,6 +85,24 @@ int main(int argc, char* argv[])
   get_integral_image(prob_yellow, integral_yellow, IMG_HEIGHT, IMG_WIDTH);
   get_integral_image(prob_blue, integral_blue, IMG_HEIGHT, IMG_WIDTH);
 
+  // step determines at how many locations we look:
+  // we can adapt this to the required computational speed
+  int step = 1;
+  int x,y;
+  for(x = 0; x < IMG_WIDTH - joe_size; x++)
+  {
+    for(y = 0; y < IMG_HEIGHT - joe_size; y++)
+    {
+      // REMARK: not sure whether it is y + x * IMG_HEIGHT or y * IMG_WIDTH + x... (change also in integral_image.c if necessary)
+      sum_yellow[y + x * IMG_HEIGHT] = integral_yellow[y + x * IMG_HEIGHT] + integral_yellow[(y+joe_size) + (x+joe_size) * IMG_HEIGHT]
+                    - integral_yellow[(y+joe_size) + x * IMG_HEIGHT] - integral_yellow[y + (x+joe_size) * IMG_HEIGHT];
+      sum_blue[y + x * IMG_HEIGHT] = integral_blue[y + x * IMG_HEIGHT] + integral_blue[(y+joe_size) + (x+joe_size) * IMG_HEIGHT]
+                    - integral_blue[(y+joe_size) + x * IMG_HEIGHT] - integral_blue[y + (x+joe_size) * IMG_HEIGHT];
+      prob_joe[y + x * IMG_HEIGHT] = sum_yellow[y + x * IMG_HEIGHT] * sum_blue[y + x * IMG_HEIGHT];
+    }
+  }  
+
+  // find maxima:
   
  
   // first make an integral image of blue and yellow
