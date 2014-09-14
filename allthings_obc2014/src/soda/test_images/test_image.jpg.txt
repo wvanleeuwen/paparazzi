@@ -1,0 +1,1 @@
+processed  ./test_images/test_image.jpg 

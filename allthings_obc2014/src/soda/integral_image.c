@@ -12,15 +12,15 @@ void get_integral_image(unsigned char* image, unsigned long* integral_image, int
     {
       if(c > 0 && r > 0)
       {
-        integral_image[r + c * height] = (unsigned long) image[r + c * height] + integral_image[r - 1 + c * height] + integral_image[r + (c-1) * height] - integral_image[r - 1 + (c-1) * height];
+        integral_image[r * width+ c] = (unsigned long) image[r * width + c] + integral_image[(r - 1) * width + c] + integral_image[r * width + (c-1)] - integral_image[(r - 1) * width + (c-1)];
       }
       else if(c > 0)
       {
-        integral_image[r + c * height] = (unsigned long) image[r + c * height] + integral_image[r + (c-1) * height];
+        integral_image[r * width + c] = (unsigned long) image[r * width + c] + integral_image[r * width + (c-1)];
       }
       else if(r > 0)
       {
-        integral_image[r + c * height] = (unsigned long) image[r + c * height] + integral_image[r - 1 + c * height];
+        integral_image[r * width + c] = (unsigned long) image[r * width + c] + integral_image[(r - 1) * width + c];
       }
     }
   }

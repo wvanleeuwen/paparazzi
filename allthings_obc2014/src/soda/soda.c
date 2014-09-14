@@ -28,7 +28,7 @@ int main(int argc, char* argv[])
   
   char  outfile[1024];
 
-  // strcpy(filename, "./test_images/IMG_0244.jpg");
+  //strcpy(filename, "./test_images/IMG_0254.jpg");
   strcpy(filename, "./test_images/test_image.jpg");
 
   printf("SODA:\tSuperb Onboard Recognition Application\n");
@@ -40,7 +40,7 @@ int main(int argc, char* argv[])
   {
     strcpy(filename, argv[1]);
   }
-
+  int x,y;
   int w,h;
   int ret = loadJpg(filename, rgb, &w, &h);
   if (ret <= 0)
@@ -91,17 +91,16 @@ int main(int argc, char* argv[])
   // we can adapt this to the required computational speed
   printf("SODA:\tSum and multiply\n");
   int step = 1;
-  int x,y;
   for(x = 0; x < IMG_WIDTH - joe_size; x++)
   {
     for(y = 0; y < IMG_HEIGHT - joe_size; y++)
     {
       // REMARK: not sure whether it is y + x * IMG_HEIGHT or y * IMG_WIDTH + x... (change also in integral_image.c if necessary)
-      sum_yellow[y + x * IMG_HEIGHT] = integral_yellow[y + x * IMG_HEIGHT] + integral_yellow[(y+joe_size) + (x+joe_size) * IMG_HEIGHT]
-                    - integral_yellow[(y+joe_size) + x * IMG_HEIGHT] - integral_yellow[y + (x+joe_size) * IMG_HEIGHT];
-      sum_blue[y + x * IMG_HEIGHT] = integral_blue[y + x * IMG_HEIGHT] + integral_blue[(y+joe_size) + (x+joe_size) * IMG_HEIGHT]
-                    - integral_blue[(y+joe_size) + x * IMG_HEIGHT] - integral_blue[y + (x+joe_size) * IMG_HEIGHT];
-      prob_joe[y + x * IMG_HEIGHT] = sum_yellow[y + x * IMG_HEIGHT] * sum_blue[y + x * IMG_HEIGHT];
+      sum_yellow[y * IMG_WIDTH + x] = integral_yellow[y * IMG_WIDTH + x] + integral_yellow[(y+joe_size) * IMG_WIDTH + (x+joe_size)]
+                    - integral_yellow[(y+joe_size) * IMG_WIDTH + x] - integral_yellow[y * IMG_WIDTH + (x+joe_size)];
+      sum_blue[y * IMG_WIDTH + x] = integral_blue[y * IMG_WIDTH + x] + integral_blue[(y+joe_size) * IMG_WIDTH + (x+joe_size)]
+                    - integral_blue[(y+joe_size) * IMG_WIDTH + x] - integral_blue[y * IMG_WIDTH + (x+joe_size)];
+      prob_joe[y * IMG_WIDTH + x] = sum_yellow[y * IMG_WIDTH + x] * sum_blue[y * IMG_WIDTH + x];
     }
   }  
 
@@ -114,9 +113,9 @@ int main(int argc, char* argv[])
   {
     for(y = 0; y < IMG_HEIGHT - joe_size; y++)
     {
-      if(prob_joe[y + x * IMG_HEIGHT] > maximum)
+      if(prob_joe[y * IMG_WIDTH + x] > maximum)
       {
-        maximum = prob_joe[y + x * IMG_HEIGHT];
+        maximum = prob_joe[y * IMG_WIDTH + x];
         joe_x = x;
         joe_y = y;
       }
@@ -131,9 +130,9 @@ int main(int argc, char* argv[])
     {
       for(y = 0; y < IMG_HEIGHT - joe_size; y++)
       {
-        if(sum_yellow[y + x * IMG_HEIGHT] > maximum)
+        if(sum_yellow[y * IMG_WIDTH + x] > maximum)
         {
-          maximum = sum_yellow[y + x * IMG_HEIGHT];
+          maximum = sum_yellow[y * IMG_WIDTH + x];
           joe_x = x;
           joe_y = y;
         }
