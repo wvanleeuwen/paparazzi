@@ -28,7 +28,7 @@ int main(int argc, char* argv[])
   
   char  outfile[1024];
 
-  strcpy(filename, "/root/IMG_0200.jpg");
+  strcpy(filename, "./test_images/IMG_0244.jpg");
 
   printf("SODA:\tSuperb Onboard Recognition Application\n");
 
@@ -65,6 +65,7 @@ int main(int argc, char* argv[])
 
   //////////////////////////////////////////////
   // Fill two additional images with probabilities
+  printf("SODA:\tCalculate probabilities\n");
   q = hsv;
   end = hsv + IMG_SIZE;
   unsigned char* yellow = prob_yellow;
@@ -78,7 +79,7 @@ int main(int argc, char* argv[])
 
   //////////////////////////////////////////////
   // Sum probabilities over a Joe-sized window:
-
+  printf("SODA:\tCalculate integral images\n");
   int joe_size = 60; // @Christophe: should best come from autopilot!
 
   // Get integral images, which allow to make window sums with 4 operations:
@@ -87,6 +88,7 @@ int main(int argc, char* argv[])
 
   // step determines at how many locations we look:
   // we can adapt this to the required computational speed
+  printf("SODA:\tSum and multiply\n");
   int step = 1;
   int x,y;
   for(x = 0; x < IMG_WIDTH - joe_size; x++)
@@ -103,6 +105,7 @@ int main(int argc, char* argv[])
   }  
 
   // find maximum (only one for now):
+  printf("SODA:\tFind maximum\n");
   unsigned long maximum = 0;
   int joe_x = 0;
   int joe_y = 0;
@@ -122,6 +125,7 @@ int main(int argc, char* argv[])
   // if no yellow and blue, send just yellow
   if(maximum == 0) 
   {
+    printf("SODA:\tJust yellow...\n");
     for(x = 0; x < IMG_WIDTH - joe_size; x++)
     {
       for(y = 0; y < IMG_HEIGHT - joe_size; y++)
