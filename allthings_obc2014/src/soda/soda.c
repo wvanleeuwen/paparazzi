@@ -29,7 +29,8 @@ int main(int argc, char* argv[])
   char  outfile[1024];
 
   //strcpy(filename, "./test_images/IMG_0254.jpg");
-  strcpy(filename, "./test_images/test_image.jpg");
+  //strcpy(filename, "./test_images/test_image.jpg");
+  strcpy(filename, "./test_images/IMG.jpg");
 
   printf("SODA:\tSuperb Onboard Recognition Application\n");
 
