@@ -102,15 +102,41 @@ int main(int argc, char* argv[])
     }
   }  
 
-  // find maxima:
-  
- 
-  // first make an integral image of blue and yellow
-  // then determine the window sums with a certain step size
-  
+  // find maximum (only one for now):
+  unsigned long maximum = 0;
+  int joe_x = 0;
+  int joe_y = 0;
+  for(x = 0; x < IMG_WIDTH - joe_size; x++)
+  {
+    for(y = 0; y < IMG_HEIGHT - joe_size; y++)
+    {
+      if(prob_joe[y + x * IMG_HEIGHT] > maximum)
+      {
+        maximum = prob_joe[y + x * IMG_HEIGHT];
+        joe_x = x;
+        joe_y = y;
+      }
+    }
+  }
 
-  int joe_x = 2000;
-  int joe_y = 1500;
+  // if no yellow and blue, send just yellow
+  if(maximum == 0) 
+  {
+    for(x = 0; x < IMG_WIDTH - joe_size; x++)
+    {
+      for(y = 0; y < IMG_HEIGHT - joe_size; y++)
+      {
+        if(sum_yellow[y + x * IMG_HEIGHT] > maximum)
+        {
+          maximum = sum_yellow[y + x * IMG_HEIGHT];
+          joe_x = x;
+          joe_y = y;
+        }
+      }
+    }
+  }  
+  
+  printf("Joe: (x,y) = (%d, %d)\n", joe_x, joe_y);
 
   #define THUMB_W  8
   #define THUMB_SIZE	(THUMB_W*THUMB_W*3)
