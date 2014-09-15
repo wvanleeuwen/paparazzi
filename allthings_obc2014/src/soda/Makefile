@@ -19,7 +19,7 @@ $(LIBJPEG):
 	make -C ./jpeg-9a
 	sudo make -C ./jpeg-9a install
 
-soda:	$(LIBJPEG) $(CFILES) $(HFILES)
+soda:	soda.c $(LIBJPEG) $(CFILES) $(HFILES)
 	g++ $(CFLAGS) $(CFILES) soda.c $(LIBJPEG) -o soda
 
 clean:
