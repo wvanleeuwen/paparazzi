@@ -6,12 +6,13 @@ CFLAGS = -static
 CFILES = \
 	rgb2hsv.c \
 	jpeg_decode.c \
+	jpeg_encode.c \
 	color_probs.c \
 	integral_image.c \
 	../lib/udp/socket.c
 HFILES = $(CFILES:.c=.h )
 
-all:	soda
+all:	soda makeheaders
 
 $(LIBJPEG):
 	tar -xvf ./jpegsrc.v9a.tar.gz
@@ -23,7 +24,10 @@ soda:	soda.c $(LIBJPEG) $(CFILES) $(HFILES)
 	g++ $(CFLAGS) $(CFILES) soda.c $(LIBJPEG) -o soda
 
 clean:
-	rm -rf ./soda
+	rm -rf ./soda ./makeheaders
+
+makeheaders: soda.c $(LIBJPEG) $(CFILES) $(HFILES)
+	g++ -DMAKE_HEADERS $(CFLAGS) $(CFILES) soda.c $(LIBJPEG) -o makeheaders
 
 explain:
 	echo "$(CFILES) $(HFILES)"
