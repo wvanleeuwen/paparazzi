@@ -1,1 +1,0 @@
-processed  ./test_images/IMG_0244.jpg 
