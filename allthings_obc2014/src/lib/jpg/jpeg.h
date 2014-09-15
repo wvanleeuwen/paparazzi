@@ -17,29 +17,8 @@ unsigned char *encode_image (
     uint32_t fmt,                     // image format code
     uint32_t width,                   // image width
     uint32_t height,                  // image height
-    uint8_t add_dri_header            // data only or full jpeg file
+    uint8_t add_dri_header,           // data only or full jpeg file
+    int* parts                        // MCU by MCU
 );
-
-unsigned char *encode_image_rtp (
-    uint8_t* in,
-    uint8_t* out,
-    uint32_t q,                       // image quality 1-8
-    uint32_t fmt,                     // image format code
-    uint32_t width,                   // image width
-    uint32_t height,                  // image height
-    uint8_t add_dri_header            // data only or full jpeg file
-);
-
-unsigned char *encode_image_std_qt (
-    uint8_t* in,
-    uint8_t* out,
-    uint32_t q,                       // image quality 0 to 99
-    uint32_t fmt,                     // image format code
-    uint32_t width,                   // image width
-    uint32_t height,                  // image height
-    uint8_t add_dri_header            // data only or full jpeg file
-);
-
-int create_svs_jpeg_header(unsigned char* buf, int32_t size, int w);
 
 #endif
