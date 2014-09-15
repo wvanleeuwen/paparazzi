@@ -6,7 +6,7 @@
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <unistd.h>
-#include <stdlib.h> 
+#include <stdlib.h>
 #include <string.h>
 #include "socket.h"
 
@@ -28,6 +28,7 @@ void socket_init(int is_server)
    bzero(&socket_server,sizeof(socket_server));
    socket_server.sin_family = AF_INET;
    socket_server.sin_port = htons(SOCKET_PORT);
+   //inet_aton("192.168.1.69", &socket_server.sin_addr);
    inet_aton("127.0.0.1", &socket_server.sin_addr);
 
    if(is_server)

@@ -4,7 +4,7 @@
 #include "jpeg_decode.h"
 #include "rgb2hsv.h"
 #include "color_probs.h"
-#include "../candy/socket.h"
+#include "../lib/udp/socket.h"
 #include "integral_image.h"
 
 #define IMG_HEIGHT 3000
