@@ -25,6 +25,7 @@ int main(int argc, char* argv[])
 {
   pthread_t shooting_threads[MAX_PROCESSING_THREADS];
   char c;
+  int i;
 
   // Initialization
   printf("CANDY:\tStarting\n");
@@ -66,12 +67,13 @@ int main(int argc, char* argv[])
       // Shoot an image if not busy
       if (mora_protocol.msg_id == MORA_SHOOT)
       {
-        int i;
-        union dc_shot_union shoot;
+        // Parse the shoot message
+        union dc_shot_union *shoot = (union dc_shot_union *) malloc(sizeof(union dc_shot_union));
         for (i=0; i<MORA_SHOOT_MSG_SIZE;i++)
-          shoot.bin[i] = mora_protocol.payload[i];
-        printf("CANDY:\tSHOT %d,%d\n",shoot.data.nr,shoot.data.phi);
-        pthread_create(&shooting_threads[(shooting_idx++ % MAX_PROCESSING_THREADS)], NULL, handle_msg_shoot, (void*)shooting_idx);
+          shoot->bin[i] = mora_protocol.payload[i];
+        printf("CANDY:\tSHOT %d,%d\n", shoot->data.nr, shoot->data.phi);
+
+        pthread_create(&shooting_threads[(shooting_idx++ % MAX_PROCESSING_THREADS)], NULL, handle_msg_shoot, (void*)shoot);
         send_msg_status();
       }
 
@@ -101,13 +103,16 @@ int main(int argc, char* argv[])
 static void *handle_msg_shoot(void *ptr)
 {
   char filename[MAX_FILENAME], soda_call[512];
+  union dc_shot_union *shoot = (union dc_shot_union *) ptr;
 
   // Test if can shoot
   pthread_mutex_lock(&mut);
   if(is_shooting)
   {
     pthread_mutex_unlock(&mut);
-    printf("CANDY-%p:\tShooting: too fast\n",ptr);
+    printf("CANDY-%d:\tShooting: too fast\n", shoot->data.nr);
+
+    free(shoot);
     return NULL;
   }
 
@@ -116,22 +121,25 @@ static void *handle_msg_shoot(void *ptr)
   shooting_thread_count++;
   pthread_mutex_unlock(&mut);
 
-  printf("CANDY-%p:\tShooting: start\n",ptr);
+  printf("CANDY-%d:\tShooting: start\n", shoot->data.nr);
   chdk_pipe_shoot(filename);
-  printf("CANDY-%p:\tShooting: got image %s\n", ptr, filename);
+  printf("CANDY-%d:\tShooting: got image %s\n", shoot->data.nr, filename);
 
   pthread_mutex_lock(&mut);
   is_shooting = 0;
   pthread_mutex_unlock(&mut);
 
   //Parse the image
-  sprintf(soda_call, "%s %s", SODA, filename);
+  sprintf(soda_call, "%s %s %d %d %d %d %d %d %d", SODA, filename, 
+    shoot->data.nr, shoot->data.lat, shoot->data.lon, shoot->data.alt, shoot->data.phi, shoot->data.theta, shoot->data.psi);
   int ret = system(soda_call);
-  printf("CANDY-%p:\tShooting: soda return %d of image %s\n", ptr, ret, filename);
+  printf("CANDY-%d:\tShooting: soda return %d of image %s\n", shoot->data.nr, ret, filename);
 
   pthread_mutex_lock(&mut);
   shooting_thread_count--;
   pthread_mutex_unlock(&mut);
+
+  free(shoot);
 }
 
 static inline void send_msg_image_buffer(void)
