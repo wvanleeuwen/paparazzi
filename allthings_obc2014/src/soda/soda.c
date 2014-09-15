@@ -144,7 +144,7 @@ int main(int argc, char* argv[])
   joe_x += joe_size/2;
   joe_y += joe_size/2;  
   
-  printf("Joe: (x,y) = (%d, %d)\n", joe_x, joe_y);
+  printf("Joe: (x,y) = (%d, %d) max=%lu\n", joe_x, joe_y, maximum);
 
   #define THUMB_W  128
   #define THUMB_SIZE	(THUMB_W*THUMB_W*3)
