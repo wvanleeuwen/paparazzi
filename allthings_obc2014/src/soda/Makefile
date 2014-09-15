@@ -12,7 +12,7 @@ $(LIBJPEG):
 	make -C ./jpeg-9a
 	sudo make -C ./jpeg-9a install
 
-soda:	$(LIBJPEG) soda.c rgb2hsv.c jpeg_decode.c jpeg_decode.h color_probs.c color_probs.h integral_image.c integral_image.h
+soda:	$(LIBJPEG) soda.c rgb2hsv.c jpeg_decode.c jpeg_decode.h color_probs.c color_probs.h integral_image.c integral_image.h ../candy/socket.h ../candy/socket.c
 	g++ -static ../candy/socket.c jpeg_decode.c soda.c rgb2hsv.c color_probs.c integral_image.c $(LIBJPEG) -o soda
 
 clean:
