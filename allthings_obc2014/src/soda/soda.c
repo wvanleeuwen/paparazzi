@@ -139,11 +139,14 @@ int main(int argc, char* argv[])
         }
       }
     }
-  }  
+  }
+
+  joe_x += joe_size/2;
+  joe_y += joe_size/2;  
   
   printf("Joe: (x,y) = (%d, %d)\n", joe_x, joe_y);
 
-  #define THUMB_W  8
+  #define THUMB_W  128
   #define THUMB_SIZE	(THUMB_W*THUMB_W*3)
 
   //////////////////////////////////////////////
@@ -166,18 +169,37 @@ int main(int argc, char* argv[])
   // dest
   q = thumb;
 
+  int tr = 0;
+  int tg = 0;
+  int tb = 0;
+
   // create thumbnail
   for (int x=0;x<THUMB_W;x++)
   {
+    tr = tg = tb = 0;
     for (int y=0;y<THUMB_W;y++)
     {
       // Copy thumbnail
       // Convert to 256 colors web pallete
-      unsigned char web = *p++ * 6 / 256 * 36;
-      web += *p++ * 6 / 256 * 6;
-      web += *p++ * 6 / 256;
-      *q = web;
-      q++;
+      tr += *p++;
+      tg += *p++;
+      tb += *p++;
+
+      if ((x%16) == 15)
+      {
+        if ((y%16) == 15)
+        {
+          tr /= 16;
+          tg /= 16;
+          tb /= 16;
+          unsigned char web = tr * 6 / 256 * 36;
+          web += tg * 6 / 256 * 6;
+          web += tb * 6 / 256;
+          *q = web;
+          q++;
+          tr = tg = tb = 0;
+        }
+      }
     }
     // Skip remainder of the source line
     p += (IMG_WIDTH-THUMB_W) * 3;
