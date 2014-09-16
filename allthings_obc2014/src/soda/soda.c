@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include "jpeg_decode.h"
+#include "jpeg_encode.h"
 #include "rgb2hsv.h"
 #include "color_probs.h"
 #include "../lib/udp/socket.h"
@@ -15,6 +16,7 @@
 int main(int argc, char* argv[])
 {
   char filename[512];
+  char  outfile[1024];
 
   unsigned char* rgb = new unsigned char [IMG_SIZE];
   unsigned char* hsv = new unsigned char [IMG_SIZE];
@@ -25,8 +27,8 @@ int main(int argc, char* argv[])
   unsigned long* sum_yellow = new unsigned long [IMG_SIZE_BW];
   unsigned long* sum_blue = new unsigned long [IMG_SIZE_BW];
   unsigned long* prob_joe = new unsigned long [IMG_SIZE_BW];
-  
-  char  outfile[1024];
+
+  int imgnr=0;
 
   //strcpy(filename, "./test_images/IMG_0254.jpg");
   //strcpy(filename, "./test_images/test_image.jpg");
@@ -41,6 +43,13 @@ int main(int argc, char* argv[])
   {
     strcpy(filename, argv[1]);
   }
+
+  if (argc >= 3)
+  {
+    imgnr = atof(argv[2]);
+    printf("SODA:\tImage nr: %d\n",imgnr);
+  }
+
   int x,y;
   int w,h;
   int ret = loadJpg(filename, rgb, &w, &h);
@@ -144,7 +153,7 @@ int main(int argc, char* argv[])
   joe_x += joe_size/2;
   joe_y += joe_size/2;  
   
-  printf("Joe: (x,y) = (%d, %d) max=%lu\n", joe_x, joe_y, maximum);
+  printf("SODA: Joe: (x,y) = (%d, %d) max=%lu\n", joe_x, joe_y, maximum);
 
   #define THUMB_W  128
   #define THUMB_SIZE	(THUMB_W*THUMB_W*3)
@@ -169,50 +178,67 @@ int main(int argc, char* argv[])
   // dest
   q = thumb;
 
-  int tr = 0;
-  int tg = 0;
-  int tb = 0;
-
   // create thumbnail
   for (int x=0;x<THUMB_W;x++)
   {
-    tr = tg = tb = 0;
     for (int y=0;y<THUMB_W;y++)
     {
       // Copy thumbnail
-      // Convert to 256 colors web pallete
-      tr += *p++;
-      tg += *p++;
-      tb += *p++;
+      *q++ = *p++;
+      *q++ = *p++;
+      *q++ = *p++;
 
-      if ((x%16) == 15)
-      {
-        if ((y%16) == 15)
-        {
-          tr /= 16;
-          tg /= 16;
-          tb /= 16;
+      /*
+          // Convert to 256 colors web pallete
           unsigned char web = tr * 6 / 256 * 36;
           web += tg * 6 / 256 * 6;
           web += tb * 6 / 256;
           *q = web;
           q++;
-          tr = tg = tb = 0;
-        }
-      }
+       */
     }
     // Skip remainder of the source line
     p += (IMG_WIDTH-THUMB_W) * 3;
   }
 
-  // compress thumbnail
-
+  ////////////////////////////////////////////////
+  // compress thumbnail & store
+  strcpy(outfile,filename);
+  strcat(outfile,".thumb.jpg");
+  int jret = storeJpg(outfile, thumb, THUMB_W, THUMB_W, 25);
 
   //////////////////////////////////////////////
   // Send resulting thumbnail to CANDY:
 
   socket_init(0);
-  socket_send((char*)thumb, 70);
+  
+  // socket_send((char*)thumb, 70);
+
+  int cnt = 0;
+  unsigned char * j = jpeg_start;
+  int size = jpeg_end - jpeg_start;
+  char blocks = (size+63)/64;
+  while (size > 0)
+  {
+    char buff[70];
+    // Packet header
+    buff[0] = imgnr;
+    buff[1] = cnt++;
+    buff[2] = blocks;
+    buff[3] = (char)size; if (size > 64) buff[3] = 64;
+    buff[4] = THUMB_W;
+    buff[5] = 0;
+
+    for (int i=6;i<(64+6);i++)
+    {
+      buff[i] = (char) *j++;
+      //if (cnt == 1)
+      //  buff[i] = 0;
+    }
+    socket_send(buff,70);
+    size -= 64;
+    printf("Sent: %x %x %x ...\n", buff[0], buff[1], buff[2]);
+  }
 
   //////////////////////////////////////////////
   // Log onboard:
@@ -221,6 +247,7 @@ int main(int argc, char* argv[])
   strcat(outfile,".txt");
   FILE* fp = fopen(outfile, "w+b");
   fprintf(fp, "processed  %s \n", filename);
+  fprintf(fp, "Joe: (x,y) = (%d, %d) max=%lu\n", joe_x, joe_y, maximum);
   fclose(fp);
 
   return 0;
