@@ -7,6 +7,7 @@
 #include "color_probs.h"
 #include "../lib/udp/socket.h"
 #include "integral_image.h"
+#include "../candy/protocol.h"
 
 #define IMG_HEIGHT 3000
 #define IMG_WIDTH 4000
@@ -211,7 +212,7 @@ int main(int argc, char* argv[])
   // Send resulting thumbnail to CANDY:
 
   socket_init(0);
-  
+
   // socket_send((char*)thumb, 70);
 
   int cnt = 0;

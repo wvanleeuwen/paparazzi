@@ -156,6 +156,9 @@ void dc_send_command(uint8_t cmd)
       dc_shot_msg.data.phi = stateGetNedToBodyEulers_i()->phi;
       dc_shot_msg.data.theta = stateGetNedToBodyEulers_i()->theta;
       dc_shot_msg.data.psi = stateGetNedToBodyEulers_i()->psi;
+      dc_shot_msg.data.vground = stateGetHorizontalSpeedNorm_i();
+      dc_shot_msg.data.course = stateGetHorizontalSpeedDir_i();
+      dc_shot_msg.data.groundalt = POS_BFP_OF_REAL(ground_alt);
 
       MoraHeader(MORA_SHOOT,MORA_SHOOT_MSG_SIZE);
       for (int i=0; i< (MORA_SHOOT_MSG_SIZE); i++)

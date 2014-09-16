@@ -44,7 +44,7 @@
 // MESSAGES
 
 #define MORA_SHOOT              1
-#define MORA_SHOOT_MSG_SIZE     (4*7)
+#define MORA_SHOOT_MSG_SIZE     (4*10)
 
 // 7 * 4 bytes int32_t
 // nr, lat, lon, h, phi, theta, psi
@@ -60,8 +60,12 @@ union dc_shot_union
     int32_t phi;
     int32_t theta;
     int32_t psi;
+    int32_t vground;
+    int32_t course;
+    int32_t groundalt;
   } data;
   uint8_t bin[MORA_SHOOT_MSG_SIZE];
+  int32_t i[10];
 };
 
 #define MORA_BUFFER_EMPTY       2
