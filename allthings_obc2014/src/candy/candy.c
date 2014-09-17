@@ -132,7 +132,7 @@ static void *handle_msg_shoot(void *ptr)
   //Parse the image
   sprintf(soda_call, "%s %s %d %d %d %d %d %d %d %d %d %d", SODA, filename,
     shoot->data.nr, shoot->data.lat, shoot->data.lon, shoot->data.alt, shoot->data.phi, shoot->data.theta, shoot->data.psi, shoot->data.vground, shoot->data.course, shoot->data.groundalt);
-  int ret = system(soda_call);
+  short int ret = system(soda_call);
   printf("CANDY-%d:\tShooting: soda return %d of image %s\n", shoot->data.nr, ret, filename);
 
   pthread_mutex_lock(&mut);
