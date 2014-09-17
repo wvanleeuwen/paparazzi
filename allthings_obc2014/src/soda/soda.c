@@ -215,24 +215,28 @@ int main(int argc, char* argv[])
 
   // socket_send((char*)thumb, 70);
 
-  int cnt = 0;
   unsigned char * j = jpeg_start;
   int size = jpeg_end - jpeg_start;
   char blocks = (size+63)/64;
-  while (size > 0)
+  int score = maximum / 200000;
+  if (score > 255)
+    score = 255;
+  
+  for (int b = blocks-1; b >= 0; b--)
   {
     char buff[70];
     // Packet header
     buff[0] = imgnr;
-    buff[1] = cnt++;
+    buff[1] = b;
     buff[2] = blocks;
-    buff[3] = (char)size; if (size > 64) buff[3] = 64;
+    buff[3] = (b == (blocks-1)? size%64 : 64);
     buff[4] = THUMB_W;
-    buff[5] = 0;
+    buff[5] = (char) ((unsigned char) score);
 
     for (int i=6;i<(64+6);i++)
     {
-      buff[i] = (char) *j++;
+      buff[i] = (char) j[b*64+i-6];
+
       //if (cnt == 1)
       //  buff[i] = 0;
     }
