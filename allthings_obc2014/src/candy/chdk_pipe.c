@@ -58,16 +58,16 @@ void chdk_pipe_init(void)
 	wait_for_cmd(10);
 
 	/* Kill all running scripts */
-	write(fi, "killscript\n", 11);
-	wait_for_cmd(10);
+	//write(fi, "killscript\n", 11);
+	//wait_for_cmd(10);
 
 	/* Start recording mode */
 	write(fi, "rec\n", 4);
 	wait_for_cmd(10);
 
 	/* Start rsint mode */
-	write(fi, "rsint /root\n", 12);
-	wait_for_cmd(10);
+	//write(fi, "rsint /root\n", 12);
+	//wait_for_cmd(10);
 }
 
 /**
@@ -76,8 +76,8 @@ void chdk_pipe_init(void)
 void chdk_pipe_deinit(void)
 {
 	/* Stop rsint mode */
-	write(fi, "q\n", 2);
-	wait_for_cmd(10);
+	//write(fi, "q\n", 2);
+	//wait_for_cmd(10);
 
 	/* Quit SHELL */
 	write(fi, "quit\n", 3);
@@ -88,7 +88,7 @@ void chdk_pipe_deinit(void)
  */
 void chdk_pipe_shoot(char *filename)
 {
-	write(fi, "s\n", 2);
+	write(fi, "rs /root\n", 9);
 	wait_for_img(filename, 10);
 }
 
