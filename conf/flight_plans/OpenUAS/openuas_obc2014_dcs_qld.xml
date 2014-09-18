@@ -1,0 +1,45 @@
+<!DOCTYPE flight_plan SYSTEM "../flight_plan.dtd">
+
+<flight_plan alt="120" ground_alt="0" home_mode_height="120" lat0="-27.2512872" lon0="152.845825" max_dist_from_home="10000" name="OpenUAS Testfield QLD" qfu="30" security_height="70">
+  <waypoints>
+    <waypoint name="HOME" x="0" y="0"/>
+    <waypoint alt="35.0" lat="-27.2512872" lon="152.845825" name="AF"/>
+    <waypoint alt="0.0" lat="-27.2512872" lon="152.845825" name="TD"/>
+    <waypoint lat="-27.278338" lon="152.891546" name="AIRFIELDHOME"/>
+    <waypoint lat="-27.277820" lon="152.893346" name="COMMSHOLD"/>
+    <waypoint lat="-27.278747" lon="152.842351" name="_MB1"/>
+    <waypoint lat="-27.291187" lon="152.849132" name="_MB2"/>
+    <waypoint lat="-27.301831" lon="152.855049" name="_MB3"/>
+    <waypoint lat="-27.316209" lon="152.871861" name="_MB4"/>
+    <waypoint lat="-27.323614" lon="152.893645" name="_MB5"/>
+    <waypoint lat="-27.322691" lon="152.923030" name="_MB6"/>
+    <waypoint lat="-27.315889" lon="152.951359" name="_MB7"/>
+    <waypoint lat="-27.292177" lon="152.945435" name="_MB8"/>
+    <waypoint lat="-27.268745" lon="152.948095" name="_MB9"/>
+    <waypoint lat="-27.258382" lon="152.927803" name="_MB10"/>
+    <waypoint lat="-27.255641" lon="152.902848" name="_MB11"/>
+    <waypoint lat="-27.254230" lon="152.867427" name="_MB12"/>
+    <waypoint lat="-27.264382" lon="152.846003" name="_MB13"/>
+    <waypoint lat="-27.277056" lon="152.890990" name="SA1"/>
+    <waypoint lat="-27.275850" lon="152.893515" name="SA2"/>
+    <waypoint lat="-27.279223" lon="152.898211" name="SA3"/>
+    <waypoint lat="-27.280094" lon="152.896819" name="SA4"/>
+    <waypoint lat="-27.280541" lon="152.894304" name="SA5"/>
+    <waypoint lat="-27.280401" lon="152.894081" name="TST-1"/>
+    <waypoint lat="-27.277660" lon="152.896948" name="TST-2"/>
+    <waypoint lat="-27.277061" lon="152.892269" name="TST-3"/>
+    <waypoint lat="-27.278026" lon="152.890686" name="EL1"/>
+    <waypoint lat="-27.277438" lon="152.890132" name="EL2"/>
+    <waypoint lat="-27.276682" lon="152.892126" name="EL3"/>
+    <waypoint lat="-27.277736" lon="152.892001" name="EL4"/>
+    <waypoint lat="-27.277207" lon="152.894080" name="AMAZED"/>
+  </waypoints>
+  <includes>
+    <include name="Mission" procedure="include_obc2014_mission.xml"/>
+    <include name="Safety" procedure="include_obc2014_safety.xml"/>
+    <include name="Testing" procedure="include_obc2014_testing.xml"/>
+  </includes>
+  <blocks>
+    <block name="Boot"/>
+  </blocks>
+</flight_plan>
