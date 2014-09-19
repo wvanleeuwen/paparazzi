@@ -59,7 +59,9 @@ int ticket_status = 0;
 
 int ticket_thumbnails = 0;
 #define THUMB_MSG_SIZE  MORA_PAYLOAD_MSG_SIZE
-static uint8_t thumb[THUMB_MSG_SIZE];
+#define THUMB_COUNT     6
+static uint8_t thumbs[THUMB_COUNT][THUMB_MSG_SIZE];
+static uint8_t thumb_pointer = 0;
 
 
 
@@ -84,7 +86,7 @@ void ticket_event(void)
         break;
       case MORA_PAYLOAD:
         for (int i=0; i< MORA_PAYLOAD_MSG_SIZE;i++)
-          thumb[i] = mora_protocol.payload[i];
+          thumbs[thumb_pointer][i] = mora_protocol.payload[i];
         break;
       default:
         break;
@@ -111,7 +113,12 @@ static void send_thumbnails(void)
     }
 //    for (int i=0;i<THUMB_MSG_SIZE;i++)
 //      thumb[i]++;
-    DOWNLINK_SEND_PAYLOAD(DefaultChannel, DefaultDevice, THUMB_MSG_SIZE, thumb);
+    DOWNLINK_SEND_PAYLOAD(DefaultChannel, DefaultDevice, THUMB_MSG_SIZE, thumbs[thumb_pointer]);
+
+    // Update the write/read pointer: if we receive a new thumb part, that will be sent, otherwise the oldest infor is repeated
+    thumb_pointer++;
+    if (thumb_pointer>THUMB_COUNT)
+      thumb_pointer = 0;
 
     MoraHeader(MORA_BUFFER_EMPTY,0);
     MoraTrailer();
@@ -124,8 +131,11 @@ void ticket_init(void)
   // Call common DC init
   dc_init();
   ticket_thumbnails = 0;
-  for (int i=0;i<THUMB_MSG_SIZE;i++)
-    thumb[i] = 0;
+  for (int t=0;t<THUMB_COUNT;t++)
+  {
+    for (int i=0;i<THUMB_MSG_SIZE;i++)
+      thumbs[t][i] = 0;
+  }
 #if PERIODIC_TELEMETRY
   register_periodic_telemetry(&telemetry_Ap, "PAYLOAD", send_thumbnails);
 #endif
