@@ -72,7 +72,7 @@ void baro_ms5611_periodic_check( void ) {
 
 #if SENSOR_SYNC_SEND
   // send coeff every 30s
-  RunOnceEvery((5*BARO_MS5611_PERIODIC_CHECK_FREQ), baro_ms5611_send_coeff());
+  // RunOnceEvery((5*BARO_MS5611_PERIODIC_CHECK_FREQ), baro_ms5611_send_coeff());
 #endif
 
 }

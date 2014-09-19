@@ -86,6 +86,7 @@ void baro_event(void) {
 #endif
 
 #if DEBUG
+#warning DEBUG
       float ftempms = bb_ms5611.data.temperature / 100.;
       float fbaroms = bb_ms5611.data.pressure / 100.;
       DOWNLINK_SEND_BARO_MS5611(DefaultChannel, DefaultDevice,
