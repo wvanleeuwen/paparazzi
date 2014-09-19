@@ -179,7 +179,7 @@ int main(int argc, char* argv[])
   // dest
   q = thumb;
 
-  // create thumbnail
+  // create thumbnail buffer needed by jpeg
   for (int x=0;x<THUMB_W;x++)
   {
     for (int y=0;y<THUMB_W;y++)
