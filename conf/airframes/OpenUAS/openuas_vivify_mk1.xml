@@ -122,7 +122,7 @@
     <subsystem name="intermcu" type="can"/>
 
     <!-- * Communication * -->
-    <subsystem name="telemetry" type="transparent">
+    <subsystem name="telemetry" type="xbee_api">
       <!-- or use type="xbee_api"> -->
       <configure name="MODEM_BAUD" value="B9600"/>
       <!--  <configure name="MODEM_BAUD" value="B57600"/>--> <!-- Good to switch on high baud while raw sensor calibaration and testing -->
