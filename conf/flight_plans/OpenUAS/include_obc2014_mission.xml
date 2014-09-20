@@ -353,7 +353,6 @@ best to perform many real life tests with the CAM
 *********** -->
 
     <block name="SearchForJoe">
-      <set value="set_airspeed_nominal" var="v_ctl_auto_airspeed_setpoint"/>
         <!--  was NavPolySurveySweepBackNum -->
       <exception cond="PolySurveySweepBackNum >= 1" deroute="ReturnToBase"/> <!-- ? TODO decide to search in reverse again on until battery < volts needed to return home? if nothing found, go back?-->
       <!-- <exception cond="FoundJoe" deroute="WaitForJugesDropApprovale"/> -->
@@ -366,6 +365,10 @@ best to perform many real life tests with the CAM
 
        <!-- SweepWidth  max photo with at height - 20 pct overlap 180- etc-->
       <call fun="nav_survey_poly_osam_setup(WP_SA1, 5, 144, CourseFromToEnuDeg(WP_SA1, WP_SA5))"/> <!-- TODO correct angle of how we want to search -->
+    </block>
+
+    <block name="Searching">
+      <set value="set_airspeed_nominal" var="v_ctl_auto_airspeed_setpoint"/>
       <call fun="nav_survey_poly_osam_run()"/>
     </block>
 
