@@ -96,7 +96,7 @@ void baro_ms5611_event( void ) {
     baro_ms5611_alt = pprz_isa_altitude_of_pressure(pressure);
     baro_ms5611_alt_valid = TRUE;
 
-#ifdef SENSOR_SYNC_SEND
+#ifdef SENSOR_SYNC_SEND_WE_DO_NOT_WANT
     ftempms = baro_ms5611.data.temperature / 100.;
     fbaroms = baro_ms5611.data.pressure / 100.;
     DOWNLINK_SEND_BARO_MS5611(DefaultChannel, DefaultDevice,
