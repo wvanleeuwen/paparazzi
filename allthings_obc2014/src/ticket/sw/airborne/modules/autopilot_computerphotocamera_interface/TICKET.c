@@ -117,7 +117,7 @@ static void send_thumbnails(void)
 
     // Update the write/read pointer: if we receive a new thumb part, that will be sent, otherwise the oldest infor is repeated
     thumb_pointer++;
-    if (thumb_pointer>THUMB_COUNT)
+    if (thumb_pointer>=THUMB_COUNT)
       thumb_pointer = 0;
 
     MoraHeader(MORA_BUFFER_EMPTY,0);
