@@ -1,38 +1,38 @@
 <!DOCTYPE flight_plan SYSTEM "../flight_plan.dtd">
 
-<flight_plan alt="120" ground_alt="0" home_mode_height="120" lat0="-27.2512872" lon0="152.845825" max_dist_from_home="10000" name="OpenUAS Testfield QLD" qfu="30" security_height="70">
+<flight_plan alt="510" ground_alt="0" home_mode_height="120" lat0="-26.485476" lon0="151.844003" max_dist_from_home="10000" name="OpenUAS Testfield QLD" qfu="30" security_height="70">
   <waypoints>
     <waypoint name="HOME" x="0" y="0"/>
-    <waypoint alt="35.0" lat="-27.2512872" lon="152.845825" name="AF"/>
-    <waypoint alt="0.0" lat="-27.2512872" lon="152.845825" name="TD"/>
-    <waypoint lat="-27.278338" lon="152.891546" name="AIRFIELDHOME"/>
-    <waypoint lat="-27.277820" lon="152.893346" name="COMMSHOLD"/>
-    <waypoint lat="-27.278747" lon="152.842351" name="_MB1"/>
-    <waypoint lat="-27.291187" lon="152.849132" name="_MB2"/>
-    <waypoint lat="-27.301831" lon="152.855049" name="_MB3"/>
-    <waypoint lat="-27.316209" lon="152.871861" name="_MB4"/>
-    <waypoint lat="-27.323614" lon="152.893645" name="_MB5"/>
-    <waypoint lat="-27.322691" lon="152.923030" name="_MB6"/>
-    <waypoint lat="-27.315889" lon="152.951359" name="_MB7"/>
-    <waypoint lat="-27.292177" lon="152.945435" name="_MB8"/>
-    <waypoint lat="-27.268745" lon="152.948095" name="_MB9"/>
-    <waypoint lat="-27.258382" lon="152.927803" name="_MB10"/>
-    <waypoint lat="-27.255641" lon="152.902848" name="_MB11"/>
-    <waypoint lat="-27.254230" lon="152.867427" name="_MB12"/>
-    <waypoint lat="-27.264382" lon="152.846003" name="_MB13"/>
-    <waypoint lat="-27.277056" lon="152.890990" name="SA1"/>
-    <waypoint lat="-27.275850" lon="152.893515" name="SA2"/>
-    <waypoint lat="-27.279223" lon="152.898211" name="SA3"/>
-    <waypoint lat="-27.280094" lon="152.896819" name="SA4"/>
-    <waypoint lat="-27.280541" lon="152.894304" name="SA5"/>
-    <waypoint lat="-27.280401" lon="152.894081" name="TST-1"/>
-    <waypoint lat="-27.277660" lon="152.896948" name="TST-2"/>
-    <waypoint lat="-27.277061" lon="152.892269" name="TST-3"/>
-    <waypoint lat="-27.278026" lon="152.890686" name="EL1"/>
-    <waypoint lat="-27.277438" lon="152.890132" name="EL2"/>
-    <waypoint lat="-27.276682" lon="152.892126" name="EL3"/>
-    <waypoint lat="-27.277736" lon="152.892001" name="EL4"/>
-    <waypoint lat="-27.277207" lon="152.894080" name="AMAZED"/>
+    <waypoint alt="35.0" lat="-26.484397" lon="151.851376" name="AF"/>
+    <waypoint alt="0.0" lat="-26.484780" lon="151.843818" name="TD"/>
+    <waypoint alt="120.0" lat="-26.484330" lon="151.845777" name="AIRFIELDHOME"/>
+    <waypoint alt="120.0" lat="-26.484276" lon="151.841793" name="COMMSHOLD"/>
+    <waypoint lat="-26.414484" lon="151.835473" name="_MB1"/>
+    <waypoint lat="-26.421547" lon="151.898786" name="_MB2"/>
+    <waypoint lat="-26.455529" lon="151.926093" name="_MB3"/>
+    <waypoint lat="-26.502836" lon="151.923043" name="_MB4"/>
+    <waypoint lat="-26.536269" lon="151.915797" name="_MB5"/>
+    <waypoint lat="-26.557208" lon="151.884066" name="_MB6"/>
+    <waypoint lat="-26.564027" lon="151.829890" name="_MB7"/>
+    <waypoint lat="-26.551091" lon="151.794936" name="_MB8"/>
+    <waypoint lat="-26.541695" lon="151.777628" name="_MB9"/>
+    <waypoint lat="-26.526781" lon="151.768963" name="_MB10"/>
+    <waypoint lat="-26.500940" lon="151.755549" name="_MB11"/>
+    <waypoint lat="-26.469819" lon="151.765056" name="_MB12"/>
+    <waypoint lat="-26.440374" lon="151.789469" name="_MB13"/>
+    <waypoint alt="120.0" lat="-26.483791" lon="151.839174" name="SA1"/>
+    <waypoint alt="120.0" lat="-26.486180" lon="151.839157" name="SA2"/>
+    <waypoint alt="120.0" lat="-26.486788" lon="151.839577" name="SA3"/>
+    <waypoint alt="120.0" lat="-26.486788" lon="151.839577" name="SA4"/>
+    <waypoint alt="120.0" lat="-26.482168" lon="151.848793" name="SA5"/>
+    <waypoint lat="-26.484620" lon="151.849070" name="TST-1"/>
+    <waypoint lat="-26.480003" lon="151.844110" name="TST-2"/>
+    <waypoint lat="-26.485724" lon="151.842000" name="TST-3"/>
+    <waypoint alt="120.0" lat="-26.482037" lon="151.843446" name="EL1"/>
+    <waypoint alt="120.0" lat="-26.482684" lon="151.839086" name="EL2"/>
+    <waypoint alt="120.0" lat="-26.487138" lon="151.840477" name="EL3"/>
+    <waypoint alt="120.0" lat="-26.486692" lon="151.842727" name="EL4"/>
+    <waypoint lat="-26.497608" lon="151.859178" name="AMAZED"/>
   </waypoints>
   <includes>
     <include name="Mission" procedure="include_obc2014_mission.xml"/>
