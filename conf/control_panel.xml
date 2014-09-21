@@ -88,20 +88,6 @@
       </program>
       <program name="Environment Simulator"/>
     </session>
-    <session name="Fast Simulation">
-      <program name="Simulator">
-        <arg flag="-a" constant="Tester"/>
-        <arg flag="-t" constant="sim"/>
-        <arg flag="--boot"/>
-      </program>
-      <program name="GCS"/>
-      <program name="Server">
-        <arg flag="-n"/>
-      </program>
-      <program name="Environment Simulator">
-        <arg flag="-t" constant="6"/>
-      </program>
-    </session>
     <session name="TestingAndForward">
       <program name="Data Link">
         <arg flag="-d" constant="/dev/ttyACM0"/>
@@ -118,6 +104,29 @@
       <program name="Ivy2Udp">
         <arg flag="-id" constant="218"/>
         <arg flag="-h" constant="192.168.183.1"/>
+      </program>
+    </session>
+    <session name="Fast Simulation">
+      <program name="Ivy2Udp">
+        <arg flag="-b" constant="127:2010"/>
+        <arg flag="-h" constant="192.168.137.1"/>
+        <arg flag="-p" constant="4242"/>
+        <arg flag="-dp" constant="4243"/>
+        <arg flag="-id" constant="1"/>
+      </program>
+      <program name="Simulator">
+        <arg flag="-a" constant="Tester"/>
+        <arg flag="-t" constant="sim"/>
+        <arg flag="--boot"/>
+      </program>
+      <program name="GCS">
+        <arg flag="-maps_zoom" constant="17"/>
+      </program>
+      <program name="Server">
+        <arg flag="-n"/>
+      </program>
+      <program name="Environment Simulator">
+        <arg flag="-t" constant="6"/>
       </program>
     </session>
     <session name="OpenUAS Forward AC via UDP">
@@ -147,6 +156,26 @@
         <arg flag="-zoom" constant="0.5"/>
       </program>
       <program name="Messages"/>
+    </session>
+    <session name="Last Simulation">
+      <program name="Ivy2Udp">
+        <arg flag="-b" constant="127:2010"/>
+        <arg flag="-h" constant="192.168.137.1"/>
+        <arg flag="-p" constant="4242"/>
+        <arg flag="-dp" constant="4243"/>
+        <arg flag="-id" constant="1"/>
+      </program>
+      <program name="Simulator">
+        <arg flag="-a" constant="Tester"/>
+        <arg flag="-t" constant="sim"/>
+        <arg flag="--boot"/>
+      </program>
+      <program name="GCS">
+        <arg flag="-maps_zoom" constant="17"/>
+      </program>
+      <program name="Server">
+        <arg flag="-n"/>
+      </program>
     </session>
     <session name="OBC2014 Simulation FG">
       <program name="GCS">
@@ -205,13 +234,17 @@
     </session>
     <session name="OpenUAS OBC2014 GCS NOCRASH">
       <program name="Data Link">
-        <arg flag="-d" constant="/dev/ttyACM0"/>
+        <arg flag="-d" constant="/dev/ttyUSB0"/>
         <arg flag="-uplink"/>
         <arg flag="-s" constant="9600"/>
       </program>
       <program name="Server"/>
       <program name="GCS">
         <arg flag="-speech"/>
+        <arg flag="-mercator"/>
+        <arg flag="-maps_no_http"/>
+        <arg flag="-track_size" constant="300"/>
+        <arg flag="-zoom" constant="0.5"/>
         <arg flag="-maps_zoom" constant="17"/>
       </program>
       <program name="Messages"/>
