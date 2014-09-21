@@ -17,6 +17,9 @@
 #define MAX_FILENAME 255
 #define SHELL "/root/develop/allthings_obc2014/src/popcorn/popcorn.sh"
 
+
+const char* setup = "lua props=require(\"propcase\");print(\"SetupScript\");set_prop(props.ISO_MODE,3200);set_prop(props.FLASH_MODE,2);set_prop(props.RESOLUTION,0);set_prop(props.DATE_STAMP,0);set_prop(props.AF_ASSIST_BEAM,0);set_prop(props.QUALITY,0);print(\"Ready\");\n";
+
 static int fo, fi;
 static void wait_for_cmd(int timeout);
 static void wait_for_img(char* filename, int timeout);
@@ -66,8 +69,8 @@ void chdk_pipe_init(void)
 	wait_for_cmd(10);
 
 	/* Start rsint mode */
-	//write(fi, "rsint /root\n", 12);
-	//wait_for_cmd(10);
+	write(fi, setup, strlen(setup));
+	wait_for_cmd(strlen(setup));
 }
 
 /**
