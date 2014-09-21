@@ -428,7 +428,11 @@ static inline void telecommand_task( void ) {
 #endif // RADIO_CONTROL
 
 
+#ifndef SITL
   vsupply = bat2;
+#else
+  vsupply = fbw_state->vsupply;
+#endif
   current = fbw_state->current;
   energy = fbw_state->energy;
 
