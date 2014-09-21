@@ -1,8 +1,8 @@
 <!DOCTYPE flight_plan SYSTEM "../flight_plan.dtd">
 
-<flight_plan alt="510" ground_alt="0" home_mode_height="120" lat0="-26.485476" lon0="151.844003" max_dist_from_home="10000" name="OpenUAS Testfield QLD" qfu="30" security_height="70">
+<flight_plan alt="120" ground_alt="510" home_mode_height="120" lat0="-26.485476" lon0="151.844003" max_dist_from_home="10000" name="OpenUAS Testfield QLD" qfu="85" security_height="70">
   <waypoints>
-    <waypoint name="HOME" x="0" y="0"/>
+    <waypoint name="HOME" x="0.0" y="0.0"/>
     <waypoint alt="35.0" lat="-26.484397" lon="151.851376" name="AF"/>
     <waypoint alt="0.0" lat="-26.484780" lon="151.843818" name="TD"/>
     <waypoint alt="120.0" lat="-26.484330" lon="151.845777" name="AIRFIELDHOME"/>
@@ -20,18 +20,18 @@
     <waypoint lat="-26.500940" lon="151.755549" name="_MB11"/>
     <waypoint lat="-26.469819" lon="151.765056" name="_MB12"/>
     <waypoint lat="-26.440374" lon="151.789469" name="_MB13"/>
-    <waypoint alt="120.0" lat="-26.483791" lon="151.839174" name="SA1"/>
-    <waypoint alt="120.0" lat="-26.486180" lon="151.839157" name="SA2"/>
-    <waypoint alt="120.0" lat="-26.486788" lon="151.839577" name="SA3"/>
-    <waypoint alt="120.0" lat="-26.486788" lon="151.839577" name="SA4"/>
+    <waypoint alt="120.0" lat="-26.483431" lon="151.839733" name="SA1"/>
+    <waypoint alt="120.0" lat="-26.486180" lon="151.840147" name="SA2"/>
+    <waypoint alt="120.0" lat="-26.485324" lon="151.848528" name="SA3"/>
+    <waypoint alt="120.0" lat="-26.484272" lon="151.849116" name="SA4"/>
     <waypoint alt="120.0" lat="-26.482168" lon="151.848793" name="SA5"/>
     <waypoint lat="-26.484620" lon="151.849070" name="TST-1"/>
-    <waypoint lat="-26.480003" lon="151.844110" name="TST-2"/>
-    <waypoint lat="-26.485724" lon="151.842000" name="TST-3"/>
-    <waypoint alt="120.0" lat="-26.482037" lon="151.843446" name="EL1"/>
-    <waypoint alt="120.0" lat="-26.482684" lon="151.839086" name="EL2"/>
-    <waypoint alt="120.0" lat="-26.487138" lon="151.840477" name="EL3"/>
-    <waypoint alt="120.0" lat="-26.486692" lon="151.842727" name="EL4"/>
+    <waypoint lat="-26.481428" lon="151.845659" name="TST-2"/>
+    <waypoint lat="-26.485146" lon="151.842115" name="TST-3"/>
+    <waypoint alt="120.0" lat="-26.482307" lon="151.843532" name="EL1"/>
+    <waypoint alt="120.0" lat="-26.482594" lon="151.839588" name="EL2"/>
+    <waypoint alt="120.0" lat="-26.485084" lon="151.840420" name="EL3"/>
+    <waypoint alt="120.0" lat="-26.484484" lon="151.843215" name="EL4"/>
     <waypoint lat="-26.497608" lon="151.859178" name="AMAZED"/>
   </waypoints>
   <includes>
