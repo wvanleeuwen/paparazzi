@@ -1,6 +1,6 @@
 <!DOCTYPE flight_plan SYSTEM "../flight_plan.dtd">
 
-<flight_plan alt="120" ground_alt="510" home_mode_height="120" lat0="-26.485476" lon0="151.844003" max_dist_from_home="10000" name="OpenUAS Testfield QLD" qfu="85" security_height="70">
+<flight_plan alt="560" ground_alt="510" home_mode_height="120" lat0="-26.485476" lon0="151.844003" max_dist_from_home="10000" name="OpenUAS Testfield QLD" qfu="85" security_height="70">
   <waypoints>
     <waypoint name="HOME" x="0.0" y="0.0"/>
     <waypoint alt="35.0" lat="-26.484397" lon="151.851376" name="AF"/>

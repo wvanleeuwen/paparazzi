@@ -6,10 +6,6 @@
     <sector name="MissionBoundary" color="yellow">
       <corner name="_MB1"/>
       <corner name="_MB2"/>
-      <corner name="_MB3"/>
-      <corner name="_MB4"/>
-      <corner name="_MB5"/>
-      <corner name="_MB6"/>
       <corner name="_MB7"/>
       <corner name="_MB8"/>
       <corner name="_MB9"/>
@@ -17,6 +13,18 @@
       <corner name="_MB11"/>
       <corner name="_MB12"/>
       <corner name="_MB13"/>
+    </sector>
+    <sector name="AirportForbidden" color="red">
+      <corner name="_MB7"/>
+      <corner name="_MB6"/>
+      <corner name="_MB5"/>
+      <corner name="_MB4"/>
+      <corner name="_MB3"/>
+    </sector>
+    <sector name="AirportForbidden2" color="red">
+      <corner name="_MB3"/>
+      <corner name="_MB2"/>
+      <corner name="_MB7"/>
     </sector>
   </sectors>
 
@@ -36,7 +44,7 @@
 
     <!-- Hard GeoFence -->
     <!-- TODO Maybe ADD aditional exception with 2 sec timer here just to be sure to avoid position GPS spikes or some other jitter issues -->
-    <exception cond="(!InsideMissionBoundary(GetPosX(), GetPosY())) && gps_has_been_good()" deroute="GeoFence"/>
+    <exception cond="((!InsideMissionBoundary(GetPosX(), GetPosY())) || (InsideAirportForbidden(GetPosX(), GetPosY())) || (InsideAirportForbidden2(GetPosX(), GetPosY()))) && gps_has_been_good()" deroute="GeoFence"/>
 
     <!-- Failure of Autopilot -->
     <!-- FTD will failsafe if no commands arrive during 100ms -->
