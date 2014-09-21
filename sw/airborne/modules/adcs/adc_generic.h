@@ -3,6 +3,8 @@
 
 #include <inttypes.h>
 
+extern uint16_t bat1;
+extern uint16_t bat2;
 extern uint16_t adc_generic_val1;
 extern uint16_t adc_generic_val2;
 void adc_generic_init( void );
