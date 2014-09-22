@@ -290,6 +290,7 @@ void event_task_fbw( void) {
         LED_OFF(5);
         LED_ON(2);
         LED_ON(4);
+        FbwDataLinkEvent();
       }
     }
     #endif
