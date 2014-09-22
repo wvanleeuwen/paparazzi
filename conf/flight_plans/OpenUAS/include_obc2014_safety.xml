@@ -14,6 +14,23 @@
       <corner name="_MB12"/>
       <corner name="_MB13"/>
     </sector>
+    <sector name="MissionBoundaryA" color="yellow">
+      <corner name="_MB1"/>
+      <corner name="_MB2"/>
+      <corner name="_MB7"/>
+      <corner name="_MB6"/>
+      <corner name="_MB13"/>
+    </sector>
+    <sector name="MissionBoundaryB" color="yellow">
+      <corner name="_MB6"/>
+      <corner name="_MB7"/>
+      <corner name="_MB8"/>
+      <corner name="_MB9"/>
+      <corner name="_MB10"/>
+      <corner name="_MB11"/>
+      <corner name="_MB12"/>
+      <corner name="_MB13"/>
+    </sector>
     <sector name="AirportForbidden" color="red">
       <corner name="_MB7"/>
       <corner name="_MB6"/>
