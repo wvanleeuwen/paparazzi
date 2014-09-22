@@ -69,6 +69,9 @@
     <!-- Failure of Geofence detection processor -->
     <!-- FTD will failsafe if no heartbeat arrives from AP (with GPS) during 100ms -->
 
+    <!-- Hard Altitude GeoFence 2800ft MSL-->
+    <exception cond="MoreThan(GetAmsl(), 2800) && gps_has_been_good()" deroute="AlmostHeightViolation" />
+
     <!-- Hard Altitude GeoFence 3000ft MSL-->
     <exception cond="MoreThan(GetAmsl(), 3000) && gps_has_been_good()" deroute="HeightViolation" />
 
@@ -81,6 +84,11 @@
 
     <block name="GeoFence">
       <handler fun="ForceCrash()"/>
+      <circle radius="nav_radius" wp="STDBY"/> <!-- todo add a dynamic TDFORCEDCRASH point so to notify and have it in the log  -->
+    </block>
+
+    <block name="AlmostHeightViolation">
+      <handler fun="NavKillThrottle()"/>
       <circle radius="nav_radius" wp="STDBY"/> <!-- todo add a dynamic TDFORCEDCRASH point so to notify and have it in the log  -->
     </block>
 
