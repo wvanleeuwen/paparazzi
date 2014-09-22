@@ -63,20 +63,25 @@
     <!-- ******* Activate the irreversible Forced Crash Command to the Flight Termination Device ******** -->
 
     <block name="GeoFence">
-      <!-- <set value="MAX_PPRZ" var="ap_state->commands[COMMAND_FORCECRASH]"/> -->
+      <handler fun="ForceCrash()"/>
       <circle radius="nav_radius" wp="STDBY"/> <!-- todo add a dynamic TDFORCEDCRASH point so to notify and have it in the log  -->
     </block>
 
     <block name="HeightViolation">
-      <!-- <set value="MAX_PPRZ" var="ap_state->commands[COMMAND_FORCECRASH]"/> -->
+      <handler fun="ForceCrash()"/>
       <circle radius="nav_radius" wp="STDBY"/> <!-- todo add a dynamic TDFORCEDCRASH point so to notify and have it in the log  -->
     </block>
 
     <block name="DatalinkAndGpsFailure">
-      <!-- <set value="MAX_PPRZ" var="ap_state->commands[COMMAND_FORCECRASH]"/> -->
+      <handler fun="ForceCrash()"/>
       <circle radius="nav_radius" wp="STDBY"/> <!-- todo add a dynamic TDFORCEDCRASH point so to notify and have it in the log  -->
     </block>
 
-  </blocks>
+    <block name="ManualTerminateRequest" strip_button="FlightTermination" strip_icon="downdownend.png">
+      <handler fun="ForceCrash()"/>
+      <circle radius="nav_radius" wp="STDBY"/> <!-- todo add a dynamic TDFORCEDCRASH point so to notify and have it in the log  -->
+    </block>
+
+    </blocks>
 </procedure>
 

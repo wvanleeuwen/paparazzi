@@ -179,6 +179,8 @@ TST-3 = -26° 35' 23.2" * 151° 50' 45.9"
 <!-- *********** Wait for GPS fix, 3D by default *********** -->
   <blocks>
     <block name="WaitForGPS" pre_call="NavKillThrottle()" >
+      <!-- Do Not Kill -->
+      <handler fun="Fly()"/>
       <!-- IDEA Close the hatch so not able to insert payload before there is a 3D fix , however maybe not so handy anyhow since we need to wat be fre we can insert-->
       <!--  <set value="NavDropCloseHatch" var="unit"/> -->
       <!-- if no valid fix or gps accuracy> 15m or no AHRS , it a no-go wait-->

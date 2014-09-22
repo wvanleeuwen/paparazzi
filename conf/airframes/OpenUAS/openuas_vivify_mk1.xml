@@ -153,7 +153,7 @@
     <target name="fbw" board="lisa_m_2.0">
       <configure name="FLASH_MODE" value="SWD"/>
 
-      <configure name="SYS_TIME_LED" value="1"/>
+      <configure name="SYS_TIME_LED" value="2"/>
       <define name="LINK_MCU_LED" value="3"/>
       <configure name="RADIO_CONTROL_LED" value="5"/>
 
@@ -211,8 +211,9 @@ I am as of yet not sure if the weird info byte is because of a failed bind proce
       <!--<define name="RADIO_CONTROL_SPEKTRUM_SIGNS" value="\{1,-1,-1,-1,1,-1,1,1,1,1,1,1\}"/>-->
       </subsystem>
 
-      <define name="OUTBACK_CHALLENGE_DANGEROUS_RULE_RC_LOST_NO_AP" value="FALSE"/>
-      <define name="OUTBACK_CHALLENGE_VERY_DANGEROUS_RULE_AP_CAN_FORCE_FAILSAFE" value="FALSE"/>
+      <define name="OUTBACK_CHALLENGE_DANGEROUS_RULE_RC_LOST_NO_AP" value="TRUE"/>
+      <define name="OUTBACK_CHALLENGE_VERY_DANGEROUS_RULE_AP_CAN_FORCE_FAILSAFE" value="TRUE"/>
+      <define name="OUTBACK_CHALLENGE_VERY_DANGEROUS_RULE_NO_AP_MUST_FAILSAFE" value="TRUE"/>
 
       <subsystem name="actuators" type="pwm"/>
       <subsystem name="intermcu" type="can"/>
@@ -299,7 +300,7 @@ I am as of yet not sure if the weird info byte is because of a failed bind proce
     <!-- <load name="geo_mag.xml"/> --> <!-- simplify the setup of magneto in various part of the world TODO needs fixing now aircarft in flight (strange)rule-->
 
     <load name="TICKET.xml">
-      <define name="AUTOSHOOT_QUARTERSEC_PERIOD" value="22" unit="quarter_second"/>
+      <define name="DC_AUTOSHOOT_QUARTERSEC_PERIOD" value="22" unit="quarter_second"/>
       <configure name="CAMERA_PORT" value="UART5"/>
     </load>
 
@@ -352,7 +353,9 @@ I am as of yet not sure if the weird info byte is because of a failed bind proce
 
     <define name="AirbrakesOff()" value="(ap_state->commands[COMMAND_BRAKE]=0)" />
     <define name="AirbrakesOn()" value="(ap_state->commands[COMMAND_BRAKE]=SERVO_BRAKE_FULL)" />
-  </section>
+    <define name="Fly()" value="(ap_state->commands[COMMAND_FORCECRASH]=0)" />
+    <define name="ForceCrash()" value="(ap_state->commands[COMMAND_FORCECRASH]=9600)" />
+    </section>
 
   <commands>
 
@@ -372,13 +375,13 @@ For a blended wing this will translate best to
 # Full down on the right aileron
 # Full up on the left aileron -->
     <axis name="THROTTLE" failsafe_value="0"/>
-    <axis name="ROLL" failsafe_value="2000"/>
-    <axis name="PITCH" failsafe_value="-1000"/>
+    <axis name="ROLL" failsafe_value="9600"/>
+    <axis name="PITCH" failsafe_value="9600"/>
     <!-- * Yaw, since we have and option via ELEVON UP FLAPPERON DOWN MIX * -->
-    <axis name="YAW" failsafe_value="0"/>
+    <axis name="YAW" failsafe_value="9600"/>
     <!-- * Maybe set to open position, to be able to simply insert the payload * -->
     <axis name="HATCH" failsafe_value="-9600"/>
-    <axis name="BRAKE" failsafe_value="-6000"/>
+    <axis name="BRAKE" failsafe_value="0"/>
     <axis name="FORCECRASH" failsafe_value="0"/>
     <!-- maybe set to 9600 -->
   </commands>
