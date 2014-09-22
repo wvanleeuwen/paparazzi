@@ -421,8 +421,8 @@ static inline void gps_ubx_ucenter_config_port(void)
 static inline void gps_ubx_ucenter_config_sbas(void)
 {
   // Since March 2nd 2011 EGNOS is released for aviation purposes
-  UbxSend_CFG_SBAS(GPS_SBAS_ENABLED, GPS_SBAS_RANGING | GPS_SBAS_CORRECTIONS | GPS_SBAS_INTEGRITY, GPS_SBAS_MAX_SBAS, GPS_SBAS_AUTOSCAN, GPS_SBAS_AUTOSCAN);
-  //UbxSend_CFG_SBAS(0x00, 0x00, 0x00, 0x00, 0x00);
+  //UbxSend_CFG_SBAS(GPS_SBAS_ENABLED, GPS_SBAS_RANGING | GPS_SBAS_CORRECTIONS | GPS_SBAS_INTEGRITY, GPS_SBAS_MAX_SBAS, GPS_SBAS_AUTOSCAN, GPS_SBAS_AUTOSCAN);
+  UbxSend_CFG_SBAS(0x00, 0x00, 0x00, 0x00, 0x00);
 }
 
 // Text Telemetry for Debugging
