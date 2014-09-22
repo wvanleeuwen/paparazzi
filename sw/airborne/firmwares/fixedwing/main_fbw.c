@@ -187,7 +187,7 @@ static inline void handle_rc_frame( void ) {
 }
 #endif
 
-
+uint8_t ap_has_been_ok = FALSE;
 /********** EVENT ************************************************************/
 
 void event_task_fbw( void) {
@@ -205,6 +205,20 @@ void event_task_fbw( void) {
 #endif /* MCU_SPI_LINK */
 
 
+#if OUTBACK_CHALLENGE_VERY_DANGEROUS_RULE_NO_AP_MUST_FAILSAFE
+#warning OUTBACK_CHALLENGE_VERY_DANGEROUS_RULE_NO_AP_MUST_FAILSAFE loose ap is forced crash
+
+    if (ap_ok)
+    {
+      ap_has_been_ok = TRUE;
+    }
+
+    if ((ap_has_been_ok) && (!ap_ok))
+    {
+      commands[COMMAND_FORCECRASH] =9600;
+    }
+#endif
+
   if (inter_mcu_received_ap) {
     inter_mcu_received_ap = FALSE;
     inter_mcu_event_task();
@@ -212,6 +226,9 @@ void event_task_fbw( void) {
     command_pitch_trim = ap_state->command_pitch_trim;
     command_yaw_trim = ap_state->command_yaw_trim;
 #if OUTBACK_CHALLENGE_DANGEROUS_RULE_RC_LOST_NO_AP
+    // LOST-RC: do NOT go to autonomous
+    // auto = stay in auto
+    // manual = stay in manual
 #else
     if (ap_ok && fbw_mode == FBW_MODE_FAILSAFE) {
       fbw_mode = FBW_MODE_AUTO;
@@ -235,7 +252,7 @@ void event_task_fbw( void) {
 
 #if OUTBACK_CHALLENGE_VERY_DANGEROUS_RULE_AP_CAN_FORCE_FAILSAFE
 #warning DANGER DANGER DANGER DANGER: Outback Challenge Rule FORCE-CRASH-RULE: DANGER DANGER: AP is now capable to FORCE your FBW in failsafe mode EVEN IF RC IS NOT LOST: Consider the consequences.
-
+  // OUTBACK: JURY REQUEST CRASH
   int crash = 0;
   if (commands[COMMAND_FORCECRASH] >= 8000)
   {
@@ -266,7 +283,14 @@ void event_task_fbw( void) {
     #if OUTBACK_CHALLENGE_VERY_DANGEROUS_RULE_AP_CAN_FORCE_FAILSAFE
     if (crash == 1)
     {
-      for (;;) {}
+      for (;;)
+      {
+        LED_OFF(1);
+        LED_OFF(3);
+        LED_OFF(5);
+        LED_ON(2);
+        LED_ON(4);
+      }
     }
     #endif
 
@@ -301,7 +325,8 @@ void periodic_task_fbw( void ) {
   if (fbw_mode == FBW_MODE_MANUAL && radio_control.status == RC_REALLY_LOST) {
 #if OUTBACK_CHALLENGE_DANGEROUS_RULE_RC_LOST_NO_AP
 #warning WARNING DANGER: OUTBACK_CHALLENGE RULE RC_LOST_NO_AP defined. If you loose RC you will NOT go to automatically go to AUTO2 Anymore!!
-set_failsafe_mode();
+    set_failsafe_mode();
+    commands[COMMAND_FORCECRASH] = 9600;
 #else
     fbw_mode = FBW_MODE_AUTO;
 #endif
