@@ -34,6 +34,8 @@
     <define name="AILEVON_ELEVATOR_RATE" value="0.75"/>
     <define name="AirbrakesOff()" value="(FALSE)" />
     <define name="AirbrakesOn()" value="(FALSE)" />
+    <define name="Fly()" value="" />
+    <define name="ForceCrash()" value="" />
   </section>
 
   <command_laws>
