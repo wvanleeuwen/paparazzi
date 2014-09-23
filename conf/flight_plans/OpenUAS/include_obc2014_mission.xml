@@ -330,6 +330,7 @@ to “Airfield Home” and orbit for either a landing or regain of Data Link.
 
     <block name="determinerescuetype">
       <exception cond="(obc_flight_mode == DROP_FLIGHT)" deroute="RescueJoe"/>
+      <deroute block="SearchForJoe" />
     </block>
 
 <!-- "Type 1" operation:
@@ -354,9 +355,12 @@ Mission scanwidh is 144m thus with a 20% overlap. Overlap depends on lots of fac
 best to perform many real life tests with the CAM
 *********** -->
 
+    <block name="SearchForJoeLateral">
+      <call fun="nav_survey_poly_osam_setup(WP_SA1, 5, 144, CourseFromToEnuDeg(WP_SA1, WP_SA2))"/> <!-- TODO correct angle of how we want to search -->
+      <deroute block="Searching" />
+    </block>
+
     <block name="SearchForJoe">
-        <!--  was NavPolySurveySweepBackNum -->
-      <exception cond="PolySurveySweepBackNum >= 1" deroute="ReturnToBase"/> <!-- ? TODO decide to search in reverse again on until battery < volts needed to return home? if nothing found, go back?-->
       <!-- <exception cond="FoundJoe" deroute="WaitForJugesDropApprovale"/> -->
       <!-- Parameters
       The orientation of the sweeps can ranges from north south to east west and
@@ -370,6 +374,7 @@ best to perform many real life tests with the CAM
     </block>
 
     <block name="Searching">
+      <exception cond="PolySurveySweepBackNum >= 1" deroute="ReturnToBase"/> <!-- ? TODO decide to search in reverse again on until battery < volts needed to return home? if nothing found, go back?-->
       <set value="set_airspeed_nominal" var="v_ctl_auto_airspeed_setpoint"/>
       <call fun="nav_survey_poly_osam_run()"/>
     </block>
@@ -498,6 +503,7 @@ extern bool_t compute_alignment(uint8_t w1, uint8_t w2, uint8_t start, uint8_t e
     </block>
 
     <block name="Flare">
+      <handler fun="NavKillThrottle()" />
       <set value="set_airspeed_glide*0.75" var="v_ctl_auto_airspeed_setpoint"/>
       <go approaching_time="0" from="AF" hmode="route" wp="TD"/>
       <attitude roll="0.0" pitch="DegOfRad(set_flare_pitch)" throttle="0.0" until="FALSE" vmode="throttle"/>
