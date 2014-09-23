@@ -360,6 +360,16 @@ best to perform many real life tests with the CAM
       <deroute block="Searching" />
     </block>
 
+    <block name="SearchForJoeDiagonal1">
+      <call fun="nav_survey_poly_osam_setup(WP_SA1, 5, 144, 45)"/> <!-- TODO correct angle of how we want to search -->
+      <deroute block="Searching" />
+    </block>
+
+    <block name="SearchForJoeDiagonal2">
+      <call fun="nav_survey_poly_osam_setup(WP_SA1, 5, 144, 135)"/> <!-- TODO correct angle of how we want to search -->
+      <deroute block="Searching" />
+    </block>
+
     <block name="SearchForJoe">
       <!-- <exception cond="FoundJoe" deroute="WaitForJugesDropApprovale"/> -->
       <!-- Parameters
