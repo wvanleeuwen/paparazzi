@@ -6,7 +6,7 @@
      http://www.uavoutbackchallenge.com.au/
 -->
 
-<flight_plan alt="560" ground_alt="444" home_mode_height="120" lat0="-26.584781" lon0="151.842325" max_dist_from_home="10000" name="OpenUAS OBC2014" qfu="170" security_height="70">
+<flight_plan alt="660" ground_alt="444" home_mode_height="120" lat0="-26.584781" lon0="151.842325" max_dist_from_home="10000" name="OpenUAS OBC2014" qfu="170" security_height="70">
 <!-- ******************************* WAYPOINTS ***************************** -->
   <waypoints>
     <waypoint name="HOME" x="0" y="0"/>
