@@ -69,11 +69,15 @@
     <!-- Failure of Geofence detection processor -->
     <!-- FTD will failsafe if no heartbeat arrives from AP (with GPS) during 100ms -->
 
-    <!-- Hard Altitude GeoFence 2800ft MSL-->
+    <!-- Soft Altitude GeoFence 2800ft MSL-->
     <exception cond="MoreThan(GetAmsl(), 2800) && gps_has_been_good()" deroute="AlmostHeightViolation" />
 
-    <!-- Hard Altitude GeoFence 3000ft MSL-->
+    <!-- Hard Altitude GeoFence 3000ft MSL
+    Removed: because: theoretically impossible to climb 200ft without engine.
+    - Kill is as safe as Forcecrash, but happens lower.
+    - Only option to reach hard geofence = sensor failure: then the plane IS NOT TOO high, but the engine will be killed.
     <exception cond="MoreThan(GetAmsl(), 3000) && gps_has_been_good()" deroute="HeightViolation" />
+    -->
 
     <!-- Case of loss of GPS AND loss of datalink -->
     <exception cond="And(datalink_time > 10, !GpsFixValid())" deroute="DatalinkAndGpsFailure"/>
