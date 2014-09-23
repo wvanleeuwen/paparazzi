@@ -141,6 +141,7 @@
         <arg flag="-n"/>
       </program>
       <program name="GCS">
+        <arg flag="-layout" constant="OpenUAS/openuas_obc2014.xml"/>
         <arg flag="-speech"/>
         <arg flag="-maps_fill"/>
         <arg flag="-mercator"/>
@@ -239,6 +240,7 @@
         <arg flag="-track_size" constant="300"/>
         <arg flag="-zoom" constant="0.5"/>
         <arg flag="-maps_zoom" constant="17"/>
+        <arg flag="-layout" constant="OpenUAS/openuas_obc2014.xml"/>
         </program>
       <program name="Messages"/>
       <program name="Ivy2Nmea">
