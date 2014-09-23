@@ -51,6 +51,7 @@
     </program>
     <program name="App Server" command="sw/ground_segment/tmtc/app_server">
       <arg flag="-b" variable="ivy_bus"/>
+      <arg flag="-p" variable="0344"/>
     </program>
     <program name="Ivy2Udp" command="sw/ground_segment/tmtc/ivy2udp">
       <arg flag="-b" variable="ivy_bus"/>
@@ -128,15 +129,6 @@
       </program>
       <program name="Environment Simulator">
         <arg flag="-t" constant="6"/>
-      </program>
-    </session>
-    <session name="OpenUAS Forward AC via UDP">
-      <program name="Ivy2Udp">
-        <arg flag="-b" constant="127:2010"/>
-        <arg flag="-h" constant="192.168.78.1"/>
-        <arg flag="-p" constant="4242"/>
-        <arg flag="-dp" constant="4243"/>
-        <arg flag="-id" constant="16"/>
       </program>
     </session>
     <session name="OpenUAS No Logging">
@@ -251,11 +243,13 @@
       <program name="Messages"/>
       <program name="Ivy2Nmea">
         <arg flag="--id" constant="218"/>
-        <arg flag="--port" constant="dev/ttyS0"/>
+        <arg flag="--port" constant="/dev/ttyS0"/>
       </program>
       <program name="Ivy2Udp">
         <arg flag="-h" constant="192.168.137.1"/>
         <arg flag="-id" constant="218"/>
+      </program>
+      <program name="App Server">
       </program>
     </session>
   </section>
