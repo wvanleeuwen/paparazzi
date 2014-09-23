@@ -108,6 +108,8 @@ TST-3 = -26° 35' 23.2" * 151° 50' 45.9"
     <waypoint name="_ABS3" lat="" lon="" height="400."/>
 -->
 
+    <waypoint name="FLARE" x="-100." y="400." height="-40."/>
+
 <!-- Additional VIA_EL2 Waypoint since we must go *via* EL2, and to have a little
     more meters optimal for our scan strips entry, otherwhise we could miss one
     photo and not spot Joe. -->
@@ -222,7 +224,9 @@ TST-3 = -26° 35' 23.2" * 151° 50' 45.9"
       <set value="DownlinkSendWpNr(WP_TD)" var="unit"/>
       <set value="SetAltitudeForFinalFromTo(WP_TD,WP_AF)" var="unit"/>
       <call fun="nav_compute_final_from_glide(WP_AF, WP_TD, V_CTL_GLIDE_RATIO)"/>
+      <call fun="nav_compute_final_from_glide(WP_FLARE, WP_TD, V_CTL_GLIDE_RATIO)"/>
       <set value="DownlinkSendWpNr(WP_AF)" var="unit"/>
+      <set value="DownlinkSendWpNr(WP_FLARE)" var="unit"/>
       <deroute block="HoldingPoint"/>
     </block>
 
@@ -496,6 +500,7 @@ extern bool_t compute_alignment(uint8_t w1, uint8_t w2, uint8_t start, uint8_t e
 
     <block name="ComputeLandingApproach" >
       <call fun="nav_compute_final_from_glide(WP_AF, WP_TD, V_CTL_GLIDE_RATIO)"/>
+      <call fun="nav_compute_final_from_glide(WP_FLARE, WP_TD, V_CTL_GLIDE_RATIO)"/>
       <set value="DownlinkSendWpNr(WP_AF)" var="unit"/>
     </block>
 
@@ -514,8 +519,8 @@ extern bool_t compute_alignment(uint8_t w1, uint8_t w2, uint8_t start, uint8_t e
 
     <block name="Flare">
       <handler fun="NavKillThrottle()" />
-      <set value="set_airspeed_glide*0.75" var="v_ctl_auto_airspeed_setpoint"/>
-      <go approaching_time="0" from="AF" hmode="route" wp="TD"/>
+      <set value="set_airspeed_glide*0.8" var="v_ctl_auto_airspeed_setpoint"/>
+      <go approaching_time="0" from="TD" hmode="route" wp="FLARE"/>
       <attitude roll="0.0" pitch="DegOfRad(set_flare_pitch)" throttle="0.0" until="FALSE" vmode="throttle"/>
       <!-- TODO: retract brake after landed is true (with +3seconds margin) better a sensor(witch) that detects IsAircraftOnSolidGround -->
     </block>
