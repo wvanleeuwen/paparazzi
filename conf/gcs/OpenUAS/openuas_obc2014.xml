@@ -1,29 +1,51 @@
-<layout width="1918" height="1097">
-  <columns>
-    <rows SIZE="420">
-      <widget NAME="alarms" SIZE="53"/>
-      <widget NAME="strips" SIZE="210"/>
-      <widget NAME="aircraft"/>
-    </rows>
-    <widget NAME="map2d">
-      <papget type="message_field" display="gauge" x="80" y="869">
-        <property name="scale" value=".00485"/>
-        <property name="field" value="ADC_GENERIC:val1"/>
-        <property name="min" value="9"/>
-        <property name="max" value="12.6"/>
-        <property name="size" value="150."/>
-        <property name="text" value="BATTERY"/>
+<layout width="975" height="744">
+  <rows>
+    <columns>
+    <widget SIZE="45" name="altgraph"/>
+    <widget SIZE="500" NAME="map2d">
+      <papget type="message_field" display="text" x="85" y="147">
+        <property name="scale" value="1."/>
+        <property name="field" value="AMSL:AMSL_BARO"/>
+        <property name="format" value="%.2f ft (baro)"/>
+        <property name="size" value="15."/>
+        <property name="color" value="green"/>
       </papget>
-     <papget type="message_field" display="gauge" x="170" y="268">
-        <property name="field" value="BAT:throttle"/>
-        <property name="scale" value="0.0104167"/>
-        <property name="min" value="0."/>
-        <property name="max" value="100."/>
-        <property name="size" value="100."/>
-        <property name="text" value="Throttle(%)"/>
+      <papget type="message_field" display="text" x="85" y="172">
+        <property name="scale" value="1."/>
+        <property name="field" value="AMSL:AMSL_GPS"/>
+        <property name="format" value="%.2f ft (gps)"/>
+        <property name="size" value="15."/>
+        <property name="color" value="green"/>
+      </papget>
+      <papget type="message_field" display="text" x="85" y="249">
+        <property name="scale" value="0.1f"/>
+        <property name="field" value="ADC_GENERIC:val2"/>
+        <property name="format" value="%.2f V (AP)"/>
+        <property name="size" value="15."/>
+        <property name="color" value="green"/>
+      </papget>
+      <papget type="message_field" display="text" x="85" y="103">
+        <property name="scale" value="0.1"/>
+        <property name="field" value="AIRSPEED:airspeed"/>
+        <property name="format" value="%.2f m/s (airspeed)"/>
+        <property name="size" value="15."/>
+        <property name="color" value="green"/>
+      </papget>
+      <papget type="message_field" display="text" x="85" y="224">
+        <property name="scale" value="1."/>
+        <property name="field" value="ADC_GENERIC:val1"/>
+        <property name="format" value="%.2f V (FTD)"/>
+        <property name="size" value="15."/>
+        <property name="color" value="green"/>
       </papget>
     </widget>
-    <!--<widget SIZE="45" name="altgraph"/>-->
-  </columns>
+    </columns>
+    <columns>
+      <rows SIZE="375">
+        <widget SIZE="200" NAME="strips"/>
+      </rows>
+      <widget SIZE="400" NAME="aircraft"/>
+      <widget NAME="alarms"/>
+    </columns>
+  </rows>
 </layout>
-
