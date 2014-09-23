@@ -484,12 +484,12 @@ extern bool_t compute_alignment(uint8_t w1, uint8_t w2, uint8_t start, uint8_t e
 
 <!-- *********** Land *********** -->
 
-    <block key="r" name="Constant Slope Land Right AF-TD" strip_button="Land right (wp AF-TD)" strip_icon="land-right.png"  group="Land">
+    <block key="r" name="ConstantSlopeLandRightAFTD" strip_button="Land right (wp AF-TD)" strip_icon="land-right.png"  group="Land">
       <set value="LANDING_CIRCLE_RADIUS" var="nav_radius"/>
       <deroute block="ComputeLandingApproach"/>
     </block>
 
-    <block key="l" name="Constant Slope Land Left AF-TD" strip_button="Land left (wp AF-TD)" strip_icon="land-left.png"  group="Land">
+    <block key="l" name="ConstantSlopeLandLeftAFTD" strip_button="Land left (wp AF-TD)" strip_icon="land-left.png"  group="Land">
       <set value="-LANDING_CIRCLE_RADIUS" var="nav_radius"/>
       <deroute block="ComputeLandingApproach"/>
     </block>
@@ -569,7 +569,7 @@ termination mode (Section 5.6).
     </block>
 
     <block name="AirfieldHomeLoiter" strip_icon="home.png" group="Link">
-      <exception cond="stage_time > 120" deroute="Constant Slope Land Right AF-TD"/>
+      <exception cond="stage_time > 120" deroute="ConstantSlopeLandRightAFTD"/>
       <circle wp="AIRFIELDHOME" radius="nav_radius*1.5"/><!-- 1.5 x  mean it will be a bit bigger circle -->
     </block>
 
