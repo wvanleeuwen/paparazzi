@@ -360,17 +360,17 @@ best to perform many real life tests with the CAM
 *********** -->
 
     <block name="SearchForJoeLateral">
-      <call fun="nav_survey_poly_osam_setup(WP_SA1, 5, 144, CourseFromToEnuDeg(WP_SA1, WP_SA2))"/> <!-- TODO correct angle of how we want to search -->
+      <call fun="nav_survey_poly_osam_setup(WP_SA1, 5, 160, CourseFromToEnuDeg(WP_SA1, WP_SA2))"/> <!-- TODO correct angle of how we want to search -->
       <deroute block="Searching" />
     </block>
 
     <block name="SearchForJoeDiagonal1">
-      <call fun="nav_survey_poly_osam_setup(WP_SA1, 5, 144, 45)"/> <!-- TODO correct angle of how we want to search -->
+      <call fun="nav_survey_poly_osam_setup(WP_SA1, 5, 160, 45)"/> <!-- TODO correct angle of how we want to search -->
       <deroute block="Searching" />
     </block>
 
     <block name="SearchForJoeDiagonal2">
-      <call fun="nav_survey_poly_osam_setup(WP_SA1, 5, 144, 135)"/> <!-- TODO correct angle of how we want to search -->
+      <call fun="nav_survey_poly_osam_setup(WP_SA1, 5, 160, 135)"/> <!-- TODO correct angle of how we want to search -->
       <deroute block="Searching" />
     </block>
 
@@ -384,7 +384,7 @@ best to perform many real life tests with the CAM
        call fun="InitializePolygonSurvey(WP_S1, NumOfCorners, SweepWidth, Orientation)"/> -->
 
        <!-- SweepWidth  max photo with at height - 20 pct overlap 180- etc-->
-      <call fun="nav_survey_poly_osam_setup(WP_SA1, 5, 144, CourseFromToEnuDeg(WP_SA1, WP_SA5))"/> <!-- TODO correct angle of how we want to search -->
+      <call fun="nav_survey_poly_osam_setup(WP_SA1, 5, 160, CourseFromToEnuDeg(WP_SA1, WP_SA5))"/> <!-- TODO correct angle of how we want to search -->
     </block>
 
     <block name="Searching">
