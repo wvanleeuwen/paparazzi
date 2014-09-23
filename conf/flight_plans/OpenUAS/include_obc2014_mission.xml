@@ -540,7 +540,7 @@ mode must be activated. A controlled flight termination mode may be
 termination mode (Section 5.6).
 -->
 
-    <block name="CommsHoldLoiter" strip_button="CommsHold" strip_icon="recenter.png" group="Safety" >  <!-- TODO other ICON -->
+    <block name="CommsHoldLoiter" strip_button="CommsHold" strip_icon="recenter.png" group="Link" >  <!-- TODO other ICON -->
       <!-- stop streaming thumbnails -->
       <set value="0" var="ticket_thumbnails"/>
       <!-- TODO: maybe set a little lower speed ? max endurence speed? -->
@@ -558,41 +558,9 @@ termination mode (Section 5.6).
        <circle wp="COMMSHOLD" radius="nav_radius"/> <!-- TODO maybe bigger than default radius -->
     </block>
 
-    <block name="AirfieldHomeLoiter">
-      <exception cond="stage_time > 120" deroute="AirfieldHomeSoftlyDown"/>
+    <block name="AirfieldHomeLoiter" strip_icon="home.png" group="Link">
+      <exception cond="stage_time > 120" deroute="Constant Slope Land Right AF-TD"/>
       <circle wp="AIRFIELDHOME" radius="nav_radius*1.5"/><!-- 1.5 x  mean it will be a bit bigger circle -->
-    </block>
-
-<!-- circle smootly down -->
-<!-- TODO: Make te routine correct it is NOT correct now -->
-    <block name="AirfieldHomeSoftlyDown">
-        <circle radius="nav_radius" wp="AIRFIELDHOME" until="NavCircleCount() > 1"/>
-      <!--
-      <for from="0" to="8" var="i">
-      </for>
-      -->
-      <!--deroute block="ComputeLandingApproach"/-->
-    </block>
-
-<!--Engine Failure
-
-Q:
- Procedure to be followed declared by the team in Deliverable 2.
- Follows from other rules, no working engine = decending till hit the ground but stll following regular flightplan, and if passing with no moterpower geofence rule will be adhered to also thus then switched to a forcedcrash
--->
-
-<!--Below routes that are handy for testing only when in the field and performing several tests -->
-<!--
-    <block name="Oval 1-2" strip_button="Oval (wp 1-2)" strip_icon="oval.png">
-      <oval p1="1" p2="2" radius="60"/>
-    </block>
--->
-
-    <!-- Just make sure it somehow stops in case of flightplan mishap or no being able to take over -->
-    <block key="a" name="Airfieldhome" strip_button="Airfieldhome" strip_icon="home.png" group="Safety">
-      <circle radius="nav_radius" wp="AIRFIELDHOME"/>
-      <!-- TODO have two landing stratigy, one with circle down one with a streight line maybe a thir depending on measured windspeed -->
-      <!--deroute block="ComputeLandingApproach"/-->
     </block>
 
 
