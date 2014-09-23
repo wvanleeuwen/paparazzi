@@ -224,7 +224,7 @@ TST-3 = -26° 35' 23.2" * 151° 50' 45.9"
       <set value="DownlinkSendWpNr(WP_TD)" var="unit"/>
       <set value="SetAltitudeForFinalFromTo(WP_TD,WP_AF)" var="unit"/>
       <call fun="nav_compute_final_from_glide(WP_AF, WP_TD, V_CTL_GLIDE_RATIO)"/>
-      <call fun="nav_compute_final_from_glide(WP_FLARE, WP_TD, V_CTL_GLIDE_RATIO)"/>
+      <call fun="nav_compute_flare_from_aftd(WP_AF, WP_TD, WP_FLARE)"/>
       <set value="DownlinkSendWpNr(WP_AF)" var="unit"/>
       <set value="DownlinkSendWpNr(WP_FLARE)" var="unit"/>
       <deroute block="HoldingPoint"/>
@@ -500,9 +500,10 @@ extern bool_t compute_alignment(uint8_t w1, uint8_t w2, uint8_t start, uint8_t e
 
     <block name="ComputeLandingApproach" >
       <call fun="nav_compute_final_from_glide(WP_AF, WP_TD, V_CTL_GLIDE_RATIO)"/>
-      <call fun="nav_compute_final_from_glide(WP_FLARE, WP_TD, V_CTL_GLIDE_RATIO)"/>
+      <call fun="nav_compute_flare_from_aftd(WP_AF, WP_TD, WP_FLARE)"/>
       <set value="DownlinkSendWpNr(WP_AF)" var="unit"/>
-    </block>
+      <set value="DownlinkSendWpNr(WP_FLARE)" var="unit"/>
+      </block>
 
     <block name="Land">
       <set value="set_airspeed_nominal" var="v_ctl_auto_airspeed_setpoint"/>
@@ -514,7 +515,7 @@ extern bool_t compute_alignment(uint8_t w1, uint8_t w2, uint8_t start, uint8_t e
 
     <block name="Final">
       <set value="AirbrakesOn()" var="unit"/>
-      <go approaching_time="5" from="AF" hmode="route" wp="TD"/>
+      <go approaching_time="8" from="AF" hmode="route" wp="TD"/>
     </block>
 
     <block name="Flare">
@@ -573,7 +574,7 @@ termination mode (Section 5.6).
        <circle wp="COMMSHOLD" radius="nav_radius"/> <!-- TODO maybe bigger than default radius -->
     </block>
 
-    <block name="AirfieldHomeLoiter" strip_icon="home.png" group="Link">
+    <block name="AirfieldHomeLoiter" strip_button="AirfieldHome" strip_icon="home.png" group="Link">
       <exception cond="stage_time > 120" deroute="ConstantSlopeLandRightAFTD"/>
       <circle wp="AIRFIELDHOME" radius="nav_radius*1.5"/><!-- 1.5 x  mean it will be a bit bigger circle -->
     </block>
