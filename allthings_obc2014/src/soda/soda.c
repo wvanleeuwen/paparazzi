@@ -55,8 +55,8 @@ int main(int argc, char* argv[])
   }
   printf("\n");
 
-  int nr = shotinfo.data.nr;
-  printf("SODA:\tImage nr: %d\n",nr);
+  imgnr = shotinfo.data.nr;
+  printf("SODA:\tImage nr: %d\n",imgnr);
 
   int x,y;
   int w,h;

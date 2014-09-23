@@ -8,7 +8,7 @@
 #include "protocol.h"
 
 #define MAX_FILENAME 512
-#define MAX_PROCESSING_THREADS 25
+#define MAX_PROCESSING_THREADS 8
 #define MAX_IMAGE_BUFFERS 25
 #define IMAGE_SIZE 70
 #define SODA "/root/develop/allthings_obc2014/src/soda/soda"
