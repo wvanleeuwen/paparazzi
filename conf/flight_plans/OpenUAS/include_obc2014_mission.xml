@@ -365,12 +365,12 @@ best to perform many real life tests with the CAM
     </block>
 
     <block name="SearchForJoeDiagonal1">
-      <call fun="nav_survey_poly_osam_setup(WP_SA1, 5, 160, 45)"/> <!-- TODO correct angle of how we want to search -->
+      <call fun="nav_survey_poly_osam_setup(WP_SA1, 5, 160, 30)"/> <!-- TODO correct angle of how we want to search -->
       <deroute block="Searching" />
     </block>
 
     <block name="SearchForJoeDiagonal2">
-      <call fun="nav_survey_poly_osam_setup(WP_SA1, 5, 160, 135)"/> <!-- TODO correct angle of how we want to search -->
+      <call fun="nav_survey_poly_osam_setup(WP_SA1, 5, 160, 55)"/> <!-- TODO correct angle of how we want to search -->
       <deroute block="Searching" />
     </block>
 
