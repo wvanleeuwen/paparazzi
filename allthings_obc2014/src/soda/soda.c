@@ -16,6 +16,7 @@
 
 int main(int argc, char* argv[])
 {
+  union dc_shot_union shotinfo;
   char filename[512];
   char  outfile[1024];
 
@@ -45,11 +46,17 @@ int main(int argc, char* argv[])
     strcpy(filename, argv[1]);
   }
 
-  if (argc >= 3)
+  printf("SODA: ");
+  for (int i = 0; (i < (argc-2)) && (i < 10); i++)
   {
-    imgnr = atof(argv[2]);
-    printf("SODA:\tImage nr: %d\n",imgnr);
+    int val = atof(argv[i+2]);
+    printf("%d, ",val);
+    shotinfo.i[i] = val;
   }
+  printf("\n");
+
+  int nr = shotinfo.data.nr;
+  printf("SODA:\tImage nr: %d\n",nr);
 
   int x,y;
   int w,h;
@@ -221,7 +228,30 @@ int main(int argc, char* argv[])
   int score = maximum / 200000;
   if (score > 255)
     score = 255;
-  
+
+  // Geo Info:
+  {
+    char buff[70];
+    // Packet header
+    buff[0] = imgnr;
+    buff[1] = 255;
+    buff[2] = blocks;
+    buff[3] = 0;
+    buff[4] = THUMB_W;
+    buff[5] = (char) ((unsigned char) score);
+
+    uint16_t val;
+    val = joe_x;
+    buff[6] = (val & 0x00ff);
+    buff[7] = (val >> 8);
+    val = joe_x;
+    buff[6] = (val & 0x00ff);
+    buff[7] = (val >> 8);
+    for (int i=0; i < MORA_SHOOT_MSG_SIZE; i++)
+      buff[i+10] = shotinfo.bin[i];
+    socket_send(buff,70);
+  }
+
   for (int b = blocks-1; b >= 0; b--)
   {
     char buff[70];

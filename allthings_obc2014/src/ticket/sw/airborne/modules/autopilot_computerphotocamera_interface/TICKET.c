@@ -59,7 +59,7 @@ int ticket_status = 0;
 
 int ticket_thumbnails = 0;
 #define THUMB_MSG_SIZE  MORA_PAYLOAD_MSG_SIZE
-#define THUMB_COUNT     6
+#define THUMB_COUNT     10
 static uint8_t thumbs[THUMB_COUNT][THUMB_MSG_SIZE];
 static uint8_t thumb_pointer = 0;
 
