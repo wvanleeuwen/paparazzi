@@ -244,9 +244,9 @@ int main(int argc, char* argv[])
     val = joe_x;
     buff[6] = (val & 0x00ff);
     buff[7] = (val >> 8);
-    val = joe_x;
-    buff[6] = (val & 0x00ff);
-    buff[7] = (val >> 8);
+    val = joe_y;
+    buff[8] = (val & 0x00ff);
+    buff[9] = (val >> 8);
     for (int i=0; i < MORA_SHOOT_MSG_SIZE; i++)
       buff[i+10] = shotinfo.bin[i];
     socket_send(buff,70);
@@ -283,6 +283,10 @@ int main(int argc, char* argv[])
   FILE* fp = fopen(outfile, "w+b");
   fprintf(fp, "processed  %s \n", filename);
   fprintf(fp, "Joe: (x,y) = (%d, %d) max=%lu\n", joe_x, joe_y, maximum);
+
+  for (int i=0; i< 10; i++)
+    fprintf(fp, "%d, ",shotinfo.i[i]);
+
   fclose(fp);
 
   return 0;
