@@ -30,7 +30,9 @@
 #include "std.h"
 
 #include "subsystems/imu.h"
+#include "subsystems/actuators/motor_mixing.h"
 #include "firmwares/rotorcraft/stabilization.h"
+#include "firmwares/rotorcraft/stabilization/stabilization_attitude_quat_indi.h"
 #include "state.h"
 
 /** Set the default File logger path to the USB drive */
@@ -61,7 +63,7 @@ void file_logger_start(void)
   if (file_logger != NULL) {
     fprintf(
       file_logger,
-      "counter,gyro_unscaled_p,gyro_unscaled_q,gyro_unscaled_r,accel_unscaled_x,accel_unscaled_y,accel_unscaled_z,mag_unscaled_x,mag_unscaled_y,mag_unscaled_z,COMMAND_THRUST,COMMAND_ROLL,COMMAND_PITCH,COMMAND_YAW,qi,qx,qy,qz\n"
+      "counter,gyro_unscaled_p,gyro_unscaled_q,gyro_unscaled_r,gyro_deriv_p,gyro_deriv_q,gyro_deriv_r,motor_0,motor_1,motor_2,motor_4,COMMAND_THRUST,COMMAND_ROLL,COMMAND_PITCH,COMMAND_YAW,qi,qx,qy,qz\n"
     );
   }
 }
