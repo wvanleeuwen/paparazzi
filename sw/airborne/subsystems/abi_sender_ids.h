@@ -89,6 +89,13 @@
 #endif
 
 /*
+ * IDs of RPM sensors that can be loaded
+ */
+#ifndef BEBOP_SENDER_ID
+#define BEBOP_SENDER_ID 1
+#endif
+
+/*
  * IDs of AGL measurment modules that can be loaded (sonars,...)
  */
 #ifndef AGL_SONAR_ADC_ID

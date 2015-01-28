@@ -28,6 +28,7 @@
 #include "subsystems/actuators.h"
 #include "subsystems/actuators/motor_mixing.h"
 #include "subsystems/electrical.h"
+#include "subsystems/abi.h"
 #include "actuators.h"
 #include "led_hw.h"
 #include "autopilot.h"
@@ -78,13 +79,12 @@ void actuators_bebop_commit(void)
 
   // Update status
   electrical.vsupply = (actuators_bebop.i2c_trans.buf[9] + (actuators_bebop.i2c_trans.buf[8] << 8)) / 100;
-  actuators_bebop.rpm_obs[0] = (actuators_bebop.i2c_trans.buf[1] + (actuators_bebop.i2c_trans.buf[0] << 8));
-  actuators_bebop.rpm_obs[1] = (actuators_bebop.i2c_trans.buf[3] + (actuators_bebop.i2c_trans.buf[2] << 8));
-  actuators_bebop.rpm_obs[2] = (actuators_bebop.i2c_trans.buf[5] + (actuators_bebop.i2c_trans.buf[4] << 8));
-  actuators_bebop.rpm_obs[3] = (actuators_bebop.i2c_trans.buf[7] + (actuators_bebop.i2c_trans.buf[6] << 8));
-
-  // Saturate the bebop motors
-  //actuators_bebop_saturate();
+  actuators_bebop.rpm_obs[0] = (actuators_bebop.i2c_trans.buf[1] + (actuators_bebop.i2c_trans.buf[0] << 8)) & ~(1<<15);
+  actuators_bebop.rpm_obs[1] = (actuators_bebop.i2c_trans.buf[3] + (actuators_bebop.i2c_trans.buf[2] << 8)) & ~(1<<15);
+  actuators_bebop.rpm_obs[2] = (actuators_bebop.i2c_trans.buf[5] + (actuators_bebop.i2c_trans.buf[4] << 8)) & ~(1<<15);
+  actuators_bebop.rpm_obs[3] = (actuators_bebop.i2c_trans.buf[7] + (actuators_bebop.i2c_trans.buf[6] << 8)) & ~(1<<15);
+  AbiSendMsgRPM(BEBOP_SENDER_ID, actuators_bebop.rpm_obs);
+  // TODO also broadcast when RPM limit is reached (1<<15)
 
   // When detected a suicide
   actuators_bebop.i2c_trans.buf[10] = actuators_bebop.i2c_trans.buf[10] & 0x7;
@@ -144,36 +144,3 @@ static uint8_t actuators_bebop_checksum(uint8_t *bytes, uint8_t size)
 
   return checksum;
 }
-
-/*static void actuators_bebop_saturate(void) {
-  // Find the lowest and highest commands
-  int32_t max_cmd = 9000; // Should be gotton from airframe file per motor
-  int32_t min_cmd = 3000; // Should be gotton from airframe file per motor
-  for(int i = 0; i < 4; i++) {
-    if(actuators_bebop.rpm_ref[i] > max_cmd)
-      max_cmd = actuators_bebop.rpm_ref[i];
-    if(actuators_bebop.rpm_ref[i] < min_cmd)
-      min_cmd = actuators_bebop.rpm_ref[i];
-  }
-
-  // Find the maximum motor command (Saturated motor or either MOTOR_MIXING_MAX_MOTOR)
-  int32_t max_motor = 9000;
-  for(int i = 0; i < 4; i++) {
-    if(actuators_bebop.rpm_obs[i] & (1<<15) && max_cmd > (actuators_bebop.rpm_obs[i] & ~(1<<15)))
-      max_motor = actuators_bebop.rpm_obs[i] & ~(1<<15);
-  }
-
-  // Saturate the offsets
-  if(max_cmd > max_motor) {
-    int32_t saturation_offset = 9000 - max_cmd;
-    for(int i = 0; i < 4; i++)
-      actuators_bebop.rpm_ref[i] += saturation_offset;
-    motor_mixing.nb_saturation++;
-  }
-  else if(min_cmd < 3000) {
-    int32_t saturation_offset = 3000 - min_cmd;
-    for(int i = 0; i < 4; i++)
-      actuators_bebop.rpm_ref[i] += saturation_offset;
-    motor_mixing.nb_saturation++;
-  }
-}*/

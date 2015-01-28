@@ -27,11 +27,11 @@
 #include "firmwares/rotorcraft/stabilization/stabilization_attitude_rc_setpoint.h"
 #include "firmwares/rotorcraft/stabilization/stabilization_attitude_quat_transformations.h"
 
-#include <stdio.h>
 #include "math/pprz_algebra_float.h"
 #include "math/pprz_algebra_int.h"
 #include "state.h"
 #include "generated/airframe.h"
+#include "subsystems/abi.h"
 #include "subsystems/imu.h"
 #include "subsystems/actuators/motor_mixing.h"
 #include "firmwares/rotorcraft/guidance/guidance_h.h"
@@ -70,6 +70,9 @@ struct FloatRates udot = {0., 0., 0.};
 struct FloatRates udotdot = {0., 0., 0.};
 struct FloatRates filt_rate = {0., 0., 0.};
 
+abi_event rpm_ev;
+static void rpm_cb(uint8_t sender_id, const uint16_t *rpm);
+
 #define IERROR_SCALE 1024
 #define GAIN_PRESCALER_FF 48
 #define GAIN_PRESCALER_P 48
@@ -89,9 +92,9 @@ struct FloatRates filt_rate = {0., 0., 0.};
 #if PERIODIC_TELEMETRY
 #include "subsystems/datalink/telemetry.h"
 
-static void send_ahrs_ref_quat(void) {
+static void send_ahrs_ref_quat(struct transport_tx *trans, struct link_device *dev) {
   struct Int32Quat* quat = stateGetNedToBodyQuat_i();
-  DOWNLINK_SEND_AHRS_REF_QUAT(DefaultChannel, DefaultDevice,
+  pprz_msg_send_AHRS_REF_QUAT(trans, dev, AC_ID,
       &stab_att_ref_quat.qi,
       &stab_att_ref_quat.qx,
       &stab_att_ref_quat.qy,
@@ -102,8 +105,8 @@ static void send_ahrs_ref_quat(void) {
       &(quat->qz));
 }
 
-static void send_att_indi(void) {
-  DOWNLINK_SEND_STAB_ATTITUDE_INDI(DefaultChannel, DefaultDevice,
+static void send_att_indi(struct transport_tx *trans, struct link_device *dev) {
+  pprz_msg_send_STAB_ATTITUDE_INDI(trans, dev, AC_ID,
                                    &filtered_rate_deriv.p,
                                    &filtered_rate_deriv.q,
                                    &filtered_rate_deriv.r,
@@ -119,6 +122,9 @@ static void send_att_indi(void) {
 void stabilization_attitude_init(void) {
 
   stabilization_attitude_ref_init();
+
+  // Register to RPM messages
+  AbiBindMsgRPM(ABI_BROADCAST, &rpm_ev, rpm_cb);
 
 #if PERIODIC_TELEMETRY
   register_periodic_telemetry(DefaultPeriodic, "AHRS_REF_QUAT", send_ahrs_ref_quat);
@@ -198,12 +204,6 @@ static void attitude_run_indi(int32_t indi_commands[], struct Int32Quat *att_err
   indi_du.p = inv_control_effectiveness.p * (angular_accel_ref.p - filtered_rate_deriv.p);
   indi_du.q = inv_control_effectiveness.q * (angular_accel_ref.q - filtered_rate_deriv.q);
   indi_du.r = inv_control_effectiveness.r * (angular_accel_ref.r - filtered_rate_deriv.r);
-
-
-  actuators_bebop.rpm_obs[0] &= ~(1<<15);
-  actuators_bebop.rpm_obs[1] &= ~(1<<15);
-  actuators_bebop.rpm_obs[2] &= ~(1<<15);
-  actuators_bebop.rpm_obs[3] &= ~(1<<15);
 
   stabilization_indi_filter_inputs();
 
@@ -322,3 +322,6 @@ void stabilization_indi_filter_inputs(void) {
   udotdot.r = -udot.r * 2*STABILIZATION_INDI_FILT_ZETA_R*STABILIZATION_INDI_FILT_OMEGA_R + (u_act_dyn.r - indi_u.r)*STABILIZATION_INDI_FILT_OMEGA2_R;
 }
 
+static void rpm_cb(uint8_t sender_id, const uint16_t *rpm) {
+
+}

@@ -20,6 +20,10 @@
       <field name="temp" type="float" unit="deg Celcius"/>
     </message>
 
+    <message name="RPM" id="4">
+      <field name="rpm" type="uint16_t" unit="RPM"/>
+    </message>
+
   </msg_class>
 
 
