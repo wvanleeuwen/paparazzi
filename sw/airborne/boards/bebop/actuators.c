@@ -83,7 +83,8 @@ void actuators_bebop_commit(void)
   actuators_bebop.rpm_obs[1] = (actuators_bebop.i2c_trans.buf[3] + (actuators_bebop.i2c_trans.buf[2] << 8)) & ~(1<<15);
   actuators_bebop.rpm_obs[2] = (actuators_bebop.i2c_trans.buf[5] + (actuators_bebop.i2c_trans.buf[4] << 8)) & ~(1<<15);
   actuators_bebop.rpm_obs[3] = (actuators_bebop.i2c_trans.buf[7] + (actuators_bebop.i2c_trans.buf[6] << 8)) & ~(1<<15);
-  AbiSendMsgRPM(BEBOP_SENDER_ID, actuators_bebop.rpm_obs);
+  uint8_t count = 4;
+  AbiSendMsgRPM(BEBOP_SENDER_ID, actuators_bebop.rpm_obs, &count);
   // TODO also broadcast when RPM limit is reached (1<<15)
 
   // When detected a suicide

@@ -36,24 +36,16 @@
 #include "subsystems/actuators/motor_mixing.h"
 #include "firmwares/rotorcraft/guidance/guidance_h.h"
 
-// dummy gains for systems expecting attitude gains
-struct Int32AttitudeGains stabilization_gains = {
-  {STABILIZATION_ATTITUDE_PHI_PGAIN, STABILIZATION_ATTITUDE_THETA_PGAIN, STABILIZATION_ATTITUDE_PSI_PGAIN },
-  {STABILIZATION_ATTITUDE_PHI_DGAIN, STABILIZATION_ATTITUDE_THETA_DGAIN, STABILIZATION_ATTITUDE_PSI_DGAIN },
-  {STABILIZATION_ATTITUDE_PHI_DDGAIN, STABILIZATION_ATTITUDE_THETA_DDGAIN, STABILIZATION_ATTITUDE_PSI_DDGAIN },
-  {STABILIZATION_ATTITUDE_PHI_IGAIN, STABILIZATION_ATTITUDE_THETA_IGAIN, STABILIZATION_ATTITUDE_PSI_IGAIN }
-};
-struct Int32Eulers stabilization_att_sum_err;
 
 int32_t stabilization_att_indi_cmd[COMMANDS_NB];
-
 struct FloatRates inv_control_effectiveness = {STABILIZATION_INDI_CONTROL_EFFECTIVENESS_P, STABILIZATION_INDI_CONTROL_EFFECTIVENESS_Q, STABILIZATION_INDI_CONTROL_EFFECTIVENESS_R};
-struct ReferenceSystem reference_acceleration = {STABILIZATION_INDI_REF_ERR_P,
-STABILIZATION_INDI_REF_ERR_Q,
-STABILIZATION_INDI_REF_ERR_R,
-STABILIZATION_INDI_REF_RATE_P,
-STABILIZATION_INDI_REF_RATE_Q,
-STABILIZATION_INDI_REF_RATE_R,
+struct ReferenceSystem reference_acceleration = {
+  STABILIZATION_INDI_REF_ERR_P,
+  STABILIZATION_INDI_REF_ERR_Q,
+  STABILIZATION_INDI_REF_ERR_R,
+  STABILIZATION_INDI_REF_RATE_P,
+  STABILIZATION_INDI_REF_RATE_Q,
+  STABILIZATION_INDI_REF_RATE_R,
 };
 
 struct FloatRates filtered_rate = {0., 0., 0.};
@@ -69,15 +61,14 @@ struct FloatRates u_in = {0., 0., 0.};
 struct FloatRates udot = {0., 0., 0.};
 struct FloatRates udotdot = {0., 0., 0.};
 struct FloatRates filt_rate = {0., 0., 0.};
+float act_obs_rpm[ACTUATORS_NB];
+
+static const int32_t roll_coef[MOTOR_MIXING_NB_MOTOR]   = MOTOR_MIXING_ROLL_COEF;
+static const int32_t pitch_coef[MOTOR_MIXING_NB_MOTOR]  = MOTOR_MIXING_PITCH_COEF;
+static const int32_t yaw_coef[MOTOR_MIXING_NB_MOTOR]    = MOTOR_MIXING_YAW_COEF;
 
 abi_event rpm_ev;
-static void rpm_cb(uint8_t sender_id, const uint16_t *rpm);
-
-#define IERROR_SCALE 1024
-#define GAIN_PRESCALER_FF 48
-#define GAIN_PRESCALER_P 48
-#define GAIN_PRESCALER_D 48
-#define GAIN_PRESCALER_I 48
+static void rpm_cb(uint8_t sender_id, const uint16_t *rpm, const uint8_t *count);
 
 #define STABILIZATION_INDI_FILT_OMEGA2 (STABILIZATION_INDI_FILT_OMEGA*STABILIZATION_INDI_FILT_OMEGA)
 
@@ -92,20 +83,22 @@ static void rpm_cb(uint8_t sender_id, const uint16_t *rpm);
 #if PERIODIC_TELEMETRY
 #include "subsystems/datalink/telemetry.h"
 
-static void send_ahrs_ref_quat(struct transport_tx *trans, struct link_device *dev) {
-  struct Int32Quat* quat = stateGetNedToBodyQuat_i();
+static void send_ahrs_ref_quat(struct transport_tx *trans, struct link_device *dev)
+{
+  struct Int32Quat *quat = stateGetNedToBodyQuat_i();
   pprz_msg_send_AHRS_REF_QUAT(trans, dev, AC_ID,
-      &stab_att_ref_quat.qi,
-      &stab_att_ref_quat.qx,
-      &stab_att_ref_quat.qy,
-      &stab_att_ref_quat.qz,
-      &(quat->qi),
-      &(quat->qx),
-      &(quat->qy),
-      &(quat->qz));
+                              &stab_att_ref_quat.qi,
+                              &stab_att_ref_quat.qx,
+                              &stab_att_ref_quat.qy,
+                              &stab_att_ref_quat.qz,
+                              &(quat->qi),
+                              &(quat->qx),
+                              &(quat->qy),
+                              &(quat->qz));
 }
 
-static void send_att_indi(struct transport_tx *trans, struct link_device *dev) {
+static void send_att_indi(struct transport_tx *trans, struct link_device *dev)
+{
   pprz_msg_send_STAB_ATTITUDE_INDI(trans, dev, AC_ID,
                                    &filtered_rate_deriv.p,
                                    &filtered_rate_deriv.q,
@@ -119,8 +112,8 @@ static void send_att_indi(struct transport_tx *trans, struct link_device *dev) {
 }
 #endif
 
-void stabilization_attitude_init(void) {
-
+void stabilization_attitude_init(void)
+{
   stabilization_attitude_ref_init();
 
   // Register to RPM messages
@@ -132,8 +125,8 @@ void stabilization_attitude_init(void) {
 #endif
 }
 
-void stabilization_attitude_enter(void) {
-
+void stabilization_attitude_enter(void)
+{
   /* reset psi setpoint to current psi angle */
   stab_att_sp_euler.psi = stabilization_attitude_get_heading_i();
 
@@ -150,10 +143,10 @@ void stabilization_attitude_enter(void) {
   FLOAT_RATES_ZERO(udot);
   FLOAT_RATES_ZERO(udotdot);
   FLOAT_RATES_ZERO(filt_rate);
-
 }
 
-void stabilization_attitude_set_failsafe_setpoint(void) {
+void stabilization_attitude_set_failsafe_setpoint(void)
+{
   /* set failsafe to zero roll/pitch and current heading */
   int32_t heading2 = stabilization_attitude_get_heading_i() / 2;
   PPRZ_ITRIG_COS(stab_att_sp_quat.qi, heading2);
@@ -162,14 +155,16 @@ void stabilization_attitude_set_failsafe_setpoint(void) {
   PPRZ_ITRIG_SIN(stab_att_sp_quat.qz, heading2);
 }
 
-void stabilization_attitude_set_rpy_setpoint_i(struct Int32Eulers *rpy) {
+void stabilization_attitude_set_rpy_setpoint_i(struct Int32Eulers *rpy)
+{
   // stab_att_sp_euler.psi still used in ref..
   memcpy(&stab_att_sp_euler, rpy, sizeof(struct Int32Eulers));
 
   quat_from_rpy_cmd_i(&stab_att_sp_quat, &stab_att_sp_euler);
 }
 
-void stabilization_attitude_set_earth_cmd_i(struct Int32Vect2 *cmd, int32_t heading) {
+void stabilization_attitude_set_earth_cmd_i(struct Int32Vect2 *cmd, int32_t heading)
+{
   // stab_att_sp_euler.psi still used in ref..
   stab_att_sp_euler.psi = heading;
 
@@ -185,21 +180,14 @@ void stabilization_attitude_set_earth_cmd_i(struct Int32Vect2 *cmd, int32_t head
   quat_from_earth_cmd_i(&stab_att_sp_quat, cmd, heading);
 }
 
-#define OFFSET_AND_ROUND(_a, _b) (((_a)+(1<<((_b)-1)))>>(_b))
-#define OFFSET_AND_ROUND2(_a, _b) (((_a)+(1<<((_b)-1))-((_a)<0?1:0))>>(_b))
-
-#define BOUND_CONTROLS(_v, _min, _max) {         \
-_v = _v < _min ? _min : _v > _max ? _max : _v;  \
-}
-
 static void attitude_run_indi(int32_t indi_commands[], struct Int32Quat *att_err)
 {
   angular_accel_ref.p = reference_acceleration.err_p * QUAT1_FLOAT_OF_BFP(att_err->qx)
-                      - reference_acceleration.rate_p * filtered_rate.p;
+                        - reference_acceleration.rate_p * filtered_rate.p;
   angular_accel_ref.q = reference_acceleration.err_q * QUAT1_FLOAT_OF_BFP(att_err->qy)
-                      - reference_acceleration.rate_q * filtered_rate.q;
+                        - reference_acceleration.rate_q * filtered_rate.q;
   angular_accel_ref.r = reference_acceleration.err_r * QUAT1_FLOAT_OF_BFP(att_err->qz)
-                      - reference_acceleration.rate_r * filtered_rate.r;
+                        - reference_acceleration.rate_r * filtered_rate.r;
 
   indi_du.p = inv_control_effectiveness.p * (angular_accel_ref.p - filtered_rate_deriv.p);
   indi_du.q = inv_control_effectiveness.q * (angular_accel_ref.q - filtered_rate_deriv.q);
@@ -211,13 +199,13 @@ static void attitude_run_indi(int32_t indi_commands[], struct Int32Quat *att_err
   u_in.q = indi_u.q + indi_du.q;
   u_in.r = indi_u.r + indi_du.r;
 
-  BOUND_CONTROLS(u_in.p, -4500, 4500);
-  BOUND_CONTROLS(u_in.q, -4500, 4500);
-  float half_thrust = ((float) stabilization_cmd[COMMAND_THRUST]/2);
-  BOUND_CONTROLS(u_in.r, -half_thrust, half_thrust);
+  Bound(u_in.p, -4500, 4500);
+  Bound(u_in.q, -4500, 4500);
+  float half_thrust = ((float) stabilization_cmd[COMMAND_THRUST] / 2);
+  Bound(u_in.r, -half_thrust, half_thrust);
 
   //Don't increment if thrust is off
-  if(stabilization_cmd[COMMAND_THRUST]<300) {
+  if (stabilization_cmd[COMMAND_THRUST] < 300) {
     FLOAT_RATES_ZERO(indi_u);
     FLOAT_RATES_ZERO(indi_du);
     FLOAT_RATES_ZERO(u_act_dyn);
@@ -235,7 +223,8 @@ static void attitude_run_indi(int32_t indi_commands[], struct Int32Quat *att_err
   indi_commands[COMMAND_YAW] = u_in.r;
 }
 
-void stabilization_attitude_run(bool_t enable_integrator) {
+void stabilization_attitude_run(bool_t enable_integrator)
+{
 
   /* Propagate the second order filter on the gyroscopes */
   stabilization_indi_filter_gyro();
@@ -246,7 +235,7 @@ void stabilization_attitude_run(bool_t enable_integrator) {
 
   /* attitude error                          */
   struct Int32Quat att_err;
-  struct Int32Quat* att_quat = stateGetNedToBodyQuat_i();
+  struct Int32Quat *att_quat = stateGetNedToBodyQuat_i();
   INT32_QUAT_INV_COMP(att_err, *att_quat, stab_att_sp_quat);
   /* wrap it in the shortest direction       */
   INT32_QUAT_WRAP_SHORTEST(att_err);
@@ -265,7 +254,8 @@ void stabilization_attitude_run(bool_t enable_integrator) {
   BoundAbs(stabilization_cmd[COMMAND_YAW], MAX_PPRZ);
 }
 
-void stabilization_attitude_read_rc(bool_t in_flight, bool_t in_carefree, bool_t coordinated_turn) {
+void stabilization_attitude_read_rc(bool_t in_flight, bool_t in_carefree, bool_t coordinated_turn)
+{
   struct FloatQuat q_sp;
 #if USE_EARTH_BOUND_RC_SETPOINT
   stabilization_attitude_read_rc_setpoint_quat_earth_bound_f(&q_sp, in_flight, in_carefree, coordinated_turn);
@@ -275,53 +265,52 @@ void stabilization_attitude_read_rc(bool_t in_flight, bool_t in_carefree, bool_t
   QUAT_BFP_OF_REAL(stab_att_sp_quat, q_sp);
 }
 
-void stabilization_indi_filter_gyro(void) {
-  filtered_rate.p = filtered_rate.p + filtered_rate_deriv.p/512.0;
-  filtered_rate.q = filtered_rate.q + filtered_rate_deriv.q/512.0;
-  filtered_rate.r = filtered_rate.r + filtered_rate_deriv.r/512.0;
+void stabilization_indi_filter_gyro(void)
+{
+  filtered_rate.p = filtered_rate.p + filtered_rate_deriv.p / 512.0;
+  filtered_rate.q = filtered_rate.q + filtered_rate_deriv.q / 512.0;
+  filtered_rate.r = filtered_rate.r + filtered_rate_deriv.r / 512.0;
 
-  filtered_rate_deriv.p = filtered_rate_deriv.p + filtered_rate_2deriv.p/512.0;
-  filtered_rate_deriv.q = filtered_rate_deriv.q + filtered_rate_2deriv.q/512.0;
-  filtered_rate_deriv.r = filtered_rate_deriv.r + filtered_rate_2deriv.r/512.0;
+  filtered_rate_deriv.p = filtered_rate_deriv.p + filtered_rate_2deriv.p / 512.0;
+  filtered_rate_deriv.q = filtered_rate_deriv.q + filtered_rate_2deriv.q / 512.0;
+  filtered_rate_deriv.r = filtered_rate_deriv.r + filtered_rate_2deriv.r / 512.0;
 
-  filtered_rate_2deriv.p = -filtered_rate_deriv.p * 2*STABILIZATION_INDI_FILT_ZETA*STABILIZATION_INDI_FILT_OMEGA + ( stateGetBodyRates_f()->p - filtered_rate.p)*STABILIZATION_INDI_FILT_OMEGA2;
-  filtered_rate_2deriv.q = -filtered_rate_deriv.q * 2*STABILIZATION_INDI_FILT_ZETA*STABILIZATION_INDI_FILT_OMEGA + ( stateGetBodyRates_f()->q - filtered_rate.q)*STABILIZATION_INDI_FILT_OMEGA2;
-  filtered_rate_2deriv.r = -filtered_rate_deriv.r * 2*STABILIZATION_INDI_FILT_ZETA_R*STABILIZATION_INDI_FILT_OMEGA_R + ( stateGetBodyRates_f()->r - filtered_rate.r)*STABILIZATION_INDI_FILT_OMEGA2_R;
+  filtered_rate_2deriv.p = -filtered_rate_deriv.p * 2 * STABILIZATION_INDI_FILT_ZETA * STABILIZATION_INDI_FILT_OMEGA + (stateGetBodyRates_f()->p - filtered_rate.p) * STABILIZATION_INDI_FILT_OMEGA2;
+  filtered_rate_2deriv.q = -filtered_rate_deriv.q * 2 * STABILIZATION_INDI_FILT_ZETA * STABILIZATION_INDI_FILT_OMEGA + (stateGetBodyRates_f()->q - filtered_rate.q) * STABILIZATION_INDI_FILT_OMEGA2;
+  filtered_rate_2deriv.r = -filtered_rate_deriv.r * 2 * STABILIZATION_INDI_FILT_ZETA_R * STABILIZATION_INDI_FILT_OMEGA_R + (stateGetBodyRates_f()->r - filtered_rate.r) * STABILIZATION_INDI_FILT_OMEGA2_R;
 }
 
-void stabilization_indi_filter_inputs(void) {
-
-  float act_obs[4]; //0 is top right, 1 is top left, 2 is bottom left, 3 is bottom right
-  act_obs[0] = ((float)actuators_bebop.rpm_obs[0] - 3000);
-  act_obs[1] = ((float)actuators_bebop.rpm_obs[1] - 3000);
-  act_obs[2] = ((float)actuators_bebop.rpm_obs[2] - 3000);
-  act_obs[3] = ((float)actuators_bebop.rpm_obs[3] - 3000);
-
+void stabilization_indi_filter_inputs(void)
+{
 #ifdef INDI_RPM_FEEDBACK
-  u_act_dyn.p = (-act_obs[0] + act_obs[1] + act_obs[2] - act_obs[3]) / 4.0 * 1.2;
-  u_act_dyn.q = ( act_obs[0] + act_obs[1] - act_obs[2] - act_obs[3])/4.0*1.2;
-  u_act_dyn.r = ( act_obs[0] - act_obs[1] + act_obs[2] - act_obs[3])/4.0*1.2;
+  u_act_dyn.p = (-act_obs_rpm[0] + act_obs_rpm[1] + act_obs_rpm[2] - act_obs_rpm[3]) / 4.0;
+  u_act_dyn.q = (act_obs_rpm[0] + act_obs_rpm[1] - act_obs_rpm[2] - act_obs_rpm[3]) / 4.0;
+  u_act_dyn.r = (act_obs_rpm[0] - act_obs_rpm[1] + act_obs_rpm[2] - act_obs_rpm[3]) / 4.0;
 #else
   //actuator dynamics
-  u_act_dyn.p = u_act_dyn.p + STABILIZATION_INDI_ACT_DYN_P*( u_in.p - u_act_dyn.p);
-  u_act_dyn.q = u_act_dyn.q + STABILIZATION_INDI_ACT_DYN_Q*( u_in.q - u_act_dyn.q);
-  u_act_dyn.r = u_act_dyn.r + STABILIZATION_INDI_ACT_DYN_R*( u_in.r - u_act_dyn.r);
+  u_act_dyn.p = u_act_dyn.p + STABILIZATION_INDI_ACT_DYN_P * (u_in.p - u_act_dyn.p);
+  u_act_dyn.q = u_act_dyn.q + STABILIZATION_INDI_ACT_DYN_Q * (u_in.q - u_act_dyn.q);
+  u_act_dyn.r = u_act_dyn.r + STABILIZATION_INDI_ACT_DYN_R * (u_in.r - u_act_dyn.r);
 #endif
 
   //Sensor dynamics (same filter as on gyro measurements)
-  indi_u.p = indi_u.p + udot.p/512.0;
-  indi_u.q = indi_u.q + udot.q/512.0;
-  indi_u.r = indi_u.r + udot.r/512.0;
+  indi_u.p = indi_u.p + udot.p / 512.0;
+  indi_u.q = indi_u.q + udot.q / 512.0;
+  indi_u.r = indi_u.r + udot.r / 512.0;
 
-  udot.p = udot.p + udotdot.p/512.0;
-  udot.q = udot.q + udotdot.q/512.0;
-  udot.r = udot.r + udotdot.r/512.0;
+  udot.p = udot.p + udotdot.p / 512.0;
+  udot.q = udot.q + udotdot.q / 512.0;
+  udot.r = udot.r + udotdot.r / 512.0;
 
-  udotdot.p = -udot.p * 2*STABILIZATION_INDI_FILT_ZETA*STABILIZATION_INDI_FILT_OMEGA + (u_act_dyn.p - indi_u.p)*STABILIZATION_INDI_FILT_OMEGA2;
-  udotdot.q = -udot.q * 2*STABILIZATION_INDI_FILT_ZETA*STABILIZATION_INDI_FILT_OMEGA + (u_act_dyn.q - indi_u.q)*STABILIZATION_INDI_FILT_OMEGA2;
-  udotdot.r = -udot.r * 2*STABILIZATION_INDI_FILT_ZETA_R*STABILIZATION_INDI_FILT_OMEGA_R + (u_act_dyn.r - indi_u.r)*STABILIZATION_INDI_FILT_OMEGA2_R;
+  udotdot.p = -udot.p * 2 * STABILIZATION_INDI_FILT_ZETA * STABILIZATION_INDI_FILT_OMEGA + (u_act_dyn.p - indi_u.p) * STABILIZATION_INDI_FILT_OMEGA2;
+  udotdot.q = -udot.q * 2 * STABILIZATION_INDI_FILT_ZETA * STABILIZATION_INDI_FILT_OMEGA + (u_act_dyn.q - indi_u.q) * STABILIZATION_INDI_FILT_OMEGA2;
+  udotdot.r = -udot.r * 2 * STABILIZATION_INDI_FILT_ZETA_R * STABILIZATION_INDI_FILT_OMEGA_R + (u_act_dyn.r - indi_u.r) * STABILIZATION_INDI_FILT_OMEGA2_R;
 }
 
-static void rpm_cb(uint8_t sender_id, const uint16_t *rpm) {
-
+static void rpm_cb(uint8_t sender_id, const uint16_t *rpm, const uint8_t *count)
+{
+  for(int i = 0; i < *count; i++) {
+    act_obs_rpm[i] = (rpm[i] - get_servo_min(i));
+    act_obs_rpm[i] *= (MAX_PPRZ / (float)(get_servo_max(i)-get_servo_min(i)));
+  }
 }
