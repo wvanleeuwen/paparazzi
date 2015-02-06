@@ -3,17 +3,17 @@
 <flight_plan alt="152" ground_alt="147" lat0="52.168326" lon0="4.407849" max_dist_from_home="150" name="Rotorcraft Basic (Enac)" security_height="2">
   <header>
 #include "autopilot.h"
-  </header>
+</header>
   <waypoints>
-    <waypoint name="HOME" x="0.0" y="0.0"/>
+    <waypoint name="HOME" x="72.6" y="-53.3"/>
     <waypoint name="CLIMB" x="0.0" y="5.0"/>
-    <waypoint name="STDBY" x="-2.0" y="-5.0"/>
-    <waypoint name="p1" x="3.6" y="-13.9"/>
-    <waypoint name="p2" x="27.5" y="-48.2"/>
-    <waypoint name="p3" x="16.7" y="-19.6"/>
-    <waypoint name="p4" x="13.7" y="-40.7"/>
-    <waypoint name="CAM" x="-20" y="-50" height="2."/>
-    <waypoint name="TD" x="5.6" y="-10.9"/>
+    <waypoint name="STDBY" x="69.3" y="47.1"/>
+    <waypoint name="p1" x="53.3" y="2.2"/>
+    <waypoint name="p2" x="105.9" y="4.1"/>
+    <waypoint name="p3" x="16.4" y="-95.3"/>
+    <waypoint name="p4" x="109.7" y="-111.9"/>
+    <waypoint name="CAM" x="34.6" y="79.3"/>
+    <waypoint name="TD" x="48.4" y="38.0"/>
   </waypoints>
   <blocks>
     <block name="Wait GPS">
@@ -23,20 +23,19 @@
     <block name="Geo init">
       <while cond="LessThan(NavBlockTime(), 10)"/>
       <call fun="NavSetGroundReferenceHere()"/>
-      <!--<call fun="NavSetAltitudeReferenceHere()"/>-->
     </block>
     <block name="Holding point">
       <call fun="NavKillThrottle()"/>
-      <attitude pitch="0" roll="0" throttle="0" vmode="throttle" until="FALSE"/>
+      <attitude pitch="0" roll="0" throttle="0" until="FALSE" vmode="throttle"/>
     </block>
     <block name="Start Engine">
       <call fun="NavResurrect()"/>
-      <attitude pitch="0" roll="0" throttle="0" vmode="throttle" until="FALSE"/>
+      <attitude pitch="0" roll="0" throttle="0" until="FALSE" vmode="throttle"/>
     </block>
     <block name="Takeoff" strip_button="Takeoff" strip_icon="takeoff.png">
       <exception cond="stateGetPositionEnu_f()->z > 2.0" deroute="Standby"/>
       <call fun="NavSetWaypointHere(WP_CLIMB)"/>
-      <stay vmode="climb" climb="0.5" wp="CLIMB"/>
+      <stay climb="1.5" vmode="climb" wp="CLIMB"/>
     </block>
     <block name="Standby" strip_button="Standby" strip_icon="home.png">
       <stay wp="STDBY"/>
@@ -51,7 +50,7 @@
     </block>
     <block name="line_p1_p2">
       <go from="p1" hmode="route" wp="p2"/>
-      <stay wp="p2" until="stage_time>10"/>
+      <stay until="stage_time>10" wp="p2"/>
       <go from="p2" hmode="route" wp="p1"/>
       <deroute block="stay_p1"/>
     </block>
@@ -77,7 +76,7 @@
       <stay climb="-0.8" vmode="climb" wp="TD"/>
     </block>
     <block name="landed">
-      <attitude pitch="0" roll="0" throttle="0" vmode="throttle" until="FALSE"/>
+      <attitude pitch="0" roll="0" throttle="0" until="FALSE" vmode="throttle"/>
     </block>
   </blocks>
 </flight_plan>
