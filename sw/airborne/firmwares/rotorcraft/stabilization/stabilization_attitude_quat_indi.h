@@ -38,6 +38,8 @@ struct ReferenceSystem {
 extern struct FloatRates inv_control_effectiveness;
 extern struct ReferenceSystem reference_acceleration;
 
+extern float sensitivity;
+
 extern struct FloatRates filtered_rate;
 extern struct FloatRates filtered_rate_deriv;
 extern struct FloatRates filtered_rate_2deriv;
@@ -48,9 +50,14 @@ extern struct FloatRates u_act_dyn;
 extern struct FloatRates u_in;
 extern struct FloatRates udot;
 extern struct FloatRates udotdot;
+extern int32_t indi_u_in_estimation_i[4];
 
 void stabilization_indi_filter_gyro(void);
 void stabilization_indi_filter_inputs(void);
+void lms_estimation(void);
+void filter_inputs_actuators(void);
+void calc_g_elmt(float du_norm, float dx_error, int8_t i, int8_t j);
+void filter_estimation_indi(void);
 
 #endif /* STABILIZATION_ATTITUDE_QUAT_INT_H */
 

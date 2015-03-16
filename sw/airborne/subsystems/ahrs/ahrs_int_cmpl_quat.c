@@ -690,7 +690,12 @@ static inline void set_body_state_from_quat(void) {
   /* compute body rates */
   struct Int32Rates body_rate;
   struct Int32RMat *body_to_imu_rmat = orientationGetRMat_i(&imu.body_to_imu);
-  int32_rmat_transp_ratemult(&body_rate, body_to_imu_rmat, &ahrs_impl.imu_rate);
+
+  /* unbias gyro             */
+  struct Int32Rates omega;
+  RATES_DIFF(omega, imu.gyro, ahrs_impl.gyro_bias);
+
+  int32_rmat_transp_ratemult(&body_rate, body_to_imu_rmat, &omega);
   /* Set state */
   stateSetBodyRates_i(&body_rate);
 }

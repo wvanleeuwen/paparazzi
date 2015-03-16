@@ -88,17 +88,10 @@ void file_logger_periodic(void)
           imu.accel_unscaled.x,
           imu.accel_unscaled.y,
           imu.accel_unscaled.z,
-          imu.mag_unscaled.x,
-          imu.mag_unscaled.y,
-          imu.mag_unscaled.z,
           stabilization_cmd[COMMAND_THRUST],
           stabilization_cmd[COMMAND_ROLL],
           stabilization_cmd[COMMAND_PITCH],
-          stabilization_cmd[COMMAND_YAW],
-          quat->qi,
-          quat->qx,
-          quat->qy,
-          quat->qz
+          stabilization_cmd[COMMAND_YAW]
          );
   counter++;
 }

@@ -28,6 +28,8 @@
 #include "subsystems/actuators/motor_mixing.h"
 #include "paparazzi.h"
 
+#include "firmwares/rotorcraft/stabilization/stabilization_attitude_quat_indi.h"
+
 //#include <stdint.h>
 #ifndef INT32_MIN
 #define INT32_MIN (-2147483647-1)
@@ -188,6 +190,14 @@ void motor_mixing_run(bool_t motors_on, bool_t override_on, pprz_t in_cmd[])
     int32_t max_cmd = INT32_MIN;
     /* do the mixing in float to avoid overflows, implicitly casted back to int32_t */
     for (i = 0; i < MOTOR_MIXING_NB_MOTOR; i++) {
+#if USE_FULL_INDI
+      motor_mixing.commands[i] = MOTOR_MIXING_MIN_MOTOR +
+//         (thrust_coef[i] * in_cmd[COMMAND_THRUST] +
+        // yaw_coef[i] * in_cmd[COMMAND_YAW] +
+        (motor_mixing.trim[i]) / MOTOR_MIXING_SCALE *
+        (MOTOR_MIXING_MAX_MOTOR - MOTOR_MIXING_MIN_MOTOR) / MAX_PPRZ +
+        indi_u_in_estimation_i[i];
+#else
       motor_mixing.commands[i] = MOTOR_MIXING_MIN_MOTOR +
                                  (thrust_coef[i] * in_cmd[COMMAND_THRUST] +
                                   roll_coef[i]   * in_cmd[COMMAND_ROLL]   +
@@ -195,6 +205,7 @@ void motor_mixing_run(bool_t motors_on, bool_t override_on, pprz_t in_cmd[])
                                   yaw_coef[i]    * in_cmd[COMMAND_YAW]    +
                                   motor_mixing.trim[i]) / MOTOR_MIXING_SCALE *
                                  (MOTOR_MIXING_MAX_MOTOR - MOTOR_MIXING_MIN_MOTOR) / MAX_PPRZ;
+#endif
       if (motor_mixing.commands[i] < min_cmd) {
         min_cmd = motor_mixing.commands[i];
       }
