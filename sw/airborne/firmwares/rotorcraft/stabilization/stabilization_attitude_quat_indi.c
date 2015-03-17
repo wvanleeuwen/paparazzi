@@ -160,7 +160,7 @@ void stabilization_attitude_set_rpy_setpoint_i(struct Int32Eulers *rpy) {
   // stab_att_sp_euler.psi still used in ref..
   memcpy(&stab_att_sp_euler, rpy, sizeof(struct Int32Eulers));
 
-  quat_from_rpy_cmd_i(&stab_att_sp_quat, &stab_att_sp_euler);
+  int32_quat_of_eulers(&stab_att_sp_quat, &stab_att_sp_euler);
 }
 
 void stabilization_attitude_set_earth_cmd_i(struct Int32Vect2 *cmd, int32_t heading) {
@@ -274,11 +274,11 @@ void stabilization_indi_filter_gyro(void) {
   filtered_rate.p = filtered_rate.p + filtered_rate_deriv.p/512.0;
   filtered_rate.q = filtered_rate.q + filtered_rate_deriv.q/512.0;
   filtered_rate.r = filtered_rate.r + filtered_rate_deriv.r/512.0;
-  
+
   filtered_rate_deriv.p = filtered_rate_deriv.p + filtered_rate_2deriv.p/512.0;
   filtered_rate_deriv.q = filtered_rate_deriv.q + filtered_rate_2deriv.q/512.0;
   filtered_rate_deriv.r = filtered_rate_deriv.r + filtered_rate_2deriv.r/512.0;
-  
+
   filtered_rate_2deriv.p = -filtered_rate_deriv.p * 2*STABILIZATION_INDI_FILT_ZETA*STABILIZATION_INDI_FILT_OMEGA + ( stateGetBodyRates_f()->p - filtered_rate.p)*STABILIZATION_INDI_FILT_OMEGA2;
   filtered_rate_2deriv.q = -filtered_rate_deriv.q * 2*STABILIZATION_INDI_FILT_ZETA*STABILIZATION_INDI_FILT_OMEGA + ( stateGetBodyRates_f()->q - filtered_rate.q)*STABILIZATION_INDI_FILT_OMEGA2;
   filtered_rate_2deriv.r = -filtered_rate_deriv.r * 2*STABILIZATION_INDI_FILT_ZETA_R*STABILIZATION_INDI_FILT_OMEGA_R + ( stateGetBodyRates_f()->r - filtered_rate.r)*STABILIZATION_INDI_FILT_OMEGA2_R;
@@ -295,11 +295,11 @@ void stabilization_indi_filter_inputs(void) {
   indi_u.p = indi_u.p + udot.p/512.0;
   indi_u.q = indi_u.q + udot.q/512.0;
   indi_u.r = indi_u.r + udot.r/512.0;
-  
+
   udot.p = udot.p + udotdot.p/512.0;
   udot.q = udot.q + udotdot.q/512.0;
   udot.r = udot.r + udotdot.r/512.0;
-  
+
   udotdot.p = -udot.p * 2*STABILIZATION_INDI_FILT_ZETA*STABILIZATION_INDI_FILT_OMEGA + (u_act_dyn.p - indi_u.p)*STABILIZATION_INDI_FILT_OMEGA2;
   udotdot.q = -udot.q * 2*STABILIZATION_INDI_FILT_ZETA*STABILIZATION_INDI_FILT_OMEGA + (u_act_dyn.q - indi_u.q)*STABILIZATION_INDI_FILT_OMEGA2;
   udotdot.r = -udot.r * 2*STABILIZATION_INDI_FILT_ZETA_R*STABILIZATION_INDI_FILT_OMEGA_R + (u_act_dyn.r - indi_u.r)*STABILIZATION_INDI_FILT_OMEGA2_R;
