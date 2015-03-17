@@ -86,7 +86,7 @@ void practical_module_init(void)
 #endif
 
   /* Try to initialize the video device */
-  practical_video_dev = v4l2_init("/dev/video1", 1280, 720, 5); //TODO: Fix defines
+  practical_video_dev = v4l2_init("/dev/video1", 1280, 720, 10); //TODO: Fix defines
   if (practical_video_dev == NULL) {
     printf("[practical_module] Could not initialize the video device\n");
   }
@@ -141,7 +141,8 @@ static void *practical_module_calc(void *data __attribute__((unused))) {
 
 #ifdef PRACTICAL_DEBUG
   // Create a new JPEG image
-  struct image_t img_jpeg;
+  struct image_t img_jpeg, img_copy;
+  image_create(&img_copy, practical_video_dev->w, practical_video_dev->h, IMAGE_YUV422);
   image_create(&img_jpeg, practical_video_dev->w, practical_video_dev->h, IMAGE_JPEG);
 #endif
 
@@ -152,28 +153,30 @@ static void *practical_module_calc(void *data __attribute__((unused))) {
     v4l2_image_get(practical_video_dev, &img);
 
     // Calculate the colours in 2 bins (left/right)
-    uint32_t bins[3];
-    memset(bins, 0, sizeof(uint32_t) * 3);
-    image_yuv422_colorfilt(&img, &img, bins, 3, practical.y_m, practical.y_M, practical.u_m, practical.u_M, practical.v_m, practical.v_M);
-    //RunOnceEvery(10, printf("Bins: %d\t%d\t%d\n", bins[0], bins[1], bins[2]));
+    uint32_t bins[2];
+    memset(bins, 0, sizeof(uint32_t) * 2);
+    image_yuv422_colorfilt(&img, &img_copy, bins, 2, practical.y_m, practical.y_M, practical.u_m, practical.u_M, practical.v_m, practical.v_M);
+    RunOnceEvery(10, printf("Bins: %d\t%d\n", bins[0], bins[1]));
 
     // Update the heading
-    if(bins[0] > 50000 || bins[1] > 50000 || bins[2] > 50000) {
-      if(bins[0] < bins[2]) {
+    if(bins[0] > 50000 || bins[1] > 50000) {
+      if(bins[1] < bins[0]) {
         // Turn left
-        printf("Turn left..\n");
+        printf("Turn left.. %d\t%d\n", bins[0], bins[1]);
         stabilization_practical_turn(-1);
       }
       else {
         // Turn left
-        printf("Trun right..\n");
+        printf("Turn right.. %d\t%d\n", bins[0], bins[1]);
         stabilization_practical_turn(1);
       }
+    } else {
+      stabilization_practical_turn(0);
     }
 
 #ifdef PRACTICAL_DEBUG
     RunOnceEvery(30, {
-      jpeg_encode_image(&img, &img_jpeg, 90, TRUE);
+      jpeg_encode_image(&img_copy, &img_jpeg, 90, TRUE);
       practical_tx_img(&img_jpeg, FALSE);
     });
 #endif

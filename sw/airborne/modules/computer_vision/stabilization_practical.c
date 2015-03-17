@@ -34,7 +34,12 @@
 #include "autopilot.h"
 #include "subsystems/datalink/downlink.h"
 
-static struct Int32Eulers cmd;;
+static struct Int32Eulers cmd;
+
+static int8_t turning = 0;
+int32_t adding_theta = -250;
+int32_t adding_psi = 10;
+int32_t adding_phi = 350;
 
 /**
  * Horizontal guidance mode enter resets the errors
@@ -44,10 +49,8 @@ void guidance_h_module_enter(void)
 {
   // Set the euler command to 0
   INT_EULERS_ZERO(cmd);
-  cmd.theta -= 143;
-
-  // GUIDANCE: Set Hover-z-hold (1 meter???)
-  guidance_v_z_sp = -1;
+  cmd.theta = adding_theta;
+  cmd.psi = stateGetNedToBodyEulers_i()->psi;
 }
 
 /**
@@ -64,6 +67,27 @@ void guidance_h_module_read_rc(void)
  */
 void guidance_h_module_run(bool_t in_flight)
 {
+  // GUIDANCE: Set Hover-z-hold (0.5 meter)
+  guidance_v_z_sp = -1 << 7;
+
+  // If turning left
+  if(turning == -1) {
+    cmd.psi += adding_psi;
+    cmd.phi = adding_phi;
+  }
+  // If not turning
+  else if(turning == 0) {
+    cmd.phi = 0;
+  }
+  // If turning right
+  else {
+    cmd.psi -= adding_psi;
+    cmd.phi = -adding_phi;
+  }
+
+  INT32_COURSE_NORMALIZE(cmd.psi);
+  stabilization_attitude_set_rpy_setpoint_i(&cmd);
+
   // Run the default attitude stabilization
   stabilization_attitude_run(in_flight);
 }
@@ -74,12 +98,5 @@ void guidance_h_module_run(bool_t in_flight)
  */
 void stabilization_practical_turn(int8_t turn)
 {
-  if(turn == -1) {
-    cmd.psi -= 3216;
-  } else if (turn == 1) {
-    cmd.psi += 3216;
-  } else {
-    //opticflow_stab.cmd.psi = 0;
-  }
-  INT32_COURSE_NORMALIZE(cmd.psi);
+  turning = turn;
 }

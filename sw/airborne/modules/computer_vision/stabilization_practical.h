@@ -30,11 +30,9 @@
 #include "std.h"
 #include "math/pprz_algebra_int.h"
 
-// Vertical loop re-uses Alt-hold
-#define GUIDANCE_V_MODE_MODULE_SETTING GUIDANCE_V_MODE_HOVER
-
-// Horizontal mode is a specific controller
-#define GUIDANCE_H_MODE_MODULE_SETTING GUIDANCE_H_MODE_MODULE
+extern int32_t adding_theta;
+extern int32_t adding_psi;
+extern int32_t adding_phi;
 
 // Implement own Horizontal loops
 extern void guidance_h_module_enter(void);
