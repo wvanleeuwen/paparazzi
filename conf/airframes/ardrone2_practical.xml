@@ -29,7 +29,15 @@
     <load name="gps_ubx_ucenter.xml"/>
     <load name="send_imu_mag_current.xml"/>
     <load name="logger_file.xml"/>
-    <!--load name="video_rtp_stream.xml"/-->
+    <load name="practical.xml">
+      <define name="PRACTICAL_DEBUG" value="FALSE"/>
+      <define name="PRACTICAL_Y_m" value="13"/>
+      <define name="PRACTICAL_Y_M" value="255"/>
+      <define name="PRACTICAL_U_m" value="0"/>
+      <define name="PRACTICAL_U_M" value="114"/>
+      <define name="PRACTICAL_V_m" value="172"/>
+      <define name="PRACTICAL_V_M" value="255"/>
+    </load>
   </modules>
 
   <commands>
@@ -87,8 +95,8 @@
     <define name="MAG_Y_CURRENT_COEF" value="0.0"/>
     <define name="MAG_Z_CURRENT_COEF" value="0.0"/>
 
-    <define name="BODY_TO_IMU_PHI" value="0." unit="deg"/>
-    <define name="BODY_TO_IMU_THETA" value="0." unit="deg"/>
+    <define name="BODY_TO_IMU_PHI" value="-1.2141" unit="deg"/>
+    <define name="BODY_TO_IMU_THETA" value="4.6948" unit="deg"/>
     <define name="BODY_TO_IMU_PSI" value="0." unit="deg"/>
   </section>
 

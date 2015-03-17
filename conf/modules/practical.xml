@@ -1,0 +1,74 @@
+<!DOCTYPE module SYSTEM "module.dtd">
+
+<module name="cv_opticflow" dir="computer_vision">
+  <doc>
+    <description>
+        Main practical module
+    </description>
+
+    <section name="PRACTICAL" prefix="PRACTICAL_">
+
+    </section>
+    <define name="PRACTICAL_AGL_ID" value="ABI_SENDER_ID" description="ABI sender id for AGL message (sonar measurement) (default: ABI_BROADCAST)"/>
+  </doc>
+  <settings>
+	  <dl_settings NAME="Practical Assignment">
+      <dl_settings name="practical">
+        <dl_setting var="practical.y_m" module="computer_vision/practical_module" min="0" step="1" max="255" shortname="y_m" param="PRACTICAL_Y_m"/>
+        <dl_setting var="practical.y_M" module="computer_vision/practical_module" min="0" step="1" max="255" shortname="y_M" param="PRACTICAL_Y_M"/>
+        <dl_setting var="practical.u_m" module="computer_vision/practical_module" min="0" step="1" max="255" shortname="u_m" param="PRACTICAL_U_m"/>
+        <dl_setting var="practical.u_M" module="computer_vision/practical_module" min="0" step="1" max="255" shortname="u_M" param="PRACTICAL_U_M"/>
+        <dl_setting var="practical.v_m" module="computer_vision/practical_module" min="0" step="1" max="255" shortname="v_m" param="PRACTICAL_V_m"/>
+        <dl_setting var="practical.v_M" module="computer_vision/practical_module" min="0" step="1" max="255" shortname="v_M" param="PRACTICAL_V_M"/>
+      </dl_settings>
+    </dl_settings>
+  </settings>
+
+  <header>
+    <file name="practical_module.h"/>
+  </header>
+
+  <init fun="practical_module_init()"/>
+  <periodic fun="practical_module_run()" start="practical_module_start()" stop="practical_module_stop()" autorun="TRUE"/>
+
+  <makefile target="ap">
+    <!-- Include the needed Computer Vision files -->
+    <define name="modules/computer_vision" type="include"/>
+    <file name="image.c" dir="modules/computer_vision/lib/vision"/>
+    <file name="jpeg.c" dir="modules/computer_vision/lib/encoding"/>
+    <file name="rtp.c" dir="modules/computer_vision/lib/encoding"/>
+    <file name="v4l2.c" dir="modules/computer_vision/lib/v4l"/>
+
+    <!-- The practical module itself -->
+    <file name="practical_module.c"/>
+    <file name="stabilization_practical.c"/>
+
+    <!-- Random flags -->
+    <define name="__USE_GNU"/>
+    <flag name="LDFLAGS" value="lrt"/>
+    <flag name="LDFLAGS" value="static-libgcc"/>
+
+    <!-- Used for debug video -->
+    <raw>
+      PRACTICAL_UDP_DEV     ?= UDP1
+      PRACTICAL_HOST        ?= $(MODEM_HOST)
+      PRACTICAL_PORT_OUT    ?= 5000
+      PRACTICAL_PORT_IN     ?= 4999
+      PRACTICAL_BROADCAST   ?= $(MODEM_BROADCAST)
+      PRACTICAL_DEV_LOWER   = $(shell echo $(PRACTICAL_UDP_DEV) | tr A-Z a-z)
+
+      PR_CFLAGS  = -DUSE_$(PRACTICAL_UDP_DEV) -DPRACTICAL_UDP_DEV=$(PRACTICAL_DEV_LOWER)
+      PR_CFLAGS += -D$(PRACTICAL_UDP_DEV)_PORT_OUT=$(PRACTICAL_PORT_OUT) -D$(PRACTICAL_UDP_DEV)_PORT_IN=$(PRACTICAL_PORT_IN)
+      PR_CFLAGS += -D$(PRACTICAL_UDP_DEV)_BROADCAST=$(PRACTICAL_BROADCAST) -D$(PRACTICAL_UDP_DEV)_HOST=\"$(PRACTICAL_HOST)\"
+
+      ap.CFLAGS += $(PR_CFLAGS)
+    </raw>
+  </makefile>
+
+  <makefile target="nps">
+    <!-- TODO -->
+    <file name="viewvideo_nps.c"/>
+  </makefile>
+
+</module>
+

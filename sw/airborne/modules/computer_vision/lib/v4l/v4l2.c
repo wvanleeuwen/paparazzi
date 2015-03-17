@@ -62,8 +62,8 @@ static void *v4l2_capture_thread(void *data)
     FD_SET(dev->fd, &fds);
 
     // Set the timeout to 2 seconds
-    tv.tv_sec = 2;
-    tv.tv_usec = 0;
+    tv.tv_sec = 0;
+    tv.tv_usec = 100;
 
     // Wait until an image was taken, with a timeout of tv
     int sr = select(dev->fd + 1, &fds, NULL, NULL, &tv);
@@ -74,10 +74,8 @@ static void *v4l2_capture_thread(void *data)
       dev->thread = (pthread_t) NULL;
       return (void *) - 1;
     } else if (sr == 0) {
-      printf("[v4l2-capture] Select timeout on %s\n", dev->name);
-      //continue;
-      dev->thread = (pthread_t) NULL;
-      return (void *) - 2;
+      //printf("[v4l2-capture] Select timeout on %s\n", dev->name);
+      continue;
     }
 
     // Dequeue a buffer

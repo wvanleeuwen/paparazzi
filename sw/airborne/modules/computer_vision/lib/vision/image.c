@@ -111,52 +111,59 @@ void image_to_grayscale(struct image_t *input, struct image_t *output)
 /**
  * Filter colors in an YUV422 image
  * @param[in] *input The input image to filter
- * @param[out] *output The filtered output image
- * @param[in] y_m The Y minimum value
- * @param[in] y_M The Y maximum value
- * @param[in] u_m The U minimum value
- * @param[in] u_M The U maximum value
- * @param[in] v_m The V minimum value
- * @param[in] v_M The V maximum value
+ * @param[out] *output The filtered output image, where pixels inside are set to maximum values (can be null)
+ * @param[out] *bins The output bin counts
+ * @param[in] bins_cnt The amount of bins to count
+ * @param[in] y_m, y_M The Y minimum and maximum value
+ * @param[in] u_m, u_M The U minimum and maximum value
+ * @param[in] v_m, v_M The V minimum and maximum value
  * @return The amount of filtered pixels
  */
-uint16_t image_yuv422_colorfilt(struct image_t *input, struct image_t *output, uint8_t y_m, uint8_t y_M, uint8_t u_m,
-                          uint8_t u_M, uint8_t v_m, uint8_t v_M)
+uint32_t image_yuv422_colorfilt(struct image_t *input, struct image_t *output, uint32_t *bins, uint16_t bins_cnt,
+  uint8_t y_m, uint8_t y_M, uint8_t u_m, uint8_t u_M, uint8_t v_m, uint8_t v_M)
 {
-  uint16_t cnt = 0;
+  uint32_t cnt = 0;
   uint8_t *source = input->buf;
-  uint8_t *dest = output->buf;
+  uint8_t *dest = NULL;
 
-  // Copy the creation timestamp (stays the same)
-  memcpy(&output->ts, &input->ts, sizeof(struct timeval));
+  // Check if the ouput is not NULL
+  if(output != NULL) {
+    dest = output->buf;
+    // Copy the creation timestamp (stays the same)
+    memcpy(&output->ts, &input->ts, sizeof(struct timeval));
+  }
 
   // Go trough all the pixels
-  for (uint16_t y = 0; y < output->h; y++) {
-    for (uint16_t x = 0; x < output->w; x += 2) {
+  for (uint16_t y = 0; y < input->h; y++) {
+    for (uint16_t x = 0; x < input->w; x += 2) {
       // Check if the color is inside the specified values
       if (
-        (dest[1] >= y_m)
-        && (dest[1] <= y_M)
-        && (dest[0] >= u_m)
-        && (dest[0] <= u_M)
-        && (dest[2] >= v_m)
-        && (dest[2] <= v_M)
+        (source[1] >= y_m)
+        && (source[1] <= y_M)
+        && (source[0] >= u_m)
+        && (source[0] <= u_M)
+        && (source[2] >= v_m)
+        && (source[2] <= v_M)
       ) {
-        cnt ++;
-        // UYVY
-        dest[0] = 64;        // U
+        cnt++; // Update the total count
+
+        // Update the bins
+        if(bins_cnt > 0) {
+          bins[x / (input->w / bins_cnt)]++;
+        }
+
+        // Update the pixel
+        if(dest != NULL) {
+          dest[0] = 255;  // U
+          dest[1] = 255;  // Y
+          dest[2] = 255;  // V
+          dest[3] = 255;  // Y
+        }
+      } else if(dest != NULL) {
+        // Update the pixel
+        dest[0] = source[0];  // U
         dest[1] = source[1];  // Y
-        dest[2] = 255;        // V
-        dest[3] = source[3];  // Y
-      } else {
-        // UYVY
-        char u = source[0] - 127;
-        u /= 4;
-        dest[0] = 127;        // U
-        dest[1] = source[1];  // Y
-        u = source[2] - 127;
-        u /= 4;
-        dest[2] = 127;        // V
+        dest[2] = source[2];  // V
         dest[3] = source[3];  // Y
       }
 
