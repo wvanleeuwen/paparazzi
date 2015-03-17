@@ -89,9 +89,9 @@ struct FloatRates filt_rate = {0., 0., 0.};
 #if PERIODIC_TELEMETRY
 #include "subsystems/datalink/telemetry.h"
 
-static void send_ahrs_ref_quat(void) {
+static void send_ahrs_ref_quat(struct transport_tx *trans, struct link_device *dev) {
   struct Int32Quat* quat = stateGetNedToBodyQuat_i();
-  DOWNLINK_SEND_AHRS_REF_QUAT(DefaultChannel, DefaultDevice,
+  pprz_msg_send_AHRS_REF_QUAT(trans, dev, AC_ID,
       &stab_att_ref_quat.qi,
       &stab_att_ref_quat.qx,
       &stab_att_ref_quat.qy,
@@ -102,8 +102,8 @@ static void send_ahrs_ref_quat(void) {
       &(quat->qz));
 }
 
-static void send_att_indi(void) {
-  DOWNLINK_SEND_STAB_ATTITUDE_INDI(DefaultChannel, DefaultDevice,
+static void send_att_indi(struct transport_tx *trans, struct link_device *dev) {
+  pprz_msg_send_STAB_ATTITUDE_INDI(trans, dev, AC_ID,
                                    &filtered_rate_deriv.p,
                                    &filtered_rate_deriv.q,
                                    &filtered_rate_deriv.r,
