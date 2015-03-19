@@ -521,27 +521,27 @@ void get_integral_image( struct image_t* img, uint32_t* int_img )
 {
 	uint8_t *img_buf = (uint8_t *)img->buf;
 	uint8_t pixel_width = (img->type == IMAGE_YUV422)? 2 : 1;
-	uint16_t w = img->w*pixel_width, h = img->h;
+	uint16_t w = img->w, h = img->h;
 	uint16_t x, y;
-	for( x = 0; x < w; x+=pixel_width )
+	for( x = 1; x < w; x++ )
 	{
 		for( y = 0; y < h; y++ )
 		{
 			if( x >= 1 && y >= 1 )
 			{
-				int_img[w*y + x] = img_buf[w*y + x] + int_img[w*y + x-1] + int_img[w*(y-1) + x] - int_img[w*(y-1) + x -1];
+				int_img[w*y + x] = img_buf[w*pixel_width*y + x*pixel_width] + int_img[w*y + x-1] + int_img[w*(y-1) + x] - int_img[w*(y-1) + x -1];
 			}
 			else if(x >= 1)
 			{
-				int_img[w*y + x] = img_buf[w*y + x] + int_img[w*y + x-1];
+				int_img[w*y + x] = img_buf[w*pixel_width*y + x*pixel_width] + int_img[w*y + x-1];
 			}
 			else if(y >= 1)
 			{
-				int_img[w*y + x] = img_buf[w*y + x] + int_img[w*(y-1) + x];
+				int_img[w*y + x] = img_buf[w*pixel_width*y + x*pixel_width] + int_img[w*(y-1) + x];
 			}
 			else
 			{
-				int_img[w*y + x] = img_buf[w*y + x];
+				int_img[w*y + x] = img_buf[w*pixel_width*y + x*pixel_width];
 			}
 		}
 	}
@@ -556,11 +556,11 @@ typedef uint8_t elem_type ;
 
 elem_type torben(elem_type m[], int n, int pixel_width)
 {
-    int         i, less, greater, equal;
+    int  i, less, greater, equal;
     elem_type  min, max, guess, maxltguess, mingtguess;
 
     min = max = m[0] ;
-    for (i=pixel_width ; i<n ; i+=pixel_width) {
+    for (i=pixel_width*2 - 1; i<n ; i+=pixel_width) {
         if (m[i]<min) min=m[i];
         if (m[i]>max) max=m[i];
     }
@@ -570,7 +570,7 @@ elem_type torben(elem_type m[], int n, int pixel_width)
         less = 0; greater = 0; equal = 0;
         maxltguess = min ;
         mingtguess = max ;
-        for (i=0; i<n; i+=pixel_width) {
+        for (i=1; i<n; i+=pixel_width) {
             if (m[i]<guess) {
                 less++;
                 if (m[i]>maxltguess) maxltguess = m[i] ;
@@ -579,12 +579,12 @@ elem_type torben(elem_type m[], int n, int pixel_width)
                 if (m[i]<mingtguess) mingtguess = m[i] ;
             } else equal++;
         }
-        if (less <= (n+pixel_width)/2 && greater <= (n+pixel_width)/2) break ; 
+        if (less <= (n+1)/2/pixel_width && greater <= (n+1)/2/pixel_width) break ; 
         else if (less>greater) max = maxltguess ;
         else min = mingtguess;
     }
-    if (less >= (n+pixel_width)/2) return maxltguess;
-    else if (less+equal >= (n+pixel_width)/2) return guess;
+    if (less >= (n+1)/2/pixel_width) return maxltguess;
+    else if (less+equal >= (n+1)/2/pixel_width) return guess;
     else return mingtguess;
 }
 
@@ -630,7 +630,10 @@ uint8_t get_obs_response(uint32_t *integral_image, uint16_t width, uint16_t x_re
 	//if ((whole_area - sub_area) > 0)
 		//resp =  (RES*((sub_area*RES) / px_inner)) / (((whole_area - sub_area)*RES) / px_border );
 		//resp =  (sub_area * px_border) / ((whole_area - sub_area) * px_inner  );
-		resp =  100*abs((sub_area / px_inner) - median_val)/255;
+  if((sub_area / px_inner) > median_val)
+		resp =  100*((sub_area / px_inner) - median_val)/256;
+  else
+    resp =  100*(median_val - (sub_area / px_inner))/256;
 	//else resp = RES;
 
 	// printf("resp: %d \n",resp);

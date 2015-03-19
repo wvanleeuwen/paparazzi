@@ -30,7 +30,7 @@
     <load name="send_imu_mag_current.xml"/>
     <load name="logger_file.xml"/>
     <load name="practical.xml">
-      <define name="PRACTICAL_DEBUG" value="FALSE"/>
+      <define name="PRACTICAL_DEBUG" value="TRUE"/>
       <define name="PRACTICAL_Y_m" value="110"/>
       <define name="PRACTICAL_Y_M" value="208"/>
       <define name="PRACTICAL_U_m" value="123"/>
