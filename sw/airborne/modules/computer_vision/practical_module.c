@@ -245,3 +245,46 @@ static void practical_tx_img(struct image_t *img, bool_t rtp)
     wait(NULL);
   }
 }
+
+/**
+ * detect object based on color difference with floor
+ * @param[in] *img The image to transmit
+ * @param[in] 
+ */
+uint32_t intergral_image[921600] = {0};
+static void practical_integral_img_detect(struct image_t *img)
+{
+	uint16_t sub_img_h = 300;
+	uint16_t feature_size = 50;
+	uint8_t median_val;
+    // uint16_tborder = feature_size*2;
+
+    uint32_t px_inner = feature_size * feature_size;
+    //px_whole = (feature_size+2*border)*(feature_size);
+    //px_border = px_whole - px_inner;
+	    
+	struct sub_img;
+	image_create(&sub_img, img->w, sub_img_h, IMAGE_YUV422);
+	
+	// get subimage
+	memcpy(sub_img, &img[img->w*2*(img->h-sub_img_h-1)], sub_img->w*2*sub_img->h);
+
+	// calculate median value in subimage
+    median_val = median(sub_image);
+
+//    printf("median! %d\n", median_val);
+
+    get_integral_image( &sub_image, &integral_image, sub_image->w, sub_image->h );
+
+//    printf("whole_area = %d width: %d, height: %d\n", whole_area, integral_image.cols, integral_image.rows);
+
+    uint16_t x_response, y_response;
+
+    for (y_response = 0; y_response < integral_image.rows - feature_size; y_response+=feature_size){
+      for (x_response = 0; x_response < integral_image.cols - feature_size; x_response+=feature_size){
+        if (get_obs_response( integral_image, sub_image->w, x_response, y_response, feature_size, px_inner, median_val) > 12)
+			img[(img->w)*(img->h - sub_img_h - 1 + y_response+feature_size/2) + x_response+feature_size/2 ] = 255;
+      }
+    }
+
+}

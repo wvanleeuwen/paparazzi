@@ -511,3 +511,134 @@ void image_draw_line(struct image_t *img, struct point_t *from, struct point_t *
       }
   }
 }
+
+/**
+ * Compute Integral Image
+ * @param[in] *img The image to be summed
+ * @param[in, out] *int_img Resultant integral image
+ */
+void get_integral_image( struct image_t* img, uint32_t* int_img )
+{
+	uint8_t *img_buf = (uint8_t *)img->buf;
+	uint8_t pixel_width = (img->type == IMAGE_YUV422)? 2 : 1;
+	uint16_t w = img->w*pixel_width, h = img->h;
+	uint16_t x, y;
+	for( x = 0; x < w; x+=pixel_width )
+	{
+		for( y = 0; y < h; y++ )
+		{
+			if( x >= 1 && y >= 1 )
+			{
+				int_img[w*y + x] = img_buf[w*y + x] + int_img[w*y + x-1] + int_img[w*(y-1) + x] - int_img[w*(y-1) + x -1];
+			}
+			else if(x >= 1)
+			{
+				int_img[w*y + x] = img_buf[w*y + x] + int_img[w*y + x-1];
+			}
+			else if(y >= 1)
+			{
+				int_img[w*y + x] = img_buf[w*y + x] + int_img[w*(y-1) + x];
+			}
+			else
+			{
+				int_img[w*y + x] = img_buf[w*y + x];
+			}
+		}
+	}
+}
+
+/*
+ * The following code is public domain.
+ * Algorithm by Torben Mogensen, implementation by N. Devillard.
+ * This code in public domain.
+ */
+typedef uint8_t elem_type ;
+
+elem_type torben(elem_type m[], int n, int pixel_width)
+{
+    int         i, less, greater, equal;
+    elem_type  min, max, guess, maxltguess, mingtguess;
+
+    min = max = m[0] ;
+    for (i=pixel_width ; i<n ; i+=pixel_width) {
+        if (m[i]<min) min=m[i];
+        if (m[i]>max) max=m[i];
+    }
+
+    while (1) {
+        guess = (min+max)/2;
+        less = 0; greater = 0; equal = 0;
+        maxltguess = min ;
+        mingtguess = max ;
+        for (i=0; i<n; i+=pixel_width) {
+            if (m[i]<guess) {
+                less++;
+                if (m[i]>maxltguess) maxltguess = m[i] ;
+            } else if (m[i]>guess) {
+                greater++;
+                if (m[i]<mingtguess) mingtguess = m[i] ;
+            } else equal++;
+        }
+        if (less <= (n+pixel_width)/2 && greater <= (n+pixel_width)/2) break ; 
+        else if (less>greater) max = maxltguess ;
+        else min = mingtguess;
+    }
+    if (less >= (n+pixel_width)/2) return maxltguess;
+    else if (less+equal >= (n+pixel_width)/2) return guess;
+    else return mingtguess;
+}
+
+/**
+ * Compute Median of Image
+ * @param[in] *img The image
+ */
+int median (struct image_t* img)
+{
+	uint8_t pixel_width = (img->type == IMAGE_YUV422)? 2 : 1;
+	return torben(img->buf, img->w*pixel_width*img->h, pixel_width);
+}
+
+int get_sum( uint32_t *integral_image, uint16_t width, uint16_t x_min, uint16_t y_min, uint16_t x_max, uint16_t y_max)
+{
+	return (integral_image[width*y_min + x_min] + integral_image[width*y_max + x_max] - integral_image[width*y_min + x_max] - integral_image[width*y_max + x_min]);
+}
+
+/**
+ * Compute Median of Image
+ * @param[in] *img The image
+ */
+uint8_t get_obs_response(uint32_t *integral_image, uint16_t width, uint16_t x_response, uint16_t y_response, uint16_t feature_size, uint32_t px_inner, uint8_t median_val)
+{
+	uint8_t resp;
+	// whole_area = get_sum( x_response - border, y_response, x_response+feature_size+border, y_response+feature_size);
+	uint32_t sub_area = get_sum( integral_image, width, x_response, y_response, x_response+feature_size, y_response+feature_size);
+
+/*	printf("px_inner: %d \n",px_inner);
+	printf("whole_area: %d \n",whole_area);
+	printf("sub_area: %d \n",sub_area);
+	printf("px_border: %d \n",px_border);
+//	printf("num: %d %d \n",((sub_area*RES) / px_inner), (sub_area * px_border));
+//	printf("den: %d %d \n",(((whole_area - sub_area)*RES) / px_border ), ((whole_area - sub_area) * px_inner  ));
+	printf("num: %d %d \n",((sub_area) / px_inner), (sub_area * px_border));
+	printf("den: %d %d \n",median_val, (((whole_area - sub_area)*RES) / px_border ));
+	printf("x_response: %d \n",x_response);
+	printf("y_response: %d \n",y_response);
+	printf("feature_size: %d \n",feature_size);*/
+
+	// resp =  (RES*((inner_area*RES) / px_inner)) / (((whole_area - inner_area)*RES) / px_border );
+
+	//if ((whole_area - sub_area) > 0)
+		//resp =  (RES*((sub_area*RES) / px_inner)) / (((whole_area - sub_area)*RES) / px_border );
+		//resp =  (sub_area * px_border) / ((whole_area - sub_area) * px_inner  );
+		resp =  100*abs((sub_area / px_inner) - median_val)/255;
+	//else resp = RES;
+
+	// printf("resp: %d \n",resp);
+	/*print_number(whole_area, 0);
+	print_space();
+	print_number(inner_area, 0);
+	print_space();
+	print_number(resp, 1);*/
+
+	return resp;
+}
