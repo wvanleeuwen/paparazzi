@@ -174,13 +174,13 @@ static void *viewvideo_thread(void *data __attribute__((unused)))
     if (viewvideo.take_shot) {
       // Create a high quality image (99% JPEG encoded)
       struct image_t jpeg_hr;
-      image_create(&jpeg_hr, img.w, img.h, IMAGE_JPEG);
-      jpeg_encode_image(&img, &jpeg_hr, 99, TRUE);
+      image_create(&jpeg_hr, img.w, img.h, IMAGE_YUV422);
+      //jpeg_encode_image(&img, &jpeg_hr, 99, TRUE);
 
       // Search for a file where we can write to
       char save_name[128];
       for (; viewvideo.shot_number < 99999; viewvideo.shot_number++) {
-        sprintf(save_name, "%s/img_%05d.jpg", STRINGIFY(VIEWVIDEO_SHOT_PATH), viewvideo.shot_number);
+        sprintf(save_name, "%s/img_%05d.raw", STRINGIFY(VIEWVIDEO_SHOT_PATH), viewvideo.shot_number);
         // Check if file exists or not
         if (access(save_name, F_OK) == -1) {
           FILE *fp = fopen(save_name, "w");
@@ -189,9 +189,9 @@ static void *viewvideo_thread(void *data __attribute__((unused)))
           } else {
             // Save it to the file and close it
             fwrite(jpeg_hr.buf, sizeof(uint8_t), jpeg_hr.buf_size, fp);
+	          printf("Saved file\n");
             fclose(fp);
           }
-
           // We don't need to seek for a next index anymore
           break;
         }
