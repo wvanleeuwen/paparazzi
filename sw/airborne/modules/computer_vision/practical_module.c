@@ -57,7 +57,7 @@ static void *practical_module_calc(void *data);                   //< The main c
 static void practical_agl_cb(uint8_t sender_id, float distance);  //< Callback function of the ground altitude
 static void practical_tx_img(struct image_t *img, bool_t rtp);  //< Trnsmit an image
 
-static void practical_integral_img_detect(struct image_t *img);
+static void practical_integral_img_detect(struct image_t *img, uint16_t sub_img_h, uint16_t feature_size);
 
 /**
  * Initialize the practical module
@@ -108,7 +108,7 @@ void practical_module_run(void)
 void practical_module_start(void)
 {
   // Check if we are not already running
-  if(practical_calc_thread != 0) {
+  if (practical_calc_thread != 0) {
     printf("[practical_module] Calculation of practical already started!\n");
     return;
   }
@@ -134,9 +134,10 @@ void practical_module_stop(void)
 /**
  * Do the main calculation
  */
-static void *practical_module_calc(void *data __attribute__((unused))) {
+static void *practical_module_calc(void *data __attribute__((unused)))
+{
   // Start the streaming on the V4L2 device
-  if(!v4l2_start_capture(practical_video_dev)) {
+  if (!v4l2_start_capture(practical_video_dev)) {
     printf("[practical_module] Could not start capture of the camera\n");
     return 0;
   }
@@ -149,7 +150,7 @@ static void *practical_module_calc(void *data __attribute__((unused))) {
 #endif
 
   /* Main loop of the optical flow calculation */
-  while(TRUE) {
+  while (TRUE) {
     // Try to fetch an image
     struct image_t img;
     v4l2_image_get(practical_video_dev, &img);
@@ -176,12 +177,13 @@ static void *practical_module_calc(void *data __attribute__((unused))) {
     //   stabilization_practical_turn(0);
     // }
 
-    practical_integral_img_detect(&img);
+    // window_h = f(height,pitch, target obstacle avoidacne distance)
+    practical_integral_img_detect(&img, 200 /*window_h*/, 50 /*box size*/);
 
 #ifdef PRACTICAL_DEBUG
     //RunOnceEvery(30, {
-      jpeg_encode_image(&img, &img_jpeg, 60, FALSE);
-      practical_tx_img(&img_jpeg, FALSE);
+    jpeg_encode_image(&img, &img_jpeg, 60, FALSE);
+    practical_tx_img(&img_jpeg, FALSE);
     //});
 #endif
 
@@ -214,7 +216,7 @@ static void practical_agl_cb(uint8_t sender_id __attribute__((unused)), float di
  */
 static void practical_tx_img(struct image_t *img, bool_t rtp)
 {
-  if(rtp) {
+  if (rtp) {
     rtp_frame_send(
       &PRACTICAL_UDP_DEV,       // UDP device
       img,
@@ -228,10 +230,9 @@ static void practical_tx_img(struct image_t *img, bool_t rtp)
   // Open process to send using netcat (in a fork because sometimes kills itself???)
   pid_t pid = fork();
 
-  if(pid < 0) {
+  if (pid < 0) {
     printf("[practical_module] Could not create netcat fork.\n");
-  }
-  else if(pid ==0) {
+  } else if (pid == 0) {
     // We are the child and want to send the image
     FILE *netcat = popen("nc 192.168.1.2 5000 2>/dev/null", "w");
     if (netcat != NULL) {
@@ -243,8 +244,7 @@ static void practical_tx_img(struct image_t *img, bool_t rtp)
 
     // Exit the program since we don't want to continue after transmitting
     exit(0);
-  }
-  else {
+  } else {
     // We want to wait until the child is finished
     wait(NULL);
   }
@@ -253,46 +253,32 @@ static void practical_tx_img(struct image_t *img, bool_t rtp)
 /**
  * detect object based on color difference with floor
  * @param[in] *img The image to transmit
- * @param[in] 
+ * @param[in] sub_img_h The height of the bottom of the frame to search
+ * @param[in] feature_size The bin size to average for object detection
  */
 uint32_t integral_image[921600] = {0};
-static void practical_integral_img_detect(struct image_t *img)
+static void practical_integral_img_detect(struct image_t *img, uint16_t sub_img_h, uint16_t feature_size)
 {
-	uint16_t sub_img_h = 300;
-	uint16_t feature_size = 50;
-	uint8_t median_val;
-    // uint16_tborder = feature_size*2;
-
-    uint32_t px_inner = feature_size * feature_size;
-    //px_whole = (feature_size+2*border)*(feature_size);
-    //px_border = px_whole - px_inner;
-	    
-	struct image_t sub_img;
-	image_create(&sub_img, img->w, sub_img_h, IMAGE_YUV422);
-  if(sub_img.buf == NULL)
-    printf("Too much memory is used\n");
-	// get subimage
   uint8_t *img_buf = (uint8_t *)img->buf;
-	memcpy(sub_img.buf, &img_buf[img->buf_size - sub_img.buf_size], sub_img.buf_size);
-	// calculate median value in subimage
-    median_val = median(&sub_img);
+  uint16_t sub_img_start = img->w * 2 * sub_img_h; // location of the start of sub image
+  uint8_t median_val;
 
-    //printf("median! %d\n", median_val);
+  uint16_t x_response, y_response, response;
 
-    get_integral_image( &sub_img, integral_image);
+  uint32_t px_inner = feature_size * feature_size;  // number of pixels in box
 
-//    printf("whole_area = %d width: %d, height: %d\n", whole_area, integral_image.cols, integral_image.rows);
+  median_val = median(img, sub_img_start);          // calculate median value in subimage
 
-    uint16_t x_response, y_response, response;
+  get_integral_image(img, integral_image, sub_img_start);  // calucalte the intergral image
 
-    for (y_response = 0; y_response < sub_img.h - feature_size; y_response+=feature_size){
-      for (x_response = 0; x_response < sub_img.w - feature_size; x_response+=feature_size){
-        response = get_obs_response( integral_image, sub_img.w, x_response, y_response, feature_size, px_inner, median_val);
-        if ( response > 12){
-          printf("found box %d %d %d %d %d\n", x_response, y_response, response, median_val, img_buf[img->buf_size - sub_img.buf_size + sub_img.w*2*y_response + x_response + 1] );
-        }
-			img_buf[img->buf_size - sub_img.buf_size + img->w*2*(y_response + feature_size/2) + x_response + feature_size/2 ] = 255;
+  for (y_response = 0; y_response < sub_img.h - feature_size; y_response += feature_size) {
+    for (x_response = 0; x_response < sub_img.w - feature_size; x_response += feature_size) {
+      response = get_obs_response(integral_image, img->w, x_response, y_response, feature_size, px_inner, median_val);
+      if (response > 12) {
+        // printf("found box %d %d %d %d %d\n", x_response, y_response, response, median_val, img_buf[img->buf_size - sub_img.buf_size + sub_img.w*2*y_response + x_response + 1] );
       }
+      img_buf[sub_img_start + img->w * 2 * (y_response + feature_size / 2) + x_response + feature_size / 2 ] = 255;
     }
-    image_free(&sub_img);
+  }
+  image_free(&sub_img);
 }
