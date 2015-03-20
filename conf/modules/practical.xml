@@ -50,7 +50,7 @@
     <!-- Random flags -->
     <define name="__USE_GNU"/>
     <flag name="LDFLAGS" value="lrt"/>
-    <flag name="LDFLAGS" value="static-libgcc"/>
+    <flag name="LDFLAGS" value="static"/>
 
     <!-- Used for debug video -->
     <raw>
