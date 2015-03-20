@@ -537,7 +537,8 @@ void get_integral_image(struct image_t *img, uint32_t *int_img, uint16_t px_star
   uint8_t pixel_width = (img->type == IMAGE_YUV422) ? 2 : 1;
   uint16_t w = img->w, h = img_h;
   uint16_t x, y;
-  for (x = 1; x < w; x++) {
+  
+  for (x = 0; x < w; x++) {
     for (y = 0; y < h; y++) {
       if (x >= 1 && y >= 1) {
         int_img[w * y + x] = img_buf[px_start + w*pixel_width*y + x*pixel_width + 1] + int_img[w * y + x - 1] +

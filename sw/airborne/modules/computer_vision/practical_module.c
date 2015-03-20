@@ -274,7 +274,7 @@ static void practical_integral_img_detect(struct image_t *img, uint16_t sub_img_
   for (y_response = 0; y_response < sub_img_h - feature_size; y_response += feature_size) {
     for (x_response = 0; x_response < img->w - feature_size; x_response += feature_size) {
       response = get_obs_response(integral_image, img->w, x_response, y_response, feature_size, px_inner, median_val);
-      if (response > 1) {
+      if (response > 12) {
         printf("found box %d %d %d %d %d\n", x_response, y_response, response, median_val, img_buf[sub_img_start + img->w*2*y_response + x_response*2 + 1] );
         img_buf[sub_img_start + img->w * 2 * (y_response + feature_size / 2) + (x_response + feature_size / 2)*2 + 1] = 255;
       }
