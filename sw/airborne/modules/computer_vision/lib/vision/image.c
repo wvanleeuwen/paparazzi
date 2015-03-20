@@ -529,24 +529,25 @@ void image_draw_line(struct image_t *img, struct point_t *from, struct point_t *
  * @param[in] *img The image to be summed
  * @param[in, out] *int_img Resultant integral image
  * @param[in] px_start The start location in the input image to sum
+ * @param[in] img_h The hieght of th esub image
  */
-void get_integral_image(struct image_t *img, uint32_t *int_img, uint16_t px_start)
+void get_integral_image(struct image_t *img, uint32_t *int_img, uint16_t px_start, uint16_t img_h)
 {
   uint8_t *img_buf = (uint8_t *)img->buf;
   uint8_t pixel_width = (img->type == IMAGE_YUV422) ? 2 : 1;
-  uint16_t w = img->w, h = img->h;
+  uint16_t w = img->w, h = img_h;
   uint16_t x, y;
   for (x = 1; x < w; x++) {
     for (y = 0; y < h; y++) {
       if (x >= 1 && y >= 1) {
-        int_img[w * y + x] = img_buf[px_start + w * pixel_width * y + x * pixel_width] + int_img[w * y + x - 1] +
+        int_img[w * y + x] = img_buf[px_start + w*pixel_width*y + x*pixel_width + 1] + int_img[w * y + x - 1] +
                              int_img[w * (y - 1) + x] - int_img[w * (y - 1) + x - 1];
       } else if (x >= 1) {
-        int_img[w * y + x] = img_buf[px_start + w * pixel_width * y + x * pixel_width] + int_img[w * y + x - 1];
+        int_img[w * y + x] = img_buf[px_start + w*pixel_width*y + x*pixel_width + 1] + int_img[w * y + x - 1];
       } else if (y >= 1) {
-        int_img[w * y + x] = img_buf[px_start + w * pixel_width * y + x * pixel_width] + int_img[w * (y - 1) + x];
+        int_img[w * y + x] = img_buf[px_start + w*pixel_width*y + x*pixel_width + 1] + int_img[w * (y - 1) + x];
       } else {
-        int_img[w * y + x] = img_buf[px_start + w * pixel_width * y + x * pixel_width];
+        int_img[w * y + x] = img_buf[px_start + w*pixel_width*y + x*pixel_width + 1];
       }
     }
   }
@@ -595,11 +596,13 @@ elem_type torben(elem_type m[], int n, int pixel_width)
  * Compute Median of Image
  * @param[in] *img The image
  * @param[in] px_start The start location to find median
+ * @param[in] img_h The hieght of the sub image
  */
-int median(struct image_t *img, uint16_t px_start)
+int median(struct image_t *img, uint16_t px_start, uint16_t img_h)
 {
   uint8_t pixel_width = (img->type == IMAGE_YUV422) ? 2 : 1;
-  return torben(img->buf + px_start, img->w * pixel_width * img->h, pixel_width);
+  uint8_t *img_buf = (uint8_t *)img->buf;
+  return torben(&img_buf[px_start], img->w * pixel_width * img_h, pixel_width);
 }
 
 int get_sum(uint32_t *integral_image, uint16_t width, uint16_t x_min, uint16_t y_min, uint16_t x_max, uint16_t y_max)
@@ -625,9 +628,9 @@ uint8_t get_obs_response(uint32_t *integral_image, uint16_t width, uint16_t x, u
   uint32_t sub_area = get_sum(integral_image, width, x, y, x + feature_size, y + feature_size);
 
   if ((sub_area / px_inner) > median_val) {
-    resp =  100 * ((sub_area / px_inner) - median_val) / 256;
+    resp =  (100*((sub_area / px_inner) - median_val)) / 256;
   } else {
-    resp =  100 * (median_val - (sub_area / px_inner)) / 256;
+    resp =  (100*(median_val - (sub_area / px_inner))) / 256;
   }
 
   return resp;

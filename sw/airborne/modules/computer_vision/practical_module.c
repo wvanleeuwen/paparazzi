@@ -178,7 +178,7 @@ static void *practical_module_calc(void *data __attribute__((unused)))
     // }
 
     // window_h = f(height,pitch, target obstacle avoidacne distance)
-    practical_integral_img_detect(&img, 200 /*window_h*/, 50 /*box size*/);
+    practical_integral_img_detect(&img, 200 /*window_h*/, 100 /*box size*/);
 
 #ifdef PRACTICAL_DEBUG
     //RunOnceEvery(30, {
@@ -260,25 +260,24 @@ uint32_t integral_image[921600] = {0};
 static void practical_integral_img_detect(struct image_t *img, uint16_t sub_img_h, uint16_t feature_size)
 {
   uint8_t *img_buf = (uint8_t *)img->buf;
-  uint16_t sub_img_start = img->w * 2 * sub_img_h; // location of the start of sub image
+  uint16_t sub_img_start = img->buf_size - img->w * 2 * sub_img_h; // location of the start of sub image
   uint8_t median_val;
 
   uint16_t x_response, y_response, response;
 
   uint32_t px_inner = feature_size * feature_size;  // number of pixels in box
 
-  median_val = median(img, sub_img_start);          // calculate median value in subimage
+  median_val = median(img, sub_img_start, sub_img_h);          // calculate median value in subimage
 
-  get_integral_image(img, integral_image, sub_img_start);  // calucalte the intergral image
+  get_integral_image(img, integral_image, sub_img_start, sub_img_h);  // calucalte the intergral image
 
-  for (y_response = 0; y_response < sub_img.h - feature_size; y_response += feature_size) {
-    for (x_response = 0; x_response < sub_img.w - feature_size; x_response += feature_size) {
+  for (y_response = 0; y_response < sub_img_h - feature_size; y_response += feature_size) {
+    for (x_response = 0; x_response < img->w - feature_size; x_response += feature_size) {
       response = get_obs_response(integral_image, img->w, x_response, y_response, feature_size, px_inner, median_val);
-      if (response > 12) {
-        // printf("found box %d %d %d %d %d\n", x_response, y_response, response, median_val, img_buf[img->buf_size - sub_img.buf_size + sub_img.w*2*y_response + x_response + 1] );
+      if (response > 1) {
+        printf("found box %d %d %d %d %d\n", x_response, y_response, response, median_val, img_buf[sub_img_start + img->w*2*y_response + x_response*2 + 1] );
+        img_buf[sub_img_start + img->w * 2 * (y_response + feature_size / 2) + (x_response + feature_size / 2)*2 + 1] = 255;
       }
-      img_buf[sub_img_start + img->w * 2 * (y_response + feature_size / 2) + x_response + feature_size / 2 ] = 255;
     }
   }
-  image_free(&sub_img);
 }

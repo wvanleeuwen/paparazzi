@@ -79,8 +79,8 @@ int32_t image_multiply(struct image_t *img_a, struct image_t *img_b, struct imag
 void image_show_points(struct image_t *img, struct point_t *points, uint16_t points_cnt);
 void image_show_flow(struct image_t *img, struct flow_t *vectors, uint16_t points_cnt, uint8_t subpixel_factor);
 void image_draw_line(struct image_t *img, struct point_t *from, struct point_t *to);
-void get_integral_image( struct image_t* img, uint32_t* int_img, uint16_t px_start );
-int median (struct image_t* img, uint16_t px_start);
+void get_integral_image( struct image_t* img, uint32_t* int_img, uint16_t px_start , uint16_t img_h);
+int median (struct image_t* img, uint16_t px_start, uint16_t img_h);
 uint8_t get_obs_response(uint32_t *integral_image, uint16_t width, uint16_t x, uint16_t y, uint16_t feature_size, uint32_t px_inner, uint8_t median_val);
 
 #endif
