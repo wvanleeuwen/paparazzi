@@ -28,8 +28,11 @@
   <modules main_freq="512">
     <load name="gps_ubx_ucenter.xml"/>
     <load name="send_imu_mag_current.xml"/>
-    <load name="logger_file.xml"/>
-    <load name="practical.xml">
+    <load name="logger_file.xml">
+      <define name="VISION_DESIRED_VY" value="0.4"/>
+    </load>
+    <load name="cv_opticflow.xml"/>
+    <!--load name="practical.xml">
       <define name="PRACTICAL_DEBUG" value="TRUE"/>
       <define name="PRACTICAL_Y_m" value="110"/>
       <define name="PRACTICAL_Y_M" value="208"/>
@@ -37,7 +40,7 @@
       <define name="PRACTICAL_U_M" value="132"/>
       <define name="PRACTICAL_V_m" value="111"/>
       <define name="PRACTICAL_V_M" value="140"/>
-    </load>
+    </load-->
   </modules>
 
   <commands>

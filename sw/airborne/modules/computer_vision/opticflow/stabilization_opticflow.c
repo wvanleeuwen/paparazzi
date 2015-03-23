@@ -138,8 +138,8 @@ void stabilization_opticflow_update(struct opticflow_result_t *result)
   float err_vx = 0;
   float err_vy = 0;
   if (result->tracked_cnt > 0) {
-    err_vx = opticflow_stab.desired_vx - result->vel_x;
-    err_vy = opticflow_stab.desired_vy - result->vel_y;
+    err_vx = opticflow_stab.desired_vx*100 - result->vel_x;
+    err_vy = opticflow_stab.desired_vy*100 - result->vel_y;
   }
 
   /* Calculate the integrated errors (TODO: bound??) */
