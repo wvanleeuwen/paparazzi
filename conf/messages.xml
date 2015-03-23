@@ -1907,18 +1907,38 @@
   </message>
 
   <message name="STAB_ATTITUDE_INDI" id="216">
-    <field name="e_phi" type="float"/>
-    <field name="e_theta" type="float"/>
-    <field name="e_psi" type="float"/>
-    <field name="pdot" type="float"/>
-    <field name="qdot" type="float"/>
-    <field name="rdot" type="float"/>
-    <field name="s_p" type="float"/>
-    <field name="s_q" type="float"/>
-    <field name="s_r" type="float"/>
+    <field name="deshith1i2" type="float"/>
+    <field name="deshitt1heta" type="float"/>
+    <field name="deshitp1si" type="float"/>
+    <field name="deshito1t1" type="float"/>
+    <field name="deshito1t2" type="float"/>
+    <field name="deshito1t3" type="float"/>
+    <field name="deshitp1" type="float"/>
+    <field name="deshitq1" type="float"/>
+    <field name="deshitr1" type="float"/>
+    <field name="deshita1p" type="float"/>
+    <field name="deshita1q" type="float"/>
+    <field name="deshita1r" type="float"/>
   </message>
 
-  <!--217 is free -->
+  <message name="STAB_ATTITUDE_INDI2" id="217">
+    <field name="bl1a_phi" type="float"/>
+    <field name="bl2a_theta" type="float"/>
+    <field name="bl3a_psi" type="float"/>
+    <field name="bla4dot" type="float"/>
+    <field name="bla6dot" type="float"/>
+    <field name="bl5adot" type="float"/>
+    <field name="bla_p" type="float"/>
+    <field name="bla_q" type="float"/>
+    <field name="bla_r" type="float"/>
+    <field name="blas_p" type="float"/>
+    <field name="blas_q" type="float"/>
+    <field name="blas_r" type="float"/>
+    <field name="zza_r" type="float"/>
+    <field name="zzas_p" type="float"/>
+    <field name="zzas_q" type="float"/>
+    <field name="zzas_r" type="float"/>
+  </message>
 
   <message name="BEBOP_ACTUATORS" id="218">
     <field name="cmd_thrust" type="int32"/>

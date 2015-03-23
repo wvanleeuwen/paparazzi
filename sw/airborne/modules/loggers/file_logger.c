@@ -29,6 +29,7 @@
 #include <stdio.h>
 #include "subsystems/imu.h"
 #include "firmwares/rotorcraft/stabilization.h"
+#include "firmwares/rotorcraft/stabilization/stabilization_attitude_quat_indi.h"
 #include "state.h"
 
 /** Set the default File logger path to the USB drive */
@@ -78,20 +79,34 @@ void file_logger_periodic(void)
     return;
   }
   static uint32_t counter;
+
+  struct FloatRates float_rates = *stateGetBodyRates_f();
   struct Int32Quat *quat = stateGetNedToBodyQuat_i();
 
-  fprintf(file_logger, "%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d\n",
+  fprintf(file_logger, "%d,%f,%f,%f,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%f,%f,%f,%f\n",
           counter,
-          imu.gyro_unscaled.p,
-          imu.gyro_unscaled.q,
-          imu.gyro_unscaled.r,
-          imu.accel_unscaled.x,
-          imu.accel_unscaled.y,
-          imu.accel_unscaled.z,
+          float_rates.p,
+          float_rates.q,
+          float_rates.r,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
           stabilization_cmd[COMMAND_THRUST],
           stabilization_cmd[COMMAND_ROLL],
           stabilization_cmd[COMMAND_PITCH],
-          stabilization_cmd[COMMAND_YAW]
+          stabilization_cmd[COMMAND_YAW],
+          quat->qi,
+          quat->qx,
+          quat->qy,
+          quat->qz,
+          act_obs_rpm[0],
+          act_obs_rpm[1],
+          act_obs_rpm[2],
+          act_obs_rpm[3]
          );
   counter++;
 }

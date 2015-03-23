@@ -37,8 +37,7 @@ struct ReferenceSystem {
 
 extern struct FloatRates inv_control_effectiveness;
 extern struct ReferenceSystem reference_acceleration;
-
-extern float sensitivity;
+extern float act_obs_rpm[ACTUATORS_NB];
 
 extern struct FloatRates filtered_rate;
 extern struct FloatRates filtered_rate_deriv;
@@ -56,8 +55,10 @@ void stabilization_indi_filter_gyro(void);
 void stabilization_indi_filter_inputs(void);
 void lms_estimation(void);
 void filter_inputs_actuators(void);
-void calc_g_elmt(float du_norm, float dx_error, int8_t i, int8_t j);
+void calc_g1_element(float du_norm, float dx_error, int8_t i, int8_t j, float mu_extra);
+void calc_g2_element(float dx_error, int8_t j, float mu_extra);
 void filter_estimation_indi(void);
+void calc_g1g2_pseudo_inv(void);
 
 #endif /* STABILIZATION_ATTITUDE_QUAT_INT_H */
 

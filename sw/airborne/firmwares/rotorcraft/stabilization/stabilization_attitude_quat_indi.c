@@ -63,8 +63,11 @@ struct FloatRates udotdot = {0., 0., 0.};
 struct FloatRates filt_rate = {0., 0., 0.};
 float act_obs_rpm[ACTUATORS_NB];
 
-float sensitivity = 0.94;
-float omegadot_extra_yaw = 0;
+float dx_error_disp[3];
+
+struct FloatMat33 G1G2_trans_mult;
+struct FloatMat33 G1G2inv;
+float G2_times_du = 0;
 int32_t indi_u_in_estimation_i[4] = {0, 0, 0, 0};
 float indi_du_estimation[4] = {0.0, 0.0, 0.0, 0.0};
 float u_estimation[4] = {0.0, 0.0, 0.0, 0.0};
@@ -82,31 +85,26 @@ struct FloatRates ratedot_estimation = {0., 0., 0.};
 struct FloatRates ratedotdot_estimation = {0., 0., 0.};
 float u_in_estimation[4] = {0.0, 0.0, 0.0, 0.0};
 float indi_u_in_estimation[4] = {0.0, 0.0, 0.0, 0.0};
-float Ginv[4][3] = {{ -14.0 , 18.0, 4.0},
+float G1G2_pseudo_inv[4][3] = {{ -14.0 , 18.0, 4.0},
 { 14.0, 18.0, -4.0},
 { 14.0, -18.0, 4.0},
 {-14.0 , -18.0, -4.0}};
-float Gyaw[4] = {0.0657, -0.0657, 0.0657, -0.0657};
-float Ginv_new[4][3] = {{0.0, 0.0, 0.0},
-{0.0, 0.0, 0.0},
-{0.0, 0.0, 0.0},
-{0.0, 0.0, 0.0}};
-float G[3][4] = {{-0.01 , 0.01 , 0.01 , -0.01 },
+float G1[3][4] = {{-20*3 , 20*3, 20*3 , -20*3 }, //scaled by 1000
+{14 , 14, -14 , -14 },
+{1, -1, 1, -1}};
+float G2[4] = {60.0, -60.0, 60.0, -60.0}; //scaled by 1000
+float G1G2[3][4] = {{-0.01 , 0.01 , 0.01 , -0.01 },
 {0.01 , 0.01, -0.01 , -0.01 },
 {-0.0025, 0.0025, -0.0025, 0.0025}};
-float G_new[3][4] = {{0.015 , -0.015, -0.015 , 0.015 },
+float G1_new[3][4] = {{0.015 , -0.015, -0.015 , 0.015 },
 {0.015 , 0.015, -0.015 , -0.015 },
 {-0.0025, 0.0025, -0.0025, 0.0025}};
-float G_start[3][4] = {{0.01 , -0.01 , -0.01 , 0.01 },
-{0.01 , 0.01, -0.01 , -0.01 },
-{-0.0025, 0.0025, -0.0025, 0.0025}};
-float Ginv_start[4][3] = {{35.0 , 35.0, -100.0},
-{-35.0, 35.0, 100.0},
-{-35.0, -35.0, -100.0},
-{35.0 , -35.0, 100.0}};
-float lambda = 1.0/500.0;
+float G2_new[4];
+float mu1 = 0.00001;
+float mu2 = 0.00001*600.0;
 float dx_estimation[3] = {0.0, 0.0, 0.0};
 float du_estimation[4] = {0.0, 0.0, 0.0, 0.0};
+float ddu_estimation[4] = {0.0, 0.0, 0.0, 0.0};
 
 static const int32_t roll_coef[MOTOR_MIXING_NB_MOTOR]   = MOTOR_MIXING_ROLL_COEF;
 static const int32_t pitch_coef[MOTOR_MIXING_NB_MOTOR]  = MOTOR_MIXING_PITCH_COEF;
@@ -124,9 +122,9 @@ static void rpm_cb(uint8_t sender_id, const uint16_t *rpm, const uint8_t *count)
 
 #define STABILIZATION_INDI_FILT_OMEGA2_R (STABILIZATION_INDI_FILT_OMEGA_R*STABILIZATION_INDI_FILT_OMEGA_R)
 
-#define IDENTIFICATION_INDI_FILT_OMEGA 20
-#define IDENTIFICATION_INDI_FILT_OMEGA2 400
-#define IDENTIFICATION_FILT_ZETA 0.4
+#define IDENTIFICATION_INDI_FILT_OMEGA 40
+#define IDENTIFICATION_INDI_FILT_OMEGA2 1600
+#define IDENTIFICATION_FILT_ZETA 0.55
 
 
 #if PERIODIC_TELEMETRY
@@ -149,15 +147,39 @@ static void send_ahrs_ref_quat(struct transport_tx *trans, struct link_device *d
 static void send_att_indi(struct transport_tx *trans, struct link_device *dev)
 {
   pprz_msg_send_STAB_ATTITUDE_INDI(trans, dev, AC_ID,
-                                   &indi_du_in_actuators[0],
-                                   &filtered_rate_deriv.r,
-                                   &omegadot_extra_yaw,
-                                   &Gyaw[0],
-                                   &Gyaw[1],
-                                   &Gyaw[2],
-                                   &Gyaw[3],
-                                   &G[1][3],
-                                   &omegadot_extra_yaw);
+                                   &G1[0][0],
+                                   &G1[0][1],
+                                   &G1[0][2],
+                                   &G1[0][3],
+                                   &G1[1][0],
+                                   &G1[1][1],
+                                   &G1[1][2],
+                                   &G1[1][3],
+                                   &G1[2][0],
+                                   &G1[2][1],
+                                   &G1[2][2],
+                                   &G1[2][3]);
+}
+
+static void send_att_indi2(struct transport_tx *trans, struct link_device *dev)
+{
+  pprz_msg_send_STAB_ATTITUDE_INDI2(trans, dev, AC_ID,
+                                   &G1G2_pseudo_inv[0][0],
+                                   &G1G2_pseudo_inv[1][0],
+                                   &G1G2_pseudo_inv[2][0],
+                                   &G1G2_pseudo_inv[3][0],
+                                   &G1G2_pseudo_inv[0][1],
+                                   &G1G2_pseudo_inv[1][1],
+                                   &G1G2_pseudo_inv[2][1],
+                                   &G1G2_pseudo_inv[3][1],
+                                   &G1G2_pseudo_inv[0][2],
+                                   &G1G2_pseudo_inv[1][2],
+                                   &G1G2_pseudo_inv[2][2],
+                                   &G1G2_pseudo_inv[3][2],
+                                   &G2[0],
+                                   &G2[1],
+                                   &G2[2],
+                                   &G2[3]);
 }
 #endif
 
@@ -171,6 +193,7 @@ void stabilization_attitude_init(void)
 #if PERIODIC_TELEMETRY
   register_periodic_telemetry(DefaultPeriodic, "AHRS_REF_QUAT", send_ahrs_ref_quat);
   register_periodic_telemetry(DefaultPeriodic, "STAB_ATTITUDE_INDI", send_att_indi);
+  register_periodic_telemetry(DefaultPeriodic, "STAB_ATTITUDE_INDI2", send_att_indi2);
 #endif
 }
 
@@ -287,18 +310,12 @@ static void attitude_run_indi(int32_t indi_commands[], struct Int32Quat *att_err
   indi_u_in_estimation[2] = (float) motor_mixing.commands[2];
   indi_u_in_estimation[3] = (float) motor_mixing.commands[3];
 
-  omegadot_extra_yaw = (Gyaw[0]*indi_du_in_actuators[0] + Gyaw[1]*indi_du_in_actuators[1] + Gyaw[2]*indi_du_in_actuators[2] + Gyaw[3]*indi_du_in_actuators[3])*sensitivity;
-//   omegadot_extra_yaw = Gyaw[3]*indi_du_in_actuators[3];
+  G2_times_du = (G2[0]/1000.0*indi_du_in_actuators[0] + G2[1]/1000.0*indi_du_in_actuators[1] + G2[2]/1000.0*indi_du_in_actuators[2] + G2[3]/1000.0*indi_du_in_actuators[3]);
 
-  indi_du_in_actuators[0] = (Ginv[0][0] * (angular_accel_ref.p - filtered_rate_deriv.p)) + (Ginv[0][1] * (angular_accel_ref.q - filtered_rate_deriv.q)) + (Ginv[0][2] * (angular_accel_ref.r - filtered_rate_deriv.r + omegadot_extra_yaw));
-  indi_du_in_actuators[1] = (Ginv[1][0] * (angular_accel_ref.p - filtered_rate_deriv.p)) + (Ginv[1][1] * (angular_accel_ref.q - filtered_rate_deriv.q)) + (Ginv[1][2] * (angular_accel_ref.r - filtered_rate_deriv.r + omegadot_extra_yaw));
-  indi_du_in_actuators[2] = (Ginv[2][0] * (angular_accel_ref.p - filtered_rate_deriv.p)) + (Ginv[2][1] * (angular_accel_ref.q - filtered_rate_deriv.q)) + (Ginv[2][2] * (angular_accel_ref.r - filtered_rate_deriv.r + omegadot_extra_yaw));
-  indi_du_in_actuators[3] = (Ginv[3][0] * (angular_accel_ref.p - filtered_rate_deriv.p)) + (Ginv[3][1] * (angular_accel_ref.q - filtered_rate_deriv.q)) + (Ginv[3][2] * (angular_accel_ref.r - filtered_rate_deriv.r + omegadot_extra_yaw));
-
-//   indi_du_in_actuators[0] = (Ginv[0][2] * (angular_accel_ref.r - filtered_rate_deriv.r + omegadot_extra_yaw));
-//   indi_du_in_actuators[1] = (Ginv[1][2] * (angular_accel_ref.r - filtered_rate_deriv.r + omegadot_extra_yaw));
-//   indi_du_in_actuators[2] = (Ginv[2][2] * (angular_accel_ref.r - filtered_rate_deriv.r + omegadot_extra_yaw));
-//   indi_du_in_actuators[3] = (Ginv[3][2] * (angular_accel_ref.r - filtered_rate_deriv.r + omegadot_extra_yaw));
+  indi_du_in_actuators[0] = (G1G2_pseudo_inv[0][0] * (angular_accel_ref.p - filtered_rate_deriv.p)) + (G1G2_pseudo_inv[0][1] * (angular_accel_ref.q - filtered_rate_deriv.q)) + (G1G2_pseudo_inv[0][2] * (angular_accel_ref.r - filtered_rate_deriv.r + G2_times_du));
+  indi_du_in_actuators[1] = (G1G2_pseudo_inv[1][0] * (angular_accel_ref.p - filtered_rate_deriv.p)) + (G1G2_pseudo_inv[1][1] * (angular_accel_ref.q - filtered_rate_deriv.q)) + (G1G2_pseudo_inv[1][2] * (angular_accel_ref.r - filtered_rate_deriv.r + G2_times_du));
+  indi_du_in_actuators[2] = (G1G2_pseudo_inv[2][0] * (angular_accel_ref.p - filtered_rate_deriv.p)) + (G1G2_pseudo_inv[2][1] * (angular_accel_ref.q - filtered_rate_deriv.q)) + (G1G2_pseudo_inv[2][2] * (angular_accel_ref.r - filtered_rate_deriv.r + G2_times_du));
+  indi_du_in_actuators[3] = (G1G2_pseudo_inv[3][0] * (angular_accel_ref.p - filtered_rate_deriv.p)) + (G1G2_pseudo_inv[3][1] * (angular_accel_ref.q - filtered_rate_deriv.q)) + (G1G2_pseudo_inv[3][2] * (angular_accel_ref.r - filtered_rate_deriv.r + G2_times_du));
 
   indi_u_in_actuators[0] = u_actuators[0] + indi_du_in_actuators[0];
   indi_u_in_actuators[1] = u_actuators[1] + indi_du_in_actuators[1];
@@ -336,8 +353,8 @@ static void attitude_run_indi(int32_t indi_commands[], struct Int32Quat *att_err
   if (stabilization_cmd[COMMAND_THRUST] < 300) {
     indi_u_in_actuators[0] = 0;
     indi_u_in_actuators[1] = 0;
+    indi_u_in_actuators[2] = 0;
     indi_u_in_actuators[3] = 0;
-    indi_u_in_actuators[4] = 0;
     indi_u_in_estimation_i[0] = 0;
     indi_u_in_estimation_i[1] = 0;
     indi_u_in_estimation_i[2] = 0;
@@ -510,45 +527,102 @@ static void rpm_cb(uint8_t sender_id, const uint16_t *rpm, const uint8_t *count)
   }
 }
 
-void calc_g_elmt(float du_norm, float dx_error, int8_t i, int8_t j) {
-//   G_new[i][j] = G[i][j] - (du_estimation[j]*lambda*dx_error)/du_norm;
-  G_new[i][j] = (du_estimation[j]/100000000.0*dx_error);
+void calc_g1_element(float du_norm, float dx_error, int8_t i, int8_t j, float mu_extra) {
+  G1_new[i][j] = G1[i][j] - du_estimation[j]*mu1*dx_error*mu_extra;
+}
+
+void calc_g2_element(float dx_error, int8_t j, float mu_extra) {
+  G2_new[j] = G2[j] - ddu_estimation[j]*mu2*dx_error*mu_extra;
 }
 
 void lms_estimation(void) {
   dx_estimation[0] = ratedotdot_estimation.p;
   dx_estimation[1] = ratedotdot_estimation.q;
   dx_estimation[2] = ratedotdot_estimation.r;
-  du_estimation[0] = udot_estimation[0];
-  du_estimation[1] = udot_estimation[1];
-  du_estimation[2] = udot_estimation[2];
-  du_estimation[3] = udot_estimation[3];
+  du_estimation[0] = udot_estimation[0]/1000.0;
+  du_estimation[1] = udot_estimation[1]/1000.0;
+  du_estimation[2] = udot_estimation[2]/1000.0;
+  du_estimation[3] = udot_estimation[3]/1000.0;
+  ddu_estimation[0] = udotdot_estimation[0]/1000.0/512.0;
+  ddu_estimation[1] = udotdot_estimation[1]/1000.0/512.0;
+  ddu_estimation[2] = udotdot_estimation[2]/1000.0/512.0;
+  ddu_estimation[3] = udotdot_estimation[3]/1000.0/512.0;
 
   //Estimation of G
   float du_norm = du_estimation[0]*du_estimation[0] + du_estimation[1]*du_estimation[1] +du_estimation[2]*du_estimation[2] + du_estimation[3]*du_estimation[3];
   float dx_norm = dx_estimation[0]*dx_estimation[0] + dx_estimation[1]*dx_estimation[1] + dx_estimation[2]*dx_estimation[2];
-  if((dx_norm > 40000.0)) {
+//   if((dx_norm > 40000.0)) {
     for(int8_t i=0; i<3; i++) {
-      float dx_error = G[i][0]*du_estimation[0] + G[i][1]*du_estimation[1] + G[i][2]*du_estimation[2] + G[i][3]*du_estimation[3] - dx_estimation[i];
+      float mu_extra = 1.0;
+      float dx_error = G1[i][0]*du_estimation[0] + G1[i][1]*du_estimation[1] + G1[i][2]*du_estimation[2] + G1[i][3]*du_estimation[3] - dx_estimation[i];
+      dx_error_disp[i] = dx_error;
+      //if the yaw axis, also use G2
+      if(i==2) {
+        mu_extra = 0.3;
+        dx_error = dx_error + G2[0]*ddu_estimation[0] + G2[1]*ddu_estimation[1] + G2[2]*ddu_estimation[2] + G2[3]*ddu_estimation[3];
+        for(int8_t j=0; j<4; j++) {
+          calc_g2_element(dx_error,j, mu_extra);
+        }
+      }
       for(int8_t j=0; j<4; j++) {
-        calc_g_elmt(du_norm, dx_error, i, j);
+        calc_g1_element(du_norm, dx_error, i, j, mu_extra);
       }
     }
 
-    for(int8_t i=0; i<3; i++) {
-      for(int8_t j=0; j<4; j++) {
-        G[i][j] = G_new[i][j];
+    for(int8_t j=0; j<4; j++) {
+      G2[j] = G2_new[j];
+      for(int8_t i=0; i<3; i++) {
+        G1[i][j] = G1_new[i][j];
       }
     }
 
-    //TODO: this should be real inverse
-//     for(int8_t i=0; i<2; i++) {
-//       float gg = G[i][0]*G[i][0] + G[i][1]*G[i][1] + G[i][2]*G[i][2] + G[i][3]*G[i][3];
-//       if(gg>1e-6) {
-//         for(int8_t j=0; j<4; j++) {
-//         Ginv[j][i] = G[i][j]/gg;
-//         }
-//       }
-//     }
+    calc_g1g2_pseudo_inv();
+}
+
+void calc_g1g2_pseudo_inv(void) {
+
+  //sum of G1 and G2
+  for(int8_t i=0; i<3; i++) {
+    for(int8_t j=0; j<4; j++) {
+      if(i<2)
+        G1G2[i][j] = G1[i][j]/1000.0;
+      else
+        G1G2[i][j] = G1[i][j]/1000.0 + G2[j]/1000.0;
+    }
+  }
+
+  //G1G2*transpose(G1G2)
+  //calculate matrix multiplication of its transpose 3x4 x 4x3
+  float element = 0;
+  for(int8_t row=0; row<3; row++) {
+    for(int8_t col=0; col<3; col++) {
+      element = 0;
+      for(int8_t i=0; i<4; i++) {
+        element = element + G1G2[row][i]*G1G2[col][i];
+      }
+      MAT33_ELMT(G1G2_trans_mult,row,col) = element;
+    }
+  }
+
+  //there are numerical errors if the scaling is not right.
+  MAT33_MULT_SCALAR(G1G2_trans_mult,100.0);
+
+  //inverse of 3x3 matrix
+  MAT33_INV(G1G2inv,G1G2_trans_mult);
+
+  //scale back
+  MAT33_MULT_SCALAR(G1G2inv,100.0);
+
+  //G1G2'*G1G2inv
+  //calculate matrix multiplication 4x3 x 3x3
+  for(int8_t row=0; row<4; row++) {
+    for(int8_t col=0; col<3; col++) {
+      element = 0;
+      for(int8_t i=0; i<3; i++) {
+        element = element + G1G2[i][row]*MAT33_ELMT(G1G2inv,col,i);
+      }
+      G1G2_pseudo_inv[row][col] = element;
+    }
   }
 }
+
