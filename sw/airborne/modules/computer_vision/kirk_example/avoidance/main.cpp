@@ -13,9 +13,13 @@ int RES = 100;
 int x_response, y_response;
 uint whole_area;
 
-Mat integral_image;
+uint16_t median0, median1, median2; 
 
-void get_integral_image( Mat* img, uint width, uint height)
+Mat integral_image0;
+Mat integral_image1;
+Mat integral_image2;
+
+void get_integral_image( Mat* img, Mat* integral_image, uint width, uint height)
 {
 	printf("w = %d, h = %d\n",width, height);
 	for(uint x = 0; x < width; x++)
@@ -24,22 +28,22 @@ void get_integral_image( Mat* img, uint width, uint height)
 		{
 			if( x >= 1 && y >= 1 )
 			{
-				integral_image.at<int>(y,x) = img->at<unsigned char>(y,x) + integral_image.at<int>(y,x-1) + integral_image.at<int>(y-1,x) - integral_image.at<int>(y-1,x-1);
+				integral_image->at<int>(y,x) = img->at<unsigned char>(y,x) + integral_image->at<int>(y,x-1) + integral_image->at<int>(y-1,x) - integral_image->at<int>(y-1,x-1);
 			}
 			else if(x >= 1)
 			{
-				integral_image.at<int>(y,x) = img->at<unsigned char>(y,x) + integral_image.at<int>(y,x-1);
+				integral_image->at<int>(y,x) = img->at<unsigned char>(y,x) + integral_image->at<int>(y,x-1);
 			}
 			else if(y >= 1)
 			{
-				integral_image.at<int>(y,x) = img->at<unsigned char>(y,x) + integral_image.at<int>(y-1,x);
+				integral_image->at<int>(y,x) = img->at<unsigned char>(y,x) + integral_image->at<int>(y-1,x);
 			}
 			else
 			{
-				integral_image.at<int>(y,x) = img->at<unsigned char>(y,x);
+				integral_image->at<int>(y,x) = img->at<unsigned char>(y,x);
 			}
 
-			if (integral_image.at<int>(y,x) > pow(2,30))
+			if (integral_image->at<int>(y,x) > pow(2,30))
 			{
 			    printf("OVERFLOW!");
 			    exit(1);
@@ -48,19 +52,19 @@ void get_integral_image( Mat* img, uint width, uint height)
 	}
 }
 
-int get_sum( uint x_min, uint y_min, uint x_max, uint y_max)
+int get_sum( Mat integral_image, uint x_min, uint y_min, uint x_max, uint y_max)
 {
 	//printf("\n x_response: %d y_response: %d edges: %d, %d, %d, %d\n ", x_response, y_response, integral_image.at<int>(y_min,x_min), integral_image.at<int>(y_max,x_max), integral_image.at<int>(y_min,x_max), integral_image.at<int>(y_max,x_min));
 	return (integral_image.at<int>(y_min,x_min) + integral_image.at<int>(y_max,x_max) - integral_image.at<int>(y_min,x_max) - integral_image.at<int>(y_max,x_min));
 }
 
-int	px_inner, px_whole, px_border, median_val;
+int	px_inner, px_whole, px_border;
 
-uint get_obs_response()
+int get_obs_response( Mat integral_img, uint16_t median_val)
 {
 	int sub_area, resp;
 	//whole_area = get_sum( x_response - border, y_response, x_response+feature_size+border, y_response+feature_size);
-	sub_area = get_sum( x_response, y_response, x_response+feature_size, y_response+feature_size);
+	sub_area = get_sum( integral_img, x_response, y_response, x_response+feature_size, y_response+feature_size);
 
 /*	printf("px_inner: %d \n",px_inner);
 	printf("whole_area: %d \n",whole_area);
@@ -79,10 +83,10 @@ uint get_obs_response()
 	if ((whole_area - sub_area) > 0)
 		//resp =  (RES*((sub_area*RES) / px_inner)) / (((whole_area - sub_area)*RES) / px_border );
 		//resp =  (sub_area * px_border) / ((whole_area - sub_area) * px_inner  );
-		resp =  RES*abs((sub_area / px_inner) - median_val)/255;
+		resp =  RES*((sub_area / px_inner) - median_val)/255;
 	else resp = RES;
 
-	printf("resp: %d \n",resp);
+	//printf("resp: %d \n",resp);
 	/*print_number(whole_area, 0);
 	print_space();
 	print_number(inner_area, 0);
@@ -168,7 +172,7 @@ int median (Mat image)
 
 int main( int argc, const char** argv )
 {
-	int response;
+	int8_t response0, response1, response2;
 	if (argc < 3)
 	{
 		cout << "Error : No image argument given!!" << endl;
@@ -210,51 +214,93 @@ int main( int argc, const char** argv )
     vector<Mat> channels(3);
     split(sub_image, channels);
 
-    sub_image = channels[0];
+    median0 = median(channels[0]);
+	median1 = median(channels[1]);
+	median2 = median(channels[2]);
 
-    median_val = median(sub_image);
+    printf("median! %d %d %d\n", median0, median1, median2);
 
-    printf("median! %d\n", median_val);
+	// CV_8U=0, CV_8S=1, CV_16U=2, CV_16S=3, CV_32S=4, CV_32F=5, CV_64F=6
+    integral_image0 = channels[0].clone();
+    integral_image0.convertTo( integral_image0, 4 );
+    get_integral_image( &channels[0], &integral_image0, integral_image0.cols, integral_image0.rows );
 
-    integral_image = sub_image.clone();
-    integral_image.convertTo( integral_image, 4 ); // CV_8U=0, CV_8S=1, CV_16U=2, CV_16S=3, CV_32S=4, CV_32F=5, CV_64F=6
-    get_integral_image( &sub_image, integral_image.cols, integral_image.rows  );
+	integral_image1 = channels[1].clone();
+    integral_image1.convertTo( integral_image1, 4 );
+    get_integral_image( &channels[1], &integral_image1, integral_image1.cols, integral_image1.rows );
 
-    printf("whole_area = %d width: %d, height: %d\n", whole_area, integral_image.cols, integral_image.rows);
+	integral_image2 = channels[2].clone();
+    integral_image2.convertTo( integral_image2, 4 );
+    get_integral_image( &channels[2], &integral_image2, integral_image2.cols, integral_image2.rows );
 
-    feature_size = 50;
+    // printf("whole_area = %d width: %d, height: %d\n", whole_area, integral_image0.cols, integral_image0.rows);
+
+    feature_size = 25;
     border = feature_size*2;
 
     px_inner = feature_size * feature_size;
     px_whole = (feature_size+2*border)*(feature_size);
     px_border = px_whole - px_inner;
 
-    for (y_response = 0; y_response < integral_image.rows - feature_size; y_response+=feature_size){
-      for (x_response = 0; x_response < integral_image.cols - feature_size; x_response+=feature_size){
-    	  response = get_obs_response();
-        if (response > 12){
-          rectangle( img,
+	cvtColor(img, img, CV_RGB2YCrCb);
+    //cvtColor(img, img, CV_RGB2HSV);
+    split(img, channels);
+
+    for (y_response = 0; y_response < integral_image0.rows - feature_size; y_response+=feature_size){
+      for (x_response = 0; x_response < integral_image0.cols - feature_size; x_response+=feature_size){
+
+    	  	response0 = get_obs_response(integral_image0, median0);
+			response1 = get_obs_response(integral_image1, median2);
+			response2 = get_obs_response(integral_image2, median2);
+
+			printf("resp: %d %d %d\n", response0, response1, response2);
+        if (response0 < -16){
+			// printf("Total: %d \n",floor(sqrt(pow(response0,2) + pow(response1,2) + pow(response2,2))));
+          rectangle( channels[0],
+                 Point( x_response, img.rows - sub_img_h + y_response),
+                 Point( x_response+feature_size, img.rows - sub_img_h + y_response + feature_size),
+                 Scalar( 255, 0, 0 ),
+                 2,
+                 8 );
+        }
+
+ 		if (abs(response1) > 9){
+			// printf("Total: %d \n",floor(sqrt(pow(response0,2) + pow(response1,2) + pow(response2,2))));
+          rectangle( channels[1],
+                 Point( x_response, img.rows - sub_img_h + y_response),
+                 Point( x_response+feature_size, img.rows - sub_img_h + y_response + feature_size),
+                 Scalar( 0, 255, 0 ),
+                 2,
+                 8 );
+        }
+
+ 		if (abs(response2) > 11){
+			// printf("Total: %d \n",floor(sqrt(pow(response0,2) + pow(response1,2) + pow(response2,2))));
+          rectangle( channels[2],
                  Point( x_response, img.rows - sub_img_h + y_response),
                  Point( x_response+feature_size, img.rows - sub_img_h + y_response + feature_size),
                  Scalar( 0, 0, 255 ),
                  2,
                  8 );
-/*        	 rectangle( sub_image,
-					 Point( x_response,  y_response),
-					 Point( x_response+feature_size, y_response + feature_size),
-					 Scalar( 0, 0, 255 ),
-					 2,
-					 8 );*/
         }
       }
     }
 
-    cvtColor(img, img, CV_RGB2YCrCb);
-    //cvtColor(img, img, CV_RGB2HSV);
-    split(img, channels);
+    
 
     imshow("MyWindow", channels[0]); //display the image which is stored in the 'img' in the "MyWindow" window
+    waitKey(0); //wait infinite time for a keypress
 
+	imshow("MyWindow", channels[1]); //display the image which is stored in the 'img' in the "MyWindow" window
+    waitKey(0); //wait infinite time for a keypress
+
+	imshow("MyWindow", channels[2]); //display the image which is stored in the 'img' in the "MyWindow" window
+    waitKey(0); //wait infinite time for a keypress
+
+	Mat fin_img;
+	merge(channels, fin_img);
+
+	imshow("MyWindow", fin_img); //display the image which is stored in the 'img' in the "MyWindow" window
     waitKey(0); //wait infinite time for a keypress
 	}
 
