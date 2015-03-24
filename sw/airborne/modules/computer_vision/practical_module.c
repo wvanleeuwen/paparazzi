@@ -261,9 +261,6 @@ static void practical_tx_img(struct image_t *img, bool_t use_netcat)
  * @param[in] sub_img_h The height of the bottom of the frame to search
  * @param[in] feature_size The bin size to average for object detection
  */
-uint32_t integral_image0[460800] = {0}; // max size = 1280x720/2 looking at every UYVY pair
-uint32_t integral_image1[460800] = {0};
-uint32_t integral_image2[460800] = {0};
 static void practical_integral_img_detect(struct image_t *img, uint16_t sub_img_h, uint16_t feature_size)
 {
   // note numbering of channels 0,1,2 -> Y,U,V
@@ -272,47 +269,74 @@ static void practical_integral_img_detect(struct image_t *img, uint16_t sub_img_
   // TODO: Optimse thresholds for each channel (a bit)
   // TODO: Don't predefine intergral image? Done now to not initialise the memory every loop, maybe can be optimsed
 
-  uint8_t *img_buf = (uint8_t *)img->buf;
-  const uint8_t intergral_img_w = img->w / 2;
-  uint16_t sub_img_start = img->buf_size - img->w * 2 * sub_img_h; // location of the start of sub image
+  struct image_t int_y, int_u, int_v;
+  image_create(&int_y, img->w, sub_img_h, IMAGE_INTEGRAL);
+  image_create(&int_u, img->w/2, sub_img_h, IMAGE_INTEGRAL);
+  image_create(&int_v, img->w/2, sub_img_h, IMAGE_INTEGRAL);
 
-  uint8_t median0, median1, median2;
-  int8_t response0, response1, response2;
 
-  uint32_t px_inner = feature_size * feature_size;  // number of pixels in box
+  // Calculate the median values
+  uint16_t sub_img_start = img->buf_size - img->w * 2 * sub_img_h;     // location of the start of sub image
+  uint8_t median_y = median(img, 0, sub_img_start, sub_img_h);
+  uint8_t median_u = median(img, 1, sub_img_start, sub_img_h);
+  uint8_t median_v = median(img, 2, sub_img_start, sub_img_h);
+  //printf("Median values: %d %d %d\n", median_y, median_u, median_v);
 
-  median0 = median(img, 0, sub_img_start, sub_img_h);          // calculate median value in subimage Y channel
-  median1 = median(img, 1, sub_img_start, sub_img_h);          // calculate median value in subimage U channel
-  median2 = median(img, 2, sub_img_start, sub_img_h);          // calculate median value in subimage V channel
+  // Get the integral image
+  struct point_t start_point = {
+    .x = 0,
+    .y = img->h - sub_img_h
+  };
+  image_get_integral(img, &int_y, &int_u, &int_v, &start_point);
 
-  get_integral_image(img, integral_image0, integral_image1, integral_image2, sub_img_start,
-                     sub_img_h);  // calucalte the intergral image
+  // Show boxes above thresholds
+  struct point_t from, to;
+  uint16_t feature_s2 = feature_size * feature_size;
+  for (uint16_t x = 0; x <= img->w - feature_size; x += feature_size) {
+    for (uint16_t y = 0; y <= sub_img_h - feature_size; y += feature_size) {
+      // Set the from and to
+      from.x = x;
+      from.y = y;
+      to.x = x + feature_size - 1;
+      to.y = y + feature_size - 1;
 
-  uint16_t x_response, y_response;
-  uint8_t feature_size2 = feature_size / 2;
-  for (y_response = 0; y_response < sub_img_h - feature_size; y_response += feature_size) {
-    for (x_response = 0; x_response < intergral_img_w - feature_size; x_response += feature_size) {
-      // NOTE: placing color in image not needed during real flight!
-      response0 = get_obs_response(integral_image0, intergral_img_w, x_response, y_response, feature_size, px_inner,
-                                   median0);
-      if (response0 < -16) {
-        img_buf[sub_img_start + intergral_img_w * 4 * (y_response + feature_size2) + (x_response + feature_size2) * 4 + 1] =
-          255;
+      uint8_t avg_y = image_get_integral_sum(&int_y, &from, &to) / feature_s2;
+
+      // Update the x and y for the U and V values (since we have 2 times less pixels)
+      from.x /= 2;
+      from.y /= 2;
+      to.x /= 2;
+      to.y /= 2;
+
+      uint32_t avg_u = 2*image_get_integral_sum(&int_u, &from, &to) / feature_s2;
+      uint32_t avg_v = 2*image_get_integral_sum(&int_v, &from, &to) / feature_s2;
+
+      printf("Point(%d, %d): %dY %dU %dV\n", x, y, avg_y - median_y, avg_u - median_u, avg_v - median_v);
+
+      // Show points
+      from.x = x + start_point.x;
+      from.y = y + start_point.y;
+      to.x = x + start_point.x + feature_size;
+      to.y = y + start_point.y + feature_size;
+
+      if(avg_y - median_y < -16) {
+        image_draw_line(img, &from, &to);
       }
-      response1 = get_obs_response(integral_image1, intergral_img_w, x_response, y_response, feature_size, px_inner,
-                                   median1);
-      if (abs(response1) > 9) {
-        img_buf[sub_img_start + intergral_img_w * 4 * (y_response + feature_size2) + (x_response + feature_size2) * 4] = 255;
-      }
-      response2 = get_obs_response(integral_image2, intergral_img_w, x_response, y_response, feature_size, px_inner,
-                                   median2);
-      if (abs(response2) > 11) {
-        img_buf[sub_img_start + intergral_img_w * 4 * (y_response + feature_size2) + (x_response + feature_size2) * 4 + 2] =
-          255;
-      }
 
-      // printf("found box %d %d %d %d %d\n", x_response, y_response, response, median_val, img_buf[sub_img_start + img->w*2*y_response + x_response*2 + 1] );
-
+      from.x = x + start_point.x + feature_size;
+      from.y = y + start_point.y;
+      to.x = x + start_point.x;
+      to.y = y + start_point.y + feature_size;
+      if(abs(avg_u - median_u) < 9) {
+        image_draw_line(img, &from, &to);
+      }
+      if(abs(avg_v - median_v) < 11) {
+        image_draw_line(img, &from, &to);
+      }
     }
   }
+
+  image_free(&int_y);
+  image_free(&int_u);
+  image_free(&int_v);
 }
