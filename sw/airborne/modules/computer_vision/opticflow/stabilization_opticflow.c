@@ -116,6 +116,8 @@ void guidance_h_module_read_rc(void)
  */
 void guidance_h_module_run(bool_t in_flight)
 {
+  // GUIDANCE: Set Hover-z-hold (0.5 meter)
+  guidance_v_z_sp = -1 << 7;
   /* Update the setpoint */
   stabilization_attitude_set_rpy_setpoint_i(&opticflow_stab.cmd);
 
