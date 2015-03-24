@@ -34,7 +34,7 @@
 #include <unistd.h>
 #include "state.h"
 #include "subsystems/abi.h"
-#include "stabilization_practical.h"
+#include "opticflow/stabilization_opticflow.h"
 
 #include "lib/v4l/v4l2.h"
 #include "lib/encoding/jpeg.h"
@@ -144,9 +144,12 @@ static void *practical_module_calc(void *data __attribute__((unused)))
 
 #ifdef PRACTICAL_DEBUG
   // Create a new JPEG image
-  struct image_t img_jpeg, img_copy;
-  image_create(&img_copy, practical_video_dev->w, practical_video_dev->h, IMAGE_YUV422);
+  struct image_t img_jpeg, img_small;
   image_create(&img_jpeg, practical_video_dev->w, practical_video_dev->h, IMAGE_JPEG);
+  image_create(&img_small,
+    practical_video_dev->w/4,
+    practical_video_dev->h/4,
+    IMAGE_YUV422);
 #endif
 
   /* Main loop of the optical flow calculation */
@@ -181,8 +184,9 @@ static void *practical_module_calc(void *data __attribute__((unused)))
     practical_integral_img_detect(&img, 200 /*window_h*/, 100 /*box size*/);
 
 #ifdef PRACTICAL_DEBUG
-    //RunOnceEvery(30, {
-    jpeg_encode_image(&img, &img_jpeg, 60, FALSE);
+    //RunOnceEvery(10, {
+    image_yuv422_downsample(&img, &img_small, 4);
+    jpeg_encode_image(&img_small, &img_jpeg, 60, FALSE);
     practical_tx_img(&img_jpeg, FALSE);
     //});
 #endif
@@ -212,11 +216,11 @@ static void practical_agl_cb(uint8_t sender_id __attribute__((unused)), float di
 /**
  * Transmit a JPEG image trough RTP or netcat
  * @param[in] *img The image to transmit
- * @param[in] rtp If we want to transmit over RTP, if false it uses netcat
+ * @param[in] use_netcat If we want to transmit over use netcat or RTP
  */
-static void practical_tx_img(struct image_t *img, bool_t rtp)
+static void practical_tx_img(struct image_t *img, bool_t use_netcat)
 {
-  if (rtp) {
+  if (!use_netcat) {
     rtp_frame_send(
       &PRACTICAL_UDP_DEV,       // UDP device
       img,
@@ -225,6 +229,7 @@ static void practical_tx_img(struct image_t *img, bool_t rtp)
       0,                        // DRI Header
       0                         // 90kHz time increment
     );
+    return;
   }
 
   // Open process to send using netcat (in a fork because sometimes kills itself???)
