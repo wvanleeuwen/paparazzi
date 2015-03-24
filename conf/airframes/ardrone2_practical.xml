@@ -28,7 +28,9 @@
   <modules main_freq="512">
     <load name="gps_ubx_ucenter.xml"/>
     <load name="send_imu_mag_current.xml"/>
-    <load name="logger_file.xml">
+    <load name="logger_file.xml"/>
+    <load name="video_rtp_stream.xml"/>
+    <load name="cv_opticflow.xml">
       <define name="VISION_DESIRED_VY" value="0.4"/>
     </load>
     <load name="cv_opticflow.xml"/>
