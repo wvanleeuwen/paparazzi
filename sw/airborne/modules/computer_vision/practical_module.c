@@ -256,28 +256,58 @@ static void practical_tx_img(struct image_t *img, bool_t rtp)
  * @param[in] sub_img_h The height of the bottom of the frame to search
  * @param[in] feature_size The bin size to average for object detection
  */
-uint32_t integral_image[921600] = {0};
+uint32_t integral_image0[460800] = {0}; // max size = 1280x720/2 looking at every UYVY pair
+uint32_t integral_image1[460800] = {0};
+uint32_t integral_image2[460800] = {0};
 static void practical_integral_img_detect(struct image_t *img, uint16_t sub_img_h, uint16_t feature_size)
 {
-  uint8_t *img_buf = (uint8_t *)img->buf;
-  uint16_t sub_img_start = img->buf_size - img->w * 2 * sub_img_h; // location of the start of sub image
-  uint8_t median_val;
+  // note numbering of channels 0,1,2 -> Y,U,V
+  // TODO: optimise computation of median and integral images in image.c
+  // TODO: Remove placing point in image in final version, maybe place in a debug define...
+  // TODO: Optimse thresholds for each channel (a bit)
+  // TODO: Don't predefine intergral image? Done now to not initialise the memory every loop, maybe can be optimsed
 
-  uint16_t x_response, y_response, response;
+  uint8_t *img_buf = (uint8_t *)img->buf;
+  const uint8_t intergral_img_w = img->w / 2;
+  uint16_t sub_img_start = img->buf_size - img->w * 2 * sub_img_h; // location of the start of sub image
+
+  uint8_t median0, median1, median2;
+  int8_t response0, response1, response2;
 
   uint32_t px_inner = feature_size * feature_size;  // number of pixels in box
 
-  median_val = median(img, sub_img_start, sub_img_h);          // calculate median value in subimage
+  median0 = median(img, 0, sub_img_start, sub_img_h);          // calculate median value in subimage Y channel
+  median1 = median(img, 1, sub_img_start, sub_img_h);          // calculate median value in subimage U channel
+  median2 = median(img, 2, sub_img_start, sub_img_h);          // calculate median value in subimage V channel
 
-  get_integral_image(img, integral_image, sub_img_start, sub_img_h);  // calucalte the intergral image
+  get_integral_image(img, integral_image0, integral_image1, integral_image2, sub_img_start,
+                     sub_img_h);  // calucalte the intergral image
 
+  uint16_t x_response, y_response;
+  uint8_t feature_size2 = feature_size / 2;
   for (y_response = 0; y_response < sub_img_h - feature_size; y_response += feature_size) {
-    for (x_response = 0; x_response < img->w - feature_size; x_response += feature_size) {
-      response = get_obs_response(integral_image, img->w, x_response, y_response, feature_size, px_inner, median_val);
-      if (response > 12) {
-        printf("found box %d %d %d %d %d\n", x_response, y_response, response, median_val, img_buf[sub_img_start + img->w*2*y_response + x_response*2 + 1] );
-        img_buf[sub_img_start + img->w * 2 * (y_response + feature_size / 2) + (x_response + feature_size / 2)*2 + 1] = 255;
+    for (x_response = 0; x_response < intergral_img_w - feature_size; x_response += feature_size) {
+      // NOTE: placing color in image not needed during real flight!
+      response0 = get_obs_response(integral_image0, intergral_img_w, x_response, y_response, feature_size, px_inner,
+                                   median0);
+      if (response0 < -16) {
+        img_buf[sub_img_start + intergral_img_w * 4 * (y_response + feature_size2) + (x_response + feature_size2) * 4 + 1] =
+          255;
       }
+      response1 = get_obs_response(integral_image1, intergral_img_w, x_response, y_response, feature_size, px_inner,
+                                   median1);
+      if (abs(response1) > 9) {
+        img_buf[sub_img_start + intergral_img_w * 4 * (y_response + feature_size2) + (x_response + feature_size2) * 4] = 255;
+      }
+      response2 = get_obs_response(integral_image2, intergral_img_w, x_response, y_response, feature_size, px_inner,
+                                   median2);
+      if (abs(response2) > 11) {
+        img_buf[sub_img_start + intergral_img_w * 4 * (y_response + feature_size2) + (x_response + feature_size2) * 4 + 2] =
+          255;
+      }
+
+      // printf("found box %d %d %d %d %d\n", x_response, y_response, response, median_val, img_buf[sub_img_start + img->w*2*y_response + x_response*2 + 1] );
+
     }
   }
 }

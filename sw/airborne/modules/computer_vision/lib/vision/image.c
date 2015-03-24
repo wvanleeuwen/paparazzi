@@ -24,12 +24,13 @@
  * Image helper functions, like resizing, color filter, converters...
  */
 
+#include <stdio.h>
 #include "image.h"
 #include <stdlib.h>
 #include <string.h>
 
 typedef uint8_t elem_type;
-elem_type torben(elem_type m[], int n, int pixel_width);
+elem_type torben(elem_type m[], uint16_t n, uint8_t pixel_width, uint8_t channel);
 int get_sum(uint32_t *integral_image, uint16_t width, uint16_t x_min, uint16_t y_min, uint16_t x_max, uint16_t y_max);
 
 /**
@@ -531,24 +532,35 @@ void image_draw_line(struct image_t *img, struct point_t *from, struct point_t *
  * @param[in] px_start The start location in the input image to sum
  * @param[in] img_h The hieght of th esub image
  */
-void get_integral_image(struct image_t *img, uint32_t *int_img, uint16_t px_start, uint16_t img_h)
+void get_integral_image(struct image_t *img, uint32_t *int_img0, uint32_t *int_img1, uint32_t *int_img2,
+                        uint16_t px_start, uint16_t img_h)
 {
   uint8_t *img_buf = (uint8_t *)img->buf;
-  uint8_t pixel_width = (img->type == IMAGE_YUV422) ? 2 : 1;
-  uint16_t w = img->w, h = img_h;
+  uint8_t pixel_width = 4; // (img->type == IMAGE_YUV422) ? 2 : 1;
+  uint16_t w = img->w / 2, h = img_h;
   uint16_t x, y;
-  
+
   for (x = 0; x < w; x++) {
     for (y = 0; y < h; y++) {
       if (x >= 1 && y >= 1) {
-        int_img[w * y + x] = img_buf[px_start + w*pixel_width*y + x*pixel_width + 1] + int_img[w * y + x - 1] +
-                             int_img[w * (y - 1) + x] - int_img[w * (y - 1) + x - 1];
+        int_img0[w * y + x] = img_buf[px_start + w * pixel_width * y + x * pixel_width + 1] + int_img0[w * y + x - 1] +
+                              int_img0[w * (y - 1) + x] - int_img0[w * (y - 1) + x - 1];
+        int_img1[w * y + x] = img_buf[px_start + w * pixel_width * y + x * pixel_width    ] + int_img1[w * y + x - 1] +
+                              int_img1[w * (y - 1) + x] - int_img1[w * (y - 1) + x - 1];
+        int_img2[w * y + x] = img_buf[px_start + w * pixel_width * y + x * pixel_width + 2] + int_img2[w * y + x - 1] +
+                              int_img2[w * (y - 1) + x] - int_img2[w * (y - 1) + x - 1];
       } else if (x >= 1) {
-        int_img[w * y + x] = img_buf[px_start + w*pixel_width*y + x*pixel_width + 1] + int_img[w * y + x - 1];
+        int_img0[w * y + x] = img_buf[px_start + w * pixel_width * y + x * pixel_width + 1] + int_img0[w * y + x - 1];
+        int_img1[w * y + x] = img_buf[px_start + w * pixel_width * y + x * pixel_width    ] + int_img1[w * y + x - 1];
+        int_img2[w * y + x] = img_buf[px_start + w * pixel_width * y + x * pixel_width + 2] + int_img2[w * y + x - 1];
       } else if (y >= 1) {
-        int_img[w * y + x] = img_buf[px_start + w*pixel_width*y + x*pixel_width + 1] + int_img[w * (y - 1) + x];
+        int_img0[w * y + x] = img_buf[px_start + w * pixel_width * y + x * pixel_width + 1] + int_img0[w * (y - 1) + x];
+        int_img1[w * y + x] = img_buf[px_start + w * pixel_width * y + x * pixel_width    ] + int_img1[w * (y - 1) + x];
+        int_img2[w * y + x] = img_buf[px_start + w * pixel_width * y + x * pixel_width + 2] + int_img2[w * (y - 1) + x];
       } else {
-        int_img[w * y + x] = img_buf[px_start + w*pixel_width*y + x*pixel_width + 1];
+        int_img0[w * y + x] = img_buf[px_start + w * pixel_width * y + x * pixel_width + 1];
+        int_img1[w * y + x] = img_buf[px_start + w * pixel_width * y + x * pixel_width    ];
+        int_img2[w * y + x] = img_buf[px_start + w * pixel_width * y + x * pixel_width + 2];
       }
     }
   }
@@ -558,14 +570,19 @@ void get_integral_image(struct image_t *img, uint32_t *int_img, uint16_t px_star
  * The following code is public domain.
  * Algorithm by Torben Mogensen, implementation by N. Devillard.
  * This code in public domain.
+Compute Median of Image
+ * @param[in] *m The image
+ * @param[in] n total number of pixels in image
+ * @param[in] pixel_width Distance between recurring channel
+ * @param[in] channel Channel number
  */
-elem_type torben(elem_type m[], int n, int pixel_width)
+elem_type torben(elem_type m[], uint16_t n, uint8_t pixel_width, uint8_t channel)
 {
   int  i, less, greater, equal;
   elem_type  min, max, guess, maxltguess, mingtguess;
 
   min = max = m[0] ;
-  for (i = pixel_width * 2 - 1; i < n ; i += pixel_width) {
+  for (i = pixel_width + channel; i < n; i += pixel_width) {
     if (m[i] < min) { min = m[i]; }
     if (m[i] > max) { max = m[i]; }
   }
@@ -575,7 +592,7 @@ elem_type torben(elem_type m[], int n, int pixel_width)
     less = 0; greater = 0; equal = 0;
     maxltguess = min ;
     mingtguess = max ;
-    for (i = 1; i < n; i += pixel_width) {
+    for (i = channel; i < n; i += pixel_width) {
       if (m[i] < guess) {
         less++;
         if (m[i] > maxltguess) { maxltguess = m[i] ; }
@@ -599,11 +616,24 @@ elem_type torben(elem_type m[], int n, int pixel_width)
  * @param[in] px_start The start location to find median
  * @param[in] img_h The hieght of the sub image
  */
-int median(struct image_t *img, uint16_t px_start, uint16_t img_h)
+int median(struct image_t *img, uint8_t channel, uint16_t px_start, uint16_t img_h)
 {
-  uint8_t pixel_width = (img->type == IMAGE_YUV422) ? 2 : 1;
+  uint8_t pixel_width = 4; // distance between repeating channel values // = (img->type == IMAGE_YUV422) ? 2 : 1;
   uint8_t *img_buf = (uint8_t *)img->buf;
-  return torben(&img_buf[px_start], img->w * pixel_width * img_h, pixel_width);
+
+  uint8_t offset = 0;
+  switch (channel) {  // YUV UY VY
+    case 0:
+      offset = 1; break;
+    case 1:
+      offset = 0; break;
+    case 2:
+      offset = 2; break;
+    default:
+      perror("Input channel out of range for YUV!");
+  }
+
+  return torben(&img_buf[px_start], img->w * pixel_width * img_h, pixel_width, offset);
 }
 
 int get_sum(uint32_t *integral_image, uint16_t width, uint16_t x_min, uint16_t y_min, uint16_t x_max, uint16_t y_max)
@@ -622,17 +652,10 @@ int get_sum(uint32_t *integral_image, uint16_t width, uint16_t x_min, uint16_t y
  * @param[in] px_inner The number of pixels in the box
  * @param[in] median_val The median value of the original sub-image
  */
-uint8_t get_obs_response(uint32_t *integral_image, uint16_t width, uint16_t x, uint16_t y,
-                         uint16_t feature_size, uint32_t px_inner, uint8_t median_val)
+int8_t get_obs_response(uint32_t *integral_image, uint16_t width, uint16_t x, uint16_t y,
+                        uint16_t feature_size, uint32_t px_inner, uint8_t median_val)
 {
-  uint8_t resp;
   uint32_t sub_area = get_sum(integral_image, width, x, y, x + feature_size, y + feature_size);
 
-  if ((sub_area / px_inner) > median_val) {
-    resp =  (100*((sub_area / px_inner) - median_val)) / 256;
-  } else {
-    resp =  (100*(median_val - (sub_area / px_inner))) / 256;
-  }
-
-  return resp;
+  return ((100 * ((sub_area / px_inner) - median_val)) / 256);
 }
