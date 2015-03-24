@@ -54,6 +54,8 @@ void image_create(struct image_t *img, uint16_t width, uint16_t height, enum ima
     img->buf_size = sizeof(uint8_t) * 1.1 * width * height;  // At maximum quality this is enough
   } else if (type == IMAGE_GRADIENT) {
     img->buf_size = sizeof(int16_t) * width * height;
+  } else if (type == IMAGE_INTEGRAL) {
+    img->buf_size = sizeof(uint32_t) * width * height;
   } else {
     img->buf_size = sizeof(uint8_t) * width * height;
   }
@@ -598,43 +600,68 @@ void image_draw_rectangle(struct image_t *img, struct point_t *from, struct poin
 
 /**
  * Compute Integral Image
- * @param[in] *img The image to be summed
- * @param[in, out] *int_img Resultant integral image
- * @param[in] px_start The start location in the input image to sum
- * @param[in] img_h The hieght of th esub image
+ * @param[in] *img The YUV422 image to be summed
+ * @param[out] *int_y The y summed integral image (optional can be NULL)
+ * @param[out] *int_u The u summed integral image (optional can be NULL)
+ * @param[out] *int_v The v summed integral image (optional can be NULL)
+ * @param[in] *start The start location in the input image to sume
  */
-void get_integral_image(struct image_t *img, uint32_t *int_img0, uint32_t *int_img1, uint32_t *int_img2,
-                        uint16_t px_start, uint16_t img_h)
+void image_get_integral(struct image_t *img, struct image_t *int_y, struct image_t *int_u, struct image_t *int_v,
+  struct point_t *start)
 {
   uint8_t *img_buf = (uint8_t *)img->buf;
-  uint8_t pixel_width = 4; // (img->type == IMAGE_YUV422) ? 2 : 1;
-  uint16_t w = img->w / 2, h = img_h;
-  uint16_t x, y;
 
-  for (x = 0; x < w; x++) {
-    for (y = 0; y < h; y++) {
-      if (x >= 1 && y >= 1) {
-        int_img0[w * y + x] = img_buf[px_start + w * pixel_width * y + x * pixel_width + 1] + int_img0[w * y + x - 1] +
-                              int_img0[w * (y - 1) + x] - int_img0[w * (y - 1) + x - 1];
-        int_img1[w * y + x] = img_buf[px_start + w * pixel_width * y + x * pixel_width    ] + int_img1[w * y + x - 1] +
-                              int_img1[w * (y - 1) + x] - int_img1[w * (y - 1) + x - 1];
-        int_img2[w * y + x] = img_buf[px_start + w * pixel_width * y + x * pixel_width + 2] + int_img2[w * y + x - 1] +
-                              int_img2[w * (y - 1) + x] - int_img2[w * (y - 1) + x - 1];
-      } else if (x >= 1) {
-        int_img0[w * y + x] = img_buf[px_start + w * pixel_width * y + x * pixel_width + 1] + int_img0[w * y + x - 1];
-        int_img1[w * y + x] = img_buf[px_start + w * pixel_width * y + x * pixel_width    ] + int_img1[w * y + x - 1];
-        int_img2[w * y + x] = img_buf[px_start + w * pixel_width * y + x * pixel_width + 2] + int_img2[w * y + x - 1];
-      } else if (y >= 1) {
-        int_img0[w * y + x] = img_buf[px_start + w * pixel_width * y + x * pixel_width + 1] + int_img0[w * (y - 1) + x];
-        int_img1[w * y + x] = img_buf[px_start + w * pixel_width * y + x * pixel_width    ] + int_img1[w * (y - 1) + x];
-        int_img2[w * y + x] = img_buf[px_start + w * pixel_width * y + x * pixel_width + 2] + int_img2[w * (y - 1) + x];
-      } else {
-        int_img0[w * y + x] = img_buf[px_start + w * pixel_width * y + x * pixel_width + 1];
-        int_img1[w * y + x] = img_buf[px_start + w * pixel_width * y + x * pixel_width    ];
-        int_img2[w * y + x] = img_buf[px_start + w * pixel_width * y + x * pixel_width + 2];
+  // Set the output buffers
+  uint32_t *buf_y = NULL;
+  uint32_t *buf_u = NULL;
+  uint32_t *buf_v = NULL;
+  if(int_y != NULL)
+    buf_y = int_y->buf;
+  if(int_u != NULL)
+    buf_u = int_u->buf;
+  if(int_v != NULL)
+    buf_v = int_v->buf;
+
+  // Loop trough the image
+  for(uint16_t x = 0; x < img->w-start->x; x++) {
+    for(uint16_t y = 0; y < img->h-start->y; y++) {
+
+      // If we want the Y integral image
+      if(buf_y != NULL) {
+        buf_y[int_y->w * y + x] = img_buf[img->w * (start->y+y) * 2 + (start->x+x) * 2 + 1]
+                            + ((x > 0)? buf_y[int_y->w * y + (x - 1)] : 0)
+                            + ((y > 0)? buf_y[int_y->w * (y - 1) + x] : 0)
+                            - ((x > 0 && y > 0)? buf_y[int_y->w * (y - 1) + (x - 1)] : 0);
+      }
+      // If we want the U integral image
+      if(buf_u != NULL && x%2 == 0) {
+        buf_u[int_u->w * y + x/2] = img_buf[img->w * (start->y+y) * 2 + (start->x+x) * 2]
+                            + ((x > 0)? buf_u[int_u->w * y + (x/2 - 1)] : 0)
+                            + ((y > 0)? buf_u[int_u->w * (y - 1) + x/2] : 0)
+                            - ((x > 0 && y > 0)? buf_u[int_u->w * (y - 1) + (x/2 - 1)] : 0);
+      }
+      // If we want the V integral image
+      if(buf_v != NULL && x%2 == 1) {
+        buf_v[int_v->w * y + x/2] = img_buf[img->w * (start->y+y) * 2 + (start->x+x) * 2]
+                            + ((x > 0)? buf_v[int_v->w * y + (x/2 - 1)] : 0)
+                            + ((y > 0)? buf_v[int_v->w * (y - 1) + x/2] : 0)
+                            - ((x > 0 && y > 0)? buf_v[int_v->w * (y - 1) + (x/2 - 1)] : 0);
       }
     }
   }
+}
+
+/**
+ * Get the sum from an integral image
+ * @param[in] *img The input integral image
+ * @param[in] *from Point at the top left
+ * @param[in] *to Point at the bottom right
+ */
+uint32_t image_get_integral_sum(struct image_t *img, struct point_t *from, struct point_t *to)
+{
+  uint32_t *img_buf = (uint32_t *)img->buf;
+  return (img_buf[img->w * from->y + from->x] + img_buf[img->w * to->y + to->x]
+          - img_buf[img->w * from->y + to->x] - img_buf[img->w * to->y + from->x]);
 }
 
 /*
@@ -705,28 +732,4 @@ int median(struct image_t *img, uint8_t channel, uint16_t px_start, uint16_t img
   }
 
   return torben(&img_buf[px_start], img->w * pixel_width * img_h, pixel_width, offset);
-}
-
-int get_sum(uint32_t *integral_image, uint16_t width, uint16_t x_min, uint16_t y_min, uint16_t x_max, uint16_t y_max)
-{
-  return (integral_image[width * y_min + x_min] + integral_image[width * y_max + x_max] -
-          integral_image[width * y_min + x_max] - integral_image[width * y_max + x_min]);
-}
-
-/**
- * Get obstacle response, computes percentage difference from median image value
- * @param[in] *img The image
- * @param[in] width Width of the integral image
- * @param[in] x The x location in of the top left corner of the box
- * @param[in] y The y location in of the top left corner of the box
- * @param[in] feature_size The length of one side of the box
- * @param[in] px_inner The number of pixels in the box
- * @param[in] median_val The median value of the original sub-image
- */
-int8_t get_obs_response(uint32_t *integral_image, uint16_t width, uint16_t x, uint16_t y,
-                        uint16_t feature_size, uint32_t px_inner, uint8_t median_val)
-{
-  uint32_t sub_area = get_sum(integral_image, width, x, y, x + feature_size, y + feature_size);
-
-  return ((100 * ((sub_area / px_inner) - median_val)) / 256);
 }

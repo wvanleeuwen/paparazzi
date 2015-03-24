@@ -21,9 +21,9 @@
         <dl_setting var="practical.v_m" module="computer_vision/practical_module" min="0" step="1" max="255" shortname="v_m" param="PRACTICAL_V_m"/>
         <dl_setting var="practical.v_M" module="computer_vision/practical_module" min="0" step="1" max="255" shortname="v_M" param="PRACTICAL_V_M"/>
 
-        <dl_setting var="adding_theta" module="computer_vision/stabilization_practical" unit="1/2^12r" alt_unit="deg" alt_unit_coef="0.0139882" min="-15" step="0.05" max="15" shortname="flight_pitch"/>
+        <!--dl_setting var="adding_theta" module="computer_vision/stabilization_practical" unit="1/2^12r" alt_unit="deg" alt_unit_coef="0.0139882" min="-15" step="0.05" max="15" shortname="flight_pitch"/>
         <dl_setting var="adding_psi" module="computer_vision/stabilization_practical" unit="1/2^12r" alt_unit="deg" alt_unit_coef="0.0139882" min="-5" step="0.01" max="5" shortname="yaw_int"/>
-        <dl_setting var="adding_phi" module="computer_vision/stabilization_practical" unit="1/2^12r" alt_unit="deg" alt_unit_coef="0.0139882" min="-15" step="0.05" max="15" shortname="roll_angle"/>
+        <dl_setting var="adding_phi" module="computer_vision/stabilization_practical" unit="1/2^12r" alt_unit="deg" alt_unit_coef="0.0139882" min="-15" step="0.05" max="15" shortname="roll_angle"/-->
       </dl_settings>
     </dl_settings>
   </settings>
@@ -45,28 +45,13 @@
 
     <!-- The practical module itself -->
     <file name="practical_module.c"/>
-    <file name="stabilization_practical.c"/>
 
     <!-- Random flags -->
-    <define name="__USE_GNU"/>
-    <flag name="LDFLAGS" value="lrt"/>
     <flag name="LDFLAGS" value="static"/>
 
     <!-- Used for debug video -->
     <raw>
-      PRACTICAL_UDP_DEV     ?= UDP1
-      PRACTICAL_HOST        ?= $(MODEM_HOST)
-      PRACTICAL_PORT_OUT    ?= 5000
-      PRACTICAL_PORT_IN     ?= 4999
-      PRACTICAL_BROADCAST   ?= $(MODEM_BROADCAST)
-      PRACTICAL_DEV_LOWER   = $(shell echo $(PRACTICAL_UDP_DEV) | tr A-Z a-z)
-
-      PR_CFLAGS  = -DUSE_$(PRACTICAL_UDP_DEV) -DPRACTICAL_UDP_DEV=$(PRACTICAL_DEV_LOWER)
-      PR_CFLAGS += -D$(PRACTICAL_UDP_DEV)_PORT_OUT=$(PRACTICAL_PORT_OUT) -D$(PRACTICAL_UDP_DEV)_PORT_IN=$(PRACTICAL_PORT_IN)
-      PR_CFLAGS += -D$(PRACTICAL_UDP_DEV)_BROADCAST=$(PRACTICAL_BROADCAST) -D$(PRACTICAL_UDP_DEV)_HOST=\"$(PRACTICAL_HOST)\"
-
-      ap.CFLAGS += $(PR_CFLAGS)
-      ap.CFLAGS += -DGUIDANCE_V_MODE_MODULE_SETTING=GUIDANCE_V_MODE_HOVER -DGUIDANCE_H_MODE_MODULE_SETTING=GUIDANCE_H_MODE_MODULE
+      ap.CFLAGS += -DPRACTICAL_UDP_DEV=udp1
     </raw>
   </makefile>
 
