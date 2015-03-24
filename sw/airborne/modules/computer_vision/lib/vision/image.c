@@ -526,6 +526,77 @@ void image_draw_line(struct image_t *img, struct point_t *from, struct point_t *
 }
 
 /**
+ * Draw a line on the image according to the Bresenham algorithm, 
+ * YUV422 images may display wider lines due to pixel rounding.
+ * @param[in,out] *img The image to show the line on
+ * @param[in] *from The point to draw from
+ * @param[in] *to The point to draw to
+ */
+void image_draw_line_bresenham(struct image_t *img, struct point_t *from, struct point_t *to)
+{
+  int16_t x = 0, y = 0;
+  uint8_t *img_buf = (uint8_t *)img->buf;
+  uint8_t pixel_width = (img->type == IMAGE_YUV422) ? 2 : 1;
+
+  // define the starting point
+  uint16_t start_x = from->x;
+  uint16_t start_y = from->y;
+
+  // compute the distances in both directions
+  int32_t delta_x = from->x - to->x;
+  int32_t delta_y = from->y - to->y;
+
+  // Compute the direction of the increment,
+  int8_t incr_x = (delta_x > 0) ? 1 : ((delta_x < 0) ? -1 : 0);
+  int8_t incr_y = (delta_y > 0) ? 1 : ((delta_y < 0) ? -1 : 0);
+
+  // Draw the line segment
+  uint32_t abs_delta_x = abs(delta_x);
+  uint32_t abs_delta_y = abs(delta_y);
+  int32_t cnt_x = abs_delta_y>>1, cnt_y = abs_delta_y>>1;
+  if (abs_delta_x >= abs_delta_y) // the line segment is directed towards the horizontal
+  {
+    for(i = 0; i < abs_delta_x; i++)
+    {
+      abs_delta_y += abs_delta_y;
+      if (cnt_y >= abs_delta_x)
+      {
+        cnt_y -= abs_delta_x;
+        y += incr_y;
+      }
+      x += incr_x;
+      // DO IMAGE PROCESSING
+    }
+  }
+  else // the line segment is directed towards the vertical
+  {
+    for(i=0; i < abs_delta_y; i++)
+    {
+      x += abs_delta_x;
+      if (x >= abs_delta_y)
+      {
+        cnt_x -= abs_delta_y;
+        x += incr_x;
+      }
+      y += incr_y;
+      // DO IMAGE PROCESSING
+    }
+  }
+}
+
+/**
+ * Draw rectangle
+ * @param[in,out] *img The image to show the rectangle on
+ * @param[in] *from The vertex of the rectangle
+ * @param[in] *to The vertex opposite to the 'from' vertex
+ */
+void image_draw_rectangle(struct image_t *img, struct point_t *from, struct point_t *to) 
+{
+
+}
+
+
+/**
  * Compute Integral Image
  * @param[in] *img The image to be summed
  * @param[in, out] *int_img Resultant integral image
