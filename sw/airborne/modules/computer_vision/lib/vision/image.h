@@ -80,7 +80,8 @@ int32_t image_multiply(struct image_t *img_a, struct image_t *img_b, struct imag
 void image_show_points(struct image_t *img, struct point_t *points, uint16_t points_cnt);
 void image_show_flow(struct image_t *img, struct flow_t *vectors, uint16_t points_cnt, uint8_t subpixel_factor);
 void image_draw_line(struct image_t *img, struct point_t *from, struct point_t *to);
-void image_draw_line_bresenham(struct image_t *img, struct point_t *from, struct point_t *to);
+// void image_draw_line_bresenham(struct image_t *img, struct point_t *from, struct point_t *to);
+void image_draw_rectangle(struct image_t *img, struct point_t *from, struct point_t *to);
 void image_get_integral(struct image_t *img, struct image_t *int_y, struct image_t *int_u, struct image_t *int_v,
   struct point_t *start);
 uint32_t image_get_integral_sum(struct image_t *img, struct point_t *from, struct point_t *to);

@@ -527,142 +527,128 @@ void image_draw_line(struct image_t *img, struct point_t *from, struct point_t *
   }
 }
 
-/**
- * Draw a line on the image according to the Bresenham algorithm, 
- * it currently only works for YUV422 (16-bit unsigned int per pixel);
- * YUV422 images may display wider lines due to pixel rounding.
- * @param[in,out] *img The image to show the line on
- * @param[in] *from The point to draw from
- * @param[in] *to The point to draw to
- */
-void image_draw_line_bresenham(struct image_t *img, struct point_t *from, struct point_t *to)
-{
-  int16_t x = 0, y = 0;
-  uint8_t *img_buf = (uint8_t *)img->buf;
-  uint8_t pixel_width = (img->type == IMAGE_YUV422) ? 2 : 1;
+// /**
+//  * Draw a line on the image according to the Bresenham algorithm, 
+//  * it currently only works for YUV422 (16-bit unsigned int per pixel);
+//  * YUV422 images may display wider lines due to pixel rounding.
+//  * @param[in,out] *img The image to show the line on
+//  * @param[in] *from The point to draw from
+//  * @param[in] *to The point to draw to
+//  */
+// void image_draw_line_bresenham(struct image_t *img, struct point_t *from, struct point_t *to)
+// {
+//   int16_t x = from->x, y = from->y;
+//   uint8_t *img_buf = (uint8_t *)img->buf;
+//   uint8_t pixel_width = (img->type == IMAGE_YUV422) ? 2 : 1;
 
-  // define the starting edge
-  uint32_t idx_from = img->w * pixel_width * from->y + from->x * pixel_width;
-  if (idx_from > img->buf_size) // outside the scope of the image buffer
-  {
-    perror("The starting point is outside the image scope\n");
-    return;
-  } 
-  else 
-  {
-    if (!(idx_from % 2)) // the index is even
-    {
-      from->x -= 1;
-    }
-  } 
+//   // define the starting edge
+//   uint32_t idx_from = img->w * pixel_width * from->y + from->x * pixel_width;
+//   if (idx_from > img->buf_size) // outside the scope of the image buffer
+//   {
+//     perror("The starting point is outside the image scope\n");
+//     return;
+//   } 
   
-  // define the ending edge
-  uint32_t idx_to = img->w * pixel_width  * to->y + pixel_width * to->x;
+//   // define the ending edge
+//   uint32_t idx_to = img->w * pixel_width  * to->y + pixel_width * to->x;
+//   if (idx_to > img->buf_size) // outside the scope of the image buffer
+//   {
+//     perror("The end point is outside the image scope\n");
+//     return;
+//   } 
 
-  if (idx_to > img->buf_size) // outside the scope of the image buffer
-  {
-    perror("The end point is outside the image scope\n");
-    return;
-  } 
-  else 
-  {
-    if (!(idx_to % 2)) // the index is even
-    {
-      to->x += 1;
-    }
-  } 
+//   // compute the distances in both directions
+//   int32_t delta_x = to->x - from->x;
+//   int32_t delta_y = to->y - from->y;
 
-  // define the starting point
-  uint16_t start_x = from->x;
-  uint16_t start_y = from->y;
+//   // compute the direction of the increment,
+//   int8_t incr_x = (delta_x > 0) ? 4 : ((delta_x < 0) ? -4 : 0);
+//   int8_t incr_y = (delta_y > 0) ? 1 : ((delta_y < 0) ? -1 : 0);
 
-  printf("start_x: %d\n", start_x);
-  printf("start_y: %d\n", start_y);
+//   // draw the line segment
+//   uint32_t abs_delta_x = abs(delta_x);
+//   uint32_t abs_delta_y = abs(delta_y);
+//   int32_t cnt_x = abs_delta_y>>1, cnt_y = abs_delta_y>>1;
 
-  // compute the distances in both directions
-  int32_t delta_x = to->x - from->x;
-  int32_t delta_y = to->y - from->y;
+//   if (abs_delta_x >= abs_delta_y) // the line segment is directed towards the horizontal
+//   {
+//     for(uint16_t i = 0; i < abs_delta_x; i+=4)
+//     {
+//       cnt_y += abs_delta_y;
+//       if (cnt_y >= abs_delta_x)
+//       {
+//         cnt_y -= abs_delta_x;
+//         y += incr_y;
+//       }
+//       x += incr_x;
 
-  printf("delta_x: %d\n", delta_x);
-  printf("delta_y: %d\n", delta_y);
+//       printf("i: %d (%d)\n", i, abs_delta_x);
+//       printf("x: %d\n", x);
+//       printf("y: %d\n", y);
 
-  // compute the direction of the increment,
-  int8_t incr_x = (delta_x > 0) ? 1 : ((delta_x < 0) ? -1 : 0);
-  int8_t incr_y = (delta_y > 0) ? 1 : ((delta_y < 0) ? -1 : 0);
+//       uint32_t idx = img->w * pixel_width * y + x * pixel_width;
 
-  printf("incr_x: %d\n", incr_x);
-  printf("incr_y: %d\n", incr_y);
+//       img_buf[idx] = 0; // U
+//       img_buf[idx + 1] = 0; // Y
+//       img_buf[idx + 2] = 255; // V
+//       img_buf[idx + 3] = 0; // Y
+//     }
+//   }
+//   else // the line segment is directed towards the vertical
+//   {
+//     for(uint16_t i = 0; i < abs_delta_y; i++)
+//     {
+//       cnt_x += abs_delta_x;
+//       if (cnt_x >= abs_delta_y)
+//       {
+//         cnt_x -= abs_delta_y;
+//         x += incr_x;
+//       }
+//       y += incr_y;
 
-  // draw the line segment
-  uint32_t abs_delta_x = abs(delta_x);
-  printf("abs_delta_x: %d\n", abs_delta_x);
-  uint32_t abs_delta_y = abs(delta_y);
-  printf("abs_delta_y: %d\n", abs_delta_y);
-  int32_t cnt_x = abs_delta_y>>1, cnt_y = abs_delta_y>>1;
+//       uint32_t idx = img->w * pixel_width * y + x * pixel_width;
 
-  if (abs_delta_x >= abs_delta_y) // the line segment is directed towards the horizontal
-  {
-    for(uint16_t i = 0; i < abs_delta_x; i ++)
-    {
-      cnt_y += abs_delta_y;
-      if (cnt_y >= abs_delta_x)
-      {
-        cnt_y -= abs_delta_x;
-        y += incr_y;
-      }
-      x += incr_x;
-      if (x % 2) // the index is uneven
-      {
-        img_buf[img->w * pixel_width * y + x * pixel_width] = 0; // U
-
-        printf("x: %d\n", x);
-        printf("y: %d\n", y);
-
-        printf("pixel value(%d): %d\n", img->w * pixel_width * y + pixel_width * x, img_buf[img->w * 2 * pixel_width * y + pixel_width * x]);
-
-        img_buf[img->w * pixel_width * y + x * pixel_width + 1] = 0; // Y
-      } 
-      else
-      {
-        img_buf[img->w * pixel_width * y + x * pixel_width] = 255; // V
-        img_buf[img->w * pixel_width * y + x * pixel_width + 1] = 0; // Y
-      }
-    }
-  }
-  else // the line segment is directed towards the vertical
-  {
-    for(uint16_t i = 0; i < abs_delta_y; i++)
-    {
-      cnt_x += abs_delta_x;
-      if (x >= abs_delta_y)
-      {
-        cnt_x -= abs_delta_y;
-        x += incr_x;
-      }
-      y += incr_y;
-      if (x % 2) // the index is uneven
-      {
-        img_buf[img->w * pixel_width * y + x * pixel_width] = 0; // U
-        img_buf[img->w * pixel_width * y + x * pixel_width + 1] = 0; // Y
-      } 
-      else
-      {
-        img_buf[img->w * pixel_width * y + x * pixel_width] = 255; // V
-        img_buf[img->w * pixel_width * y + x * pixel_width + 1] = 0; // Y
-      }
-    }
-  }
-}
+//       img_buf[idx] = 0; // U
+//       img_buf[idx + 1] = 0; // Y
+//       img_buf[idx + 2] = 255; // V
+//       img_buf[idx + 3] = 0; // Y
+//     }
+//   }
+// }
 
 /**
- * Draw rectangle
+ * Draw rectangle and apply pixel rounding to make sure the color of the 
+ * rectangle is consistent.
  * @param[in,out] *img The image to show the rectangle on
  * @param[in] *from The vertex of the rectangle
  * @param[in] *to The vertex opposite to the 'from' vertex
  */
 void image_draw_rectangle(struct image_t *img, struct point_t *from, struct point_t *to) 
 {
+  //
 
+
+  // define the two remaining point
+  struct point_t fromto = {
+    .x = from->x,
+    .y = to->y
+  };
+  struct point_t tofrom = {
+    .x = to->x,
+    .y = from->y
+  };
+
+  // draw the first line segment 
+  image_draw_line(img, from, &fromto);
+
+  // draw the second line segment
+  image_draw_line(img, from, &tofrom);
+
+  // draw the third line segment
+  image_draw_line(img, &fromto, to);
+
+  // draw the fourth line segment
+  image_draw_line(img, &tofrom, to);
 }
 
 
