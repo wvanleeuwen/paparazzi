@@ -59,6 +59,8 @@ static void practical_tx_img(struct image_t *img, bool_t rtp);  //< Trnsmit an i
 
 static void practical_integral_img_detect(struct image_t *img, uint16_t sub_img_h, uint16_t feature_size);
 
+uint8_t point_in_sector(struct image_t *img, struct point_t point);
+
 /**
  * Initialize the practical module
  */
@@ -347,4 +349,33 @@ static void practical_integral_img_detect(struct image_t *img, uint16_t sub_img_
   image_free(&int_y);
   image_free(&int_u);
   image_free(&int_v);
+}
+
+uint8_t point_in_sector(struct image_t *img, struct point_t point) {
+
+  struct FloatEulers *eulers = stateGetNedToBodyEulers_f();
+  uint8_t sector = 0;
+  float path_angle = 0.6981;
+  struct point_t center_point;
+
+  center_point.x = img->w/2;
+  center_point.y = img->h/2 + img->h*eulers->theta/0.6632251157578453;
+
+//   printf("Center point: %d %d\n", center_point.x, center_point.y);
+
+  // look at a fourth under the center point
+  float y_line_at_point = center_point.y + img->h/4 + eulers->phi*(img->w/2 - point.x);
+
+  if(point.y > y_line_at_point) {
+    float x_line_left_at_point = tan(path_angle - eulers->phi) * (img->h - center_point.y);
+    float x_line_right_at_point = tan(path_angle + eulers->phi) * (img->h - center_point.y);
+    if(point.x < x_line_left_at_point)
+      sector = 1;
+    else if(point.x < x_line_right_at_point)
+      sector = 2;
+    else
+      sector = 3;
+  }
+
+  return sector;
 }
