@@ -317,18 +317,28 @@ static void practical_integral_img_detect(struct image_t *img, uint16_t sub_img_
       to.x = from.x + feature_size;
       to.y = from.y + feature_size;
 
-      if(practical.y_m < diff_y && diff_y < practical.y_M) {
-        image_draw_line(img, &from, &to);
-      }
+//       if(practical.y_m < diff_y && diff_y < practical.y_M) {
+//         image_draw_line(img, &from, &to);
+//       }
 
       from.x = x + start_point.x + feature_size;
       from.y = y + start_point.y;
       to.x = x + start_point.x;
       to.y = y + start_point.y + feature_size;
-      if(practical.u_m < diff_u && diff_u < practical.u_M) {
-        image_draw_line(img, &from, &to);
-      }
-      if(practical.v_m < diff_v && diff_v < practical.v_M) {
+//       if(practical.u_m < diff_u && diff_u < practical.u_M) {
+//         image_draw_line(img, &from, &to);
+//       }
+//       if(practical.v_m < diff_v && diff_v < practical.v_M) {
+//         image_draw_line(img, &from, &to);
+//       }
+
+      struct point_t midpoint_feature;
+      midpoint_feature.x = x + start_point.x + feature_size/2;
+      midpoint_feature.y = y + start_point.y + feature_size/2;
+
+      uint8_t sector = point_in_sector(img, midpoint_feature);
+
+      if(sector != 0) {
         image_draw_line(img, &from, &to);
       }
     }

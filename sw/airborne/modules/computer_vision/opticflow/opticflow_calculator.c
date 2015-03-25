@@ -204,11 +204,15 @@ static int cmp_flow(const void *a, const void *b)
   return (a_p->flow_x*a_p->flow_x + a_p->flow_y*a_p->flow_y) - (b_p->flow_x*b_p->flow_x + b_p->flow_y*b_p->flow_y);
 }
 
-uint8_t point_in_sector(struct image_t *img, struct point_t point, struct point_t center_point) {
+uint8_t point_in_sector(struct image_t *img, struct point_t point) {
 
   struct FloatEulers *eulers = stateGetNedToBodyEulers_f();
   uint8_t sector = 0;
   float path_angle = 0.6981;
+  struct point_t center_point;
+
+  center_point.x = img->w/2;
+  center_point.y = img->h/2 + 0.6632251157578453*img->h/eulers->theta;
 
   // look at a fourth under the center point
   float y_line_at_point = (img->h - (center_point.y + 720/4)) + eulers->phi*(img->w/2 - point.x);
