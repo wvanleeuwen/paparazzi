@@ -188,7 +188,7 @@ static void *practical_module_calc(void *data __attribute__((unused)))
     image_yuv422_downsample(&img, &img_small, 4);
     jpeg_encode_image(&img_small, &img_jpeg, 60, FALSE);
     practical_tx_img(&img_jpeg, FALSE);
-    });
+    //});
 #endif
 
     // Free the image

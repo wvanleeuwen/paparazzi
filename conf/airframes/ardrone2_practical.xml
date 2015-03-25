@@ -19,21 +19,18 @@
     <subsystem name="motor_mixing"/>
     <subsystem name="actuators" type="ardrone2"/>
     <subsystem name="imu" type="ardrone2"/>
-    <subsystem name="gps" type="ublox"/>
+    <subsystem name="gps" type="datalink"/>
     <subsystem name="stabilization" type="indi"/>
     <subsystem name="ahrs" type="int_cmpl_quat"/>
     <subsystem name="ins" type="extended"/>
   </firmware>
 
   <modules main_freq="512">
-    <load name="gps_ubx_ucenter.xml"/>
     <load name="send_imu_mag_current.xml"/>
     <load name="logger_file.xml"/>
-    <load name="video_rtp_stream.xml"/>
     <load name="cv_opticflow.xml">
       <define name="VISION_DESIRED_VY" value="0.4"/>
     </load>
-    <load name="cv_opticflow.xml"/>
     <load name="practical.xml">
       <define name="PRACTICAL_DEBUG" value="TRUE"/>
       <define name="PRACTICAL_Y_m" value="-512"/>

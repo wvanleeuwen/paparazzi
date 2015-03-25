@@ -72,7 +72,7 @@ void opticflow_calc_init(struct opticflow_t *opticflow, uint16_t w, uint16_t h)
 /**
  * Run the optical flow on a new image frame
  * @param[in] *opticflow The opticalflow structure that keeps track of previous images
- * @param[in] *state The state of the drone
+ * @param[in] *opticflow_state The state of the drone
  * @param[in] *img The image frame to calculate the optical flow from
  * @param[out] *result The optical flow result
  */
@@ -157,12 +157,12 @@ void opticflow_calc_frame(struct opticflow_t *opticflow, struct opticflow_state_
   }
 
   // Flow Derotation
-  float diff_flow_x = (state->phi - opticflow->prev_phi) * img->w / FOV_W;
-  float diff_flow_y = (state->theta - opticflow->prev_theta) * img->h / FOV_H;
+  float diff_flow_x = (opticflow_state->phi - opticflow->prev_phi) * img->w / FOV_W;
+  float diff_flow_y = (opticflow_state->theta - opticflow->prev_theta) * img->h / FOV_H;
   result->flow_der_x = result->flow_x - diff_flow_x * SUBPIXEL_FACTOR;
   result->flow_der_y = result->flow_y - diff_flow_y * SUBPIXEL_FACTOR;
-  opticflow->prev_phi = state->phi;
-  opticflow->prev_theta = state->theta;
+  opticflow->prev_phi = opticflow_state->phi;
+  opticflow->prev_theta = opticflow_state->theta;
 
   // Velocity calculation
   result->vel_x = -result->flow_der_x * result->fps / SUBPIXEL_FACTOR * img->w / Fx_ARdrone;
