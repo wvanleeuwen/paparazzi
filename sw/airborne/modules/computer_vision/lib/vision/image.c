@@ -478,8 +478,8 @@ void image_draw_line(struct image_t *img, struct point_t *from, struct point_t *
   uint16_t starty = from->y;
 
   /* compute the distances in both directions */
-  int32_t delta_x = from->x - to->x;
-  int32_t delta_y = from->y - to->y;
+  int32_t delta_x = to->x - from->x;
+  int32_t delta_y = to->y - from->y;
 
   /* Compute the direction of the increment,
      an increment of 0 means either a horizontal or vertical
@@ -502,7 +502,7 @@ void image_draw_line(struct image_t *img, struct point_t *from, struct point_t *
   else { distance = delta_y * 20; }
 
   /* draw the line */
-  for(uint16_t t = 0; starty >= 0 && starty < img->h && startx >= 0 && startx < img->w && t <= distance+1; t++) {
+  for(uint16_t t = 0; starty >= 0  && starty < img->h && startx >= 0 && startx < img->w && t <= distance+1; t++) {
       img_buf[img->w*pixel_width*starty + startx*pixel_width] = (t <= 3)? 0 : 255;
 
       if(img->type == IMAGE_YUV422) {
@@ -704,16 +704,16 @@ void image_get_integral(struct image_t *img, struct image_t *int_y, struct image
       // If we want the U integral image
       if(buf_u != NULL && x%2 == 0) {
         buf_u[int_u->w * y + x/2] = img_buf[img->w * (start->y+y) * 2 + (start->x+x) * 2]
-                            + ((x > 0)? buf_u[int_u->w * y + (x/2 - 1)] : 0)
+                            + ((x/2 > 0)? buf_u[int_u->w * y + (x/2 - 1)] : 0)
                             + ((y > 0)? buf_u[int_u->w * (y - 1) + x/2] : 0)
-                            - ((x > 0 && y > 0)? buf_u[int_u->w * (y - 1) + (x/2 - 1)] : 0);
+                            - ((x/2 > 0 && y > 0)? buf_u[int_u->w * (y - 1) + (x/2 - 1)] : 0);
       }
       // If we want the V integral image
       if(buf_v != NULL && x%2 == 1) {
         buf_v[int_v->w * y + x/2] = img_buf[img->w * (start->y+y) * 2 + (start->x+x) * 2]
-                            + ((x > 0)? buf_v[int_v->w * y + (x/2 - 1)] : 0)
+                            + ((x/2 > 0)? buf_v[int_v->w * y + (x/2 - 1)] : 0)
                             + ((y > 0)? buf_v[int_v->w * (y - 1) + x/2] : 0)
-                            - ((x > 0 && y > 0)? buf_v[int_v->w * (y - 1) + (x/2 - 1)] : 0);
+                            - ((x/2 > 0 && y > 0)? buf_v[int_v->w * (y - 1) + (x/2 - 1)] : 0);
       }
     }
   }

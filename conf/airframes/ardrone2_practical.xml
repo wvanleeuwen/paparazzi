@@ -36,13 +36,17 @@
     <load name="cv_opticflow.xml"/>
     <load name="practical.xml">
       <define name="PRACTICAL_DEBUG" value="TRUE"/>
-      <define name="PRACTICAL_Y_m" value="110"/>
-      <define name="PRACTICAL_Y_M" value="208"/>
-      <define name="PRACTICAL_U_m" value="123"/>
-      <define name="PRACTICAL_U_M" value="132"/>
-      <define name="PRACTICAL_V_m" value="111"/>
-      <define name="PRACTICAL_V_M" value="140"/>
+      <define name="PRACTICAL_Y_m" value="-512"/>
+      <define name="PRACTICAL_Y_M" value="-16"/>
+      <define name="PRACTICAL_U_m" value="23"/>
+      <define name="PRACTICAL_U_M" value="512"/>
+      <define name="PRACTICAL_V_m" value="28"/>
+      <define name="PRACTICAL_V_M" value="512"/>
     </load>
+    <!--load name="video_rtp_stream.xml">
+      <define name="VIEWVIDEO_DEVICE" value="/dev/video2"/>
+      <define name="VIEWVIDEO_DEVICE_SIZE" value="320,240"/>
+    </load-->
   </modules>
 
   <commands>

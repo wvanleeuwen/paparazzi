@@ -14,12 +14,12 @@
   <settings>
 	  <dl_settings NAME="Practical Assignment">
       <dl_settings name="practical">
-        <dl_setting var="practical.y_m" module="computer_vision/practical_module" min="0" step="1" max="255" shortname="y_m" param="PRACTICAL_Y_m"/>
-        <dl_setting var="practical.y_M" module="computer_vision/practical_module" min="0" step="1" max="255" shortname="y_M" param="PRACTICAL_Y_M"/>
-        <dl_setting var="practical.u_m" module="computer_vision/practical_module" min="0" step="1" max="255" shortname="u_m" param="PRACTICAL_U_m"/>
-        <dl_setting var="practical.u_M" module="computer_vision/practical_module" min="0" step="1" max="255" shortname="u_M" param="PRACTICAL_U_M"/>
-        <dl_setting var="practical.v_m" module="computer_vision/practical_module" min="0" step="1" max="255" shortname="v_m" param="PRACTICAL_V_m"/>
-        <dl_setting var="practical.v_M" module="computer_vision/practical_module" min="0" step="1" max="255" shortname="v_M" param="PRACTICAL_V_M"/>
+        <dl_setting var="practical.y_m" module="computer_vision/practical_module" min="-512" step="1" max="512" shortname="y_m" param="PRACTICAL_Y_m"/>
+        <dl_setting var="practical.y_M" module="computer_vision/practical_module" min="-512" step="1" max="512" shortname="y_M" param="PRACTICAL_Y_M"/>
+        <dl_setting var="practical.u_m" module="computer_vision/practical_module" min="-512" step="1" max="512" shortname="u_m" param="PRACTICAL_U_m"/>
+        <dl_setting var="practical.u_M" module="computer_vision/practical_module" min="-512" step="1" max="512" shortname="u_M" param="PRACTICAL_U_M"/>
+        <dl_setting var="practical.v_m" module="computer_vision/practical_module" min="-512" step="1" max="512" shortname="v_m" param="PRACTICAL_V_m"/>
+        <dl_setting var="practical.v_M" module="computer_vision/practical_module" min="-512" step="1" max="512" shortname="v_M" param="PRACTICAL_V_M"/>
 
         <!--dl_setting var="adding_theta" module="computer_vision/stabilization_practical" unit="1/2^12r" alt_unit="deg" alt_unit_coef="0.0139882" min="-15" step="0.05" max="15" shortname="flight_pitch"/>
         <dl_setting var="adding_psi" module="computer_vision/stabilization_practical" unit="1/2^12r" alt_unit="deg" alt_unit_coef="0.0139882" min="-5" step="0.01" max="5" shortname="yaw_int"/>

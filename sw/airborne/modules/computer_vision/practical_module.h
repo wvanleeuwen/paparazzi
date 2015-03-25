@@ -31,12 +31,12 @@
 #include "std.h"
 
 struct practical_t {
-  uint8_t y_m;
-  uint8_t y_M;
-  uint8_t u_m;
-  uint8_t u_M;
-  uint8_t v_m;
-  uint8_t v_M;
+  int16_t y_m;
+  int16_t y_M;
+  int16_t u_m;
+  int16_t u_M;
+  int16_t v_m;
+  int16_t v_M;
 };
 extern struct practical_t practical;
 
