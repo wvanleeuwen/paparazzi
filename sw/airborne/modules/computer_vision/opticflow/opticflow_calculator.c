@@ -72,7 +72,7 @@ void opticflow_calc_init(struct opticflow_t *opticflow, uint16_t w, uint16_t h)
 /**
  * Run the optical flow on a new image frame
  * @param[in] *opticflow The opticalflow structure that keeps track of previous images
- * @param[in] *state The state of the drone
+ * @param[in] *opticflow_state The state of the drone
  * @param[in] *img The image frame to calculate the optical flow from
  * @param[out] *result The optical flow result
  */
@@ -157,12 +157,12 @@ void opticflow_calc_frame(struct opticflow_t *opticflow, struct opticflow_state_
   }
 
   // Flow Derotation
-  float diff_flow_x = (state->phi - opticflow->prev_phi) * img->w / FOV_W;
-  float diff_flow_y = (state->theta - opticflow->prev_theta) * img->h / FOV_H;
+  float diff_flow_x = (opticflow_state->phi - opticflow->prev_phi) * img->w / FOV_W;
+  float diff_flow_y = (opticflow_state->theta - opticflow->prev_theta) * img->h / FOV_H;
   result->flow_der_x = result->flow_x - diff_flow_x * SUBPIXEL_FACTOR;
   result->flow_der_y = result->flow_y - diff_flow_y * SUBPIXEL_FACTOR;
-  opticflow->prev_phi = state->phi;
-  opticflow->prev_theta = state->theta;
+  opticflow->prev_phi = opticflow_state->phi;
+  opticflow->prev_theta = opticflow_state->theta;
 
   // Velocity calculation
   result->vel_x = -result->flow_der_x * result->fps / SUBPIXEL_FACTOR * img->w / Fx_ARdrone;
@@ -202,27 +202,4 @@ static int cmp_flow(const void *a, const void *b)
   const struct flow_t *a_p = (const struct flow_t *)a;
   const struct flow_t *b_p = (const struct flow_t *)b;
   return (a_p->flow_x*a_p->flow_x + a_p->flow_y*a_p->flow_y) - (b_p->flow_x*b_p->flow_x + b_p->flow_y*b_p->flow_y);
-}
-
-uint8_t point_in_sector(struct image_t *img, struct point_t point, struct point_t center_point) {
-
-  struct FloatEulers *eulers = stateGetNedToBodyEulers_f();
-  uint8_t sector = 0;
-  float path_angle = 0.6981;
-
-  // look at a fourth under the center point
-  float y_line_at_point = (img->h - (center_point.y + 720/4)) + eulers->phi*(img->w/2 - point.x);
-
-  if(point.y < y_line_at_point) {
-    float x_line_left_at_point = tan(path_angle - eulers->phi) * (img->h - center_point.y);
-    float x_line_right_at_point = tan(path_angle + eulers->phi) * (img->h - center_point.y);
-    if(point.x < x_line_left_at_point)
-      sector = 1;
-    else if(point.x < x_line_right_at_point)
-      sector = 2;
-    else
-      sector = 3;
-  }
-
-  return sector;
 }
