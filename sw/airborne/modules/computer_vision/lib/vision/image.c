@@ -565,16 +565,16 @@ void image_get_integral(struct image_t *img, struct image_t *int_y, struct image
       // If we want the U integral image
       if(buf_u != NULL && x%2 == 0) {
         buf_u[int_u->w * y + x/2] = img_buf[img->w * (start->y+y) * 2 + (start->x+x) * 2]
-                            + ((x > 0)? buf_u[int_u->w * y + (x/2 - 1)] : 0)
+                            + ((x/2 > 0)? buf_u[int_u->w * y + (x/2 - 1)] : 0)
                             + ((y > 0)? buf_u[int_u->w * (y - 1) + x/2] : 0)
-                            - ((x > 0 && y > 0)? buf_u[int_u->w * (y - 1) + (x/2 - 1)] : 0);
+                            - ((x/2 > 0 && y > 0)? buf_u[int_u->w * (y - 1) + (x/2 - 1)] : 0);
       }
       // If we want the V integral image
       if(buf_v != NULL && x%2 == 1) {
         buf_v[int_v->w * y + x/2] = img_buf[img->w * (start->y+y) * 2 + (start->x+x) * 2]
-                            + ((x > 0)? buf_v[int_v->w * y + (x/2 - 1)] : 0)
+                            + ((x/2 > 0)? buf_v[int_v->w * y + (x/2 - 1)] : 0)
                             + ((y > 0)? buf_v[int_v->w * (y - 1) + x/2] : 0)
-                            - ((x > 0 && y > 0)? buf_v[int_v->w * (y - 1) + (x/2 - 1)] : 0);
+                            - ((x/2 > 0 && y > 0)? buf_v[int_v->w * (y - 1) + (x/2 - 1)] : 0);
       }
     }
   }

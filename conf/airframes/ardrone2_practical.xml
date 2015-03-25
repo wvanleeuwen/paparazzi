@@ -41,6 +41,10 @@
       <define name="PRACTICAL_V_m" value="111"/>
       <define name="PRACTICAL_V_M" value="140"/>
     </load>
+    <!--load name="video_rtp_stream.xml">
+      <define name="VIEWVIDEO_DEVICE" value="/dev/video2"/>
+      <define name="VIEWVIDEO_DEVICE_SIZE" value="320,240"/>
+    </load-->
   </modules>
 
   <commands>

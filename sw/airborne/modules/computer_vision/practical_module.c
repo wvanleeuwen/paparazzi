@@ -181,7 +181,7 @@ static void *practical_module_calc(void *data __attribute__((unused)))
     // }
 
     // window_h = f(height,pitch, target obstacle avoidacne distance)
-    practical_integral_img_detect(&img, 200 /*window_h*/, 100 /*box size*/);
+    practical_integral_img_detect(&img, 200 /*window_h*/, 50 /*box size*/);
 
 #ifdef PRACTICAL_DEBUG
     //RunOnceEvery(10, {
@@ -302,22 +302,20 @@ static void practical_integral_img_detect(struct image_t *img, uint16_t sub_img_
 
       uint8_t avg_y = image_get_integral_sum(&int_y, &from, &to) / feature_s2;
 
-      // Update the x and y for the U and V values (since we have 2 times less pixels)
+      // Update the x for the U and V values (since we have 2 times less pixels)
       from.x /= 2;
-      from.y /= 2;
       to.x /= 2;
-      to.y /= 2;
 
       uint32_t avg_u = 2*image_get_integral_sum(&int_u, &from, &to) / feature_s2;
       uint32_t avg_v = 2*image_get_integral_sum(&int_v, &from, &to) / feature_s2;
 
-      printf("Point(%d, %d): %dY %dU %dV\n", x, y, avg_y - median_y, avg_u - median_u, avg_v - median_v);
+      //printf("Point(%d, %d): %dY %dU %dV\n", x, y, avg_y - median_y, avg_u - median_u, avg_v - median_v);
 
       // Show points
       from.x = x + start_point.x;
       from.y = y + start_point.y;
-      to.x = x + start_point.x + feature_size;
-      to.y = y + start_point.y + feature_size;
+      to.x = from.x + feature_size;
+      to.y = from.y + feature_size;
 
       if(avg_y - median_y < -16) {
         image_draw_line(img, &from, &to);
@@ -327,10 +325,10 @@ static void practical_integral_img_detect(struct image_t *img, uint16_t sub_img_
       from.y = y + start_point.y;
       to.x = x + start_point.x;
       to.y = y + start_point.y + feature_size;
-      if(abs(avg_u - median_u) < 9) {
+      if(abs(avg_u - median_u) > 23) {
         image_draw_line(img, &from, &to);
       }
-      if(abs(avg_v - median_v) < 11) {
+      if(abs(avg_v - median_v) > 28) {
         image_draw_line(img, &from, &to);
       }
     }
