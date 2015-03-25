@@ -528,6 +528,124 @@ void image_draw_line(struct image_t *img, struct point_t *from, struct point_t *
 }
 
 /**
+ * Draw a line on the image according to the Bresenham algorithm, 
+ * it currently only works for YUV422 (16-bit unsigned int per pixel);
+ * YUV422 images may display wider lines due to pixel rounding.
+ * @param[in,out] *img The image to show the line on
+ * @param[in] *from The point to draw from
+ * @param[in] *to The point to draw to
+ */
+void image_draw_line_bresenham(struct image_t *img, struct point_t *from, struct point_t *to)
+{
+  int16_t x = 0, y = 0;
+  uint8_t *img_buf = (uint8_t *)img->buf;
+  uint8_t pixel_width = (img->type == IMAGE_YUV422) ? 2 : 1;
+
+  // define the starting edge
+  uint32_t idx_from = img->w * pixel_width * 2 * from->y + from->x;
+  if (idx_from < 0 || idx_from > img->buf_size) // outside the scope of the image buffer
+  {
+    perror("The starting point is outside the image scope\n");
+  } 
+  else 
+  {
+    if (idx_from % 2) // the index is uneven
+    {
+      from->x -= 1;
+    }
+  } 
+  
+  // define the ending edge
+  uint32_t idx_to = img->w * pixel_width * 2 * to->y + to->x;
+  if (idx_to < 0 || idx_to > img->buf_size) // outside the scope of the image buffer
+  {
+    perror("The end point is outside the image scope\n");
+  } 
+  else 
+  {
+    if (idx_to % 2) // the index is uneven
+    {
+      to->x += 1;
+    }
+  } 
+
+  // define the starting point
+  uint16_t start_x = from->x;
+  uint16_t start_y = from->y;
+
+  // compute the distances in both directions
+  int32_t delta_x = from->x - to->x;
+  int32_t delta_y = from->y - to->y;
+
+  // compute the direction of the increment,
+  int8_t incr_x = (delta_x > 0) ? 1 : ((delta_x < 0) ? -1 : 0);
+  int8_t incr_y = (delta_y > 0) ? 1 : ((delta_y < 0) ? -1 : 0);
+
+  // draw the line segment
+  uint32_t abs_delta_x = abs(delta_x);
+  uint32_t abs_delta_y = abs(delta_y);
+  int32_t cnt_x = abs_delta_y>>1, cnt_y = abs_delta_y>>1;
+  if (abs_delta_x >= abs_delta_y) // the line segment is directed towards the horizontal
+  {
+    for(i = 0; i < abs_delta_x; i ++)
+    {
+      abs_delta_y += abs_delta_y;
+      if (cnt_y >= abs_delta_x)
+      {
+        cnt_y -= abs_delta_x;
+        y += incr_y;
+      }
+      x += incr_x;
+      if (x % 2) // the index is uneven
+      {
+        img->buf[img->w * pixel_width * 2 * y + x] = 0; // U
+        img->buf[img->w * pixel_width * 2 * y + x + 1] = 0; // Y
+      } 
+      else
+      {
+        img->buf[img->w * pixel_width * 2 * y + x] = 255; // V
+        img->buf[img->w * pixel_width * 2 * y + x + 1] = 0; // Y
+      }
+    }
+  }
+  else // the line segment is directed towards the vertical
+  {
+    for(i=0; i < abs_delta_y; i++)
+    {
+      x += abs_delta_x;
+      if (x >= abs_delta_y)
+      {
+        cnt_x -= abs_delta_y;
+        x += incr_x;
+      }
+      y += incr_y;
+      if (x % 2) // the index is uneven
+      {
+        img->buf[img->w * pixel_width * 2 * y + x] = 0; // U
+        img->buf[img->w * pixel_width * 2 * y + x + 1] = 0; // Y
+      } 
+      else
+      {
+        img->buf[img->w * pixel_width * 2 * y + x] = 255; // V
+        img->buf[img->w * pixel_width * 2 * y + x + 1] = 0; // Y
+      }
+    }
+  }
+}
+
+/**
+ * Draw rectangle
+ * @param[in,out] *img The image to show the rectangle on
+ * @param[in] *from The vertex of the rectangle
+ * @param[in] *to The vertex opposite to the 'from' vertex
+ */
+void image_draw_rectangle(struct image_t *img, struct point_t *from, struct point_t *to) 
+{
+
+}
+
+
+/**
  * Compute Integral Image
  * @param[in] *img The YUV422 image to be summed
  * @param[out] *int_y The y summed integral image (optional can be NULL)

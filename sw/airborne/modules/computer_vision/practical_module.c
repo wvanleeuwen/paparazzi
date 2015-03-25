@@ -188,7 +188,7 @@ static void *practical_module_calc(void *data __attribute__((unused)))
     image_yuv422_downsample(&img, &img_small, 4);
     jpeg_encode_image(&img_small, &img_jpeg, 60, FALSE);
     practical_tx_img(&img_jpeg, FALSE);
-    //});
+    });
 #endif
 
     // Free the image
@@ -225,7 +225,7 @@ static void practical_tx_img(struct image_t *img, bool_t use_netcat)
       &PRACTICAL_UDP_DEV,       // UDP device
       img,
       0,                        // Format 422
-      60,                       // Jpeg-Quality
+      20,                       // Jpeg-Quality
       0,                        // DRI Header
       0                         // 90kHz time increment
     );
@@ -239,7 +239,7 @@ static void practical_tx_img(struct image_t *img, bool_t use_netcat)
     printf("[practical_module] Could not create netcat fork.\n");
   } else if (pid == 0) {
     // We are the child and want to send the image
-    FILE *netcat = popen("nc 192.168.1.2 5000 2>/dev/null", "w");
+    FILE *netcat = popen("nc 192.168.1.3 5000 2>/dev/null", "w");
     if (netcat != NULL) {
       fwrite(img->buf, sizeof(uint8_t), img->buf_size, netcat);
       pclose(netcat); // Ignore output, because it is too much when not connected

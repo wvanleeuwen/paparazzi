@@ -31,6 +31,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
+#include "state.h"
 
 // Own Header
 #include "opticflow_calculator.h"
@@ -75,7 +76,7 @@ void opticflow_calc_init(struct opticflow_t *opticflow, uint16_t w, uint16_t h)
  * @param[in] *img The image frame to calculate the optical flow from
  * @param[out] *result The optical flow result
  */
-void opticflow_calc_frame(struct opticflow_t *opticflow, struct opticflow_state_t *state, struct image_t *img, struct opticflow_result_t *result)
+void opticflow_calc_frame(struct opticflow_t *opticflow, struct opticflow_state_t *opticflow_state, struct image_t *img, struct opticflow_result_t *result)
 {
   // Update FPS for information
   result->fps = 1 / (timeval_diff(&opticflow->prev_timestamp, &img->ts) / 1000.);
@@ -201,4 +202,27 @@ static int cmp_flow(const void *a, const void *b)
   const struct flow_t *a_p = (const struct flow_t *)a;
   const struct flow_t *b_p = (const struct flow_t *)b;
   return (a_p->flow_x*a_p->flow_x + a_p->flow_y*a_p->flow_y) - (b_p->flow_x*b_p->flow_x + b_p->flow_y*b_p->flow_y);
+}
+
+uint8_t point_in_sector(struct image_t *img, struct point_t point, struct point_t center_point) {
+
+  struct FloatEulers *eulers = stateGetNedToBodyEulers_f();
+  uint8_t sector = 0;
+  float path_angle = 0.6981;
+
+  // look at a fourth under the center point
+  float y_line_at_point = (img->h - (center_point.y + 720/4)) + eulers->phi*(img->w/2 - point.x);
+
+  if(point.y < y_line_at_point) {
+    float x_line_left_at_point = tan(path_angle - eulers->phi) * (img->h - center_point.y);
+    float x_line_right_at_point = tan(path_angle + eulers->phi) * (img->h - center_point.y);
+    if(point.x < x_line_left_at_point)
+      sector = 1;
+    else if(point.x < x_line_right_at_point)
+      sector = 2;
+    else
+      sector = 3;
+  }
+
+  return sector;
 }
