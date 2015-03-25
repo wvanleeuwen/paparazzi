@@ -35,6 +35,7 @@
 #include "firmwares/rotorcraft/guidance/guidance_v.h"
 #include "autopilot.h"
 #include "subsystems/datalink/downlink.h"
+#include "practical_module.h"
 
 #define CMD_OF_SAT  1500 // 40 deg = 2859.1851
 
@@ -86,6 +87,8 @@ struct opticflow_stab_t opticflow_stab = {
   .desired_vy = VISION_DESIRED_VY
 };
 
+int32_t yaw_rate = 0;
+
 /**
  * Horizontal guidance mode enter resets the errors
  * and starts the controller.
@@ -117,7 +120,12 @@ void guidance_h_module_read_rc(void)
 void guidance_h_module_run(bool_t in_flight)
 {
   // GUIDANCE: Set Hover-z-hold (0.5 meter)
-  guidance_v_z_sp = -1 << 7;
+  guidance_v_z_sp = -1 << 8;
+
+  opticflow_stab.cmd.psi += yaw_rate;
+
+  INT32_ANGLE_NORMALIZE(opticflow_stab.cmd.psi);
+
   /* Update the setpoint */
   stabilization_attitude_set_rpy_setpoint_i(&opticflow_stab.cmd);
 
@@ -134,6 +142,21 @@ void stabilization_opticflow_update(struct opticflow_result_t *result)
   /* Check if we are in the correct AP_MODE before setting commands */
   if (autopilot_mode != AP_MODE_MODULE) {
     return;
+  }
+
+  if(num_features_in_sector[2] == 0) {
+    //go straight
+    opticflow_stab.desired_vy = 0.4;
+    yaw_rate = 0;
+  }
+  else {
+    //fly with zero velocity
+    opticflow_stab.desired_vy = 0;
+    //turn
+    if(num_features_in_sector[1] > num_features_in_sector[3])
+      yaw_rate = 1;//turn right
+    else
+      yaw_rate = -1;
   }
 
   /* Calculate the error if we have enough flow */

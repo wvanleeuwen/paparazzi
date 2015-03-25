@@ -35,6 +35,7 @@
 #include "state.h"
 #include "subsystems/abi.h"
 #include "opticflow/stabilization_opticflow.h"
+#include "subsystems/datalink/downlink.h"
 
 #include "lib/v4l/v4l2.h"
 #include "lib/encoding/jpeg.h"
@@ -60,6 +61,7 @@ static void practical_tx_img(struct image_t *img, bool_t rtp);  //< Trnsmit an i
 static void practical_integral_img_detect(struct image_t *img, uint16_t sub_img_h, uint16_t feature_size);
 
 uint8_t point_in_sector(struct image_t *img, struct point_t point);
+uint16_t num_features_in_sector[4] = {0, 0, 0, 0};
 
 /**
  * Initialize the practical module
@@ -183,7 +185,7 @@ static void *practical_module_calc(void *data __attribute__((unused)))
     // }
 
     // window_h = f(height,pitch, target obstacle avoidacne distance)
-    practical_integral_img_detect(&img, 200 /*window_h*/, 50 /*box size*/);
+    practical_integral_img_detect(&img, 200 /*window_h*/, 25 /*box size*/);
 
 #ifdef PRACTICAL_DEBUG
     //RunOnceEvery(10, {
@@ -294,6 +296,7 @@ static void practical_integral_img_detect(struct image_t *img, uint16_t sub_img_
   // Show boxes above thresholds
   struct point_t from, to;
   uint16_t feature_s2 = feature_size * feature_size;
+  num_features_in_sector[0] = num_features_in_sector[1]  = num_features_in_sector[2] = num_features_in_sector[3] = 0;
   for (uint16_t x = 0; x <= img->w - feature_size; x += feature_size) {
     for (uint16_t y = 0; y <= sub_img_h - feature_size; y += feature_size) {
       // Set the from and to
@@ -313,42 +316,54 @@ static void practical_integral_img_detect(struct image_t *img, uint16_t sub_img_
 
       //printf("Point(%d, %d): %dY %dU %dV\n", x, y, avg_y - median_y, avg_u - median_u, avg_v - median_v);
 
-      // Show points
-      from.x = x + start_point.x;
-      from.y = y + start_point.y;
-      to.x = from.x + feature_size;
-      to.y = from.y + feature_size;
-
-//       if(practical.y_m < diff_y && diff_y < practical.y_M) {
-//         image_draw_line(img, &from, &to);
-//       }
-
-      from.x = x + start_point.x + feature_size;
-      from.y = y + start_point.y;
-      to.x = x + start_point.x;
-      to.y = y + start_point.y + feature_size;
-//       if(practical.u_m < diff_u && diff_u < practical.u_M) {
-//         image_draw_line(img, &from, &to);
-//       }
-//       if(practical.v_m < diff_v && diff_v < practical.v_M) {
-//         image_draw_line(img, &from, &to);
-//       }
-
       struct point_t midpoint_feature;
       midpoint_feature.x = x + start_point.x + feature_size/2;
       midpoint_feature.y = y + start_point.y + feature_size/2;
 
       uint8_t sector = point_in_sector(img, midpoint_feature);
 
-      if(sector != 0) {
+      // Show points
+      from.x = x + start_point.x;
+      from.y = y + start_point.y;
+      to.x = from.x + feature_size;
+      to.y = from.y + feature_size;
+
+      if(practical.y_m < diff_y && diff_y < practical.y_M && sector != 0) {
         image_draw_line(img, &from, &to);
       }
+
+      from.x = x + start_point.x + feature_size;
+      from.y = y + start_point.y;
+      to.x = x + start_point.x;
+      to.y = y + start_point.y + feature_size;
+      if(practical.u_m < diff_u && diff_u < practical.u_M && sector != 0) {
+        image_draw_line(img, &from, &to);
+      }
+      if(practical.v_m < diff_v && diff_v < practical.v_M && sector != 0) {
+        image_draw_line(img, &from, &to);
+      }
+
+      if((practical.y_m < diff_y && diff_y < practical.y_M) || (practical.u_m < diff_u && diff_u < practical.u_M) || (practical.v_m < diff_v && diff_v < practical.v_M)) {
+        num_features_in_sector[sector] += 1;
+      }
+
+// Display sector
+//       if(sector == 2) {
+//         image_draw_line(img, &from, &to);
+//       }
     }
   }
 
   image_free(&int_y);
   image_free(&int_u);
   image_free(&int_v);
+
+  DOWNLINK_SEND_OPTIC_AVOID(DefaultChannel, DefaultDevice,
+                            &num_features_in_sector[0],
+                            &num_features_in_sector[1],
+                            &num_features_in_sector[2],
+                            &num_features_in_sector[3]);
+
 }
 
 uint8_t point_in_sector(struct image_t *img, struct point_t point) {
@@ -361,14 +376,12 @@ uint8_t point_in_sector(struct image_t *img, struct point_t point) {
   center_point.x = img->w/2;
   center_point.y = img->h/2 + img->h*eulers->theta/0.6632251157578453;
 
-//   printf("Center point: %d %d\n", center_point.x, center_point.y);
-
   // look at a fourth under the center point
   float y_line_at_point = center_point.y + img->h/4 + eulers->phi*(img->w/2 - point.x);
 
   if(point.y > y_line_at_point) {
-    float x_line_left_at_point = tan(path_angle - eulers->phi) * (img->h - center_point.y);
-    float x_line_right_at_point = tan(path_angle + eulers->phi) * (img->h - center_point.y);
+    float x_line_left_at_point = img->w/2 - tan(path_angle - eulers->phi) * (point.y - center_point.y);
+    float x_line_right_at_point = img->w/2 + tan(path_angle + eulers->phi) * (point.y - center_point.y);
     if(point.x < x_line_left_at_point)
       sector = 1;
     else if(point.x < x_line_right_at_point)

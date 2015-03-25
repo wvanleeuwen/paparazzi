@@ -39,6 +39,7 @@ struct practical_t {
   int16_t v_M;
 };
 extern struct practical_t practical;
+extern uint16_t num_features_in_sector[4];
 
 // Module functions
 extern void practical_module_init(void);
