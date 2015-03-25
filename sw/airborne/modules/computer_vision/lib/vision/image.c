@@ -99,8 +99,8 @@ void image_copy(struct image_t *input, struct image_t *output)
  */
 void image_to_grayscale(struct image_t *input, struct image_t *output)
 {
-  uint8_t *source = input->buf;
-  uint8_t *dest = output->buf;
+  uint8_t *source = (uint8_t *)input->buf;
+  uint8_t *dest = (uint8_t *)output->buf;
   source++;
 
   // Copy the creation timestamp (stays the same)
@@ -133,12 +133,12 @@ uint32_t image_yuv422_colorfilt(struct image_t *input, struct image_t *output, u
                                 uint8_t y_m, uint8_t y_M, uint8_t u_m, uint8_t u_M, uint8_t v_m, uint8_t v_M)
 {
   uint32_t cnt = 0;
-  uint8_t *source = input->buf;
+  uint8_t *source = (uint8_t *)input->buf;
   uint8_t *dest = NULL;
 
   // Check if the ouput is not NULL
   if (output != NULL) {
-    dest = output->buf;
+    dest = (uint8_t *)output->buf;
     // Copy the creation timestamp (stays the same)
     memcpy(&output->ts, &input->ts, sizeof(struct timeval));
   }
@@ -203,8 +203,8 @@ uint32_t image_yuv422_colorfilt(struct image_t *input, struct image_t *output, u
 */
 void image_yuv422_downsample(struct image_t *input, struct image_t *output, uint16_t downsample)
 {
-  uint8_t *source = input->buf;
-  uint8_t *dest = output->buf;
+  uint8_t *source = (uint8_t *)input->buf;
+  uint8_t *dest = (uint8_t *)output->buf;
   uint16_t pixelskip = (downsample - 1) * 2;
 
   // Copy the creation timestamp (stays the same)
@@ -542,28 +542,31 @@ void image_draw_line_bresenham(struct image_t *img, struct point_t *from, struct
   uint8_t pixel_width = (img->type == IMAGE_YUV422) ? 2 : 1;
 
   // define the starting edge
-  uint32_t idx_from = img->w * pixel_width * 2 * from->y + from->x;
-  if (idx_from < 0 || idx_from > img->buf_size) // outside the scope of the image buffer
+  uint32_t idx_from = img->w * pixel_width * from->y + from->x * pixel_width;
+  if (idx_from > img->buf_size) // outside the scope of the image buffer
   {
     perror("The starting point is outside the image scope\n");
+    return;
   } 
   else 
   {
-    if (idx_from % 2) // the index is uneven
+    if (!(idx_from % 2)) // the index is even
     {
       from->x -= 1;
     }
   } 
   
   // define the ending edge
-  uint32_t idx_to = img->w * pixel_width * 2 * to->y + to->x;
-  if (idx_to < 0 || idx_to > img->buf_size) // outside the scope of the image buffer
+  uint32_t idx_to = img->w * pixel_width  * to->y + pixel_width * to->x;
+
+  if (idx_to > img->buf_size) // outside the scope of the image buffer
   {
     perror("The end point is outside the image scope\n");
+    return;
   } 
   else 
   {
-    if (idx_to % 2) // the index is uneven
+    if (!(idx_to % 2)) // the index is even
     {
       to->x += 1;
     }
@@ -573,23 +576,35 @@ void image_draw_line_bresenham(struct image_t *img, struct point_t *from, struct
   uint16_t start_x = from->x;
   uint16_t start_y = from->y;
 
+  printf("start_x: %d\n", start_x);
+  printf("start_y: %d\n", start_y);
+
   // compute the distances in both directions
-  int32_t delta_x = from->x - to->x;
-  int32_t delta_y = from->y - to->y;
+  int32_t delta_x = to->x - from->x;
+  int32_t delta_y = to->y - from->y;
+
+  printf("delta_x: %d\n", delta_x);
+  printf("delta_y: %d\n", delta_y);
 
   // compute the direction of the increment,
   int8_t incr_x = (delta_x > 0) ? 1 : ((delta_x < 0) ? -1 : 0);
   int8_t incr_y = (delta_y > 0) ? 1 : ((delta_y < 0) ? -1 : 0);
 
+  printf("incr_x: %d\n", incr_x);
+  printf("incr_y: %d\n", incr_y);
+
   // draw the line segment
   uint32_t abs_delta_x = abs(delta_x);
+  printf("abs_delta_x: %d\n", abs_delta_x);
   uint32_t abs_delta_y = abs(delta_y);
+  printf("abs_delta_y: %d\n", abs_delta_y);
   int32_t cnt_x = abs_delta_y>>1, cnt_y = abs_delta_y>>1;
+
   if (abs_delta_x >= abs_delta_y) // the line segment is directed towards the horizontal
   {
-    for(i = 0; i < abs_delta_x; i ++)
+    for(uint16_t i = 0; i < abs_delta_x; i ++)
     {
-      abs_delta_y += abs_delta_y;
+      cnt_y += abs_delta_y;
       if (cnt_y >= abs_delta_x)
       {
         cnt_y -= abs_delta_x;
@@ -598,21 +613,27 @@ void image_draw_line_bresenham(struct image_t *img, struct point_t *from, struct
       x += incr_x;
       if (x % 2) // the index is uneven
       {
-        img->buf[img->w * pixel_width * 2 * y + x] = 0; // U
-        img->buf[img->w * pixel_width * 2 * y + x + 1] = 0; // Y
+        img_buf[img->w * pixel_width * y + x * pixel_width] = 0; // U
+
+        printf("x: %d\n", x);
+        printf("y: %d\n", y);
+
+        printf("pixel value(%d): %d\n", img->w * pixel_width * y + pixel_width * x, img_buf[img->w * 2 * pixel_width * y + pixel_width * x]);
+
+        img_buf[img->w * pixel_width * y + x * pixel_width + 1] = 0; // Y
       } 
       else
       {
-        img->buf[img->w * pixel_width * 2 * y + x] = 255; // V
-        img->buf[img->w * pixel_width * 2 * y + x + 1] = 0; // Y
+        img_buf[img->w * pixel_width * y + x * pixel_width] = 255; // V
+        img_buf[img->w * pixel_width * y + x * pixel_width + 1] = 0; // Y
       }
     }
   }
   else // the line segment is directed towards the vertical
   {
-    for(i=0; i < abs_delta_y; i++)
+    for(uint16_t i = 0; i < abs_delta_y; i++)
     {
-      x += abs_delta_x;
+      cnt_x += abs_delta_x;
       if (x >= abs_delta_y)
       {
         cnt_x -= abs_delta_y;
@@ -621,13 +642,13 @@ void image_draw_line_bresenham(struct image_t *img, struct point_t *from, struct
       y += incr_y;
       if (x % 2) // the index is uneven
       {
-        img->buf[img->w * pixel_width * 2 * y + x] = 0; // U
-        img->buf[img->w * pixel_width * 2 * y + x + 1] = 0; // Y
+        img_buf[img->w * pixel_width * y + x * pixel_width] = 0; // U
+        img_buf[img->w * pixel_width * y + x * pixel_width + 1] = 0; // Y
       } 
       else
       {
-        img->buf[img->w * pixel_width * 2 * y + x] = 255; // V
-        img->buf[img->w * pixel_width * 2 * y + x + 1] = 0; // Y
+        img_buf[img->w * pixel_width * y + x * pixel_width] = 255; // V
+        img_buf[img->w * pixel_width * y + x * pixel_width + 1] = 0; // Y
       }
     }
   }
@@ -663,11 +684,11 @@ void image_get_integral(struct image_t *img, struct image_t *int_y, struct image
   uint32_t *buf_u = NULL;
   uint32_t *buf_v = NULL;
   if(int_y != NULL)
-    buf_y = int_y->buf;
+    buf_y = (uint32_t *)int_y->buf;
   if(int_u != NULL)
-    buf_u = int_u->buf;
+    buf_u = (uint32_t *)int_u->buf;
   if(int_v != NULL)
-    buf_v = int_v->buf;
+    buf_v = (uint32_t *)int_v->buf;
 
   // Loop trough the image
   for(uint16_t x = 0; x < img->w-start->x; x++) {
