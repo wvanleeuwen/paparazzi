@@ -124,12 +124,12 @@
     <define name="CONTROL_EFFECTIVENESS_R" value="120.0"/>
 
     <!-- reference acceleration for attitude control -->
-    <define name="REF_ERR_P" value="130.0"/>
-    <define name="REF_ERR_Q" value="130.0"/>
-    <define name="REF_ERR_R" value="110.0"/>
-    <define name="REF_RATE_P" value="13.5"/>
-    <define name="REF_RATE_Q" value="13.5"/>
-    <define name="REF_RATE_R" value="12.0"/>
+    <define name="REF_ERR_P" value="1000.0"/>
+    <define name="REF_ERR_Q" value="1000.0"/>
+    <define name="REF_ERR_R" value="500.0"/>
+    <define name="REF_RATE_P" value="50.0"/>
+    <define name="REF_RATE_Q" value="50.0"/>
+    <define name="REF_RATE_R" value="30.0"/>
 
     <!-- second order filter parameters -->
     <define name="FILT_OMEGA" value="50.0"/>

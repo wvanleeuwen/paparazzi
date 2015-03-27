@@ -89,7 +89,7 @@ float G1G2_pseudo_inv[4][3] = {{ -14.0 , 18.0, 4.0},
 { 14.0, 18.0, -4.0},
 { 14.0, -18.0, 4.0},
 {-14.0 , -18.0, -4.0}};
-float G1[3][4] = {{-20*3 , 20*3, 20*3 , -20*3 }, //scaled by 1000
+float G1[3][4] = {{-20 , 20, 20 , -20 }, //scaled by 1000
 {14 , 14, -14 , -14 },
 {1, -1, 1, -1}};
 float G2[4] = {60.0, -60.0, 60.0, -60.0}; //scaled by 1000
@@ -295,11 +295,11 @@ void stabilization_attitude_set_earth_cmd_i(struct Int32Vect2 *cmd, int32_t head
 static void attitude_run_indi(int32_t indi_commands[], struct Int32Quat *att_err)
 {
   angular_accel_ref.p = reference_acceleration.err_p * QUAT1_FLOAT_OF_BFP(att_err->qx)
-                        - reference_acceleration.rate_p * filtered_rate.p;
+                        - reference_acceleration.rate_p * stateGetBodyRates_f()->p;
   angular_accel_ref.q = reference_acceleration.err_q * QUAT1_FLOAT_OF_BFP(att_err->qy)
-                        - reference_acceleration.rate_q * filtered_rate.q;
+                        - reference_acceleration.rate_q * stateGetBodyRates_f()->q;
   angular_accel_ref.r = reference_acceleration.err_r * QUAT1_FLOAT_OF_BFP(att_err->qz)
-                        - reference_acceleration.rate_r * filtered_rate.r;
+                        - reference_acceleration.rate_r * stateGetBodyRates_f()->r;
 
   indi_du.p = inv_control_effectiveness.p * (angular_accel_ref.p - filtered_rate_deriv.p);
   indi_du.q = inv_control_effectiveness.q * (angular_accel_ref.q - filtered_rate_deriv.q);
