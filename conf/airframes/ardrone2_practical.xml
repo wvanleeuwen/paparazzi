@@ -27,7 +27,7 @@
 
   <modules main_freq="512">
     <load name="send_imu_mag_current.xml"/>
-    <load name="logger_file.xml"/>
+<!--     <load name="logger_file.xml"/> -->
     <load name="cv_opticflow.xml">
       <define name="VISION_DESIRED_VY" value="0.4"/>
     </load>
@@ -40,10 +40,10 @@
       <define name="PRACTICAL_V_m" value="28"/>
       <define name="PRACTICAL_V_M" value="-28"/>
     </load>
-    <load name="video_rtp_stream.xml">
+<!--    <load name="video_rtp_stream.xml">
       <define name="VIEWVIDEO_DEVICE" value="/dev/video2"/>
       <define name="VIEWVIDEO_DEVICE_SIZE" value="320,240"/>
-    </load
+    </load>-->
   </modules>
 
   <commands>
@@ -201,12 +201,12 @@
     <define name="CONTROL_EFFECTIVENESS_R" value="120.0"/>
 
     <!-- reference acceleration for attitude control -->
-    <define name="REF_ERR_P" value="140.0"/>
-    <define name="REF_ERR_Q" value="140.0"/>
-    <define name="REF_ERR_R" value="120.0"/>
-    <define name="REF_RATE_P" value="17.0"/>
-    <define name="REF_RATE_Q" value="17.0"/>
-    <define name="REF_RATE_R" value="17.0"/>
+    <define name="REF_ERR_P" value="200.0"/>
+    <define name="REF_ERR_Q" value="200.0"/>
+    <define name="REF_ERR_R" value="200.0"/>
+    <define name="REF_RATE_P" value="23.0"/>
+    <define name="REF_RATE_Q" value="23.0"/>
+    <define name="REF_RATE_R" value="23.0"/>
 
     <!-- second order filter parameters -->
     <define name="FILT_OMEGA" value="50.0"/>
