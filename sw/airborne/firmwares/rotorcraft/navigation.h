@@ -84,10 +84,26 @@ void nav_periodic_task(void);
 bool_t nav_detect_ground(void);
 bool_t nav_is_in_flight(void);
 
+// #ifndef NAVIGATION_RADIUS_SAFE_ZONE
+// #define NAVIGATION_RADIUS_SAFE_ZONE 5 // meters
+// #endif
+
+// #ifndef NAVIGATION_THRESHOLD_SAFE_ZONE
+// #define NAVIGATION_THRESHOLD_SAFE_ZONE 1 // meters
+// #endif
+
+// #ifndef NAVIGATION_DEFLECTION_ANGLE
+// #define NAVIGATION_DEFLECTION_ANGLE 90 // degrees
+// #endif 
+// #if NAVIGATION_DEFLECTION_ANGLE < 90
+// #error The deflection angle is too small!
+// #endif 
+
 extern bool_t nav_set_heading_rad(float rad);
 extern bool_t nav_set_heading_deg(float deg);
 extern bool_t nav_set_heading_towards(float x, float y);
 extern bool_t nav_set_heading_towards_waypoint(uint8_t wp);
+// extern bool_t nav_set_heading_towards_safe_zone(uint8_t wp);
 extern bool_t nav_set_heading_current(void);
 
 /** default approaching_time for a wp */

@@ -343,6 +343,7 @@ static void practical_integral_img_detect(struct image_t *img, uint16_t sub_img_
         image_draw_line(img, &from, &to);
       }
 
+      // compute number of features per sector
       if((practical.y_m < diff_y && diff_y < practical.y_M) || (practical.u_m < diff_u && diff_u < practical.u_M) || (practical.v_m < diff_v && diff_v < practical.v_M)) {
         num_features_in_sector[sector] += 1;
       }
@@ -374,7 +375,7 @@ uint8_t point_in_sector(struct image_t *img, struct point_t point) {
   struct point_t center_point;
 
   center_point.x = img->w/2;
-  center_point.y = img->h/2 + img->h*eulers->theta/0.6632251157578453;
+  center_point.y = img->h/2 + img->h*eulers->theta*1.5; // the '1.5' is the conversion factor
 
   // look at a fourth under the center point
   float y_line_at_point = center_point.y + img->h/4 + eulers->phi*(img->w/2 - point.x);

@@ -520,9 +520,34 @@ bool_t nav_set_heading_towards_waypoint(uint8_t wp)
   return nav_set_heading_towards(WaypointX(wp), WaypointY(wp));
 }
 
+// /** Set heading in the direction of the safe zone */
+// bool_t nav_set_heading_towards_safe_zone(uint8_t wp_id)
+// {
+//   // get the squared distance to the waypoint
+//   float dist2 = get_dist2_to_waypoint(wp_id);
+
+//   // update heading if within danger zone
+//   if (dist2 >= (NAVIGATION_RADIUS_SAFE_ZONE-NAVIGATION_THRESHOLD_SAFE_ZONE)*
+//     (NAVIGATION_RADIUS_SAFE_ZONE-NAVIGATION_THRESHOLD_SAFE_ZONE))
+//   {
+//     // get current heading
+//     float psi = stateGetNedToBodyEulers_f()->psi;
+//     if (psi >= 180.)
+//     {
+//       nav_set_heading_deg(psi+NAVIGATION_DEFLECTION_ANGLE);
+//     }
+//     else
+//     {
+//       nav_set_heading_deg(psi-NAVIGATION_DEFLECTION_ANGLE);
+//     }
+//   }
+//   return FALSE;
+// }
+
 /** Set heading to the current yaw angle */
 bool_t nav_set_heading_current(void)
 {
   nav_heading = stateGetNedToBodyEulers_i()->psi;
   return FALSE;
 }
+

@@ -625,9 +625,6 @@ void image_draw_line(struct image_t *img, struct point_t *from, struct point_t *
  */
 void image_draw_rectangle(struct image_t *img, struct point_t *from, struct point_t *to) 
 {
-  //
-
-
   // define the two remaining point
   struct point_t fromto = {
     .x = from->x,
