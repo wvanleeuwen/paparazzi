@@ -32,6 +32,7 @@
 
 #include "std.h"
 #include "math/pprz_algebra_int.h"
+#include "guidance/guidance_h.h"
 
 /* The practical stabilization */
 struct practical_stab_t {
@@ -47,10 +48,5 @@ struct practical_stab_t {
   struct Int32Eulers cmd;   //< The commands that are send to the hover loop
 };
 extern struct practical_stab_t practical_stab;
-
-// Implement own Horizontal loops
-extern void guidance_h_module_enter(void);
-extern void guidance_h_module_read_rc(void);
-extern void guidance_h_module_run(bool_t in_flight);
 
 #endif /* CV_STABILIZATION_OPTICFLOW_H_ */

@@ -222,6 +222,7 @@ static void practical_agl_cb(uint8_t sender_id __attribute__((unused)), float di
  * @param[in] *img The image to transmit
  * @param[in] use_netcat If we want to transmit over use netcat or RTP
  */
+#if PRACTICAL_DEBUG
 static void practical_tx_img(struct image_t *img, bool_t use_netcat)
 {
   if (!use_netcat) {
@@ -258,6 +259,7 @@ static void practical_tx_img(struct image_t *img, bool_t use_netcat)
     wait(NULL);
   }
 }
+#endif
 
 /**
  * detect object based on color difference with floor

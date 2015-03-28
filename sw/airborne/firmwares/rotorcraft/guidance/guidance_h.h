@@ -101,6 +101,12 @@ extern void guidance_h_mode_changed(uint8_t new_mode);
 extern void guidance_h_read_rc(bool_t in_flight);
 extern void guidance_h_run(bool_t in_flight);
 
+#if GUIDANCE_H_MODE_MODULE_SETTING == GUIDANCE_H_MODE_MODULE
+extern void guidance_h_module_enter(void);
+extern void guidance_h_module_read_rc(void);
+extern void guidance_h_module_run(bool_t in_flight);
+#endif
+
 
 #define guidance_h_SetKi(_val) {            \
     guidance_h_igain = _val;                \
