@@ -35,6 +35,8 @@
 #include "firmwares/rotorcraft/guidance/guidance_v.h"
 #include "autopilot.h"
 #include "subsystems/datalink/downlink.h"
+#include "navigation.h"
+#include "generated/flight_plan.h"
 
 #define CMD_OF_SAT  1500 // 40 deg = 2859.1851
 
@@ -121,6 +123,23 @@ void guidance_h_module_run(bool_t in_flight)
   if(in_flight) {
     // Set the height
     guidance_v_z_sp = -1 << 8;
+
+    // Some logic to change the desired speed if outside boundery
+    if(!InsideFlight_Area(GetPosX(), GetPosY())) {
+      nav_set_heading_towards_waypoint(WP_MID);
+      practical_stab.cmd.psi = nav_heading;
+
+      uint32_t diff_heading = nav_heading - stateGetNedToBodyEulers_i()->psi;
+      INT32_ANGLE_NORMALIZE(diff_heading);
+
+      if(abs(diff_heading) < 357) {
+        practical_stab.desired_vx = 0.5;
+        practical_stab.desired_vy = 0;
+      } else {
+        practical_stab.desired_vx = 0;
+        practical_stab.desired_vy = 0;
+      }
+    }
 
     // Calculate the speed in body frame
     struct FloatVect2 speed_cur, speed_err;
