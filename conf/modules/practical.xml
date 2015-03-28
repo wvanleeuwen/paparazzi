@@ -1,6 +1,6 @@
 <!DOCTYPE module SYSTEM "module.dtd">
 
-<module name="cv_opticflow" dir="computer_vision">
+<module name="practical" dir="computer_vision">
   <doc>
     <description>
         Main practical module
@@ -21,9 +21,12 @@
         <dl_setting var="practical.v_m" module="computer_vision/practical_module" min="-512" step="1" max="512" shortname="v_m" param="PRACTICAL_V_m"/>
         <dl_setting var="practical.v_M" module="computer_vision/practical_module" min="-512" step="1" max="512" shortname="v_M" param="PRACTICAL_V_M"/>
 
-        <!--dl_setting var="adding_theta" module="computer_vision/stabilization_practical" unit="1/2^12r" alt_unit="deg" alt_unit_coef="0.0139882" min="-15" step="0.05" max="15" shortname="flight_pitch"/>
-        <dl_setting var="adding_psi" module="computer_vision/stabilization_practical" unit="1/2^12r" alt_unit="deg" alt_unit_coef="0.0139882" min="-5" step="0.01" max="5" shortname="yaw_int"/>
-        <dl_setting var="adding_phi" module="computer_vision/stabilization_practical" unit="1/2^12r" alt_unit="deg" alt_unit_coef="0.0139882" min="-15" step="0.05" max="15" shortname="roll_angle"/-->
+        <dl_setting var="practical_stab.phi_pgain" module="computer_vision/stabilization_practical" min="0" step="1" max="1000" shortname="kp_v_phi" param="PRACTICAL_PHI_PGAIN"/>
+        <dl_setting var="practical_stab.phi_igain" module="computer_vision/stabilization_practical" min="0" step="1" max="1000" shortname="ki_v_phi" param="PRACTICAL_PHI_IGAIN"/>
+        <dl_setting var="practical_stab.theta_pgain" module="computer_vision/stabilization_practical" min="0" step="1" max="1000" shortname="kp_v_theta" param="PRACTICAL_THETA_PGAIN"/>
+        <dl_setting var="practical_stab.theta_igain" module="computer_vision/stabilization_practical" min="0" step="1" max="1000" shortname="ki_v_theta" param="PRACTICAL_THETA_IGAIN"/>
+        <dl_setting var="practical_stab.desired_vx" module="computer_vision/stabilization_practical" min="-5" step="0.01" max="5" shortname="desired_vx" param="PRACTICAL_DESIRED_VX"/>
+        <dl_setting var="practical_stab.desired_vy" module="computer_vision/stabilization_practical" min="-5" step="0.01" max="5" shortname="desired_vy" param="PRACTICAL_DESIRED_VY"/>
       </dl_settings>
     </dl_settings>
   </settings>
@@ -45,13 +48,18 @@
 
     <!-- The practical module itself -->
     <file name="practical_module.c"/>
+    <file name="stabilization_practical.c"/>
 
     <!-- Random flags -->
     <flag name="LDFLAGS" value="static"/>
 
     <!-- Used for debug video -->
     <raw>
+      ap.CFLAGS += -DUSE_UDP1
       ap.CFLAGS += -DPRACTICAL_UDP_DEV=udp1
+
+      ap.CFLAGS += -DGUIDANCE_V_MODE_MODULE_SETTING=GUIDANCE_V_MODE_HOVER
+      ap.CFLAGS += -DGUIDANCE_H_MODE_MODULE_SETTING=GUIDANCE_H_MODE_MODULE
     </raw>
   </makefile>
 
