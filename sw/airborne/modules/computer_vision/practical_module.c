@@ -146,7 +146,7 @@ static void *practical_module_calc(void *data __attribute__((unused)))
     return 0;
   }
 
-#ifdef PRACTICAL_DEBUG
+#if PRACTICAL_DEBUG
   // Create a new JPEG image
   struct image_t img_jpeg, img_small;
   image_create(&img_jpeg, practical_video_dev->w, practical_video_dev->h, IMAGE_JPEG);
@@ -187,7 +187,7 @@ static void *practical_module_calc(void *data __attribute__((unused)))
     // window_h = f(height,pitch, target obstacle avoidacne distance)
     practical_integral_img_detect(&img, 200 /*window_h*/, 25 /*box size*/);
 
-#ifdef PRACTICAL_DEBUG
+#if PRACTICAL_DEBUG
     //RunOnceEvery(10, {
     image_yuv422_downsample(&img, &img_small, 4);
     jpeg_encode_image(&img_small, &img_jpeg, 60, FALSE);
@@ -199,7 +199,7 @@ static void *practical_module_calc(void *data __attribute__((unused)))
     v4l2_image_free(practical_video_dev, &img);
   }
 
-#ifdef PRACTICAL_DEBUG
+#if PRACTICAL_DEBUG
   image_free(&img_jpeg);
 #endif
 }
