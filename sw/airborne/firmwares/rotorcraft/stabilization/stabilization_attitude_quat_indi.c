@@ -206,7 +206,7 @@ static void attitude_run_indi(int32_t indi_commands[], struct Int32Quat *att_err
   BOUND_CONTROLS(u_in.p, -4500, 4500);
   BOUND_CONTROLS(u_in.q, -4500, 4500);
   float half_thrust = ((float) stabilization_cmd[COMMAND_THRUST]/2);
-  BOUND_CONTROLS(u_in.r, -half_thrust, half_thrust);
+  BOUND_CONTROLS(u_in.r, -1500, 1500);
 
   //Propagate input filters
   stabilization_indi_filter_inputs();

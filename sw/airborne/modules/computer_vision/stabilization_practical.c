@@ -46,7 +46,7 @@
 PRINT_CONFIG_VAR(PRACTICAL_PHI_PGAIN);
 
 #ifndef PRACTICAL_PHI_IGAIN
-#define PRACTICAL_PHI_IGAIN 100
+#define PRACTICAL_PHI_IGAIN 300
 #endif
 PRINT_CONFIG_VAR(PRACTICAL_PHI_IGAIN);
 
@@ -56,12 +56,12 @@ PRINT_CONFIG_VAR(PRACTICAL_PHI_IGAIN);
 PRINT_CONFIG_VAR(PRACTICAL_THETA_PGAIN);
 
 #ifndef PRACTICAL_THETA_IGAIN
-#define PRACTICAL_THETA_IGAIN 100
+#define PRACTICAL_THETA_IGAIN 300
 #endif
 PRINT_CONFIG_VAR(PRACTICAL_THETA_IGAIN);
 
 #ifndef PRACTICAL_DESIRED_VX
-#define PRACTICAL_DESIRED_VX 0
+#define PRACTICAL_DESIRED_VX 0.5
 #endif
 PRINT_CONFIG_VAR(PRACTICAL_DESIRED_VX);
 
@@ -122,17 +122,20 @@ void guidance_h_module_run(bool_t in_flight)
 {
   if(in_flight) {
     // Set the height
-    guidance_v_z_sp = -1 << 8;
+    guidance_v_z_sp = -1 << 7;
 
     // Some logic to change the desired speed if outside boundery
     if(!InsideFlight_Area(GetPosX(), GetPosY())) {
       nav_set_heading_towards_waypoint(WP_MID);
-      practical_stab.cmd.psi = nav_heading;
 
-      uint32_t diff_heading = nav_heading - stateGetNedToBodyEulers_i()->psi;
+      int32_t diff_heading = nav_heading - stateGetNedToBodyEulers_i()->psi;
       INT32_ANGLE_NORMALIZE(diff_heading);
 
-      if(abs(diff_heading) < 357) {
+      int32_t diff_lim_heading = diff_heading;
+      BoundAbs(diff_lim_heading, 357*3); //15 deg
+      practical_stab.cmd.psi =  stateGetNedToBodyEulers_i()->psi + diff_lim_heading;
+
+      if(abs(diff_heading) < 357) { //5 deg
         practical_stab.desired_vx = 0.5;
         practical_stab.desired_vy = 0;
       } else {

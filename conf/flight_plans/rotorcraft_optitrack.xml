@@ -21,10 +21,10 @@
   </waypoints>
   <sectors>
     <sector color="red" name="Flight_Area">
-      <corner name="FA4"/>
-      <corner name="FA3"/>
-      <corner name="FA2"/>
       <corner name="FA1"/>
+      <corner name="FA2"/>
+      <corner name="FA3"/>
+      <corner name="FA4"/>
     </sector>
   </sectors>
   <blocks>
