@@ -44,7 +44,7 @@
 PRINT_CONFIG_VAR(PRACTICAL_PHI_PGAIN);
 
 #ifndef PRACTICAL_PHI_IGAIN
-#define PRACTICAL_PHI_IGAIN 20
+#define PRACTICAL_PHI_IGAIN 100
 #endif
 PRINT_CONFIG_VAR(PRACTICAL_PHI_IGAIN);
 
@@ -54,7 +54,7 @@ PRINT_CONFIG_VAR(PRACTICAL_PHI_IGAIN);
 PRINT_CONFIG_VAR(PRACTICAL_THETA_PGAIN);
 
 #ifndef PRACTICAL_THETA_IGAIN
-#define PRACTICAL_THETA_IGAIN 20
+#define PRACTICAL_THETA_IGAIN 100
 #endif
 PRINT_CONFIG_VAR(PRACTICAL_THETA_IGAIN);
 
@@ -143,7 +143,7 @@ void guidance_h_module_run(bool_t in_flight)
     // Set the new commands
     practical_stab.cmd.phi = -(speed_err.y * practical_stab.phi_pgain
                         + practical_stab.err_vy_int * practical_stab.phi_igain);
-    practical_stab.cmd.theta = -(speed_err.x * practical_stab.theta_pgain
+    practical_stab.cmd.theta = (speed_err.x * practical_stab.theta_pgain
                         + practical_stab.err_vx_int * practical_stab.theta_igain);
   }
   else {
