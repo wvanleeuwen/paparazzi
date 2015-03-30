@@ -34,7 +34,7 @@
 #include <unistd.h>
 #include "state.h"
 #include "subsystems/abi.h"
-#include "opticflow/stabilization_opticflow.h"
+#include "stabilization_practical.h"
 #include "subsystems/datalink/downlink.h"
 
 #include "lib/v4l/v4l2.h"
@@ -185,7 +185,7 @@ static void *practical_module_calc(void *data __attribute__((unused)))
     // }
 
     // window_h = f(height,pitch, target obstacle avoidacne distance)
-    practical_integral_img_detect(&img, 200 /*window_h*/, 25 /*box size*/);
+    practical_integral_img_detect(&img, 200 /*window_h*/, 50 /*box size*/);
 
 #if PRACTICAL_DEBUG
     //RunOnceEvery(10, {
@@ -323,7 +323,7 @@ static void practical_integral_img_detect(struct image_t *img, uint16_t sub_img_
       midpoint_feature.y = y + start_point.y + feature_size/2;
 
       uint8_t sector = point_in_sector(img, midpoint_feature);
-
+#if PRACTICAL_DEBUG
       // Show points
       from.x = x + start_point.x;
       from.y = y + start_point.y;
@@ -338,15 +338,16 @@ static void practical_integral_img_detect(struct image_t *img, uint16_t sub_img_
       from.y = y + start_point.y;
       to.x = x + start_point.x;
       to.y = y + start_point.y + feature_size;
-      if(practical.u_m < diff_u && diff_u < practical.u_M && sector != 0) {
+      if((practical.u_m > diff_u || diff_u > practical.u_M) && sector != 0) {
         image_draw_line(img, &from, &to);
       }
-      if(practical.v_m < diff_v && diff_v < practical.v_M && sector != 0) {
+      if((practical.v_m > diff_v || diff_v > practical.v_M) && sector != 0) {
         image_draw_line(img, &from, &to);
       }
+#endif
 
       // compute number of features per sector
-      if((practical.y_m < diff_y && diff_y < practical.y_M) || (practical.u_m < diff_u && diff_u < practical.u_M) || (practical.v_m < diff_v && diff_v < practical.v_M)) {
+      if((practical.y_m < diff_y && diff_y < practical.y_M) || (practical.u_m > diff_u || diff_u > practical.u_M) || (practical.v_m > diff_v || diff_v > practical.v_M)) {
         num_features_in_sector[sector] += 1;
       }
 
@@ -360,6 +361,22 @@ static void practical_integral_img_detect(struct image_t *img, uint16_t sub_img_
   image_free(&int_y);
   image_free(&int_u);
   image_free(&int_v);
+
+  //do avoidance
+  if(num_features_in_sector[2] == 0) {
+    //go straight
+    yaw_rate = 0;
+  }
+  else {
+    //fly with zero velocity
+    //turn
+//     if(num_features_in_sector[1] > num_features_in_sector[3])
+//       yaw_rate = 1;//turn right
+//     else
+//       yaw_rate = -1;
+    //always turn right
+    yaw_rate = 1;//turn right
+  }
 
   DOWNLINK_SEND_OPTIC_AVOID(DefaultChannel, DefaultDevice,
                             &num_features_in_sector[0],

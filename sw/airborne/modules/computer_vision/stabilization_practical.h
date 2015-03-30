@@ -48,5 +48,6 @@ struct practical_stab_t {
   struct Int32Eulers cmd;   //< The commands that are send to the hover loop
 };
 extern struct practical_stab_t practical_stab;
+extern int32_t yaw_rate;
 
 #endif /* CV_STABILIZATION_OPTICFLOW_H_ */

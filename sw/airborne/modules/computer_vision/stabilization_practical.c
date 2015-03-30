@@ -89,6 +89,8 @@ struct practical_stab_t practical_stab = {
 };
 
 int32_t yaw_rate = 0;
+int32_t keep_yaw_rate = 0;
+int32_t keep_turning = 0;
 
 /**
  * Horizontal guidance mode enter resets the errors
@@ -136,12 +138,37 @@ void guidance_h_module_run(bool_t in_flight)
       practical_stab.cmd.psi =  stateGetNedToBodyEulers_i()->psi + diff_lim_heading;
 
       if(abs(diff_heading) < 357) { //5 deg
-        practical_stab.desired_vx = 0.5;
+        practical_stab.desired_vx = PRACTICAL_DESIRED_VX;
         practical_stab.desired_vy = 0;
       } else {
         practical_stab.desired_vx = 0;
         practical_stab.desired_vy = 0;
       }
+    }
+    else {
+
+      practical_stab.cmd.psi += yaw_rate;
+
+      if(yaw_rate == 0) {
+        if(keep_turning>0) {
+          keep_turning = keep_turning - 1;
+          practical_stab.cmd.psi += keep_yaw_rate;
+        }
+      }
+      else{
+        keep_yaw_rate = yaw_rate;
+        keep_turning = 500;
+      }
+
+
+
+      INT32_ANGLE_NORMALIZE(practical_stab.cmd.psi);
+
+      if(yaw_rate == 0)
+        practical_stab.desired_vx = PRACTICAL_DESIRED_VX;
+      else
+        practical_stab.desired_vx = 0;
+
     }
 
     // Calculate the speed in body frame
