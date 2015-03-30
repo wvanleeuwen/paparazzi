@@ -73,13 +73,12 @@
 
   <section name="IMU" prefix="IMU_">
     <!-- Magneto calibration -->
-    <define name="MAG_X_NEUTRAL" value="39"/>
-    <define name="MAG_Y_NEUTRAL" value="207"/>
-    <define name="MAG_Z_NEUTRAL" value="10"/>
-    <define name="MAG_X_SENS" value="6.78022427669" integer="16"/>
-    <define name="MAG_Y_SENS" value="7.13419326383" integer="16"/>
-    <define name="MAG_Z_SENS" value="7.46705970297" integer="16"/>
-
+    <define name="MAG_X_NEUTRAL" value="-30"/>
+    <define name="MAG_Y_NEUTRAL" value="-164"/>
+    <define name="MAG_Z_NEUTRAL" value="409"/>
+    <define name="MAG_X_SENS" value="11.5668060373" integer="16"/>
+    <define name="MAG_Y_SENS" value="11.7896310142" integer="16"/>
+    <define name="MAG_Z_SENS" value="12.0325454254" integer="16"/>
 
     <!-- Magneto current calibration -->
     <define name= "MAG_X_CURRENT_COEF" value="-0.00466524889445"/>
