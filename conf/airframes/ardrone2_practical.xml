@@ -24,7 +24,7 @@
     <subsystem name="gps" type="datalink"/>
     <subsystem name="stabilization" type="indi"/>
     <subsystem name="ahrs" type="int_cmpl_quat"/>
-    <subsystem name="ins" type="extended"/>
+    <subsystem name="ins"/>
   </firmware>
 
   <modules main_freq="512">
@@ -36,7 +36,7 @@
     <load name="practical.xml">
       <define name="PRACTICAL_DEBUG" value="FALSE"/>
       <define name="PRACTICAL_Y_m" value="-512"/>
-      <define name="PRACTICAL_Y_M" value="-90"/>
+      <define name="PRACTICAL_Y_M" value="80"/>
       <define name="PRACTICAL_U_m" value="-23"/>
       <define name="PRACTICAL_U_M" value="23"/>
       <define name="PRACTICAL_V_m" value="-28"/>

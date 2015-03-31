@@ -185,7 +185,7 @@ static void *practical_module_calc(void *data __attribute__((unused)))
     // }
 
     // window_h = f(height,pitch, target obstacle avoidacne distance)
-    practical_integral_img_detect(&img, 200 /*window_h*/, 50 /*box size*/);
+    practical_integral_img_detect(&img, 200 /*window_h*/, 25 /*box size*/);
 
 #if PRACTICAL_DEBUG
     //RunOnceEvery(10, {
@@ -307,7 +307,9 @@ static void practical_integral_img_detect(struct image_t *img, uint16_t sub_img_
       to.x = x + feature_size - 1;
       to.y = y + feature_size - 1;
 
-      int16_t diff_y = image_get_integral_sum(&int_y, &from, &to) / feature_s2 - median_y;
+//       int16_t diff_y = image_get_integral_sum(&int_y, &from, &to) / feature_s2 - median_y;
+      int16_t y_value = image_get_integral_sum(&int_y, &from, &to) / feature_s2;
+      int16_t diff_y = y_value - median_y;
 
       // Update the x for the U and V values (since we have 2 times less pixels)
       from.x /= 2;
@@ -330,7 +332,7 @@ static void practical_integral_img_detect(struct image_t *img, uint16_t sub_img_
       to.x = from.x + feature_size;
       to.y = from.y + feature_size;
 
-      if(practical.y_m < diff_y && diff_y < practical.y_M && sector != 0) {
+      if((practical.y_m < y_value) && (y_value < practical.y_M) && (sector != 0)) {
         image_draw_line(img, &from, &to);
       }
 
@@ -347,7 +349,7 @@ static void practical_integral_img_detect(struct image_t *img, uint16_t sub_img_
 #endif
 
       // compute number of features per sector
-      if((practical.y_m < diff_y && diff_y < practical.y_M) || (practical.u_m > diff_u || diff_u > practical.u_M) || (practical.v_m > diff_v || diff_v > practical.v_M)) {
+      if((practical.y_m < y_value && y_value < practical.y_M) || (practical.u_m > diff_u || diff_u > practical.u_M) || (practical.v_m > diff_v || diff_v > practical.v_M)) {
         num_features_in_sector[sector] += 1;
       }
 
@@ -371,11 +373,11 @@ static void practical_integral_img_detect(struct image_t *img, uint16_t sub_img_
     //fly with zero velocity
     //turn
 //     if(num_features_in_sector[1] > num_features_in_sector[3])
-//       yaw_rate = 1;//turn right
+//       yaw_rate = 2;//turn right
 //     else
-//       yaw_rate = -1;
+//       yaw_rate = -2;
     //always turn right
-    yaw_rate = 1;//turn right
+    yaw_rate = 2;//turn right
   }
 
   DOWNLINK_SEND_OPTIC_AVOID(DefaultChannel, DefaultDevice,
@@ -390,7 +392,7 @@ uint8_t point_in_sector(struct image_t *img, struct point_t point) {
 
   struct FloatEulers *eulers = stateGetNedToBodyEulers_f();
   uint8_t sector = 0;
-  float path_angle = 0.6981;
+  float path_angle = 0.8;//0.6981;
   struct point_t center_point;
 
   center_point.x = img->w/2;

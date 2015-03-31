@@ -124,7 +124,7 @@ void guidance_h_module_run(bool_t in_flight)
 {
   if(in_flight) {
     // Set the height
-    guidance_v_z_sp = -1 << 7;
+    guidance_v_z_sp = -1 << 8;
 
     // Some logic to change the desired speed if outside boundery
     if(!InsideFlight_Area(GetPosX(), GetPosY())) {
@@ -157,7 +157,7 @@ void guidance_h_module_run(bool_t in_flight)
       }
       else{
         keep_yaw_rate = yaw_rate;
-        keep_turning = 500;
+        keep_turning = 500/yaw_rate;
       }
 
 
