@@ -165,7 +165,7 @@ static void *practical_module_calc(void *data __attribute__((unused)))
 #endif
 
   struct image_t int_y, int_u, int_v;
-  struct image_t img;
+  
 
   uint8_t first_time = 1;
   uint16_t img_height = 200;
@@ -174,7 +174,6 @@ static void *practical_module_calc(void *data __attribute__((unused)))
   while (TRUE) {
     // Try to fetch an image    
     counter++;
-    printf("%d, %d\n", get_sys_time_msec(), last_second);
     if ((get_sys_time_msec()-last_second) > 1000) {
       printf("Count: %d\n", counter);
       counter = 0;
@@ -215,7 +214,7 @@ static void *practical_module_calc(void *data __attribute__((unused)))
     // }
 
     // window_h = f(height,pitch, target obstacle avoidacne distance)
-    practical_integral_img_detect(&img, img_height /*window_h*/, 25 /*box size*/, &int_y, &int_u, &int_v);
+    practical_integral_img_detect(&img, img_height /*window_h*/, 50 /*box size*/, &int_y, &int_u, &int_v);
 
 #if PRACTICAL_DEBUG
     //RunOnceEvery(10, {
@@ -225,11 +224,9 @@ static void *practical_module_calc(void *data __attribute__((unused)))
     //});
 #endif
 
-    
+    // Free the image
+    v4l2_image_free(practical_video_dev, &img);
   }
-
-  // Free the image
-  v4l2_image_free(practical_video_dev, &img);
 
   image_free(&int_y);
   image_free(&int_u);
