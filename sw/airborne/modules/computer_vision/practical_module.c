@@ -58,7 +58,7 @@ static void *practical_module_calc(void *data);                   //< The main c
 static void practical_agl_cb(uint8_t sender_id, float distance);  //< Callback function of the ground altitude
 static void practical_tx_img(struct image_t *img, bool_t rtp);  //< Trnsmit an image
 
-static void practical_integral_img_detect(struct image_t *img, uint16_t sub_img_h, uint16_t feature_size);
+static void practical_integral_img_detect(struct image_t *img, uint16_t sub_img_h, uint16_t feature_size, struct image_t* int_y, struct image_t* int_u, struct image_t* int_v);
 
 uint8_t point_in_sector(struct image_t *img, struct point_t point);
 uint16_t num_features_in_sector[4] = {0, 0, 0, 0};
@@ -156,11 +156,23 @@ static void *practical_module_calc(void *data __attribute__((unused)))
     IMAGE_YUV422);
 #endif
 
+  struct image_t int_y, int_u, int_v;
+  struct image_t img;
+
+  uint8_t first_time = 1;
+  uint16_t img_height = 200;
+
   /* Main loop of the optical flow calculation */
   while (TRUE) {
-    // Try to fetch an image
-    struct image_t img;
+    // Try to fetch an image    
     v4l2_image_get(practical_video_dev, &img);
+
+    if(first_time){
+      image_create(&int_y, img.w, img_height, IMAGE_INTEGRAL);
+      image_create(&int_u, img.w/2, img_height, IMAGE_INTEGRAL);
+      image_create(&int_v, img.w/2, img_height, IMAGE_INTEGRAL);
+      first_time = 0;
+    }
 
     // Calculate the colours in 2 bins (left/right)
     // uint32_t bins[2];
@@ -185,7 +197,7 @@ static void *practical_module_calc(void *data __attribute__((unused)))
     // }
 
     // window_h = f(height,pitch, target obstacle avoidacne distance)
-    practical_integral_img_detect(&img, 200 /*window_h*/, 25 /*box size*/);
+    practical_integral_img_detect(&img, img_height /*window_h*/, 25 /*box size*/, &int_y, &int_u, &int_v);
 
 #if PRACTICAL_DEBUG
     //RunOnceEvery(10, {
@@ -195,12 +207,19 @@ static void *practical_module_calc(void *data __attribute__((unused)))
     //});
 #endif
 
-    // Free the image
-    v4l2_image_free(practical_video_dev, &img);
+    
   }
+
+  // Free the image
+  v4l2_image_free(practical_video_dev, &img);
+
+  image_free(&int_y);
+  image_free(&int_u);
+  image_free(&int_v);
 
 #if PRACTICAL_DEBUG
   image_free(&img_jpeg);
+  image_free(&img_small);
 #endif
 }
 
@@ -267,7 +286,7 @@ static void practical_tx_img(struct image_t *img, bool_t use_netcat)
  * @param[in] sub_img_h The height of the bottom of the frame to search
  * @param[in] feature_size The bin size to average for object detection
  */
-static void practical_integral_img_detect(struct image_t *img, uint16_t sub_img_h, uint16_t feature_size)
+static void practical_integral_img_detect(struct image_t *img, uint16_t sub_img_h, uint16_t feature_size, struct image_t* int_y, struct image_t* int_u, struct image_t* int_v)
 {
   // note numbering of channels 0,1,2 -> Y,U,V
   // TODO: optimise computation of median and integral images in image.c
@@ -275,15 +294,10 @@ static void practical_integral_img_detect(struct image_t *img, uint16_t sub_img_
   // TODO: Optimse thresholds for each channel (a bit)
   // TODO: Don't predefine intergral image? Done now to not initialise the memory every loop, maybe can be optimsed
 
-  struct image_t int_y, int_u, int_v;
-  image_create(&int_y, img->w, sub_img_h, IMAGE_INTEGRAL);
-  image_create(&int_u, img->w/2, sub_img_h, IMAGE_INTEGRAL);
-  image_create(&int_v, img->w/2, sub_img_h, IMAGE_INTEGRAL);
-
 
   // Calculate the median values
   uint16_t sub_img_start = img->buf_size - img->w * 2 * sub_img_h;     // location of the start of sub image
-  uint8_t median_y = median(img, 0, sub_img_start, sub_img_h);
+  // uint8_t median_y = median(img, 0, sub_img_start, sub_img_h);
   uint8_t median_u = median(img, 1, sub_img_start, sub_img_h);
   uint8_t median_v = median(img, 2, sub_img_start, sub_img_h);
   //printf("Median values: %d %d %d\n", median_y, median_u, median_v);
@@ -293,10 +307,13 @@ static void practical_integral_img_detect(struct image_t *img, uint16_t sub_img_
     .x = 0,
     .y = img->h - sub_img_h
   };
-  image_get_integral(img, &int_y, &int_u, &int_v, &start_point);
+  image_get_integral(img, int_y, int_u, int_v, &start_point);
 
   // Show boxes above thresholds
   struct point_t from, to;
+  struct point_t midpoint_feature;
+  int16_t diff_u, diff_v, y_value;
+  uint8_t  sector;
   uint16_t feature_s2 = feature_size * feature_size;
   num_features_in_sector[0] = num_features_in_sector[1]  = num_features_in_sector[2] = num_features_in_sector[3] = 0;
   for (uint16_t x = 0; x <= img->w - feature_size; x += feature_size) {
@@ -307,24 +324,23 @@ static void practical_integral_img_detect(struct image_t *img, uint16_t sub_img_
       to.x = x + feature_size - 1;
       to.y = y + feature_size - 1;
 
-//       int16_t diff_y = image_get_integral_sum(&int_y, &from, &to) / feature_s2 - median_y;
-      int16_t y_value = image_get_integral_sum(&int_y, &from, &to) / feature_s2;
-      int16_t diff_y = y_value - median_y;
+//      int16_t diff_y = image_get_integral_sum(&int_y, &from, &to) / feature_s2 - median_y;
+      y_value = image_get_integral_sum(int_y, &from, &to) / feature_s2;
+      //int16_t diff_y = y_value - median_y;
 
       // Update the x for the U and V values (since we have 2 times less pixels)
       from.x /= 2;
       to.x /= 2;
 
-      int16_t diff_u = 2*image_get_integral_sum(&int_u, &from, &to) / feature_s2 - median_u;
-      int16_t diff_v = 2*image_get_integral_sum(&int_v, &from, &to) / feature_s2 - median_v;
+      diff_u = 2*image_get_integral_sum(int_u, &from, &to) / feature_s2 - median_u;
+      diff_v = 2*image_get_integral_sum(int_v, &from, &to) / feature_s2 - median_v;
 
       //printf("Point(%d, %d): %dY %dU %dV\n", x, y, avg_y - median_y, avg_u - median_u, avg_v - median_v);
 
-      struct point_t midpoint_feature;
       midpoint_feature.x = x + start_point.x + feature_size/2;
       midpoint_feature.y = y + start_point.y + feature_size/2;
 
-      uint8_t sector = point_in_sector(img, midpoint_feature);
+      sector = point_in_sector(img, midpoint_feature);
 #if PRACTICAL_DEBUG
       // Show points
       from.x = x + start_point.x;
@@ -359,10 +375,6 @@ static void practical_integral_img_detect(struct image_t *img, uint16_t sub_img_
 //       }
     }
   }
-
-  image_free(&int_y);
-  image_free(&int_u);
-  image_free(&int_v);
 
   //do avoidance
   if(num_features_in_sector[2] == 0) {
