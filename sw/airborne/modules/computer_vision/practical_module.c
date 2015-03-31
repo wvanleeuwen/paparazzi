@@ -63,11 +63,17 @@ static void practical_integral_img_detect(struct image_t *img, uint16_t sub_img_
 uint8_t point_in_sector(struct image_t *img, struct point_t point);
 uint16_t num_features_in_sector[4] = {0, 0, 0, 0};
 
+uint32_t last_second;
+static uint32_t counter;
+
 /**
  * Initialize the practical module
  */
 void practical_module_init(void)
 {
+  last_second = get_sys_time_msec();
+  counter = 0;
+
   // Subscribe to the altitude above ground level ABI messages
   AbiBindMsgAGL(PRACTICAL_AGL_ID, &practical_agl_ev, practical_agl_cb);
 
@@ -135,6 +141,8 @@ void practical_module_stop(void)
   // TODO: fix thread stop
 }
 
+
+
 /**
  * Do the main calculation
  */
@@ -164,7 +172,20 @@ static void *practical_module_calc(void *data __attribute__((unused)))
 
   /* Main loop of the optical flow calculation */
   while (TRUE) {
+<<<<<<< Updated upstream
     // Try to fetch an image    
+=======
+    counter++;
+    printf("%d, %d\n", get_sys_time_msec(), last_second);
+    if ((get_sys_time_msec()-last_second) > 1000) {
+      printf("Count: %d\n", counter);
+      counter = 0;
+      last_second = get_sys_time_msec();
+    }
+
+    // Try to fetch an image
+    struct image_t img;
+>>>>>>> Stashed changes
     v4l2_image_get(practical_video_dev, &img);
 
     if(first_time){
