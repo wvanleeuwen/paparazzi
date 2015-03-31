@@ -1,0 +1,15 @@
+<!DOCTYPE module SYSTEM "module.dtd">
+
+<module name="myvision">
+  <doc>
+    <description>bla</description>
+  </doc>
+  <header>
+    <file name="myvision.h"/>
+  </header>
+  <periodic fun="myvision_run()" freq="10" autorun="TRUE"/>
+  <makefile>
+    <file name="myvision.c"/>
+  </makefile>
+</module>
+
