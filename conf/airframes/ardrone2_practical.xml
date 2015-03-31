@@ -34,7 +34,7 @@
       <define name="VISION_DESIRED_VY" value="0.4"/>
     </load-->
     <load name="practical.xml">
-      <define name="PRACTICAL_DEBUG" value="FALSE"/>
+      <define name="PRACTICAL_DEBUG" value="TRUE"/>
       <define name="PRACTICAL_Y_m" value="-512"/>
       <define name="PRACTICAL_Y_M" value="80"/>
       <define name="PRACTICAL_U_m" value="-23"/>

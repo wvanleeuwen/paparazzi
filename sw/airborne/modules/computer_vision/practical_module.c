@@ -172,9 +172,7 @@ static void *practical_module_calc(void *data __attribute__((unused)))
 
   /* Main loop of the optical flow calculation */
   while (TRUE) {
-<<<<<<< Updated upstream
     // Try to fetch an image    
-=======
     counter++;
     printf("%d, %d\n", get_sys_time_msec(), last_second);
     if ((get_sys_time_msec()-last_second) > 1000) {
@@ -185,7 +183,6 @@ static void *practical_module_calc(void *data __attribute__((unused)))
 
     // Try to fetch an image
     struct image_t img;
->>>>>>> Stashed changes
     v4l2_image_get(practical_video_dev, &img);
 
     if(first_time){
