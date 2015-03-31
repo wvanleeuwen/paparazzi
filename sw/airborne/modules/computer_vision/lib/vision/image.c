@@ -673,30 +673,32 @@ void image_get_integral(struct image_t *img, struct image_t *int_y, struct image
   if(int_v != NULL)
     buf_v = (uint32_t *)int_v->buf;
 
-  // Loop trough the image
-  for(uint16_t x = 0; x < img->w-start->x; x++) {
-    for(uint16_t y = 0; y < img->h-start->y; y++) {
+  uint8_t x2;
 
+  // Loop trough the image
+  for(uint16_t x = 0; x < img->w-start->x; x+=2) {
+    for(uint16_t y = 0; y < img->h-start->y; y++) {
+      x2 = x/2;
       // If we want the Y integral image
-      if(buf_y != NULL) {
-        buf_y[int_y->w * y + x] = img_buf[img->w * (start->y+y) * 2 + (start->x+x) * 2 + 1]
-                            + ((x > 0)? buf_y[int_y->w * y + (x - 1)] : 0)
-                            + ((y > 0)? buf_y[int_y->w * (y - 1) + x] : 0)
-                            - ((x > 0 && y > 0)? buf_y[int_y->w * (y - 1) + (x - 1)] : 0);
+      if(buf_y != NULL && x%2 == 0) {
+        buf_y[int_y->w * y + x2] = img_buf[img->w * (start->y+y) * 2 + (start->x+x) * 2 + 1]
+                            + ((x2 > 0)? buf_y[int_y->w * y + (x2 - 1)] : 0)
+                            + ((y > 0)? buf_y[int_y->w * (y - 1) + x2] : 0)
+                            - ((x2 > 0 && y > 0)? buf_y[int_y->w * (y - 1) + (x2 - 1)] : 0);
       }
       // If we want the U integral image
       if(buf_u != NULL && x%2 == 0) {
-        buf_u[int_u->w * y + x/2] = img_buf[img->w * (start->y+y) * 2 + (start->x+x) * 2]
-                            + ((x/2 > 0)? buf_u[int_u->w * y + (x/2 - 1)] : 0)
-                            + ((y > 0)? buf_u[int_u->w * (y - 1) + x/2] : 0)
-                            - ((x/2 > 0 && y > 0)? buf_u[int_u->w * (y - 1) + (x/2 - 1)] : 0);
+        buf_u[int_u->w * y + x2] = img_buf[img->w * (start->y+y) * 2 + (start->x+x) * 2]
+                            + ((x2 > 0)? buf_u[int_u->w * y + (x2 - 1)] : 0)
+                            + ((y > 0)? buf_u[int_u->w * (y - 1) + x2] : 0)
+                            - ((x2 > 0 && y > 0)? buf_u[int_u->w * (y - 1) + (x2 - 1)] : 0);
       }
       // If we want the V integral image
       if(buf_v != NULL && x%2 == 1) {
-        buf_v[int_v->w * y + x/2] = img_buf[img->w * (start->y+y) * 2 + (start->x+x) * 2]
-                            + ((x/2 > 0)? buf_v[int_v->w * y + (x/2 - 1)] : 0)
-                            + ((y > 0)? buf_v[int_v->w * (y - 1) + x/2] : 0)
-                            - ((x/2 > 0 && y > 0)? buf_v[int_v->w * (y - 1) + (x/2 - 1)] : 0);
+        buf_v[int_v->w * y + x2] = img_buf[img->w * (start->y+y) * 2 + (start->x+x) * 2]
+                            + ((x2 > 0)? buf_v[int_v->w * y + (x2 - 1)] : 0)
+                            + ((y > 0)? buf_v[int_v->w * (y - 1) + x2] : 0)
+                            - ((x2 > 0 && y > 0)? buf_v[int_v->w * (y - 1) + (x2 - 1)] : 0);
       }
     }
   }

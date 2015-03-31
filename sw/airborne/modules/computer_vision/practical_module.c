@@ -185,11 +185,21 @@ static void *practical_module_calc(void *data __attribute__((unused)))
     v4l2_image_get(practical_video_dev, &img);
 
     if(first_time){
-      image_create(&int_y, img.w, img_height, IMAGE_INTEGRAL);
+      image_create(&int_y, img.w/2, img_height, IMAGE_INTEGRAL);
       image_create(&int_u, img.w/2, img_height, IMAGE_INTEGRAL);
       image_create(&int_v, img.w/2, img_height, IMAGE_INTEGRAL);
       first_time = 0;
     }
+
+  if(int_y.w != img_height){
+    image_free(&int_y);
+    image_free(&int_u);
+    image_free(&int_v);
+
+	image_create(&int_y, img.w, img_height, IMAGE_INTEGRAL);
+    image_create(&int_u, img.w/2, img_height, IMAGE_INTEGRAL);
+    image_create(&int_v, img.w/2, img_height, IMAGE_INTEGRAL);
+  }
 
     // Calculate the colours in 2 bins (left/right)
     // uint32_t bins[2];
