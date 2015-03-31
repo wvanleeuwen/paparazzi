@@ -37,6 +37,7 @@ struct practical_t {
   int16_t u_M;
   int16_t v_m;
   int16_t v_M;
+  uint8_t trigger_thres;
 };
 extern struct practical_t practical;
 extern uint16_t num_features_in_sector[4];

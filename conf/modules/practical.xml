@@ -20,6 +20,7 @@
         <dl_setting var="practical.u_M" module="computer_vision/practical_module" min="-512" step="1" max="512" shortname="u_M" param="PRACTICAL_U_M"/>
         <dl_setting var="practical.v_m" module="computer_vision/practical_module" min="-512" step="1" max="512" shortname="v_m" param="PRACTICAL_V_m"/>
         <dl_setting var="practical.v_M" module="computer_vision/practical_module" min="-512" step="1" max="512" shortname="v_M" param="PRACTICAL_V_M"/>
+        <dl_setting var="practical.trigger_thres" module="computer_vision/practical_module" min="0" step="1" max="255" shortname="thres" param="PRACTICAL_thres"/>
 
         <dl_setting var="practical_stab.phi_pgain" module="computer_vision/stabilization_practical" min="0" step="1" max="1000" shortname="kp_v_phi" param="PRACTICAL_PHI_PGAIN"/>
         <dl_setting var="practical_stab.phi_igain" module="computer_vision/stabilization_practical" min="0" step="1" max="1000" shortname="ki_v_phi" param="PRACTICAL_PHI_IGAIN"/>

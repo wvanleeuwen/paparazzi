@@ -63,16 +63,20 @@ static void practical_integral_img_detect(struct image_t *img, uint16_t sub_img_
 uint8_t point_in_sector(struct image_t *img, struct point_t point);
 uint16_t num_features_in_sector[4] = {0, 0, 0, 0};
 
-uint32_t last_second;
-static uint32_t counter;
+// uint32_t last_second;
+// static uint32_t counter;
 
 /**
  * Initialize the practical module
  */
 void practical_module_init(void)
 {
-  last_second = get_sys_time_msec();
-  counter = 0;
+  // last_second = get_sys_time_msec();
+  // counter = 0;
+
+#ifdef PRACTICAL_thres
+  practical.trigger_thres = PRACTICAL_thres;
+#endif 
 
   // Subscribe to the altitude above ground level ABI messages
   AbiBindMsgAGL(PRACTICAL_AGL_ID, &practical_agl_ev, practical_agl_cb);
@@ -173,12 +177,12 @@ static void *practical_module_calc(void *data __attribute__((unused)))
   /* Main loop of the optical flow calculation */
   while (TRUE) {
     // Try to fetch an image    
-    counter++;
-    if ((get_sys_time_msec()-last_second) > 1000) {
-      printf("Count: %d\n", counter);
-      counter = 0;
-      last_second = get_sys_time_msec();
-    }
+    // counter++;
+    // if ((get_sys_time_msec()-last_second) > 1000) {
+    //   printf("Count: %d\n", counter);
+    //   counter = 0;
+    //   last_second = get_sys_time_msec();
+    // }
 
     // Try to fetch an image
     struct image_t img;
@@ -196,7 +200,7 @@ static void *practical_module_calc(void *data __attribute__((unused)))
     image_free(&int_u);
     image_free(&int_v);
 
-	image_create(&int_y, img.w, img_height, IMAGE_INTEGRAL);
+	  image_create(&int_y, img.w/2, img_height, IMAGE_INTEGRAL);
     image_create(&int_u, img.w/2, img_height, IMAGE_INTEGRAL);
     image_create(&int_v, img.w/2, img_height, IMAGE_INTEGRAL);
   }
@@ -224,7 +228,7 @@ static void *practical_module_calc(void *data __attribute__((unused)))
     // }
 
     // window_h = f(height,pitch, target obstacle avoidacne distance)
-    practical_integral_img_detect(&img, img_height /*window_h*/, 50 /*box size*/, &int_y, &int_u, &int_v);
+    practical_integral_img_detect(&img, img_height /*window_h*/, 25 /*box size*/, &int_y, &int_u, &int_v);
 
 #if PRACTICAL_DEBUG
     //RunOnceEvery(10, {
@@ -322,7 +326,7 @@ static void practical_integral_img_detect(struct image_t *img, uint16_t sub_img_
 
   // Calculate the median values
   uint16_t sub_img_start = img->buf_size - img->w * 2 * sub_img_h;     // location of the start of sub image
-  // uint8_t median_y = median(img, 0, sub_img_start, sub_img_h);
+  uint8_t median_y = median(img, 0, sub_img_start, sub_img_h);
   uint8_t median_u = median(img, 1, sub_img_start, sub_img_h);
   uint8_t median_v = median(img, 2, sub_img_start, sub_img_h);
   //printf("Median values: %d %d %d\n", median_y, median_u, median_v);
@@ -337,30 +341,30 @@ static void practical_integral_img_detect(struct image_t *img, uint16_t sub_img_
   // Show boxes above thresholds
   struct point_t from, to;
   struct point_t midpoint_feature;
-  int16_t diff_u, diff_v, y_value;
+  int16_t diff_y, diff_u, diff_v;// y_value;
   uint8_t  sector;
   uint16_t feature_s2 = feature_size * feature_size;
   num_features_in_sector[0] = num_features_in_sector[1]  = num_features_in_sector[2] = num_features_in_sector[3] = 0;
   for (uint16_t x = 0; x <= img->w - feature_size; x += feature_size) {
     for (uint16_t y = 0; y <= sub_img_h - feature_size; y += feature_size) {
       // Set the from and to
-      from.x = x;
+      from.x = x/2;
       from.y = y;
-      to.x = x + feature_size - 1;
+      to.x = (x + feature_size - 1)/2;
       to.y = y + feature_size - 1;
 
-//      int16_t diff_y = image_get_integral_sum(&int_y, &from, &to) / feature_s2 - median_y;
-      y_value = image_get_integral_sum(int_y, &from, &to) / feature_s2;
+      diff_y = 2*image_get_integral_sum(int_y, &from, &to) / feature_s2 - median_y;
+      // y_value = image_get_integral_sum(int_y, &from, &to) / feature_s2;
       //int16_t diff_y = y_value - median_y;
 
       // Update the x for the U and V values (since we have 2 times less pixels)
-      from.x /= 2;
-      to.x /= 2;
+      // from.x /= 2;
+      // to.x /= 2;
 
       diff_u = 2*image_get_integral_sum(int_u, &from, &to) / feature_s2 - median_u;
       diff_v = 2*image_get_integral_sum(int_v, &from, &to) / feature_s2 - median_v;
 
-      //printf("Point(%d, %d): %dY %dU %dV\n", x, y, avg_y - median_y, avg_u - median_u, avg_v - median_v);
+      // printf("Point: %dY(%d) %dU(%d) %dV(%d) \n", diff_y, median_y, diff_u, median_u, diff_v, median_v);
 
       midpoint_feature.x = x + start_point.x + feature_size/2;
       midpoint_feature.y = y + start_point.y + feature_size/2;
@@ -373,7 +377,8 @@ static void practical_integral_img_detect(struct image_t *img, uint16_t sub_img_
       to.x = from.x + feature_size;
       to.y = from.y + feature_size;
 
-      if((practical.y_m < y_value) && (y_value < practical.y_M) && (sector != 0)) {
+      // if((practical.y_m < y_value) && (y_value < practical.y_M) && (sector != 0)) {
+      if((practical.y_m > diff_y) || (diff_y > practical.y_M) && (sector != 0)) {
         image_draw_line(img, &from, &to);
       }
 
@@ -390,7 +395,8 @@ static void practical_integral_img_detect(struct image_t *img, uint16_t sub_img_
 #endif
 
       // compute number of features per sector
-      if((practical.y_m < y_value && y_value < practical.y_M) || (practical.u_m > diff_u || diff_u > practical.u_M) || (practical.v_m > diff_v || diff_v > practical.v_M)) {
+      // if((practical.y_m < y_value && y_value < practical.y_M) || (practical.u_m > diff_u || diff_u > practical.u_M) || (practical.v_m > diff_v || diff_v > practical.v_M)) {
+      if((practical.y_m > diff_y || diff_y > practical.y_M) || (practical.u_m > diff_u || diff_u > practical.u_M) || (practical.v_m > diff_v || diff_v > practical.v_M)) {
         num_features_in_sector[sector] += 1;
       }
 
@@ -402,7 +408,7 @@ static void practical_integral_img_detect(struct image_t *img, uint16_t sub_img_
   }
 
   //do avoidance
-  if(num_features_in_sector[2] == 0) {
+  if(num_features_in_sector[2] < practical.trigger_thres) {
     //go straight
     yaw_rate = 0;
   }
@@ -415,6 +421,7 @@ static void practical_integral_img_detect(struct image_t *img, uint16_t sub_img_
 //       yaw_rate = -2;
     //always turn right
     yaw_rate = 2;//turn right
+    // printf("Turn...\n");
   }
 
   DOWNLINK_SEND_OPTIC_AVOID(DefaultChannel, DefaultDevice,

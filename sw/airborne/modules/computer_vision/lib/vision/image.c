@@ -673,10 +673,10 @@ void image_get_integral(struct image_t *img, struct image_t *int_y, struct image
   if(int_v != NULL)
     buf_v = (uint32_t *)int_v->buf;
 
-  uint8_t x2;
+  uint16_t x2;
 
   // Loop trough the image
-  for(uint16_t x = 0; x < img->w-start->x; x+=2) {
+  for(uint16_t x = 0; x < img->w-start->x; x++) {
     for(uint16_t y = 0; y < img->h-start->y; y++) {
       x2 = x/2;
       // If we want the Y integral image
