@@ -34,14 +34,14 @@
       <define name="VISION_DESIRED_VY" value="0.4"/>
     </load-->
     <load name="practical.xml">
-      <define name="PRACTICAL_DEBUG" value="TRUE"/>
+      <define name="PRACTICAL_DEBUG" value="FALSE"/>
       <define name="PRACTICAL_Y_m" value="-60"/>
       <define name="PRACTICAL_Y_M" value="512"/>
       <define name="PRACTICAL_U_m" value="-23"/>
       <define name="PRACTICAL_U_M" value="23"/>
       <define name="PRACTICAL_V_m" value="-28"/>
       <define name="PRACTICAL_V_M" value="28"/>
-      <define name="PRACTICAL_thres" value="0"/>
+      <define name="PRACTICAL_thres" value="100"/>
     </load>
     <!--load name="video_rtp_stream.xml">
       <define name="VIEWVIDEO_DEVICE" value="/dev/video2"/>
