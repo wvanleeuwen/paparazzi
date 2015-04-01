@@ -25,6 +25,25 @@
  * Actuator driver for the bebop
  */
 
+
+#include <sys/ioctl.h>
+#define PWM_MAGIC 'p'
+typedef struct { unsigned int val[4]; } __attribute__ ((packed)) pwm_delos_quadruplet;
+#define PWM_DELOS_SET_RATIOS _IOR(PWM_MAGIC, 9,  pwm_delos_quadruplet*)
+#define PWM_DELOS_SET_SPEEDS _IOR(PWM_MAGIC, 10, pwm_delos_quadruplet*)
+#define PWM_DELOS_SET_CTRL   _IOR(PWM_MAGIC, 11, unsigned int)
+#define PWM_DELOS_REQUEST    _IO(PWM_MAGIC, 12)
+
+#define   PWM_NB_BITS   (9)
+
+/* PWM can take value between 0 and 511 */
+#ifndef PWM_TOTAL_RANGE
+#define   PWM_TOTAL_RANGE              (1<<PWM_NB_BITS)
+#endif
+
+#define   PWM_REG_RATIO_PRECISION_MASK (PWM_NB_BITS<<16)
+#define   PWM_REG_SATURATION (PWM_REG_RATIO_PRECISION_MASK|PWM_TOTAL_RANGE)
+
 #include "subsystems/actuators.h"
 #include "subsystems/actuators/motor_mixing.h"
 #include "subsystems/electrical.h"
@@ -57,22 +76,72 @@ static void send_actuators_bebop(struct transport_tx *trans, struct link_device 
 uint32_t led_hw_values;
 struct ActuatorsBebop actuators_bebop;
 static uint8_t actuators_bebop_checksum(uint8_t *bytes, uint8_t size);
+static int actuators_fd;
+
+// Start/stop PWM
+enum{
+        SiP6_PWM0_START = (1<<0),
+        SiP6_PWM1_START = (1<<1),
+        SiP6_PWM2_START = (1<<2),
+        SiP6_PWM3_START = (1<<3),
+};
 
 void actuators_bebop_init(void)
 {
   /* Initialize the I2C connection */
-  actuators_bebop.i2c_trans.slave_addr = ACTUATORS_BEBOP_ADDR;
+  /*actuators_bebop.i2c_trans.slave_addr = ACTUATORS_BEBOP_ADDR;
   actuators_bebop.i2c_trans.status = I2CTransDone;
   actuators_bebop.led = 0;
 
 #if PERIODIC_TELEMETRY
   register_periodic_telemetry(DefaultPeriodic, "ACTUATORS_BEBOP", send_actuators_bebop);
-#endif
+#endif*/
+
+  actuators_fd = open("/dev/pwm");
+
+  pwm_delos_quadruplet m = {1, 1, 1, 1};
+  int ret = ioctl(actuators_fd, PWM_DELOS_SET_SPEEDS, &m);
+  printf("Return Speeds: %d\n", ret);
+
+  actuators_bebop_commit();
+
+  unsigned int control_reg = (SiP6_PWM0_START|SiP6_PWM1_START|SiP6_PWM2_START|SiP6_PWM3_START);
+  //unsigned int control_reg = (0);
+
+  ret = ioctl(actuators_fd, PWM_DELOS_SET_CTRL, &control_reg);
+  printf("Return control: %d\n", ret);
 }
 
 void actuators_bebop_commit(void)
 {
-  // Receive the status
+  pwm_delos_quadruplet m;
+
+  m.val[0] = actuators_bebop.rpm_ref[0] & 0xffff;
+  m.val[1] = actuators_bebop.rpm_ref[1] & 0xffff;
+  m.val[2] = actuators_bebop.rpm_ref[2] & 0xffff;
+  m.val[3] = actuators_bebop.rpm_ref[3] & 0xffff;
+
+
+  if( actuators_bebop.rpm_ref[0] > (PWM_TOTAL_RANGE) ) { m.val[0] = PWM_REG_SATURATION; }
+  if( actuators_bebop.rpm_ref[1] > (PWM_TOTAL_RANGE) ) { m.val[1] = PWM_REG_SATURATION; }
+  if( actuators_bebop.rpm_ref[2] > (PWM_TOTAL_RANGE) ) { m.val[2] = PWM_REG_SATURATION; }
+  if( actuators_bebop.rpm_ref[3] > (PWM_TOTAL_RANGE) ) { m.val[3] = PWM_REG_SATURATION; }
+
+  if( actuators_bebop.rpm_ref[0] < 0 ) { m.val[0] = 0; }
+  if( actuators_bebop.rpm_ref[1] < 0 ) { m.val[1] = 0; }
+  if( actuators_bebop.rpm_ref[2] < 0 ) { m.val[2] = 0; }
+  if( actuators_bebop.rpm_ref[3] < 0 ) { m.val[3] = 0; }
+
+  /* The upper 16-bit word of the ratio register contains the number
+   * of bits used to code the ratio command  */
+  m.val[0] |= PWM_REG_RATIO_PRECISION_MASK;
+  m.val[1] |= PWM_REG_RATIO_PRECISION_MASK;
+  m.val[2] |= PWM_REG_RATIO_PRECISION_MASK;
+  m.val[3] |= PWM_REG_RATIO_PRECISION_MASK;
+
+  int ret = ioctl(actuators_fd, PWM_DELOS_SET_RATIOS, &m);
+  RunOnceEvery(512, printf("Return ratios: %d (ratios: %d %d %d %d, pwm: %d %d %d %d\n", ret, m.val[0], m.val[1], m.val[2], m.val[3], actuators_bebop.rpm_ref[0], actuators_bebop.rpm_ref[1], actuators_bebop.rpm_ref[2], actuators_bebop.rpm_ref[3]));
+  /*// Receive the status
   actuators_bebop.i2c_trans.buf[0] = ACTUATORS_BEBOP_GET_OBS_DATA;
   i2c_transceive(&i2c1, &actuators_bebop.i2c_trans, actuators_bebop.i2c_trans.slave_addr, 1, 13);
 
@@ -119,7 +188,7 @@ void actuators_bebop_commit(void)
     actuators_bebop.i2c_trans.buf[8] = actuators_bebop.rpm_ref[3] & 0xFF;
     actuators_bebop.i2c_trans.buf[9] = 0x00; //UNK?
 
-    actuators_bebop.i2c_trans.buf[10] = actuators_bebop_checksum((uint8_t *)actuators_bebop.i2c_trans.buf, 9);
+    actuators_be2.bop.i2c_trans.buf[10] = actuators_bebop_checksum((uint8_t *)actuators_bebop.i2c_trans.buf, 9);
     i2c_transmit(&i2c1, &actuators_bebop.i2c_trans, actuators_bebop.i2c_trans.slave_addr, 11);
   }
 
@@ -130,10 +199,10 @@ void actuators_bebop_commit(void)
     i2c_transmit(&i2c1, &actuators_bebop.i2c_trans, actuators_bebop.i2c_trans.slave_addr, 2);
 
     actuators_bebop.led = led_hw_values & 0x3;
-  }
+  }*/
 }
 
-static uint8_t actuators_bebop_checksum(uint8_t *bytes, uint8_t size)
+/*static uint8_t actuators_bebop_checksum(uint8_t *bytes, uint8_t size)
 {
   uint8_t checksum = 0;
   for (int i = 0; i < size; i++) {
@@ -141,7 +210,7 @@ static uint8_t actuators_bebop_checksum(uint8_t *bytes, uint8_t size)
   }
 
   return checksum;
-}
+}*/
 
 /*static void actuators_bebop_saturate(void) {
   // Find the lowest and highest commands
