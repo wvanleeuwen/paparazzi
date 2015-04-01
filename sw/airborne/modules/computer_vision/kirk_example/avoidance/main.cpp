@@ -64,7 +64,7 @@ int get_obs_response( Mat integral_img, uint16_t median_val)
 {
 	int sub_area, resp;
 	//whole_area = get_sum( x_response - border, y_response, x_response+feature_size+border, y_response+feature_size);
-	sub_area = get_sum( integral_img, x_response, y_response, x_response+feature_size, y_response+feature_size);
+	sub_area = get_sum( integral_img, x_response, y_response, x_response+feature_size-1, y_response+feature_size-1);
 
 /*	printf("px_inner: %d \n",px_inner);
 	printf("whole_area: %d \n",whole_area);
@@ -170,6 +170,18 @@ int median (Mat image)
 	return torben(image.data,image.rows*image.cols);
 }
 
+void MyLine( Mat img, Point start, Point end )
+{
+  int thickness = 3;
+  int lineType = 8;
+  line( img,
+        start,
+        end,
+        Scalar( 255, 0, 0 ),
+        thickness,
+        lineType );
+}
+
 int main( int argc, const char** argv )
 {
 	int8_t response0, response1, response2;
@@ -204,7 +216,7 @@ int main( int argc, const char** argv )
 
     //cvtColor(img,img,CV_BGR2GRAY);
 
-    int sub_img_h = 301;
+    int sub_img_h = 200;
     Mat sub_image;
     cvtColor(img(Rect(0, img.rows - sub_img_h, img.cols, sub_img_h)), sub_image, CV_RGB2YCrCb);
     //cvtColor(img(Rect(0, img.rows - sub_img_h, img.cols, sub_img_h)), sub_image, CV_RGB2HSV);
@@ -235,7 +247,7 @@ int main( int argc, const char** argv )
 
     // printf("whole_area = %d width: %d, height: %d\n", whole_area, integral_image0.cols, integral_image0.rows);
 
-    feature_size = 25;
+    feature_size = 20;
     border = feature_size*2;
 
     px_inner = feature_size * feature_size;
@@ -246,14 +258,14 @@ int main( int argc, const char** argv )
     //cvtColor(img, img, CV_RGB2HSV);
     split(img, channels);
 
-    for (y_response = 0; y_response < integral_image0.rows - feature_size; y_response+=feature_size){
-      for (x_response = 0; x_response < integral_image0.cols - feature_size; x_response+=feature_size){
+    for (y_response = 0; y_response <= integral_image0.rows - feature_size; y_response+=feature_size){
+      for (x_response = 0; x_response <= integral_image0.cols - feature_size; x_response+=feature_size){
 
     	  	response0 = get_obs_response(integral_image0, median0);
 			response1 = get_obs_response(integral_image1, median2);
 			response2 = get_obs_response(integral_image2, median2);
 
-			printf("resp: %d %d %d\n", response0, response1, response2);
+			//printf("resp: %d %d %d\n", response0, response1, response2);
         if (response0 < -16){
 			// printf("Total: %d \n",floor(sqrt(pow(response0,2) + pow(response1,2) + pow(response2,2))));
           rectangle( channels[0],
@@ -284,23 +296,34 @@ int main( int argc, const char** argv )
                  8 );
         }
       }
-    }
+    }    
 
-    
 
     imshow("MyWindow", channels[0]); //display the image which is stored in the 'img' in the "MyWindow" window
+	sprintf(file, "Output/img_%04da.jpg", i);
+	if (argc > 3) imwrite(file, channels[0]);
     waitKey(0); //wait infinite time for a keypress
 
 	imshow("MyWindow", channels[1]); //display the image which is stored in the 'img' in the "MyWindow" window
+	sprintf(file, "Output/img_%04db.jpg", i);
+	if (argc > 3) imwrite(file, channels[1]);
     waitKey(0); //wait infinite time for a keypress
 
 	imshow("MyWindow", channels[2]); //display the image which is stored in the 'img' in the "MyWindow" window
+	sprintf(file, "Output/img_%04dc.jpg", i);
+	if (argc > 3) imwrite(file, channels[2] );
     waitKey(0); //wait infinite time for a keypress
 
 	Mat fin_img;
 	merge(channels, fin_img);
 
+	cvtColor(fin_img, fin_img, CV_YCrCb2RGB);
+
+//	MyLine( fin_img, Point( img.cols*1/4, img.rows ),  Point( img.cols*1/4 + img.rows/2/sub_img_h, img.rows - sub_img_h ) );
+
 	imshow("MyWindow", fin_img); //display the image which is stored in the 'img' in the "MyWindow" window
+	sprintf(file, "Output/img_%04d.jpg", i);
+	if (argc > 3) imwrite(file, fin_img );
     waitKey(0); //wait infinite time for a keypress
 	}
 
