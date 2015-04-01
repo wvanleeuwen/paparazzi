@@ -26,8 +26,8 @@ IMU_SRCS    += peripherals/mpu60x0.c peripherals/mpu60x0_i2c.c
 IMU_SRCS		+= peripherals/ak8963.c
 
 
-BEBOP_MAG_I2C_DEV ?= i2c1
-BEBOP_MPU_I2C_DEV ?= i2c2
+BEBOP_MAG_I2C_DEV ?= i2c0
+BEBOP_MPU_I2C_DEV ?= i2c0
 
 BEBOP_MAG_I2C_DEV_UPPER=$(shell echo $(BEBOP_MAG_I2C_DEV) | tr a-z A-Z)
 BEBOP_MAG_I2C_DEV_LOWER=$(shell echo $(BEBOP_MAG_I2C_DEV) | tr A-Z a-z)

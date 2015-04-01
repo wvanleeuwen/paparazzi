@@ -35,7 +35,7 @@
 PRINT_CONFIG_VAR(BEBOP_MAG_I2C_DEV)
 
 #ifndef BEBOP_MPU_I2C_DEV
-#define BEBOP_MPU_I2C_DEV i2c2
+#define BEBOP_MPU_I2C_DEV i2c0
 #endif
 PRINT_CONFIG_VAR(BEBOP_MPU_I2C_DEV)
 
@@ -89,7 +89,7 @@ void imu_impl_init(void)
   imu_bebop.mpu.config.accel_range = BEBOP_ACCEL_RANGE;
 
   /* AKM8963 */
-  ak8963_init(&imu_bebop.ak, &(BEBOP_MAG_I2C_DEV), AK8963_ADDR >> 1);
+  //ak8963_init(&imu_bebop.ak, &(BEBOP_MAG_I2C_DEV), AK8963_ADDR >> 1);
 }
 
 /**
@@ -102,7 +102,7 @@ void imu_periodic(void)
   mpu60x0_i2c_periodic(&imu_bebop.mpu);
 
   // AKM8963
-  ak8963_periodic(&imu_bebop.ak);
+  //ak8963_periodic(&imu_bebop.ak);
 }
 
 /**
@@ -127,7 +127,7 @@ void imu_bebop_event(void)
   }
 
   /* AKM8963 event task */
-  ak8963_event(&imu_bebop.ak);
+  /*ak8963_event(&imu_bebop.ak);
 
   if (imu_bebop.ak.data_available) {
     //32760 to -32760
@@ -135,5 +135,5 @@ void imu_bebop_event(void)
 
     imu_bebop.ak.data_available = FALSE;
     imu_bebop.mag_valid = TRUE;
-  }
+  }*/
 }

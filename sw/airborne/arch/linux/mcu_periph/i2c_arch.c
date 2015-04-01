@@ -46,8 +46,6 @@ bool_t i2c_idle(struct i2c_periph *p __attribute__((unused)))
   return TRUE;
 }
 
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wcast-qual"
 bool_t i2c_submit(struct i2c_periph *p, struct i2c_transaction *t)
 {
   int file = (int)p->reg_addr;
@@ -59,6 +57,7 @@ bool_t i2c_submit(struct i2c_periph *p, struct i2c_transaction *t)
   switch (t->type) {
       // Just transmitting
     case I2CTransTx:
+      printf("Writing...\n");
       if (write(file, (uint8_t *)t->buf, t->len_w) < 0) {
         t->status = I2CTransFailed;
         return TRUE;
@@ -66,6 +65,7 @@ bool_t i2c_submit(struct i2c_periph *p, struct i2c_transaction *t)
       break;
       // Just reading
     case I2CTransRx:
+      printf("Reading...\n");
       if (read(file, (uint8_t *)t->buf, t->len_r) < 0) {
         t->status = I2CTransFailed;
         return TRUE;
@@ -73,6 +73,7 @@ bool_t i2c_submit(struct i2c_periph *p, struct i2c_transaction *t)
       break;
       // First Transmit and then read
     case I2CTransTxRx:
+      printf("Write+read...\n");
       if (write(file, (uint8_t *)t->buf, t->len_w) < 0 ||
           read(file, (uint8_t *)t->buf, t->len_r) < 0) {
         t->status = I2CTransFailed;
@@ -82,12 +83,12 @@ bool_t i2c_submit(struct i2c_periph *p, struct i2c_transaction *t)
     default:
       break;
   }
+  printf("Success!\n");
 
   // Successfull transfer
   t->status = I2CTransSuccess;
   return TRUE;
 }
-#pragma GCC diagnostic pop
 
 
 #if USE_I2C0
@@ -97,6 +98,7 @@ void i2c0_hw_init(void)
 {
   i2c1.reg_addr = (void *)open("/dev/i2c-0", O_RDWR);
   i2c0.errors = &i2c0_errors;
+  printf("Opened device %p\n", i2c1.reg_addr);
 
   /* zeros error counter */
   ZEROS_ERR_COUNTER(i2c0_errors);

@@ -2,21 +2,21 @@
 #
 # bebop.makefile
 #
-# http://wiki.paparazziuav.org/wiki/Bebop
+# http://wiki.paparazziuav.org/wiki/RollingSpider
 #
 
-BOARD=bebop
+BOARD=rollingspider
 BOARD_CFG=\"boards/$(BOARD).h\"
 
 ARCH=linux
 $(TARGET).ARCHDIR = $(ARCH)
-# include conf/Makefile.bebop (with specific upload rules) instead of only Makefile.linux:
-ap.MAKEFILE = bebop
+# include conf/Makefile.rollingspider (with specific upload rules) instead of only Makefile.linux:
+ap.MAKEFILE = rollingspider
 
 # -----------------------------------------------------------------------
 USER=foobar
 HOST?=192.168.2.1
-SUB_DIR=/
+SUB_DIR=internal_000/paparazzi
 FTP_DIR=/data/ftp
 TARGET_DIR=$(FTP_DIR)/$(SUB_DIR)
 # -----------------------------------------------------------------------

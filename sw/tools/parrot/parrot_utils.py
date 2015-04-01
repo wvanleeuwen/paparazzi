@@ -46,7 +46,7 @@ def split_into_path_and_file(name):
 # Execute a command
 def execute_command(tn, command):
     tn.write(command + '\n')
-    return tn.read_until('# ')[len(command) + 2:-4]
+    return tn.read_until('$ ')[len(command) + 2:-4]
 
 # Check the version
 def check_version(tn, directory):
@@ -93,7 +93,7 @@ def connect(host):
         tn = telnetlib.Telnet(host, timeout=3)
         ftp = FTP(host)
         ftp.login()
-        tn.read_until('# ')
+        tn.read_until('> ')
         return tn, ftp
     except:
         print('Could not connect to Parrot UAV (host: ' + host + ')')

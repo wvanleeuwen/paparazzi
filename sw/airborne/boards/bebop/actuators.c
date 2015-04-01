@@ -118,10 +118,8 @@ void actuators_bebop_commit(void)
     actuators_bebop.i2c_trans.buf[7] = actuators_bebop.rpm_ref[3] >> 8;
     actuators_bebop.i2c_trans.buf[8] = actuators_bebop.rpm_ref[3] & 0xFF;
     actuators_bebop.i2c_trans.buf[9] = 0x00; //UNK?
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wcast-qual"
+
     actuators_bebop.i2c_trans.buf[10] = actuators_bebop_checksum((uint8_t *)actuators_bebop.i2c_trans.buf, 9);
-#pragma GCC diagnostic pop
     i2c_transmit(&i2c1, &actuators_bebop.i2c_trans, actuators_bebop.i2c_trans.slave_addr, 11);
   }
 

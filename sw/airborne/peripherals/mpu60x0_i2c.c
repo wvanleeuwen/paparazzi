@@ -100,10 +100,7 @@ void mpu60x0_i2c_event(struct Mpu60x0_I2c *mpu)
           /* the buffer is volatile, since filled from ISR
            * but we know it's ok to use it here so we silence the warning
            */
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wcast-qual"
           memcpy(mpu->data_ext, (uint8_t *) & (mpu->i2c_trans.buf[15]), mpu->config.nb_bytes - 15);
-#pragma GCC diagnostic pop
         }
 
         mpu->data_available = TRUE;
