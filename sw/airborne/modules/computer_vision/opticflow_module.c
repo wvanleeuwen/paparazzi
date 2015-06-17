@@ -203,6 +203,10 @@ static void *opticflow_module_calc(void *data __attribute__((unused)))
   // Create a new JPEG image
   struct image_t img_jpeg;
   image_create(&img_jpeg, opticflow_dev->w, opticflow_dev->h, IMAGE_JPEG);
+
+  // Create the socket connection
+  struct UdpSocket video_sock;
+  udp_socket_create(&video_sock, STRINGIFY(VIEWVIDEO_HOST), VIEWVIDEO_PORT_OUT, -1, VIEWVIDEO_BROADCAST);
 #endif
 
   /* Main loop of the optical flow calculation */
@@ -230,7 +234,7 @@ static void *opticflow_module_calc(void *data __attribute__((unused)))
 #if OPTICFLOW_DEBUG
     jpeg_encode_image(&img, &img_jpeg, 70, FALSE);
     rtp_frame_send(
-      &VIEWVIDEO_DEV,           // UDP device
+      &video_sock,              // UDP socket
       &img_jpeg,
       0,                        // Format 422
       70, // Jpeg-Quality

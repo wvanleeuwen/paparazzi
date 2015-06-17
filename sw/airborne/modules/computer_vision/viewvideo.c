@@ -149,7 +149,20 @@ static void *viewvideo_thread(void *data __attribute__((unused)))
 
   // Create the JPEG encoded image
   struct image_t img_jpeg;
-  image_create(&img_jpeg, img_small.w, img_small.h, IMAGE_JPEG);
+  image_create(&img_jpeg, img_small.w/2, img_small.h, IMAGE_JPEG);
+
+  // Blob detection
+  struct image_t img_blob, img_contour;
+  image_create(&img_blob, img_small.w/2, img_small.h, IMAGE_LABELS);
+  image_create(&img_contour, img_small.w, img_small.h, IMAGE_YUV422);
+  struct image_label_t labels[512];
+  struct image_filter_t filter;
+  filter.y_min = 0;
+  filter.y_max = 110;
+  filter.u_min = 50;
+  filter.u_max = 205;
+  filter.v_min = 50;
+  filter.v_max = 205;
 
   // Initialize timing
   uint32_t microsleep = (uint32_t)(1000000. / (float)viewvideo.fps);
@@ -177,6 +190,77 @@ static void *viewvideo_thread(void *data __attribute__((unused)))
     // Wait for a new frame (blocking)
     struct image_t img;
     v4l2_image_get(viewvideo.dev, &img);
+
+
+
+
+
+
+
+    // Do a blob detection
+    uint16_t labels_cnt = 512;
+    image_labeling(&img, &img_blob, &filter, 1, labels, &labels_cnt);
+
+    // Show blobs
+    //uint16_t *img_buf = (uint16_t *)img_blob.buf;
+    /*for(uint16_t i = 0; i < img_blob.buf_size/2; i++) {
+      if(img_buf[i] != 0xFFFF && labels[labels[img_buf[i]].id].pixel_cnt > 20*20 && labels[labels[img_buf[i]].id].pixel_cnt < 200*200) {
+        img_buf[i] = labels[img_buf[i]].id;
+      } else {
+        img_buf[i] = 0xFFFF;
+      }
+    }*/
+
+    // Draw contour
+    memset(img_contour.buf, 0x00, img_contour.buf_size);
+    //img_buf = (uint16_t *)img_contour.buf;
+    uint16_t cnt = 0;
+    for(uint16_t i = 0; i < labels_cnt ; i++) {
+      if(labels[i].id == i && labels[i].pixel_cnt > 20*20 && labels[i].pixel_cnt < 200*200) {
+        struct image_label_t *label = &labels[i];
+        image_contour(&img_blob, labels, label);
+
+
+        // Make it visible
+        /*for(uint16_t c = 0; c < label->contour_cnt; c++) {
+          //printf("X: %d Y; %d\n", label->contour[c].x, label->contour[c].y);
+          img_buf[label->contour[c].y*img_blob.w + label->contour[c].x] = c;
+        }*/
+        if(label->contour_cnt > 0 && image_square(label)) {
+          cnt++;
+          image_draw_line(&img_contour, &label->contour[label->corners[0]], &label->contour[label->corners[1]]);
+          image_draw_line(&img_contour, &label->contour[label->corners[1]], &label->contour[label->corners[2]]);
+          image_draw_line(&img_contour, &label->contour[label->corners[2]], &label->contour[label->corners[3]]);
+          image_draw_line(&img_contour, &label->contour[label->corners[3]], &label->contour[label->corners[0]]);
+          uint16_t code = 0;
+          float help = image_code(&img_blob, label, &code);
+          if(help > 0.8)
+            printf("Code(%d): %d %f\n", label->id, code, help);
+        }
+      }
+    }
+    printf("Squares: %d\n", cnt);
+
+    /*for(uint16_t i = 0; i < img_blob.buf_size/2; i++) {
+      if(img_buf[i] != 0xFFFF) {
+        printf("%3d ", img_buf[i]);
+      } else {
+        printf("  X ");
+      }
+      if(i % img_blob.w == img_blob.w-1)
+        printf("\n");
+    }
+    printf("\n");*/
+
+    image_to_grayscale(&img_contour, &img);
+
+
+
+
+
+
+
+
 
     // Check if we need to take a shot
     if (viewvideo.take_shot) {

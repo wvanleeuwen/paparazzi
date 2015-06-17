@@ -42,22 +42,22 @@
 
 // Camera parameters (defaults are from an ARDrone 2)
 #ifndef OPTICFLOW_FOV_W
-#define OPTICFLOW_FOV_W 0.89360857702
+#define OPTICFLOW_FOV_W 1.5967
 #endif
 PRINT_CONFIG_VAR(OPTICFLOW_FOV_W)
 
 #ifndef OPTICFLOW_FOV_H
-#define OPTICFLOW_FOV_H 0.67020643276
+#define OPTICFLOW_FOV_H 0.9453
 #endif
 PRINT_CONFIG_VAR(OPTICFLOW_FOV_H)
 
 #ifndef OPTICFLOW_FX
-#define OPTICFLOW_FX 343.1211
+#define OPTICFLOW_FX 311.8124
 #endif
 PRINT_CONFIG_VAR(OPTICFLOW_FX)
 
 #ifndef OPTICFLOW_FY
-#define OPTICFLOW_FY 348.5053
+#define OPTICFLOW_FY 312.9071
 #endif
 PRINT_CONFIG_VAR(OPTICFLOW_FY)
 
@@ -217,22 +217,24 @@ void opticflow_calc_frame(struct opticflow_t *opticflow, struct opticflow_state_
     result->flow_y += vectors[result->tracked_cnt / 2 + 1].flow_y;
     result->flow_x /= 3;
     result->flow_y /= 3;
+
   } else {
     // Take the median point
     result->flow_x = vectors[result->tracked_cnt / 2].flow_x;
     result->flow_y = vectors[result->tracked_cnt / 2].flow_y;
   }
+  result->flow_y = -result->flow_y;
 
   // Flow Derotation
   float diff_flow_x = (state->phi - opticflow->prev_phi) * img->w / OPTICFLOW_FOV_W;
   float diff_flow_y = (state->theta - opticflow->prev_theta) * img->h / OPTICFLOW_FOV_H;
   result->flow_der_x = result->flow_x - diff_flow_x * opticflow->subpixel_factor;
-  result->flow_der_y = result->flow_y - diff_flow_y * opticflow->subpixel_factor;
+  result->flow_der_y = result->flow_y + diff_flow_y * opticflow->subpixel_factor;
   opticflow->prev_phi = state->phi;
   opticflow->prev_theta = state->theta;
 
   // Velocity calculation
-  result->vel_x = -result->flow_der_x * result->fps * state->agl/ opticflow->subpixel_factor * img->w / OPTICFLOW_FX;
+  result->vel_x =  result->flow_der_x * result->fps * state->agl/ opticflow->subpixel_factor * img->w / OPTICFLOW_FX;
   result->vel_y =  result->flow_der_y * result->fps * state->agl/ opticflow->subpixel_factor * img->h / OPTICFLOW_FY;
 
   // *************************************************************************************
