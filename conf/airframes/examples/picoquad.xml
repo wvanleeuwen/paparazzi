@@ -45,10 +45,10 @@
   </modules>
 
   <servos driver="Pwm">
-    <servo name="FL" no="0" min="1000" neutral="1100" max="1900"/>
-    <servo name="FR" no="1" min="1000" neutral="1100" max="1900"/>
-    <servo name="BR" no="2" min="1000" neutral="1100" max="1900"/>
-    <servo name="BL" no="3" min="1000" neutral="1100" max="1900"/>
+    <servo name="FL" no="0" min="900" neutral="1000" max="1900"/>
+    <servo name="FR" no="1" min="900" neutral="1000" max="1900"/>
+    <servo name="BR" no="2" min="900" neutral="1000" max="1900"/>
+    <servo name="BL" no="3" min="900" neutral="1000" max="1900"/>
   </servos>
 
   <commands>
