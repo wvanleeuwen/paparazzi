@@ -13,7 +13,7 @@
   <firmware name="rotorcraft">
     <target name="ap" board="picoquad_1.0"/>
 
-    <subsystem name="radio_control" type="datalink"/>
+    <subsystem name="radio_control" type="ppm"/>
     <subsystem name="motor_mixing"/>
     <subsystem name="actuators"     type="pwm">
       <define name="SERVO_HZ" value="400"/>
