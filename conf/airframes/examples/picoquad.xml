@@ -36,6 +36,7 @@
 
   <firmware name="test_progs">
     <target name="test_sys_time_timer" board="picoquad_1.0"/>
+    <target name="test_telemetry" board="picoquad_1.0"/>
   </firmware>
 
 
