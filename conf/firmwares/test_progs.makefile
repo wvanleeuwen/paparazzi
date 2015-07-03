@@ -119,7 +119,7 @@ ifeq ($(BOARD), cc3d)
 LED_DEFINES = -DLED_BLUE=1
 endif
 ifeq ($(BOARD), picoquad)
-LED_DEFINES = -DLED_RED=1
+LED_DEFINES = -DLED_GREEN=1
 endif
 LED_DEFINES ?= -DLED_RED=2 -DLED_GREEN=3
 

@@ -29,6 +29,11 @@ DFU_ADDR = 0x8004000
 DFU_PRODUCT = Lisa/Lia
 endif
 
+#
+# default IMU
+#
+IMU_MPU9250_SPI_DEV ?= spi2
+IMU_MPU9250_SPI_SLAVE_IDX ?= SPI_SLAVE0
 
 #
 # default LED configuration

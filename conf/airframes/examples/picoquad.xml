@@ -20,7 +20,7 @@
     </subsystem>
 
     <subsystem name="telemetry"     type="transparent"/>
-    <subsystem name="imu"           type="lisa_mx_v2.1"/>
+    <subsystem name="imu"           type="mpu9250_spi"/>
     <subsystem name="gps"           type="datalink"/>
     <subsystem name="stabilization" type="int_quat"/>
     <subsystem name="ahrs"          type="float_mlkf">
