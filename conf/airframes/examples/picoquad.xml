@@ -16,7 +16,8 @@
     <subsystem name="radio_control" type="ppm"/>
     <subsystem name="motor_mixing"/>
     <subsystem name="actuators"     type="pwm">
-      <define name="SERVO_HZ" value="400"/>
+      <define name="PWM_BASE_FREQ" value="36000000"/>
+      <define name="SERVO_HZ" value="36000"/>
     </subsystem>
 
     <subsystem name="telemetry"     type="transparent"/>
@@ -37,6 +38,7 @@
   <firmware name="test_progs">
     <target name="test_sys_time_timer" board="picoquad_1.0"/>
     <target name="test_telemetry" board="picoquad_1.0"/>
+    <target name="test_actuators_pwm" board="picoquad_1.0"/>
   </firmware>
 
 
@@ -46,10 +48,10 @@
   </modules>
 
   <servos driver="Pwm">
-    <servo name="FL" no="0" min="900" neutral="1000" max="1900"/>
-    <servo name="FR" no="1" min="900" neutral="1000" max="1900"/>
-    <servo name="BR" no="2" min="900" neutral="1000" max="1900"/>
-    <servo name="BL" no="3" min="900" neutral="1000" max="1900"/>
+    <servo name="FL" no="0" min="0" neutral="100" max="1000"/>
+    <servo name="FR" no="1" min="0" neutral="100" max="1000"/>
+    <servo name="BR" no="2" min="0" neutral="100" max="1000"/>
+    <servo name="BL" no="3" min="0" neutral="100" max="1000"/>
   </servos>
 
   <commands>
