@@ -25,8 +25,8 @@
 
 #define BOARD_PICOQUAD
 
-/* Lisa/M has a 12MHz external clock and 168MHz internal. */
-#define EXT_CLK 12000000
+/* Lisa/M has a 26MHz external clock and 168MHz internal. */
+#define EXT_CLK 26000000
 #define AHB_CLK 168000000
 
 /*
