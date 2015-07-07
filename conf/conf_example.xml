@@ -234,7 +234,7 @@
    name="picoquad"
    ac_id="1"
    airframe="airframes/examples/picoquad.xml"
-   radio="radios/cockpitSX.xml"
+   radio="radios/dx6i.xml"
    telemetry="telemetry/default_rotorcraft.xml"
    flight_plan="flight_plans/rotorcraft_basic.xml"
    settings="settings/rotorcraft_basic.xml"
