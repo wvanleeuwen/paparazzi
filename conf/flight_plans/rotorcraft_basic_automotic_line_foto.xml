@@ -39,6 +39,7 @@
       <stay vmode="climb" climb="2.5" wp="CLIMB"/>
     </block>
     <block name="Standby" strip_button="Standby" strip_icon="home.png">
+      <set var="video_usb_logger_video_usb_logger_periodic_status" value="2"/>
       <stay wp="STDBY"/>
     </block>
     <block name="stay_p1">
@@ -50,7 +51,6 @@
       <deroute block="stay_p1"/>
     </block>
     <block name="line_p1_p2">
-      <set var="video_usb_logger_video_usb_logger_periodic_status" value="TRUE"/>
       <go from="p1" hmode="route" wp="p2"/>
       <stay wp="p2" until="stage_time>10"/>
       <go from="p2" hmode="route" wp="p1"/>
