@@ -71,7 +71,7 @@ void video_usb_logger_stop(void)
 /** Log the values to a csv file */
 void video_usb_logger_periodic(void)
 {
-  if (video_usb_logger == NULL) {
+  if (video_usb_logger == NULL || viewvideo.take_shot) {
     return;
   }
   static uint32_t counter = 0;
