@@ -1,0 +1,17 @@
+ <!DOCTYPE module SYSTEM "module.dtd">
+
+ <module name="lisa_stereo" dir="lisa_stereo">
+  <doc>
+   <description>
+     Get images from stereocam on Lisa/s     
+   </description>
+   </doc>
+<header>
+    <file name="lisa_stereo.h"/>
+  </header>
+  <periodic fun="lisa_stereo_periodic()" start="lisa_stereo_start()" stop="lisa_stereo_stop()" autorun="TRUE" freq="512"/>
+  <makefile>
+    <raw> $(TARGET).CFLAGS += -DUSE_UART1 </raw> <!--DUART1_BAUD=B38400 </raw-->
+    <file name="lisa_stereo.c"/>
+  </makefile>
+ </module>
