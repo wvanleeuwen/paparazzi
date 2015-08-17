@@ -754,21 +754,5 @@ int main(int argc, char *argv[])
   pthread_create(&threads[2], NULL, recv_paparazzi_comms, NULL);
   //pthread_create(&threads[2], NULL, send_paparazzi_comms, NULL);
 
-  // Message loop
-  char in;
-  while (state != state_finish) {
-    if (kbhit()) {
-      in = getchar();
-      break;
-    }
-    usleep(1000);
-  }
-
-  change_state(state_finish);
-
-  ble_cmd_gap_end_procedure();
-
-  uart_close();
-
-  pthread_exit(NULL);
+  for(;;);
 }
