@@ -2422,13 +2422,13 @@
    <field name="cycle_time" type="uint32" unit="ms"/>
  </message>
 
-  <message name="RC_3CH" id="51" link="broadcasted">
+  <message name="RC_3CH" id="51" link="forwarded">
     <field name="throttle_mode" type="uint8" unit="byte_mask"/>
     <field name="roll"  type="int8"/>
     <field name="pitch" type="int8"/>
   </message>
 
-  <message name="RC_4CH" id="52" link="broadcasted">
+  <message name="RC_4CH" id="52" link="forwarded">
     <field name="ac_id"       type="uint8"/>
     <field name="mode"        type="uint8"/>
     <field name="throttle"    type="uint8"/>
@@ -2437,7 +2437,7 @@
     <field name="yaw"         type="int8"/>
   </message>
 
-  <message name="REMOTE_GPS" id="55" link="broadcasted">
+  <message name="REMOTE_GPS" id="55" link="forwarded">
     <field name="ac_id"   type="uint8"/>
     <field name="numsv"   type="uint8"/>
     <field name="ecef_x"  type="int32" unit="cm"   alt_unit="m"/>
@@ -2509,6 +2509,13 @@
    <field name="tilt" type="int8"/>
    <field name="pan" type="int8"/>
  </message>
+
+ <message name="REMOTE_GPS_SMALL" id="153" link="forwarded">
+    <field name="ac_id"    type="uint8"/>
+    <field name="num_sv"   type="uint8"/>
+    <field name="pos_xyz"  type="int32" unit="cm"   alt_unit="m"/>
+    <field name="speed_xy" type="int32" unit="cm"   alt_unit="m"/>
+  </message>
 
 </msg_class>
 
