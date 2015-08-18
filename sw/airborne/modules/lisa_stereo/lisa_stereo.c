@@ -35,12 +35,19 @@
 #include "subsystems/datalink/telemetry.h"
 
 
-#define STEREO_PORT    UART1
+#define STEREO_PORT   (&((UART_LINK).device))
 
-#define __StereoLink(dev, _x) dev##_x
+#define StereoGetch() STEREO_PORT ->get_byte(STEREO_PORT->periph)
+#define StereoSend1(c) STEREO_PORT->put_byte(STEREO_PORT->periph, c)
+#define StereoUartSend1(c) StereoSend1(c)
+#define StereoSend(_dat,_len) { for (uint8_t i = 0; i< (_len); i++) StereoSend1(_dat[i]); };
+#define StereoUartSetBaudrate(_b) uart_periph_set_baudrate(STEREO_PORT, _b);
+
+
+/*#define __StereoLink(dev, _x) dev##_x
 #define _StereoLink(dev, _x)  __StereoLink(dev, _x)
 #define StereoLink(_x) _StereoLink(STEREO_PORT, _x)
-#define StereoBuffer() StereoLink(ChAvailable())
+#define StereoBuffer() StereoLink(ChAvailable())*/
 
 
 typedef struct ImageProperties{
@@ -113,12 +120,15 @@ ImageProperties get_image_properties(uint8_t *raw, uint32_t img_start, uint32_t 
 
 static uint8_t handleStereoPackage(void) {
     // read all data from serial buffer
-    while (StereoLink(ChAvailable()))
+    struct link_device *dev = STEREO_PORT;
+
+
+    while (dev->char_available(dev->periph))
     {
-      ser_read_buf[insert_loc] = StereoLink(Getch());
+      ser_read_buf[insert_loc] = dev->get_byte(dev->periph);
       insert_loc = (insert_loc + 1) % BUF_SIZE;
     }
-    
+
     // currently written to search for full image buffer, if found increments read location and returns immediately
     while((insert_loc - extract_loc + BUF_SIZE) % BUF_SIZE > 0)    // Check if we found the end of the image
     {
@@ -163,7 +173,7 @@ extern void lisa_stereo_start(void){
   send_data = 0;
 
   // initiate uart
-  UART1Init();
+ // UART1Init();
 }
 
 extern void lisa_stereo_stop(void) {

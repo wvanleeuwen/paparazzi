@@ -11,7 +11,9 @@
   </header>
   <periodic fun="lisa_stereo_periodic()" start="lisa_stereo_start()" stop="lisa_stereo_stop()" autorun="TRUE" freq="512"/>
   <makefile>
-    <raw> $(TARGET).CFLAGS += -DUSE_UART1 </raw> <!--DUART1_BAUD=B38400 </raw-->
+    <define name="USE_UART1" value="1"/>
+    <define name="UART_LINK" value="uart1"/>
+    <define name="UART1_BAUD" value="B9600"/>
     <file name="lisa_stereo.c"/>
   </makefile>
  </module>
