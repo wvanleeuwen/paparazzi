@@ -172,8 +172,8 @@
    <define name="HOVER_KP" value="276"/>
    <define name="HOVER_KD" value="455"/>
    <define name="HOVER_KI" value="100"/>
-   <define name="GUIDANCE_V_NOMINAL_HOVER_THROTTLE" value="0.5"/>
-   <define name="ADAPT_THROTTLE_ENABLED" value="TRUE"/>
+   <define name="NOMINAL_HOVER_THROTTLE" value="0.65"/>
+   <define name="ADAPT_THROTTLE_ENABLED" value="FALSE"/>
   </section>
 
   <section name="AHRS" prefix="AHRS_">
@@ -188,11 +188,16 @@
    <define name="PGAIN" value="90"/>
    <define name="DGAIN" value="50"/>
    <define name="IGAIN" value="24"/>
+   <define name="REF_MAX_SPEED" value="0.5" />
  </section>
 
   <section name="NAVIGATION" prefix="NAV_">
     <define  name="CLIMB_VSPEED" value="1.0" />
     <define  name="DESCEND_VSPEED" value="-0.5" />
+  </section>
+
+  <section name="MISC">
+    <define name="ARRIVED_AT_WAYPOINT" value="0.2" />
   </section>
 
  <section name="SIMULATOR" prefix="NPS_">
