@@ -38,6 +38,9 @@
 #if USE_USB_SERIAL
 #include "mcu_periph/usb_serial.h"
 #endif
+#if USE_BLUEGIGA
+#include "subsystems/datalink/bluegiga.h"
+#endif
 #include "mcu_periph/uart.h"
 
 /*

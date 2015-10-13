@@ -91,6 +91,10 @@ void mavlink_init(void)
   mavlink_system.compid = MAV_COMP_ID_MISSIONPLANNER; // Component/Subsystem ID, 1-255
 
   get_pprz_git_version(custom_version);
+
+#ifdef USE_BLUEGIGA
+  bluegiga_init(&(MAVLINK_DEV));
+#endif
 }
 
 /**
@@ -100,7 +104,7 @@ void mavlink_init(void)
 void mavlink_periodic(void)
 {
   RunOnceEvery(2, mavlink_send_heartbeat());
-  RunOnceEvery(5, mavlink_send_sys_status());
+  /*RunOnceEvery(5, mavlink_send_sys_status());
   RunOnceEvery(10, mavlink_send_attitude());
   RunOnceEvery(5, mavlink_send_attitude_quaternion());
   RunOnceEvery(5, mavlink_send_params());
@@ -111,7 +115,7 @@ void mavlink_periodic(void)
   RunOnceEvery(5, mavlink_send_rc_channels());
   RunOnceEvery(21, mavlink_send_battery_status());
   RunOnceEvery(32, mavlink_send_autopilot_version());
-  RunOnceEvery(33, mavlink_send_gps_global_origin());
+  RunOnceEvery(33, mavlink_send_gps_global_origin());*/
 }
 
 static int16_t settings_idx_from_param_id(char *param_id)
@@ -470,9 +474,17 @@ static inline void mavlink_send_autopilot_version(void)
   /// TODO: fill in versions correctly, how should they be encoded?
   static uint32_t ver = PPRZ_VERSION_INT;
   mavlink_msg_autopilot_version_send(MAVLINK_COMM_0,
-                                     0,  // capabilities,
-                                     ver, // version
-                                     custom_version);
+				     0, // capabilities,
+				     ver, // flight_sw_version,
+				     0, // middleware_sw_version,
+				     0, // os_sw_version,
+				     0, // board_version,
+				     custom_version, // *flight_custom_version,
+				     0, // *middleware_custom_version,
+				     0, // *os_custom_version,
+				     0, // vendor_id,
+				     0, // product_id,
+				     0); //  uid)
 }
 
 static inline void mavlink_send_attitude_quaternion(void)

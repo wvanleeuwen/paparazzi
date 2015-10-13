@@ -3,7 +3,7 @@
 <module name="datalink">
   <doc>
     <description>Basic MAVLink implementation</description>
-    <configure name="MAVLINK_PORT" value="UARTx|UDPx|UsbS" description="The port device to use for mavlink (default: UART1)"/>
+    <configure name="MAVLINK_PORT" value="UARTx|UDPx|UsbS|Bluegiga" description="The port device to use for mavlink (default: UART1)"/>
     <configure name="MAVLINK_BAUD" value="B57600" description="Baud rate if MAVLINK_PORT is a UART"/>
   </doc>
   <header>
@@ -30,10 +30,24 @@
       $(TARGET).CFLAGS += -DMAVLINK_DEV=$(MAVLINK_PORT_LOWER)
       $(TARGET).CFLAGS += -DUSE_$(MAVLINK_PORT_UPPER)
       else
+      ifneq (,$(findstring bluegiga,$(MAVLINK_PORT_LOWER)))
+      ap.CFLAGS += -DUSE_BLUEGIGA
+      BLUEGIGA_SPI_DEV ?= SPI2
+      BLUEGIGA_SPI_DEV_LOWER=$(shell echo $(BLUEGIGA_SPI_DEV) | tr A-Z a-z)
+      ap.CFLAGS += -DUSE_$(BLUEGIGA_SPI_DEV)_SLAVE -DSPI_SLAVE -DBLUEGIGA_SPI_DEV=$(BLUEGIGA_SPI_DEV_LOWER)
+      ap.CFLAGS += -DMAVLINK_DEV=bluegiga_p
+      ap.srcs += $(SRC_SUBSYSTEMS)/datalink/bluegiga.c
+      # LED
+      MODEM_LED ?= none
+      ifneq ($(MODEM_LED),none)
+      ap.CFLAGS += -DMODEM_LED=$(MODEM_LED)
+      endif
+      else
       MAVLINK_BAUD ?= B57600
       ap.CFLAGS += -DMAVLINK_DEV=$(MAVLINK_PORT_LOWER)
       ap.CFLAGS += -DUSE_$(MAVLINK_PORT_UPPER)
       ap.CFLAGS += -D$(MAVLINK_PORT_UPPER)_BAUD=$(MAVLINK_BAUD)
+      endif
       endif
       endif
     </raw>
