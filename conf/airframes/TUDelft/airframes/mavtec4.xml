@@ -46,6 +46,7 @@
       <define name="POLYSURVEY_DEFAULT_DISTANCE" value="10"/>
     </load>
     <load name="drop_zone.xml"/>
+    <load name="logger_spi_link.xml"/>
     <!--load name="gps_ubx_ucenter.xml"/-->
   </modules>
 
