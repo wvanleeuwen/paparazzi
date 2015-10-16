@@ -26,9 +26,7 @@
     <subsystem name="actuators"     type="pwm"/>
     <subsystem name="telemetry"     type="xbee_api"/>
     <subsystem name="imu"           type="lisa_mx_v2.1"/>
-    <subsystem name="gps"           type="piksi">
-      <define name="USE_PIKSI_EXT_ANTENNA" value="TRUE"/>
-    </subsystem>
+    <subsystem name="gps"           type="ublox"/>
     <subsystem name="stabilization" type="int_quat"/>
     <subsystem name="ahrs"          type="int_cmpl_quat"/>
     <subsystem name="ins"           type="hff"/>
@@ -47,7 +45,7 @@
     </load>
     <load name="drop_zone.xml"/>
     <load name="logger_spi_link.xml"/>
-    <!--load name="gps_ubx_ucenter.xml"/-->
+    <load name="gps_ubx_ucenter.xml"/>
   </modules>
 
   <servos driver="Asctec_v2">
