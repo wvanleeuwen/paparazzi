@@ -60,13 +60,16 @@ uint8 MAC_ADDR[] = {0x00, 0x00, 0x2d, 0x80, 0x07, 0x00};
 
 // {0x00,0x00,0x2d,0x80,0x07,0x00};   // begining of all modules adresses
 
+FILE* rssi_fp = NULL;
+
 enum actions {
   action_none,
   action_scan,
   action_connect,
   action_info,
   action_connect_all,
-  action_broadcast
+  action_broadcast,
+  action_get_rssi
 };
 enum actions action = action_none;
 
@@ -346,6 +349,10 @@ void ble_evt_gap_scan_response(const struct ble_msg_gap_scan_response_evt_t *msg
     if (sock[0])
       sendto(sock[0], msg->data.data, msg->data.len, MSG_DONTWAIT,
              (struct sockaddr *)&send_addr[0], sizeof(struct sockaddr));
+  } else if (action == action_get_rssi){
+    gettimeofday(&tm, NULL); //Time zone struct is obsolete, hence NULL
+    mytime = (double)tm.tv_sec + (double)tm.tv_usec / 1000000.0;
+    fprintf(rssi_fp, "%f %d\n", mytime, msg->rssi);
   } else {
     uint8_t i;
     char *name = NULL;
@@ -661,7 +668,6 @@ void intHandler(int dummy)
 int main(int argc, char *argv[])
 {
   // signal(SIGINT, intHandler);
-
   pthread_t threads[3];
 
   send_port = recv_port = 0;
@@ -712,6 +718,18 @@ int main(int argc, char *argv[])
       } else {
         usage(argv[0]);
         return 1;
+      }
+    } else if (strcmp(argv[CLARG_ACTION], "rssi") == 0) {
+      action = action_get_rssi;
+      time_t timev;
+      time(&timev);
+      char timedate[256];
+      strftime(timedate, 256, "var/logs/%Y%m%d_%H%M%S.rssilog", localtime(&timev));
+      rssi_fp = fopen(timedate, "w");
+      if (!rssi_fp)
+      {
+	fprintf(stderr,"Unable to open file for logging: %s\n Make sure to run from paparazzi home\n", timedate);
+	return -1;
       }
     } else if (strcmp(argv[CLARG_ACTION], "all") == 0) {
       connect_all = 1;
@@ -775,7 +793,7 @@ int main(int argc, char *argv[])
   ble_cmd_system_address_get();
 
   // Execute action
-  if (action == action_scan) {
+  if (action == action_scan || action == action_get_rssi) {
     ble_cmd_gap_discover(gap_discover_generic);
   } else if (action == action_info) {
     ble_cmd_system_get_info();
@@ -807,4 +825,7 @@ int main(int argc, char *argv[])
   uart_close();
 
   pthread_exit(NULL);
+
+  if (rssi_fp)
+    fclose(rssi_fp);
 }
