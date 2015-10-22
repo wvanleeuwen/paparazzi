@@ -19,6 +19,7 @@
     <subsystem name="radio_control" type="spektrum">
       <configure name="USE_SECONDARY_SPEKTRUM_RECEIVER" value="1"/>
       <define name="RADIO_CONTROL_SPEKTRUM_NO_SIGN" value="1"/>
+      <define name="RADIO_KILL_SWITCH" value="RADIO_AUX2"/>
     </subsystem>
 
     <subsystem name="actuators"     type="spektrum"/>
@@ -29,6 +30,8 @@
     <subsystem name="ahrs"          type="int_cmpl_quat"/>
     <subsystem name="ins"           type="hff"/>
     <subsystem name="guidance"      type="indi"/>
+
+    <define name="USE_KILL_SWITCH_FOR_MOTOR_ARMING" value="1"/>
   </firmware>
 
   <modules>
@@ -38,13 +41,13 @@
   </modules>
 
   <servos driver="Spektrum">
-     <servo name="THRUST"       no="0" min="340" neutral="1024" max="1708"/>
+     <servo name="THRUST"       no="0" min="340" neutral="340"  max="1708"/>
      <servo name="ROLL"         no="1" min="340" neutral="1024" max="1708"/>
      <servo name="PITCH"        no="2" min="340" neutral="1024" max="1708"/>
      <servo name="YAW"          no="3" min="340" neutral="1024" max="1708"/>
      <servo name="TAIL_GAIN"    no="4" min="340" neutral="1024" max="1708"/>
      <servo name="COLLECTIVE"   no="5" min="340" neutral="1024" max="1708"/>
-     <servo name="AUX1"         no="6" min="340" neutral="1024" max="1708"/>
+     <servo name="AUX2"         no="6" min="340" neutral="1024" max="1708"/>
   </servos>
 
   <commands>
@@ -54,7 +57,7 @@
     <axis name="YAW"        failsafe_value="0"/>
     <axis name="TAIL_GAIN"  failsafe_value="0"/>
     <axis name="COLLECTIVE" failsafe_value="0"/>
-    <axis name="AUX1"       failsafe_value="0"/>
+    <axis name="AUX2"       failsafe_value="0"/>
   </commands>
 
   <rc_commands>
@@ -64,7 +67,7 @@
     <set command="YAW"        value="@YAW"/>
     <set command="TAIL_GAIN"  value="@GEAR"/>
     <set command="COLLECTIVE" value="@FLAP"/>
-    <set command="AUX1"       value="@AUX1"/>
+    <set command="AUX2"       value="0"/>
   </rc_commands>
 
   <command_laws>
@@ -74,7 +77,7 @@
     <set servo="YAW"         value="@YAW"/>
     <set servo="TAIL_GAIN"   value="@TAIL_GAIN"/>
     <set servo="COLLECTIVE"  value="@COLLECTIVE"/>
-    <set servo="AUX1"        value="@AUX1"/>
+    <set servo="AUX2"        value="0"/>
   </command_laws>
 
   <section name="MISC">
