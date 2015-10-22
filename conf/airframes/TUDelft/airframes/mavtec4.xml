@@ -33,6 +33,8 @@
     <subsystem name="ahrs"          type="int_cmpl_quat"/>
     <subsystem name="ins"           type="hff"/>
     <subsystem name="guidance"      type="indi"/>
+
+    <define name="USE_KILL_SWITCH_FOR_MOTOR_ARMING" value="1"/>
   </firmware>
 
   <modules>
