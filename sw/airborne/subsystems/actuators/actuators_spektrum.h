@@ -26,20 +26,17 @@
 #ifndef ACTUATORS_SPEKTRUM_H
 #define ACTUATORS_SPEKTRUM_H
 
+#include "std.h"
 #include "generated/airframe.h"
 
-
 struct ActuatorsSpektrum {
-  enum actuators_spektrum_cmd cmd;
-  int32_t cmds[ACTUATORS_NB];
+  int32_t cmds[SERVOS_SPEKTRUM_NB];
   struct link_device *device;
 };
 
-
 extern struct ActuatorsSpektrum actuators_spektrum;
-
-extern void actuators_asctec_v2_init(void);
-extern void actuators_asctec_v2_set(void);
+extern void actuators_spektrum_init(void);
+extern void actuators_spektrum_set(void);
 
 #define ActuatorSpektrumSet(_i, _v) { actuators_spektrum.cmds[_i] = _v; }
 #define ActuatorsSpektrumInit() actuators_spektrum_init()

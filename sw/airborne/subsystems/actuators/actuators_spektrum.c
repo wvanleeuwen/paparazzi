@@ -19,8 +19,8 @@
  * Boston, MA 02111-1307, USA.
  */
 
-/** @file actuators_asctec_v2.c
- *  Actuators driver for Asctec v2 motor controllers.
+/** @file actuators_spektrum.c
+ *  Actuators for spektrum output at ~11ms
  */
 
 #include "subsystems/actuators.h"
@@ -30,14 +30,36 @@
 
 struct ActuatorsSpektrum actuators_spektrum;
 
-void actuators_asctec_v2_init(void)
+void actuators_spektrum_init(void)
 {
-  actuators_spektrum.device = &((ACUTATORS_SPEKTRUM_OUT).link_device);
+  actuators_spektrum.device = &((ACTUATORS_SPEKTRUM_DEV).device);
 }
 
 
-void actuators_asctec_v2_set(void)
+void actuators_spektrum_set(void)
 {
-  actuators_spektrum.device.put_byte(0x01); // 7 channels, 11 bit
+  static uint8_t cnt = 0;
+
+  cnt++;
+  // Only send every 11 ms
+  if(cnt == 6) {
+    actuators_spektrum.device->put_byte(actuators_spektrum.device->periph, 0x00); // number missed frames
+    actuators_spektrum.device->put_byte(actuators_spektrum.device->periph, 0x12); // 7 channels, 11 bit, 11ms
+    actuators_spektrum.device->put_byte(actuators_spektrum.device->periph, 0 << 3 | actuators_spektrum.cmds[0] >> 8);
+    actuators_spektrum.device->put_byte(actuators_spektrum.device->periph, actuators_spektrum.cmds[0] & 0xFF);
+    actuators_spektrum.device->put_byte(actuators_spektrum.device->periph, 1 << 3 | actuators_spektrum.cmds[1] >> 8);
+    actuators_spektrum.device->put_byte(actuators_spektrum.device->periph, actuators_spektrum.cmds[1] & 0xFF);
+    actuators_spektrum.device->put_byte(actuators_spektrum.device->periph, 2 << 3 | actuators_spektrum.cmds[2] >> 8);
+    actuators_spektrum.device->put_byte(actuators_spektrum.device->periph, actuators_spektrum.cmds[2] & 0xFF);
+    actuators_spektrum.device->put_byte(actuators_spektrum.device->periph, 3 << 3 | actuators_spektrum.cmds[3] >> 8);
+    actuators_spektrum.device->put_byte(actuators_spektrum.device->periph, actuators_spektrum.cmds[3] & 0xFF);
+    actuators_spektrum.device->put_byte(actuators_spektrum.device->periph, 4 << 3 | actuators_spektrum.cmds[4] >> 8);
+    actuators_spektrum.device->put_byte(actuators_spektrum.device->periph, actuators_spektrum.cmds[4] & 0xFF);
+    actuators_spektrum.device->put_byte(actuators_spektrum.device->periph, 5 << 3 | actuators_spektrum.cmds[5] >> 8);
+    actuators_spektrum.device->put_byte(actuators_spektrum.device->periph, actuators_spektrum.cmds[5] & 0xFF);
+    actuators_spektrum.device->put_byte(actuators_spektrum.device->periph, 6 << 3 | actuators_spektrum.cmds[6] >> 8);
+    actuators_spektrum.device->put_byte(actuators_spektrum.device->periph, actuators_spektrum.cmds[6] & 0xFF);
+    cnt = 0;
+  }
 }
 

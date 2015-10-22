@@ -17,16 +17,14 @@
     </target>
 
     <subsystem name="radio_control" type="spektrum">
-      <define name="RADIO_KILL_SWITCH" value="RADIO_AUX2"/>
-      <define name="RADIO_MODE" value="RADIO_GEAR"/>
+      <configure name="USE_SECONDARY_SPEKTRUM_RECEIVER" value="1"/>
+      <define name="RADIO_CONTROL_SPEKTRUM_NO_SIGN" value="1"/>
     </subsystem>
 
-    <subsystem name="motor_mixing"/>
-    <subsystem name="actuators"     type="asctec_v2"/>
-    <subsystem name="actuators"     type="pwm"/>
+    <subsystem name="actuators"     type="spektrum"/>
     <subsystem name="telemetry"     type="xbee_api"/>
     <subsystem name="imu"           type="lisa_mx_v2.1"/>
-    <subsystem name="gps"           type="ublox"/>
+    <subsystem name="gps"           type="datalink"/>
     <subsystem name="stabilization" type="int_quat"/>
     <subsystem name="ahrs"          type="int_cmpl_quat"/>
     <subsystem name="ins"           type="hff"/>
@@ -36,56 +34,47 @@
   <modules>
     <load name="geo_mag.xml"/>
     <load name="air_data.xml"/>
-    <load name="servo_switch.xml"/>
-    <load name="nav_survey_rectangle_rotorcraft.xml">
-      <define name="RECTANGLE_SURVEY_DEFAULT_SWEEP" value="10"/>
-    </load>
-    <load name="nav_survey_poly_rotorcraft.xml">
-      <define name="POLYSURVEY_DEFAULT_DISTANCE" value="10"/>
-    </load>
-    <load name="drop_zone.xml"/>
     <load name="logger_spi_link.xml"/>
-    <load name="gps_ubx_ucenter.xml"/>
   </modules>
 
-  <servos driver="Asctec_v2">
-    <servo name="FRONT"   no="0" min="0" neutral="3" max="200"/>
-    <servo name="RIGHT"   no="1" min="0" neutral="3" max="200"/>
-    <servo name="BACK"    no="2" min="0" neutral="3" max="200"/>
-    <servo name="LEFT"    no="3" min="0" neutral="3" max="200"/>
-  </servos>
-
-  <servos driver="Pwm">
-     <servo name="DROP" no="4" min="900" neutral="1500" max="2000"/>
+  <servos driver="Spektrum">
+     <servo name="THRUST"       no="0" min="340" neutral="1024" max="1708"/>
+     <servo name="ROLL"         no="1" min="340" neutral="1024" max="1708"/>
+     <servo name="PITCH"        no="2" min="340" neutral="1024" max="1708"/>
+     <servo name="YAW"          no="3" min="340" neutral="1024" max="1708"/>
+     <servo name="TAIL_GAIN"    no="4" min="340" neutral="1024" max="1708"/>
+     <servo name="COLLECTIVE"   no="5" min="340" neutral="1024" max="1708"/>
+     <servo name="AUX1"         no="6" min="340" neutral="1024" max="1708"/>
   </servos>
 
   <commands>
-    <axis name="ROLL"   failsafe_value="0"/>
-    <axis name="PITCH"  failsafe_value="0"/>
-    <axis name="YAW"    failsafe_value="0"/>
-    <axis name="THRUST" failsafe_value="0"/>
+    <axis name="THRUST"     failsafe_value="0"/>
+    <axis name="ROLL"       failsafe_value="0"/>
+    <axis name="PITCH"      failsafe_value="0"/>
+    <axis name="YAW"        failsafe_value="0"/>
+    <axis name="TAIL_GAIN"  failsafe_value="0"/>
+    <axis name="COLLECTIVE" failsafe_value="0"/>
+    <axis name="AUX1"       failsafe_value="0"/>
   </commands>
 
-  <section name="MIXING" prefix="MOTOR_MIXING_">
-    <!-- front left (CW), front right (CCW), back right (CW), back left (CCW) -->
-    <define name="TYPE" value="QUAD_X"/>
-    <define name="REVERSE" value="TRUE"/>
-  </section>
-
-  <section name="SERVO_SWITCH">
-    <define name="SERVO_SWITCH_SERVO" value="DROP"/>
-    <define name="SERVO_SWITCH_ON_VALUE" value="SERVO_DROP_MIN"/>
-    <define name="SERVO_SWITCH_OFF_VALUE" value="SERVO_DROP_MAX"/>
-    <define name="DropOpen()" value="ServoSwitchOn()"/>
-    <define name="DropClose()" value="ServoSwitchOff()"/>
-  </section>
+  <rc_commands>
+    <set command="THRUST"     value="@THROTTLE"/>
+    <set command="ROLL"       value="@ROLL"/>
+    <set command="PITCH"      value="@PITCH"/>
+    <set command="YAW"        value="@YAW"/>
+    <set command="TAIL_GAIN"  value="@GEAR"/>
+    <set command="COLLECTIVE" value="@FLAP"/>
+    <set command="AUX1"       value="@AUX1"/>
+  </rc_commands>
 
   <command_laws>
-    <call fun="motor_mixing_run(autopilot_motors_on,FALSE,values)"/>
-    <set servo="FRONT"   value="motor_mixing.commands[MOTOR_FRONT_LEFT]"/>
-    <set servo="RIGHT"   value="motor_mixing.commands[MOTOR_FRONT_RIGHT]"/>
-    <set servo="BACK"    value="motor_mixing.commands[MOTOR_BACK_RIGHT]"/>
-    <set servo="LEFT"    value="motor_mixing.commands[MOTOR_BACK_LEFT]"/>
+    <set servo="THRUST"      value="@THRUST"/>
+    <set servo="ROLL"        value="@ROLL"/>
+    <set servo="PITCH"       value="@PITCH"/>
+    <set servo="YAW"         value="@YAW"/>
+    <set servo="TAIL_GAIN"   value="@TAIL_GAIN"/>
+    <set servo="COLLECTIVE"  value="@COLLECTIVE"/>
+    <set servo="AUX1"        value="@AUX1"/>
   </command_laws>
 
   <section name="MISC">
@@ -210,9 +199,9 @@
   </section>
 
   <section name="AUTOPILOT">
-    <define name="MODE_MANUAL" value="AP_MODE_ATTITUDE_DIRECT"/>
-    <define name="MODE_AUTO1"  value="AP_MODE_HOVER_Z_HOLD"/>
-    <define name="MODE_AUTO2"  value="AP_MODE_NAV"/>
+    <define name="MODE_MANUAL" value="AP_MODE_RC_DIRECT"/>
+    <define name="MODE_AUTO1"  value="AP_MODE_RC_DIRECT"/>
+    <define name="MODE_AUTO2"  value="AP_MODE_RC_DIRECT"/>
   </section>
 
   <section name="BAT">
