@@ -464,7 +464,8 @@ void ble_evt_gap_scan_response(const struct ble_msg_gap_scan_response_evt_t *msg
   } else if (action == action_get_rssi){
     gettimeofday(&tm, NULL); //Time zone struct is obsolete, hence NULL
     mytime = (double)tm.tv_sec + (double)tm.tv_usec / 1000000.0;
-    fprintf(rssi_fp, "%f %d\n", mytime, msg->rssi);
+    fprintf(rssi_fp, "%f %x %d\n", mytime, msg->sender.addr[0], msg->rssi); fflush(rssi_fp);
+    fprintf(stderr, "%f %x %d\n", mytime, msg->sender.addr[0], msg->rssi);
   } else {
     uint8_t i, j;
     char *name = NULL;
@@ -1036,8 +1037,11 @@ int main(int argc, char *argv[])
                                    0x07);    // advertise interval scales 625us, min, max, channels (0x07 = 3, 0x03 = 2, 0x04 = 1)
   }
 
-  pthread_create(&threads[0], NULL, send_msg, NULL);
-  pthread_create(&threads[1], NULL, recv_paparazzi_comms, NULL);
+  if (action == action_connect && action == action_connect_all)
+  {
+    pthread_create(&threads[0], NULL, send_msg, NULL);
+    pthread_create(&threads[1], NULL, recv_paparazzi_comms, NULL);
+  }
 
   // Message loop
   while (state != state_finish) {
