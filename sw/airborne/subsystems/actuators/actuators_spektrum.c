@@ -29,10 +29,15 @@
 #include "mcu_periph/uart.h"
 
 struct ActuatorsSpektrum actuators_spektrum;
+static inline void actuators_spektrum_send(struct link_device *dev);
 
 void actuators_spektrum_init(void)
 {
   actuators_spektrum.device = &((ACTUATORS_SPEKTRUM_DEV).device);
+
+  #ifdef ACTUATORS_SPEKTRUM_DEV2
+  actuators_spektrum.device2 = &((ACTUATORS_SPEKTRUM_DEV2).device);
+  #endif
 }
 
 
@@ -43,23 +48,32 @@ void actuators_spektrum_set(void)
   cnt++;
   // Only send every 11 ms
   if(cnt == 6) {
-    actuators_spektrum.device->put_byte(actuators_spektrum.device->periph, 0x00); // number missed frames
-    actuators_spektrum.device->put_byte(actuators_spektrum.device->periph, 0x12); // 7 channels, 11 bit, 11ms
-    actuators_spektrum.device->put_byte(actuators_spektrum.device->periph, 0 << 3 | actuators_spektrum.cmds[0] >> 8);
-    actuators_spektrum.device->put_byte(actuators_spektrum.device->periph, actuators_spektrum.cmds[0] & 0xFF);
-    actuators_spektrum.device->put_byte(actuators_spektrum.device->periph, 1 << 3 | actuators_spektrum.cmds[1] >> 8);
-    actuators_spektrum.device->put_byte(actuators_spektrum.device->periph, actuators_spektrum.cmds[1] & 0xFF);
-    actuators_spektrum.device->put_byte(actuators_spektrum.device->periph, 2 << 3 | actuators_spektrum.cmds[2] >> 8);
-    actuators_spektrum.device->put_byte(actuators_spektrum.device->periph, actuators_spektrum.cmds[2] & 0xFF);
-    actuators_spektrum.device->put_byte(actuators_spektrum.device->periph, 3 << 3 | actuators_spektrum.cmds[3] >> 8);
-    actuators_spektrum.device->put_byte(actuators_spektrum.device->periph, actuators_spektrum.cmds[3] & 0xFF);
-    actuators_spektrum.device->put_byte(actuators_spektrum.device->periph, 4 << 3 | actuators_spektrum.cmds[4] >> 8);
-    actuators_spektrum.device->put_byte(actuators_spektrum.device->periph, actuators_spektrum.cmds[4] & 0xFF);
-    actuators_spektrum.device->put_byte(actuators_spektrum.device->periph, 5 << 3 | actuators_spektrum.cmds[5] >> 8);
-    actuators_spektrum.device->put_byte(actuators_spektrum.device->periph, actuators_spektrum.cmds[5] & 0xFF);
-    actuators_spektrum.device->put_byte(actuators_spektrum.device->periph, 6 << 3 | actuators_spektrum.cmds[6] >> 8);
-    actuators_spektrum.device->put_byte(actuators_spektrum.device->periph, actuators_spektrum.cmds[6] & 0xFF);
+    actuators_spektrum_send(actuators_spektrum.device);
+
+    #ifdef ACTUATORS_SPEKTRUM_DEV2
+    actuators_spektrum_send(actuators_spektrum.device2);
+    #endif
+
     cnt = 0;
   }
 }
 
+static inline void actuators_spektrum_send(struct link_device *dev)
+{
+  dev->put_byte(dev->periph, 0x00); // number missed frames
+  dev->put_byte(dev->periph, 0x12); // 7 channels, 11 bit, 11ms
+  dev->put_byte(dev->periph, 0 << 3 | actuators_spektrum.cmds[0] >> 8);
+  dev->put_byte(dev->periph, actuators_spektrum.cmds[0] & 0xFF);
+  dev->put_byte(dev->periph, 1 << 3 | actuators_spektrum.cmds[1] >> 8);
+  dev->put_byte(dev->periph, actuators_spektrum.cmds[1] & 0xFF);
+  dev->put_byte(dev->periph, 2 << 3 | actuators_spektrum.cmds[2] >> 8);
+  dev->put_byte(dev->periph, actuators_spektrum.cmds[2] & 0xFF);
+  dev->put_byte(dev->periph, 3 << 3 | actuators_spektrum.cmds[3] >> 8);
+  dev->put_byte(dev->periph, actuators_spektrum.cmds[3] & 0xFF);
+  dev->put_byte(dev->periph, 4 << 3 | actuators_spektrum.cmds[4] >> 8);
+  dev->put_byte(dev->periph, actuators_spektrum.cmds[4] & 0xFF);
+  dev->put_byte(dev->periph, 5 << 3 | actuators_spektrum.cmds[5] >> 8);
+  dev->put_byte(dev->periph, actuators_spektrum.cmds[5] & 0xFF);
+  dev->put_byte(dev->periph, 6 << 3 | actuators_spektrum.cmds[6] >> 8);
+  dev->put_byte(dev->periph, actuators_spektrum.cmds[6] & 0xFF);
+}

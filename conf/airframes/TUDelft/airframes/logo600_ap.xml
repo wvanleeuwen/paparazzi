@@ -22,7 +22,9 @@
       <define name="RADIO_KILL_SWITCH" value="RADIO_AUX2"/>
     </subsystem>
 
-    <subsystem name="actuators"     type="spektrum"/>
+    <subsystem name="actuators"     type="spektrum">
+      <configure name="ACTUATORS_SPEKTRUM_DEV2" value="UART6"/>
+    </subsystem>
     <subsystem name="telemetry"     type="xbee_api"/>
     <subsystem name="imu"           type="lisa_mx_v2.1"/>
     <subsystem name="gps"           type="datalink"/>

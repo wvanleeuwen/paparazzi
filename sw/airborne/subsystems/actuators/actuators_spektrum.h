@@ -32,6 +32,7 @@
 struct ActuatorsSpektrum {
   int32_t cmds[SERVOS_SPEKTRUM_NB];
   struct link_device *device;
+  struct link_device *device2;
 };
 
 extern struct ActuatorsSpektrum actuators_spektrum;
