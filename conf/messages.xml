@@ -2869,6 +2869,15 @@
     </message>
   </msg_class>
 
+  <msg_class name="intermcu">
+    <message name="COMMANDS" id="1">
+      <field name="values" type="int16[]"/>
+    </message>
+
+    <message name="RADIO_COMMANDS" id="2">
+      <field name="values" type="int16[]"/>
+    </message>
+  </msg_class>
 
 
 </protocol>
