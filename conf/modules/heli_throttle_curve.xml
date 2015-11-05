@@ -1,0 +1,16 @@
+<!DOCTYPE module SYSTEM "module.dtd">
+
+<module name="throttle_curve" dir="helicopter">
+  <doc>
+    <description>Throttle Curve Mixers</description>
+  </doc>
+  <header>
+    <file name="throttle_curve.h"/>
+  </header>
+  <init fun="throttle_curve_init()"/>
+  <periodic fun="throttle_curve_periodic()" freq="512"/>
+  <makefile>
+    <file name="throttle_curve.c"/>
+  </makefile>
+</module>
+
