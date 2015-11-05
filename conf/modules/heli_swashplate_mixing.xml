@@ -1,0 +1,16 @@
+<!DOCTYPE module SYSTEM "module.dtd">
+
+<module name="swashplate_mixing" dir="helicopter">
+  <doc>
+    <description>Helicopter Swashplate Mixing</description>
+  </doc>
+  <header>
+    <file name="swashplate_mixing.h"/>
+  </header>
+  <init fun="swashplate_mixing_init()"/>
+  <periodic fun="swashplate_mixing_periodic()" freq="512"/>
+  <makefile>
+    <file name="swashplate_mixing.c"/>
+  </makefile>
+</module>
+

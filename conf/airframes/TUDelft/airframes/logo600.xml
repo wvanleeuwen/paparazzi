@@ -57,6 +57,8 @@
     <load name="air_data.xml"/>
     <load name="logger_spi_link.xml"/>
     <load name="gps_ubx_ucenter.xml"/>
+    <load name="heli_swashplate_mixing.xml"/>
+    <load name="heli_throttle_curve.xml"/>
   </modules>
 
   <servos driver="Spektrum">
