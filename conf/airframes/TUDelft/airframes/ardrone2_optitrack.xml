@@ -28,6 +28,7 @@
 
   <modules main_freq="512">
     <load name="bat_voltage_ardrone2.xml"/>
+    <load name="constant_forward_flight.xml"/>
   </modules>
 
   <commands>

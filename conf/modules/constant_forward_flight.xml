@@ -1,0 +1,25 @@
+<!DOCTYPE module SYSTEM "module.dtd">
+
+<module name="constant_forward_flight" dir="nav">
+  <doc>
+    <description></description>
+  </doc>
+  <header>
+    <file name="constant_forward_flight.h"/>
+  </header>
+  <init fun="forward_flight_init()"/>
+  <periodic fun="forward_flight_periodic()" freq="20" autorun="TRUE"/>
+  <makefile>
+    <file name="constant_forward_flight.c"/>
+    <raw>
+      STEREO_UART ?= UART1
+      STEREO_BAUD ?= B9600
+      STEREO_LED ?= 3
+      STEREO_UART_LOWER=$(shell echo $(STEREO_UART) | tr A-Z a-z)
+    </raw>
+    <define name="USE_$(STEREO_UART)"/>
+    <define name="STEREO_UART" value="$(STEREO_UART_LOWER)"/>
+    <define name="$(STEREO_UART)_BAUD" value="$(STEREO_BAUD)"/>
+  </makefile>
+</module>
+
