@@ -31,14 +31,6 @@
       <call fun="NavKillThrottle()"/>
       <while cond="!GpsFixValid()"/>
     </block>
-    <block name="Geo init">
-      <while cond="LessThan(NavBlockTime(), 1)"/>
-      <call fun="NavSetWaypointHere(WP_HOME)"/>
-      <call fun="NavSetWaypointHere(WP_CLIMB)"/>
-      <call fun="NavSetWaypointHere(WP_STDBY)"/>
-      <call fun="NavSetWaypointHere(WP_TD)"/>
-      <call fun="NavSetAltitudeReferenceHere()"/>
-    </block>
     <block name="Holding point">
       <call fun="NavKillThrottle()"/>
       <attitude pitch="0" roll="0" throttle="0" until="FALSE" vmode="throttle"/>
@@ -48,12 +40,49 @@
       <attitude pitch="0" roll="0" throttle="0" until="FALSE" vmode="throttle"/>
     </block>
     <block name="Takeoff" strip_button="Takeoff" strip_icon="takeoff.png">
-      <exception cond="stateGetPositionEnu_f()->z > 2.0" deroute="Standby"/>
-      <call fun="NavSetWaypointHere(WP_CLIMB)"/>
-      <stay climb="nav_climb_vspeed" vmode="climb" wp="CLIMB"/>
+      <exception cond="stage_time > 1" deroute="FHover"/>
+      <attitude pitch="0" roll="0" until="FALSE" climb="nav_climb_vspeed" vmode="climb"/>
+    </block>
+    <block name="FHover">
+      <exception cond="stage_time > 4" deroute="Fore"/>
+      <call fun="nav_set_heading_deg(0)" />
+      <attitude pitch="0" roll="0" until="FALSE" alt="2.0" vmode="alt"/>
+    </block>
+
+    <block name="Fore">
+      <exception cond="stage_time > 0" deroute="Back"/>
+      <attitude pitch="-10" roll="0" until="FALSE" alt="2.0" vmode="alt"/>
+    </block>
+    <block name="Back">
+      <exception cond="stage_time > 0" deroute="Turn"/>
+      <attitude pitch="10" roll="0" until="FALSE" alt="2.0" vmode="alt"/>
+    </block>
+    <block name="Turn">
+      <exception cond="stage_time > 2" deroute="Fore2"/>
+      <call fun="nav_set_heading_deg(90)" />
+      <attitude pitch="0" roll="0" until="FALSE" alt="2.0" vmode="alt"/>
+    </block>
+    <block name="Fore2">
+      <exception cond="stage_time > 0" deroute="Back2"/>
+      <attitude pitch="-15" roll="0" until="FALSE" alt="2.0" vmode="alt"/>
+    </block>
+    <block name="Back2">
+      <exception cond="stage_time > 0" deroute="Turn2"/>
+      <attitude pitch="15" roll="0" until="FALSE" alt="2.0" vmode="alt"/>
+    </block>
+    <block name="Turn2">
+      <exception cond="stage_time > 2" deroute="FLand"/>
+      <call fun="nav_set_heading_deg(180)" />
+      <attitude pitch="0" roll="0" until="FALSE" alt="2.0" vmode="alt"/>
+    </block>
+    <block name="FLand">
+      <exception cond="NavDetectGround()" deroute="landed"/>
+      <exception cond="!nav_is_in_flight()" deroute="landed"/>
+      <exception cond="stage_time > 2" deroute="landed"/>
+      <attitude pitch="0" roll="0" until="FALSE" climb="nav_descend_vspeed" vmode="climb"/>
     </block>
     <block name="Standby" strip_button="Standby" strip_icon="home.png">
-      <stay wp="STDBY"/>
+      <exception cond="stage_time > 2" deroute="landed"/>
     </block>
     <block name="stay_p1">
       <stay wp="p1"/>

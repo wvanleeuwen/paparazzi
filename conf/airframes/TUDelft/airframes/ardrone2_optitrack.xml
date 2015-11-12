@@ -6,8 +6,8 @@
     <target name="ap" board="ardrone2">
       <define name="FAILSAFE_DESCENT_SPEED" value="0.5"/>
       <define name="USE_SONAR" value="0"/>
-      <configure name="USE_BARO_BOARD" value="FALSE"/>
-      <configure name="USE_MAGNETOMETER" value="0"/>
+      <configure name="USE_BARO_BOARD" value="TRUE"/>
+      <configure name="USE_MAGNETOMETER" value="1"/>
     </target>
 
     <target name="nps" board="pc">
@@ -20,7 +20,7 @@
     <subsystem name="motor_mixing"/>
     <subsystem name="actuators" type="ardrone2"/>
     <subsystem name="imu" type="ardrone2"/>
-    <subsystem name="gps" type="datalink"/>
+    <subsystem name="gps" type="vision"/>
     <subsystem name="stabilization" type="indi"/>
     <subsystem name="ahrs" type="int_cmpl_quat"/>
     <subsystem name="ins" type="extended"/>
@@ -81,7 +81,7 @@
     <define name="MAG_Z_CURRENT_COEF" value="0.0"/>
 
     <define name="BODY_TO_IMU_PHI" value="0." unit="deg"/>
-    <define name="BODY_TO_IMU_THETA" value="0." unit="deg"/>
+    <define name="BODY_TO_IMU_THETA" value="5." unit="deg"/>
     <define name="BODY_TO_IMU_PSI" value="0." unit="deg"/>
   </section>
 
@@ -204,6 +204,11 @@
     <define name="IGAIN" value="30"/>
     <define name="VGAIN" value="0"/>
     <define name="AGAIN" value="0"/>
+  </section>
+
+  <section name="NAVIGATION" prefix="NAV_">
+    <define name="CLIMB_VSPEED" value="1.0"/>
+    <define name="DESCEND_VSPEED" value="-1.5"/>
   </section>
 
   <section name="SIMULATOR" prefix="NPS_">
