@@ -49,10 +49,11 @@
       <stay wp="STDBY"/>
     </block>
     <block name="START" strip_button="Go" strip_icon="lookfore.png">
-      <call fun="NavSetWaypointHere(WP_GOAL)"/>
+      <call fun="mod_avoid_init(WP_GOAL)"/>
     </block>
     <block name="StayGoal">
-      <stay wp="GOAL"/>
+      <call fun="mod_avoid_run()"/>
+      <deroute block="Standby"/>
     </block>
     <block name="stay_p1">
       <stay wp="p1"/>

@@ -26,7 +26,10 @@
 #ifndef CONSTANT_FORWARD_FLIGHT_H
 #define CONSTANT_FORWARD_FLIGHT_H
 
+#include "std.h"
 
+bool_t mod_avoid_init(uint8_t _wp);
+bool_t mod_avoid_run(void);
 
 extern void forward_flight_init(void);
 extern void forward_flight_periodic(void);

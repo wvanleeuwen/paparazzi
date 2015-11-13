@@ -30,7 +30,7 @@
 
 #include "navigation.h"
 
-
+#include "std.h"
 
 // Serial Port
 #include "mcu_periph/uart.h"
@@ -76,8 +76,23 @@ struct AvoidNavigationStruct avoid_navigation_data;
 
 
 
+const int start[20] = {
+    -15, -5, -5, -5, -3,
+    -3,-3,-3,-3,-3,
+    -3,-3,-3,-3,-3,
+    -3,-3,-3,-3,-3
+};
+
+const int stop[20] = {
+    20, 18, 16, 14, 2,
+    0,0,0,0,0,
+    0,0,0,0,0,
+    0,0,0,0,0,
+};
 
 
+float trim_phi = -1.5;
+float trim_theta = 4.5;
 
 static void stereo_parse(uint8_t c);
 static void stereo_parse(uint8_t c)
@@ -92,17 +107,98 @@ void forward_flight_init(void) {
   avoid_navigation_data.mode = 0;
 
 }
+
+uint8_t wp_nr = 0;
+int mod_state = 20;
+
+// start, move, brake, turn
+int mod_phase = 0;
+
+/** FP functions */
+bool_t mod_avoid_init(uint8_t _wp)
+{
+  //height = GetPosAlt();
+  wp_nr = _wp;
+  mod_state = 0;
+  mod_phase = 0;
+  return FALSE;
+}
+
+void go(float roll, float pitch, float yaw)
+{
+  nav_set_heading_rad(RadOfDeg(yaw));
+  NavAttitude(RadOfDeg(roll+trim_phi));
+  NavVerticalAutoThrottleMode(RadOfDeg(pitch+trim_theta));
+  NavVerticalAltitudeMode(WaypointAlt(wp_nr), 0.);
+}
+
+void play(mod_state)
+{
+  mod_state++;
+  if (mod_state >= 20)
+  {
+    mod_state = 0;
+    mod_phase++;
+  }
+}
+
+bool_t mod_avoid_run(void)
+{
+  if (mod_state >= 20)
+  {
+    return FALSE;
+  }
+
+  switch (mod_phase)
+  {
+  case 0:
+    go(0,start[mod_state],0);
+    break;
+  case 1:
+  case 2:
+    go(0,-3,0);
+    break;
+  case 3:
+    go(0,stop[mod_state],0);
+    break;
+  case 4:
+  case 5:
+    go(0,0,0);
+    break;
+  }
+  mod_state++;
+  if (mod_state >= 20)
+  {
+    mod_state = 0;
+    mod_phase++;
+    if (mod_phase >= 6)
+      return FALSE;
+  }
+
+  return TRUE;
+}
+
+
 void forward_flight_periodic(void) {
 
   static float heading = 0;
 
+  static int speed = 0;
+  static int action = 0;
+
+  //////////////////////////////////////////////
   // Read Serial
   while (StereoChAvailable()) {
     stereo_parse(StereoGetch());
   }
 
-  // Results
+  /////////////////////////////////////////////
+  // Downlink
   DOWNLINK_SEND_PAYLOAD(DefaultChannel, DefaultDevice, 1, avoid_navigation_data.stereo_bin);
+
+
+
+
 
   volatile bool_t once = TRUE;
   // Move waypoint with constant speed in current direction
@@ -111,23 +207,16 @@ void forward_flight_periodic(void) {
         (avoid_navigation_data.stereo_bin[0] == 100)
       )
   {
+    // FORWARD!!!
+    action = 1;
     once = TRUE;
-    struct EnuCoor_f enu;
-    enu.x = waypoint_get_x(WP_GOAL);
-    enu.y = waypoint_get_y(WP_GOAL);
-    enu.z = waypoint_get_alt(WP_GOAL);
-    float sin_heading = sinf(ANGLE_FLOAT_OF_BFP(nav_heading));
-    float cos_heading = cosf(ANGLE_FLOAT_OF_BFP(nav_heading));
-    enu.x += (sin_heading * 1.3 / 20);
-    enu.y += (cos_heading * 1.3 / 20);
-    waypoint_set_enu(WP_GOAL, &enu);
   }
   else if (avoid_navigation_data.stereo_bin[0] == 98)
   {
     // STOP!!!
     if (once)
     {
-      NavSetWaypointHere(WP_GOAL);
+      action = 0;
       once = FALSE;
     }
   }
@@ -136,16 +225,16 @@ void forward_flight_periodic(void) {
     once = TRUE;
   }
 
-
-  switch (avoid_navigation_data.stereo_bin[0]) {
-    case 99:     // Turn
+  if (avoid_navigation_data.stereo_bin[0] == 99)
+  {
+    /*
+    // TURN!!!
       heading += 4;
       if (heading > 360) heading = 0;
       nav_set_heading_rad(RadOfDeg(heading));
-      break;
-    default:    // do nothing
-      break;
+      */
   }
+
 
 #if STEREO_LED
   if (obstacle_detected) {
