@@ -74,25 +74,24 @@ struct AvoidNavigationStruct {
 struct AvoidNavigationStruct avoid_navigation_data;
 
 
+#define FORWARD   -3
 
-
-const int start[20] = {
-    -15, -5, -5, -5, -3,
-    -3,-3,-3,-3,-3,
-    -3,-3,-3,-3,-3,
-    -3,-3,-3,-3,-3
+const int start[10] = {
+    -14, -15, -12, -9, FORWARD,
+    FORWARD,FORWARD,FORWARD,FORWARD,FORWARD
 };
 
-const int stop[20] = {
-    20, 18, 16, 14, 2,
-    0,0,0,0,0,
-    0,0,0,0,0,
-    0,0,0,0,0,
+const int stop[10] = {
+    20, 18, 16, 14, 12,
+    10,0,0,0,0
 };
 
 
-float trim_phi = -1.5;
+float trim_phi = -0.1;
 float trim_theta = 4.5;
+
+float heading = 0;
+
 
 static void stereo_parse(uint8_t c);
 static void stereo_parse(uint8_t c)
@@ -109,10 +108,12 @@ void forward_flight_init(void) {
 }
 
 uint8_t wp_nr = 0;
-int mod_state = 20;
+int mod_state = 10;
 
 // start, move, brake, turn
 int mod_phase = 0;
+
+int phase_request = 3;
 
 /** FP functions */
 bool_t mod_avoid_init(uint8_t _wp)
@@ -124,7 +125,7 @@ bool_t mod_avoid_init(uint8_t _wp)
   return FALSE;
 }
 
-void go(float roll, float pitch, float yaw)
+static inline void go(float roll, float pitch, float yaw)
 {
   nav_set_heading_rad(RadOfDeg(yaw));
   NavAttitude(RadOfDeg(roll+trim_phi));
@@ -132,14 +133,38 @@ void go(float roll, float pitch, float yaw)
   NavVerticalAltitudeMode(WaypointAlt(wp_nr), 0.);
 }
 
-void play(mod_state)
+static inline void turn(void)
+{
+  heading += 6;
+  if (heading > 360)
+    heading -= 360;
+  go(1.7,0.2,heading);
+}
+
+static inline void play(void)
 {
   mod_state++;
-  if (mod_state >= 20)
+  if (mod_state >= 10)
   {
     mod_state = 0;
     mod_phase++;
   }
+}
+
+static void set(int phase)
+{
+  if (phase == 1)
+    phase = 0;
+  if (phase == 3)
+    phase = 2;
+
+  mod_state = 0;
+  mod_phase = phase;
+}
+
+static void request(int phase)
+{
+  phase_request = phase;
 }
 
 bool_t mod_avoid_run(void)
@@ -151,28 +176,37 @@ bool_t mod_avoid_run(void)
 
   switch (mod_phase)
   {
-  case 0:
-    go(0,start[mod_state],180);
+  case 0: // start
+    go(0,start[mod_state],heading);
+    play();
     break;
-  case 1:
-  case 2:
-    go(0,-3,180);
+  case 1: // move
+    go(0,FORWARD,heading);
+    if (phase_request != 1)
+    {
+      set(phase_request);
+    }
+    //play();
+    break;
+  case 2:  // stop
+    go(0,stop[mod_state],heading);
+    play();
     break;
   case 3:
-    go(0,stop[mod_state],180);
+    go(0,0,heading);
+    if (phase_request != 3)
+    {
+      set(phase_request);
+    }
     break;
   case 4:
-  case 5:
-    go(0,0,180);
+    turn();
+    if (phase_request != 4)
+    {
+      set(phase_request);
+    }
+    //play();
     break;
-  }
-  mod_state++;
-  if (mod_state >= 20)
-  {
-    mod_state = 0;
-    mod_phase++;
-    if (mod_phase >= 6)
-      return FALSE;
   }
 
   return TRUE;
@@ -181,10 +215,9 @@ bool_t mod_avoid_run(void)
 
 void forward_flight_periodic(void) {
 
-  static float heading = 0;
 
-  static int speed = 0;
-  static int action = 0;
+  //static int speed = 0;
+  //static int action = 0;
 
   //////////////////////////////////////////////
   // Read Serial
@@ -198,41 +231,26 @@ void forward_flight_periodic(void) {
 
 
 
-
-
-  volatile bool_t once = TRUE;
   // Move waypoint with constant speed in current direction
   if (
-        (avoid_navigation_data.stereo_bin[0] == 97) ||
-        (avoid_navigation_data.stereo_bin[0] == 100)
+        (avoid_navigation_data.stereo_bin[0] == 97)
+        ||      (avoid_navigation_data.stereo_bin[0] == 100)
       )
   {
     // FORWARD!!!
-    action = 1;
-    once = TRUE;
+    request(1);
   }
   else if (avoid_navigation_data.stereo_bin[0] == 98)
   {
-    // STOP!!!
-    if (once)
-    {
-      action = 0;
-      once = FALSE;
-    }
-  }
-  else
-  {
-    once = TRUE;
+    request(3); // stop
   }
 
   if (avoid_navigation_data.stereo_bin[0] == 99)
   {
     /*
     // TURN!!!
-      heading += 4;
-      if (heading > 360) heading = 0;
-      nav_set_heading_rad(RadOfDeg(heading));
-      */
+     */
+    request(4);
   }
 
 
