@@ -104,26 +104,42 @@ void forward_flight_periodic(void) {
   // Results
   DOWNLINK_SEND_PAYLOAD(DefaultChannel, DefaultDevice, 1, avoid_navigation_data.stereo_bin);
 
+  volatile bool_t once = TRUE;
   // Move waypoint with constant speed in current direction
   if (
         (avoid_navigation_data.stereo_bin[0] == 97) ||
         (avoid_navigation_data.stereo_bin[0] == 100)
       )
   {
+    once = TRUE;
     struct EnuCoor_f enu;
     enu.x = waypoint_get_x(WP_GOAL);
     enu.y = waypoint_get_y(WP_GOAL);
     enu.z = waypoint_get_alt(WP_GOAL);
     float sin_heading = sinf(ANGLE_FLOAT_OF_BFP(nav_heading));
     float cos_heading = cosf(ANGLE_FLOAT_OF_BFP(nav_heading));
-    enu.x += (sin_heading * 0.5 / 20);
-    enu.y += (cos_heading * 0.5 / 20);
+    enu.x += (sin_heading * 1.3 / 20);
+    enu.y += (cos_heading * 1.3 / 20);
     waypoint_set_enu(WP_GOAL, &enu);
   }
+  else if (avoid_navigation_data.stereo_bin[0] == 98)
+  {
+    // STOP!!!
+    if (once)
+    {
+      NavSetWaypointHere(WP_GOAL);
+      once = FALSE;
+    }
+  }
+  else
+  {
+    once = TRUE;
+  }
+
 
   switch (avoid_navigation_data.stereo_bin[0]) {
     case 99:     // Turn
-      heading += 3;
+      heading += 4;
       if (heading > 360) heading = 0;
       nav_set_heading_rad(RadOfDeg(heading));
       break;
