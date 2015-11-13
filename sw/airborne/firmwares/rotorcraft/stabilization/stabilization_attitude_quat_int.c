@@ -173,7 +173,6 @@ void stabilization_attitude_set_rpy_setpoint_i(struct Int32Eulers *rpy)
 {
   // stab_att_sp_euler.psi still used in ref..
   stab_att_sp_euler = *rpy;
-
   int32_quat_of_eulers(&stab_att_sp_quat, &stab_att_sp_euler);
 }
 

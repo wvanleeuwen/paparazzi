@@ -152,18 +152,18 @@ bool_t mod_avoid_run(void)
   switch (mod_phase)
   {
   case 0:
-    go(0,start[mod_state],0);
+    go(0,start[mod_state],180);
     break;
   case 1:
   case 2:
-    go(0,-3,0);
+    go(0,-3,180);
     break;
   case 3:
-    go(0,stop[mod_state],0);
+    go(0,stop[mod_state],180);
     break;
   case 4:
   case 5:
-    go(0,0,0);
+    go(0,0,180);
     break;
   }
   mod_state++;
