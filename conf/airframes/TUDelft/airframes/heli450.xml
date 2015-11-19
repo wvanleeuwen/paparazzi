@@ -127,9 +127,9 @@
     <define name="REF_TAU" value="4"/>
 
     <!-- feedback -->
-    <define name="GAIN_P" value="400"/>
-    <define name="GAIN_Q" value="400"/>
-    <define name="GAIN_R" value="350"/>
+    <define name="GAIN_P" value="1000"/>
+    <define name="GAIN_Q" value="1000"/>
+    <define name="GAIN_R" value="1000"/>
 
     <define name="IGAIN_P" value="75"/>
     <define name="IGAIN_Q" value="75"/>
@@ -209,6 +209,8 @@
     <define name="MODE_MANUAL" value="AP_MODE_RATE_DIRECT"/>
     <define name="MODE_AUTO1"  value="AP_MODE_HOVER_Z_HOLD"/>
     <define name="MODE_AUTO2"  value="AP_MODE_NAV"/>
+
+    <define name="KILL_AS_FAILSAFE" value="TRUE"/>
   </section>
 
   <section name="BAT">

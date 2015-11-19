@@ -223,6 +223,7 @@ void stabilization_rate_run(bool_t in_flight)
   /* compute feed-back command */
   struct Int32Rates _error;
   struct Int32Rates *body_rate = stateGetBodyRates_i();
+//   struct Int32Rates *body_rate = ;
   RATES_DIFF(_error, stabilization_rate_sp, (*body_rate));
   if (in_flight) {
     /* update integrator */
@@ -233,10 +234,10 @@ void stabilization_rate_run(bool_t in_flight)
   }
 
   /* PI */
-  stabilization_rate_fb_cmd.p = stabilization_rate_gain.p * _error.p +
+  stabilization_rate_fb_cmd.p = stabilization_rate_gain.p * stabilization_rate_sp.p +
                                 OFFSET_AND_ROUND2((stabilization_rate_igain.p  * stabilization_rate_sum_err.p), 10);
 
-  stabilization_rate_fb_cmd.q = stabilization_rate_gain.q * _error.q +
+  stabilization_rate_fb_cmd.q = stabilization_rate_gain.q * stabilization_rate_sp.q +
                                 OFFSET_AND_ROUND2((stabilization_rate_igain.q  * stabilization_rate_sum_err.q), 10);
 
   stabilization_rate_fb_cmd.r = stabilization_rate_gain.r * _error.r +
