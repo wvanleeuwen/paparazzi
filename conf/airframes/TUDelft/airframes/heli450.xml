@@ -211,6 +211,7 @@
     <define name="MODE_AUTO2"  value="AP_MODE_NAV"/>
 
     <define name="KILL_AS_FAILSAFE" value="TRUE"/>
+    <define name="AHRS_PROPAGATE_LOW_PASS_RATES" value="TRUE"/>
   </section>
 
   <section name="BAT">
