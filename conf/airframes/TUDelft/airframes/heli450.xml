@@ -127,9 +127,9 @@
     <define name="REF_TAU" value="4"/>
 
     <!-- feedback -->
-    <define name="GAIN_P" value="1000"/>
-    <define name="GAIN_Q" value="1000"/>
-    <define name="GAIN_R" value="1000"/>
+    <define name="GAIN_P" value="2048"/>
+    <define name="GAIN_Q" value="2048"/>
+    <define name="GAIN_R" value="2000"/>
 
     <define name="IGAIN_P" value="75"/>
     <define name="IGAIN_Q" value="75"/>
