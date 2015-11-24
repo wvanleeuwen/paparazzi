@@ -25,7 +25,14 @@
 
 #include "modules/stereocam/stereocam_range2roll.h"
 
+#include "state.h"
 #include "firmwares/rotorcraft/navigation.h"
+#include "math/pprz_algebra_int.h"
+#include "firmwares/rotorcraft/stabilization/stabilization_attitude.h"
+#include "firmwares/rotorcraft/guidance/guidance_v.h"
+#include "autopilot.h"
+#include "subsystems/datalink/downlink.h"
+
 
 // Serial Port
 #include "mcu_periph/uart.h"
@@ -155,6 +162,77 @@ void range2roll_flightplan(void) {
   go(roll,pitch,yaw,height);
 }
 
+struct Int32Eulers avoid_nav_cmd;   ///< The commands that are send to the hover loop
 
+void guidance_h_module_init(void) {
+  avoid_nav_cmd.phi = 0;
+  avoid_nav_cmd.theta = 0;
+  avoid_nav_cmd.psi = 0;
+}
+
+int32_t cmd_height = 0;
+
+#include "firmwares/rotorcraft/guidance/guidance_v_ref.h"
+
+
+void guidance_h_module_enter(void) {
+  /* Set rool/pitch to 0 degrees and psi to current heading */
+  avoid_nav_cmd.phi = 0;
+  avoid_nav_cmd.theta = 0;
+  avoid_nav_cmd.psi = stateGetNedToBodyEulers_i()->psi;
+
+  cmd_height = stateGetPositionNed_i()->z * 512;
+}
+
+#include "subsystems/radio_control.h"
+
+int32_t radio_roll = 0;
+int32_t radio_pitch = 0;
+int32_t radio_yaw = 0;
+
+void guidance_h_module_read_rc(void) {
+
+  radio_roll = radio_control.values[RADIO_ROLL];
+  radio_pitch = radio_control.values[RADIO_PITCH];
+  radio_yaw = radio_control.values[RADIO_YAW];
+  avoid_nav_cmd.psi += radio_yaw / 25;
+}
+
+
+// Range: 0 -> 64 = 5 bit
+// Angle: 12 bit radians: 15 deg = 10
+#define ANGLE_FROM_RANGE(X) ((X)<<5)
+
+void guidance_h_module_run(bool_t in_flight) {
+
+  if (range_data.up < 5) {
+    cmd_height -= 1;
+  } else if (range_data.up > 50) {
+    cmd_height += 5;
+  }
+  else if (range_data.up > 20) {
+    cmd_height += 1;
+  }
+  guidance_v_z_sp = cmd_height / 512;
+
+  if (range_data.front > 15) {
+    avoid_nav_cmd.psi -= 4;
+  } else {
+    avoid_nav_cmd.psi -= 1;
+  }
+
+  int32_t lateral = ANGLE_FROM_RANGE(range_data.left) - ANGLE_FROM_RANGE(range_data.right);
+  int32_t longitu = ANGLE_FROM_RANGE(range_data.front);
+
+  avoid_nav_cmd.phi = radio_roll / 4 + lateral; //( * 0.5 rad / 9600 * 4096)
+  avoid_nav_cmd.theta = radio_pitch / 4 + longitu;
+
+  /* Update the setpoint */
+  stabilization_attitude_set_rpy_setpoint_i(&avoid_nav_cmd);
+
+  /* Run the default attitude stabilization */
+  stabilization_attitude_run(in_flight);
+
+}
 
 

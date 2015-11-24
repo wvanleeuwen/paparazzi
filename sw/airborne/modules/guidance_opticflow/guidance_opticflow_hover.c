@@ -33,6 +33,7 @@
 #include "subsystems/abi.h"
 
 // Stabilization
+#include "math/pprz_algebra_int.h"
 #include "firmwares/rotorcraft/stabilization/stabilization_attitude.h"
 #include "firmwares/rotorcraft/guidance/guidance_v.h"
 #include "autopilot.h"
