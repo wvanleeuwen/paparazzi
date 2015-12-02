@@ -38,12 +38,12 @@
 
     <subsystem name="radio_control" type="spektrum">
       <configure name="USE_SECONDARY_SPEKTRUM_RECEIVER" value="1"/>
-      <define name="RADIO_CONTROL_SPEKTRUM_NO_SIGN" value="1"/>
     </subsystem>
 
     <subsystem name="actuators"     type="spektrum">
       <configure name="ACTUATORS_SPEKTRUM_DEV2" value="UART6"/>
     </subsystem>
+    <subsystem name="heli" type="throttle_curve"/>
     <define name="RC_LOST_FBW_MODE" value="FBW_MODE_FAILSAFE"/><!-- Switch to Failsafe or to Autopilot on RC loss? -->
     <define name="RC_LOST_IN_AUTO_FBW_MODE" value="FBW_MODE_FAILSAFE"/><!-- Switch to Failsafe with a working autopilot on RC loss? -->
     <define name="AP_LOST_FBW_MODE" value="FBW_MODE_MANUAL"/><!-- Switch to Failsafe or to Manual on AP loss? -->
@@ -71,41 +71,46 @@
   </servos>
 
   <section name="RADIO">
-    <define name="RADIO_COLLECTIVE" value="RADIO_FLAP"/>
-    <define name="RADIO_TAIL_GAIN" value="RADIO_AUX2"/>
+    <define name="RADIO_TH_HOLD" value="RADIO_FLAP"/><!-- KILL -->
+    <define name="RADIO_FMODE"   value="RADIO_AUX2"/><!-- Throttle Curve -->
   </section>
 
   <commands>
-    <axis name="THRUST"     failsafe_value="0"/><!-- Ignored -->
-
-    <axis name="THROTTLE"   failsafe_value="0"/>
+    <axis name="THRUST"     failsafe_value="0"/>
     <axis name="ROLL"       failsafe_value="0"/>
     <axis name="PITCH"      failsafe_value="0"/>
     <axis name="YAW"        failsafe_value="0"/>
-    <axis name="COLLECTIVE" failsafe_value="0"/>
-    <axis name="TAIL_GAIN"  failsafe_value="0"/>
+    <axis name="TH_HOLD"    failsafe_value="-9600"/>
+    <axis name="FMODE"      failsafe_value="-9600"/>
   </commands>
 
   <rc_commands>
-    <set command="THROTTLE"   value="@THROTTLE"/>
+    <set command="THRUST"     value="@THROTTLE"/>
     <set command="ROLL"       value="@ROLL"/>
     <set command="PITCH"      value="@PITCH"/>
     <set command="YAW"        value="@YAW"/>
-    <set command="COLLECTIVE" value="@COLLECTIVE"/>
-    <set command="TAIL_GAIN"  value="@TAIL_GAIN"/>
+    <set command="FMODE"      value="@FMODE"/>
+    <set command="TH_HOLD"    value="@TH_HOLD"/>
   </rc_commands>
 
   <auto_rc_commands>
-   <set command="TAIL_GAIN"   value="@TAIL_GAIN"/>
+   <set command="TH_HOLD"     value="@TH_HOLD"/>
   </auto_rc_commands>
 
+  <heli_curves>
+    <curve throttle="0,3840,5760,7200,8640" collective="-3840,-960,1920,5088,8256"/>
+    <curve throttle="9120,8160,9120" collective="-9600,0,9600"/>
+    <curve throttle="9600,8640,9600" collective="-9600,0,9600"/>
+  </heli_curves>
+
   <command_laws>
-    <set servo="THROTTLE"    value="@THROTTLE"/>
+    <call fun="throttle_curve_run(TRUE, values)"/>
+    <set servo="THROTTLE"    value="((@TH_HOLD > 4800)? throttle_curve.throttle :-9600)"/>
     <set servo="ROLL"        value="@ROLL"/>
     <set servo="PITCH"       value="@PITCH"/>
     <set servo="YAW"         value="@YAW"/>
-    <set servo="COLLECTIVE"  value="@COLLECTIVE"/>
-    <set servo="TAIL_GAIN"   value="@TAIL_GAIN"/>
+    <set servo="COLLECTIVE"  value="throttle_curve.collective"/>
+    <set servo="TAIL_GAIN"   value="0"/>
     <set servo="AUX2"        value="0"/>
   </command_laws>
 

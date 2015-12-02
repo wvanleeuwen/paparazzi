@@ -32,7 +32,8 @@
 /* Initialize the throttle curves from the airframe file */
 struct throttle_curve_t throttle_curve = {
   .nb_curves = THROTTLE_CURVES_NB,
-  .curves = THROTTLE_CURVES
+  .curves = THROTTLE_CURVES,
+  .mode = THROTTLE_CURVE_MODE_INIT
 };
 
 /**
@@ -40,7 +41,6 @@ struct throttle_curve_t throttle_curve = {
  */
 void throttle_curve_init(void)
 {
-  throttle_curve.mode       = THROTTLE_CURVE_MODE_INIT;
   throttle_curve.throttle   = throttle_curve.curves[THROTTLE_CURVE_MODE_INIT].throttle[0];
   throttle_curve.collective = throttle_curve.curves[THROTTLE_CURVE_MODE_INIT].collective[0];
 }

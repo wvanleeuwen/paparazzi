@@ -36,6 +36,9 @@
 #if USE_MOTOR_MIXING
 #include "subsystems/actuators/motor_mixing.h"
 #endif
+#if USE_THROTTLE_CURVE
+#include "modules/helicopter/throttle_curve.h"
+#endif
 
 
 #include "subsystems/electrical.h"
@@ -90,6 +93,9 @@ STATIC_INLINE void main_init(void)
   actuators_init();
 #if USE_MOTOR_MIXING
   motor_mixing_init();
+#endif
+#if USE_THROTTLE_CURVE
+  throttle_curve_init();
 #endif
 
   radio_control_init();
