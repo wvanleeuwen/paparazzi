@@ -71,6 +71,7 @@
   </servos>
 
   <section name="RADIO">
+    <define name="RADIO_KILL_SWITCH" value="RADIO_FLAP"/><!-- KILL -->
     <define name="RADIO_TH_HOLD" value="RADIO_FLAP"/><!-- KILL -->
     <define name="RADIO_FMODE"   value="RADIO_AUX2"/><!-- Throttle Curve -->
   </section>
@@ -94,6 +95,7 @@
   </rc_commands>
 
   <auto_rc_commands>
+   <set command="FMODE"       value="@FMODE"/>
    <set command="TH_HOLD"     value="@TH_HOLD"/>
   </auto_rc_commands>
 
@@ -119,8 +121,8 @@
     <define name="NAV_CLIMB_VSPEED" value="2.5"/>
     <define name="NAV_DESCEND_VSPEED" value="-1.0"/>
     <define name="NO_RC_THRUST_LIMIT" value="TRUE"/>
-    <define name="USE_THROTTLE_FOR_MOTOR_ARMING" value="TRUE"/>
-    <!--define name="USE_KILL_SWITCH_FOR_MOTOR_ARMING" value="TRUE"/-->
+    <!--define name="USE_THROTTLE_FOR_MOTOR_ARMING" value="TRUE"/-->
+    <define name="USE_KILL_SWITCH_FOR_MOTOR_ARMING" value="TRUE"/>
     <define name="VoltageOfAdc(adc)" value="(0.014355*adc)"/>
     <define name="MilliAmpereOfAdc(adc)" value="(((float)adc)-1990.0f)*40.29f*2.0f"/>  <!-- 100Amp = 2Volt -> 2482,42 tick/100Amp"(0.0402832*adc)" -->
   </section>
@@ -198,11 +200,11 @@
     <define name="REF_MAX_RDOT" value="RadOfDeg(1800.)"/>
 
     <!-- feedback -->
-    <define name="PHI_PGAIN" value="500"/>
-    <define name="PHI_DGAIN" value="100"/>
+    <define name="PHI_PGAIN" value="800"/>
+    <define name="PHI_DGAIN" value="50"/>
     <define name="PHI_IGAIN" value="0"/>
-    <define name="THETA_PGAIN" value="500"/>
-    <define name="THETA_DGAIN" value="100"/>
+    <define name="THETA_PGAIN" value="800"/>
+    <define name="THETA_DGAIN" value="50"/>
     <define name="THETA_IGAIN" value="0"/>
     <define name="PSI_PGAIN" value="200"/>
     <define name="PSI_DGAIN" value="0"/>
@@ -215,20 +217,20 @@
   </section>
 
   <section name="GUIDANCE_V" prefix="GUIDANCE_V_">
-    <define name="HOVER_KP"    value="150"/>
-    <define name="HOVER_KD"    value="80"/>
-    <define name="HOVER_KI"    value="20"/>
-    <define name="NOMINAL_HOVER_THROTTLE" value="0.5"/>
+    <define name="HOVER_KP"    value="100"/>
+    <define name="HOVER_KD"    value="60"/>
+    <define name="HOVER_KI"    value="15"/>
+    <define name="NOMINAL_HOVER_THROTTLE" value="0.62"/>
     <define name="ADAPT_THROTTLE_ENABLED" value="TRUE"/>
   </section>
 
   <section name="GUIDANCE_H" prefix="GUIDANCE_H_">
-    <define name="MAX_BANK" value="35" unit="deg"/>
+    <define name="MAX_BANK" value="25" unit="deg"/>
     <define name="USE_SPEED_REF" value="TRUE"/>
-    <define name="PGAIN" value="50"/>
-    <define name="DGAIN" value="100"/>
-    <define name="AGAIN" value="70"/>
-    <define name="IGAIN" value="20"/>
+    <define name="PGAIN" value="30"/>
+    <define name="DGAIN" value="50"/>
+    <define name="AGAIN" value="35"/>
+    <define name="IGAIN" value="10"/>
   </section>
 
   <section name="SIMULATOR" prefix="NPS_">
@@ -242,7 +244,7 @@
   <section name="AUTOPILOT">
     <define name="MODE_MANUAL" value="AP_MODE_RC_DIRECT"/>
     <define name="MODE_AUTO1"  value="AP_MODE_ATTITUDE_DIRECT"/>
-    <define name="MODE_AUTO2"  value="AP_MODE_HOVER_DIRECT"/>
+    <define name="MODE_AUTO2"  value="AP_MODE_HOVER_Z_HOLD"/>
   </section>
 
   <section name="BAT">
