@@ -20,6 +20,7 @@
     <subsystem name="imu"           type="lisa_mx_v2.1"/>
     <subsystem name="gps"           type="ublox">
       <configure name="GPS_PORT" value="UART4"/>
+      <configure name="GPS_BAUD" value="B115200"/>
     </subsystem>
     <subsystem name="stabilization" type="int_quat"/>
     <subsystem name="ahrs"          type="int_cmpl_quat"/>
