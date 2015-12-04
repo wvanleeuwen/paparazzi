@@ -101,8 +101,8 @@
   </auto_rc_commands>
 
   <heli_curves>
-    <curve throttle="0,3840,5760,7200,8640" collective="-3840,-960,1920,5088,8256"/>
-    <curve throttle="9120,8160,9120" collective="-9600,0,9600"/>
+    <curve throttle="0,3940,5860,7300,8640" collective="-3840,-960,1920,5088,8256"/>
+    <curve throttle="8920,7960,8920" collective="-9600,0,9600"/>
     <curve throttle="9600,8640,9600" collective="-9600,0,9600"/>
   </heli_curves>
 
@@ -120,7 +120,7 @@
   <section name="MISC">
     <define name="ROTORCRAFT_COMMANDS_YAW_ALWAYS_ENABLED" value="TRUE" />
     <define name="NAV_CLIMB_VSPEED" value="2.5"/>
-    <define name="NAV_DESCEND_VSPEED" value="-1.0"/>
+    <define name="NAV_DESCEND_VSPEED" value="-0.7"/>
     <define name="NO_RC_THRUST_LIMIT" value="TRUE"/>
     <!--define name="USE_THROTTLE_FOR_MOTOR_ARMING" value="TRUE"/-->
     <define name="USE_KILL_SWITCH_FOR_MOTOR_ARMING" value="TRUE"/>
@@ -183,31 +183,31 @@
     <!-- setpoints -->
     <define name="SP_MAX_PHI" value="45." unit="deg"/>
     <define name="SP_MAX_THETA" value="45." unit="deg"/>
-    <define name="SP_MAX_R" value="150." unit="deg/s"/>
+    <define name="SP_MAX_R" value="90." unit="deg/s"/>
     <define name="DEADBAND_R" value="200"/>
 
     <!-- reference -->
     <define name="REF_OMEGA_P" value="800" unit="deg/s"/>
     <define name="REF_ZETA_P" value="0.85"/>
-    <define name="REF_MAX_P" value="300." unit="deg/s"/>
+    <define name="REF_MAX_P" value="150." unit="deg/s"/>
     <define name="REF_MAX_PDOT" value="RadOfDeg(7000.)"/>
     <define name="REF_OMEGA_Q" value="800" unit="deg/s"/>
     <define name="REF_ZETA_Q" value="0.85"/>
-    <define name="REF_MAX_Q" value="300." unit="deg/s"/>
+    <define name="REF_MAX_Q" value="150." unit="deg/s"/>
     <define name="REF_MAX_QDOT" value="RadOfDeg(7000.)"/>
     <define name="REF_OMEGA_R" value="500" unit="deg/s"/>
     <define name="REF_ZETA_R" value="0.85"/>
-    <define name="REF_MAX_R" value="180." unit="deg/s"/>
-    <define name="REF_MAX_RDOT" value="RadOfDeg(1800.)"/>
+    <define name="REF_MAX_R" value="90." unit="deg/s"/>
+    <define name="REF_MAX_RDOT" value="RadOfDeg(1000.)"/>
 
     <!-- feedback -->
-    <define name="PHI_PGAIN" value="800"/>
+    <define name="PHI_PGAIN" value="1200"/>
     <define name="PHI_DGAIN" value="50"/>
     <define name="PHI_IGAIN" value="0"/>
-    <define name="THETA_PGAIN" value="800"/>
+    <define name="THETA_PGAIN" value="1200"/>
     <define name="THETA_DGAIN" value="50"/>
     <define name="THETA_IGAIN" value="0"/>
-    <define name="PSI_PGAIN" value="200"/>
+    <define name="PSI_PGAIN" value="300"/>
     <define name="PSI_DGAIN" value="0"/>
     <define name="PSI_IGAIN" value="0"/>
 
@@ -227,17 +227,18 @@
 
   <section name="GUIDANCE_H" prefix="GUIDANCE_H_">
     <define name="MAX_BANK" value="25" unit="deg"/>
+    <define name="REF_MAX_SPEED" value="2" unit="m/s"/>
     <define name="USE_SPEED_REF" value="TRUE"/>
-    <define name="PGAIN" value="30"/>
+    <define name="PGAIN" value="20"/>
     <define name="DGAIN" value="50"/>
-    <define name="AGAIN" value="35"/>
-    <define name="IGAIN" value="10"/>
+    <define name="AGAIN" value="25"/>
+    <define name="IGAIN" value="8"/>
   </section>
 
   <section name="SIMULATOR" prefix="NPS_">
-    <define name="ACTUATOR_NAMES"  value="{&quot;nw_motor&quot;, &quot;ne_motor&quot;, &quot;se_motor&quot;, &quot;sw_motor&quot;}"/>
-    <define name="JSBSIM_MODEL" value="&quot;simple_x_quad&quot;"/>
-    <define name="SENSORS_PARAMS" value="&quot;nps_sensors_params_default.h&quot;"/>
+    <define name="ACTUATOR_NAMES"  value="nw_motor, ne_motor, se_motor, sw_motor" type="string[]"/>
+    <define name="JSBSIM_MODEL" value="simple_x_quad" type="string"/>
+    <define name="SENSORS_PARAMS" value="nps_sensors_params_default.h" type="string"/>
     <!-- mode switch on joystick channel 5 (axis numbering starting at zero) -->
     <define name="JS_AXIS_MODE" value="4"/>
   </section>
