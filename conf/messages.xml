@@ -196,7 +196,11 @@
     <field name="YprU3" 	type="float" 	unit="deg"/>
   </message>
 
-  <!--24 is free -->
+  <message name="REFROLLPITCH" id="24">
+    <field name="ref_roll" type="float"/>
+    <field name="ref_pitch" type="float"/>
+  </message>
+
 
   <message name="SVINFO" id="25">
     <field name="chn" type="uint8"/>
@@ -894,6 +898,7 @@
     <field name="velocity" type="float"/>
     <field name="velocitySideways" type="float"/>
     <field name="velocityUpDown" type="float"/>
+    <field name="mode" type="uint8"/>
   </message>
 
   <message name="MLX_SERIAL" id="113">
