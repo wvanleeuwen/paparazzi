@@ -653,10 +653,14 @@ void autopilot_on_rc_frame(void)
 #else
     uint8_t new_autopilot_mode = ap_mode_of_3way_switch();
 #endif
-
+#ifdef NO_GPS_NEEDED_FOR_NAV
+#if !NO_GPS_NEEDED_FOR_NAV
     /* don't enter NAV mode if GPS is lost (this also prevents mode oscillations) */
     if (!(new_autopilot_mode == AP_MODE_NAV && GpsIsLost())) {
       /* always allow to switch to manual */
+
+#endif
+#endif
       if (new_autopilot_mode == MODE_MANUAL) {
         autopilot_set_mode(new_autopilot_mode);
       }
@@ -669,7 +673,12 @@ void autopilot_on_rc_frame(void)
               ) {
         autopilot_set_mode(new_autopilot_mode);
       }
+
+#ifdef NO_GPS_NEEDED_FOR_NAV
+#if !NO_GPS_NEEDED_FOR_NAV
     }
+#endif
+#endif
   }
 
   /* an arming sequence is used to start/stop motors.

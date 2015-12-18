@@ -1,0 +1,16 @@
+<!DOCTYPE module SYSTEM "module.dtd">
+
+<module name="stereocam_forward_velocity" dir="stereocam">
+  <doc>
+    <description>stereocam_forward_velocity</description>
+  </doc>
+  <header>
+    <file name="stereocam_forward_velocity/stereocam_forward_velocity.h"/>
+  </header>
+  <init fun="stereocam_forward_velocity_init()"/>
+  <periodic fun="stereocam_forward_velocity_periodic()" freq="512"/>
+  <makefile>
+    <file name="stereocam_forward_velocity/stereocam_forward_velocity.c"  />
+  </makefile>
+</module>
+

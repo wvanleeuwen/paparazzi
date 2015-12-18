@@ -186,7 +186,7 @@ void dl_parse_msg(void)
         );
       break;
 #endif
-
+/*
     case DL_GUIDED_SETPOINT_NED:
       if (DL_GUIDED_SETPOINT_NED_ac_id(dl_buffer) != AC_ID) { break; }
       uint8_t flags = DL_GUIDED_SETPOINT_NED_flags(dl_buffer);
@@ -197,22 +197,23 @@ void dl_parse_msg(void)
       switch (flags) {
         case 0x00:
         case 0x02:
-          /* local NED position setpoints */
+          /* local NED position setpoints
           autopilot_guided_goto_ned(x, y, z, yaw);
           break;
         case 0x01:
-          /* local NED offset position setpoints */
+          /* local NED offset position setpoints
           autopilot_guided_goto_ned_relative(x, y, z, yaw);
           break;
         case 0x03:
-          /* body NED offset position setpoints */
+          /* body NED offset position setpoints
           autopilot_guided_goto_body_relative(x, y, z, yaw);
           break;
         default:
-          /* others not handled yet */
+          /* others not handled yet
           break;
       }
       break;
+      */
     default:
       break;
   }

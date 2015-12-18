@@ -16,17 +16,14 @@
     <waypoint name="TD" x="5.6" y="-10.9"/>
   </waypoints>
   <blocks>
-    <block name="Wait GPS">
-      <call fun="NavKillThrottle()"/>
-      <while cond="!GpsFixValid()"/>
-    </block>
+ 
     <block name="Geo init">
       <while cond="LessThan(NavBlockTime(), 10)"/>
       <call fun="NavSetGroundReferenceHere()"/>
  
     </block>
     <block name="avoid">
-      <attitude pitch="(ref_pitch)" roll="(ref_roll)" alt="2.5" vmode="alt" until="FALSE"/>
+      <attitude pitch="DegOfRad(ref_pitch)" roll="DegOfRad(ref_roll)" alt="1.5" vmode="alt" until="FALSE"/>
     </block>
   </blocks>
 </flight_plan>
