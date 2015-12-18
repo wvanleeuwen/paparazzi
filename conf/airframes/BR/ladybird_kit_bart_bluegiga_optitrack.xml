@@ -80,7 +80,7 @@
    <define name="MODE_STARTUP" value="AP_MODE_NAV"/>
    <define name="MODE_MANUAL" value="AP_MODE_ATTITUDE_DIRECT"/>
    <define name="MODE_AUTO1" value="AP_MODE_ATTITUDE_Z_HOLD"/>
-   <define name="MODE_AUTO2" value="AP_MODE_NAV"/>
+   <define name="MODE_AUTO2" value="AP_MODE_HOVER_Z_HOLD"/>
 
     <define name="USE_THROTTLE_FOR_MOTOR_ARMING" value="TRUE"/>
     <define name="NO_RC_THRUST_LIMIT" value="TRUE"/>
@@ -159,7 +159,7 @@
   </section>
 
   <section name="INS" prefix="INS_">
-    <define name="USE_GPS_ALT" value="0"/>
+    <define name="USE_GPS_ALT" value="1"/>
   </section>
 
   <section name="GPS" prefix="GPS_">
@@ -219,7 +219,7 @@
 	<configure name="STEREO_UART" value="UART1"/>
 	<configure name="STEREO_BAUD" value="B115200"/>
 </load>
- <!--load name="stereocam_forward_velocity.xml"/-->
+<load name="stereocam_forward_velocity.xml"/>
  </modules>
 
   <firmware name="rotorcraft">
