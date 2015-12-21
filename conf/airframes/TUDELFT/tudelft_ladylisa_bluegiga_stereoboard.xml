@@ -47,7 +47,6 @@
     <axis name="THRUST" failsafe_value="0"/>
   </commands>
 
-    <define name="NO_GPS_NEEDED_FOR_NAV" value="TRUE"/>
   <command_laws>
     <call fun="motor_mixing_run(autopilot_motors_on,FALSE,values)"/>
     <set servo="NE" value="motor_mixing.commands[0]"/>
@@ -79,8 +78,8 @@
  <section name="AUTOPILOT">
    <define name="MODE_STARTUP" value="AP_MODE_NAV"/>
    <define name="MODE_MANUAL" value="AP_MODE_ATTITUDE_DIRECT"/>
-   <define name="MODE_AUTO1" value="AP_MODE_ATTITUDE_Z_HOLD"/>
-   <define name="MODE_AUTO2" value="AP_MODE_HOVER_Z_HOLD"/>
+   <define name="MODE_AUTO1" value="AP_MODE_HOVER_DIRECT"/>
+   <define name="MODE_AUTO2" value="AP_MODE_HOVER_DIRECT"/>
 
     <define name="USE_THROTTLE_FOR_MOTOR_ARMING" value="TRUE"/>
     <define name="NO_RC_THRUST_LIMIT" value="TRUE"/>
@@ -182,20 +181,17 @@
     <define name="H_X" value="0.39049610"/>
     <define name="H_Y" value="0.00278894"/>
     <define name="H_Z" value="0.92060036"/>
-    <define name="USE_GPS_HEADING" value="0"/>
-
-    <define name="USE_MAGNETOMETER" value="1"/>
+    <define name="USE_GPS_HEADING" value="1"/>
   </section>
 <define name="USE_GPS" value="FALSE"/>
- <define name="NO_GPS_NEEDED_FOR_NAV" value="TRUE"/>
  <define name="USE_GPS_HEADING" value="FALSE"/>
- <define name="USE_MAGNETOMETER" value="TRUE"/>
 
  <section name="GUIDANCE_H" prefix="GUIDANCE_H_">
-   <define name="PGAIN" value="290"/>
-   <define name="DGAIN" value="134"/>
+   <define name="PGAIN" value="40"/>
+   <define name="DGAIN" value="10"/>
    <define name="IGAIN" value="0"/>
-   <define name="REF_MAX_SPEED" value="0.8"/>
+   <define name="REF_MAX_SPEED" value="0.5"/>
+   <define name="USE_REF" value="FALSE"/>
  </section>
 
   <section name="NAVIGATION" prefix="NAV_">
@@ -215,10 +211,11 @@
 
  <modules main_freq="512">
    <load name="send_imu_mag_current.xml"/>
- <load name="stereocam.xml">
-	<configure name="STEREO_UART" value="UART1"/>
-	<configure name="STEREO_BAUD" value="B115200"/>
-</load>
+   <load name="stereocam.xml">
+     <configure name="STEREO_UART" value="UART1"/>
+     <configure name="STEREO_BAUD" value="B115200"/>
+   </load>
+   <load name="stereocam_stereocam2state.xml"/>
  </modules>
 
   <firmware name="rotorcraft">
@@ -251,9 +248,9 @@
       <define name="LISA_S_UPSIDE_DOWN"/> <!-- Upside down is a relative term. :) -->
     </subsystem>
 	
-    <!--subsystem name="gps" type="datalink"/-->
+    <subsystem name="gps" type="datalink"/>
     <subsystem name="stabilization" type="int_quat"/>
     <subsystem name="ahrs" type="int_cmpl_quat"/>
-    <subsystem name="ins"/>
+    <subsystem name="ins" />
   </firmware>
 </airframe>
