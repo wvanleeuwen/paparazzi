@@ -150,8 +150,9 @@ void stereocam_forward_velocity_periodic()
 		else if(closest>50){
 			ref_pitch=0.1;
 		}
-		float p_gain = 0.2;
-		float i_gain = 0.01;
+
+		float p_gain = 0.4;
+		float i_gain = 0.03;
 
 		float max_roll=0.2;
 		float rollToTake = p_gain * guidoVelocityHor+sumVelocities*i_gain;
@@ -177,7 +178,7 @@ void stereocam_forward_velocity_periodic()
     }
     else if(current_state==TURN){
     	if(autopilot_mode == AP_MODE_NAV){
-    		increase_nav_heading(&nav_heading,460);
+    		increase_nav_heading(&nav_heading,860);
     	 }
     	if(closest<50){
     		totalTurningSeenNothing++;
