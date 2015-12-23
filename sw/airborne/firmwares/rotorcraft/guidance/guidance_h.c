@@ -481,6 +481,7 @@ static void guidance_h_update_reference(void)
 #define GH_GAIN_SCALE 2
 
 #if !GUIDANCE_INDI
+#pragma "woo guidance INDI not working"
 static void guidance_h_traj_run(bool_t in_flight)
 {
   /* maximum bank angle: default 20 deg, max 40 deg*/

@@ -114,7 +114,7 @@
     <define name="SP_MAX_PHI" value="45." unit="deg"/>
     <define name="SP_MAX_THETA" value="45." unit="deg"/>
     <define name="SP_MAX_PSI" value="45." unit="deg"/>
-    <define name="SP_MAX_R" value="90." unit="deg/s"/>
+    <define name="SP_MAX_R" value="180." unit="deg/s"/>
     <define name="SP_MAX_P" value="90." unit="deg/s"/>
     <define name="DEADBAND_R" value="250"/>
     <define name="DEADBAND_A" value="250"/>
@@ -132,7 +132,7 @@
 
     <define name="REF_OMEGA_R" value="500" unit="deg/s"/>
     <define name="REF_ZETA_R" value="0.85"/>
-    <define name="REF_MAX_R" value="90." unit="deg/s"/>
+    <define name="REF_MAX_R" value="180." unit="deg/s"/>
     <define name="REF_MAX_RDOT" value="RadOfDeg(900.)"/>
 
     <!-- feedback -->
@@ -190,28 +190,24 @@
  <define name="NO_GPS_NEEDED_FOR_NAV" value="TRUE"/>
  <define name="USE_GPS_HEADING" value="FALSE"/>
  <define name="USE_MAGNETOMETER" value="TRUE"/>
+<define name="GUIDANCE_INDI" value="0"/>
 
  <section name="GUIDANCE_H" prefix="GUIDANCE_H_">
-   <define name="PGAIN" value="290"/>
-   <define name="DGAIN" value="134"/>
-   <define name="IGAIN" value="0"/>
-   <define name="REF_MAX_SPEED" value="0.8"/>
+   <define name="PGAIN" value="200"/>
+   <define name="DGAIN" value="100"/>
+   <define name="IGAIN" value="20"/>
+   <define name="REF_MAX_SPEED" value="3.5"/>
+   <define name="USE_REF" value="1"/>
  </section>
 
   <section name="NAVIGATION" prefix="NAV_">
-    <define name="CLIMB_VSPEED" value="0.0"/>
-    <define name="DESCEND_VSPEED" value="-0.0"/>
+    <define name="CLIMB_VSPEED" value="0.1"/>
+    <define name="DESCEND_VSPEED" value="-0.1"/>
   </section>
 
   <section name="MISC">
     <define name="ARRIVED_AT_WAYPOINT" value="0.2"/>
   </section>
-
- <section name="SIMULATOR" prefix="NPS_">
-   <define name="ACTUATOR_NAMES" value="ne_motor, se_motor, sw_motor, nw_motor" type="string[]"/>
-   <define name="JSBSIM_MODEL" value="simple_x_quad_ccw" type="string"/>
-   <define name="SENSORS_PARAMS" value="nps_sensors_params_default.h" type="string"/>
- </section>
 
  <modules main_freq="512">
    <load name="send_imu_mag_current.xml"/>
