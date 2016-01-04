@@ -71,10 +71,16 @@ float ref_disparity_to_keep=40.0;
 float pitch_compensation = 0.05;
 int initFastForwardCount = 0;
 int goForwardXStages=3;
+int counterStab=0;
+float previousStabRoll=0.0;
 float ref_alt=1.0;
 typedef enum{USE_DROPLET,USE_CLOSEST_DISPARITY} something;
 something sf = USE_DROPLET;
 float heading=0.0;
+float someGainWhenDoingNothing=0.0;
+
+float somePitchGainWhenDoingNothing=0.0;
+float previousStabPitch=0.0;
 float calculateForwardVelocity(float distance,float alpha,int MAX_SUBSEQUENT_OUTLIERS,int n_steps_velocity)
 {
 	    disparity_velocity_step += 1;
@@ -168,6 +174,10 @@ void stereocam_forward_velocity_periodic()
     ref_roll=0.0;
     if(autopilot_mode != AP_MODE_NAV){
     	 ref_alt= -state.ned_pos_f.z;
+    	 current_state=STABILISE;
+    	 ref_disparity_to_keep=closest;
+    	 someGainWhenDoingNothing=0.0;
+    	 somePitchGainWhenDoingNothing=0.0;
     }
 
     float usedIFactor=0.0;
@@ -215,46 +225,51 @@ void stereocam_forward_velocity_periodic()
 
     }
     else if(current_state==STABILISE){
-    	float stab_pitch_pgain=0.015;
-    	if(autopilot_mode != AP_MODE_NAV){
-    			ref_disparity_to_keep=closest;
-    		}
+    	counterStab++;
+    	float stab_pitch_pgain=0.08;
     	float pitchDiff = closest- ref_disparity_to_keep;
     	float pitchToTake = stab_pitch_pgain*pitchDiff;
-    	if(pitchToTake>0.1){
-    		ref_pitch=0.1;
-    	}
-    	else if (pitchToTake<-0.1){
-    		ref_pitch=-0.1;
-    	}
-    	else{
-    		ref_pitch=pitchToTake;
-    	}
-//    	if(totalStabiliseStateCount<4){
-//			ref_pitch=0.1;
-//			totalStabiliseStateCount++;
-//		}
-//    	else{
-//    		current_state=TURN;
-//    	}
 
-    	float p_gain = 0.2;
+    	ref_pitch=0.0;
+    	float p_gain = 0.6;
 		float i_gain = 0.01;
 		float d_gain = 0.05;
-		float max_roll=0.1;
+		float max_roll=0.25;
 		usedIFactor=sumHorizontalVelocities*i_gain;
-		float rollToTake = p_gain * guidoVelocityHor+usedIFactor - d_gain*differenceD;
+		float rollToTake = p_gain * guidoVelocityHor;//+usedIFactor - d_gain*differenceD;
+		rollToTake*=-1;
+		if(counterStab%4==0){
+			if(rollToTake>max_roll){
+				ref_roll=max_roll;
+			}
+			else if(rollToTake<(-1.0*max_roll)){
+				ref_roll=-(1.0*max_roll);
+			}
+			else{
+				ref_roll=rollToTake;
+			}
 
-		if(rollToTake>max_roll){
-			ref_roll=max_roll;
-		}
-		else if(rollToTake<(-1.0*max_roll)){
-			ref_roll=-(1.0*max_roll);
+			if(pitchToTake>0.1){
+				ref_pitch=0.1;
+			}
+			else if (pitchToTake<-0.1){
+				ref_pitch=-0.1;
+			}
+			else{
+				ref_pitch=pitchToTake;
+			}
+
+			previousStabRoll=ref_roll;
+			someGainWhenDoingNothing+=0.1*ref_roll;
+			somePitchGainWhenDoingNothing+=0.1*ref_pitch;
+			previousStabPitch=ref_pitch;
 		}
 		else{
-			ref_roll=rollToTake;
+			ref_pitch=0.2*previousStabPitch;
+//			ref_roll=0.2*previousStabRoll;
+			ref_roll=someGainWhenDoingNothing;
 		}
-ref_roll=0.0;
+		//ref_roll=0.0;
     //	if(guidoVelocityHor<0.5 && guidoVelocityHor>-0.5){
     	//	if(sf==USE_CLOSEST_DISPARITY){
 	//			if(closest < CLOSE_DISPARITY){
@@ -321,7 +336,7 @@ ref_roll=0.0;
    // nav_set_heading_deg(heading);
 
     ref_pitch += pitch_compensation;
-    DOWNLINK_SEND_STEREO_VELOCITY(DefaultChannel, DefaultDevice, &closest, &disparitiesInDroplet,&dist, &velocityFound,&guidoVelocityHor,&usedIFactor,&current_state);
+    DOWNLINK_SEND_STEREO_VELOCITY(DefaultChannel, DefaultDevice, &closest, &disparitiesInDroplet,&dist, &velocityFound,&guidoVelocityHor,&ref_disparity_to_keep,&current_state);
 
     DOWNLINK_SEND_REFROLLPITCH(DefaultChannel, DefaultDevice, &ref_roll,&ref_pitch);
 //*/
