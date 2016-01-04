@@ -14,6 +14,7 @@
 #define FOLLOW_ME_H
 extern float ref_pitch;
 extern float ref_roll;
+extern float ref_alt;
 extern void stereocam_forward_velocity_init(void);
 extern void stereocam_forward_velocity_periodic(void);
 

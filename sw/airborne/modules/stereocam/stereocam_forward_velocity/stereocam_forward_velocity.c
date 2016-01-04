@@ -51,22 +51,30 @@ float timeStepHistory[500];
 float velocityHistory[LENGTH_VELOCITY_HISTORY];
 int indexVelocityHistory=0;
 float sumVelocities=0.0;
+
+float sumHorizontalVelocities=0.0;
 uint8_t GO_FORWARD=0;
 uint8_t TURN=1;
 uint8_t STABILISE=2;
 uint8_t INIT_FORWARD=3;
-uint8_t current_state=0;
+uint8_t current_state=2;
 int totalStabiliseStateCount = 0;
 int totalTurningSeenNothing=0;
 float previousLateralSpeed = 0.0;
 uint8_t detectedWall=0;
 float velocityAverageAlpha = 0.65;
 float previousHorizontalVelocity = 0.0;
-#define DANGEROUS_CLOSE_DISPARITY 60
-#define CLOSE_DISPARITY 45
-float pitch_compensation = 0.0;
+#define DANGEROUS_CLOSE_DISPARITY 40
+#define CLOSE_DISPARITY 33
+#define LOW_AMOUNT_PIXELS_IN_DROPLET 20
+float ref_disparity_to_keep=40.0;
+float pitch_compensation = 0.05;
 int initFastForwardCount = 0;
 int goForwardXStages=3;
+float ref_alt=1.0;
+typedef enum{USE_DROPLET,USE_CLOSEST_DISPARITY} something;
+something sf = USE_DROPLET;
+float heading=0.0;
 float calculateForwardVelocity(float distance,float alpha,int MAX_SUBSEQUENT_OUTLIERS,int n_steps_velocity)
 {
 	    disparity_velocity_step += 1;
@@ -119,6 +127,12 @@ void stereocam_forward_velocity_periodic()
 {
 
   if (stereocam_data.fresh && stereocam_data.len>20) {
+//	  if (autopilot_mode != AP_MODE_NAV) {
+//
+//	  		  struct Int32Eulers *euler = stateGetNedToBodyEulers_i();
+//	  		  nav_set_heading_rad(ANGLE_FLOAT_OF_BFP(euler->psi));
+//	  	//heading=;
+//	  }
     stereocam_data.fresh = 0;
 	uint8_t closest = stereocam_data.data[4];
 
@@ -139,36 +153,47 @@ void stereocam_forward_velocity_periodic()
 
     // Set the velocity to either the average of the last few velocities, or take the current velocity with alpha times the previous one
     guidoVelocityHor = guidoVelocityHorStereoboard*velocityAverageAlpha + (1-velocityAverageAlpha)*previousHorizontalVelocity;
+    sumHorizontalVelocities+=guidoVelocityHor;
     previousHorizontalVelocity= guidoVelocityHorStereoboard;
 
     int timeStamp = 0;
     //float guidoVelocityZ = upDownVelocity/100.0;
     float guidoVelocityZ=0.0;
     float noiseUs = 0.3f;
-    DOWNLINK_SEND_STEREO_VELOCITY(DefaultChannel, DefaultDevice, &closest, &disparitiesInDroplet,&dist, &velocityFound,&guidoVelocityHor,&guidoVelocityZ,&current_state);
 
     AbiSendMsgVELOCITY_ESTIMATE(STEREO_VELOCITY_ID, timeStamp, velocityFound, guidoVelocityHor,
                                 guidoVelocityZ,
                                 noiseUs);
 	ref_pitch=-.05;
     ref_roll=0.0;
+    if(autopilot_mode != AP_MODE_NAV){
+    	 ref_alt= -state.ned_pos_f.z;
+    }
 
+    float usedIFactor=0.0;
     float differenceD = guidoVelocityHor -previousLateralSpeed;
     previousLateralSpeed=guidoVelocityHor;
     if(current_state==GO_FORWARD){
-		if(closest>DANGEROUS_CLOSE_DISPARITY){
-			ref_pitch=0.2;
-			detectedWall=1;
-		}
-		else if(closest>CLOSE_DISPARITY){
-			ref_pitch=0.1;
-			detectedWall=1;
-		}
-
+    	if(sf==USE_CLOSEST_DISPARITY){
+			if(closest>DANGEROUS_CLOSE_DISPARITY){
+				ref_pitch=0.2;
+				detectedWall=1;
+			}
+			else if(closest>CLOSE_DISPARITY){
+				ref_pitch=0.1;
+				detectedWall=1;
+			}
+    	}
+    	else{
+    		if(disparitiesInDroplet>30){
+    			ref_pitch=0.2;
+    			detectedWall=1;
+    		}
+    	}
 		float p_gain = 0.2;
 		float i_gain = 0.00;
 		float d_gain = 0.00;
-		float max_roll=0.2;
+		float max_roll=0.1;
 		float rollToTake = p_gain * guidoVelocityHor+sumVelocities*i_gain - d_gain*differenceD;
 
 		if(rollToTake>max_roll){
@@ -181,7 +206,7 @@ void stereocam_forward_velocity_periodic()
 			ref_roll=rollToTake;
 		}
 
-		if(closest < 60 && detectedWall){
+		if(closest < DANGEROUS_CLOSE_DISPARITY && detectedWall){
 			totalTurningSeenNothing=0;
 			current_state=STABILISE;
 			totalStabiliseStateCount=0;
@@ -190,19 +215,35 @@ void stereocam_forward_velocity_periodic()
 
     }
     else if(current_state==STABILISE){
-    	if(totalStabiliseStateCount<4){
-			ref_pitch=0.4;
-			totalStabiliseStateCount++;
-		}
-    	else{
-    		current_state=TURN;
+    	float stab_pitch_pgain=0.015;
+    	if(autopilot_mode != AP_MODE_NAV){
+    			ref_disparity_to_keep=closest;
+    		}
+    	float pitchDiff = closest- ref_disparity_to_keep;
+    	float pitchToTake = stab_pitch_pgain*pitchDiff;
+    	if(pitchToTake>0.1){
+    		ref_pitch=0.1;
     	}
+    	else if (pitchToTake<-0.1){
+    		ref_pitch=-0.1;
+    	}
+    	else{
+    		ref_pitch=pitchToTake;
+    	}
+//    	if(totalStabiliseStateCount<4){
+//			ref_pitch=0.1;
+//			totalStabiliseStateCount++;
+//		}
+//    	else{
+//    		current_state=TURN;
+//    	}
 
     	float p_gain = 0.2;
-		float i_gain = 0.00;
-		float d_gain = 0.00;
-		float max_roll=0.2;
-		float rollToTake = p_gain * guidoVelocityHor+sumVelocities*i_gain - d_gain*differenceD;
+		float i_gain = 0.01;
+		float d_gain = 0.05;
+		float max_roll=0.1;
+		usedIFactor=sumHorizontalVelocities*i_gain;
+		float rollToTake = p_gain * guidoVelocityHor+usedIFactor - d_gain*differenceD;
 
 		if(rollToTake>max_roll){
 			ref_roll=max_roll;
@@ -213,26 +254,52 @@ void stereocam_forward_velocity_periodic()
 		else{
 			ref_roll=rollToTake;
 		}
-
-    	if(guidoVelocityHor<0.5 && guidoVelocityHor>-0.5){
-    		if(closest < CLOSE_DISPARITY){
-    			current_state=TURN;
-    			indexTurnFactors=0;
-    		}
-    	}
+ref_roll=0.0;
+    //	if(guidoVelocityHor<0.5 && guidoVelocityHor>-0.5){
+    	//	if(sf==USE_CLOSEST_DISPARITY){
+	//			if(closest < CLOSE_DISPARITY){
+	//				current_state=TURN;
+	//				indexTurnFactors=0;
+	//			}
+//    		}
+//    		else{
+//    			if(disparitiesInDroplet<LOW_AMOUNT_PIXELS_IN_DROPLET){
+//    				current_state=TURN;
+//    				indexTurnFactors=0;
+//    			}
+//    		}
+   // 	}
        }
     else if(current_state==TURN){
-    	ref_pitch=0.2;
-    	increase_nav_heading(&nav_heading,turnFactors[indexTurnFactors]);
+    	ref_pitch=0.13;
+    	ref_roll=0.1;
+    	 heading += 18.0;
+    	  if (heading > 360.0)
+    	    heading -= 360.0;
+
+    	//increase_nav_heading(&nav_heading,turnFactors[indexTurnFactors]);
     	indexTurnFactors+=1;
     	if(indexTurnFactors>countFactorsTurning){
     		indexTurnFactors = countFactorsTurning;
     	}
-    	if(closest<50&& indexTurnFactors > 3){
-    		totalTurningSeenNothing++;
-    		if(totalTurningSeenNothing>2){
-    			current_state=INIT_FORWARD;
-    			detectedWall=0;
+    	if(indexTurnFactors > 3){
+    		if(sf==USE_CLOSEST_DISPARITY){
+    			if(closest<CLOSE_DISPARITY){
+					totalTurningSeenNothing++;
+					if(totalTurningSeenNothing>2){
+						current_state=INIT_FORWARD;
+						detectedWall=0;
+					}
+    			}
+    		}
+    		else{
+    			if(disparitiesInDroplet<LOW_AMOUNT_PIXELS_IN_DROPLET){
+    				totalTurningSeenNothing++;
+					if(totalTurningSeenNothing>2){
+						current_state=INIT_FORWARD;
+						detectedWall=0;
+					}
+    			}
     		}
     	}
     	else{
@@ -251,8 +318,11 @@ void stereocam_forward_velocity_periodic()
     else{
     	current_state=GO_FORWARD;
     }
+   // nav_set_heading_deg(heading);
 
     ref_pitch += pitch_compensation;
+    DOWNLINK_SEND_STEREO_VELOCITY(DefaultChannel, DefaultDevice, &closest, &disparitiesInDroplet,&dist, &velocityFound,&guidoVelocityHor,&usedIFactor,&current_state);
+
     DOWNLINK_SEND_REFROLLPITCH(DefaultChannel, DefaultDevice, &ref_roll,&ref_pitch);
 //*/
   }
