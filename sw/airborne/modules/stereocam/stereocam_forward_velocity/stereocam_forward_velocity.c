@@ -24,17 +24,17 @@
 #include "generated/flight_plan.h"
  float ref_pitch=0.0;
  float ref_roll=0.0;
-void stereocam_forward_velocity_init()
-{
 
-}
-void array_pop(float *array, int lengthArray)
-{
-  int index;
-  for (index = 1; index < lengthArray; index++) {
-    array[index - 1] = array[index];
-  }
-}
+
+ struct Gains{
+	 float pGain;
+	 float dGain;
+	 float iGain;
+ };
+typedef struct Gains gains;
+
+gains stabilisationLateralGains;
+
 int turnFactors[]={300,300,300,200,100,100,100,100};
 int countFactorsTurning=6;
 int indexTurnFactors=0;
@@ -54,8 +54,8 @@ float sumVelocities=0.0;
 
 float sumHorizontalVelocities=0.0;
 uint8_t GO_FORWARD=0;
-uint8_t TURN=1;
-uint8_t STABILISE=2;
+uint8_t STABILISE=1;
+uint8_t TURN=2;
 uint8_t INIT_FORWARD=3;
 uint8_t current_state=2;
 int totalStabiliseStateCount = 0;
@@ -76,11 +76,28 @@ float previousStabRoll=0.0;
 float ref_alt=1.0;
 typedef enum{USE_DROPLET,USE_CLOSEST_DISPARITY} something;
 something sf = USE_DROPLET;
-float heading=0.0;
+float headingStereocamStab=0.0;
 float someGainWhenDoingNothing=0.0;
 
 float somePitchGainWhenDoingNothing=0.0;
 float previousStabPitch=0.0;
+void stereocam_forward_velocity_init()
+{
+	stabilisationLateralGains.pGain=0.6;
+	stabilisationLateralGains.dGain=0.05;
+	stabilisationLateralGains.iGain=0.01;
+}
+
+void array_pop(float *array, int lengthArray);
+void array_pop(float *array, int lengthArray)
+{
+  int index;
+  for (index = 1; index < lengthArray; index++) {
+    array[index - 1] = array[index];
+  }
+}
+
+float calculateForwardVelocity(float distance,float alpha,int MAX_SUBSEQUENT_OUTLIERS,int n_steps_velocity);
 float calculateForwardVelocity(float distance,float alpha,int MAX_SUBSEQUENT_OUTLIERS,int n_steps_velocity)
 {
 	    disparity_velocity_step += 1;
@@ -124,10 +141,10 @@ float calculateForwardVelocity(float distance,float alpha,int MAX_SUBSEQUENT_OUT
 	    }
 	    return velocityFound;
 }
-void increase_nav_heading(int32_t *heading, int32_t increment);
-void increase_nav_heading(int32_t *heading, int32_t increment)
+void increase_nav_heading(int32_t *headingToChange, int32_t increment);
+void increase_nav_heading(int32_t *headingToChange, int32_t increment)
 {
-  *heading = *heading + increment;
+  *headingToChange = *headingToChange + increment;
 }
 void stereocam_forward_velocity_periodic()
 {
@@ -174,15 +191,16 @@ void stereocam_forward_velocity_periodic()
     ref_roll=0.0;
     if(autopilot_mode != AP_MODE_NAV){
     	 ref_alt= -state.ned_pos_f.z;
-    	 current_state=STABILISE;
     	 ref_disparity_to_keep=closest;
     	 someGainWhenDoingNothing=0.0;
     	 somePitchGainWhenDoingNothing=0.0;
+    	 current_state=STABILISE;
     }
 
-    float usedIFactor=0.0;
+
     float differenceD = guidoVelocityHor -previousLateralSpeed;
     previousLateralSpeed=guidoVelocityHor;
+    counterStab++;
     if(current_state==GO_FORWARD){
     	if(sf==USE_CLOSEST_DISPARITY){
 			if(closest>DANGEROUS_CLOSE_DISPARITY){
@@ -196,25 +214,30 @@ void stereocam_forward_velocity_periodic()
     	}
     	else{
     		if(disparitiesInDroplet>30){
-    			ref_pitch=0.2;
+    			ref_pitch=0.0;
     			detectedWall=1;
+    			ref_disparity_to_keep=CLOSE_DISPARITY;
     		}
     	}
-		float p_gain = 0.2;
-		float i_gain = 0.00;
-		float d_gain = 0.00;
-		float max_roll=0.1;
-		float rollToTake = p_gain * guidoVelocityHor+sumVelocities*i_gain - d_gain*differenceD;
+    	float p_gain = 0.6;
+		float i_gain = 0.01;
+		float d_gain = 0.05;
+		float max_roll=0.25;
+		float rollToTake = p_gain * guidoVelocityHor;
+		rollToTake*=-1;
+		if(counterStab%4==0){
+			if(rollToTake>max_roll){
+				ref_roll=max_roll;
+			}
+			else if(rollToTake<(-1.0*max_roll)){
+				ref_roll=-(1.0*max_roll);
+			}
+			else{
+				ref_roll=rollToTake;
+			}
+		}
+		ref_pitch=-0.1;
 
-		if(rollToTake>max_roll){
-			ref_roll=max_roll;
-		}
-		else if(rollToTake<(-1.0*max_roll)){
-			ref_roll=-(1.0*max_roll);
-		}
-		else{
-			ref_roll=rollToTake;
-		}
 
 		if(closest < DANGEROUS_CLOSE_DISPARITY && detectedWall){
 			totalTurningSeenNothing=0;
@@ -225,18 +248,14 @@ void stereocam_forward_velocity_periodic()
 
     }
     else if(current_state==STABILISE){
-    	counterStab++;
+
     	float stab_pitch_pgain=0.08;
     	float pitchDiff = closest- ref_disparity_to_keep;
     	float pitchToTake = stab_pitch_pgain*pitchDiff;
 
     	ref_pitch=0.0;
-    	float p_gain = 0.6;
-		float i_gain = 0.01;
-		float d_gain = 0.05;
 		float max_roll=0.25;
-		usedIFactor=sumHorizontalVelocities*i_gain;
-		float rollToTake = p_gain * guidoVelocityHor;//+usedIFactor - d_gain*differenceD;
+		float rollToTake =stabilisationLateralGains.pGain * guidoVelocityHor;
 		rollToTake*=-1;
 		if(counterStab%4==0){
 			if(rollToTake>max_roll){
@@ -263,6 +282,15 @@ void stereocam_forward_velocity_periodic()
 			someGainWhenDoingNothing+=0.1*ref_roll;
 			somePitchGainWhenDoingNothing+=0.1*ref_pitch;
 			previousStabPitch=ref_pitch;
+
+
+//			if(guidoVelocityHor<0.5 && guidoVelocityHor>-0.5){
+//
+//				if(closest < CLOSE_DISPARITY){
+//					current_state=TURN;
+//					indexTurnFactors=0;
+//				}
+//			}
 		}
 		else{
 			ref_pitch=0.2*previousStabPitch;
@@ -270,7 +298,7 @@ void stereocam_forward_velocity_periodic()
 			ref_roll=someGainWhenDoingNothing;
 		}
 		//ref_roll=0.0;
-    //	if(guidoVelocityHor<0.5 && guidoVelocityHor>-0.5){
+//    	if(guidoVelocityHor<0.5 && guidoVelocityHor>-0.5){
     	//	if(sf==USE_CLOSEST_DISPARITY){
 	//			if(closest < CLOSE_DISPARITY){
 	//				current_state=TURN;
@@ -288,9 +316,9 @@ void stereocam_forward_velocity_periodic()
     else if(current_state==TURN){
     	ref_pitch=0.13;
     	ref_roll=0.1;
-    	 heading += 18.0;
-    	  if (heading > 360.0)
-    	    heading -= 360.0;
+    	headingStereocamStab += 18.0;
+    	  if (headingStereocamStab > 360.0)
+    		  headingStereocamStab -= 360.0;
 
     	//increase_nav_heading(&nav_heading,turnFactors[indexTurnFactors]);
     	indexTurnFactors+=1;
@@ -302,7 +330,7 @@ void stereocam_forward_velocity_periodic()
     			if(closest<CLOSE_DISPARITY){
 					totalTurningSeenNothing++;
 					if(totalTurningSeenNothing>2){
-						current_state=INIT_FORWARD;
+						current_state=GO_FORWARD;
 						detectedWall=0;
 					}
     			}
@@ -311,7 +339,7 @@ void stereocam_forward_velocity_periodic()
     			if(disparitiesInDroplet<LOW_AMOUNT_PIXELS_IN_DROPLET){
     				totalTurningSeenNothing++;
 					if(totalTurningSeenNothing>2){
-						current_state=INIT_FORWARD;
+						current_state=GO_FORWARD;
 						detectedWall=0;
 					}
     			}
