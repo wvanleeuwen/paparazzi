@@ -18,7 +18,7 @@
 #include "subsystems/abi.h"
 #include "firmwares/rotorcraft/guidance/guidance_h.h"
 #include "subsystems/datalink/telemetry.h"
-
+#include "firmwares/rotorcraft/stabilization/stabilization_attitude_quat_int.h"
 #define AVERAGE_VELOCITY 0
 // Know waypoint numbers and blocks
 #include "generated/flight_plan.h"
@@ -34,6 +34,7 @@
 typedef struct Gains gains;
 
 gains stabilisationLateralGains;
+gains forwardLateralGains;
 
 int turnFactors[]={300,300,300,200,100,100,100,100};
 int countFactorsTurning=6;
@@ -86,6 +87,7 @@ void stereocam_forward_velocity_init()
 	stabilisationLateralGains.pGain=0.6;
 	stabilisationLateralGains.dGain=0.05;
 	stabilisationLateralGains.iGain=0.01;
+	forwardLateralGains.pGain=0.6;
 }
 
 void array_pop(float *array, int lengthArray);
@@ -192,8 +194,8 @@ void stereocam_forward_velocity_periodic()
     if(autopilot_mode != AP_MODE_NAV){
     	 ref_alt= -state.ned_pos_f.z;
     	 ref_disparity_to_keep=closest;
-    	 someGainWhenDoingNothing=0.0;
-    	 somePitchGainWhenDoingNothing=0.0;
+    	// someGainWhenDoingNothing=0.0;
+    	 //somePitchGainWhenDoingNothing=0.0;
     	 current_state=STABILISE;
     }
 
@@ -219,11 +221,9 @@ void stereocam_forward_velocity_periodic()
     			ref_disparity_to_keep=CLOSE_DISPARITY;
     		}
     	}
-    	float p_gain = 0.6;
-		float i_gain = 0.01;
-		float d_gain = 0.05;
+
 		float max_roll=0.25;
-		float rollToTake = p_gain * guidoVelocityHor;
+		float rollToTake = forwardLateralGains.pGain * guidoVelocityHor;
 		rollToTake*=-1;
 		if(counterStab%4==0){
 			if(rollToTake>max_roll){
@@ -257,40 +257,42 @@ void stereocam_forward_velocity_periodic()
 		float max_roll=0.25;
 		float rollToTake =stabilisationLateralGains.pGain * guidoVelocityHor;
 		rollToTake*=-1;
-		if(counterStab%4==0){
-			if(rollToTake>max_roll){
-				ref_roll=max_roll;
-			}
-			else if(rollToTake<(-1.0*max_roll)){
-				ref_roll=-(1.0*max_roll);
-			}
-			else{
-				ref_roll=rollToTake;
-			}
+		 if(autopilot_mode == AP_MODE_NAV){
+			if(counterStab%4==0){
+				if(rollToTake>max_roll){
+					ref_roll=max_roll;
+				}
+				else if(rollToTake<(-1.0*max_roll)){
+					ref_roll=-(1.0*max_roll);
+				}
+				else{
+					ref_roll=rollToTake;
+				}
 
-			if(pitchToTake>0.1){
-				ref_pitch=0.1;
-			}
-			else if (pitchToTake<-0.1){
-				ref_pitch=-0.1;
-			}
-			else{
-				ref_pitch=pitchToTake;
-			}
+				if(pitchToTake>0.1){
+					ref_pitch=0.1;
+				}
+				else if (pitchToTake<-0.1){
+					ref_pitch=-0.1;
+				}
+				else{
+					ref_pitch=pitchToTake;
+				}
 
-			previousStabRoll=ref_roll;
-			someGainWhenDoingNothing+=0.1*ref_roll;
-			somePitchGainWhenDoingNothing+=0.1*ref_pitch;
-			previousStabPitch=ref_pitch;
+				previousStabRoll=ref_roll;
+				someGainWhenDoingNothing+=0.1*ref_roll;
+				somePitchGainWhenDoingNothing+=0.1*ref_pitch;
+				previousStabPitch=ref_pitch;
 
 
-//			if(guidoVelocityHor<0.5 && guidoVelocityHor>-0.5){
-//
-//				if(closest < CLOSE_DISPARITY){
-//					current_state=TURN;
-//					indexTurnFactors=0;
-//				}
-//			}
+	//			if(guidoVelocityHor<0.5 && guidoVelocityHor>-0.5){
+	//
+	//				if(closest < CLOSE_DISPARITY){
+	//					current_state=TURN;
+	//					indexTurnFactors=0;
+	//				}
+	//			}
+			}
 		}
 		else{
 			ref_pitch=0.2*previousStabPitch;
@@ -365,8 +367,9 @@ void stereocam_forward_velocity_periodic()
 
     ref_pitch += pitch_compensation;
     DOWNLINK_SEND_STEREO_VELOCITY(DefaultChannel, DefaultDevice, &closest, &disparitiesInDroplet,&dist, &velocityFound,&guidoVelocityHor,&ref_disparity_to_keep,&current_state);
-
-    DOWNLINK_SEND_REFROLLPITCH(DefaultChannel, DefaultDevice, &ref_roll,&ref_pitch);
+//    float currentPitch=state.ned_to_body_orientation.eulers_i.phi;
+    float currentPitch=stab_att_sp_euler.phi;
+    DOWNLINK_SEND_REFROLLPITCH(DefaultChannel, DefaultDevice, &currentPitch,&ref_pitch);
 //*/
   }
 }
