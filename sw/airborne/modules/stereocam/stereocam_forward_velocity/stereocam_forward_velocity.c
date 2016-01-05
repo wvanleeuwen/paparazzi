@@ -19,6 +19,7 @@
 #include "firmwares/rotorcraft/guidance/guidance_h.h"
 #include "subsystems/datalink/telemetry.h"
 #include "firmwares/rotorcraft/stabilization/stabilization_attitude_quat_int.h"
+
 #define AVERAGE_VELOCITY 0
 // Know waypoint numbers and blocks
 #include "generated/flight_plan.h"
@@ -186,21 +187,21 @@ void stereocam_forward_velocity_periodic()
     //float guidoVelocityZ = upDownVelocity/100.0;
     float guidoVelocityZ=0.0;
     float noiseUs = 0.3f;
-
+/*
     AbiSendMsgVELOCITY_ESTIMATE(STEREO_VELOCITY_ID, timeStamp, velocityFound, guidoVelocityHor,
                                 guidoVelocityZ,
-                                noiseUs);
-	ref_pitch=-.05;
+                                noiseUs);*/
+	ref_pitch=0.0;
     ref_roll=0.0;
     if(autopilot_mode != AP_MODE_NAV){
     	 ref_alt= -state.ned_pos_f.z;
-    	 ref_disparity_to_keep=closest;
+    	 ref_disparity_to_keep=30;//closest;
     	// someGainWhenDoingNothing=0.0;
     	 //somePitchGainWhenDoingNothing=0.0;
-    	 current_state=STABILISE;
+    	 current_state=TURN;
     	 headingStereocamStab=ANGLE_FLOAT_OF_BFP(INT32_DEG_OF_RAD(stab_att_sp_euler.psi));
-    	 roll_compensation=-ANGLE_FLOAT_OF_BFP(stab_att_sp_euler.phi);
-    	 pitch_compensation=-ANGLE_FLOAT_OF_BFP(stab_att_sp_euler.theta);
+    	 roll_compensation=ANGLE_FLOAT_OF_BFP(stab_att_sp_euler.phi);
+    	 pitch_compensation=ANGLE_FLOAT_OF_BFP(stab_att_sp_euler.theta);
     }
 
 
@@ -261,48 +262,49 @@ void stereocam_forward_velocity_periodic()
 		float max_roll=0.25;
 		float rollToTake =stabilisationLateralGains.pGain * guidoVelocityHor;
 		rollToTake*=-1;
-		 if(autopilot_mode == AP_MODE_NAV){
-			if(counterStab%4==0){
-				if(rollToTake>max_roll){
-					ref_roll=max_roll;
-				}
-				else if(rollToTake<(-1.0*max_roll)){
-					ref_roll=-(1.0*max_roll);
-				}
-				else{
-					ref_roll=rollToTake;
-				}
 
-				if(pitchToTake>0.1){
-					ref_pitch=0.1;
-				}
-				else if (pitchToTake<-0.1){
-					ref_pitch=-0.1;
-				}
-				else{
-					ref_pitch=pitchToTake;
-				}
+		if(counterStab%4==0){
+			if(rollToTake>max_roll){
+				ref_roll=max_roll;
+			}
+			else if(rollToTake<(-1.0*max_roll)){
+				ref_roll=-(1.0*max_roll);
+			}
+			else{
+				ref_roll=rollToTake;
+			}
 
-				previousStabRoll=ref_roll;
-				someGainWhenDoingNothing+=0.1*ref_roll;
-				somePitchGainWhenDoingNothing+=0.1*ref_pitch;
-				previousStabPitch=ref_pitch;
+			if(pitchToTake>0.1){
+				ref_pitch=0.1;
+			}
+			else if (pitchToTake<-0.1){
+				ref_pitch=-0.1;
+			}
+			else{
+				ref_pitch=pitchToTake;
+			}
+
+			previousStabRoll=ref_roll;
+			someGainWhenDoingNothing+=0.1*ref_roll;
+			somePitchGainWhenDoingNothing+=0.1*ref_pitch;
+			previousStabPitch=ref_pitch;
 
 
-	//			if(guidoVelocityHor<0.5 && guidoVelocityHor>-0.5){
-	//
-	//				if(closest < CLOSE_DISPARITY){
-	//					current_state=TURN;
-	//					indexTurnFactors=0;
-	//				}
-	//			}
+			if(guidoVelocityHor<0.25 && guidoVelocityHor>-0.25){
+
+				if(closest < CLOSE_DISPARITY){
+					current_state=TURN;
+					indexTurnFactors=0;
+				}
 			}
 		}
 		else{
-			ref_pitch=0.2*previousStabPitch;
-//			ref_roll=0.2*previousStabRoll;
-			ref_roll=someGainWhenDoingNothing;
+//			ref_pitch=somePitchGainWhenDoingNothing;
+			ref_pitch=0.5*previousStabPitch;
+			ref_roll=0.5*previousStabRoll;
+//			ref_roll=someGainWhenDoingNothing;
 		}
+
 		//ref_roll=0.0;
 //    	if(guidoVelocityHor<0.5 && guidoVelocityHor>-0.5){
     	//	if(sf==USE_CLOSEST_DISPARITY){
@@ -318,11 +320,12 @@ void stereocam_forward_velocity_periodic()
 //    			}
 //    		}
    // 	}
+
        }
     else if(current_state==TURN){
-    	ref_pitch=0.13;
-    	ref_roll=0.1;
-    	headingStereocamStab += 18.0;
+    	ref_pitch=0.0;
+    	ref_roll=0.0;
+    	headingStereocamStab += 6.0;
     	  if (headingStereocamStab > 360.0)
     		  headingStereocamStab -= 360.0;
 
@@ -371,8 +374,8 @@ void stereocam_forward_velocity_periodic()
 
     ref_pitch += pitch_compensation;
     ref_roll += roll_compensation;
-    DOWNLINK_SEND_STEREO_VELOCITY(DefaultChannel, DefaultDevice, &closest, &disparitiesInDroplet,&dist, &velocityFound,&guidoVelocityHor,&ref_disparity_to_keep,&current_state);
-    DOWNLINK_SEND_REFROLLPITCH(DefaultChannel, DefaultDevice, &ref_roll,&ref_pitch);
+    DOWNLINK_SEND_STEREO_VELOCITY(DefaultChannel, DefaultDevice, &closest, &disparitiesInDroplet,&dist, &velocityFound,&guidoVelocityHor,&ref_disparity_to_keep,&current_state,&guidance_h_trim_att_integrator.x);
+    DOWNLINK_SEND_REFROLLPITCH(DefaultChannel, DefaultDevice, &somePitchGainWhenDoingNothing,&ref_pitch);
 //*/
   }
 }

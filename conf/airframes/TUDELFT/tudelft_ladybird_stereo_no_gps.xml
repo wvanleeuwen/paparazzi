@@ -47,7 +47,6 @@
     <axis name="THRUST" failsafe_value="0"/>
   </commands>
 
-    <define name="NO_GPS_NEEDED_FOR_NAV" value="TRUE"/>
   <command_laws>
     <call fun="motor_mixing_run(autopilot_motors_on,FALSE,values)"/>
     <set servo="NE" value="motor_mixing.commands[0]"/>
@@ -207,6 +206,7 @@
    <define name="USE_REF" value="1"/>
  </section>
 
+
   <section name="NAVIGATION" prefix="NAV_">
     <define name="CLIMB_VSPEED" value="0.1"/>
     <define name="DESCEND_VSPEED" value="-0.1"/>
@@ -227,6 +227,10 @@
  </modules>
 
   <firmware name="rotorcraft">
+
+    <define name="NO_GPS_NEEDED_FOR_NAV" value="TRUE"/>
+    <define name="NO_ATTITUDE_RESET_ON_MODE_CHANGE" value="TRUE"/>
+
     <target name="ap" board="lisa_s_1.0">
       <subsystem name="radio_control" type="datalink">
       </subsystem>

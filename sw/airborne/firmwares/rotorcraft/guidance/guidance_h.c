@@ -52,6 +52,10 @@
 #define GUIDANCE_H_VGAIN 0
 #endif
 
+#ifndef NO_ATTITUDE_RESET_ON_MODE_CHANGE
+#define NO_ATTITUDE_RESET_ON_MODE_CHANGE 0
+#endif
+
 /* error if some gains are negative */
 #if (GUIDANCE_H_PGAIN < 0) ||                   \
   (GUIDANCE_H_DGAIN < 0)   ||                   \
@@ -268,6 +272,7 @@ void guidance_h_mode_changed(uint8_t new_mode)
 
     case GUIDANCE_H_MODE_NAV:
       guidance_h_nav_enter();
+
 #if NO_ATTITUDE_RESET_ON_MODE_CHANGE
       /* reset attitude stabilization if previous mode was not using it */
       if (guidance_h.mode == GUIDANCE_H_MODE_KILL ||

@@ -900,6 +900,7 @@
     <field name="velocitySideways" type="float"/>
     <field name="velocityUpDown" type="float"/>
     <field name="mode" type="uint8"/>
+    <field name="randomVariable" type="int32"/>
   </message>
 
   <message name="MLX_SERIAL" id="113">

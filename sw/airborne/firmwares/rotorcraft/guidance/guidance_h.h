@@ -61,7 +61,7 @@
 #define GUIDANCE_H_MODE_FLIP        9
 #define GUIDANCE_H_MODE_GUIDED      10
 
-
+extern struct Int32Vect2 guidance_h_trim_att_integrator;
 struct HorizontalGuidanceSetpoint {
   /** horizontal position setpoint in NED.
    *  fixed point representation: Q23.8
