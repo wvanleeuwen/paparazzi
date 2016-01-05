@@ -69,7 +69,8 @@ float previousHorizontalVelocity = 0.0;
 #define CLOSE_DISPARITY 33
 #define LOW_AMOUNT_PIXELS_IN_DROPLET 20
 float ref_disparity_to_keep=40.0;
-float pitch_compensation = 0.05;
+float pitch_compensation = 0.0;
+float roll_compensation=0.0;
 int initFastForwardCount = 0;
 int goForwardXStages=3;
 int counterStab=0;
@@ -197,6 +198,8 @@ void stereocam_forward_velocity_periodic()
     	// someGainWhenDoingNothing=0.0;
     	 //somePitchGainWhenDoingNothing=0.0;
     	 current_state=STABILISE;
+    	 roll_compensation=-ANGLE_FLOAT_OF_BFP(stab_att_sp_euler.phi);
+    	 pitch_compensation=-ANGLE_FLOAT_OF_BFP(stab_att_sp_euler.theta);
     }
 
 
@@ -363,13 +366,12 @@ void stereocam_forward_velocity_periodic()
     else{
     	current_state=GO_FORWARD;
     }
-   // nav_set_heading_deg(heading);
+    nav_set_heading_deg(headingStereocamStab);
 
     ref_pitch += pitch_compensation;
+    ref_roll += roll_compensation;
     DOWNLINK_SEND_STEREO_VELOCITY(DefaultChannel, DefaultDevice, &closest, &disparitiesInDroplet,&dist, &velocityFound,&guidoVelocityHor,&ref_disparity_to_keep,&current_state);
-//    float currentPitch=state.ned_to_body_orientation.eulers_i.phi;
-    float currentPitch=stab_att_sp_euler.phi;
-    DOWNLINK_SEND_REFROLLPITCH(DefaultChannel, DefaultDevice, &currentPitch,&ref_pitch);
+    DOWNLINK_SEND_REFROLLPITCH(DefaultChannel, DefaultDevice, &ref_roll,&ref_pitch);
 //*/
   }
 }
