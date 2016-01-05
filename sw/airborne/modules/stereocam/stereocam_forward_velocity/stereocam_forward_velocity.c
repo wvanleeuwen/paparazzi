@@ -198,6 +198,7 @@ void stereocam_forward_velocity_periodic()
     	// someGainWhenDoingNothing=0.0;
     	 //somePitchGainWhenDoingNothing=0.0;
     	 current_state=STABILISE;
+    	 headingStereocamStab=ANGLE_FLOAT_OF_BFP(INT32_DEG_OF_RAD(stab_att_sp_euler.psi));
     	 roll_compensation=-ANGLE_FLOAT_OF_BFP(stab_att_sp_euler.phi);
     	 pitch_compensation=-ANGLE_FLOAT_OF_BFP(stab_att_sp_euler.theta);
     }
