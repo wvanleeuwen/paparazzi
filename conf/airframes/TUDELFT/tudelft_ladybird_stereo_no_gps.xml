@@ -71,14 +71,14 @@
 
   <section name="IMU" prefix="IMU_">
 
-    <define name="ACCEL_X_NEUTRAL" value="31"/>
-    <define name="ACCEL_Y_NEUTRAL" value="-31"/>
+    <define name="ACCEL_X_NEUTRAL" value="40"/>
+    <define name="ACCEL_Y_NEUTRAL" value="10"/>
     <define name="ACCEL_Z_NEUTRAL" value="0"/>
 
 
 
-    <define name="BODY_TO_IMU_PHI" value="-1.4" unit="deg"/>
-    <define name="BODY_TO_IMU_THETA" value="0.66" unit="deg"/>
+    <define name="BODY_TO_IMU_PHI" value="0.4" unit="deg"/>
+    <define name="BODY_TO_IMU_THETA" value="-.66" unit="deg"/>
     <define name="BODY_TO_IMU_PSI" value="-13." unit="deg"/>
   </section>
 
@@ -189,14 +189,8 @@
     <define name="H_Y" value="0.00278894"/>
     <define name="H_Z" value="0.92060036"/>
     <define name="USE_GPS_HEADING" value="0"/>
-
-    <define name="USE_MAGNETOMETER" value="1"/>
+    <define name="USE_MAGNETOMETER" value="0"/>
   </section>
-<define name="USE_GPS" value="FALSE"/>
- <define name="NO_GPS_NEEDED_FOR_NAV" value="TRUE"/>
- <define name="USE_GPS_HEADING" value="FALSE"/>
- <define name="USE_MAGNETOMETER" value="TRUE"/>
-<define name="GUIDANCE_INDI" value="0"/>
 
  <section name="GUIDANCE_H" prefix="GUIDANCE_H_">
    <define name="PGAIN" value="200"/>
@@ -237,6 +231,8 @@
       <configure name="USE_MAGNETOMETER" value="0"/>
       <configure name="AHRS_PROPAGATE_FREQUENCY" value="500"/>
       <define name="USE_PERSISTENT_SETTINGS" value="TRUE"/>
+	 <define name="NO_GPS_NEEDED_FOR_NAV" value="TRUE"/>
+<define name="USE_GPS" value="FALSE"/>
     </target>
 
     <subsystem name="motor_mixing"/>
