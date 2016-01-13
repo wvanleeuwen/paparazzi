@@ -219,7 +219,7 @@
 	<configure name="STEREO_BAUD" value="B115200"/>
 </load>
 
-   <load name="stereocam_forward_velocity.xml"/>
+   <load name="stereocam_forward_velocity_optitrack.xml"/>
  </modules>
 
   <firmware name="rotorcraft">
