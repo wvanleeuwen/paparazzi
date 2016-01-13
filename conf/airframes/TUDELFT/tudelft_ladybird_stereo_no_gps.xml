@@ -212,6 +212,8 @@
 
  <modules main_freq="512">
    <load name="send_imu_mag_current.xml"/>
+
+   <load name="air_data.xml"/>
  <load name="stereocam.xml">
 	<configure name="STEREO_UART" value="UART1"/>
 	<configure name="STEREO_BAUD" value="B115200"/>
@@ -232,6 +234,7 @@
       <configure name="AHRS_PROPAGATE_FREQUENCY" value="500"/>
       <define name="USE_PERSISTENT_SETTINGS" value="TRUE"/>
 	 <define name="NO_GPS_NEEDED_FOR_NAV" value="TRUE"/>
+ <define name="SENSOR_SYNC_SEND" value="TRUE"/>
 <define name="USE_GPS" value="FALSE"/>
     </target>
 

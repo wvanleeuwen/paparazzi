@@ -4,6 +4,14 @@
   <doc>
     <description>stereocam_forward_velocity</description>
   </doc>
+ <settings>
+    <dl_settings name="stereocam_avoidance">
+      <dl_settings name="mode">
+        <dl_setting max="1" min="0" step="1" var="demonstration_type" shortname="mode" values="EXPLORE|STABLE"/>
+        <dl_setting max="40" min="1" step="1" var="ref_disparity_to_keep" shortname="distance_to_keep"/>
+      </dl_settings>
+    </dl_settings>
+  </settings>
   <header>
     <file name="stereocam_forward_velocity/stereocam_forward_velocity.h"/>
   </header>

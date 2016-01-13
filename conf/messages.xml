@@ -901,6 +901,8 @@
     <field name="velocityUpDown" type="float"/>
     <field name="mode" type="uint8"/>
     <field name="randomVariable" type="int32"/>
+    <field name="disparityLeft" type="uint8"/>
+    <field name="disparityRight" type="uint8"/>
   </message>
 
   <message name="MLX_SERIAL" id="113">
