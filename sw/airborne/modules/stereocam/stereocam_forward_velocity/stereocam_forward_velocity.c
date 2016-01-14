@@ -67,9 +67,9 @@ uint8_t detectedWall=0;
 float velocityAverageAlpha = 0.65;
 float previousHorizontalVelocity = 0.0;
 //#define DANGEROUS_CLOSE_DISPARITY 24
-int DANGEROUS_CLOSE_DISPARITY=24;
+int DANGEROUS_CLOSE_DISPARITY=30;
 //#define CLOSE_DISPARITY 18
-#define INIT_CLOSE_DISP 18
+#define INIT_CLOSE_DISP 22
 int CLOSE_DISPARITY=INIT_CLOSE_DISP;
 //#define LOW_AMOUNT_PIXELS_IN_DROPLET 20
 int LOW_AMOUNT_PIXELS_IN_DROPLET=20;
@@ -85,9 +85,6 @@ typedef enum{USE_DROPLET,USE_CLOSEST_DISPARITY} something;
 demo_type demonstration_type = EXPLORE;
 something sf = USE_DROPLET;
 float headingStereocamStab=0.0;
-float someGainWhenDoingNothing=0.0;
-
-float somePitchGainWhenDoingNothing=0.0;
 float previousStabPitch=0.0;
 uint8_t initialisedTurn=0;
 uint8_t turnMultiplier=1;
@@ -285,19 +282,17 @@ void stereocam_forward_velocity_periodic()
 				ref_roll=rollToTake;
 			}
 
-			if(pitchToTake>0.1){
-				ref_pitch=0.1;
+			if(pitchToTake>0.15){
+				ref_pitch=0.15;
 			}
-			else if (pitchToTake<-0.1){
-				ref_pitch=-0.1;
+			else if (pitchToTake<-0.15){
+				ref_pitch=-0.15;
 			}
 			else{
 				ref_pitch=pitchToTake;
 			}
 
 			previousStabRoll=ref_roll;
-			someGainWhenDoingNothing+=0.1*ref_roll;
-			somePitchGainWhenDoingNothing+=0.1*ref_pitch;
 			previousStabPitch=ref_pitch;
 
 
@@ -311,7 +306,7 @@ void stereocam_forward_velocity_periodic()
 			}
 		}
 		else{
-			ref_pitch=0.5*previousStabPitch;
+			ref_pitch=previousStabPitch;
 			ref_roll=0.5*previousStabRoll;
 		}
 
@@ -382,8 +377,27 @@ void stereocam_forward_velocity_periodic()
 
     ref_pitch += pitch_compensation;
     ref_roll += roll_compensation;
+
+    if(ref_pitch>0.15){
+		ref_pitch=0.15;
+	}
+	else if (ref_pitch<-0.15){
+		ref_pitch=-0.15;
+	}
+
+
+    if(ref_roll>0.15){
+    	ref_roll=0.15;
+	}
+	else if (ref_roll<-0.15){
+		ref_roll=-0.15;
+	}
+
+    if(demonstration_type==HORIZONTAL_HOVER){
+		current_state=STABILISE;
+	}
     DOWNLINK_SEND_STEREO_VELOCITY(DefaultChannel, DefaultDevice, &closest, &disparitiesInDroplet,&dist, &velocityFound,&guidoVelocityHor,&ref_disparity_to_keep,&current_state,&guidance_h_trim_att_integrator.x,&disparityLeft,&disparityRight);
-    DOWNLINK_SEND_REFROLLPITCH(DefaultChannel, DefaultDevice, &somePitchGainWhenDoingNothing,&ref_pitch);
+    DOWNLINK_SEND_REFROLLPITCH(DefaultChannel, DefaultDevice, &ref_roll,&ref_pitch);
 //*/
   }
 }

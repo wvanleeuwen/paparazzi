@@ -179,8 +179,8 @@
    <define name="HOVER_KP" value="276"/>
    <define name="HOVER_KD" value="455"/>
    <define name="HOVER_KI" value="100"/>
-   <define name="NOMINAL_HOVER_THROTTLE" value="0.70"/>
-   <define name="ADAPT_THROTTLE_ENABLED" value="TRUE"/>
+   <define name="NOMINAL_HOVER_THROTTLE" value="0.75"/>
+   <define name="ADAPT_THROTTLE_ENABLED" value="FALSE"/>
   </section>
 
   <section name="AHRS" prefix="AHRS_">
@@ -188,7 +188,7 @@
     <define name="H_X" value="0.39049610"/>
     <define name="H_Y" value="0.00278894"/>
     <define name="H_Z" value="0.92060036"/>
-    <define name="USE_GPS_HEADING" value="0"/>
+    <define name="USE_GPS_HEADING" value="1"/>
     <define name="USE_MAGNETOMETER" value="0"/>
   </section>
 
@@ -196,14 +196,15 @@
    <define name="PGAIN" value="200"/>
    <define name="DGAIN" value="100"/>
    <define name="IGAIN" value="20"/>
-   <define name="REF_MAX_SPEED" value="3.5"/>
+   <define name="REF_MAX_SPEED" value="4.5"/>
    <define name="USE_REF" value="1"/>
+   <define name="REF_MAX_ACCEL" value="8.0"/>
  </section>
 
 
   <section name="NAVIGATION" prefix="NAV_">
-    <define name="CLIMB_VSPEED" value="0.1"/>
-    <define name="DESCEND_VSPEED" value="-0.1"/>
+    <define name="CLIMB_VSPEED" value="2.5"/>
+    <define name="DESCEND_VSPEED" value="-0.5"/>
   </section>
 
   <section name="MISC">
@@ -224,7 +225,6 @@
 
   <firmware name="rotorcraft">
 
-    <define name="NO_GPS_NEEDED_FOR_NAV" value="TRUE"/>
     <define name="NO_ATTITUDE_RESET_ON_MODE_CHANGE" value="TRUE"/>
 
     <target name="ap" board="lisa_s_1.0">
@@ -233,9 +233,9 @@
       <configure name="USE_MAGNETOMETER" value="0"/>
       <configure name="AHRS_PROPAGATE_FREQUENCY" value="500"/>
       <define name="USE_PERSISTENT_SETTINGS" value="TRUE"/>
-	 <define name="NO_GPS_NEEDED_FOR_NAV" value="TRUE"/>
- <define name="SENSOR_SYNC_SEND" value="TRUE"/>
-<define name="USE_GPS" value="FALSE"/>
+	 <define name="SENSOR_SYNC_SEND" value="TRUE"/>
+	 <define name="USE_GPS_ALT" value="1"/>
+	
     </target>
 
     <subsystem name="motor_mixing"/>
