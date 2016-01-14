@@ -1,6 +1,6 @@
 <!DOCTYPE flight_plan SYSTEM "../flight_plan.dtd">
 
-<flight_plan alt="2" ground_alt="0" lat0="43 33 50.83" lon0="1 28 52.61" max_dist_from_home="150" name="Rotorcraft Basic (Enac)" security_height="2">
+<flight_plan alt="1.2" ground_alt="0" lat0="43 33 50.83" lon0="1 28 52.61" max_dist_from_home="150" name="Rotorcraft Basic (Delft)" security_height="1.2">
   <header>
 #include "autopilot.h"
   </header>
@@ -35,16 +35,16 @@
       <attitude pitch="0" roll="0" throttle="0" until="stage_time > 1" vmode="throttle"/>
     </block>
  <block name="Takeoff">
-      <exception cond="stateGetPositionEnu_f()->z > 0.5" deroute="Standby"/>
+      <exception cond="stateGetPositionEnu_f()->z > 0.05" deroute="Start"/>
       <call fun="NavSetWaypointHere(WP_CLIMB)"/>
       <call fun="NavSetWaypointHere(WP_STDBY)"/>
       <stay climb="nav_climb_vspeed" vmode="climb" wp="CLIMB"/>
     </block>
-    <block name="Standby" strip_button="Standby" strip_icon="home.png">
-      <call fun="NavSetWaypointHere(last_wp)"/>
-      <stay wp="STDBY"/>
-    </block>
 
+    <block name="Start">
+      <exception cond="stage_time > 3" deroute="FlyForward"/>
+      <stay wp="CLIMB"/>
+    </block>
     <block name="FlyForward">
       <exception cond="!stateGoForward()" deroute="stabilise"/>
       <call fun="NavSetWaypointHere(last_wp)"/>
@@ -58,6 +58,7 @@
 
     </block>
     <block name="turn">
+	<call fun="allowedToChangeHeading()"/>
       <exception cond="!stateTurn()" deroute="FlyForward"/>
 
   <call fun="NavSetWaypointHere(WP_STDBY)"/>

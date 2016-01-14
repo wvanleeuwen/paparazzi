@@ -81,7 +81,7 @@ float previousStabRoll=0.0;
 float ref_alt=1.0;
 typedef enum{USE_DROPLET,USE_CLOSEST_DISPARITY} something;
 demo_type demonstration_type = EXPLORE;
-something sf = USE_DROPLET;
+something sf = USE_CLOSEST_DISPARITY;
 float headingStereocamStab=0.0;
 float someGainWhenDoingNothing=0.0;
 
@@ -89,8 +89,8 @@ float somePitchGainWhenDoingNothing=0.0;
 float previousStabPitch=0.0;
 uint8_t initialisedTurn=0;
 uint8_t turnMultiplier=1;
-
-
+uint8_t isAllowedToChangeHeading=0;
+uint8_t turnPhaseCounter=0;
  int stateGoForward(){
 return current_state==GO_FORWARD;
 }
@@ -175,6 +175,9 @@ uint8_t dangerousClose(uint8_t closeValue){
 uint8_t simplyClose(uint8_t closeValue){
 	return closeValue>CLOSE_DISPARITY || closeValue==0;
 }
+void allowedToChangeHeading(){
+	isAllowedToChangeHeading=1;
+}
 void stereocam_forward_velocity_periodic()
 {
 
@@ -210,11 +213,15 @@ void stereocam_forward_velocity_periodic()
     float noiseUs = 0.3f;
 
 	if(autopilot_mode != AP_MODE_NAV){
+		isAllowedToChangeHeading=0;
     	 ref_alt= -state.ned_pos_f.z;
     	 current_state=TURN;
-    	 headingStereocamStab=ANGLE_FLOAT_OF_BFP(INT32_DEG_OF_RAD(stab_att_sp_euler.psi));
+    		if(isAllowedToChangeHeading){
+    			headingStereocamStab=ANGLE_FLOAT_OF_BFP(INT32_DEG_OF_RAD(stab_att_sp_euler.psi));
+    		}
     	 roll_compensation=ANGLE_FLOAT_OF_BFP(stab_att_sp_euler.phi);
     	 pitch_compensation=ANGLE_FLOAT_OF_BFP(stab_att_sp_euler.theta);
+    	 turnPhaseCounter=0;
     }
     if(demonstration_type==HORIZONTAL_HOVER){
     	current_state=STABILISE;
@@ -228,7 +235,7 @@ void stereocam_forward_velocity_periodic()
 		  struct EnuCoor_i *pos = stateGetPositionEnu_i();
 		  float sin_heading = sinf(ANGLE_FLOAT_OF_BFP(nav_heading));
 		  float cos_heading = cosf(ANGLE_FLOAT_OF_BFP(nav_heading));
-		  float NAV_LINE_AVOID_SEGMENT_LENGTH = 0.55;
+		  float NAV_LINE_AVOID_SEGMENT_LENGTH = 1.50;
 		  new_coor.x = pos->x + POS_BFP_OF_REAL(sin_heading * (NAV_LINE_AVOID_SEGMENT_LENGTH));
 		  new_coor.y = pos->y + POS_BFP_OF_REAL(cos_heading * (NAV_LINE_AVOID_SEGMENT_LENGTH));
 		  new_coor.z = pos->z;
@@ -248,54 +255,26 @@ void stereocam_forward_velocity_periodic()
     		}
     	}
 
-		float max_roll=0.25;
-		float rollToTake = forwardLateralGains.pGain * guidoVelocityHor;
-		rollToTake*=-1;
-		if(counterStab%4==0){
-
-		}
-
-
 		if(detectedWall){
 			totalTurningSeenNothing=0;
 			current_state=STABILISE;
 			totalStabiliseStateCount=0;
 			detectedWall=0;
+			turnPhaseCounter=0;
 		}
 
     }
     else if(current_state==STABILISE){
-
-    	float stab_pitch_pgain=0.08;
-    	float pitchDiff = closest- ref_disparity_to_keep;
-    	float pitchToTake = stab_pitch_pgain*pitchDiff;
-    	if(dangerousClose(closest)){
-    		pitchToTake=0.2;
+    	turnPhaseCounter++;
+    	if(turnPhaseCounter>40){
+    		current_state=TURN;
     	}
-    	float max_roll=0.25;
-		float rollToTake =stabilisationLateralGains.pGain * guidoVelocityHor;
-		rollToTake*=-1;
-
-		if(counterStab%4==0){
-
-			if(guidoVelocityHor<0.25 && guidoVelocityHor>-0.25){
-
-				if(closest < (DANGEROUS_CLOSE_DISPARITY) && velocityFound <0){
-					current_state=TURN;
-					indexTurnFactors=0;
-					initialisedTurn=0;
-				}
-			}
-		}
-		else{
-
-		}
 
        }
     else if(current_state==TURN){
     	if(!initialisedTurn){
         	 initialisedTurn=1;
-        	 if(disparityLeft>disparityRight-30){
+        	 if(disparityLeft>disparityRight-10){
         		 turnMultiplier=1;
         	 }
         	 else{
@@ -303,36 +282,36 @@ void stereocam_forward_velocity_periodic()
         	 }
     	}
 
-
-    	headingStereocamStab += turnMultiplier*5.0;
-		  if (headingStereocamStab > 360.0){
-			  headingStereocamStab -= 360.0;
-		  }
-		  if(headingStereocamStab < 0){
-			  headingStereocamStab += 360;
-		  }
-
+    	if(isAllowedToChangeHeading){
+			headingStereocamStab += turnMultiplier*5.0;
+			  if (headingStereocamStab > 360.0){
+				  headingStereocamStab -= 360.0;
+			  }
+			  if(headingStereocamStab < 0){
+				  headingStereocamStab += 360;
+			  }
+    	}
     	indexTurnFactors+=1;
     	if(indexTurnFactors>countFactorsTurning){
     		indexTurnFactors = countFactorsTurning;
     	}
     	if(indexTurnFactors > 3){
     		if(sf==USE_CLOSEST_DISPARITY){
-    			if(closest<CLOSE_DISPARITY){
+    			if(!dangerousClose(closest) && !simplyClose(closest)){
 					totalTurningSeenNothing++;
-					if(totalTurningSeenNothing>2){
+
 						current_state=GO_FORWARD;
 						detectedWall=0;
-					}
+
     			}
     		}
     		else{
     			if(disparitiesInDroplet<LOW_AMOUNT_PIXELS_IN_DROPLET){
     				totalTurningSeenNothing++;
-					if(totalTurningSeenNothing>2){
+
 						current_state=GO_FORWARD;
 						detectedWall=0;
-					}
+
     			}
     		}
     	}

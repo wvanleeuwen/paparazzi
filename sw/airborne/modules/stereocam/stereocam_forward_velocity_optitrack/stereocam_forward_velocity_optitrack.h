@@ -31,7 +31,7 @@ extern uint8_t current_state;
 extern int stateGoForward(void);
 extern int stateStabilise(void);
 extern int stateTurn(void);
-
+extern void allowedToChangeHeading(void);
 extern void stereocam_forward_velocity_init(void);
 extern void stereocam_forward_velocity_periodic(void);
 
