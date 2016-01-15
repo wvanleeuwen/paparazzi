@@ -39,8 +39,7 @@ typedef struct Gains gains;
 gains stabilisationLateralGains;
 gains forwardLateralGains;
 
-int turnFactors[]={300,300,300,200,100,100,100,100};
-int countFactorsTurning=6;
+
 int indexTurnFactors=0;
 
 
@@ -48,11 +47,7 @@ int disparity_velocity_step = 0;
 int disparity_velocity_max_time = 500;
 int distancesRecorded = 0;
 int timeStepsRecorded = 0;
-int velocity_disparity_outliers = 0;
-float distancesHistory[500];
-float timeStepHistory[500];
-#define LENGTH_VELOCITY_HISTORY 6
-float velocityHistory[LENGTH_VELOCITY_HISTORY];
+
 int indexVelocityHistory=0;
 float sumVelocities=0.0;
 
@@ -98,61 +93,6 @@ void stereocam_forward_velocity_init()
 	forwardLateralGains.pGain=0.6;
 }
 
-void array_pop(float *array, int lengthArray);
-void array_pop(float *array, int lengthArray)
-{
-  int index;
-  for (index = 1; index < lengthArray; index++) {
-    array[index - 1] = array[index];
-  }
-}
-
-float calculateForwardVelocity(float distance,float alpha,int MAX_SUBSEQUENT_OUTLIERS,int n_steps_velocity);
-float calculateForwardVelocity(float distance,float alpha,int MAX_SUBSEQUENT_OUTLIERS,int n_steps_velocity)
-{
-	    disparity_velocity_step += 1;
-	    float new_dist = 0.0;
-	    if (distancesRecorded > 0) {
-	      new_dist = alpha * distancesHistory[distancesRecorded - 1] + (1 - alpha) * distance;
-	    }
-	    // Deal with outliers:
-	    // Single outliers are discarded, while persisting outliers will lead to an array reset:
-	    if (distancesRecorded > 0 && fabs(new_dist - distancesHistory[distancesRecorded - 1]) > 0.5) {
-	      velocity_disparity_outliers += 1;
-	      if (velocity_disparity_outliers >= MAX_SUBSEQUENT_OUTLIERS) {
-	        // The drone has probably turned in a new direction
-	        distancesHistory[0] = new_dist;
-	        distancesRecorded = 1;
-
-	        timeStepHistory[0] = disparity_velocity_step;
-	        timeStepsRecorded = 1;
-	        velocity_disparity_outliers = 0;
-	      }
-	    } else {
-	        //append
-	      velocity_disparity_outliers = 0;
-	      timeStepHistory[timeStepsRecorded] = disparity_velocity_step;
-	      distancesHistory[distancesRecorded] = new_dist;
-	      distancesRecorded++;
-	      timeStepsRecorded++;
-	    }
-
-	    //determine velocity (very simple method):
-	    float velocityFound = 0.0;
-	    if (distancesRecorded > n_steps_velocity) {
-	      velocityFound = distancesHistory[distancesRecorded - n_steps_velocity] - distancesHistory[distancesRecorded - 1];
-	    }
-	    // keep maximum array size:
-	    if (distancesRecorded > disparity_velocity_max_time) {
-	    	array_pop(distancesHistory, disparity_velocity_max_time);
-	    	distancesRecorded--;
-	    }
-	    if (timeStepsRecorded > disparity_velocity_max_time) {
-	    	array_pop(timeStepHistory, disparity_velocity_max_time);
-	    	timeStepsRecorded--;
-	    }
-	    return velocityFound;
-}
 void increase_nav_heading(int32_t *headingToChange, int32_t increment);
 void increase_nav_heading(int32_t *headingToChange, int32_t increment)
 {
@@ -185,7 +125,6 @@ void stereocam_forward_velocity_periodic()
 	if (closest > 0) {
 	  dist = ((BASELINE_STEREO_MM * BRANDSPUNTSAFSTAND_STEREO / (float)closest)) / 1000;
 	}
-	float velocityFound = calculateForwardVelocity(dist,0.65, 5,5);
 
     float guidoVelocityHorStereoboard = horizontalVelocity/100.0;
     float guidoVelocityHor = 0.0;
@@ -266,7 +205,7 @@ void stereocam_forward_velocity_periodic()
     }
     else if(current_state==STABILISE){
     	totalStabiliseStateCount++;
-    	float stab_pitch_pgain=0.05;
+    	float stab_pitch_pgain=0.04;
     	float pitchDiff = closest- ref_disparity_to_keep;
     	float pitchToTake = stab_pitch_pgain*pitchDiff;
     	if(dangerousClose(closest)){
@@ -304,7 +243,7 @@ void stereocam_forward_velocity_periodic()
 
 		    if(demonstration_type!=HORIZONTAL_HOVER){
 				if(guidoVelocityHor<0.25 && guidoVelocityHor>-0.25){
-					if((!dangerousClose(closest) && velocityFound <=0) || totalStabiliseStateCount > 50 ){
+					if((!dangerousClose(closest)) || totalStabiliseStateCount > 50 ){
 						current_state=TURN;
 						indexTurnFactors=0;
 						initialisedTurn=0;
@@ -341,9 +280,7 @@ void stereocam_forward_velocity_periodic()
 
     	//increase_nav_heading(&nav_heading,turnFactors[indexTurnFactors]);
     	indexTurnFactors+=1;
-    	if(indexTurnFactors>countFactorsTurning){
-    		indexTurnFactors = countFactorsTurning;
-    	}
+
     	if(indexTurnFactors > 3){
     		if(wayToDetermineState==USE_CLOSEST_DISPARITY){
     			if(!dangerousClose(closest) && !simplyClose(closest)){
@@ -407,7 +344,7 @@ void stereocam_forward_velocity_periodic()
    		addedPitchJoystick=-0.25;
    	}
     ref_pitch+= addedPitchJoystick;
-    DOWNLINK_SEND_STEREO_VELOCITY(DefaultChannel, DefaultDevice, &closest, &disparitiesInDroplet,&dist, &velocityFound,&guidoVelocityHor,&ref_disparity_to_keep,&current_state,&totalStabiliseStateCount,&disparityLeft,&disparityRight,&stabilisationLateralGains.pGain);
+    DOWNLINK_SEND_STEREO_VELOCITY(DefaultChannel, DefaultDevice, &closest, &disparitiesInDroplet,&dist, &guidoVelocityHor,&guidoVelocityHor,&ref_disparity_to_keep,&current_state,&totalStabiliseStateCount,&disparityLeft,&disparityRight,&stabilisationLateralGains.pGain);
     DOWNLINK_SEND_REFROLLPITCH(DefaultChannel, DefaultDevice, &ref_roll,&ref_pitch);
 //*/
   }
