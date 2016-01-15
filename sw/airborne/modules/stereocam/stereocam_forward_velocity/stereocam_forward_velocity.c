@@ -58,7 +58,6 @@ float sumHorizontalVelocities=0.0;
 uint8_t GO_FORWARD=0;
 uint8_t STABILISE=1;
 uint8_t TURN=2;
-uint8_t INIT_FORWARD=3;
 uint8_t current_state=2;
 int totalStabiliseStateCount = 0;
 int totalTurningSeenNothing=0;
@@ -83,7 +82,7 @@ float previousStabRoll=0.0;
 float ref_alt=1.0;
 typedef enum{USE_DROPLET,USE_CLOSEST_DISPARITY} something;
 demo_type demonstration_type = EXPLORE;
-something sf = USE_DROPLET;
+something wayToDetermineState = USE_CLOSEST_DISPARITY;
 float headingStereocamStab=0.0;
 float previousStabPitch=0.0;
 uint8_t initialisedTurn=0;
@@ -202,7 +201,7 @@ void stereocam_forward_velocity_periodic()
     ref_roll=0.0;
     if(autopilot_mode != AP_MODE_NAV){
     	 ref_alt= -state.ned_pos_f.z;
-    	 current_state=TURN;
+    	 current_state=STABILISE;
     	 headingStereocamStab=ANGLE_FLOAT_OF_BFP(INT32_DEG_OF_RAD(stab_att_sp_euler.psi));
     	 roll_compensation=ANGLE_FLOAT_OF_BFP(stab_att_sp_euler.phi);
     	 pitch_compensation=ANGLE_FLOAT_OF_BFP(stab_att_sp_euler.theta);
@@ -217,7 +216,7 @@ void stereocam_forward_velocity_periodic()
     if(current_state==GO_FORWARD){
     	ref_pitch=-0.1;
 
-    	if(sf==USE_CLOSEST_DISPARITY){
+    	if(wayToDetermineState==USE_CLOSEST_DISPARITY){
 			if(dangerousClose(closest)){
 				ref_pitch=0.2;
 				detectedWall=1;
@@ -260,7 +259,7 @@ void stereocam_forward_velocity_periodic()
     }
     else if(current_state==STABILISE){
 
-    	float stab_pitch_pgain=0.08;
+    	float stab_pitch_pgain=0.07;
     	float pitchDiff = closest- ref_disparity_to_keep;
     	float pitchToTake = stab_pitch_pgain*pitchDiff;
     	if(dangerousClose(closest)){
@@ -297,8 +296,7 @@ void stereocam_forward_velocity_periodic()
 
 
 			if(guidoVelocityHor<0.25 && guidoVelocityHor>-0.25){
-
-				if(closest < (DANGEROUS_CLOSE_DISPARITY) && velocityFound <0){
+				if(!dangerousClose(closest) && velocityFound <=0){
 					current_state=TURN;
 					indexTurnFactors=0;
 					initialisedTurn=0;
@@ -338,13 +336,11 @@ void stereocam_forward_velocity_periodic()
     		indexTurnFactors = countFactorsTurning;
     	}
     	if(indexTurnFactors > 3){
-    		if(sf==USE_CLOSEST_DISPARITY){
-    			if(closest<CLOSE_DISPARITY){
+    		if(wayToDetermineState==USE_CLOSEST_DISPARITY){
+    			if(!dangerousClose(closest) && !simplyClose(closest)){
 					totalTurningSeenNothing++;
-					if(totalTurningSeenNothing>2){
-						current_state=GO_FORWARD;
-						detectedWall=0;
-					}
+					current_state=GO_FORWARD;
+					detectedWall=0;
     			}
     		}
     		else{
@@ -362,14 +358,6 @@ void stereocam_forward_velocity_periodic()
     	}
 
     }
-    else if(current_state==INIT_FORWARD){
-    	ref_pitch=-0.25;
-    	initFastForwardCount++;
-    	if(initFastForwardCount >= goForwardXStages){
-    		initFastForwardCount = 0;
-    		current_state=GO_FORWARD;
-    	}
-     }
     else{
     	current_state=GO_FORWARD;
     }
