@@ -19,12 +19,14 @@
 #include "firmwares/rotorcraft/guidance/guidance_h.h"
 #include "subsystems/datalink/telemetry.h"
 #include "firmwares/rotorcraft/stabilization/stabilization_attitude_quat_int.h"
+#include "subsystems/radio_control.h"
+
 
 #define AVERAGE_VELOCITY 0
 // Know waypoint numbers and blocks
 #include "generated/flight_plan.h"
- float ref_pitch=0.0;
- float ref_roll=0.0;
+float ref_pitch=0.0;
+float ref_roll=0.0;
 
 
  struct Gains{
@@ -87,6 +89,7 @@ float headingStereocamStab=0.0;
 float previousStabPitch=0.0;
 uint8_t initialisedTurn=0;
 uint8_t turnMultiplier=1;
+int timeInStableMode=0;
 void stereocam_forward_velocity_init()
 {
 	stabilisationLateralGains.pGain=0.6;
@@ -142,9 +145,11 @@ float calculateForwardVelocity(float distance,float alpha,int MAX_SUBSEQUENT_OUT
 	    // keep maximum array size:
 	    if (distancesRecorded > disparity_velocity_max_time) {
 	    	array_pop(distancesHistory, disparity_velocity_max_time);
+	    	distancesRecorded--;
 	    }
 	    if (timeStepsRecorded > disparity_velocity_max_time) {
 	    	array_pop(timeStepHistory, disparity_velocity_max_time);
+	    	timeStepsRecorded--;
 	    }
 	    return velocityFound;
 }
@@ -162,6 +167,7 @@ uint8_t simplyClose(uint8_t closeValue){
 }
 void stereocam_forward_velocity_periodic()
 {
+
 
   if (stereocam_data.fresh && stereocam_data.len>20) {
     stereocam_data.fresh = 0;
@@ -205,6 +211,7 @@ void stereocam_forward_velocity_periodic()
     	 headingStereocamStab=ANGLE_FLOAT_OF_BFP(INT32_DEG_OF_RAD(stab_att_sp_euler.psi));
     	 roll_compensation=ANGLE_FLOAT_OF_BFP(stab_att_sp_euler.phi);
     	 pitch_compensation=ANGLE_FLOAT_OF_BFP(stab_att_sp_euler.theta);
+    	 totalStabiliseStateCount=0;
     }
     if(demonstration_type==HORIZONTAL_HOVER){
     	current_state=STABILISE;
@@ -258,8 +265,8 @@ void stereocam_forward_velocity_periodic()
 
     }
     else if(current_state==STABILISE){
-
-    	float stab_pitch_pgain=0.07;
+    	totalStabiliseStateCount++;
+    	float stab_pitch_pgain=0.05;
     	float pitchDiff = closest- ref_disparity_to_keep;
     	float pitchToTake = stab_pitch_pgain*pitchDiff;
     	if(dangerousClose(closest)){
@@ -295,13 +302,15 @@ void stereocam_forward_velocity_periodic()
 			previousStabPitch=ref_pitch;
 
 
-			if(guidoVelocityHor<0.25 && guidoVelocityHor>-0.25){
-				if(!dangerousClose(closest) && velocityFound <=0){
-					current_state=TURN;
-					indexTurnFactors=0;
-					initialisedTurn=0;
+		    if(demonstration_type!=HORIZONTAL_HOVER){
+				if(guidoVelocityHor<0.25 && guidoVelocityHor>-0.25){
+					if((!dangerousClose(closest) && velocityFound <=0) || totalStabiliseStateCount > 50 ){
+						current_state=TURN;
+						indexTurnFactors=0;
+						initialisedTurn=0;
+					}
 				}
-			}
+		    }
 		}
 		else{
 			ref_pitch=previousStabPitch;
@@ -380,11 +389,25 @@ void stereocam_forward_velocity_periodic()
 	else if (ref_roll<-0.15){
 		ref_roll=-0.15;
 	}
-
-    if(demonstration_type==HORIZONTAL_HOVER){
-		current_state=STABILISE;
+    float addedRollJoystick = ((float)radio_control.values[RADIO_ROLL])/((float)MAX_PPRZ);//RADIO_CONTROL_NB_CHANNEL
+    if(addedRollJoystick>0.25){
+    	addedRollJoystick=0.25;
 	}
-    DOWNLINK_SEND_STEREO_VELOCITY(DefaultChannel, DefaultDevice, &closest, &disparitiesInDroplet,&dist, &velocityFound,&guidoVelocityHor,&ref_disparity_to_keep,&current_state,&guidance_h_trim_att_integrator.x,&disparityLeft,&disparityRight);
+	else if (addedRollJoystick<-0.25){
+		addedRollJoystick=-0.25;
+	}
+    ref_roll+= addedRollJoystick;
+
+
+    float addedPitchJoystick = ((float)radio_control.values[RADIO_PITCH])/((float)MAX_PPRZ);//RADIO_CONTROL_NB_CHANNEL
+       if(addedPitchJoystick>0.25){
+    	   addedPitchJoystick=0.25;
+   	}
+   	else if (addedPitchJoystick<-0.25){
+   		addedPitchJoystick=-0.25;
+   	}
+    ref_pitch+= addedPitchJoystick;
+    DOWNLINK_SEND_STEREO_VELOCITY(DefaultChannel, DefaultDevice, &closest, &disparitiesInDroplet,&dist, &velocityFound,&guidoVelocityHor,&ref_disparity_to_keep,&current_state,&totalStabiliseStateCount,&disparityLeft,&disparityRight,&stabilisationLateralGains.pGain);
     DOWNLINK_SEND_REFROLLPITCH(DefaultChannel, DefaultDevice, &ref_roll,&ref_pitch);
 //*/
   }
