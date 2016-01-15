@@ -78,7 +78,7 @@ int counterStab=0;
 float previousStabRoll=0.0;
 float ref_alt=1.0;
 typedef enum{USE_DROPLET,USE_CLOSEST_DISPARITY} something;
-demo_type demonstration_type = EXPLORE;
+demo_type demonstration_type = HORIZONTAL_HOVER;
 something wayToDetermineState = USE_CLOSEST_DISPARITY;
 float headingStereocamStab=0.0;
 float previousStabPitch=0.0;
