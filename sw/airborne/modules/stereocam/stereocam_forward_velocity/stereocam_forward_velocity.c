@@ -78,7 +78,7 @@ int counterStab=0;
 float previousStabRoll=0.0;
 float ref_alt=1.0;
 typedef enum{USE_DROPLET,USE_CLOSEST_DISPARITY} something;
-demo_type demonstration_type = HORIZONTAL_HOVER;
+demo_type demonstration_type = EXPLORE;
 something wayToDetermineState = USE_CLOSEST_DISPARITY;
 float headingStereocamStab=0.0;
 float previousStabPitch=0.0;
@@ -138,10 +138,7 @@ void stereocam_forward_velocity_periodic()
     //float guidoVelocityZ = upDownVelocity/100.0;
     float guidoVelocityZ=0.0;
     float noiseUs = 0.3f;
-/*
-    AbiSendMsgVELOCITY_ESTIMATE(STEREO_VELOCITY_ID, timeStamp, velocityFound, guidoVelocityHor,
-                                guidoVelocityZ,
-                                noiseUs);*/
+
 	ref_pitch=0.0;
     ref_roll=0.0;
     if(autopilot_mode != AP_MODE_NAV){
