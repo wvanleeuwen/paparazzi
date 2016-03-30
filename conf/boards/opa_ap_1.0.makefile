@@ -42,6 +42,7 @@ GPS_PORT ?= UART1
 GPS_BAUD ?= B57600
 
 INTERMCU_PORT ?= UART3
+INTERMCU_BAUD ?= B230400
 
 #
 # default IMU configuration

@@ -80,7 +80,6 @@ void intermcu_periodic(void)
 
 void intermcu_on_rc_frame(uint8_t fbw_mode)
 {
-
   pprz_t  values[8];
 
   values[INTERMCU_RADIO_THROTTLE] = radio_control.values[RADIO_THROTTLE];
