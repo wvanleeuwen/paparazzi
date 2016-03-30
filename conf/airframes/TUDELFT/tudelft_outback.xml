@@ -3,7 +3,8 @@
 <!-- this is a helicopter with a double wing as frame
      * Autopilot:   OPA/FTD 1.0 and OPA/AP 1.0 with STM32F4
      * IMU:         MPU6000 (FTD), MPU6000 (AP)
-     * Actuators:
+     * Baro:        MS5611 (AP)
+     * Actuators:   10 PWM (FTD)
      * GPS:         UBlox
      * RC:          Spektrum sats (2x)
 -->
@@ -17,20 +18,20 @@
     </target-->
 
     <module name="telemetry"     type="xbee_api"/>
-    <module name="imu"           type="lisa_mx_v2.1"/>
+    <module name="imu"           type="mpu6000"/>
     <module name="gps"           type="ublox"/>
     <module name="stabilization" type="int_quat"/>
     <module name="ahrs"          type="int_cmpl_quat"/>
     <module name="ins"           type="hff"/>
     <module name="guidance"      type="indi"/>
-    <!--module name="current_sensor">
-      <configure name="ADC_CURRENT_SENSOR" value="ADC_3"/>
-    </module-->
-    <subsystem name="intermcu"      type="uart"/>
+    <module name="intermcu"      type="uart"/>
+    <module name="current_sensor"/>
 
     <module name="geo_mag.xml"/>
     <module name="air_data.xml"/>
-    <module name="logger_spi_link.xml"/>
+    <module name="logger_sd_spi_direct.xml">
+      <define name="SDLOGGER_DIRECT_CONTROL_SWITCH" value="AUX3"/>
+    </module>
     <module name="gps_ubx_ucenter.xml"/>
   </firmware>
 

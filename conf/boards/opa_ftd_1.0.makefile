@@ -1,7 +1,8 @@
 # Hey Emacs, this is a -*- makefile -*-
 #
-# opa_ftd_1.0.makefile
+# Oversized Paparazzi (AP) Board
 #
+# http://wiki.paparazziuav.org/wiki/OPA
 #
 
 BOARD=opa_ftd
@@ -16,27 +17,18 @@ $(TARGET).LDSCRIPT=$(SRC_ARCH)/lisa-mx.ld
 
 # -----------------------------------------------------------------------
 
-# default flash mode is via usb dfu bootloader (luftboot)
-# other possibilities: DFU-UTIL, SWD, JTAG_BMP, STLINK, SERIAL
+#
+# default flash mode is via SWD (JTAG)
+#
 FLASH_MODE ?= SWD
-
-HAS_LUFTBOOT ?= 0
-ifeq (,$(findstring $(HAS_LUFTBOOT),0 FALSE))
-$(TARGET).CFLAGS+=-DLUFTBOOT
-$(TARGET).LDFLAGS+=-Wl,-Ttext=0x8004000
-DFU_ADDR = 0x8004000
-DFU_PRODUCT = Lisa/Lia
-endif
 
 
 #
 # default LED configuration
 #
-RADIO_CONTROL_LED  ?= 2
-BARO_LED           ?= none
-AHRS_ALIGNER_LED   ?= none
-GPS_LED            ?= none
 SYS_TIME_LED       ?= 1
+RADIO_CONTROL_LED  ?= 2
+ARMING_LED         ?= 3
 
 
 #
@@ -50,12 +42,8 @@ MODEM_BAUD ?= B57600
 
 INTERMCU_PORT ?= UART2
 
+
 #
 # default actuator configuration
-#
-# you can use different actuators by adding a configure option to your firmware section
-# e.g. <configure name="ACTUATORS" value="actuators_ppm/>
-# and by setting the correct "driver" attribute in servo section
-# e.g. <servo driver="Ppm">
 #
 ACTUATORS ?= actuators_pwm

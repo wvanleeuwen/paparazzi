@@ -62,6 +62,9 @@
 #define LED_2_AFIO_REMAP ((void)0)
 
 /* Status LED ext, PB13 */
+#ifndef USE_LED_3
+#define USE_LED_3 1
+#endif
 #define LED_3_GPIO GPIOB
 #define LED_3_GPIO_PIN GPIO13
 #define LED_3_GPIO_ON gpio_set
@@ -156,8 +159,8 @@
 #define USE_ADC_1 1
 #endif
 #if USE_ADC_1
-#define AD1_4_CHANNEL 14
-#define ADC_1 AD1_4
+#define AD1_1_CHANNEL 14
+#define ADC_1 AD1_1
 #define ADC_1_GPIO_PORT GPIOC
 #define ADC_1_GPIO_PIN GPIO4
 #endif

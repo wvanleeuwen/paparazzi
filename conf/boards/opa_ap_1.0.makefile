@@ -1,11 +1,11 @@
 # Hey Emacs, this is a -*- makefile -*-
 #
-# opa_ap_1.0.makefile
+# Oversized Paparazzi (AP) Board
 #
-# http://wiki.paparazziuav.org/wiki/Lisa/M_v20
+# http://wiki.paparazziuav.org/wiki/OPA
 #
 
-BOARD=opa_ftd
+BOARD=opa_ap
 BOARD_VERSION=1.0
 BOARD_CFG=\"boards/$(BOARD)_$(BOARD_VERSION).h\"
 
@@ -17,44 +17,47 @@ $(TARGET).LDSCRIPT=$(SRC_ARCH)/lisa-mx.ld
 
 # -----------------------------------------------------------------------
 
-# default flash mode is via usb dfu bootloader (luftboot)
-# other possibilities: DFU-UTIL, SWD, JTAG_BMP, STLINK, SERIAL
+#
+# default flash mode is via SWD (JTAG)
+#
 FLASH_MODE ?= SWD
-
-HAS_LUFTBOOT ?= 0
-ifeq (,$(findstring $(HAS_LUFTBOOT),0 FALSE))
-$(TARGET).CFLAGS+=-DLUFTBOOT
-$(TARGET).LDFLAGS+=-Wl,-Ttext=0x8004000
-DFU_ADDR = 0x8004000
-DFU_PRODUCT = Lisa/Lia
-endif
-
 
 #
 # default LED configuration
 #
-RADIO_CONTROL_LED  ?= 2
+SYS_TIME_LED       ?= 1
+RADIO_CONTROL_LED  ?= none
 BARO_LED           ?= none
 AHRS_ALIGNER_LED   ?= none
 GPS_LED            ?= none
-SYS_TIME_LED       ?= 1
-
+LOGGER_LED         ?= none
 
 #
 # default uart configuration
 #
-RADIO_CONTROL_SPEKTRUM_PRIMARY_PORT   ?= UART1
-RADIO_CONTROL_SPEKTRUM_SECONDARY_PORT ?= UART5
-
-MODEM_PORT ?= UART3
+MODEM_PORT ?= UART2
 MODEM_BAUD ?= B57600
 
+GPS_PORT ?= UART1
+GPS_BAUD ?= B57600
+
+INTERMCU_PORT ?= UART3
+
 #
-# default actuator configuration
+# default IMU configuration
 #
-# you can use different actuators by adding a configure option to your firmware section
-# e.g. <configure name="ACTUATORS" value="actuators_ppm/>
-# and by setting the correct "driver" attribute in servo section
-# e.g. <servo driver="Ppm">
+IMU_MPU_SPI_DEV ?= spi2
+IMU_MPU_SPI_SLAVE_IDX ?= SPI_SLAVE1
+
 #
-ACTUATORS ?= actuators_pwm
+# default SPI logger configuration
+#
+SDLOGGER_DIRECT_SPI ?= spi1
+SDLOGGER_DIRECT_SPI_SLAVE ?= SPI_SLAVE0
+HS_LOG_SPI_DEV ?= spi1
+HS_LOG_SPI_SLAVE_IDX ?= SPI_SLAVE0
+
+#
+# default Current Sensor configuration
+#
+ADC_CURRENT_SENSOR ?= ADC_2
