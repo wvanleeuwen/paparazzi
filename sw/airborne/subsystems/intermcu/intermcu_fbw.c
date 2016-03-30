@@ -44,7 +44,7 @@ tid_t px4bl_tid; ///< id for time out of the px4 bootloader reset
 #if RADIO_CONTROL_NB_CHANNEL > 8
 #undef RADIO_CONTROL_NB_CHANNEL
 #define RADIO_CONTROL_NB_CHANNEL 8
-#warning "INTERMCU UART WILL ONLY SEND 8 RADIO CHANNELS"
+INFO("InterMCU UART will only send 8 radio channels!")
 #endif
 
 // Used for communication
