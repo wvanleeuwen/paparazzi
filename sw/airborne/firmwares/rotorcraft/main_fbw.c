@@ -39,9 +39,7 @@
 
 
 #include "subsystems/electrical.h"
-
 #include "subsystems/radio_control.h"
-
 #include "subsystems/intermcu/intermcu_fbw.h"
 
 #include "firmwares/rotorcraft/main_fbw.h"
@@ -179,12 +177,13 @@ STATIC_INLINE void main_periodic(void)
   }
 
 
-  static uint16_t dv = 0;
   // TODO make module out of led blink?
   /* set failsafe commands     */
   if (fbw_mode == FBW_MODE_FAILSAFE) {
     SetCommands(commands_failsafe);
+
 #ifdef FBW_MODE_LED
+    static uint16_t dv = 0;
     if (!(dv++ % (PERIODIC_FREQUENCY / 20))) { LED_TOGGLE(FBW_MODE_LED);}
   } else if (fbw_mode == FBW_MODE_MANUAL) {
     if (!(dv++ % (PERIODIC_FREQUENCY))) { LED_TOGGLE(FBW_MODE_LED);}
