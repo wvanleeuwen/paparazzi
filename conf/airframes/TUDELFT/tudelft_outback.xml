@@ -27,12 +27,12 @@
     <module name="intermcu"      type="uart"/>
     <module name="current_sensor"/>
 
-    <module name="geo_mag.xml"/>
-    <module name="air_data.xml"/>
-    <module name="logger_sd_spi_direct.xml">
+    <module name="geo_mag"/>
+    <module name="air_data"/>
+    <module name="logger_sd_spi_direct">
       <define name="SDLOGGER_DIRECT_CONTROL_SWITCH" value="AUX3"/>
     </module>
-    <module name="gps_ubx_ucenter.xml"/>
+    <module name="gps_ubx_ucenter"/>
   </firmware>
 
   <firmware name="rotorcraft">
