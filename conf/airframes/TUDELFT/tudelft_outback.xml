@@ -16,47 +16,47 @@
       <subsystem name="fdm" type="jsbsim"/>
     </target-->
 
-    <subsystem name="telemetry"     type="xbee_api"/>
-    <subsystem name="imu"           type="lisa_mx_v2.1"/>
-    <subsystem name="gps"           type="ublox"/>
-    <subsystem name="stabilization" type="int_quat"/>
-    <subsystem name="ahrs"          type="int_cmpl_quat"/>
-    <subsystem name="ins"           type="hff"/>
-    <subsystem name="guidance"      type="indi"/>
-    <!--subsystem name="current_sensor">
+    <module name="telemetry"     type="xbee_api"/>
+    <module name="imu"           type="lisa_mx_v2.1"/>
+    <module name="gps"           type="ublox"/>
+    <module name="stabilization" type="int_quat"/>
+    <module name="ahrs"          type="int_cmpl_quat"/>
+    <module name="ins"           type="hff"/>
+    <module name="guidance"      type="indi"/>
+    <!--module name="current_sensor">
       <configure name="ADC_CURRENT_SENSOR" value="ADC_3"/>
-    </subsystem-->
+    </module-->
     <subsystem name="intermcu"      type="uart"/>
+
+    <module name="geo_mag.xml"/>
+    <module name="air_data.xml"/>
+    <module name="logger_spi_link.xml"/>
+    <module name="gps_ubx_ucenter.xml"/>
   </firmware>
 
   <firmware name="rotorcraft">
     <target name="fbw" board="opa_ftd_1.0"/>
 
-    <subsystem name="radio_control" type="spektrum">
+    <module name="radio_control" type="spektrum">
       <configure name="USE_SECONDARY_SPEKTRUM_RECEIVER" value="1"/>
       <define name="RADIO_CONTROL_SPEKTRUM_NO_SIGN" value="1"/>
-    </subsystem>
+    </module>
 
-    <subsystem name="actuators"     type="pwm"/>
+    <module name="heli_throttle_curve"/>
+    <module name="heli_swashplate_mixing"/>
+    <module name="actuators"     type="pwm"/>
+    <module name="intermcu"     type="uart"/>
+
     <define name="RC_LOST_FBW_MODE" value="FBW_MODE_FAILSAFE"/><!-- Switch to Failsafe or to Autopilot on RC loss? -->
     <define name="RC_LOST_IN_AUTO_FBW_MODE" value="FBW_MODE_FAILSAFE"/><!-- Switch to Failsafe with a working autopilot on RC loss? -->
     <define name="AP_LOST_FBW_MODE" value="FBW_MODE_MANUAL"/><!-- Switch to Failsafe or to Manual on AP loss? -->
-
-    <subsystem name="intermcu"     type="uart"/>
   </firmware>
-
-  <modules>
-    <load name="geo_mag.xml"/>
-    <load name="air_data.xml"/>
-    <load name="logger_spi_link.xml"/>
-    <load name="gps_ubx_ucenter.xml"/>
-  </modules>
 
   <servos driver="Pwm">
      <servo name="THROTTLE"       no="0" min="1100" neutral="1500" max="1900"/>
-     <servo name="SP_BACK"        no="1" min="1100" neutral="1500" max="1900"/>
-     <servo name="SP_LEFTFRONT"   no="2" min="1100" neutral="1500" max="1900"/>
-     <servo name="SP_RIGHTFRONT"  no="3" min="1100" neutral="1500" max="1900"/>
+     <servo name="SW_BACK"        no="1" min="1100" neutral="1500" max="1900"/>
+     <servo name="SW_LEFTFRONT"   no="2" min="1100" neutral="1500" max="1900"/>
+     <servo name="SW_RIGHTFRONT"  no="3" min="1100" neutral="1500" max="1900"/>
      <servo name="TAIL_LEFT"      no="4" min="1100" neutral="1500" max="1900"/>
      <servo name="TAIL_RIGHT"     no="5" min="1100" neutral="1500" max="1900"/>
      <servo name="AIL_LEFTFRONT"  no="6" min="1100" neutral="1500" max="1900"/>
@@ -81,20 +81,32 @@
     <axis name="FMODE"      failsafe_value="0"/>
   </commands>
 
+  <section name="MIXING" prefix="SW_MIXING_">
+    <define name="TYPE" value="HR120"/>
+    <define name="TRIM_ROLL"  value="0"/>
+    <define name="TRIM_PITCH" value="0"/>
+    <define name="TRIM_COLL"  value="0"/>
+  </section>
+
   <command_laws>
-    <!--call fun="throttle_curve_run(autopilot_motors_on, values)"/>
-    <call fun="swashplate_mixing_run(values)"/-->
-    <set servo="THROTTLE"       value="0"/>
-    <set servo="SP_BACK"        value="0"/>
-    <set servo="SP_LEFTFRONT"   value="0"/>
-    <set servo="SP_RIGHTFRONT"  value="0"/>
-    <set servo="TAIL_LEFT"      value="0"/>
-    <set servo="TAIL_RIGHT"     value="0"/>
+    <call fun="throttle_curve_run(autopilot_motors_on, values)"/>
+    <call fun="swashplate_mixing_run(values)"/>
+    <set servo="THROTTLE"       value="throttle_curve.throttle"/>
+    <set servo="SW_BACK"        value="swashplate_mixing.commands[SW_BACK]"/>
+    <set servo="SW_LEFTFRONT"   value="swashplate_mixing.commands[SW_LEFTFRONT]"/>
+    <set servo="SW_RIGHTFRONT"  value="swashplate_mixing.commands[SW_RIGHTFRONT]"/>
+    <set servo="TAIL_LEFT"      value="@YAW"/>
+    <set servo="TAIL_RIGHT"     value="-@YAW"/>
     <set servo="AIL_LEFTFRONT"  value="0"/>
     <set servo="AIL_LEFTBACK"   value="0"/>
     <set servo="AIL_RIGHTFRONT" value="0"/>
     <set servo="AIL_RIGHTBACK"  value="0"/>
   </command_laws>
+
+  <heli_curves>
+    <curve throttle="0,4800,7200,8400,9600" collective="-1000,750,2500,4250,6000"/>
+    <curve throttle="9600,7200,9600" collective="-7500,0,7500"/>
+  </heli_curves>
 
   <section name="MISC">
     <define name="NAV_CLIMB_VSPEED" value="2.5"/>
