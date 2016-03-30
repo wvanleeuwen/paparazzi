@@ -38,7 +38,6 @@
 static uint8_t px4RebootSequence[] = {0x41, 0xd7, 0x32, 0x0a, 0x46, 0x39};
 static uint8_t px4RebootSequenceCount = 0;
 static bool_t px4RebootTimeout = FALSE;
-uint8_t autopilot_motors_on = FALSE;
 tid_t px4bl_tid; ///< id for time out of the px4 bootloader reset
 #endif
 
@@ -54,6 +53,7 @@ static struct pprz_transport intermcu_transport;
 
 struct intermcu_t inter_mcu;
 pprz_t intermcu_commands[COMMANDS_NB];
+uint8_t autopilot_motors_on = FALSE;
 static void intermcu_parse_msg(struct transport_rx *trans, void (*commands_frame_handler)(void));
 #ifdef BOARD_PX4IO
 static void checkPx4RebootCommand(unsigned char b);
