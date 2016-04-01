@@ -28,7 +28,7 @@
 #include "mcu_periph/gpio.h"
 
 void opa_controller_init(void) {
-  gpio_setup_output(BTN_ESTOP, BTN_ESTOP_PIN);
+  gpio_setup_input(BTN_ESTOP, BTN_ESTOP_PIN);
 }
 
 void opa_controller_periodic(void) {
