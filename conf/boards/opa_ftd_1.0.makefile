@@ -25,9 +25,9 @@ FLASH_MODE ?= SWD
 #
 # default LED configuration
 #
-SYS_TIME_LED       ?= 3
+SYS_TIME_LED       ?= 1
 RADIO_CONTROL_LED  ?= 2
-ARMING_LED         ?= 1
+ARMING_LED         ?= 3
 FBW_MODE_LED       ?= none
 
 #
