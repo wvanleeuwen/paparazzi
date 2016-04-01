@@ -11,7 +11,7 @@
     <configure name="MODEM_BAUD" value="B57600" description="UART baud rate"/>
   </doc>
   <header/>
-  <makefile target="ap">
+  <makefile target="ap|fbw">
     <configure name="MODEM_PORT" case="upper|lower"/>
     <define name="USE_$(MODEM_PORT_UPPER)"/>
     <define name="$(MODEM_PORT_UPPER)_BAUD" value="$(MODEM_BAUD)"/>
@@ -33,7 +33,7 @@
   <makefile target="ap|fbw" firmware="fixedwing">
     <file name="fbw_downlink.c" dir="$(SRC_FIRMWARE)"/>
   </makefile>
-  <makefile target="ap" firmware="rotorcraft">
+  <makefile target="ap|fbw" firmware="rotorcraft">
     <file name="rotorcraft_datalink.c" dir="$(SRC_FIRMWARE)"/>
     <file name="rotorcraft_telemetry.c" dir="$(SRC_FIRMWARE)"/>
   </makefile>

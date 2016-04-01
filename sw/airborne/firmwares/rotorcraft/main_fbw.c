@@ -53,6 +53,11 @@
 #define MODULES_C
 #include "generated/modules.h"
 
+#if PERIODIC_TELEMETRY
+#define PERIODIC_C_FBW
+#include "subsystems/datalink/telemetry.h"
+#endif
+
 /** Fly by wire modes */
 typedef enum {FBW_MODE_MANUAL = 0, FBW_MODE_AUTO = 1, FBW_MODE_FAILSAFE = 2} fbw_mode_enum;
 fbw_mode_enum fbw_mode;
@@ -149,8 +154,9 @@ STATIC_INLINE void telemetry_periodic(void)  // 60Hz
   intermcu_send_status(fbw_mode);
 
   /* Handle Modems */
-  // TODO
-  // Read Telemetry
+#if PERIODIC_TELEMETRY
+    periodic_telemetry_send_Fbw(DefaultPeriodic, &(DefaultChannel).trans_tx, &(DefaultDevice).device);
+#endif
 }
 
 STATIC_INLINE void main_periodic(void)
