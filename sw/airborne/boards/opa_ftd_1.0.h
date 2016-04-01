@@ -30,12 +30,22 @@
 #define AHB_CLK 168000000
 
 /*
- * MCU Power control
+ * Power control
  */
+
+/* MCU power */
 #define MCU_PWR GPIOB
 #define MCU_PWR_PIN GPIO5
 #define MCU_PWR_ON gpio_set
 #define MCU_PWR_OFF gpio_clear
+
+/*
+ * Buttons
+ */
+
+/* E-Stop button */
+#define BTN_ESTOP GPIOC
+#define BTN_ESTOP_PIN GPIO12
 
 /*
  * Onboard LEDs

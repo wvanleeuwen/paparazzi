@@ -48,6 +48,7 @@
     <module name="intermcu"      type="uart"/>
     <module name="imu"           type="mpu6000"/>
     <module name="telemetry"     type="transparent"/>
+    <module name="opa_controller"/>
     <module name="heli_throttle_curve"/>
     <module name="heli_swashplate_mixing"/>
 
