@@ -37,6 +37,11 @@
 #include "subsystems/actuators/motor_mixing.h"
 #endif
 
+#if USE_IMU
+#define ABI_C
+#include "subsystems/abi.h"
+#include "subsystems/imu.h"
+#endif
 
 #include "subsystems/electrical.h"
 #include "subsystems/radio_control.h"
@@ -93,6 +98,10 @@ STATIC_INLINE void main_init(void)
 #endif
 
   radio_control_init();
+
+#if USE_IMU
+  imu_init();
+#endif
 
   modules_init();
 
@@ -192,6 +201,10 @@ STATIC_INLINE void main_periodic(void)
 #endif // FWB_MODE_LED
   }
 
+#if USE_IMU
+  imu_periodic();
+#endif
+
   /* set actuators     */
   SetActuatorsFromCommands(commands, autopilot_mode);
 
@@ -248,6 +261,11 @@ STATIC_INLINE void main_event(void)
 
   // Handle RC
   RadioControlEvent(autopilot_on_rc_frame);
+
+#if USE_IMU
+  // Handle IMU
+  ImuEvent();
+#endif
 
   // InterMCU
   InterMcuEvent(autopilot_on_ap_command);

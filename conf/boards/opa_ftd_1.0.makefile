@@ -43,6 +43,12 @@ INTERMCU_PORT ?= UART2
 INTERMCU_BAUD ?= B230400
 
 #
+# default IMU configuration
+#
+IMU_MPU_SPI_DEV ?= spi1
+IMU_MPU_SPI_SLAVE_IDX ?= SPI_SLAVE0
+
+#
 # default actuator configuration
 #
 ACTUATORS ?= actuators_pwm

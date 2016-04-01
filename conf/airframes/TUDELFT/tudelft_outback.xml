@@ -44,10 +44,11 @@
       <define name="RADIO_CONTROL_SPEKTRUM_NO_SIGN" value="1"/>
     </module>
 
+    <module name="actuators"     type="pwm"/>
+    <module name="intermcu"      type="uart"/>
+    <module name="imu"           type="mpu6000"/>
     <module name="heli_throttle_curve"/>
     <module name="heli_swashplate_mixing"/>
-    <module name="actuators"     type="pwm"/>
-    <module name="intermcu"     type="uart"/>
 
     <define name="RC_LOST_FBW_MODE" value="FBW_MODE_FAILSAFE"/><!-- Switch to Failsafe or to Autopilot on RC loss? -->
     <define name="RC_LOST_IN_AUTO_FBW_MODE" value="FBW_MODE_FAILSAFE"/><!-- Switch to Failsafe with a working autopilot on RC loss? -->
