@@ -69,6 +69,10 @@
 #define BTN_ARMING GPIOB
 #define BTN_ARMING_PIN GPIO14
 
+/* On/Off button */
+#define BTN_ON GPIOC
+#define BTN_ON_PIN GPIO1
+
 /*
  * Onboard LEDs
  */
