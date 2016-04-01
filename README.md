@@ -4,15 +4,15 @@ Paparazzi UAS
 =============
 
 [![Build Status](https://travis-ci.org/paparazzi/paparazzi.png?branch=master)](https://travis-ci.org/paparazzi/paparazzi) [![Gitter chat](https://badges.gitter.im/paparazzi/discuss.svg)](https://gitter.im/paparazzi/discuss)
+Paparazzi UAV, the real Open-Source autopilot driven by a community of users without an economically driven goal!
 
-Paparazzi is an attempt to develop a free software Unmanned (Air) Vehicle System.
- As of today the system is being used successfuly by a number of hobbyists, universities and companies all over the world, on vehicle of various size ( 100g to 25Kg ) and of various nature ( fixed wing, rotorcrafts, boats and surface vehicles).
+Why choose Paparazzi UAV?
 
-Up to date information is available in the wiki http://wiki.paparazziuav.org
-
-and from the mailing list [paparazzi-devel@nongnu.org] (http://savannah.nongnu.org/mail/?group=paparazzi)
-and the IRC channel (freenode, #paparazzi).
-
+If you are looking for an advanced, modular open-source autopilot which has features others can only dream of, you choose Paparazzi UAV.
+You can make the comparison between Windows and Linux. For example APM is the Windows unfriendly plug and pay software, While Paparazzi UAV is the Linux of autopilot systems, where everything you can imagine is possible.
+We make it possible for you to choose the best software for your needs, on the hardware platforms that are right for your project.
+Wishing you successful flights,
+The Paparuzzi dev team
 
 Required Software
 -----------------
