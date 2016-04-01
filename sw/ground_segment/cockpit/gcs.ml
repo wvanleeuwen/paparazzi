@@ -812,7 +812,7 @@ let () =
     geomap#center (Latlong.of_string !center)
   end;
 
-  Speech.say "Welcome to papa ratsi";
+  Speech.say "Welcome to paparuzie!";
 
   if !display_particules then
     Particules.listen geomap ;
