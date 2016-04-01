@@ -39,6 +39,24 @@
 #define MCU_PWR_ON gpio_set
 #define MCU_PWR_OFF gpio_clear
 
+/* Autopilot power */
+#define AP_PWR GPIOB
+#define AP_PWR_PIN GPIO0
+#define AP_PWR_ON gpio_set
+#define AP_PWR_OFF gpio_clear
+
+/* Main power (25V) */
+#define MAIN_PWR GPIOC
+#define MAIN_PWR_PIN GPIO12
+#define MAIN_PWR_ON gpio_set
+#define MAIN_PWR_OFF gpio_clear
+
+/* Balancer power */
+#define BAL_PWR GPIOC
+#define BAL_PWR_PIN GPIO2
+#define BAL_PWR_ON gpio_set
+#define BAL_PWR_OFF gpio_clear
+
 /*
  * Buttons
  */
@@ -46,6 +64,10 @@
 /* E-Stop button */
 #define BTN_ESTOP GPIOB
 #define BTN_ESTOP_PIN GPIO12
+
+/* Arming button */
+#define BTN_ARMING GPIOB
+#define BTN_ARMING_PIN GPIO14
 
 /*
  * Onboard LEDs
