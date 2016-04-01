@@ -1,0 +1,19 @@
+<!DOCTYPE module SYSTEM "module.dtd">
+
+<module name="opa_controller" dir="boards">
+  <doc>
+    <description>Controller for OPA board functionalities</description>
+  </doc>
+  <header>
+    <file name="opa_controller.h"/>
+  </header>
+  <init fun="opa_controller_init()"/>
+  <periodic fun="opa_controller_periodic()" freq="20" autorun="TRUE"/>
+  <makefile target="ap|fbw">
+    <file name="opa_controller.c"/>
+
+    <configure name="ARMING_LED" default="none"/>
+    <define name="ARMING_LED" value="$(ARMING_LED)" cond="ifneq ($(ARMING_LED),none)"/>
+  </makefile>
+</module>
+

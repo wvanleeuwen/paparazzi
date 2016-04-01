@@ -91,8 +91,16 @@ void intermcu_set_enabled(bool value)
 void intermcu_set_actuators(pprz_t *command_values, uint8_t ap_mode __attribute__((unused)))
 {
   if (intermcu.enabled) {
+    uint8_t ap_arming_status = 0;
+    if (autopilot_motors_on == TRUE) {
+      ap_arming_status |= 1;
+    }
+    if (opa_controller_ap_ftd_disarm == TRUE) {
+      ap_arming_status |= 2;
+      opa_controller_ap_ftd_disarm = FALSE;
+    }
     pprz_msg_send_IMCU_COMMANDS(&(intermcu.transport.trans_tx), intermcu.device,
-                                INTERMCU_AP, &autopilot_motors_on, COMMANDS_NB, command_values); //TODO: Append more status
+                                INTERMCU_AP, &ap_arming_status, COMMANDS_NB, command_values); //TODO: Append more status
   }
 }
 

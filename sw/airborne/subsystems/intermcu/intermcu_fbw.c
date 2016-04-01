@@ -29,6 +29,8 @@
 #include "subsystems/radio_control.h"
 #include "subsystems/electrical.h"
 #include "mcu_periph/uart.h"
+#include "modules/boards/opa_controller.h"
+
 
 #include "modules/spektrum_soft_bind/spektrum_soft_bind_fbw.h"
 
@@ -152,6 +154,9 @@ static void intermcu_parse_msg(void (*commands_frame_handler)(void))
       int16_t *new_commands = DL_IMCU_COMMANDS_values(imcu_msg_buf);
       uint8_t status = DL_IMCU_COMMANDS_status(imcu_msg_buf);
       autopilot_motors_on = status & 0x1;
+      if ((status & 0x2) != 0) {
+        opa_controller_disarm = 1;
+      }
       for (i = 0; i < size; i++) {
         intermcu_commands[i] = new_commands[i];
       }
