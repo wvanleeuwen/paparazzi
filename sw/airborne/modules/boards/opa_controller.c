@@ -28,10 +28,12 @@
 #include "mcu_periph/gpio.h"
 #include "led.h"
 
-#define OFF_TIMER 512*3 // FIXME: make nicer
+#define OFF_TIMER 20*3 // FIXME: make nicer
+#define MIN_ARMING_TRIG 20*3 //FIXME: make nicer
 
-/* Whether the autopilot is armed */
-static bool_t autopilot_armed = FALSE;
+/* Whether the autopilot arming LED is on */
+static bool_t arming_led = FALSE;
+extern bool_t autopilot_motors_on;
 
 void opa_controller_init(void) {
   /* Setup E-Stop, Arming and On/Off button as input */
@@ -58,7 +60,8 @@ void opa_controller_init(void) {
 }
 
 void opa_controller_periodic(void) {
-  static uint32_t off_cnt = 0;
+  static uint16_t off_cnt = 0;
+  static uint16_t arming_cnt = 0;
 
   /* Check E-Stop and power off Main power if pressed */
   if(!gpio_get(BTN_ESTOP, BTN_ESTOP_PIN)) {
@@ -74,13 +77,16 @@ void opa_controller_periodic(void) {
   else off_cnt = 0;
 
   /* Check Arming button and set LED */
-  if(!gpio_get(BTN_ARMING, BTN_ARMING_PIN)) {
-    // TODO: fix functionality of real arming
-    autopilot_armed = !autopilot_armed;
+  if(arming_cnt >= MIN_ARMING_TRIG && !gpio_get(BTN_ARMING, BTN_ARMING_PIN)) {
+    autopilot_motors_on = !autopilot_motors_on;
+    arming_cnt = 0;
+  }
+  else arming_cnt++;
 
 #if defined ARMING_LED
-    if(autopilot_armed) LED_ON(ARMING_LED);
-    else LED_OFF(ARMING_LED);
+  /* Update Arming LED */
+  if(arming_led && !autopilot_motors_on) LED_OFF(ARMING_LED);
+  if(!arming_led && autopilot_motors_on) LED_ON(ARMING_LED);
+  arming_led = autopilot_motors_on;
 #endif
-  }
 }

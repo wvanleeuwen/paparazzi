@@ -8,7 +8,7 @@
     <file name="opa_controller.h"/>
   </header>
   <init fun="opa_controller_init()"/>
-  <periodic fun="opa_controller_periodic()" freq="512" autorun="TRUE"/>
+  <periodic fun="opa_controller_periodic()" freq="20" autorun="TRUE"/>
   <makefile target="ap|fbw">
     <file name="opa_controller.c"/>
 
