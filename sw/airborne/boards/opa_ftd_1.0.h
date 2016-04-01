@@ -44,7 +44,7 @@
  */
 
 /* E-Stop button */
-#define BTN_ESTOP GPIOC
+#define BTN_ESTOP GPIOB
 #define BTN_ESTOP_PIN GPIO12
 
 /*
