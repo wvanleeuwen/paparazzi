@@ -33,7 +33,7 @@ void opa_controller_init(void) {
 
 void opa_controller_periodic(void) {
   /* Check E-Stop */
-  if(gpio_get(BTN_ESTOP, BTN_ESTOP_PIN)) {
+  if(!gpio_get(BTN_ESTOP, BTN_ESTOP_PIN)) {
     MCU_PWR_OFF(MCU_PWR, MCU_PWR_PIN);
   }
 }
