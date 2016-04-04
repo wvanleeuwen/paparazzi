@@ -65,7 +65,7 @@ void opa_controller_periodic(void) {
 
   /* Check E-Stop and power off Main power if pressed */
   if(!gpio_get(BTN_ESTOP, BTN_ESTOP_PIN)) {
-    MAIN_PWR_OFF(MCU_PWR, MCU_PWR_PIN);
+    MAIN_PWR_OFF(MAIN_PWR, MAIN_PWR_PIN);
   }
 
   /* Check On/Off button and disable if pressed for 3 seconds */
