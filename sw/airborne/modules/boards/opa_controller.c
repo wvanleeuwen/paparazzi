@@ -28,8 +28,8 @@
 #include "mcu_periph/gpio.h"
 #include "led.h"
 
-#define OFF_TIMER 20*3 // FIXME: make nicer
-#define MIN_ARMING_TRIG 20*3 //FIXME: make nicer
+#define OFF_TIMER 20*5 // FIXME: make nicer
+#define MIN_ARMING_TRIG 20*1 //FIXME: make nicer
 
 /* Whether the autopilot arming LED is on */
 static bool_t arming_led = FALSE;
@@ -66,27 +66,45 @@ void opa_controller_periodic(void) {
   /* Check E-Stop and power off Main power if pressed */
   if(!gpio_get(BTN_ESTOP, BTN_ESTOP_PIN)) {
     MAIN_PWR_OFF(MAIN_PWR, MAIN_PWR_PIN);
+    BAL_PWR_OFF(BAL_PWR, BAL_PWR_PIN);
+    AP_PWR_OFF(AP_PWR, AP_PWR_PIN);
+    arming_led = FALSE;
   }
 
   /* Check On/Off button and disable if pressed for 3 seconds */
-  if(!gpio_get(BTN_ON, BTN_ON_PIN)) {
-    if(++off_cnt >= OFF_TIMER) {
+  if(gpio_get(BTN_ON, BTN_ON_PIN)) {
+    if(off_cnt >= OFF_TIMER) {
       MCU_PWR_OFF(MCU_PWR, MCU_PWR_PIN);
+    } else {
+      off_cnt++;
     }
   }
-  else off_cnt = 0;
+  else {
+    off_cnt = 0;
+  }
 
   /* Check Arming button and set LED */
-  if(arming_cnt >= MIN_ARMING_TRIG && !gpio_get(BTN_ARMING, BTN_ARMING_PIN)) {
-    autopilot_motors_on = !autopilot_motors_on;
+  if(!gpio_get(BTN_ARMING, BTN_ARMING_PIN)) {
+    if (arming_cnt >= MIN_ARMING_TRIG) {
+      arming_led = TRUE;
+      MAIN_PWR_ON(MAIN_PWR, MAIN_PWR_PIN);
+      BAL_PWR_ON(BAL_PWR, BAL_PWR_PIN);
+      AP_PWR_ON(AP_PWR, AP_PWR_PIN);
+    } else {
+      arming_cnt++;
+    }
+  }
+  else {
     arming_cnt = 0;
   }
-  else arming_cnt++;
 
 #if defined ARMING_LED
   /* Update Arming LED */
-  if(arming_led && !autopilot_motors_on) LED_OFF(ARMING_LED);
-  if(!arming_led && autopilot_motors_on) LED_ON(ARMING_LED);
-  arming_led = autopilot_motors_on;
+  if (arming_led) {
+    LED_OFF(ARMING_LED);
+  } else {
+    LED_ON(ARMING_LED);
+  }
+  // autopilot_motors_on;
 #endif
 }
