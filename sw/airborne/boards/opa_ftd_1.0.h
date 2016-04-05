@@ -206,7 +206,12 @@
 #define ADC_CHANNEL_VSUPPLY ADC_1
 #endif
 
-#define DefaultVoltageOfAdc(adc) (0.0045*adc)
+
+// Default: 10k / 2k2 ->
+// #define DefaultVoltageOfAdc(adc) (0.00446777*adc)
+
+// Opa-FBW:  10k / 4k7
+#define DefaultVoltageOfAdc(adc) (00.00252*adc)
 
 
 /*

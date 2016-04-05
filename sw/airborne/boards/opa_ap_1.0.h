@@ -30,6 +30,16 @@
 #define AHB_CLK 168000000
 
 /*
+ * Power control
+ */
+
+/* VISION power */
+#define VISION_PWR GPIOA
+#define VISION_PWR_PIN GPIO1
+#define VISION_PWR_ON gpio_set
+#define VISION_PWR_OFF gpio_clear
+
+/*
  * Onboard LEDs
  */
 
@@ -147,8 +157,15 @@
 #define ADC_CHANNEL_VSUPPLY ADC_1
 #endif
 
-#define DefaultVoltageOfAdc(adc) (0.0045*adc)
-#define DefaultMilliAmpereOfAdc(adc) (0.42497*adc)
+// Default: 10k / 2k2
+// #define DefaultVoltageOfAdc(adc) (0.0045*adc)
+// Opa: 31k6 / 4k7
+#define DefaultVoltageOfAdc(adc) (0.00605*adc)
+
+// ADC756-B050: +/-50Amp range bidirectional
+// 40 mV / Ampere
+// 1 ADC-count = 0,000805664 Volt, 0.040 V = 1 Ampere -> 1 Ampere = 49,6484887 ADC ticks: 1 ADC-tck = 20mA
+#define DefaultMilliAmpereOfAdc(adc) (20.142*(adc-2048))
 
 /* by default activate onboard baro */
 #ifndef USE_BARO_BOARD
