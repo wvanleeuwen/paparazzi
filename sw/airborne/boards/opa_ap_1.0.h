@@ -167,6 +167,13 @@
 // 1 ADC-count = 0,000805664 Volt, 0.040 V = 1 Ampere -> 1 Ampere = 49,6484887 ADC ticks: 1 ADC-tck = 20mA
 #define DefaultMilliAmpereOfAdc(adc) (20.142*(adc-2048))
 
+// 10k (@25C) NTC with 10k fixed pull up
+// Alpha: -4.39 %/degC
+// Beta: 3976 K
+// 0.5 -> 25C
+
+#define DefaultTemperatureOfAdc(adc) (adc)
+
 /* by default activate onboard baro */
 #ifndef USE_BARO_BOARD
 #define USE_BARO_BOARD 1
