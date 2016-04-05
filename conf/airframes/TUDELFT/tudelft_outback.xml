@@ -13,48 +13,52 @@
 <airframe name="Outback">
 
   <firmware name="rotorcraft">
-    <target name="ap" board="opa_ap_1.0"/>
-    <!--target name="nps" board="pc">
-      <subsystem name="fdm" type="jsbsim"/>
-    </target-->
 
-    <module name="telemetry"     type="xbee_api"/>
-    <module name="imu"           type="mpu6000"/>
-    <module name="gps"           type="ublox"/>
-    <module name="stabilization" type="int_quat"/>
-    <module name="ahrs"          type="int_cmpl_quat"/>
-    <module name="ins"           type="hff"/>
-    <module name="guidance"      type="indi"/>
-    <module name="intermcu"      type="uart"/>
-    <module name="current_sensor"/>
+    <!-- AP (autopilot) part of the board -->
+    <target name="ap" board="opa_ap_1.0">
+      <!--target name="nps" board="pc">
+        <subsystem name="fdm" type="jsbsim"/>
+      </target-->
 
-    <module name="geo_mag"/>
-    <module name="air_data"/>
-    <module name="logger_sd_spi_direct">
-      <define name="SDLOGGER_DIRECT_CONTROL_SWITCH" value="AUX3"/>
-    </module>
-    <module name="gps_ubx_ucenter"/>
-  </firmware>
+      <module name="telemetry"     type="xbee_api"/>
+      <module name="imu"           type="mpu6000"/>
+      <module name="gps"           type="ublox"/>
+      <module name="stabilization" type="int_quat"/>
+      <module name="ahrs"          type="int_cmpl_quat"/>
+      <module name="ins"           type="hff"/>
+      <module name="guidance"      type="indi"/>
+      <module name="intermcu"      type="uart"/>
+      <module name="current_sensor"/>
 
-  <firmware name="rotorcraft">
-    <target name="fbw" board="opa_ftd_1.0"/>
+      <module name="geo_mag"/>
+      <module name="air_data"/>
+      <module name="temp_adc"/>
+      <module name="logger_sd_spi_direct">
+        <define name="SDLOGGER_DIRECT_CONTROL_SWITCH" value="AUX3"/>
+      </module>
+      <module name="gps_ubx_ucenter"/>
+    </target>
 
-    <module name="radio_control" type="spektrum">
-      <configure name="USE_SECONDARY_SPEKTRUM_RECEIVER" value="1"/>
-      <define name="RADIO_CONTROL_SPEKTRUM_NO_SIGN" value="1"/>
-    </module>
+    <!-- FBW (Flight by Wire) part of the board -->
+    <target name="fbw" board="opa_ftd_1.0">
 
-    <module name="actuators"     type="pwm"/>
-    <module name="intermcu"      type="uart"/>
-    <!--module name="imu"           type="mpu6000"/-->
-    <module name="telemetry"     type="transparent"/>
-    <module name="opa_controller"/>
-    <module name="heli_throttle_curve"/>
-    <module name="heli_swashplate_mixing"/>
+      <module name="radio_control" type="spektrum">
+        <configure name="USE_SECONDARY_SPEKTRUM_RECEIVER" value="1"/>
+        <define name="RADIO_CONTROL_SPEKTRUM_NO_SIGN" value="1"/>
+      </module>
 
-    <define name="RC_LOST_FBW_MODE" value="FBW_MODE_FAILSAFE"/><!-- Switch to Failsafe or to Autopilot on RC loss? -->
-    <define name="RC_LOST_IN_AUTO_FBW_MODE" value="FBW_MODE_FAILSAFE"/><!-- Switch to Failsafe with a working autopilot on RC loss? -->
-    <define name="AP_LOST_FBW_MODE" value="FBW_MODE_MANUAL"/><!-- Switch to Failsafe or to Manual on AP loss? -->
+      <module name="actuators"     type="pwm"/>
+      <module name="intermcu"      type="uart"/>
+      <!--module name="imu"           type="mpu6000"/-->
+      <module name="telemetry"     type="transparent"/>
+      <module name="opa_controller"/>
+      <module name="heli_throttle_curve"/>
+      <module name="heli_swashplate_mixing"/>
+
+      <define name="RC_LOST_FBW_MODE" value="FBW_MODE_FAILSAFE"/><!-- Switch to Failsafe or to Autopilot on RC loss? -->
+      <define name="RC_LOST_IN_AUTO_FBW_MODE" value="FBW_MODE_FAILSAFE"/><!-- Switch to Failsafe with a working autopilot on RC loss? -->
+      <define name="AP_LOST_FBW_MODE" value="FBW_MODE_MANUAL"/><!-- Switch to Failsafe or to Manual on AP loss? -->
+    </target>
   </firmware>
 
   <!-- This should be different for AP and FBW -->

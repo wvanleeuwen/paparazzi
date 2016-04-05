@@ -5,7 +5,7 @@
     <description>
       Temperature ADC
       Measure temperature of 3 sensores connecter to any ADC
-      Can read LM35 or 10k / 100k NTC sensor
+      Can read LM35 or NTC sensor
     </description>
     <define name="TEMP_ADC_CHANNELX" value="ADC_X" description="choose which ADC is used for temperature sensor"/>
     <define name="TEMP_ADC_CHANNELX_TYPE" value="XXXX" description="choose which type of sensor is used (LM35 or NTC)"/>

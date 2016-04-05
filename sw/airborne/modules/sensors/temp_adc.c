@@ -48,26 +48,28 @@ float temp_c1, temp_c2, temp_c3;
 #endif
 #endif
 
+#ifdef TEMP_ADC_CHANNEL1
+static struct adc_buf temp_buf1;
+
 #ifndef TEMP_ADC_CHANNEL1_TYPE
 #define TEMP_ADC_CHANNEL1_TYPE LM35
 #endif
-#ifndef TEMP_ADC_CHANNEL2_TYPE
-#define TEMP_ADC_CHANNEL2_TYPE LM35
-#endif
-#ifndef TEMP_ADC_CHANNEL3_TYPE
-#define TEMP_ADC_CHANNEL3_TYPE LM35
-#endif
-
-#ifdef TEMP_ADC_CHANNEL1
-static struct adc_buf temp_buf1;
 #endif
 
 #ifdef TEMP_ADC_CHANNEL2
 static struct adc_buf temp_buf2;
+
+#ifndef TEMP_ADC_CHANNEL2_TYPE
+#define TEMP_ADC_CHANNEL2_TYPE LM35
+#endif
 #endif
 
 #ifdef TEMP_ADC_CHANNEL3
 static struct adc_buf temp_buf3;
+
+#ifndef TEMP_ADC_CHANNEL3_TYPE
+#define TEMP_ADC_CHANNEL3_TYPE LM35
+#endif
 #endif
 
 #ifndef TEMP_ADC_NB_SAMPLES
@@ -81,19 +83,25 @@ static struct adc_buf temp_buf3;
 #define TEMP_ADC_SYNC_SEND FALSE
 #endif
 
-float calc_ntc(int16_t raw_temp)
+/**
+ * Calculate the NTC tempreature in celcius based on the Steinhart equation
+ */
+static float calc_ntc(int16_t raw_adc, uint16_t pull_up_r, float a, float b, float c)
 {
-  float temp_c;
-  //calc for NTC
-  temp_c = log(((10240000 / raw_temp) - 10000) * 10);
-  //temp_c = 1/(0.001129148+(0.000234125*temp_c)+(0.0000000876741*temp_c*temp_c*temp_c));
-  temp_c = 1 / (0.000603985662844 + (0.000229995493730 * temp_c) + (0.000000067653027 * temp_c *
-                temp_c * temp_c));
-  temp_c = temp_c - 273.15; //convert do celcius
+#ifdef TEMP_ADC_12BIT
+  float log_r = log((pull_up_r * raw_adc) / (4096 - raw_adc));
+#else
+  float log_r = log((pull_up_r * raw_adc) / (1024 - raw_adc));
+#endif
+
+  // Steinhart equation (https://en.wikipedia.org/wiki/Steinhart%E2%80%93Hart_equation)
+  // 1 / T = a + b*len(R) + c*ln(R)³
+  float temp_c = 1 / (a + (b * log_r) + (c * log_r * log_r * log_r));
+  temp_c = temp_c - 273.15; // Convert do celcius
   return temp_c;
 }
 
-float calc_lm35(int16_t raw_temp)
+static float calc_lm35(int16_t raw_temp)
 {
   return ((float)raw_temp * (3300.0f / 1024.0f) / 10.0f);
 }
@@ -103,10 +111,11 @@ static void temp_adc_downlink(struct transport_tx *trans, struct link_device *de
   pprz_msg_send_TEMP_ADC(trans, dev, AC_ID, &temp_c1, &temp_c2, &temp_c3);
 }
 
+/**
+ * Temperature ADC initialize channels
+ */
 void temp_adc_init(void)
 {
-  temp_adc_sync_send = TEMP_ADC_SYNC_SEND;
-
 #ifdef TEMP_ADC_CHANNEL1
   adc_buf_channel(TEMP_ADC_CHANNEL1, &temp_buf1, TEMP_ADC_NB_SAMPLES);
 #endif
@@ -134,7 +143,8 @@ void temp_adc_periodic(void)
 #if TEMP_ADC_CHANNEL1_TYPE == LM35
   temp_c1 = calc_lm35(adc_raw);
 #elif TEMP_ADC_CHANNEL1_TYPE == NTC
-  temp_c1 = calc_ntc(adc_raw);
+  temp_c1 = calc_ntc(adc_raw, TEMP_ADC_CHANNEL1_PU_R,
+    TEMP_ADC_CHANNEL1_A, TEMP_ADC_CHANNEL1_B, TEMP_ADC_CHANNEL1_C);
 #endif
 #endif
 
@@ -143,7 +153,8 @@ void temp_adc_periodic(void)
 #if TEMP_ADC_CHANNEL2_TYPE == LM35
   temp_c2 = calc_lm35(adc_raw);
 #elif TEMP_ADC_CHANNEL2_TYPE == NTC
-  temp_c2 = calc_ntc(adc_raw);
+  temp_c2 = calc_ntc(adc_raw, TEMP_ADC_CHANNEL2_PU_R,
+    TEMP_ADC_CHANNEL2_A, TEMP_ADC_CHANNEL2_B, TEMP_ADC_CHANNEL2_C);
 #endif
 #endif
 
@@ -152,12 +163,12 @@ void temp_adc_periodic(void)
 #if TEMP_ADC_CHANNEL3_TYPE == LM35
   temp_c3 = calc_lm35(adc_raw);
 #elif TEMP_ADC_CHANNEL3_TYPE == NTC
-  temp_c3 = calc_ntc(adc_raw);
+  temp_c3 = calc_ntc(adc_raw, TEMP_ADC_CHANNEL3_PU_R,
+    TEMP_ADC_CHANNEL3_A, TEMP_ADC_CHANNEL3_B, TEMP_ADC_CHANNEL3_C);
 #endif
 #endif
 
-  if (temp_adc_sync_send) {
-    temp_adc_downlink(&(DefaultChannel).trans_tx, &(DefaultDevice).device);
-  }
-
+#if TEMP_ADC_SYNC_SEND
+  temp_adc_downlink(&(DefaultChannel).trans_tx, &(DefaultDevice).device);
+#endif
 }

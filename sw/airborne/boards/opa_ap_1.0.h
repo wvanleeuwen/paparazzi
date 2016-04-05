@@ -137,6 +137,9 @@
 #endif
 
 /* TEMP_MOTOR PC0/ADC10 */
+#ifndef USE_ADC_3
+#define USE_ADC_3 1
+#endif
 #if USE_ADC_3
 #define AD1_3_CHANNEL 10
 #define ADC_3 AD1_3
@@ -145,6 +148,9 @@
 #endif
 
 /* TEMP_BATT PC1/ADC11 */
+#ifndef USE_ADC_4
+#define USE_ADC_4 1
+#endif
 #if USE_ADC_4
 #define AD1_4_CHANNEL 11
 #define ADC_4 AD1_4
@@ -167,12 +173,34 @@
 // 1 ADC-count = 0,000805664 Volt, 0.040 V = 1 Ampere -> 1 Ampere = 49,6484887 ADC ticks: 1 ADC-tck = 20mA
 #define DefaultMilliAmpereOfAdc(adc) (20.142*(adc-2048))
 
-// 10k (@25C) NTC with 10k fixed pull up
-// Alpha: -4.39 %/degC
-// Beta: 3976 K
-// 0.5 -> 25C
+/* TEMP MOTOR: NTC with 2k fixed pull up */
+// R0: 10k (@25C)
+// T0: 25C -> 298.15K
+// B: 3976 K
+// a = (1/T0) - (1/B)*ln(R0) = 0.00103753243
+// b = 1/B = 0.00025150905
+// c = 0
+#define TEMP_ADC_12BIT TRUE
+#define TEMP_ADC_CHANNEL1 ADC_3
+#define TEMP_ADC_CHANNEL1_TYPE NTC
+#define TEMP_ADC_CHANNEL1_PU_R 2000
+#define TEMP_ADC_CHANNEL1_A 0.00103753243
+#define TEMP_ADC_CHANNEL1_B 0.00025150905
+#define TEMP_ADC_CHANNEL1_C 0
 
-#define DefaultTemperatureOfAdc(adc) (adc)
+/* TEMP BATT: NTC with 2k fixed pull up */
+// R0: 10k (@25C)
+// T0: 25C -> 298.15K
+// B: 3976 K
+// a = (1/T0) - (1/B)*ln(R0) = 0.00103753243
+// b = 1/B = 0.00025150905
+// c = 0
+#define TEMP_ADC_CHANNEL2 ADC_4
+#define TEMP_ADC_CHANNEL2_TYPE NTC
+#define TEMP_ADC_CHANNEL2_PU_R 2000
+#define TEMP_ADC_CHANNEL2_A 0.00103753243
+#define TEMP_ADC_CHANNEL2_B 0.00025150905
+#define TEMP_ADC_CHANNEL2_C 0
 
 /* by default activate onboard baro */
 #ifndef USE_BARO_BOARD
