@@ -20,7 +20,7 @@
         <subsystem name="fdm" type="jsbsim"/>
       </target-->
 
-      <module name="telemetry"     type="xbee_api"/>
+      <module name="telemetry"     type="transparent"/>
       <module name="imu"           type="mpu6000"/>
       <module name="gps"           type="ublox"/>
       <module name="stabilization" type="int_quat"/>
@@ -63,10 +63,10 @@
 
   <!-- This should be different for AP and FBW -->
   <section name="BAT">
-    <define name="CATASTROPHIC_BAT_LEVEL" value="43.0" unit="V"/>
-    <define name="CRITIC_BAT_LEVEL" value="44.0" unit="V"/>
-    <define name="LOW_BAT_LEVEL" value="46.0" unit="V"/>
-    <define name="MAX_BAT_LEVEL" value="50.5" unit="V"/>
+    <define name="CATASTROPHIC_BAT_LEVEL" value="21.0" unit="V"/>
+    <define name="CRITIC_BAT_LEVEL" value="21.6" unit="V"/>
+    <define name="LOW_BAT_LEVEL" value="22.2" unit="V"/>
+    <define name="MAX_BAT_LEVEL" value="25.2" unit="V"/>
   </section>
 
   <servos driver="Pwm">
