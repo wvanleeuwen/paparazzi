@@ -51,6 +51,12 @@ IMU_MPU_SPI_DEV ?= spi2
 IMU_MPU_SPI_SLAVE_IDX ?= SPI_SLAVE1
 
 #
+# BARO configuration
+#
+
+# See baro_board.makefile
+
+#
 # default SPI logger configuration
 #
 SDLOGGER_DIRECT_SPI ?= spi1

@@ -68,6 +68,7 @@ void opa_controller_periodic(void) {
     MAIN_PWR_OFF(MAIN_PWR, MAIN_PWR_PIN);
     BAL_PWR_OFF(BAL_PWR, BAL_PWR_PIN);
     AP_PWR_OFF(AP_PWR, AP_PWR_PIN);
+    RADIO_CONTROL_POWER_OFF(RADIO_CONTROL_POWER,RADIO_CONTROL_POWER_PIN);
     arming_led = FALSE;
   }
 
@@ -90,6 +91,7 @@ void opa_controller_periodic(void) {
       MAIN_PWR_ON(MAIN_PWR, MAIN_PWR_PIN);
       BAL_PWR_ON(BAL_PWR, BAL_PWR_PIN);
       AP_PWR_ON(AP_PWR, AP_PWR_PIN);
+      RADIO_CONTROL_POWER_ON(RADIO_CONTROL_POWER,RADIO_CONTROL_POWER_PIN);
     } else {
       arming_cnt++;
     }
