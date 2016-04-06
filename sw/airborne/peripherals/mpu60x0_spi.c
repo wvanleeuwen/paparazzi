@@ -85,7 +85,7 @@ void mpu60x0_spi_start_configure(struct Mpu60x0_Spi *mpu)
       mpu60x0_send_config(mpu60x0_spi_write_to_reg, (void *)mpu, &(mpu->config));
     }
     // Send WHO_AM_I to check if chip is there
-    else if(mpu->spi_trans.status != SPITransRunning) {
+    else if(mpu->spi_trans.status != SPITransRunning && mpu->spi_trans.status != SPITransPending) {
       mpu->spi_trans.output_length = 1;
       mpu->spi_trans.input_length = 2;
       mpu->tx_buf[0] = MPU60X0_REG_WHO_AM_I | MPU60X0_SPI_READ;
