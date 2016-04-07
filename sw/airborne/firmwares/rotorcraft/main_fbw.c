@@ -119,7 +119,7 @@ STATIC_INLINE void main_init(void)
   modules_tid = sys_time_register_timer(1. / MODULES_FREQUENCY, NULL);
   radio_control_tid = sys_time_register_timer((1. / 60.), NULL);
   electrical_tid = sys_time_register_timer(0.1, NULL);
-  telemetry_tid = sys_time_register_timer((1. / 20.), NULL);
+  telemetry_tid = sys_time_register_timer((1. / 10.), NULL);
 }
 
 
