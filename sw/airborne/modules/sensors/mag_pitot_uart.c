@@ -33,11 +33,36 @@ struct Int32Vect3 mag;
 bool_t mag_valid;
 
 
+// Downlink
+#include "mcu_periph/uart.h"
+#include "pprzlink/messages.h"
+#include "subsystems/datalink/downlink.h"
+#include BOARD_CONFIG
+
+#if PERIODIC_TELEMETRY
+#include "subsystems/datalink/telemetry.h"
+#endif
+
+
+void mag_pitot_raw_downlink(struct transport_tx *trans, struct link_device *dev);
+void mag_pitot_raw_downlink(struct transport_tx *trans, struct link_device *dev)
+{
+  pprz_msg_send_IMU_MAG_RAW(trans, dev, AC_ID, &imu.mag_unscaled.x, &imu.mag_unscaled.y,
+                             &imu.mag_unscaled.z);
+}
+
+
 void mag_pitot_init() {
   mag.x = 0;
   mag.y = 0;
   mag.z = 0;
   mag_valid = FALSE;
+
+
+#if PERIODIC_TELEMETRY
+  register_periodic_telemetry(DefaultPeriodic, PPRZ_MSG_ID_IMU_MAG_RAW, mag_pitot_raw_downlink);
+#endif
+
 }
 
 void mag_pitot_event() {
