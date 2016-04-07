@@ -24,13 +24,22 @@
  */
 
 #include "modules/sensors/mag_pitot_uart.h"
+
+#include "pprzlink/pprz_transport.h"
+#include "pprzlink/intermcu_msg.h"
 #include "mcu_periph/uart.h"
+
 #include "subsystems/abi.h"
 #include "subsystems/imu.h"
 
 
-struct Int32Vect3 mag;
-bool_t mag_valid;
+// Variables
+static struct link_device *mag_pitot_device = (&((MAG_PITOT_PORT).device));
+static struct pprz_transport mag_pitot_transport;
+static uint8_t mag_pitot_buf[128]  __attribute__((aligned));
+static bool_t mag_pitot_msg_available = FALSE;
+
+
 
 
 // Downlink
@@ -41,23 +50,17 @@ bool_t mag_valid;
 
 #if PERIODIC_TELEMETRY
 #include "subsystems/datalink/telemetry.h"
-#endif
 
-
-void mag_pitot_raw_downlink(struct transport_tx *trans, struct link_device *dev);
-void mag_pitot_raw_downlink(struct transport_tx *trans, struct link_device *dev)
+static void mag_pitot_raw_downlink(struct transport_tx *trans, struct link_device *dev)
 {
   pprz_msg_send_IMU_MAG_RAW(trans, dev, AC_ID, &imu.mag_unscaled.x, &imu.mag_unscaled.y,
                              &imu.mag_unscaled.z);
 }
+#endif
 
 
 void mag_pitot_init() {
-  mag.x = 0;
-  mag.y = 0;
-  mag.z = 0;
-  mag_valid = FALSE;
-
+  pprz_transport_init(&mag_pitot_transport);
 
 #if PERIODIC_TELEMETRY
   register_periodic_telemetry(DefaultPeriodic, PPRZ_MSG_ID_IMU_MAG_RAW, mag_pitot_raw_downlink);
@@ -65,17 +68,59 @@ void mag_pitot_init() {
 
 }
 
-void mag_pitot_event() {
-  if (mag_valid) {
-    uint32_t now_ts = get_sys_time_usec();
 
+static inline void mag_pitot_parse_msg(void)
+{
+  uint32_t now_ts = get_sys_time_usec();
+
+  /* Parse the mag-pitot message */
+  uint8_t msg_id = mag_pitot_buf[1];
+  switch (msg_id) {
+  case DL_IMCU_REMOTE_MAG: {
+    struct Int16Vect3 mag;
+
+    mag.x = DL_IMCU_REMOTE_MAG_mag_x(mag_pitot_buf);
+    mag.y = DL_IMCU_REMOTE_MAG_mag_y(mag_pitot_buf);
+    mag.z = DL_IMCU_REMOTE_MAG_mag_z(mag_pitot_buf);
+
+    // TODO: Rotate from Mag Axis to IMU Axis
     VECT3_COPY(imu.mag_unscaled, mag);
-    mag_valid = FALSE;
+
     imu_scale_mag(&imu);
     AbiSendMsgIMU_MAG_INT32(IMU_BOARD_ID, now_ts, &imu.mag);
 
-    // BARO_BOARD_SENDER_ID
+    break;
   }
+
+  case DL_IMCU_REMOTE_BARO: {
+    float abs = 1.0f * ((float)(DL_IMCU_REMOTE_BARO_pitot_tot(mag_pitot_buf)));
+    float diff = 1.0f * DL_IMCU_REMOTE_BARO_pitot_stat(mag_pitot_buf);
+    float temp = 1.0f * DL_IMCU_REMOTE_BARO_pitot_temp(mag_pitot_buf);
+
+    AbiSendMsgBARO_ABS(BARO_BOARD_SENDER_ID, abs);
+    AbiSendMsgBARO_DIFF(BARO_BOARD_SENDER_ID, diff);
+    AbiSendMsgTEMPERATURE(BARO_BOARD_SENDER_ID, temp);
+    break;
+  }
+
+    default:
+      break;
+  }
+
+
+}
+
+
+
+void mag_pitot_event() {
+
+  pprz_check_and_parse(mag_pitot_device, &mag_pitot_transport, mag_pitot_buf, &mag_pitot_msg_available );
+
+  if (mag_pitot_msg_available) {
+    mag_pitot_parse_msg();
+    mag_pitot_msg_available = FALSE;
+  }
+
 }
 
 
