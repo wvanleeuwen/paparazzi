@@ -1,0 +1,40 @@
+<!DOCTYPE layout SYSTEM "layout.dtd">
+
+<layout width="1024" height="768">
+  <rows>
+    <columns SIZE="400">
+      <rows SIZE="300">
+        <widget NAME="strips" size="242"/>
+        <widget NAME="alarms" size="73"/>
+        <widget NAME="plugin" size="73"/>
+      </rows>
+      <widget NAME="map2d" size="716">
+        <papget type="message_field" display="text" x="72" y="201">
+          <property name="scale" value="0.1"/>
+          <property name="field" value="ROTORCRAFT_STATUS:vsupply"/>
+          <property name="ac_id" value="6"/>
+          <property name="format" value="Bat %.1f V"/>
+          <property name="size" value="15."/>
+          <property name="color" value="#00ff00"/>
+        </papget>
+        <papget type="message_field" display="text" x="71" y="273">
+          <property name="scale" value="1."/>
+          <property name="field" value="TEMP_ADC:temp1"/>
+          <property name="ac_id" value="6"/>
+          <property name="format" value="Mot %.1f °C"/>
+          <property name="size" value="15."/>
+          <property name="color" value="#00ff00"/>
+        </papget>
+        <papget type="message_field" display="text" x="71" y="229">
+          <property name="scale" value="1."/>
+          <property name="field" value="TEMP_ADC:temp2"/>
+          <property name="ac_id" value="6"/>
+          <property name="format" value="Bat %.1f °C"/>
+          <property name="size" value="15."/>
+          <property name="color" value="#00ff00"/>
+        </papget>
+      </widget>
+    </columns>
+    <widget NAME="aircraft" size="360"/>
+  </rows>
+</layout>
