@@ -101,7 +101,7 @@ static float calc_ntc(int16_t raw_adc, uint16_t pull_up_r, float a, float b, flo
   return temp_c;
 }
 
-static float calc_lm35(int16_t raw_temp)
+static inline float calc_lm35(int16_t raw_temp)
 {
   return ((float)raw_temp * (3300.0f / 1024.0f) / 10.0f);
 }
