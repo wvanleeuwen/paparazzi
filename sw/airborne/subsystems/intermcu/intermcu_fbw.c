@@ -26,9 +26,11 @@
 
 #include "intermcu_fbw.h"
 #include "pprzlink/intermcu_msg.h"
-#include "subsystems/radio_control.h"
-#include "mcu_periph/uart.h"
 #include "pprzlink/pprz_transport.h"
+#include "subsystems/radio_control.h"
+#include "subsystems/electrical.h"
+#include "mcu_periph/uart.h"
+
 #include "modules/spektrum_soft_bind/spektrum_soft_bind_fbw.h"
 
 #ifdef BOARD_PX4IO
@@ -54,18 +56,21 @@ static struct pprz_transport intermcu_transport;
 struct intermcu_t inter_mcu;
 pprz_t intermcu_commands[COMMANDS_NB];
 uint8_t autopilot_motors_on = FALSE;
-static void intermcu_parse_msg(struct transport_rx *trans, void (*commands_frame_handler)(void));
+static void intermcu_parse_msg(void (*commands_frame_handler)(void));
+
 #ifdef BOARD_PX4IO
 static void checkPx4RebootCommand(unsigned char b);
 #endif
 
 void intermcu_init(void)
 {
+  inter_mcu.msg_available = FALSE;
+  inter_mcu.enabled = TRUE;
   pprz_transport_init(&intermcu_transport);
+
 #ifdef BOARD_PX4IO
   px4bl_tid = sys_time_register_timer(20.0, NULL);
 #endif
-
 }
 
 void intermcu_periodic(void)
@@ -114,20 +119,22 @@ void intermcu_on_rc_frame(uint8_t fbw_mode)
 void intermcu_send_status(uint8_t mode)
 {
   // Send Status
-  (void)mode;
-  //FIXME
+  pprz_msg_send_IMCU_FBW_STATUS(&(intermcu_transport.trans_tx), intermcu_device, INTERMCU_FBW,
+                            &mode, &(radio_control.status), &(radio_control.frame_rate), &electrical.vsupply,
+                            &electrical.current);
 }
 
-static void intermcu_parse_msg(struct transport_rx *trans, void (*commands_frame_handler)(void))
+#pragma GCC diagnostic ignored "-Wcast-align"
+static void intermcu_parse_msg(void (*commands_frame_handler)(void))
 {
   /* Parse the Inter MCU message */
-  uint8_t msg_id = trans->payload[1];
+  uint8_t msg_id = inter_mcu.msg_buf[1];
   switch (msg_id) {
     case DL_IMCU_COMMANDS: {
       uint8_t i;
-      uint8_t size = DL_IMCU_COMMANDS_values_length(trans->payload);
-      int16_t *new_commands = DL_IMCU_COMMANDS_values(trans->payload);
-      uint8_t status = DL_IMCU_COMMANDS_status(trans->payload);
+      uint8_t size = DL_IMCU_COMMANDS_values_length(inter_mcu.msg_buf);
+      int16_t *new_commands = DL_IMCU_COMMANDS_values(inter_mcu.msg_buf);
+      uint8_t status = DL_IMCU_COMMANDS_status(inter_mcu.msg_buf);
       autopilot_motors_on = status & 0x1;
       for (i = 0; i < size; i++) {
         intermcu_commands[i] = new_commands[i];
@@ -144,32 +151,30 @@ static void intermcu_parse_msg(struct transport_rx *trans, void (*commands_frame
       received_spektrum_soft_bind();
       break;
 #endif
+
     default:
       break;
   }
-
-  // Set to receive another message
-  trans->msg_received = FALSE;
 }
+#pragma GCC diagnostic pop
 
 void InterMcuEvent(void (*frame_handler)(void))
 {
+  pprz_check_and_parse(intermcu_device, &intermcu_transport, inter_mcu.msg_buf, &inter_mcu.msg_available);
 
-  /* Parse incoming bytes */
-  if (intermcu_device->char_available(intermcu_device->periph)) {
-    while (intermcu_device->char_available(intermcu_device->periph) && !intermcu_transport.trans_rx.msg_received) {
-      unsigned char b = intermcu_device->get_byte(intermcu_device->periph);
+  // FIXME!!!
 #ifdef BOARD_PX4IO
-      checkPx4RebootCommand(b);
+  checkPx4RebootCommand(b);
 #endif
-      parse_pprz(&intermcu_transport, b);
-    }
 
-    if (intermcu_transport.trans_rx.msg_received) {
-      intermcu_parse_msg(&(intermcu_transport.trans_rx), frame_handler);
-    }
+  if(inter_mcu.msg_available) {
+    intermcu_parse_msg(frame_handler);
+    inter_mcu.msg_available = FALSE;
   }
 }
+
+
+/* SOME STUFF FOR PX4IO BOOTLOADER (TODO: move this code) */
 #ifdef BOARD_PX4IO
 static void checkPx4RebootCommand(unsigned char b)
 {

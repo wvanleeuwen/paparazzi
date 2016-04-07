@@ -43,8 +43,11 @@ enum intermcu_status {
 };
 
 struct intermcu_t {
-  enum intermcu_status status;
-  uint8_t time_since_last_frame;
+  enum intermcu_status status;    ///< Status of the INTERMCU
+  uint8_t time_since_last_frame;  ///< Time since last frame
+  uint8_t enabled;                ///< If the InterMCU communication is enabled
+  bool_t msg_available;           ///< If we have an InterMCU message
+  uint8_t msg_buf[128] __attribute__((aligned));  ///< The message buffer
 };
 extern struct intermcu_t inter_mcu;
 
