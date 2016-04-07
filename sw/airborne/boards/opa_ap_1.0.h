@@ -166,7 +166,7 @@
 // Default: 10k / 2k2
 // #define DefaultVoltageOfAdc(adc) (0.0045*adc)
 // Opa: 31k6 / 4k7
-#define DefaultVoltageOfAdc(adc) (0.00605*adc)
+#define DefaultVoltageOfAdc(adc) (0.0063*adc)
 
 // ADC756-B050: +/-50Amp range bidirectional
 // 40 mV / Ampere
