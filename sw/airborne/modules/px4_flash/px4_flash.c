@@ -151,7 +151,7 @@ void px4flash_event(void)
 
 
       //stop all intermcu communication:
-      disable_inter_comm(true);
+      intermcu_set_enabled(FALSE);
 
       /*
       * The progdieshit define is very usefull, if for whatever reason the (normal, not bootloader) firmware on the IO chip became disfunct.
