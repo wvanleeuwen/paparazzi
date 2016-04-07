@@ -30,6 +30,7 @@
       <module name="intermcu"      type="uart"/>
       <module name="current_sensor"/>
       <module name="opa_controller_ap"/>
+      <module name="mag_pitot_uart" />
 
       <module name="geo_mag"/>
       <module name="air_data"/>
