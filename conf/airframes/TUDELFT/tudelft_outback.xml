@@ -135,8 +135,9 @@
   </command_laws>
 
   <heli_curves>
-    <curve throttle="0,4800,7200,8400,9600" collective="-1000,750,2500,4250,6000"/>
-    <curve throttle="9600,7200,9600" collective="-7500,0,7500"/>
+    <curve throttle="0,7000,7000" collective="-7500,-5000,-2500"/>
+    <curve throttle="7500,7500,7500" collective="-7500,-5000,-2500"/>
+    <curve throttle="7500,7500,7500" collective="-7000,500,8000"/>
   </heli_curves>
 
   <section name="MISC">
