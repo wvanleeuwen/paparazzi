@@ -84,12 +84,18 @@
      <servo name="AIL_RIGHTBACK"  no="9" min="1100" neutral="1500" max="1900"/>
   </servos>
 
+  <section name="RADIO">
+    <define name="RADIO_TH_HOLD" value="RADIO_AUX1"/>
+    <define name="RADIO_FMODE"   value="RADIO_AUX2"/>
+  </section>
+
   <rc_commands>
-    <set command="THRUST" value="@THROTTLE"/>
-    <set command="ROLL"   value="@ROLL"/>
-    <set command="PITCH"  value="@PITCH"/>
-    <set command="YAW"    value="@YAW"/>
-    <set command="FMODE"  value="@AUX2"/>
+    <set command="THRUST"   value="@THROTTLE"/>
+    <set command="ROLL"     value="@ROLL"/>
+    <set command="PITCH"    value="@PITCH"/>
+    <set command="YAW"      value="@YAW"/>
+    <set command="FMODE"    value="@FMODE"/>
+    <set command="TH_HOLD"  value="@TH_HOLD"/>
   </rc_commands>
 
   <commands>
@@ -98,10 +104,16 @@
     <axis name="PITCH"      failsafe_value="0"/>
     <axis name="YAW"        failsafe_value="0"/>
     <axis name="FMODE"      failsafe_value="0"/>
+    <axis name="TH_HOLD"    failsafe_value="-9600"/>
   </commands>
 
-  <section name="MIXING" prefix="SW_MIXING_">
-    <define name="TYPE" value="HR120"/>
+  <auto_rc_commands>
+    <set command="FMODE"    value="@FMODE"/>
+    <set command="TH_HOLD"  value="@TH_HOLD"/>
+  </auto_rc_commands>
+
+  <section name="MIXING"      prefix="SW_MIXING_">
+    <define name="TYPE"       value="HR120"/>
     <define name="TRIM_ROLL"  value="0"/>
     <define name="TRIM_PITCH" value="0"/>
     <define name="TRIM_COLL"  value="0"/>
@@ -110,12 +122,12 @@
   <command_laws>
     <call fun="throttle_curve_run(autopilot_motors_on, values)"/>
     <call fun="swashplate_mixing_run(values)"/>
-    <set servo="THROTTLE"       value="throttle_curve.throttle"/>
+    <set servo="THROTTLE"       value="(((@TH_HOLD) > 4800)? throttle_curve.throttle :-9600)"/>
     <set servo="SW_BACK"        value="swashplate_mixing.commands[SW_BACK]"/>
     <set servo="SW_LEFTFRONT"   value="swashplate_mixing.commands[SW_LEFTFRONT]"/>
     <set servo="SW_RIGHTFRONT"  value="swashplate_mixing.commands[SW_RIGHTFRONT]"/>
-    <set servo="TAIL_LEFT"      value="@YAW"/>
-    <set servo="TAIL_RIGHT"     value="-@YAW"/>
+    <set servo="TAIL_LEFT"      value="(((@TH_HOLD) > 4800)? (@YAW) : 0)"/>
+    <set servo="TAIL_RIGHT"     value="(((@TH_HOLD) > 4800)? (-@YAW) : 0)"/>
     <set servo="AIL_LEFTFRONT"  value="@YAW"/>
     <set servo="AIL_LEFTBACK"   value="@YAW"/>
     <set servo="AIL_RIGHTFRONT" value="@YAW"/>
