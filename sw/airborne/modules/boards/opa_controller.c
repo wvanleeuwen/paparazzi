@@ -47,11 +47,11 @@ void opa_controller_init(void) {
 
   /* Enable Main power (25V) */
   gpio_setup_output(MAIN_PWR, MAIN_PWR_PIN);
-  MAIN_PWR_ON(MAIN_PWR, MAIN_PWR_PIN);
+  MAIN_PWR_OFF(MAIN_PWR, MAIN_PWR_PIN);
 
   /* Enable Balancer power */
   gpio_setup_output(BAL_PWR, BAL_PWR_PIN);
-  BAL_PWR_ON(BAL_PWR, BAL_PWR_PIN);
+  BAL_PWR_OFF(BAL_PWR, BAL_PWR_PIN);
 
 #if defined ARMING_LED
   /* Disable the arming LED */
