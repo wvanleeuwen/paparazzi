@@ -215,6 +215,24 @@ void stabilization_rate_run(bool_t in_flight)
   stabilization_cmd[COMMAND_PITCH] = stabilization_rate_fb_cmd.q >> 11;
   stabilization_cmd[COMMAND_YAW]   = stabilization_rate_fb_cmd.r >> 11;
 
+
+  float original_roll = stabilization_cmd[COMMAND_ROLL];
+  float original_pitch = stabilization_cmd[COMMAND_PITCH];
+
+//    stabilization_cmd[COMMAND_ROLL]  = indi_rate_inputs_filt.p + rate_error.p*1200.0;
+//    stabilization_cmd[COMMAND_PITCH]  = indi_rate_inputs_filt.q + rate_error.q*1200.0;
+//    stabilization_cmd[COMMAND_YAW]  = indi_rate_inputs_filt_sec_r + du_r;
+//    stabilization_rate_sum_err.p = 0;
+//    stabilization_rate_sum_err.q = 0;
+//    stabilization_rate_sum_err.r = 0;
+
+  float angle = -((float) radio_control.values[7]+9600.0)/9600.0/2*M_PI/2.0;
+  float cangle = cosf(angle);
+  float sangle = sinf(angle);
+
+  stabilization_cmd[COMMAND_ROLL] =  cangle*original_roll + sangle*original_pitch;
+  stabilization_cmd[COMMAND_PITCH] =-sangle*original_roll + cangle*original_pitch;
+
   /* bound the result */
   BoundAbs(stabilization_cmd[COMMAND_ROLL], MAX_PPRZ);
   BoundAbs(stabilization_cmd[COMMAND_PITCH], MAX_PPRZ);
