@@ -85,7 +85,7 @@ void intermcu_periodic(void)
 
 void intermcu_on_rc_frame(uint8_t fbw_mode)
 {
-  pprz_t  values[8];
+  pprz_t  values[9];
 
   values[INTERMCU_RADIO_THROTTLE] = radio_control.values[RADIO_THROTTLE];
   values[INTERMCU_RADIO_ROLL] = radio_control.values[RADIO_ROLL];
@@ -109,7 +109,7 @@ void intermcu_on_rc_frame(uint8_t fbw_mode)
   values[INTERMCU_RADIO_AUX2] = radio_control.values[RADIO_AUX2];
 #endif
 #ifdef RADIO_AUX3
-  values[INTERMCU_RADIO_AUX2] = radio_control.values[RADIO_AUX2];
+  values[INTERMCU_RADIO_AUX3] = radio_control.values[RADIO_AUX3];
 #endif
 
   pprz_msg_send_IMCU_RADIO_COMMANDS(&(intermcu_transport.trans_tx), intermcu_device,
