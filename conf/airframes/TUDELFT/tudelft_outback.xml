@@ -128,11 +128,11 @@
     <set servo="SW_LEFTFRONT"   value="swashplate_mixing.commands[SW_LEFTFRONT]"/>
     <set servo="SW_RIGHTFRONT"  value="swashplate_mixing.commands[SW_RIGHTFRONT]"/>
     <set servo="TAIL_LEFT"      value="(((@TH_HOLD) > 4800)? (@YAW) : 0)"/>
-    <set servo="TAIL_RIGHT"     value="(((@TH_HOLD) > 4800)? (-@YAW) : 0)"/>
-    <set servo="AIL_LEFTFRONT"  value="@YAW"/>
-    <set servo="AIL_LEFTBACK"   value="@YAW"/>
-    <set servo="AIL_RIGHTFRONT" value="@YAW"/>
-    <set servo="AIL_RIGHTBACK"  value="@YAW"/>
+    <set servo="TAIL_RIGHT"     value="(((@TH_HOLD) > 4800)? (@YAW) : 0)"/>
+    <set servo="AIL_LEFTFRONT"  value="0"/>
+    <set servo="AIL_LEFTBACK"   value="0"/>
+    <set servo="AIL_RIGHTFRONT" value="0"/>
+    <set servo="AIL_RIGHTBACK"  value="0"/>
   </command_laws>
 
   <heli_curves>
