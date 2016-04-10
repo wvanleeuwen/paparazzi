@@ -1,5 +1,6 @@
 /*
  * Copyright (C) C. De Wagter
+ * Copyright (C) 2015 Freek van Tienen <freek.v.tienen@gmail.com>
  *
  * This file is part of paparazzi
  *
@@ -25,6 +26,26 @@
 
 #ifndef MAG_PITOT_UART_H
 #define MAG_PITOT_UART_H
+
+#include "std.h"
+#include "generated/airframe.h"
+#include "pprzlink/pprz_transport.h"
+#include "math/pprz_orientation_conversion.h"
+
+/* Set default rotation to 0 */
+#if !defined IMU_TO_MAG_PHI && !defined IMU_TO_MAG_THETA && !defined IMU_TO_MAG_PSI
+#define IMU_TO_MAG_PHI   0
+#define IMU_TO_MAG_THETA 0
+#define IMU_TO_MAG_PSI   0
+#endif
+
+/* Main magneto pitot strcuture */
+struct mag_pitot_t {
+  struct link_device *device;           ///< The device which is uses for communication
+  struct pprz_transport transport;      ///< The transport layer (PPRZ)
+  struct OrientationReps imu_to_mag;    ///< IMU to magneto translation
+  bool_t msg_available;                 ///< If we received a message
+};
 
 extern void mag_pitot_init(void);
 extern void mag_pitot_event(void);
