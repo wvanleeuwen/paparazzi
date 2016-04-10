@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2015 The Paparazzi Team
+ * Copyright (C) 2015 Freek van Tienen <freek.v.tienen@gmail.com>
  *
  * This file is part of paparazzi.
  *
@@ -27,7 +27,6 @@
 #include "intermcu_ap.h"
 #include "pprzlink/intermcu_msg.h"
 #include "subsystems/radio_control.h"
-#include "pprzlink/pprz_transport.h"
 #include "mcu_periph/uart.h"
 
 #include "subsystems/electrical.h"
@@ -37,14 +36,17 @@
 #error "INTERMCU UART CAN ONLY SEND 8 COMMANDS OR THE UART WILL BE OVERFILLED"
 #endif
 
-// Used for communication
-static struct link_device *intermcu_device = (&((INTERMCU_LINK).device));
-static struct pprz_transport intermcu_transport;
 
-/* Main interMCU defines */
-struct intermcu_t inter_mcu;
+/* Main InterMCU defines */
+struct intermcu_t intermcu = {
+  .device = (&((INTERMCU_LINK).device)),
+  .enabled = TRUE,
+  .msg_available = FALSE
+};
+uint8_t imcu_msg_buf[128] __attribute__((aligned));  ///< The InterMCU message buffer
 static struct fbw_status_t fbw_status;
 static inline void intermcu_parse_msg(void (*rc_frame_handler)(void));
+
 
 #if PERIODIC_TELEMETRY
 #include "subsystems/datalink/telemetry.h"
@@ -61,9 +63,7 @@ static void send_status(struct transport_tx *trans, struct link_device *dev)
 /* InterMCU initialization */
 void intermcu_init(void)
 {
-  inter_mcu.msg_available = FALSE;
-  inter_mcu.enabled = TRUE;
-  pprz_transport_init(&intermcu_transport);
+  pprz_transport_init(&intermcu.transport);
 
 #if PERIODIC_TELEMETRY
   register_periodic_telemetry(DefaultPeriodic, PPRZ_MSG_ID_FBW_STATUS, send_status);
@@ -74,24 +74,24 @@ void intermcu_init(void)
 void intermcu_periodic(void)
 {
   /* Check for interMCU loss */
-  if (inter_mcu.time_since_last_frame >= INTERMCU_LOST_CNT) {
-    inter_mcu.status = INTERMCU_LOST;
+  if (intermcu.time_since_last_frame >= INTERMCU_LOST_CNT) {
+    intermcu.status = INTERMCU_LOST;
   } else {
-    inter_mcu.time_since_last_frame++;
+    intermcu.time_since_last_frame++;
   }
 }
 
 /* Enable or disable the communication of the InterMCU */
 void intermcu_set_enabled(bool_t value)
 {
-  inter_mcu.enabled = value;
+  intermcu.enabled = value;
 }
 
 /* Send the actuators to the FBW */
 void intermcu_set_actuators(pprz_t *command_values, uint8_t ap_mode __attribute__((unused)))
 {
-  if (inter_mcu.enabled) {
-    pprz_msg_send_IMCU_COMMANDS(&(intermcu_transport.trans_tx), intermcu_device,
+  if (intermcu.enabled) {
+    pprz_msg_send_IMCU_COMMANDS(&(intermcu.transport.trans_tx), intermcu.device,
                                 INTERMCU_AP, &autopilot_motors_on, COMMANDS_NB, command_values); //TODO: Append more status
   }
 }
@@ -99,8 +99,8 @@ void intermcu_set_actuators(pprz_t *command_values, uint8_t ap_mode __attribute_
 /* Send the spektrum Bind message */
 void intermcu_send_spektrum_bind(void)
 {
-  if (inter_mcu.enabled) {
-    pprz_msg_send_IMCU_SPEKTRUM_SOFT_BIND(&(intermcu_transport.trans_tx), intermcu_device, INTERMCU_AP);
+  if (intermcu.enabled) {
+    pprz_msg_send_IMCU_SPEKTRUM_SOFT_BIND(&(intermcu.transport.trans_tx), intermcu.device, INTERMCU_AP);
   }
 }
 
@@ -109,14 +109,14 @@ void intermcu_send_spektrum_bind(void)
 static inline void intermcu_parse_msg(void (*rc_frame_handler)(void))
 {
   /* Parse the Inter MCU message */
-  uint8_t msg_id = inter_mcu.msg_buf[1];
+  uint8_t msg_id = imcu_msg_buf[1];
   switch (msg_id) {
     case DL_IMCU_RADIO_COMMANDS: {
       uint8_t i;
-      uint8_t size = DL_IMCU_RADIO_COMMANDS_values_length(inter_mcu.msg_buf);
-      inter_mcu.status = DL_IMCU_RADIO_COMMANDS_status(inter_mcu.msg_buf);
+      uint8_t size = DL_IMCU_RADIO_COMMANDS_values_length(imcu_msg_buf);
+      intermcu.status = DL_IMCU_RADIO_COMMANDS_status(imcu_msg_buf);
       for (i = 0; i < size; i++) {
-        radio_control.values[i] = DL_IMCU_RADIO_COMMANDS_values(inter_mcu.msg_buf)[i];
+        radio_control.values[i] = DL_IMCU_RADIO_COMMANDS_values(imcu_msg_buf)[i];
       }
 
       radio_control.frame_cpt++;
@@ -127,11 +127,11 @@ static inline void intermcu_parse_msg(void (*rc_frame_handler)(void))
     }
 
     case DL_IMCU_FBW_STATUS: {
-      fbw_status.rc_status = DL_IMCU_FBW_STATUS_rc_status(inter_mcu.msg_buf);
-      fbw_status.frame_rate = DL_IMCU_FBW_STATUS_frame_rate(inter_mcu.msg_buf);
-      fbw_status.mode = DL_IMCU_FBW_STATUS_mode(inter_mcu.msg_buf);
-      fbw_status.vsupply = DL_IMCU_FBW_STATUS_vsupply(inter_mcu.msg_buf);
-      fbw_status.current = DL_IMCU_FBW_STATUS_current(inter_mcu.msg_buf);
+      fbw_status.rc_status = DL_IMCU_FBW_STATUS_rc_status(imcu_msg_buf);
+      fbw_status.frame_rate = DL_IMCU_FBW_STATUS_frame_rate(imcu_msg_buf);
+      fbw_status.mode = DL_IMCU_FBW_STATUS_mode(imcu_msg_buf);
+      fbw_status.vsupply = DL_IMCU_FBW_STATUS_vsupply(imcu_msg_buf);
+      fbw_status.current = DL_IMCU_FBW_STATUS_current(imcu_msg_buf);
       break;
     }
 
@@ -145,12 +145,12 @@ static inline void intermcu_parse_msg(void (*rc_frame_handler)(void))
 void RadioControlEvent(void (*frame_handler)(void))
 {
   /* Parse incoming bytes */
-  if (inter_mcu.enabled) {
-    pprz_check_and_parse(intermcu_device, &intermcu_transport, inter_mcu.msg_buf, &inter_mcu.msg_available);
+  if (intermcu.enabled) {
+    pprz_check_and_parse(intermcu.device, &intermcu.transport, imcu_msg_buf, &intermcu.msg_available);
 
-    if(inter_mcu.msg_available) {
+    if(intermcu.msg_available) {
       intermcu_parse_msg(frame_handler);
-      inter_mcu.msg_available = FALSE;
+      intermcu.msg_available = FALSE;
     }
   }
 }

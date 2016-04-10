@@ -29,6 +29,7 @@
 
 #include "std.h"
 #include "subsystems/commands.h"
+#include "pprzlink/pprz_transport.h"
 
 #define INTERMCU_AP   0
 #define INTERMCU_FBW  1
@@ -43,13 +44,14 @@ enum intermcu_status {
 };
 
 struct intermcu_t {
-  enum intermcu_status status;    ///< Status of the INTERMCU
-  uint8_t time_since_last_frame;  ///< Time since last frame
-  uint8_t enabled;                ///< If the InterMCU communication is enabled
-  bool_t msg_available;           ///< If we have an InterMCU message
-  uint8_t msg_buf[128] __attribute__((aligned));  ///< The message buffer
+  struct link_device *device;       ///< Device used for communication
+  struct pprz_transport transport;  ///< Transport over communication line (PPRZ)
+  enum intermcu_status status;      ///< Status of the INTERMCU
+  uint8_t time_since_last_frame;    ///< Time since last frame
+  uint8_t enabled;                  ///< If the InterMCU communication is enabled
+  bool_t msg_available;             ///< If we have an InterMCU message
 };
-extern struct intermcu_t inter_mcu;
+extern struct intermcu_t intermcu;
 
 void intermcu_init(void);
 void intermcu_periodic(void);
