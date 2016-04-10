@@ -165,7 +165,7 @@ STATIC_INLINE void main_periodic(void)
   intermcu_periodic();
 
   /* Safety logic */
-  bool_t ap_lost = (inter_mcu.status == INTERMCU_LOST);
+  bool_t ap_lost = (intermcu.status == INTERMCU_LOST);
   bool_t rc_lost = (radio_control.status == RC_REALLY_LOST);
   if (rc_lost) {
     if (ap_lost) {
@@ -232,7 +232,7 @@ static void autopilot_on_rc_frame(void)
   }
 
   /* Trying to switch to auto when AP is lost */
-  if ((inter_mcu.status == INTERMCU_LOST) &&
+  if ((intermcu.status == INTERMCU_LOST) &&
       (fbw_mode == FBW_MODE_AUTO)) {
     fbw_mode = AP_LOST_FBW_MODE;
   }

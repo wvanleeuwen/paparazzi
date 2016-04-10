@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2015 The Paparazzi Team
+ * Copyright (C) 2015 Freek van Tienen <freek.v.tienen@gmail.com>
  *
  * This file is part of paparazzi.
  *
@@ -26,7 +26,6 @@
 
 #include "intermcu_fbw.h"
 #include "pprzlink/intermcu_msg.h"
-#include "pprzlink/pprz_transport.h"
 #include "subsystems/radio_control.h"
 #include "subsystems/electrical.h"
 #include "mcu_periph/uart.h"
@@ -49,11 +48,14 @@ tid_t px4bl_tid; ///< id for time out of the px4 bootloader reset
 INFO("InterMCU UART will only send 8 radio channels!")
 #endif
 
-// Used for communication
-static struct link_device *intermcu_device = (&((INTERMCU_LINK).device));
-static struct pprz_transport intermcu_transport;
+/* Main InterMCU structure */
+struct intermcu_t intermcu = {
+  .device = (&((INTERMCU_LINK).device)),
+  .enabled = TRUE,
+  .msg_available = FALSE
+};
+uint8_t imcu_msg_buf[128] __attribute__((aligned));  ///< The InterMCU message buffer
 
-struct intermcu_t inter_mcu;
 pprz_t intermcu_commands[COMMANDS_NB];
 uint8_t autopilot_motors_on = FALSE;
 static void intermcu_parse_msg(void (*commands_frame_handler)(void));
@@ -64,9 +66,7 @@ static void checkPx4RebootCommand(unsigned char b);
 
 void intermcu_init(void)
 {
-  inter_mcu.msg_available = FALSE;
-  inter_mcu.enabled = TRUE;
-  pprz_transport_init(&intermcu_transport);
+  pprz_transport_init(&intermcu.transport);
 
 #ifdef BOARD_PX4IO
   px4bl_tid = sys_time_register_timer(20.0, NULL);
@@ -76,10 +76,10 @@ void intermcu_init(void)
 void intermcu_periodic(void)
 {
   /* Check for interMCU loss */
-  if (inter_mcu.time_since_last_frame >= INTERMCU_LOST_CNT) {
-    inter_mcu.status = INTERMCU_LOST;
+  if (intermcu.time_since_last_frame >= INTERMCU_LOST_CNT) {
+    intermcu.status = INTERMCU_LOST;
   } else {
-    inter_mcu.time_since_last_frame++;
+    intermcu.time_since_last_frame++;
   }
 }
 
@@ -112,14 +112,14 @@ void intermcu_on_rc_frame(uint8_t fbw_mode)
   values[INTERMCU_RADIO_AUX3] = radio_control.values[RADIO_AUX3];
 #endif
 
-  pprz_msg_send_IMCU_RADIO_COMMANDS(&(intermcu_transport.trans_tx), intermcu_device,
+  pprz_msg_send_IMCU_RADIO_COMMANDS(&(intermcu.transport.trans_tx), intermcu.device,
                                     INTERMCU_FBW, &fbw_mode, RADIO_CONTROL_NB_CHANNEL, values);
 }
 
 void intermcu_send_status(uint8_t mode)
 {
   // Send Status
-  pprz_msg_send_IMCU_FBW_STATUS(&(intermcu_transport.trans_tx), intermcu_device, INTERMCU_FBW,
+  pprz_msg_send_IMCU_FBW_STATUS(&(intermcu.transport.trans_tx), intermcu.device, INTERMCU_FBW,
                             &mode, &(radio_control.status), &(radio_control.frame_rate), &electrical.vsupply,
                             &electrical.current);
 }
@@ -128,20 +128,20 @@ void intermcu_send_status(uint8_t mode)
 static void intermcu_parse_msg(void (*commands_frame_handler)(void))
 {
   /* Parse the Inter MCU message */
-  uint8_t msg_id = inter_mcu.msg_buf[1];
+  uint8_t msg_id = imcu_msg_buf[1];
   switch (msg_id) {
     case DL_IMCU_COMMANDS: {
       uint8_t i;
-      uint8_t size = DL_IMCU_COMMANDS_values_length(inter_mcu.msg_buf);
-      int16_t *new_commands = DL_IMCU_COMMANDS_values(inter_mcu.msg_buf);
-      uint8_t status = DL_IMCU_COMMANDS_status(inter_mcu.msg_buf);
+      uint8_t size = DL_IMCU_COMMANDS_values_length(imcu_msg_buf);
+      int16_t *new_commands = DL_IMCU_COMMANDS_values(imcu_msg_buf);
+      uint8_t status = DL_IMCU_COMMANDS_status(imcu_msg_buf);
       autopilot_motors_on = status & 0x1;
       for (i = 0; i < size; i++) {
         intermcu_commands[i] = new_commands[i];
       }
 
-      inter_mcu.status = INTERMCU_OK;
-      inter_mcu.time_since_last_frame = 0;
+      intermcu.status = INTERMCU_OK;
+      intermcu.time_since_last_frame = 0;
       commands_frame_handler();
       break;
     }
@@ -160,16 +160,16 @@ static void intermcu_parse_msg(void (*commands_frame_handler)(void))
 
 void InterMcuEvent(void (*frame_handler)(void))
 {
-  pprz_check_and_parse(intermcu_device, &intermcu_transport, inter_mcu.msg_buf, &inter_mcu.msg_available);
+  pprz_check_and_parse(intermcu.device, &intermcu.transport, imcu_msg_buf, &intermcu.msg_available);
 
   // FIXME!!!
 #ifdef BOARD_PX4IO
   checkPx4RebootCommand(b);
 #endif
 
-  if(inter_mcu.msg_available) {
+  if(intermcu.msg_available) {
     intermcu_parse_msg(frame_handler);
-    inter_mcu.msg_available = FALSE;
+    intermcu.msg_available = FALSE;
   }
 }
 
