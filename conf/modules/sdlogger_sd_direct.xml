@@ -1,0 +1,16 @@
+<!DOCTYPE module SYSTEM "module.dtd">
+
+<module name="sdlogger_sd_direct" dir="loggers">
+  <doc>
+    <description>Log spi direct variables direct on SD card</description>
+  </doc>
+  <header>
+    <file name="sdlogger_sd_direct.h"/>
+  </header>
+  <init fun="sdlogger_direct_init()"/>
+  <periodic fun="sdlogger_direct_periodic()" freq="512" autorun="TRUE"/>
+  <makefile>
+    <file name="sdlogger_sd_direct.c"/>
+  </makefile>
+</module>
+
