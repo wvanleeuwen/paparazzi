@@ -40,7 +40,7 @@ static uint16_t rpm = 0;
 static int32_t current = 0;
 
 #define ONE_MHZ_CLK 1000000
-#define RC_RPM_TICKS_PER_USEC 6
+#define RC_RPM_TICKS_PER_USEC 1
 #define RPM_IRQ_PRIO 2
 
 /*
@@ -112,14 +112,14 @@ void tim4_isr(void)
     uint32_t now = timer_get_counter(TIM4) + timer_rollover_cnt;
 
     // Calculate the RPM
-    float diff_time = now - rpm_last_pulse_time;
+    uint32_t diff_time = now - rpm_last_pulse_time;
     rpm_last_pulse_time = now;
 
-    rpm = 1/(diff_time/RC_RPM_TICKS_PER_USEC)*1e-6 * 60;
-
-
+    //rpm = diff_time / 1000000 + 1;
+    rpm++;
   } else if ((TIM4_SR & TIM_SR_UIF) != 0) {
     timer_rollover_cnt += (1 << 16);
+    current++;
     timer_clear_flag(TIM4, TIM_SR_UIF);
   }
 }

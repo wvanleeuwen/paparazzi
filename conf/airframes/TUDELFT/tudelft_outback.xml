@@ -38,7 +38,7 @@
       <module name="temp_adc"/>
       <module name="logger_sd_spi_direct"/>
       <module name="gps_ubx_ucenter"/>
-      <module name="rpm_sensor"/>
+      <!--module name="rpm_sensor"/-->
     </target>
 
     <!-- FBW (Flight by Wire) part of the board -->
@@ -126,8 +126,8 @@
     <set servo="SW_BACK"        value="swashplate_mixing.commands[SW_BACK]"/>
     <set servo="SW_LEFTFRONT"   value="swashplate_mixing.commands[SW_LEFTFRONT]"/>
     <set servo="SW_RIGHTFRONT"  value="swashplate_mixing.commands[SW_RIGHTFRONT]"/>
-    <set servo="TAIL_LEFT"      value="(((@TH_HOLD) > 4800)? (@YAW) : 0)"/>
-    <set servo="TAIL_RIGHT"     value="(((@TH_HOLD) > 4800)? (@YAW) : 0)"/>
+    <set servo="TAIL_LEFT"      value="(((@TH_HOLD) > 4800)? (-@YAW - throttle_curve.throttle*0.5) : 0)"/>
+    <set servo="TAIL_RIGHT"     value="(((@TH_HOLD) > 4800)? (-@YAW - throttle_curve.throttle*0.5) : 0)"/>
     <set servo="AIL_LEFTFRONT"  value="0"/>
     <set servo="AIL_LEFTBACK"   value="0"/>
     <set servo="AIL_RIGHTFRONT" value="0"/>
@@ -205,7 +205,7 @@
     <!-- feedback -->
     <define name="GAIN_P" value="400"/>
     <define name="GAIN_Q" value="400"/>
-    <define name="GAIN_R" value="350"/>
+    <define name="GAIN_R" value="700"/>
 
     <define name="IGAIN_P" value="75"/>
     <define name="IGAIN_Q" value="75"/>
@@ -234,14 +234,14 @@
     <define name="REF_MAX_RDOT" value="RadOfDeg(1800.)"/>
 
     <!-- feedback -->
-    <define name="PHI_PGAIN" value="500"/>
-    <define name="PHI_DGAIN" value="100"/>
+    <define name="PHI_PGAIN" value="600"/>
+    <define name="PHI_DGAIN" value="260"/>
     <define name="PHI_IGAIN" value="0"/>
-    <define name="THETA_PGAIN" value="500"/>
-    <define name="THETA_DGAIN" value="100"/>
+    <define name="THETA_PGAIN" value="600"/>
+    <define name="THETA_DGAIN" value="260"/>
     <define name="THETA_IGAIN" value="0"/>
-    <define name="PSI_PGAIN" value="200"/>
-    <define name="PSI_DGAIN" value="0"/>
+    <define name="PSI_PGAIN" value="500"/>
+    <define name="PSI_DGAIN" value="460"/>
     <define name="PSI_IGAIN" value="0"/>
 
     <!-- feedforward -->
