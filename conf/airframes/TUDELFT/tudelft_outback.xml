@@ -171,6 +171,10 @@
   </section>
 
   <section name="AHRS" prefix="AHRS_">
+    <!--This airframe vibrates a lot, which causes accel measurements in excess of 1g continuously-->
+    <define name="GRAVITY_HEURISTIC_FACTOR" value="0"/>
+    <define name="PROPAGATE_LOW_PASS_RATES" value="TRUE"/>
+
     <!-- values used if no GPS fix, on 3D fix is update by geo_mag module -->
     <define name="H_X" value="0.3770441"/>
     <define name="H_Y" value="0.0193986"/>
