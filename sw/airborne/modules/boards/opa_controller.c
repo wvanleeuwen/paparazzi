@@ -75,6 +75,10 @@ void opa_controller_periodic(void) {
   /* Check On/Off button and disable if pressed for 3 seconds */
   if(gpio_get(BTN_ON, BTN_ON_PIN)) {
     if(off_cnt >= OFF_TIMER) {
+      AP_PWR_OFF(AP_PWR, AP_PWR_PIN);
+      MAIN_PWR_OFF(MAIN_PWR, MAIN_PWR_PIN);
+      BAL_PWR_OFF(BAL_PWR, BAL_PWR_PIN);
+      RADIO_CONTROL_POWER_OFF(RADIO_CONTROL_POWER,RADIO_CONTROL_POWER_PIN);
       MCU_PWR_OFF(MCU_PWR, MCU_PWR_PIN);
     } else {
       off_cnt++;
