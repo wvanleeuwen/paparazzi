@@ -28,8 +28,8 @@
 #include "mcu_periph/gpio.h"
 #include "led.h"
 
-#define OFF_TIMER 20*3 // FIXME: make nicer
-#define MIN_ARMING_TRIG 20*1 //FIXME: make nicer
+#define OFF_TIMER 5*1 // FIXME: make nicer
+#define MIN_ARMING_TRIG 1*1 //FIXME: make nicer
 
 /* Whether the autopilot arming LED is on */
 static bool_t arming_led = FALSE;
@@ -65,21 +65,20 @@ void opa_controller_periodic(void) {
 
   /* Check E-Stop and power off Main power if pressed */
   if(!gpio_get(BTN_ESTOP, BTN_ESTOP_PIN)) {
+    AP_PWR_OFF(AP_PWR, AP_PWR_PIN);
     MAIN_PWR_OFF(MAIN_PWR, MAIN_PWR_PIN);
     BAL_PWR_OFF(BAL_PWR, BAL_PWR_PIN);
-    //AP_PWR_OFF(AP_PWR, AP_PWR_PIN);
-    //RADIO_CONTROL_POWER_OFF(RADIO_CONTROL_POWER,RADIO_CONTROL_POWER_PIN);
+    RADIO_CONTROL_POWER_OFF(RADIO_CONTROL_POWER,RADIO_CONTROL_POWER_PIN);
+    MCU_PWR_OFF(MCU_PWR, MCU_PWR_PIN);
     arming_led = FALSE;
   }
 
   /* Check On/Off button and disable if pressed for 3 seconds */
   if(gpio_get(BTN_ON, BTN_ON_PIN)) {
     if(off_cnt >= OFF_TIMER) {
-      AP_PWR_OFF(AP_PWR, AP_PWR_PIN);
       MAIN_PWR_OFF(MAIN_PWR, MAIN_PWR_PIN);
       BAL_PWR_OFF(BAL_PWR, BAL_PWR_PIN);
-      RADIO_CONTROL_POWER_OFF(RADIO_CONTROL_POWER,RADIO_CONTROL_POWER_PIN);
-      MCU_PWR_OFF(MCU_PWR, MCU_PWR_PIN);
+      arming_led = FALSE;
     } else {
       off_cnt++;
     }
