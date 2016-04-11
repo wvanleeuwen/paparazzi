@@ -114,6 +114,22 @@
 #define SPI_SELECT_SLAVE2_PIN GPIO13
 
 /*
+ * RPM sensor
+ */
+#define RPM_TIMER           TIM4
+#define RCC_TIM_RPM         RCC_TIM4
+
+#define RPM_CHANNEL         TIM_IC1
+#define RPM_TIMER_INPUT     TIM_IC_IN_TI1
+#define RPM_IRQ             NVIC_TIM4_IRQ
+// Capture/Compare InteruptEnable and InterruptFlag
+#define RPM_CC_IE           TIM_DIER_CC1IE
+#define RPM_CC_IF           TIM_SR_CC1IF
+#define RPM_GPIO_PORT       GPIOB
+#define RPM_GPIO_PIN        GPIO6
+#define RPM_GPIO_AF         0
+
+/*
  * ADC
  */
 
