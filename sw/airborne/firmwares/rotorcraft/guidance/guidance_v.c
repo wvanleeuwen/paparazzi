@@ -331,6 +331,7 @@ void guidance_v_run(bool_t in_flight)
       } else
 #endif
         stabilization_cmd[COMMAND_THRUST] = guidance_v_delta_t;
+        Bound(stabilization_cmd[COMMAND_THRUST], 3840, 5760);
       break;
 
 #if GUIDANCE_V_MODE_MODULE_SETTING == GUIDANCE_V_MODE_MODULE
