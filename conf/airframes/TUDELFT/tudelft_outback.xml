@@ -38,6 +38,7 @@
       <module name="temp_adc"/>
       <module name="logger_sd_spi_direct"/>
       <module name="gps_ubx_ucenter"/>
+      <module name="rpm_sensor"/>
     </target>
 
     <!-- FBW (Flight by Wire) part of the board -->
@@ -144,7 +145,7 @@
 
 -->
 
-<!-- Pitch RODS white symmetric props: 56mm top links 65mm bottom links
+<!-- Pitch RODS white symmetric props: 56mm top links 65mm bottom links -->
 
   <heli_curves>
     <curve throttle="0,7000,7000" collective="0,2000,4000"/>

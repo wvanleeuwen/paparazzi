@@ -1,0 +1,15 @@
+<!DOCTYPE module SYSTEM "module.dtd">
+
+<module name="rpm_sensor" dir="sensors">
+  <doc>
+    <description>RPM sensor based on time difference between pulses</description>
+  </doc>
+  <header>
+    <file name="rpm_sensor.h"/>
+  </header>
+  <init fun="rpm_sensor_init()"/>
+  <makefile>
+    <file name="rpm_sensor.c"/>
+  </makefile>
+</module>
+
