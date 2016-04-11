@@ -115,11 +115,13 @@ void tim4_isr(void)
     uint32_t diff_time = now - rpm_last_pulse_time;
     rpm_last_pulse_time = now;
 
-    //rpm = diff_time / 1000000 + 1;
-    rpm++;
+    current++;
+    if(diff_time > 0)
+      rpm = (1000000 * 60) / (diff_time * 14);
+    else
+      rpm = 1;
   } else if ((TIM4_SR & TIM_SR_UIF) != 0) {
     timer_rollover_cnt += (1 << 16);
-    current++;
     timer_clear_flag(TIM4, TIM_SR_UIF);
   }
 }

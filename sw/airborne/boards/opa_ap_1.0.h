@@ -127,7 +127,7 @@
 #define RPM_CC_IF           TIM_SR_CC1IF
 #define RPM_GPIO_PORT       GPIOB
 #define RPM_GPIO_PIN        GPIO6
-#define RPM_GPIO_AF         0
+#define RPM_GPIO_AF         GPIO_AF2
 
 /*
  * ADC
