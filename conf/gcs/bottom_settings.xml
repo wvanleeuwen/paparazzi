@@ -25,6 +25,14 @@
           <property name="size" value="15."/>
           <property name="color" value="#00ff00"/>
         </papget>
+        <papget type="message_field" display="text" x="322" y="63">
+          <property name="scale" value="1."/>
+          <property name="field" value="MOTOR:rpm"/>
+          <property name="ac_id" value="6"/>
+          <property name="format" value="RPM %.0f"/>
+          <property name="size" value="15."/>
+          <property name="color" value="#00ff00"/>
+        </papget>
         <papget type="message_field" display="text" x="489" y="8">
           <property name="scale" value="0.1"/>
           <property name="field" value="FBW_STATUS:vsupply"/>

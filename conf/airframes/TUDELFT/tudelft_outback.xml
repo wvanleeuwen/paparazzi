@@ -38,7 +38,7 @@
       <module name="temp_adc"/>
       <module name="logger_sd_spi_direct"/>
       <module name="gps_ubx_ucenter"/>
-      <!--module name="rpm_sensor"/-->
+      <module name="rpm_sensor"/>
     </target>
 
     <!-- FBW (Flight by Wire) part of the board -->
@@ -251,11 +251,11 @@
   </section>
 
   <section name="GUIDANCE_V" prefix="GUIDANCE_V_">
-    <define name="HOVER_KP"    value="150"/>
-    <define name="HOVER_KD"    value="80"/>
-    <define name="HOVER_KI"    value="20"/>
-    <define name="NOMINAL_HOVER_THROTTLE" value="0.5"/>
-    <define name="ADAPT_THROTTLE_ENABLED" value="TRUE"/>
+    <define name="HOVER_KP"    value="75"/>
+    <define name="HOVER_KD"    value="40"/>
+    <define name="HOVER_KI"    value="0"/>
+    <define name="NOMINAL_HOVER_THROTTLE" value="0.51"/>
+    <define name="ADAPT_THROTTLE_ENABLED" value="FALSE"/>
   </section>
 
   <section name="GUIDANCE_H" prefix="GUIDANCE_H_">
