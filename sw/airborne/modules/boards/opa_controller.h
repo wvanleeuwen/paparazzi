@@ -26,6 +26,10 @@
 #ifndef OPA_CONTROLLER_H
 #define OPA_CONTROLLER_H
 
+#include "std.h"
+
+extern uint8_t opa_controller_disarm;
+
 extern void opa_controller_init(void);
 extern void opa_controller_periodic(void);
 

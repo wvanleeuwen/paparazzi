@@ -35,6 +35,9 @@
 static bool_t arming_led = FALSE;
 extern bool_t autopilot_motors_on;
 
+uint8_t opa_controller_disarm = 0;
+
+
 void opa_controller_init(void) {
   /* Setup E-Stop, Arming and On/Off button as input */
   gpio_setup_input(BTN_ESTOP, BTN_ESTOP_PIN);
@@ -71,6 +74,14 @@ void opa_controller_periodic(void) {
     RADIO_CONTROL_POWER_OFF(RADIO_CONTROL_POWER,RADIO_CONTROL_POWER_PIN);
     MCU_PWR_OFF(MCU_PWR, MCU_PWR_PIN);
     arming_led = FALSE;
+  }
+
+  /* AP soft disarm */
+  if ((opa_controller_disarm == 1)) {
+    MAIN_PWR_OFF(MAIN_PWR, MAIN_PWR_PIN);
+    BAL_PWR_OFF(BAL_PWR, BAL_PWR_PIN);
+    arming_led = FALSE;
+    opa_controller_disarm = 0;
   }
 
   /* Check On/Off button and disable if pressed for 3 seconds */

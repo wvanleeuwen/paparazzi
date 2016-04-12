@@ -28,12 +28,20 @@
 #include "mcu_periph/gpio.h"
 
 uint8_t opa_controller_ap_vision_power = 0;
+bool_t opa_controller_ap_ftd_disarm = 0;
+
+extern void opa_controller_ap_do_disarm(bool_t action) {
+  opa_controller_ap_ftd_disarm = action;
+}
+
 
 
 void opa_controller_ap_init() {
 
   /* Enable Vision Power Control: Default Power Off */
   opa_controller_ap_vision_power = 0;
+  opa_controller_ap_ftd_disarm = 0;
+
   gpio_setup_output(VISION_PWR, VISION_PWR_PIN);
   VISION_PWR_OFF(VISION_PWR, VISION_PWR_PIN);
 

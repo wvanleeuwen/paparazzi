@@ -26,9 +26,14 @@
 #ifndef OPA_CONTROLLER_AP_H
 #define OPA_CONTROLLER_AP_H
 
+#include "std.h"
 #include <inttypes.h>
 
 extern uint8_t opa_controller_ap_vision_power;
+extern bool_t opa_controller_ap_ftd_disarm;
+
+extern void opa_controller_ap_do_disarm(bool_t take);
+
 
 extern void opa_controller_ap_init(void);
 extern void opa_controller_ap_periodic(void);
