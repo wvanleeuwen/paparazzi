@@ -78,10 +78,10 @@
      <servo name="SW_RIGHTFRONT"  no="3" min="1880" neutral="1480" max="1080"/>
      <servo name="TAIL_LEFT"      no="4" min="1100" neutral="1500" max="1900"/>
      <servo name="TAIL_RIGHT"     no="5" min="1100" neutral="1500" max="1900"/>
-     <servo name="AIL_LEFTFRONT"  no="6" min="1100" neutral="1500" max="1900"/>
-     <servo name="AIL_LEFTBACK"   no="7" min="1100" neutral="1500" max="1900"/>
-     <servo name="AIL_RIGHTFRONT" no="8" min="1100" neutral="1500" max="1900"/>
-     <servo name="AIL_RIGHTBACK"  no="9" min="1100" neutral="1500" max="1900"/>
+     <servo name="AIL_LEFTLOW"    no="6" min="1100" neutral="1500" max="1900"/>
+     <servo name="AIL_RIGHTLOW"   no="7" min="1100" neutral="1500" max="1900"/>
+     <servo name="AIL_LEFTUP"     no="8" min="1100" neutral="1500" max="1900"/>
+     <servo name="AIL_RIGHTUP"    no="9" min="1100" neutral="1500" max="1900"/>
   </servos>
 
   <section name="RADIO">
@@ -104,11 +104,13 @@
     <axis name="PITCH"      failsafe_value="0"/>
     <axis name="YAW"        failsafe_value="0"/>
     <axis name="FMODE"      failsafe_value="0"/>
+    <axis name="MODE"       failsafe_value="-9600"/>
     <axis name="TH_HOLD"    failsafe_value="-9600"/>
   </commands>
 
   <auto_rc_commands>
     <set command="FMODE"    value="@FMODE"/>
+    <set command="MODE"    value="@MODE"/>
     <set command="TH_HOLD"  value="@TH_HOLD"/>
   </auto_rc_commands>
 
@@ -128,10 +130,10 @@
     <set servo="SW_RIGHTFRONT"  value="swashplate_mixing.commands[SW_RIGHTFRONT]"/>
     <set servo="TAIL_LEFT"      value="(((@TH_HOLD) > 4800)? (-@YAW - throttle_curve.throttle*0.5) : 0)"/>
     <set servo="TAIL_RIGHT"     value="(((@TH_HOLD) > 4800)? (-@YAW - throttle_curve.throttle*0.5) : 0)"/>
-    <set servo="AIL_LEFTFRONT"  value="0"/>
-    <set servo="AIL_LEFTBACK"   value="0"/>
-    <set servo="AIL_RIGHTFRONT" value="0"/>
-    <set servo="AIL_RIGHTBACK"  value="0"/>
+    <set servo="AIL_LEFTLOW"    value="((-4800 > @MODE)? (@PITCH - @ROLL) : 0)"/>
+    <set servo="AIL_RIGHTLOW"   value="((-4800 > @MODE)? (-@PITCH - @ROLL) : 0)"/>
+    <set servo="AIL_LEFTUP"     value="((-4800 > @MODE)? (@PITCH - @ROLL) : 0)"/>
+    <set servo="AIL_RIGHTUP"    value="((-4800 > @MODE)? (-@PITCH - @ROLL) : 0)"/>
   </command_laws>
 
 
@@ -252,7 +254,7 @@
   <section name="GUIDANCE_V" prefix="GUIDANCE_V_">
     <define name="HOVER_KP"    value="75"/>
     <define name="HOVER_KD"    value="40"/>
-    <define name="HOVER_KI"    value="0"/>
+    <define name="HOVER_KI"    value="6"/>
     <define name="NOMINAL_HOVER_THROTTLE" value="0.51"/>
     <define name="ADAPT_THROTTLE_ENABLED" value="FALSE"/>
   </section>
@@ -260,10 +262,10 @@
   <section name="GUIDANCE_H" prefix="GUIDANCE_H_">
     <define name="MAX_BANK" value="35" unit="deg"/>
     <define name="USE_SPEED_REF" value="TRUE"/>
-    <define name="PGAIN" value="50"/>
-    <define name="DGAIN" value="100"/>
-    <define name="AGAIN" value="70"/>
-    <define name="IGAIN" value="20"/>
+    <define name="PGAIN" value="20"/>
+    <define name="DGAIN" value="40"/>
+    <define name="AGAIN" value="30"/>
+    <define name="IGAIN" value="10"/>
   </section>
 
   <section name="AUTOPILOT">
