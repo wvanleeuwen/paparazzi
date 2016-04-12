@@ -71,5 +71,8 @@ STATIC_INLINE void handle_periodic_tasks(void);
 STATIC_INLINE void main_periodic(void);
 STATIC_INLINE void telemetry_periodic(void);
 
+bool radio_is_killed(void);
+bool mode_is_manual(void);
+
 
 #endif /* MAIN_H */

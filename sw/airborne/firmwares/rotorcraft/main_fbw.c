@@ -249,6 +249,15 @@ static void autopilot_on_rc_frame(void)
   intermcu_on_rc_frame(fbw_mode);
 }
 
+bool radio_is_killed(void) {
+  return radio_control.values[RADIO_TH_HOLD] < -4800;
+}
+
+bool mode_is_manual(void) {
+  return radio_control.values[RADIO_MODE] < -4800;
+}
+
+
 static void autopilot_on_ap_command(void)
 {
   if (fbw_mode != FBW_MODE_MANUAL) {
