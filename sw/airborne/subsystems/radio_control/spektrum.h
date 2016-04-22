@@ -27,12 +27,62 @@
 #ifndef RADIO_CONTROL_SPEKTRUM_H
 #define RADIO_CONTROL_SPEKTRUM_H
 
-/* implemented in arch/xxx/subsystems/radio_control/spektrum_arch.c */
-extern void radio_control_spektrum_try_bind(void);
+/*
+ * All Spektrum and JR 2.4 GHz transmitters
+ * have the same channel assignments.
+ */
 
-#include "subsystems/radio_control/spektrum_arch.h"
-/* implemented in arch/xxx/subsystems/radio_control/spektrum_arch.c */
+#define SPEKTRUM_NB_CHANNEL 12
+
+#ifndef RADIO_CONTROL_NB_CHANNEL
+#define RADIO_CONTROL_NB_CHANNEL 12
+#endif
+
+#if RADIO_CONTROL_NB_CHANNEL > 12
+#error "RADIO_CONTROL_NB_CHANNEL mustn't be higher than 12."
+#endif
+
+/* default channel assignments */
+#ifndef RADIO_THROTTLE
+#define RADIO_THROTTLE   0
+#endif
+#ifndef RADIO_ROLL
+#define RADIO_ROLL       1
+#endif
+#ifndef RADIO_PITCH
+#define RADIO_PITCH      2
+#endif
+#ifndef RADIO_YAW
+#define RADIO_YAW        3
+#endif
+#define RADIO_GEAR       4
+#define RADIO_FLAP       5
+#define RADIO_AUX1       5
+#define RADIO_AUX2       6
+#define RADIO_AUX3       7
+#define RADIO_AUX4       8
+#define RADIO_AUX5       9
+#define RADIO_AUX6       10
+#define RADIO_AUX7       11
+
+/* reverse some channels to suit Paparazzi conventions          */
+/* the maximum number of channels a Spektrum can transmit is 12 */
+#ifndef RADIO_CONTROL_SPEKTRUM_SIGNS
+#ifdef RADIO_CONTROL_SPEKTRUM_OLD_SIGNS
+#define RADIO_CONTROL_SPEKTRUM_SIGNS {1,-1,-1,-1,1,-1,1,1,1,1,1,1} // As most transmitters are sold
+#else
+#define RADIO_CONTROL_SPEKTRUM_SIGNS {1,1,1,1,1,1,1,1,1,1,1,1} // PPRZ sign convention
+#endif
+#endif
+
+/* really for a 9 channel transmitter
+   we would swap the order of these */
+#ifndef RADIO_MODE
+#define RADIO_MODE       RADIO_GEAR
+#endif
 
 #define RadioControlEvent(_received_frame_handler) RadioControlEventImp(_received_frame_handler)
+
+extern void RadioControlEventImp(void (*_received_frame_handler)(void));
 
 #endif /* RADIO_CONTROL_SPEKTRUM_H */
