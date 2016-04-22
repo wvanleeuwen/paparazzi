@@ -1,5 +1,6 @@
 /*
  * Copyright (C) Kevin van Hecke
+ *               2015 Freek van Tienen <freek.v.tienen@gmail.com>
  *
  * This file is part of paparazzi
  *
@@ -31,22 +32,14 @@
 
 #include "mcu_periph/gpio.h"
 
-void spektrum_soft_bind_init(void)
-{
-
-}
-
 void received_spektrum_soft_bind(void)
 {
-
-  //power cycle the spektrum
+  // Power cycle the radio's
   RADIO_CONTROL_POWER_OFF(RADIO_CONTROL_POWER, RADIO_CONTROL_POWER_PIN);
   sys_time_usleep(100000);
   RADIO_CONTROL_POWER_ON(RADIO_CONTROL_POWER, RADIO_CONTROL_POWER_PIN);
 
   //put to bind mode
   RADIO_CONTROL_BIND_IMPL_FUNC();    //basically  = radio_control_spektrum_try_bind()
-
   SpektrumUartInit();
-
 }

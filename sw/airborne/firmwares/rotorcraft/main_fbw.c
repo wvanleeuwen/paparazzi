@@ -28,8 +28,8 @@
 
 #include <inttypes.h>
 #include "mcu.h"
-#include "mcu_periph/sys_time.h"
 #include "led.h"
+#include "mcu_periph/sys_time.h"
 
 #include "subsystems/commands.h"
 #include "subsystems/actuators.h"
@@ -47,7 +47,6 @@
 #include "generated/modules.h"
 
 
-
 /** Fly by wire modes */
 typedef enum {FBW_MODE_MANUAL = 0, FBW_MODE_AUTO = 1, FBW_MODE_FAILSAFE = 2} fbw_mode_enum;
 fbw_mode_enum fbw_mode;
@@ -55,7 +54,7 @@ fbw_mode_enum fbw_mode;
 /* MODULES_FREQUENCY is defined in generated/modules.h
  * according to main_freq parameter set for modules in airframe file
  */
-//PRINT_CONFIG_VAR(MODULES_FREQUENCY)
+PRINT_CONFIG_VAR(MODULES_FREQUENCY)
 
 tid_t main_periodic_tid; ///< id for main_periodic() timer
 tid_t modules_tid;     ///< id for modules_periodic_task() timer
@@ -63,7 +62,7 @@ tid_t radio_control_tid; ///< id for radio_control_periodic_task() timer
 tid_t electrical_tid;    ///< id for electrical_periodic() timer
 tid_t telemetry_tid;     ///< id for telemetry_periodic() timer
 
-#ifndef SITL
+/** Real main function handling initialization, periodic- and event functions */
 int main(void)
 {
   main_init();
@@ -75,11 +74,11 @@ int main(void)
 
   return 0;
 }
-#endif /* SITL */
 
+/** Main initialization */
 STATIC_INLINE void main_init(void)
 {
-  // fbw_init
+  // Set startup mode to Failsafe
   fbw_mode = FBW_MODE_FAILSAFE;
 
   mcu_init();
@@ -100,7 +99,7 @@ STATIC_INLINE void main_init(void)
 
   intermcu_init();
 
-  // register the timers for the periodic functions
+  // Register the timers for the periodic functions
   main_periodic_tid = sys_time_register_timer((1. / PERIODIC_FREQUENCY), NULL);
   modules_tid = sys_time_register_timer(1. / MODULES_FREQUENCY, NULL);
   radio_control_tid = sys_time_register_timer((1. / 60.), NULL);
@@ -114,13 +113,10 @@ STATIC_INLINE void main_init(void)
 
 STATIC_INLINE void handle_periodic_tasks(void)
 {
-
-
   if (sys_time_check_and_ack_timer(main_periodic_tid)) {
     main_periodic();
   }
   if (sys_time_check_and_ack_timer(modules_tid)) {
-
     modules_periodic_task();
   }
   if (sys_time_check_and_ack_timer(radio_control_tid)) {
@@ -134,47 +130,59 @@ STATIC_INLINE void handle_periodic_tasks(void)
   }
 }
 
-STATIC_INLINE void telemetry_periodic(void)  // 60Hz
+STATIC_INLINE void telemetry_periodic(void)
 {
   /* Send status to AP */
   intermcu_send_status(fbw_mode);
 
   /* Handle Modems */
   // TODO
-  // Read Telemetry
 }
 
+/* Checks the different safety cases and sets the correct FBW mode */
+STATIC_INLINE void fbw_safety_check(void)
+{
+  /* Safety logic */
+  bool ap_lost = (intermcu.status == INTERMCU_LOST);
+  bool rc_lost = (radio_control.status == RC_REALLY_LOST);
+
+  // Both the RC and AP are lost
+  if (rc_lost && ap_lost) {
+      fbw_mode = FBW_MODE_FAILSAFE;
+  }
+  // RC is valid but lost AP
+  else if (!rc_lost && ap_lost) {
+    // Only crucial when AP was in control
+    if (fbw_mode == FBW_MODE_AUTO) {
+      fbw_mode = AP_LOST_FBW_MODE;
+    }
+  }
+  // RC is lost but AP is valid
+  else if (rc_lost && !ap_lost) {
+
+    // Lost RC while flying in manual trough FBW
+    if (fbw_mode == FBW_MODE_MANUAL) {
+      fbw_mode = RC_LOST_FBW_MODE;
+    }
+    // Allways keep failsafe when RC is lost
+    else if (fbw_mode == FBW_MODE_FAILSAFE) {
+        // No change: failsafe stays failsafe
+    }
+    // Lost RC while in working Auto mode
+    else {
+      fbw_mode = RC_LOST_IN_AUTO_FBW_MODE;
+    }
+  }
+}
+
+/* Sets the actual actuator commands */
 STATIC_INLINE void main_periodic(void)
 {
   /* Inter-MCU watchdog */
   intermcu_periodic();
 
-  /* Safety logic */
-  bool ap_lost = (intermcu.status == INTERMCU_LOST);
-  bool rc_lost = (radio_control.status == RC_REALLY_LOST);
-  if (rc_lost) {
-    if (ap_lost) {
-      // Both are lost
-      fbw_mode = FBW_MODE_FAILSAFE;
-    } else {
-      if (fbw_mode == FBW_MODE_MANUAL) {
-        fbw_mode = RC_LOST_FBW_MODE;
-      } else {
-        if (fbw_mode == FBW_MODE_FAILSAFE) {
-          // No change: failsafe stays failsafe
-        } else {
-          // Lost RC while in working Auto mode
-          fbw_mode = RC_LOST_IN_AUTO_FBW_MODE;
-        }
-      }
-    }
-  } else { // rc_is_good
-    if (fbw_mode == FBW_MODE_AUTO) {
-      if (ap_lost) {
-        fbw_mode = AP_LOST_FBW_MODE;
-      }
-    }
-  }
+  /* Safety check and set FBW mode */
+  fbw_safety_check();
 
 #ifdef BOARD_PX4IO
   //due to a baud rate issue on PX4, for a few seconds the baud is 1500000 however this may result in package loss, causing the motors to spin at random
@@ -190,25 +198,21 @@ STATIC_INLINE void main_periodic(void)
 #endif
 
   // TODO make module out of led blink?
-  /* set failsafe commands     */
+#ifdef FBW_MODE_LED
+    static uint16_t dv = 0;
+    intermcu_blink_fbw_led(dv++);
+#endif // FWB_MODE_LED
+
+  /* Set failsafe commands */
   if (fbw_mode == FBW_MODE_FAILSAFE) {
     autopilot_motors_on = false;
     SetCommands(commands_failsafe);
-
-#ifdef FBW_MODE_LED
-    static uint16_t dv = 0;
-    if (!(dv++ % (PERIODIC_FREQUENCY / 20))) { LED_TOGGLE(FBW_MODE_LED);}
-  } else if (fbw_mode == FBW_MODE_MANUAL) {
-    if (!(dv++ % (PERIODIC_FREQUENCY))) { LED_TOGGLE(FBW_MODE_LED);}
-  } else if (fbw_mode == FBW_MODE_AUTO) {
-    intermcu_blink_fbw_led(dv++);
-#endif // FWB_MODE_LED
   }
 
-  /* set actuators     */
+  /* Set actuators */
   SetActuatorsFromCommands(commands, autopilot_mode);
 
-  /* blink     */
+  /* Periodic blinking */
   RunOnceEvery(10, LED_PERIODIC());
 }
 
@@ -216,7 +220,8 @@ STATIC_INLINE void main_periodic(void)
 ///////////////////////
 // Event
 
-static void autopilot_on_rc_frame(void)
+/** Callback when we received an RC frame */
+static void fbw_on_rc_frame(void)
 {
   /* get autopilot fbw mode as set by RADIO_MODE 3-way switch */
   if (radio_control.values[RADIO_FBW_MODE] < (MIN_PPRZ / 2)) {
@@ -228,13 +233,13 @@ static void autopilot_on_rc_frame(void)
     fbw_mode = FBW_MODE_AUTO;
   }
 
-  /* Trying to switch to auto when AP is lost */
+  /* Failsafe check if intermcu is lost while AP was in control */
   if ((intermcu.status == INTERMCU_LOST) &&
       (fbw_mode == FBW_MODE_AUTO)) {
     fbw_mode = AP_LOST_FBW_MODE;
   }
 
-  /* if manual */
+  /* If the FBW is in control */
   if (fbw_mode == FBW_MODE_MANUAL) {
     autopilot_motors_on = true;
     SetCommands(commands_failsafe);
@@ -249,37 +254,26 @@ static void autopilot_on_rc_frame(void)
   intermcu_on_rc_frame(fbw_mode);
 }
 
-bool radio_is_killed(void) {
-  return radio_control.values[RADIO_TH_HOLD] < -4800;
-}
-
-bool mode_is_manual(void) {
-  return radio_control.values[RADIO_MODE] < -4800;
-}
-
-
-static void autopilot_on_ap_command(void)
+/** Callback when receive commands from the AP */
+static void fbw_on_ap_command(void)
 {
-  if (fbw_mode != FBW_MODE_MANUAL) {
+  // Only set the command from AP when we are in AUTO mode
+  if (fbw_mode == FBW_MODE_AUTO) {
     SetCommands(intermcu_commands);
-  } else if (fbw_mode == FBW_MODE_AUTO) {
-    autopilot_motors_on = true;
-  } else {
-    autopilot_motors_on = false;
   }
 }
 
 STATIC_INLINE void main_event(void)
 {
-  /* event functions for mcu peripherals: i2c, usb_serial.. */
+  /* Event functions for mcu peripherals: i2c, usb_serial.. */
   mcu_event();
 
-  // Handle RC
-  RadioControlEvent(autopilot_on_rc_frame);
+  /* Handle RC */
+  RadioControlEvent(fbw_on_rc_frame);
 
-  // InterMCU
-  InterMcuEvent(autopilot_on_ap_command);
+  /* InterMCU (gives autopilot commands as output) */
+  InterMcuEvent(fbw_on_ap_command);
 
-  //Modules
+  /* FBW modules */
   modules_event_task();
 }

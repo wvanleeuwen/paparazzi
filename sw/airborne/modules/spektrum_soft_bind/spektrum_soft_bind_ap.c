@@ -27,7 +27,6 @@
 #include "subsystems/intermcu/intermcu_ap.h"
 #include "led.h"
 
-void spektrum_soft_bind_init(void) {}
 
 uint8_t bind_soft_value;
 void spektrum_soft_bind_click(uint8_t val __attribute__((unused)))
