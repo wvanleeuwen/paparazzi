@@ -204,12 +204,12 @@
     <define name="DEADBAND_R" value="200"/>
 
     <!-- feedback -->
-    <define name="GAIN_P" value="400"/>
-    <define name="GAIN_Q" value="400"/>
-    <define name="GAIN_R" value="700"/>
+    <define name="GAIN_P" value="500"/>
+    <define name="GAIN_Q" value="500"/>
+    <define name="GAIN_R" value="850"/>
 
-    <define name="IGAIN_P" value="75"/>
-    <define name="IGAIN_Q" value="75"/>
+    <define name="IGAIN_P" value="0"/>
+    <define name="IGAIN_Q" value="0"/>
     <define name="IGAIN_R" value="50"/>
   </section>
 
