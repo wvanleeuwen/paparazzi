@@ -238,7 +238,7 @@ void video_thread_init(void)
   // Initialize the V4L2 subdevice if needed
   if (vid->subdev_name != NULL) {
     // FIXME! add subdev format to config, only needed on bebop front camera so far
-    if (!v4l2_init_subdev(vid->subdev_name, 0, 0, V4L2_MBUS_FMT_SGBRG10_1X10, vid->w, vid->h)) {
+    if (!v4l2_init_subdev(vid->subdev_name, 0, 0, vid->subdev_format, vid->sensor_w, vid->sensor_h)) {
       printf("[video_thread] Could not initialize the %s subdevice.\n", vid->subdev_name);
       return;
     }
