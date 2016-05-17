@@ -494,19 +494,31 @@ static void mt9f002_parallel_stage2(int fd)
 static void mt9f002_set_pll(int fd)
 {
   // Precomputed values to go from InputCLK of (26/2)MHz to 96MHz
-  write_reg(fd, MT9F002_VT_PIX_CLK_DIV , pll->vt_pix_clk_div, 2);
-  write_reg(fd, MT9F002_VT_SYS_CLK_DIV , pll->vt_sys_clk_div, 2);
-  write_reg(fd, MT9F002_PRE_PLL_CLK_DIV, pll->pre_pll_clk_div, 2);
-  write_reg(fd, MT9F002_PLL_MULTIPLIER , pll->pll_multiplier, 2);
-  write_reg(fd, MT9F002_OP_PIX_CLK_DIV , pll->op_pix_clk_div, 2);
-  write_reg(fd, MT9F002_OP_SYS_CLK_DIV , pll->op_sys_clk_div, 2);
+  //vt_pix_clk_div: 0x0007
+  //vt_sys_clk_div: 0x0001
+  //pre_pll_clk_div: 0x0001
+  //pll_multiplier: 0x003B
+  //op_pix_clk_div: 0x0008
+  //op_sys_clk_div: 0x0001
+  //shift_vt_pix_clk_div: 0x0001
+  //rowSpeed_2_0: 0x01
+  //row_speed_10_8: 0x01
+  //vt_pix_clk: 219.142853
+  //op_pix_clk: 95.875000
+
+  write_reg(fd, MT9F002_VT_PIX_CLK_DIV , 0x0007, 2);
+  write_reg(fd, MT9F002_VT_SYS_CLK_DIV , 0x0001, 2);
+  write_reg(fd, MT9F002_PRE_PLL_CLK_DIV, 0x0001, 2);
+  write_reg(fd, MT9F002_PLL_MULTIPLIER , 0x003B, 2);
+  write_reg(fd, MT9F002_OP_PIX_CLK_DIV , 0x0008, 2);
+  write_reg(fd, MT9F002_OP_SYS_CLK_DIV , 0x0001, 2);
 
   uint16_t smia = read_reg(fd, MT9F002_SMIA_TEST, 2);
-  write_reg(fd, MT9F002_SMIA_TEST, (smia & 0xFFBF) | ((pll->shift_vt_pix_clk_div & 0x01)<<6), 2);
+  write_reg(fd, MT9F002_SMIA_TEST, (smia & 0xFFBF) | (0x01<<6), 2);
 
   uint16_t row_speed = read_reg(fd, MT9F002_ROW_SPEED, 2);
-  row_speed = (row_speed & 0xFFF8) | (pll->rowSpeed_2_0 & 0x07);
-  row_speed = (row_speed & 0xF8FF) | ((pll->row_speed_10_8 & 0x07)<<8);
+  row_speed = (row_speed & 0xFFF8) | (0x01 & 0x07);
+  row_speed = (row_speed & 0xF8FF) | ((0x01 & 0x07)<<8);
   row_speed = (row_speed&(~0x70)) | (0x2<<4); // from ASIC team : change opclk_delay
   write_reg(fd, MT9F002_ROW_SPEED, row_speed, 2);
 }
