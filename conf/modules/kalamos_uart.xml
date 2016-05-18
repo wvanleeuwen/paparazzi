@@ -1,0 +1,30 @@
+<!DOCTYPE module SYSTEM "module.dtd">
+
+<module name="kalamos_uart" dir="sensors">
+  <doc>
+    <description>Parrot Kalamos Nvidia tk1 stereo vision uart (RS232) communication</description>
+    <configure name="KALAMOS_PORT" value="UART5" description="select which uart it is connected to"/>
+    <configure name="KALAMOS_BAUD" value="B115200" description="set the baudrate of the uart"/>
+  </doc>
+  <header>
+    <file name="kalamos_uart.h"/>
+  </header>
+  <init fun="kalamos_init()"/>
+  <periodic fun="kalamos_periodic()" freq="60." autorun="TRUE"/>
+  <event fun="kalamos_event()"/>
+  <makefile>
+    <!-- Configure default UART port and baudrate -->
+    <configure name="KALAMOS_PORT" default="UART3" case="upper|lower"/>
+    <configure name="KALAMOS_BAUD" default="B115200"/>
+
+    <!-- Enable UART and set baudrate -->
+    <define name="USE_$(KALAMOS_PORT_UPPER)"/>
+    <define name="$(KALAMOS_PORT_UPPER)_BAUD" value="$(KALAMOS_BAUD)"/>
+    <define name="KALAMOS_PORT" value="$(KALAMOS_PORT_LOWER)"/>
+
+    <!-- Sources and PPRZLink for transport -->
+    <file name="kalamos_uart.c"/>
+    <file name="pprz_transport.c" dir="pprzlink/src"/>
+  </makefile>
+</module>
+
