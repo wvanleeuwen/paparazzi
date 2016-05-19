@@ -27,20 +27,47 @@
 #ifndef MT9F002H
 #define MT9F002H
 
+#include "std.h"
+#include "mcu_periph/i2c.h"
+
 /* Interface types for the MT9F002 connection */
 enum mt9f002_interface {
   MT9F002_MIPI,     ///< MIPI type connection
   MT9F002_HiSPi,    ///< HiSPi type connection
   MT9F002_PARALLEL  ///< Parallel type connection
-}
+};
 
 /* Main configuration structure */
 struct mt9f002_t {
   enum mt9f002_interface interface;   ///< Interface used to connect
+  float input_clk_freq;               ///< Input clock frequency
+  uint16_t vt_pix_clk_div;            ///< Fixed PLL config from calculator tool
+  uint16_t vt_sys_clk_div;            ///< Fixed PLL config from calculator tool
+  uint16_t pre_pll_clk_div;           ///< Fixed PLL config from calculator tool
+  uint16_t pll_multiplier;            ///< Fixed PLL config from calculator tool
+  uint16_t op_pix_clk_div;            ///< Fixed PLL config from calculator tool
+  uint16_t op_sys_clk_div;            ///< Fixed PLL config from calculator tool
+  uint8_t shift_vt_pix_clk_div;       ///< Fixed PLL config from calculator tool
+  uint8_t rowSpeed_2_0;               ///< Fixed PLL config from calculator tool
+  uint8_t row_speed_10_8;             ///< Fixed PLL config from calculator tool
+  float vt_pix_clk;                   ///< Calculated based on PLL
+  float op_pix_clk;                   ///< Calculated based on PLL
+  uint16_t line_length;               ///< Calculated line length of blanking
+  uint16_t frame_length;              ///< Calculated frame length of blanking
+
+  float target_fps;                   ///< FPS wanted
+  float real_fps;                     ///< Real calculated FPS
+  float target_exposure;              ///< Target exposure time in ms
+  float real_exposure;                ///< Real exposure time in ms
+
+  float gain_green1;                  ///< Gain for the GreenR pixels [1.5 -> 63.50]
+  float gain_blue;                    ///< Gain for the Blue pixels [1.5 -> 63.50]
+  float gain_red;                     ///< Gain for the Red pixels [1.5 -> 63.50]
+  float gain_green2;                  ///< Gain for the GreenB pixels [1.5 -> 63.50]
 
   uint16_t output_width;              ///< Output width
   uint16_t output_height;             ///< Output height
-  float output_scale;                 ///< Output scale
+  float output_scaler;                ///< Output scale
   uint16_t scaled_width;              ///< Width after corrected scaling
   uint16_t scaled_height;             ///< Height after corrected scaling
   uint16_t offset_x;                  ///< Offset from left in pixels

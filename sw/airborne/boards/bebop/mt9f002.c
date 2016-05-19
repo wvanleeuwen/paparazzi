@@ -27,6 +27,7 @@
 #include "std.h"
 #include "mt9f002.h"
 #include "mt9f002_regs.h"
+#include "math/pprz_algebra_int.h"
 
 #include <stdio.h>
 #include <unistd.h>
@@ -34,9 +35,11 @@
 #include <sys/ioctl.h>
 #include <linux/i2c-dev.h>
 
-I2C_BUF_LEN
+#define MAX(x,y) (((x) > (y)) ? (x) : (y))
 
-/* Write multiple bytes to a single register */
+/**
+ * Write multiple bytes to a single register
+ */
 static void write_reg(struct mt9f002_t *mt, uint16_t addr, uint32_t val, uint8_t len)
 {
   mt->i2c_trans.buf[0] = addr >> 8;
@@ -64,7 +67,9 @@ static void write_reg(struct mt9f002_t *mt, uint16_t addr, uint32_t val, uint8_t
   i2c_transmit(mt->i2c_periph, &mt->i2c_trans, mt->i2c_trans.slave_addr, len + 2);
 }
 
-/* Read multiple bytes from a register */
+/**
+ * Read multiple bytes from a register
+ */
 static uint32_t read_reg(struct mt9f002_t *mt, uint16_t addr, uint8_t len)
 {
   uint32_t ret = 0;
@@ -81,7 +86,9 @@ static uint32_t read_reg(struct mt9f002_t *mt, uint16_t addr, uint8_t len)
   return ret;
 }
 
-/* Configure stage 1 for both MiPi and HiSPi connection */
+/**
+ * Configure stage 1 for both MiPi and HiSPi connection
+ */
 static void mt9f002_mipi_stage1(struct mt9f002_t *mt)
 {
   write_reg(mt, MT9F002_RESET_REGISTER, 0x0118, 2);
@@ -333,16 +340,31 @@ static void mt9f002_mipi_stage1(struct mt9f002_t *mt)
   write_reg(mt, MT9F002_MFR_3EE6, 0x0000, 2);
   write_reg(mt, MT9F002_MFR_3ED8, 0xE0E0, 2);
   write_reg(mt, MT9F002_MFR_3EE8, 0x0001, 2);
-  write_reg(mt, MT9F002_MFR_3064, 0x0005, 2);
+  write_reg(mt, MT9F002_SMIA_TEST, 0x0005, 2);
 }
 
-/* Configure stage 2 for both MiPi and HiSPi connection */
+/**
+ * Configure stage 2 for both MiPi and HiSPi connection
+ */
 static void mt9f002_mipi_stage2(struct mt9f002_t *mt)
 {
   write_reg(mt, MT9F002_SMIA_TEST, 0x0045, 2);
 }
 
-/* Configure stage 1 for parallel connection */
+/**
+ * Configure stage 3 for both MiPi and HiSPi connection
+ */
+static void mt9f002_mipi_stage3(struct mt9f002_t *mt)
+{
+  write_reg(mt, MT9F002_EXTRA_DELAY      , 0x0000, 2);
+  write_reg(mt, MT9F002_RESET_REGISTER   , 0x0118, 2);
+  write_reg(mt, MT9F002_MFR_3EDC, 0x68CF, 2);
+  write_reg(mt, MT9F002_MFR_3EE2, 0xE363, 2);
+}
+
+/**
+ * Configure stage 1 for parallel connection
+ */
 static void mt9f002_parallel_stage1(struct mt9f002_t *mt)
 {
   write_reg(mt, MT9F002_RESET_REGISTER , 0x0010, 2);
@@ -437,79 +459,80 @@ static void mt9f002_parallel_stage1(struct mt9f002_t *mt)
   write_reg(mt, MT9F002_DATAPATH_SELECT, 0xD880, 2);
 }
 
-/* Configure stage 2 for parallel connection */
+/**
+ * Configure stage 2 for parallel connection
+ */
 static void mt9f002_parallel_stage2(struct mt9f002_t *mt)
 {
   write_reg(mt, MT9F002_ANALOG_CONTROL4, 0x8000, 2);
   write_reg(mt, MT9F002_READ_MODE, 0x0041, 2);
 
-  write_reg(mt, READ_MODE              , 0x04C3, 2);
-  write_reg(mt, READ_MODE              , 0x04C3, 2);
-  write_reg(mt, ANALOG_CONTROL5        , 0x0000, 2);
-  write_reg(mt, ANALOG_CONTROL5        , 0x0000, 2);
-  write_reg(mt, ANALOG_CONTROL5        , 0x0000, 2);
-  write_reg(mt, ANALOG_CONTROL5        , 0x0000, 2);
-  write_reg(mt, DAC_LD_28_29           , 0x0047, 2);
-  write_reg(mt, COLUMN_CORRECTION      , 0xB080, 2);
-  write_reg(mt, COLUMN_CORRECTION      , 0xB100, 2);
-  write_reg(mt, DARK_CONTROL3          , 0x0020, 2);
-  write_reg(mt, DAC_LD_24_25           , 0x6349, 2);
-  write_reg(mt, ANALOG_CONTROL7        , 0x800A, 2);
-  write_reg(mt, RESET_REGISTER         , 0x90C8, 2);
-  write_reg(mt, CTX_CONTROL_REG        , 0x8005, 2);
-  write_reg(mt, ANALOG_CONTROL7        , 0x800A, 2);
-  write_reg(mt, DAC_LD_28_29           , 0x0047, 2);
-  write_reg(mt, DAC_LD_30_31           , 0x15F0, 2);
-  write_reg(mt, DAC_LD_30_31           , 0x15F0, 2);
-  write_reg(mt, DAC_LD_30_31           , 0x15F0, 2);
-  write_reg(mt, DAC_LD_28_29           , 0x0047, 2);
-  write_reg(mt, DAC_LD_28_29           , 0x0047, 2);
-  write_reg(mt, RESET_REGISTER         , 0x10C8, 2);
-  //write_reg(mt, RESET_REGISTER         , 0x14C8, 2); // reset bad frame
-  write_reg(mt, COARSE_INTEGRATION_TIME, 0x08C3, 2);
-  write_reg(mt, DIGITAL_TEST           , 0x0000, 2);
-  //write_reg(mt, DATAPATH_SELECT        , 0xd881, 2); // permanent line valid
-  write_reg(mt, DATAPATH_SELECT        , 0xd880, 2);
-  write_reg(mt, READ_MODE              , 0x0041, 2);
-  write_reg(mt, X_ODD_INC              , 0x0001, 2);
-  write_reg(mt, Y_ODD_INC              , 0x0001, 2);
-  write_reg(mt, MASK_CORRUPTED_FRAME   , 0x0001, 2); // 0 output corrupted frame, 1 mask them
+  write_reg(mt, MT9F002_READ_MODE              , 0x04C3, 2);
+  write_reg(mt, MT9F002_READ_MODE              , 0x04C3, 2);
+  write_reg(mt, MT9F002_ANALOG_CONTROL5        , 0x0000, 2);
+  write_reg(mt, MT9F002_ANALOG_CONTROL5        , 0x0000, 2);
+  write_reg(mt, MT9F002_ANALOG_CONTROL5        , 0x0000, 2);
+  write_reg(mt, MT9F002_ANALOG_CONTROL5        , 0x0000, 2);
+  write_reg(mt, MT9F002_DAC_LD_28_29           , 0x0047, 2);
+  write_reg(mt, MT9F002_COLUMN_CORRECTION      , 0xB080, 2);
+  write_reg(mt, MT9F002_COLUMN_CORRECTION      , 0xB100, 2);
+  write_reg(mt, MT9F002_DARK_CONTROL3          , 0x0020, 2);
+  write_reg(mt, MT9F002_DAC_LD_24_25           , 0x6349, 2);
+  write_reg(mt, MT9F002_ANALOG_CONTROL7        , 0x800A, 2);
+  write_reg(mt, MT9F002_RESET_REGISTER         , 0x90C8, 2);
+  write_reg(mt, MT9F002_CTX_CONTROL_REG        , 0x8005, 2);
+  write_reg(mt, MT9F002_ANALOG_CONTROL7        , 0x800A, 2);
+  write_reg(mt, MT9F002_DAC_LD_28_29           , 0x0047, 2);
+  write_reg(mt, MT9F002_DAC_LD_30_31           , 0x15F0, 2);
+  write_reg(mt, MT9F002_DAC_LD_30_31           , 0x15F0, 2);
+  write_reg(mt, MT9F002_DAC_LD_30_31           , 0x15F0, 2);
+  write_reg(mt, MT9F002_DAC_LD_28_29           , 0x0047, 2);
+  write_reg(mt, MT9F002_DAC_LD_28_29           , 0x0047, 2);
+  write_reg(mt, MT9F002_RESET_REGISTER         , 0x10C8, 2);
+  //write_reg(mt, MT9F002_RESET_REGISTER         , 0x14C8, 2); // reset bad frame
+  write_reg(mt, MT9F002_COARSE_INTEGRATION_TIME, 0x08C3, 2);
+  write_reg(mt, MT9F002_DIGITAL_TEST           , 0x0000, 2);
+  //write_reg(mt, MT9F002_DATAPATH_SELECT        , 0xd881, 2); // permanent line valid
+  write_reg(mt, MT9F002_DATAPATH_SELECT        , 0xd880, 2);
+  write_reg(mt, MT9F002_READ_MODE              , 0x0041, 2);
+  write_reg(mt, MT9F002_X_ODD_INC              , 0x0001, 2);
+  write_reg(mt, MT9F002_Y_ODD_INC              , 0x0001, 2);
+  write_reg(mt, MT9F002_MASK_CORRUPTED_FRAMES  , 0x0001, 1); // 0 output corrupted frame, 1 mask them
 }
 
-/* Set the PLL registers based on config */
+/**
+ * Set the PLL registers based on config
+ */
 static void mt9f002_set_pll(struct mt9f002_t *mt)
 {
-  // Precomputed values to go from InputCLK of (26/2)MHz to 96MHz
-  //vt_pix_clk_div: 7
-  //vt_sys_clk_div: 1
-  //pre_pll_clk_div: 1
-  //pll_multiplier: 59
-  //op_pix_clk_div: 8
-  //op_sys_clk_div: 1
-  //shift_vt_pix_clk_div: 1
-  //rowSpeed_2_0: 1
-  //row_speed_10_8: 1
-  //vt_pix_clk: 219.142853
-  //op_pix_clk: 95.875000
-
-  write_reg(mt, MT9F002_VT_PIX_CLK_DIV , 7, 2);
-  write_reg(mt, MT9F002_VT_SYS_CLK_DIV , 1, 2);
-  write_reg(mt, MT9F002_PRE_PLL_CLK_DIV, 1, 2);
-  write_reg(mt, MT9F002_PLL_MULTIPLIER , 59, 2);
-  write_reg(mt, MT9F002_OP_PIX_CLK_DIV , 8, 2);
-  write_reg(mt, MT9F002_OP_SYS_CLK_DIV , 1, 2);
+  // Update registers
+  write_reg(mt, MT9F002_VT_PIX_CLK_DIV , mt->vt_pix_clk_div, 2);
+  write_reg(mt, MT9F002_VT_SYS_CLK_DIV , mt->vt_sys_clk_div, 2);
+  write_reg(mt, MT9F002_PRE_PLL_CLK_DIV, mt->pre_pll_clk_div, 2);
+  write_reg(mt, MT9F002_PLL_MULTIPLIER , mt->pll_multiplier, 2);
+  write_reg(mt, MT9F002_OP_PIX_CLK_DIV , mt->op_pix_clk_div, 2);
+  write_reg(mt, MT9F002_OP_SYS_CLK_DIV , mt->op_sys_clk_div, 2);
 
   uint16_t smia = read_reg(mt, MT9F002_SMIA_TEST, 2);
-  write_reg(mt, MT9F002_SMIA_TEST, (smia & 0xFFBF) | (0x01<<6), 2);
+  write_reg(mt, MT9F002_SMIA_TEST, (smia & 0xFFBF) | (mt->shift_vt_pix_clk_div<<6), 2); // shift_vt_pix_clk_div
 
   uint16_t row_speed = read_reg(mt, MT9F002_ROW_SPEED, 2);
-  row_speed = (row_speed & 0xFFF8) | (1 & 0x07); // rowSpeed_2_0
-  row_speed = (row_speed & 0xF8FF) | ((1 & 0x07)<<8); // row_speed_10_8
+  row_speed = (row_speed & 0xFFF8) | (mt->rowSpeed_2_0 & 0x07); // rowSpeed_2_0
+  row_speed = (row_speed & 0xF8FF) | ((mt->row_speed_10_8 & 0x07)<<8); // row_speed_10_8
   row_speed = (row_speed&(~0x70)) | (0x2<<4); // Change opclk_delay
   write_reg(mt, MT9F002_ROW_SPEED, row_speed, 2);
+
+  // Compute clocks
+  mt->vt_pix_clk = mt->input_clk_freq * (float)mt->pll_multiplier * (float)(1+mt->shift_vt_pix_clk_div)
+            /((float)mt->pre_pll_clk_div * (float)mt->vt_sys_clk_div * (float)mt->vt_pix_clk_div);
+  mt->op_pix_clk = mt->input_clk_freq * (float)mt->pll_multiplier
+       /((float)mt->pre_pll_clk_div * (float)mt->op_sys_clk_div * (float)mt->op_pix_clk_div);
 }
 
-/* Set the blanking configuration */
+/**
+ *Set the blanking configuration
+ * Blanking of the MT9F002 depends on the target FPS
+ */
 static void mt9f002_set_blanking(struct mt9f002_t *mt)
 {
   /* Read some config values in order to calculate blanking configuration */
@@ -520,29 +543,214 @@ static void mt9f002_set_blanking(struct mt9f002_t *mt)
 
   /* Calculate minimum line length */
   float subsampling_factor = (float)(1 + x_odd_inc) / 2.0f; // See page 52
-  uint32_t minimum_line_length = MAX(min_line_length_pck, mt->scaled_width/subsampling_factor + min_line_blanking_pck); // EQ 9
-  minimum_line_length = MAX(minimum_line_length, (mt->scaled_width-1 + x_odd_inc) / subsampling_factor/2 + min_line_blanking_pck);
+  uint16_t min_line_length = MAX(min_line_length_pck, mt->scaled_width/subsampling_factor + min_line_blanking_pck); // EQ 9
+  min_line_length = MAX(min_line_length, (mt->scaled_width-1 + x_odd_inc) / subsampling_factor/2 + min_line_blanking_pck);
 
   if (mt->interface == MT9F002_MIPI ||
       mt->interface == MT9F002_HiSPi) {
-    minimum_line_length = MAX(minimum_line_length, ((uint32_t)((float)mt->scaled_width * 219.142853 / 95.875000)/2) + 0x005E); // 2 lanes, pll clocks
+    min_line_length = MAX(min_line_length, ((uint16_t)((float)mt->scaled_width * mt->vt_pix_clk / mt->op_pix_clk)/2) + 0x005E); // 2 lanes, pll clocks
   }
   else {
-    minimum_line_length = MAX(minimum_line_length, ((uint32_t)((float)mt->scaled_width * 219.142853 / 95.875000)) + 0x005E); // pll clocks
+    min_line_length = MAX(min_line_length, ((uint16_t)((float)mt->scaled_width * mt->vt_pix_clk / mt->op_pix_clk)) + 0x005E); // pll clocks
   }
 
-  /* Do some magic to get it to work with P7 ISP */
-  uint32_t clkRatio_num = 16; // op_sys_clk_div * op_pix_clk_div * row_speed_10_8 * (1 + shift_vt_pix_clk_div)
-  uint32_t clkRatio_den = 7; // vt_sys_clk_div * vt_pix_clk_div
+  /* Do some magic to get it to work with P7 ISP (with horizontal blanking) */
+  uint32_t clkRatio_num = mt->op_sys_clk_div * mt->op_pix_clk_div * mt->row_speed_10_8 * (1 + mt->shift_vt_pix_clk_div);
+  uint32_t clkRatio_den = mt->vt_sys_clk_div * mt->vt_pix_clk_div;
 
-  uint32_t minHBlkStep = clkRatio_num*2; // Because denumerator is not even
-  uint32_t fpgaCorrection = (minimum_line_length % (minHBlkStep));
-  if (fpgaCorrection) {
-    minimum_line_length += minHBlkStep - fpgaCorrection;
+  /* Divide by the GCD to find smallest ratio */
+  uint32_t clkRatio_gcd = int32_gcd(clkRatio_num, clkRatio_den);
+  clkRatio_num = clkRatio_num / clkRatio_gcd;
+  clkRatio_den = clkRatio_den / clkRatio_gcd;
+
+  /* Calculate minimum horizontal blanking, since fpga line_length must be divideable by 2 */
+  uint32_t min_horizontal_blanking = clkRatio_num;
+  if((min_horizontal_blanking % 2) != 0) {
+    min_horizontal_blanking = 2 * clkRatio_num;
+  }
+
+  /* Fix fpga correction based on min horizontal blanking */
+  if ((min_line_length % min_horizontal_blanking) != 0) {
+    min_line_length += min_horizontal_blanking - (min_line_length % min_horizontal_blanking);
   }
 
   /* Calculate minimum frame length lines */
-  uint32_t minimum_frame_length_lines = (ctx->sensorRes.height)/subsampling_factor + blanking->min_frame_blanking_lines; // (EQ 10)
+  uint16_t min_frame_length = (mt->scaled_height) / subsampling_factor + min_frame_blanking_lines; // (EQ 10)
+
+  /* Calculate FPS we get using these minimums (Maximum FPS) */
+  mt->line_length = min_line_length;
+  mt->frame_length = min_frame_length;
+  mt->real_fps = mt->vt_pix_clk * 1000000 / (float)(mt->line_length * mt->frame_length);
+
+  /* Check if we need to downscale the FPS and bruteforce better solution */
+  if(mt->target_fps < mt->real_fps) {
+    float min_fps_err = fabs(mt->target_fps - mt->real_fps);
+    float new_fps = mt->real_fps;
+
+    // Go through all possible line lengths
+    for(uint16_t ll = min_line_length; ll <= MT9F002_LINE_LENGTH_MAX; ll += min_horizontal_blanking) {
+      // Go through all possible frame lengths
+      for(uint16_t fl = min_frame_length; fl < MT9F002_FRAME_LENGTH_MAX; ++fl) {
+        new_fps = mt->vt_pix_clk * 1000000 / (float)(ll * fl);
+
+        // Calculate FPS error and save if it is better
+        float fps_err = fabs(mt->target_fps - mt->real_fps);
+        if(fps_err < min_fps_err) {
+          min_fps_err = fps_err;
+          mt->line_length = ll;
+          mt->frame_length = fl;
+          mt->real_fps = new_fps;
+        }
+
+        // Stop searching if FPS is lower or equal
+        if(mt->target_fps > new_fps) {
+          break;
+        }
+      }
+
+      // Calculate if next step is still needed (since we only need to go one step below target_fps)
+      new_fps = mt->vt_pix_clk * 1000000 / (float)(ll * min_frame_length);
+
+      // Stop searching if FPS is lower or equal
+      if(mt->target_fps > new_fps) {
+        break;
+      }
+    }
+  }
+
+  /* Actually set the calculated values */
+  write_reg(mt, MT9F002_LINE_LENGTH_PCK, mt->line_length, 2);
+  write_reg(mt, MT9F002_FRAME_LENGTH_LINES, mt->frame_length, 2);
+}
+
+/**
+ * Set the exposure configuration
+ * Depends on the blanking (and therefore the FPS)
+ */
+static void mt9f002_set_exposure(struct mt9f002_t *mt)
+{
+  /* Fetch minimum and maximum integration times */
+  uint16_t coarse_integration_min = read_reg(mt, MT9F002_COARSE_INTEGRATION_TIME_MIN, 2);
+  uint16_t coarse_integration_max = mt->frame_length - read_reg(mt, MT9F002_COARSE_INTEGRATION_TIME_MAX_MARGIN, 2);
+  uint16_t fine_integration_min = read_reg(mt, MT9F002_FINE_INTEGRATION_TIME_MIN, 2);
+  uint16_t fine_integration_max = mt->line_length - read_reg(mt, MT9F002_FINE_INTEGRATION_TIME_MAX_MARGIN, 2);
+
+  /* Compute fine and coarse integration time */
+  uint32_t integration = mt->target_exposure * mt->vt_pix_clk * 1000;
+  uint16_t coarse_integration = integration / mt->line_length;
+  uint16_t fine_integration = integration % mt->line_length;
+
+  /* Make sure fine integration is inside bounds */
+  if(fine_integration_min > fine_integration || fine_integration > fine_integration_max)
+  {
+    int32_t upper_coarse_integration = coarse_integration + 1;
+    int32_t upper_fine_integration = fine_integration_min;
+
+    int32_t lower_coarse_integration = coarse_integration - 1;
+    int32_t lower_fine_integration = fine_integration_max;
+
+    // Check if lower case is invalid (take upper coarse)
+    if(lower_coarse_integration < coarse_integration_min) {
+      coarse_integration = upper_coarse_integration;
+      fine_integration = upper_fine_integration;
+    }
+    // Check if upper case is invalid (take lower coarse)
+    else if(upper_coarse_integration > coarse_integration_max) {
+      coarse_integration = lower_coarse_integration;
+      fine_integration = lower_fine_integration;
+    }
+    // Both are good
+    else {
+      // Calculate error to decide which is better
+      int32_t upper_error = abs((mt->line_length * upper_coarse_integration + upper_fine_integration) - integration);
+      int32_t lower_error = abs((mt->line_length * lower_coarse_integration + lower_fine_integration) - integration);
+
+      if(upper_error < lower_error) {
+        coarse_integration = upper_coarse_integration;
+        fine_integration = upper_fine_integration;
+      }
+      else {
+        coarse_integration = lower_coarse_integration;
+        fine_integration = lower_fine_integration;
+      }
+    }
+  }
+
+  /* Fix saturations */
+  Bound(fine_integration, fine_integration_min, fine_integration_max);
+  Bound(coarse_integration, coarse_integration_min, coarse_integration_max);
+
+  /* Set the registers */
+  mt->real_exposure = (float)(coarse_integration * mt->line_length + fine_integration) / (mt->vt_pix_clk * 1000);
+  write_reg(mt, MT9F002_COARSE_INTEGRATION_TIME, coarse_integration, 2);
+  write_reg(mt, MT9F002_FINE_INTEGRATION_TIME, fine_integration, 2);
+}
+
+/**
+ *  Calculate the gain based on value of 1.0 -> 63.50
+ */
+static inline uint16_t mt9f002_calc_gain(float gain) {
+  // Check if gain is valid
+  if(gain < 1.0) {
+    gain = 1.0;
+  }
+
+  // Calculation of colamp, analg3 and digital gain based on table 19 p56
+  uint8_t colamp_gain, analog_gain3, digital_gain;
+  if (gain < 1.50)
+  {
+    // This is not recommended
+    colamp_gain = 0;
+    analog_gain3 = 0;
+    digital_gain = 1;
+  }
+  else if (gain < 3.0)
+  {
+    colamp_gain = 1;
+    analog_gain3 = 0;
+    digital_gain = 1;
+  }
+  else if (gain < 6.0)
+  {
+    colamp_gain = 2;
+    analog_gain3 = 0;
+    digital_gain = 1;
+  }
+  else if (gain < 16.0)
+  {
+    colamp_gain = 3;
+    analog_gain3 = 0;
+    digital_gain = 1;
+  }
+  else if (gain < 32.0)
+  {
+    colamp_gain = 3;
+    analog_gain3 = 0;
+    digital_gain = 2;
+  }
+  else
+  {
+    colamp_gain = 3;
+    analog_gain3 = 0;
+    digital_gain = 4;
+  }
+
+  // Calculate gain 2 (fine gain)
+  uint16_t analog_gain2 = gain / (float)digital_gain / (float)(1<<colamp_gain) / (float)(1<<analog_gain3) * 64.0;
+  Bound(analog_gain2, 1, 127);
+
+  return (analog_gain2 & 0x3F) | ((analog_gain3 & 0x7) << 7) | ((colamp_gain & 0x3) << 10) | ((digital_gain & 0xF) << 12);
+}
+
+/**
+ * Sets the GreenR, Blue, Red and GreenB gains
+ */
+static void mt9f002_set_gains(struct mt9f002_t *mt)
+{
+  write_reg(mt, MT9F002_GREEN1_GAIN, mt9f002_calc_gain(mt->gain_green1), 2);
+  write_reg(mt, MT9F002_BLUE_GAIN,   mt9f002_calc_gain(mt->gain_blue), 2);
+  write_reg(mt, MT9F002_RED_GAIN,    mt9f002_calc_gain(mt->gain_red), 2);
+  write_reg(mt, MT9F002_GREEN2_GAIN, mt9f002_calc_gain(mt->gain_green2), 2);
 }
 
 /**
@@ -555,7 +763,7 @@ void mt9f002_init(struct mt9f002_t *mt)
   //TODO???
 
   /* Setup i2c transaction */
-  mt->i2c_trans.slave_addr = MT9V117_ADDRESS;
+  mt->i2c_trans.slave_addr = MT9F002_ADDRESS;
   mt->i2c_trans.status = I2CTransDone;
 
   /* Software reset */
@@ -563,7 +771,7 @@ void mt9f002_init(struct mt9f002_t *mt)
   usleep(1000000); // Wait for one second
 
   /* Based on the interface configure stage 1 */
-  if(mt->interface == HAL_MT9F002_MIPI || mt->interface == HAL_MT9F002_HiSPi) {
+  if(mt->interface == MT9F002_MIPI || mt->interface == MT9F002_HiSPi) {
     mt9f002_mipi_stage1(mt);
   }
   else {
@@ -574,7 +782,7 @@ void mt9f002_init(struct mt9f002_t *mt)
   mt9f002_set_pll(mt);
 
   /* Based on the interface configure stage 2 */
-  if(mt->interface == HAL_MT9F002_MIPI || mt->interface == HAL_MT9F002_HiSPi) {
+  if(mt->interface == MT9F002_MIPI || mt->interface == MT9F002_HiSPi) {
     mt9f002_mipi_stage2(mt);
   }
   else {
@@ -582,27 +790,37 @@ void mt9f002_init(struct mt9f002_t *mt)
   }
 
   /* Set output resolution */
-  write_reg(mt, MT9F002_X_OUTPUT_SIZE, width, 2);
-  write_reg(mt, MT9F002_Y_OUTPUT_SIZE, height, 2);
+  write_reg(mt, MT9F002_X_OUTPUT_SIZE, mt->output_width, 2);
+  write_reg(mt, MT9F002_Y_OUTPUT_SIZE, mt->output_height, 2);
 
   /* Set scaling */
   uint16_t scaleFactor = ceil((float)MT9F002_SCALER_N / mt->output_scaler);
   mt->output_scaler = (float)MT9F002_SCALER_N / scaleFactor;
-  mt->scaled_width = ceil((float)width / mt->output_scaler);
-  mt->scaled_height = ceil((float)height / mt->output_scaler);
+  mt->scaled_width = ceil((float)mt->output_width / mt->output_scaler);
+  mt->scaled_height = ceil((float)mt->output_height / mt->output_scaler);
   if (mt->output_scaler != 1.0)
   {
     write_reg(mt, MT9F002_SCALING_MODE, 2, 2); // Vertical and horizontal scaling
-    write_reg(mt, MT9F002_SCALE_M, scaleFactor);
+    write_reg(mt, MT9F002_SCALE_M, scaleFactor, 2);
   }
 
   /* Set position (based on offset) */
-  write_reg(mt, MT9F002_X_ADDR_START , mt->offset_x , 2);
-  write_reg(mt, MT9F002_X_ADDR_END   , mt->offset_x + mt->scaled_width - 1);
-  write_reg(mt, MT9F002_Y_ADDR_START , mt->offset_y);
-  write_reg(mt, MT9F002_Y_ADDR_END   , mt->offset_y + mt->scaled_height - 1);
+  write_reg(mt, MT9F002_X_ADDR_START, mt->offset_x , 2);
+  write_reg(mt, MT9F002_X_ADDR_END  , mt->offset_x + mt->scaled_width - 1, 2);
+  write_reg(mt, MT9F002_Y_ADDR_START, mt->offset_y, 2);
+  write_reg(mt, MT9F002_Y_ADDR_END  , mt->offset_y + mt->scaled_height - 1, 2);
 
+  /* Update blanking (based on FPS) */
+  mt9f002_set_blanking(mt);
 
-  /* Close the device */
-  close(dev);
+  /* Update exposure (based on target_exposure) */
+  mt9f002_set_exposure(mt);
+
+  /* Update gains for the different pixel colors */
+  mt9f002_set_gains(mt);
+
+  /* Based on the interface configure stage 3 */
+  if(mt->interface == MT9F002_MIPI || mt->interface == MT9F002_HiSPi) {
+    mt9f002_mipi_stage3(mt);
+  }
 }
