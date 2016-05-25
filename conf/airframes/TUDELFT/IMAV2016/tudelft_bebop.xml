@@ -85,13 +85,13 @@
   </section>
 
   <section name="IMU" prefix="IMU_">
-    <!-- Magneto calibration (average of 3 runs in cyberzoo) -->
-    <define name="MAG_X_NEUTRAL" value="-40"/>
-    <define name="MAG_Y_NEUTRAL" value="-40"/>
-    <define name="MAG_Z_NEUTRAL" value="30"/>
-    <define name="MAG_X_SENS" value="7.5" integer="16"/>
-    <define name="MAG_Y_SENS" value="7.5" integer="16"/>
-    <define name="MAG_Z_SENS" value="5.0" integer="16"/>
+    <!-- Magneto calibration (average of 3 runs outside) -->
+    <define name="MAG_X_NEUTRAL" value="-30"/>
+    <define name="MAG_Y_NEUTRAL" value="-30"/>
+    <define name="MAG_Z_NEUTRAL" value="25"/>
+    <define name="MAG_X_SENS" value="7.2" integer="16"/>
+    <define name="MAG_Y_SENS" value="7.3" integer="16"/>
+    <define name="MAG_Z_SENS" value="7.8" integer="16"/>
 
     <!-- Magneto current calibration -->
     <define name= "MAG_X_CURRENT_COEF" value="-0.0010796390082"/>
