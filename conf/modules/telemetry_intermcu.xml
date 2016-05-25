@@ -1,0 +1,20 @@
+<!DOCTYPE module SYSTEM "module.dtd">
+
+<module name="telemetry_intermcu" dir="telemetry">
+  <doc>
+    <description>Telemetry over InterMCU
+      This module transmits Telemetry of the process "InterMCU" from AP to FBW. The FBW then transmits this telemetry further through PPRZ over an UART.
+    </description>
+  </doc>
+  <!-- <depends>intermcu</depends> -->
+  <header>
+    <file name="telemetry_intermcu.h"/>
+  </header>
+  <init fun="telemetry_intermcu_init()"/>
+  <periodic fun="telemetry_intermcu_periodic()"/>
+  <makefile>
+    <file name="telemetry_intermcu_ap.c"/>
+    <file name="short_transport.c" dir="pprzlink/src"/>
+  </makefile>
+</module>
+
