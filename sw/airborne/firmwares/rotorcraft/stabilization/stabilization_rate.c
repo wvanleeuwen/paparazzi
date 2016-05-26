@@ -189,6 +189,7 @@ void stabilization_rate_run(bool in_flight)
   /* compute feed-back command */
   struct FloatRates _error;
   struct FloatRates *body_rate = stateGetBodyRates_f();
+  struct FloatRates *body_ratef = stateGetBodyRates_f();
   RATES_DIFF(_error, stabilization_rate_sp, (*body_rate));
   if (in_flight) {
     /* update integrator */
@@ -219,19 +220,14 @@ void stabilization_rate_run(bool in_flight)
   float original_roll = stabilization_cmd[COMMAND_ROLL];
   float original_pitch = stabilization_cmd[COMMAND_PITCH];
 
-//    stabilization_cmd[COMMAND_ROLL]  = indi_rate_inputs_filt.p + rate_error.p*1200.0;
-//    stabilization_cmd[COMMAND_PITCH]  = indi_rate_inputs_filt.q + rate_error.q*1200.0;
-//    stabilization_cmd[COMMAND_YAW]  = indi_rate_inputs_filt_sec_r + du_r;
-//    stabilization_rate_sum_err.p = 0;
-//    stabilization_rate_sum_err.q = 0;
-//    stabilization_rate_sum_err.r = 0;
+  // Add euler dynamics compensation
+  float compensation_ratio = ((float) radio_control.values[7]+9600.0)/9600.0/2.0;
+  original_roll = original_roll + 299.0*3.43*body_ratef->q * compensation_ratio;
+  original_pitch = original_pitch + 120.1*-7.45*body_ratef->p * compensation_ratio;
 
-  float angle = -((float) radio_control.values[7]+9600.0)/9600.0/2*M_PI/2.0;
-  float cangle = cosf(angle);
-  float sangle = sinf(angle);
-
-  stabilization_cmd[COMMAND_ROLL] =  cangle*original_roll + sangle*original_pitch;
-  stabilization_cmd[COMMAND_PITCH] =-sangle*original_roll + cangle*original_pitch;
+  // Add advance angle compensation
+  stabilization_cmd[COMMAND_ROLL] =   0.8578*original_roll + -0.3276*original_pitch;
+  stabilization_cmd[COMMAND_PITCH] =  0.5139*original_roll + 0.9448*original_pitch;
 
   /* bound the result */
   BoundAbs(stabilization_cmd[COMMAND_ROLL], MAX_PPRZ);
