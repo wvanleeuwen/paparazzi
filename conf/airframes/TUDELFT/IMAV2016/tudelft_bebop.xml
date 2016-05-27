@@ -1,7 +1,6 @@
 <!DOCTYPE airframe SYSTEM "../../airframe.dtd">
 
-<!-- And example airframe to be use in the TU DElft Course 2016 -->
-<airframe name="Bebop"> <!-- The name of your airframe -->
+<airframe name="bebop">
 
   <firmware name="rotorcraft">
     <target name="ap" board="bebop"/>
@@ -17,11 +16,12 @@
     <module name="motor_mixing"/>
     <module name="actuators" type="bebop"/>
     <module name="imu" type="bebop"/>
-    <module name="gps" type="datalink"/> <!-- The GPS information also comes over this wifi, as we are sitting in the cyberzoo all the time -->
+    <module name="gps" type="furuno"/>
     <module name="stabilization" type="indi"/>
+    <module name="stabilization" type="rate_indi"/>
     <module name="ahrs" type="int_cmpl_quat">
-      <configure name="USE_MAGNETOMETER" value="FALSE"/> <!-- Heading is from Optitrack, in reguler outside flight case one would use and Magnetometer-->
-      <define name="AHRS_USE_GPS_HEADING" value="TRUE"/>
+      <configure name="USE_MAGNETOMETER" value="TRUE"/>
+      <define name="AHRS_USE_GPS_HEADING" value="FALSE"/>
     </module>
     <module name="ins" type="extended"/>
     <module name="guidance" type="indi"/>
@@ -30,25 +30,23 @@
   <modules main_freq="512">
     <module name="geo_mag"/>
     <module name="air_data"/>
-    <module name="send_imu_mag_current"/>
 
-    <!--<module name="logger_file">
+    <!--<module name="send_imu_mag_current"/>-->
+
+    <!--module name="logger_file">
       <define name="FILE_LOGGER_PATH" value="/data/ftp/internal_000"/>
-    </module>-->
+    </module-->
 
-    <!--<module name="video_thread">-->
-      <!--<define name="VIDEO_THREAD_FPS" value="30"/>-->
-      <!--<define name="VIDEO_THREAD_CAMERA" value="bottom_camera"/>-->
-      <!--<define name="VIDEO_THREAD_SHOT_PATH" value="/data/ftp/internal_000/images"/>-->
-    <!--</module>-->
+    <module name="video_thread">
+      <define name="VIDEO_THREAD_FPS" value="30"/>
+      <define name="VIDEO_THREAD_CAMERA" value="bottom_camera"/>
+    </module>
 
-    <!--<module name="cv_colorfilter">-->
-    <!--</module>-->
+    <module name="video_rtp_stream">
+      <define name="VIEWVIDEO_DOWNSIZE_FACTOR" value="1"/>
+      <define name="VIEWVIDEO_QUALITY_FACTOR" value="20"/>
+    </module>
 
-    <!--<module name="video_rtp_stream">-->
-      <!--<define name="VIEWVIDEO_QUALITY_FACTOR" value="20"/>-->
-      <!--<define name="VIEWVIDEO_DOWNSIZE_FACTOR" value="1"/>-->
-    <!--</module>-->
   </modules>
 
   <commands>
@@ -66,7 +64,9 @@
   </servos>
 
   <section name="MIXING" prefix="MOTOR_MIXING_">
-    <!-- Time cross layout (X), with order NW (CW), NE (CCW), SE (CW), SW (CCW) -->
+    <define name="TRIM_ROLL" value="0"/>
+    <define name="TRIM_PITCH" value="0"/>
+    <define name="TRIM_YAW" value="0"/>
     <define name="TYPE" value="QUAD_X"/>
   </section>
 
@@ -122,7 +122,7 @@
     <!-- setpoint limits for attitude stabilization rc flight -->
     <define name="SP_MAX_PHI" value="45" unit="deg"/>
     <define name="SP_MAX_THETA" value="45" unit="deg"/>
-    <define name="SP_MAX_R" value="100" unit="deg/s"/>
+    <define name="SP_MAX_R" value="300" unit="deg/s"/>
     <define name="DEADBAND_A" value="0"/>
     <define name="DEADBAND_E" value="0"/>
     <define name="DEADBAND_R" value="50"/>
@@ -161,9 +161,6 @@
     <define name="REF_RATE_Q" value="28.0"/>
     <define name="REF_RATE_R" value="28.0"/>
 
-    <!--Maxium yaw rate, to avoid instability-->
-    <define name="MAX_R" value="120.0"/> <!--deg/s-->
-
     <!-- second order filter parameters -->
     <define name="FILT_OMEGA" value="50.0"/>
     <define name="FILT_ZETA" value="0.55"/>
@@ -183,13 +180,13 @@
   <section name="GUIDANCE_V" prefix="GUIDANCE_V_">
     <define name="HOVER_KP" value="283"/>
     <define name="HOVER_KD" value="82"/>
-    <define name="HOVER_KI" value="70"/>
-    <define name="NOMINAL_HOVER_THROTTLE" value="0.5"/>
-    <define name="ADAPT_THROTTLE_ENABLED" value="FALSE"/>
+    <define name="HOVER_KI" value="20"/>
+    <define name="NOMINAL_HOVER_THROTTLE" value="0.655"/>
+    <define name="ADAPT_THROTTLE_ENABLED" value="TRUE"/>
   </section>
 
   <section name="GUIDANCE_H" prefix="GUIDANCE_H_">
-    <define name="MAX_BANK" value="32" unit="deg"/>
+    <define name="MAX_BANK" value="20" unit="deg"/>
     <define name="PGAIN" value="79"/>
     <define name="DGAIN" value="100"/>
     <define name="IGAIN" value="30"/>
@@ -211,10 +208,7 @@
     <define name="MODE_MANUAL" value="AP_MODE_ATTITUDE_DIRECT"/>
     <define name="MODE_AUTO1" value="AP_MODE_ATTITUDE_Z_HOLD"/>
     <define name="MODE_AUTO2" value="AP_MODE_NAV"/>
-    <define name="NO_RC_THRUST_LIMIT" value="TRUE"/>
-  </section>
 
-  <section name="MISC">
     <define name="NO_RC_THRUST_LIMIT" value="TRUE"/>
   </section>
 
