@@ -1,0 +1,95 @@
+<!DOCTYPE flight_plan SYSTEM "../../flight_plan.dtd">
+
+<!-- Flight Plan centered in the Cyber Zoo -->
+<flight_plan
+        name="IMAV2016 CyberZoo"
+        lat0="51.990634" lon0="4.376789"
+        ground_alt="0"
+        security_height="0.4"
+        max_dist_from_home="8"
+        alt="1.5">
+
+  <!-- Include headers to allow calling of functions that are not part of a module -->
+  <header>
+    #include "autopilot.h"
+    #include "subsystems/ahrs.h"
+    #include "subsystems/electrical.h"
+    #include "subsystems/datalink/datalink.h"
+  </header>
+
+  <!-- Waypoints used in this flight plan -->
+  <waypoints>
+    <!-- Mission waypoints -->
+    <waypoint name="HOME" x="0.0" y="0.0"/>
+    <waypoint name="STANDBY" x="-1" y="-1"/>
+
+    <!-- Corners of the obstacle zone -->
+    <waypoint lat="51.9905922" lon="4.3767779" name="_OZ1"/>
+    <waypoint lat="51.9906428" lon="4.3767195" name="_OZ2"/>
+    <waypoint lat="51.9906780" lon="4.3768044" name="_OZ3"/>
+    <waypoint lat="51.9906271" lon="4.3768621" name="_OZ4"/>
+  </waypoints>
+
+  <!-- Sectors used in this flight plan -->
+  <sectors>
+    <sector color="blue" name="ObstacleZone">
+      <corner name="_OZ1"/>
+      <corner name="_OZ2"/>
+      <corner name="_OZ3"/>
+      <corner name="_OZ4"/>
+    </sector>
+  </sectors>
+
+  <!-- Global exceptions -->
+  <exceptions>
+    <exception cond="datalink_time > 2 && nav_is_in_flight()" deroute="Hover"/>
+    <exception cond="electrical.bat_low && !(nav_block == IndexOfBlock('Land')) && !(nav_block == IndexOfBlock('Hold'))" deroute="Land"/>
+  </exceptions>
+
+  <!-- Blocks describing the units of the mission -->
+  <blocks>
+    <!-- Kill the throttle and wait for GPS fix -->
+    <block name="Wait GPS">
+      <call fun="NavKillThrottle()"/>
+      <while cond="!GpsFixValid()"/>
+    </block>
+
+    <!-- Wait 5 seconds and then set altitude reference -->
+    <block name="Geo init">
+      <while cond="LessThan(NavBlockTime(), 10)"/>
+      <call fun="NavSetAltitudeReferenceHere()"/>
+    </block>
+
+    <!-- Kill the throttle and wait -->
+    <block key="k" name="Hold" strip_button="Kill" strip_icon="flat_theme/kill.png">
+      <call fun="NavKillThrottle()"/>
+      <attitude pitch="0" roll="0" throttle="0" vmode="throttle"/>
+    </block>
+
+    <!-- Start the engine and wait -->
+    <block key="s" name="Start Engine" strip_button="Start" strip_icon="flat_theme/start_motors.png">
+      <call fun="NavResurrect()"/>
+      <attitude pitch="0" roll="0" throttle="0" vmode="throttle"/>
+    </block>
+
+    <!-- Hover at the current location -->
+    <block key="h" name="Hover" strip_button="Hover" strip_icon="flat_theme/pano_hov.png">
+      <call fun="NavSetWaypointHere(WP_STANDBY)"/>
+      <stay wp="STANDBY"/>
+    </block>
+
+    <!-- Land at the current location -->
+    <block key="l" name="Land" strip_button="Land" strip_icon="flat_theme/downdown.png">
+      <exception cond="NavDetectGround()" deroute="Hold"/> <!-- Condition is not triggered properly with bebop -->
+      <exception cond="!nav_is_in_flight()" deroute="Hold"/>
+      <!--<exception cond="block_time > 1 && stateGetSpeedEnu_f()->z > 0" deroute="Hold"/>-->
+      <call fun="NavSetWaypointHere(WP_STANDBY)"/>
+      <call fun="NavStartDetectGround()"/>
+      <stay wp="STANDBY" vmode="climb" climb="nav_descend_vspeed"/>
+    </block>
+
+    <!-- End of blocks -->
+  </blocks>
+
+  <!-- End of flight plan -->
+</flight_plan>
