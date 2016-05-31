@@ -28,23 +28,10 @@
 #define TELEMETRY_INTERMCU_H
 
 #include "std.h"
-#include "pprzlink/short_transport.h"
-
-/* Default maximum telemetry message size */
-#ifndef TELEMERTY_INTERMCU_MSG_SIZE
-#define TELEMERTY_INTERMCU_MSG_SIZE 128
-#endif
-
-/* Structure for handling telemetry over InterMCU */
-struct telemetry_intermcu_t {
-  struct link_device dev;                     ///< Device structure for communication
-  struct short_transport trans;               ///< Transport without any extra encoding
-  uint8_t buf[TELEMERTY_INTERMCU_MSG_SIZE];   ///< Buffer for the messages
-  uint8_t buf_idx;                            ///< Index of the buffer
-};
 
 /* External functions */
 void telemetry_intermcu_init(void);
 void telemetry_intermcu_periodic(void);
+void telemetry_intermcu_on_msg(uint8_t msg_id, uint8_t* msg, uint8_t size);
 
 #endif /* TELEMETRY_INTERMCU_H */

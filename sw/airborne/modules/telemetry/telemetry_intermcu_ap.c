@@ -28,8 +28,22 @@
 #include "telemetry_intermcu.h"
 #include "subsystems/intermcu.h"
 #include "pprzlink/intermcu_msg.h"
+#include "pprzlink/short_transport.h"
 #include "generated/periodic_telemetry.h"
 #include "subsystems/datalink/telemetry.h"
+
+/* Default maximum telemetry message size */
+#ifndef TELEMERTY_INTERMCU_MSG_SIZE
+#define TELEMERTY_INTERMCU_MSG_SIZE 128
+#endif
+
+/* Structure for handling telemetry over InterMCU */
+struct telemetry_intermcu_t {
+  struct link_device dev;                     ///< Device structure for communication
+  struct short_transport trans;               ///< Transport without any extra encoding
+  uint8_t buf[TELEMERTY_INTERMCU_MSG_SIZE];   ///< Buffer for the messages
+  uint8_t buf_idx;                            ///< Index of the buffer
+};
 
 /* Telemetry InterMCU throughput */
 static struct telemetry_intermcu_t telemetry_intermcu;
@@ -60,6 +74,11 @@ void telemetry_intermcu_periodic(void)
   periodic_telemetry_send_InterMCU(DefaultPeriodic, &telemetry_intermcu.trans.trans_tx, &telemetry_intermcu.dev);
 }
 
+void telemetry_intermcu_on_msg(uint8_t msg_id __attribute__((unused)), uint8_t* msg __attribute__((unused)), uint8_t size __attribute__((unused)))
+{
+
+}
+
 static bool telemetry_intermcu_check_free_space(struct telemetry_intermcu_t *p, long *fd __attribute__((unused)), uint16_t len)
 {
   return ((p->buf_idx + len) < (TELEMERTY_INTERMCU_MSG_SIZE - 1));
@@ -84,5 +103,6 @@ static void telemetry_intermcu_put_buffer(struct telemetry_intermcu_t *p, long f
 static void telemetry_intermcu_send_message(struct telemetry_intermcu_t *p, long fd __attribute__((unused)))
 {
   pprz_msg_send_IMCU_TELEMETRY(&(intermcu.transport.trans_tx), intermcu.device,
-                            INTERMCU_AP, &p->buf[0], (p->buf_idx - 2), &p->buf[2]);
+                            INTERMCU_AP, &p->buf[1], (p->buf_idx - 2), &p->buf[2]);
+  p->buf_idx = 0;
 }
