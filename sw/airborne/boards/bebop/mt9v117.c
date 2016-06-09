@@ -33,20 +33,24 @@
 #include <fcntl.h>
 #include <sys/ioctl.h>
 #include <linux/i2c-dev.h>
+#include <linux/videodev2.h>
+#include <linux/v4l2-mediabus.h>
 
 //FIXMEE!
 #include "boards/bebop.h"
 struct video_config_t bottom_camera = {
-  .w = 128,
-  .h = 128,
+  .w = 320,
+  .h = 240,
   .sensor_w = 320,
   .sensor_h = 240,
   .dev_name = "/dev/video0",
   .subdev_name = "/dev/v4l-subdev0",
   .format = V4L2_PIX_FMT_UYVY,
   .subdev_format = V4L2_MBUS_FMT_UYVY8_2X8,
-  .buf_cnt = 120,
-  .filters = 0
+  .buf_cnt = 100,
+  .filters = 0,
+  .pointer_to_first_listener=NULL,
+  .fps = 0
 };
 
 
@@ -414,6 +418,7 @@ void mt9v117_init(struct mt9v117_t *mt)
       }
 
       // Successfully configured!
+      printf("DONE!\r\n");
       return;
     }
   }

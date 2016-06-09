@@ -22,7 +22,7 @@
   </doc>
 
   <settings>
-	<dl_settings NAME="Vision stabilization">
+	<dl_settings>
       <!-- Satabilization loop parameters and gains -->
       <dl_settings name="vision_stab">
         <dl_setting var="opticflow_stab.phi_pgain" module="guidance_opticflow/guidance_opticflow_hover" min="0" step="1" max="10000" shortname="kp_v_phi" param="VISION_PHI_PGAIN"/>

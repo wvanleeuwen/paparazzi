@@ -246,8 +246,8 @@ struct v4l2_device *v4l2_init(char *device_name, uint16_t width, uint16_t height
   crop.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
   crop.c.top = 0;
   crop.c.left = 0;
-  crop.c.width = 240;
-  crop.c.height = 240;
+  crop.c.width = width;
+  crop.c.height = height;
 
   if (ioctl(fd, VIDIOC_S_CROP, &crop) < 0) {
     printf("[v4l2] Could not set crop window of %s\n", device_name);

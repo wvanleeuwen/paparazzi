@@ -36,15 +36,18 @@
 
     <module name="cv_opticflow">
       <define name="OPTICFLOW_CAMERA" value="bottom_camera"/>
-	  <define name="MAX_HORIZON" value="2"/>
+	    <define name="MAX_HORIZON" value="2"/>
       <define name="CAMERA_ROTATED_180" value="1"/>
       <define name="OPTICFLOW_DEROTATION" value="0"/>
+      <define name="OPTICFLOW_METHOD" value="0"/>
     </module>
 
     <module name="video_capture">
       <define name="VIDEO_CAPTURE_CAMERA" value="bottom_camera"/>
       <define name="VIDEO_CAPTURE_PATH" value="/data/ftp/internal_000/images"/>
     </module>
+
+    <module name="opticflow_hover"/>
 
   </modules>
 
