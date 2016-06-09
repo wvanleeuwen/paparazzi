@@ -117,10 +117,11 @@ static void *video_thread_function(void *data)
       uint32_t fps_period_us = (uint32_t)(1000000. / (float)vid->fps);
       if (dt_us < fps_period_us) {
         usleep(fps_period_us - dt_us);
-      } else {
-        fprintf(stderr, "video_thread with size %d %d: desired %i fps, only managing %.1f fps\n",
-                vid->w, vid->h, vid->fps, 1000000.f / dt_us);
       }
+      //else {
+        //fprintf(stderr, "video_thread with size %d %d: desired %i fps, only managing %.1f fps\n",
+        //        vid->w, vid->h, vid->fps, 1000000.f / dt_us);
+      //}
     }
 
     // Wait for a new frame (blocking)
@@ -158,7 +159,7 @@ bool initialize_camera(struct video_config_t *camera)
   // Initialize the V4L2 subdevice if needed
   if (camera->subdev_name != NULL) {
     // FIXME! add subdev format to config, only needed on bebop front camera so far
-    if (!v4l2_init_subdev(camera->subdev_name, 0, 0, V4L2_MBUS_FMT_SGBRG10_1X10, camera->w, camera->h)) {
+    if (!v4l2_init_subdev(camera->subdev_name, 0, 0, V4L2_MBUS_FMT_SGBRG10_1X10, camera->sensor_w, camera->sensor_h)) {
       printf("[video_thread] Could not initialize the %s subdevice.\n", camera->subdev_name);
       return false;
     }

@@ -49,6 +49,8 @@ struct video_thread_t {
 struct video_config_t {
   int w;              ///< Width
   int h;              ///< Height
+  int sensor_w;             ///< Sensor Width
+  int sensor_h;             ///< Sensor Height
   char *dev_name;     ///< path to device
   char *subdev_name;  ///< path to sub device
   uint32_t format;    ///< Video format
