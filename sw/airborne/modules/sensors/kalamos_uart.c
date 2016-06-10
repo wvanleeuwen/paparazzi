@@ -32,6 +32,10 @@
 #include "subsystems/abi.h"
 #include "subsystems/imu.h"
 #include "state.h"
+#include "subsystems/navigation/waypoints.h"
+#include "firmwares/rotorcraft/navigation.h"
+
+ #include "generated/flight_plan.h"
 
  /* Main magneto structure */
 static struct kalamos_t kalamos = {
@@ -61,6 +65,10 @@ void kalamos_init() {
 #if PERIODIC_TELEMETRY
   register_periodic_telemetry(DefaultPeriodic, PPRZ_MSG_ID_DEBUG, kalamos_raw_downlink);
 #endif
+
+  NavSetWaypointHere(WP_KALAMOS);
+
+
 }
 
 /* Parse the InterMCU message */
@@ -121,13 +129,24 @@ void kalamos_periodic() {
       p2k_package.hoer[i] = hoer[i];
 
 
-      // Send Telemetry report
-DOWNLINK_SEND_SONAR(DefaultChannel, DefaultDevice, 0, &k2p_package.height);
+        // Send Telemetry report
+  DOWNLINK_SEND_SONAR(DefaultChannel, DefaultDevice, 0, &k2p_package.height);
 
 
- pprz_msg_send_IMCU_DEBUG(&(kalamos.transport.trans_tx), kalamos.device,
-                                       1, sizeof(struct PPRZ2KalamosPackage), (unsigned char *)(&p2k_package));
+  pprz_msg_send_IMCU_DEBUG(&(kalamos.transport.trans_tx), kalamos.device,
+                                         1, sizeof(struct PPRZ2KalamosPackage), (unsigned char *)(&p2k_package));
 
+  //get pprz height
+  // calculate it so that sonar is 10m high
+  //set waypoint to that number
+
+  struct EnuCoor_f *pos = stateGetPositionEnu_f();
+
+  float target_kalamos_height = 10;
+  float diff = (target_kalamos_height - k2p_package.height);
+  float pprzheight  = pos->z + diff;
+
+  waypoint_set_alt(WP_KALAMOS,pprzheight );
 
 }
 
