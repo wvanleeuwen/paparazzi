@@ -144,7 +144,7 @@
   <heli_curves>
     <curve throttle="0,6492,6492" collective="-7500,-5000,-2500"/>
     <curve throttle="6492,6492,6492" collective="-7500,-5200,-2000"/>
-    <curve throttle="6600,6600,6600" collective="-7000,500,8000"/>
+    <curve throttle="6864,6864,6864" collective="-7500,-5200,-2000"/>
   </heli_curves>
 
   <!-- Pitch RODS white symmetric props: 56mm top links 65mm bottom links -->
