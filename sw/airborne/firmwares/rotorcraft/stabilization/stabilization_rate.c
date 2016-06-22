@@ -224,10 +224,6 @@ void stabilization_rate_run(bool in_flight)
   original_roll =  original_roll  + 800.0*3.20*body_rate->q  * compensation_ratio;
   original_pitch = original_pitch + 582.0*-1.88*body_rate->p * compensation_ratio;
 
-  // Add advance angle compensation
-  stabilization_cmd[COMMAND_ROLL] =   0.9701*original_roll + -0.7399*original_pitch;
-  stabilization_cmd[COMMAND_PITCH] =  0.2425*original_roll + 0.6727*original_pitch;
-
   /* bound the result */
   BoundAbs(stabilization_cmd[COMMAND_ROLL], MAX_PPRZ);
   BoundAbs(stabilization_cmd[COMMAND_PITCH], MAX_PPRZ);

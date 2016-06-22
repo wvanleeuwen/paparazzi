@@ -120,7 +120,6 @@
     <call fun="throttle_curve_run(fbw_motors_on, values)"/>
     <call fun="swashplate_mixing_run(values)"/>
     <let var="th_hold"          value="LessThan(RadioControlValues(RADIO_TH_HOLD), -4800)"/>
-    <let var="man_mode"         value="LessThan(RadioControlValues(RADIO_MODE), -4800)"/>
 
     <set servo="THROTTLE"       value="($th_hold? -9600 : throttle_curve.throttle)"/>
     <set servo="SW_BACK"        value="swashplate_mixing.commands[SW_BACK]"/>
@@ -128,10 +127,10 @@
     <set servo="SW_RIGHTFRONT"  value="swashplate_mixing.commands[SW_RIGHTFRONT]"/>
     <set servo="TAIL_LEFT"      value="($th_hold? 0 : (-@YAW - throttle_curve.throttle*0.25) )"/>
     <set servo="TAIL_RIGHT"     value="($th_hold? 0 : (-@YAW - throttle_curve.throttle*0.25) )"/>
-    <set servo="AIL_LEFTLOW"    value="($man_mode? ( @PITCH - @ROLL) : 0)"/>
-    <set servo="AIL_RIGHTLOW"   value="($man_mode? (-@PITCH - @ROLL) : 0)"/>
-    <set servo="AIL_LEFTUP"     value="($man_mode? ( @PITCH - @ROLL) : 0)"/>
-    <set servo="AIL_RIGHTUP"    value="($man_mode? (-@PITCH - @ROLL) : 0)"/>
+    <set servo="AIL_LEFTLOW"    value=" @PITCH + @YAW"/>
+    <set servo="AIL_RIGHTLOW"   value="-@PITCH + @YAW"/>
+    <set servo="AIL_LEFTUP"     value=" @PITCH + @YAW"/>
+    <set servo="AIL_RIGHTUP"    value="-@PITCH + @YAW"/>
   </command_laws>
 
   <!-- RPM to PPRZ calculation (governer low, fixed RPM) -->
