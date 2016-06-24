@@ -248,8 +248,9 @@ uint32_t getMinimum(uint32_t *a, uint32_t n)
  * @param[in] *size Size of displacement array
  * @param[in] border  A border offset of the array that should not be considerd for the line fit
  * @param[in] RES  Resolution to be used for the integer based linefit
+ * @param[out] return  total fit error
  */
-void line_fit(int32_t *displacement, int32_t *divergence, int32_t *flow, uint32_t size, uint32_t border,
+uint32_t line_fit(int32_t *displacement, int32_t *divergence, int32_t *flow, uint32_t size, uint32_t border,
               uint16_t RES)
 {
   int32_t x;
@@ -261,7 +262,6 @@ void line_fit(int32_t *displacement, int32_t *divergence, int32_t *flow, uint32_
   int32_t sumXY = 0;
   int32_t xMean = 0;
   int32_t yMean = 0;
-  int32_t divergence_int = 0;
   int32_t border_int = (int32_t)border;
   int32_t size_int = (int32_t)size;
   uint32_t total_error = 0;
@@ -283,13 +283,14 @@ void line_fit(int32_t *displacement, int32_t *divergence, int32_t *flow, uint32_
 
   yMean = RES * sumY / count;
 
-  divergence_int = (RES * sumXY - sumX * yMean) / (sumX2 - sumX * xMean);    // compute slope of line ax + b
-  *divergence = divergence_int;
+  *divergence = (RES * sumXY - sumX * yMean) / (sumX2 - sumX * xMean);    // compute slope of line ax + b
   *flow = yMean - *divergence * xMean;  // compute b (or y) intercept of line ax + b
 
   for (x = border_int; x < size - border_int; x++) {
-    total_error += abs(RES * displacement[x] - divergence_int * x + yMean);
+    total_error += abs(RES * displacement[x] - *divergence * x + yMean);
   }
+
+  return (total_error / (size - border_int));
 }
 
 /**

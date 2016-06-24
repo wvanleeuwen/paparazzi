@@ -466,12 +466,14 @@ void calc_edgeflow_tot(struct opticflow_t *opticflow, struct opticflow_state_t *
 
   // Fit a line on the pixel displacement to estimate
   // the global pixel flow and divergence (RES is resolution)
-  line_fit(displacement.x, &edgeflow.div_x,
+  result->surface_roughness = line_fit(displacement.x, &edgeflow.div_x,
            &edgeflow.flow_x, img->w,
            window_size + disp_range, RES);
-  line_fit(displacement.y, &edgeflow.div_y,
+  result->surface_roughness += line_fit(displacement.y, &edgeflow.div_y,
            &edgeflow.flow_y, img->h,
            window_size + disp_range, RES);
+
+  result->surface_roughness /= 2.*RES;
 
   /* Save Resulting flow in results
    * Warning: The flow detected here is different in sign
@@ -489,11 +491,10 @@ void calc_edgeflow_tot(struct opticflow_t *opticflow, struct opticflow_state_t *
   result->flow_der_x =  result->flow_x;
   result->flow_der_y =  result->flow_y;
   result->corner_cnt = getAmountPeaks(edge_hist_x, 500 , img->w);
-  result->tracked_cnt = getAmountPeaks(edge_hist_x, 500 , img->w);
-  result->divergence = (float)edgeflow.flow_x / RES;
+  result->tracked_cnt = result->corner_cnt;
+  result->divergence = (float)(edgeflow.div_x + edgeflow.div_y) / (2*RES);
   result->div_size = 0.0f;
-  result->noise_measurement = 0.0f;
-  result->surface_roughness = 0.0f;
+  result->noise_measurement = (float)result->tracked_cnt/((float)img->w);
 
   //......................Calculating VELOCITY ..................... //
 
