@@ -65,7 +65,7 @@ void stereocam_to_state(void)
   int16_t vel_y_int = (int16_t)stereocam_data.data[12] << 8;
   vel_y_int |= (int16_t)stereocam_data.data[13];
 
-  int16_t RES = 100;
+  float RES = 100.;
 
   float vel_x = (float)vel_x_int / RES;
   float vel_y = (float)vel_y_int / RES;
@@ -95,9 +95,12 @@ void stereocam_to_state(void)
   uint16_t dummy_uint16 = 0;
   int16_t dummy_int16 = 0;
   float dummy_float = 0;
+  //float divergence = (div_x + div_y)/(2*RES);
+  float divergence_x = (float)div_x/RES;
+  float divergence_y = (float)div_y/RES;
 
   DOWNLINK_SEND_OPTIC_FLOW_EST(DefaultChannel, DefaultDevice, &fps, &dummy_uint16, &dummy_uint16, &flow_x, &flow_y, &dummy_int16, &dummy_int16,
-		  &vel_x, &vel_y,&dummy_float, &dummy_float, &dummy_float);
+		  &vel_x, &vel_y,&dummy_float, &divergence_x, &divergence_y);
 
 #endif
 

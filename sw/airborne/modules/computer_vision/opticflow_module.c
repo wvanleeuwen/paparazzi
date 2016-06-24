@@ -52,7 +52,7 @@ PRINT_CONFIG_VAR(OPTICFLOW_AGL_ID)
 
 /* The main opticflow variables */
 struct opticflow_t opticflow;                      ///< Opticflow calculations
-static struct opticflow_result_t opticflow_result; ///< The opticflow result
+struct opticflow_result_t opticflow_result; ///< The opticflow result
 static struct opticflow_state_t opticflow_state;   ///< State of the drone to communicate with the opticflow
 static abi_event opticflow_agl_ev;                 ///< The altitude ABI event
 static bool opticflow_got_result;                ///< When we have an optical flow calculation
@@ -121,7 +121,7 @@ void opticflow_module_run(void)
   // Update the stabilization loops on the current calculation
   if (opticflow_got_result) {
     uint32_t now_ts = get_sys_time_usec();
-    uint8_t quality = opticflow_result.divergence; // FIXME, scale to some quality measure 0-255
+    uint8_t quality = opticflow_result.surface_roughness; // FIXME, scale to some quality measure 0-255
     AbiSendMsgOPTICAL_FLOW(OPTICFLOW_SENDER_ID, now_ts,
                            opticflow_result.flow_x,
                            opticflow_result.flow_y,
