@@ -34,6 +34,8 @@
 #include "guidance_h.h"
 #include "guidance_v.h"
 
+#include "downlink.h"
+
 #ifndef FOE_GAIN
 #define FOE_GAIN 0.1
 #endif
@@ -42,7 +44,7 @@
 #define FOE_CMD 0
 #endif
 
-static struct Int32Vect2 FOE;       // focus of expansion measured from the center of the image
+static struct FloatVect2 FOE;       // focus of expansion measured from the center of the image
 static struct FloatVect2 vel_sp;    // velocity set-point
 
 float gain;                         // control gain for FOE controller
@@ -69,4 +71,7 @@ void div_ctrl_run(void) {
   // set x,y velocity set-point with fixed alt
   guidance_h_set_guided_body_vel(vel_sp.x, vel_sp.y);
   guidance_v_set_guided_z(1.5);
+
+  uint8_t msg[] = {(uint8_t)(FOE.x*opticflow.img_gray.w), (uint8_t)(FOE.y*opticflow.img_gray.h), vel_sp.x*100, vel_sp.y*100};
+  DOWNLINK_SEND_DEBUG(DefaultChannel, DefaultDevice, 4, msg);
 }
