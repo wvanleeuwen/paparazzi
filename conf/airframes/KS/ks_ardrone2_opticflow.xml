@@ -37,7 +37,7 @@
     <module name="bat_voltage_ardrone2.xml"/>
     <module name="video_thread"/>
     <module name="cv_opticflow">
-      <define name="OPTICFLOW_CAMERA" value="front_camera"/>
+      <define name="OPTICFLOW_CAMERA" value="bottom_camera"/>
       <define name="OPTICFLOW_METHOD" value="0"/>
       <!--define name="MAX_HORIZON" value="4"/-->
     </module>

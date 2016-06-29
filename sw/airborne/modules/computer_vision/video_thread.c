@@ -74,7 +74,7 @@ void video_thread_periodic(void)
 
 /**
  * Handles all the video streaming and saving of the image shots
- * This is a sepereate thread, so it needs to be thread safe!
+ * This is a separate thread, so it needs to be thread safe!
  */
 static void *video_thread_function(void *data)
 {
@@ -100,12 +100,14 @@ static void *video_thread_function(void *data)
 
   // be nice to the more important stuff
   set_nice_level(VIDEO_THREAD_NICE_LEVEL);
-  fprintf(stdout, "[%s] Set nice level to %i.\n", print_tag, VIDEO_THREAD_NICE_LEVEL);
+  fprintf(stdout, "[%s] Set nice level to %i\n", print_tag, VIDEO_THREAD_NICE_LEVEL);
 
   // Initialize timing
   struct timespec time_now;
   struct timespec time_prev;
   clock_gettime(CLOCK_MONOTONIC, &time_prev);
+
+  struct image_t img;
 
   // Start streaming
   vid->thread.is_running = true;
@@ -127,7 +129,6 @@ static void *video_thread_function(void *data)
     }
 
     // Wait for a new frame (blocking)
-    struct image_t img;
     v4l2_image_get(vid->thread.dev, &img);
 
     // pointer to the final image to pass for saving and further processing

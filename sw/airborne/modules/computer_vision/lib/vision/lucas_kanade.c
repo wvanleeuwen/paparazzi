@@ -73,6 +73,7 @@ struct flow_t *opticFlowLK(struct image_t *new_img, struct image_t *old_img, str
 {
 
   // if no pyramids, use the old code:
+  //todo kirk why do this, why not just run with pyramid = 0?
   if (pyramid_level == 0) {
     // use the old code in this case:
     return opticFlowLK_flat(new_img, old_img, points, points_cnt, half_window_size, subpixel_factor, max_iterations,

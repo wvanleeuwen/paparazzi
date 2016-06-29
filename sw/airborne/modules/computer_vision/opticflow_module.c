@@ -143,26 +143,22 @@ void opticflow_module_run(void)
 
 /**
  * The main optical flow calculation thread
- * This thread passes the images trough the optical flow
+ * This thread passes the images through the optical flow
  * calculator
  * @param[in] *img The image_t structure of the captured image
  * @return *img The processed image structure
  */
 static struct image_t *opticflow_module_calc(struct image_t *img)
 {
-
+  printf("calc\n\n\n");
   // update state from
   // TODO: This assumes fixed body to cam rotation, rotate state here.
   opticflow_state.phi = stateGetNedToBodyEulers_f()->phi;
   opticflow_state.theta = stateGetNedToBodyEulers_f()->theta;
 
-  // Copy the state
-  struct opticflow_state_t temp_state;
-  memcpy(&temp_state, &opticflow_state, sizeof(struct opticflow_state_t));
-
   // Do the optical flow calculation
   struct opticflow_result_t temp_result = {}; // new initialization
-  opticflow_calc_frame(&opticflow, &temp_state, img, &temp_result);
+  opticflow_calc_frame(&opticflow, &opticflow_state, img, &temp_result);
 
   // Copy the result if finished
   pthread_mutex_lock(&opticflow_mutex);
