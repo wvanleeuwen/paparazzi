@@ -425,7 +425,7 @@ void image_gradients(struct image_t *input, struct image_t *dx, struct image_t *
   int16_t *dx_buf = (int16_t *)dx->buf;
   int16_t *dy_buf = (int16_t *)dy->buf;
 
-  // Go trough all pixels except the borders
+  // Go through all pixels except the borders
   for (uint16_t x = 1; x < input->w - 1; x++) {
     for (uint16_t y = 1; y < input->h - 1; y++) {
       dx_buf[(y - 1)*dx->w + (x - 1)] = (int16_t)input_buf[y * input->w + x + 1] - (int16_t)input_buf[y * input->w + x - 1];
@@ -440,7 +440,7 @@ void image_gradients(struct image_t *input, struct image_t *dx, struct image_t *
  * This is used for optical flow calculation.
  * @param[in] *dx The gradient in the X direction
  * @param[in] *dy The gradient in the Y direction
- * @param[out] *g The G[4] vector devided by 255 to keep in range
+ * @param[out] *g The G[4] vector divided by 255 to keep in range for later computations
  */
 void image_calculate_g(struct image_t *dx, struct image_t *dy, int32_t *g)
 {

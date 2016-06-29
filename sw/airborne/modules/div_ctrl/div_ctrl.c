@@ -20,24 +20,24 @@
 /**
  * @file "modules/div_ctrl/div_ctrl.c"
  * @author Kirk Scheper
- * 
+ *
  */
 
 #include "modules/div_ctrl/div_ctrl.h"
 
-#include "pprz_algebra_int.h"
-#include "pprz_algebra_float.h"
+#include "math/pprz_algebra_int.h"
+#include "math/pprz_algebra_float.h"
 
 #include "opticflow_module.h"
 
 #include "generated/flight_plan.h"
-#include "guidance_h.h"
-#include "guidance_v.h"
+#include "guidance/guidance_h.h"
+#include "guidance/guidance_v.h"
 
-#include "downlink.h"
+#include "subsystems/datalink/downlink.h"
 
 #ifndef FOE_GAIN
-#define FOE_GAIN 0.1
+#define FOE_GAIN 0.05
 #endif
 
 #ifndef FOE_CMD
@@ -50,28 +50,38 @@ static struct FloatVect2 vel_sp;    // velocity set-point
 float gain;                         // control gain for FOE controller
 float foe_cmd;                      // reference FOE x-location command
 
-void div_ctrl_init(void) {
+void div_ctrl_init(void)
+{
   FOE.x = 0;
   FOE.y = 0;
 
-  vel_sp.x = 0.;
-  vel_sp.y = 0.5;   // fixed foward speed
+  vel_sp.x = 0.5; // fixed forward speed
+  vel_sp.y = 0.;
 
   gain = FOE_GAIN;
   foe_cmd = FOE_CMD;
 }
 
-void div_ctrl_run(void) {
-  // FOE is x intercept of flow field
-  FOE.x = -(float)opticflow_result.flow_der_x / (opticflow_result.divergence * opticflow.img_gray.w);
-  FOE.y = -(float)opticflow_result.flow_der_y / (opticflow_result.divergence * opticflow.img_gray.h);
+void div_ctrl_run(void)
+{
+  // FOE is x intercept of flow field, rotate camera to x positive right, y positive up
+  FOE.x = -(float)opticflow_result.flow_x / (opticflow_result.divergence * (float)opticflow.img_gray.w *
+          (float)opticflow.subpixel_factor);
+  FOE.y = -(float)opticflow_result.flow_y / (opticflow_result.divergence * (float)opticflow.img_gray.h *
+          (float)opticflow.subpixel_factor);
 
-  vel_sp.x = gain*(foe_cmd - FOE.x);
+  vel_sp.y = gain * (foe_cmd - FOE.x);
+
+  BoundAbs(vel_sp.y, 1);
 
   // set x,y velocity set-point with fixed alt
-  guidance_h_set_guided_body_vel(vel_sp.x, vel_sp.y);
-  guidance_v_set_guided_z(1.5);
+  if (stateGetSpeedEnu_f()->x > 0.3) {
+    guidance_h_set_guided_body_vel(vel_sp.x, vel_sp.y);
+  } else {
+    guidance_h_set_guided_body_vel(vel_sp.x, 0.);
+  }
+  guidance_v_set_guided_z(-1.5);
 
-  uint8_t msg[] = {(uint8_t)(FOE.x*opticflow.img_gray.w), (uint8_t)(FOE.y*opticflow.img_gray.h), vel_sp.x*100, vel_sp.y*100};
-  DOWNLINK_SEND_DEBUG(DefaultChannel, DefaultDevice, 4, msg);
+  uint8_t msg[] = {(uint8_t)(opticflow_result.focus_of_expansion.x), (uint8_t)(opticflow_result.focus_of_expansion.y), (uint8_t)(FOE.x * opticflow.img_gray.w), (uint8_t)(FOE.y * opticflow.img_gray.h), vel_sp.x * 100, vel_sp.y * 100};
+  DOWNLINK_SEND_DEBUG(DefaultChannel, DefaultDevice, 6, msg);
 }

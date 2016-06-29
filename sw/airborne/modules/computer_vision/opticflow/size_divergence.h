@@ -24,18 +24,17 @@
 
 /**
  * @file modules/computer_vision/opticflow/size_divergence.h
- * @brief Calculate divergence from flow vectors by looking at line sizes beteween the points.
+ * @brief Calculate divergence from flow vectors by looking at line sizes between the points.
  *
  * Uses optical flow vectors as determined with a corner tracker and Lucas Kanade to estimate divergence.
  */
 
-#include "lib/vision/image.h"
-
 #ifndef SIZE_DIVERGENCE
 #define SIZE_DIVERGENCE
 
-float get_size_divergence(struct flow_t *vectors, int count, int n_samples);
-float get_mean(float *numbers, int n_elements);
+#include "lib/vision/image.h"
+
+extern float get_size_divergence(struct flow_t *vectors, uint16_t count, uint16_t n_samples);
 
 #endif
 

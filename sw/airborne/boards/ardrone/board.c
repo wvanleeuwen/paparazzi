@@ -48,8 +48,12 @@ struct video_config_t front_camera = {
   .format = V4L2_PIX_FMT_UYVY,
   .buf_cnt = 10,
   .filters = 0,
-  .pointer_to_first_listener=NULL,
-  .fps = 0
+  .pointer_to_first_listener = NULL,
+  .fps = 0,
+  .body_to_cam.eulers_f.phi = 90.,
+  .body_to_cam.eulers_f.theta = 0.,
+  .body_to_cam.eulers_f.psi = 90.,
+  .body_to_cam.status = (1 << ORREP_EULER_F)
 };
 
 
@@ -61,8 +65,12 @@ struct video_config_t bottom_camera = {
   .format = V4L2_PIX_FMT_UYVY,
   .buf_cnt = 10,
   .filters = 0,
-  .pointer_to_first_listener=NULL,
-  .fps = 0
+  .pointer_to_first_listener = NULL,
+  .fps = 0,
+  .body_to_cam.eulers_f.phi = 0.,
+  .body_to_cam.eulers_f.theta = 0.,
+  .body_to_cam.eulers_f.psi = 90.,
+  .body_to_cam.status = (1 << ORREP_EULER_F)
 };
 
 int KillGracefully(char *process_name);

@@ -142,9 +142,9 @@ static inline float pythag(float a, float b)
  * @param v output square matrix V [n x n]
  * @param m number of rows of input the matrix
  * @param n number of columns of the input matrix
- * @return 0 (false) if convergence failed, 1 (true) if decomposition succed
+ * @return false if convergence failed, true if decomposition succeeded
  */
-int pprz_svd_float(float **a, float *w, float **v, int m, int n)
+bool pprz_svd_float(float **a, float *w, float **v, int m, int n)
 {
   /* Householder reduction to bidiagonal form. */
   int flag, i, its, j, jj, k, l, NM;
@@ -356,7 +356,7 @@ int pprz_svd_float(float **a, float *w, float **v, int m, int n)
 
       if (its >= 30) {
         // No convergence in 30 iterations
-        return 0;
+        return false;
       }
 
       X = w[l];
@@ -422,7 +422,7 @@ int pprz_svd_float(float **a, float *w, float **v, int m, int n)
     }
   }
 
-  return 1;
+  return true;
 }
 
 /** SVD based linear solver

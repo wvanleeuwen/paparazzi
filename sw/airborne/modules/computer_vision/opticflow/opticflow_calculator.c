@@ -27,14 +27,10 @@
  * Using images from a vertical camera and IMU sensor data.
  */
 
-#include "std.h"
-
-#include <stdio.h>
-#include <string.h>
-#include <stdlib.h>
-
 // Own Header
 #include "opticflow_calculator.h"
+
+#include <stdlib.h>
 
 // Computer Vision
 #include "lib/vision/image.h"
@@ -197,27 +193,22 @@ void opticflow_calc_init(struct opticflow_t *opticflow, uint16_t w, uint16_t h)
 /**
  * Run the optical flow with fast9 and lukaskanade on a new image frame
  * @param[in] *opticflow The opticalflow structure that keeps track of previous images
- * @param[in] *state The state of the drone
+ * @param[in] *state The state of the drone // todo change to state of camera
  * @param[in] *img The image frame to calculate the optical flow from
  * @param[out] *result The optical flow result
  */
 void calc_fast9_lukas_kanade(struct opticflow_t *opticflow, struct opticflow_state_t *state, struct image_t *img,
                              struct opticflow_result_t *result)
 {
-  if (opticflow->just_switched_method) {
-    opticflow_calc_init(opticflow, img->w, img->h);
-  }
-
   // variables for size_divergence:
-  float size_divergence; int n_samples;
+  float size_divergence;
+  uint16_t n_samples;
 
   // variables for linear flow fit:
-  float error_threshold; int n_iterations_RANSAC, n_samples_RANSAC, success_fit; struct linear_flow_fit_info fit_info;
-
-  // Update FPS for information
-  result->fps = 1 / (timeval_diff(&opticflow->prev_timestamp, &img->ts) / 1000.);
-  memcpy(&opticflow->prev_timestamp, &img->ts, sizeof(struct timeval));
-  printf("FPS = %f\n", result->fps);
+  float error_threshold;
+  uint16_t n_iterations_RANSAC, n_samples_RANSAC;
+  bool success_fit;
+  struct linear_flow_fit_info fit_info;
 
   // Convert image to grayscale
   image_to_grayscale(img, &opticflow->img_gray);
@@ -226,8 +217,8 @@ void calc_fast9_lukas_kanade(struct opticflow_t *opticflow, struct opticflow_sta
   if (!opticflow->got_first_img) {
     image_copy(&opticflow->img_gray, &opticflow->prev_img_gray);
     opticflow->got_first_img = true;
+    return;
   }
-
 
   // *************************************************************************************
   // Corner detection
@@ -242,7 +233,7 @@ void calc_fast9_lukas_kanade(struct opticflow_t *opticflow, struct opticflow_sta
   // Adaptive threshold
   if (opticflow->fast9_adaptive) {
     // Decrease and increase the threshold based on previous values
-    if (result->corner_cnt < 40 && opticflow->fast9_threshold > FAST9_LOW_THRESHOLD) { // TODO: Replace 40 with OPTICFLOW_MAX_TRACK_CORNERS / 2
+    if (result->corner_cnt < OPTICFLOW_MAX_TRACK_CORNERS / 2 && opticflow->fast9_threshold > FAST9_LOW_THRESHOLD) {
       opticflow->fast9_threshold--;
     } else if (result->corner_cnt > OPTICFLOW_MAX_TRACK_CORNERS * 2 && opticflow->fast9_threshold < FAST9_HIGH_THRESHOLD) {
       opticflow->fast9_threshold++;
@@ -253,7 +244,7 @@ void calc_fast9_lukas_kanade(struct opticflow_t *opticflow, struct opticflow_sta
   image_show_points(img, corners, result->corner_cnt);
 #endif
 
-  // Check if we found some corners to track 
+  // Check if we found some corners to track
   if (result->corner_cnt < 1) {
     free(corners);
     image_copy(&opticflow->img_gray, &opticflow->prev_img_gray);
@@ -296,13 +287,15 @@ void calc_fast9_lukas_kanade(struct opticflow_t *opticflow, struct opticflow_sta
       fit_info.surface_roughness = 0.0f;
     }
 
-    result->divergence = fit_info.divergence;
+    // TODO confirm scaling of analyse_linear_flow_field parameters
+    result->divergence = fit_info.divergence / opticflow->subpixel_factor;
     result->surface_roughness = fit_info.surface_roughness;
+    result->focus_of_expansion.x = fit_info.focus_of_expansion_x / opticflow->subpixel_factor;
+    result->focus_of_expansion.y = fit_info.focus_of_expansion_y / opticflow->subpixel_factor;
   } else {
     result->divergence = 0.0f;
     result->surface_roughness = 0.0f;
   }
-
 
   // Get the median flow
   qsort(vectors, result->tracked_cnt, sizeof(struct flow_t), cmp_flow);
@@ -310,7 +303,15 @@ void calc_fast9_lukas_kanade(struct opticflow_t *opticflow, struct opticflow_sta
     // We got no flow
     result->flow_x = 0;
     result->flow_y = 0;
-  } else if (result->tracked_cnt > 3) {
+  } else if (result->tracked_cnt % 2 == 0) {
+    // Take the average of the 2 median points
+    result->flow_x = vectors[result->tracked_cnt / 2 - 1].flow_x;
+    result->flow_y = vectors[result->tracked_cnt / 2 - 1].flow_y;
+    result->flow_x += vectors[result->tracked_cnt / 2].flow_x;
+    result->flow_y += vectors[result->tracked_cnt / 2].flow_y;
+    result->flow_x /= 2;
+    result->flow_y /= 2;
+  } else if (result->tracked_cnt % 3 == 0) {
     // Take the average of the 3 median points
     result->flow_x = vectors[result->tracked_cnt / 2 - 1].flow_x;
     result->flow_y = vectors[result->tracked_cnt / 2 - 1].flow_y;
@@ -322,19 +323,16 @@ void calc_fast9_lukas_kanade(struct opticflow_t *opticflow, struct opticflow_sta
     result->flow_y /= 3;
   } else {
     // Take the median point
-    result->flow_x = vectors[result->tracked_cnt / 2].flow_x;
-    result->flow_y = vectors[result->tracked_cnt / 2].flow_y;
+    result->flow_x = vectors[0].flow_x;
+    result->flow_y = vectors[0].flow_y;
   }
 
   // Flow Derotation
   float diff_flow_x = 0;
   float diff_flow_y = 0;
 
-  /*// Flow Derotation TODO:
-  float diff_flow_x = (state->phi - opticflow->prev_phi) * img->w / OPTICFLOW_FOV_W;
-  float diff_flow_y = (state->theta - opticflow->prev_theta) * img->h / OPTICFLOW_FOV_H;*/
-
   if (opticflow->derotation) {
+    // TODO change the rotation axis to the axis of the camera i.e. reverse phi and theta here
     diff_flow_x = (state->phi - opticflow->prev_phi) * img->w / OPTICFLOW_FOV_W;
     diff_flow_y = (state->theta - opticflow->prev_theta) * img->h / OPTICFLOW_FOV_H;
   }
@@ -347,14 +345,12 @@ void calc_fast9_lukas_kanade(struct opticflow_t *opticflow, struct opticflow_sta
   // Velocity calculation
   // Right now this formula is under assumption that the flow only exist in the center axis of the camera.
   // TODO Calculate the velocity more sophisticated, taking into account the drone's angle and the slope of the ground plane.
-  float vel_x = result->flow_der_x * result->fps * state->agl / opticflow->subpixel_factor  / OPTICFLOW_FX;
-  float vel_y = result->flow_der_y * result->fps * state->agl / opticflow->subpixel_factor  / OPTICFLOW_FY;
-  result->vel_x = vel_x;
-  result->vel_y = vel_y;
+  result->vel.x = result->flow_der_x * result->fps * state->agl / opticflow->subpixel_factor  / OPTICFLOW_FX;
+  result->vel.y = result->flow_der_y * result->fps * state->agl / opticflow->subpixel_factor  / OPTICFLOW_FY;
 
   // Velocity calculation: uncomment if focal length of the camera is not known or incorrect.
-  //  result->vel_x =  - result->flow_der_x * result->fps * state->agl / opticflow->subpixel_factor * OPTICFLOW_FOV_W / img->w
-  //  result->vel_y =  result->flow_der_y * result->fps * state->agl / opticflow->subpixel_factor * OPTICFLOW_FOV_H / img->h
+  // result->vel.x =  - result->flow_der_x * result->fps * state->agl / opticflow->subpixel_factor * OPTICFLOW_FOV_W / img->w
+  // result->vel.y =  result->flow_der_y * result->fps * state->agl / opticflow->subpixel_factor * OPTICFLOW_FOV_H / img->h
 
 
   // Determine quality of noise measurement for state filter
@@ -376,7 +372,7 @@ void calc_fast9_lukas_kanade(struct opticflow_t *opticflow, struct opticflow_sta
 /**
  * Run the optical flow with EDGEFLOW on a new image frame
  * @param[in] *opticflow The opticalflow structure that keeps track of previous images
- * @param[in] *state The state of the drone
+ * @param[in] *state The state of the drone // todo change to state of camera
  * @param[in] *img The image frame to calculate the optical flow from
  * @param[out] *result The optical flow result
  */
@@ -386,23 +382,24 @@ void calc_edgeflow_tot(struct opticflow_t *opticflow, struct opticflow_state_t *
   // Define Static Variables
   static struct edge_hist_t edge_hist[MAX_HORIZON];
   static uint8_t current_frame_nr = 0;
-  struct edge_flow_t edgeflow;
   static uint8_t previous_frame_offset[2] = {1, 1};
+  static struct edgeflow_displacement_t displacement = {NULL, NULL};
 
   // Define Normal variables
-  struct edgeflow_displacement_t displacement;
-  displacement.x = malloc(sizeof(int32_t) * img->w);
-  displacement.y = malloc(sizeof(int32_t) * img->h);
+  struct edge_flow_t edgeflow;
 
-  // If the methods just switched to this one, reintialize the
-  // array of edge_hist structure.
-  if (opticflow->just_switched_method == 1) {
-    int i;
+  // If first time called allocate array buffers.
+  // This assumes the image size will not change during runtime
+  if (displacement.x == NULL) {
+    displacement.x = calloc(img->w, sizeof(int32_t));
+    displacement.y = calloc(img->h, sizeof(int32_t));
+
+    uint8_t i;
     for (i = 0; i < MAX_HORIZON; i++) {
-      edge_hist[i].x = malloc(sizeof(int32_t) * img->w);
-      edge_hist[i].y = malloc(sizeof(int32_t) * img->h);
-      edge_hist[i].roll = 0.0f;
-      edge_hist[i].pitch = 0.0f;
+      edge_hist[i].x = calloc(img->w, sizeof(int32_t));
+      edge_hist[i].y = calloc(img->h, sizeof(int32_t));
+      edge_hist[i].roll = 0.;
+      edge_hist[i].pitch = 0.;
     }
   }
 
@@ -414,14 +411,11 @@ void calc_edgeflow_tot(struct opticflow_t *opticflow, struct opticflow_state_t *
   }
 
   uint16_t window_size;
-
   if (opticflow->window_size < MAX_WINDOW_SIZE) {
     window_size = opticflow->window_size;
   } else {
     window_size = MAX_WINDOW_SIZE;
   }
-
-  uint16_t RES = opticflow->subpixel_factor;
 
   //......................Calculating EdgeFlow..................... //
 
@@ -430,7 +424,6 @@ void calc_edgeflow_tot(struct opticflow_t *opticflow, struct opticflow_state_t *
   int32_t *edge_hist_y = edge_hist[current_frame_nr].y;
   calculate_edge_histogram(img, edge_hist_x, 'x', 0);
   calculate_edge_histogram(img, edge_hist_y, 'y', 0);
-
 
   // Copy frame time and angles of image to calculated edge histogram
   memcpy(&edge_hist[current_frame_nr].frame_time, &img->ts, sizeof(struct timeval));
@@ -449,6 +442,8 @@ void calc_edgeflow_tot(struct opticflow_t *opticflow, struct opticflow_state_t *
   int16_t der_shift_x = 0;
   int16_t der_shift_y = 0;
 
+  // TODO doesn't allow for rotated and derotated outputs
+  // TODO change the rotation axis to the axis of the camera i.e. reverse phi and theta here
   if (opticflow->derotation) {
     der_shift_x = -(int16_t)((edge_hist[previous_frame_nr[0]].roll - edge_hist[current_frame_nr].roll) *
                              (float)img->w / (OPTICFLOW_FOV_W));
@@ -467,56 +462,50 @@ void calc_edgeflow_tot(struct opticflow_t *opticflow, struct opticflow_state_t *
   // Fit a line on the pixel displacement to estimate
   // the global pixel flow and divergence (RES is resolution)
   result->surface_roughness = line_fit(displacement.x, &edgeflow.div_x,
-           &edgeflow.flow_x, img->w,
-           window_size + disp_range, RES);
+                                       &edgeflow.flow_x, img->w,
+                                       window_size + disp_range, opticflow->subpixel_factor);
   result->surface_roughness += line_fit(displacement.y, &edgeflow.div_y,
-           &edgeflow.flow_y, img->h,
-           window_size + disp_range, RES);
+                                        &edgeflow.flow_y, img->h,
+                                        window_size + disp_range, opticflow->subpixel_factor);
 
-  result->surface_roughness /= 2.*RES;
+  result->surface_roughness /= 2.*(float)opticflow->subpixel_factor;
 
   /* Save Resulting flow in results
    * Warning: The flow detected here is different in sign
-   * and size, therefore this will be multiplied with
-   * the same subpixel factor and -1 to make it on par with
-   * the LK algorithm of t opticalflow_calculator.c
+   * to that in the LK algorithm of the opticalflow_calculator.c
+   * following lines rotate frame to be the same
    * */
+  // TODO define axis system of camera
   edgeflow.flow_x = -1 * edgeflow.flow_x;
   edgeflow.flow_y = -1 * edgeflow.flow_y;
 
   result->flow_x = (int16_t)edgeflow.flow_x / previous_frame_offset[0];
   result->flow_y = (int16_t)edgeflow.flow_y / previous_frame_offset[1];
 
-  //Fill up the results optic flow to be on par with LK_fast9
+  // Fill up the results optic flow to be on par with LK_fast9
   result->flow_der_x =  result->flow_x;
   result->flow_der_y =  result->flow_y;
   result->corner_cnt = getAmountPeaks(edge_hist_x, 500 , img->w);
   result->tracked_cnt = result->corner_cnt;
-  result->divergence = (float)(edgeflow.div_x + edgeflow.div_y) / (2*RES);
-  result->div_size = 0.0f;
-  result->noise_measurement = (float)result->tracked_cnt/((float)img->w);
+  result->divergence = (float)(edgeflow.div_x + edgeflow.div_y) / (2.*(float)opticflow->subpixel_factor);
+  result->div_size = result->divergence;
+  result->noise_measurement = (float)result->tracked_cnt / ((float)img->w);
 
   //......................Calculating VELOCITY ..................... //
 
-  /*Estimate fps per direction
+  /* Estimate fps per direction
    * This is the fps with adaptive horizon for subpixel flow, which is not similar
    * to the loop speed of the algorithm. The faster the quadcopter flies
    * the higher it becomes
   */
-  float fps_x = 0;
-  float fps_y = 0;
   float time_diff_x = (float)(timeval_diff(&edge_hist[previous_frame_nr[0]].frame_time, &img->ts)) / 1000.;
   float time_diff_y = (float)(timeval_diff(&edge_hist[previous_frame_nr[1]].frame_time, &img->ts)) / 1000.;
-  fps_x = 1 / (time_diff_x);
-  fps_y = 1 / (time_diff_y);
-
-  result->fps = fps_x;
+  float fps_x = 1 / (time_diff_x);
+  float fps_y = 1 / (time_diff_y);
 
   // Calculate velocity
-  float vel_x = edgeflow.flow_x * fps_x * state->agl * OPTICFLOW_FOV_W / (img->w * RES);
-  float vel_y = edgeflow.flow_y * fps_y * state->agl * OPTICFLOW_FOV_H / (img->h * RES);
-  result->vel_x = vel_x;
-  result->vel_y = vel_y;
+  result->vel.x = edgeflow.flow_x * fps_x * state->agl * OPTICFLOW_FOV_W / (img->w * opticflow->subpixel_factor);
+  result->vel.y = edgeflow.flow_y * fps_y * state->agl * OPTICFLOW_FOV_H / (img->h * opticflow->subpixel_factor);
 
 #if OPTICFLOW_SHOW_FLOW
   draw_edgeflow_img(img, edgeflow, prev_edge_histogram_x, edge_hist_x);
@@ -529,33 +518,24 @@ void calc_edgeflow_tot(struct opticflow_t *opticflow, struct opticflow_state_t *
 /**
  * Run the optical flow on a new image frame
  * @param[in] *opticflow The opticalflow structure that keeps track of previous images
- * @param[in] *state The state of the drone
+ * @param[in] *state The state of the drone // todo change to state of camera
  * @param[in] *img The image frame to calculate the optical flow from
  * @param[out] *result The optical flow result
  */
 void opticflow_calc_frame(struct opticflow_t *opticflow, struct opticflow_state_t *state, struct image_t *img,
                           struct opticflow_result_t *result)
 {
-
-  // A switch counter that checks in the loop if the current method is similar,
-  // to the previous (for reinitializing structs)
-  static int8_t switch_counter = -1;
-  if (switch_counter != opticflow->method) {
-    opticflow->just_switched_method = true;
-    switch_counter = opticflow->method;
-  } else {
-    opticflow->just_switched_method = false;
-  }
+  // Update FPS for information
+  result->fps = 1 / (timeval_diff(&opticflow->prev_timestamp, &img->ts) / 1000.);
+  memcpy(&opticflow->prev_timestamp, &img->ts, sizeof(struct timeval));
 
   // Switch between methods (0 = fast9/lukas-kanade, 1 = EdgeFlow)
   if (opticflow->method == 0) {
     calc_fast9_lukas_kanade(opticflow, state, img, result);
+  } else if (opticflow->method == 1) {
+    calc_edgeflow_tot(opticflow, state, img, result);
   } else {
-    if (opticflow->method == 1) {
-      calc_edgeflow_tot(opticflow, state, img, result);
-    } else {}
   }
-
 }
 
 /**

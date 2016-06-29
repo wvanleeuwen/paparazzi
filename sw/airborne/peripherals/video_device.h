@@ -29,6 +29,7 @@
 #include <stdbool.h>
 #include <inttypes.h>
 #include "modules/computer_vision/lib/vision/image.h"
+#include "math/pprz_orientation_conversion.h"
 
 #define VIDEO_FILTER_DEBAYER 0x01
 
@@ -57,6 +58,7 @@ struct video_config_t {
   struct video_thread_t thread; ///< Information about the thread this camera is running on
   struct video_listener *pointer_to_first_listener; ///< The first listener in the linked list for this video device
   int fps;
+  struct OrientationReps body_to_cam; ///< rotation matrix to rotate from body to camera axis frame
 };
 extern struct video_config_t dummy_camera;
 
