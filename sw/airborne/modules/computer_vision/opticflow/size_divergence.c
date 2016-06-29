@@ -41,6 +41,10 @@
  */
 static float get_mean(float *numbers, uint16_t n_elements)
 {
+  if (n_elements == 0){
+    return 0.;
+  }
+
   uint16_t i = 0;
   float mean = 0.;
   for (i = 0; i < n_elements; i++) {
@@ -94,7 +98,12 @@ float get_size_divergence(struct flow_t *vectors, uint16_t count, uint16_t n_sam
         distance_2 = sqrtf(dx * dx + dy * dy);
 
         // calculate divergence for this sample:
-        divs[sample] = (distance_2 - distance_1) / distance_1;
+        if (distance_1 > 0)
+        {
+          divs[sample] = (distance_2 - distance_1) / distance_1;
+        } else {
+          divs[sample] = 0.;
+        }
         sample++;
       }
     }
@@ -122,9 +131,13 @@ float get_size_divergence(struct flow_t *vectors, uint16_t count, uint16_t n_sam
       dy = (float)vectors[i].pos.y + (float)vectors[i].flow_y - (float)vectors[j].pos.y - (float)vectors[j].flow_y;
       distance_2 = sqrtf(dx * dx + dy * dy);
 
-
       // calculate divergence for this sample:
-      divs[sample] = (distance_2 - distance_1) / distance_1;
+      if (distance_1 > 0)
+      {
+        divs[sample] = (distance_2 - distance_1) / distance_1;
+      } else {
+        divs[sample] = 0.;
+      }
     }
   }
 

@@ -11,6 +11,7 @@
       <configure name="MODEM_BROADCAST" value="FALSE"/>
       <configure name="USE_BARO_BOARD" value="FALSE"/>
       <configure name="USE_SONAR" value="TRUE"/>
+      <define name="SENSOR_SYNC_SEND_SONAR" value="TRUE"/>
     </target>
 
     <target name="nps" board="pc">
@@ -209,7 +210,7 @@
 
   <section name="AUTOPILOT">
     <define name="MODE_STARTUP" value="AP_MODE_NAV"/>
-    <define name="MODE_MANUAL" value="AP_MODE_HOVER_DIRECT"/>
+    <define name="MODE_MANUAL" value="AP_MODE_ATTITUDE_DIRECT"/>
     <define name="MODE_AUTO1" value="AP_MODE_GUIDED"/>
     <define name="MODE_AUTO2" value="AP_MODE_NAV"/>
     <define name="ARRIVED_AT_WAYPOINT" value="0.15"/>

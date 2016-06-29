@@ -273,6 +273,7 @@ void calc_fast9_lukas_kanade(struct opticflow_t *opticflow, struct opticflow_sta
   } else {
     result->div_size = 0.0f;
   }
+
   if (LINEAR_FIT) {
     // Linear flow fit (normally derotation should be performed before):
     error_threshold = 10.0f;
@@ -310,7 +311,7 @@ void calc_fast9_lukas_kanade(struct opticflow_t *opticflow, struct opticflow_sta
     result->flow_y += vectors[result->tracked_cnt / 2].flow_y;
     result->flow_x /= 2;
     result->flow_y /= 2;
-  } else if (result->tracked_cnt % 3 == 0) {
+  } else if (result->tracked_cnt > 3) {
     // Take the average of the 3 median points
     result->flow_x = vectors[result->tracked_cnt / 2 - 1].flow_x;
     result->flow_y = vectors[result->tracked_cnt / 2 - 1].flow_y;

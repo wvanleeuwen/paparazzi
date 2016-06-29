@@ -260,10 +260,10 @@ void fit_linear_flow_field(struct flow_t *vectors, uint16_t count, float error_t
   // for horizontal flow:
   uint16_t param;
   uint16_t min_ind = 0;
-  *min_error_u = (float)errors_pu[0];
+  *min_error_u = errors_pu[0];
   for (it = 1; it < n_iterations; it++) {
     if (errors_pu[it] < *min_error_u) {
-      *min_error_u = (float)errors_pu[it];
+      *min_error_u = errors_pu[it];
       min_ind = it;
     }
   }
@@ -274,10 +274,10 @@ void fit_linear_flow_field(struct flow_t *vectors, uint16_t count, float error_t
 
   // for vertical flow:
   min_ind = 0;
-  *min_error_v = (float)errors_pv[0];
+  *min_error_v = errors_pv[0];
   for (it = 0; it < n_iterations; it++) {
     if (errors_pv[it] < *min_error_v) {
-      *min_error_v = (float)errors_pv[it];
+      *min_error_v = errors_pv[it];
       min_ind = it;
     }
   }
@@ -293,7 +293,7 @@ void fit_linear_flow_field(struct flow_t *vectors, uint16_t count, float error_t
   MAT_SUB(count, 1, C, bb, bu_all);
   *min_error_u = 0;
   for (p = 0; p < count; p++) {
-    *min_error_u += fabs(C[p][0]);
+    *min_error_u += fabsf(C[p][0]);
   }
   // bb = AA * pv:
   MAT_MUL(count, 3, 1, bb, AA, pv);
@@ -301,7 +301,7 @@ void fit_linear_flow_field(struct flow_t *vectors, uint16_t count, float error_t
   MAT_SUB(count, 1, C, bb, bv_all);
   *min_error_v = 0;
   for (p = 0; p < count; p++) {
-    *min_error_v += fabs(C[p][0]);
+    *min_error_v += fabsf(C[p][0]);
   }
   *fit_error = (*min_error_u + *min_error_v) / (2 * count);
 }
@@ -340,6 +340,7 @@ void extract_information_from_parameters(float *parameters_u, float *parameters_
   float threshold_slope = 1.0;
   float eta = 0.002;
 
+  // TODO check divide by zero below
   if (fabsf(parameters_v[1]) < eta && arv_y < threshold_slope && arv_x >= 2 * threshold_slope) {
     // there is no forward motion and not enough vertical motion, but enough horizontal motion:
     info->slope_x = parameters_u[0] / info->relative_velocity_x;

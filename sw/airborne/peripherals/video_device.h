@@ -57,7 +57,7 @@ struct video_config_t {
   uint8_t filters;    ///< filters to use (bitfield with VIDEO_FILTER_x)
   struct video_thread_t thread; ///< Information about the thread this camera is running on
   struct video_listener *pointer_to_first_listener; ///< The first listener in the linked list for this video device
-  int fps;
+  int fps;            ///< Requested frame rate of the video feed (set 0 if request fastest)
   struct OrientationReps body_to_cam; ///< rotation matrix to rotate from body to camera axis frame
 };
 extern struct video_config_t dummy_camera;

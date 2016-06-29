@@ -69,7 +69,7 @@ struct video_config_t bottom_camera = {
   .fps = 0,
   .body_to_cam.eulers_f.phi = 0.,
   .body_to_cam.eulers_f.theta = 0.,
-  .body_to_cam.eulers_f.psi = 90.,
+  .body_to_cam.eulers_f.psi = -90.,
   .body_to_cam.status = (1 << ORREP_EULER_F)
 };
 

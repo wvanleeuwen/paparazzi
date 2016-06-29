@@ -64,6 +64,7 @@ static void opticflow_agl_cb(uint8_t sender_id, float distance);    ///< Callbac
 
 #if PERIODIC_TELEMETRY
 #include "subsystems/datalink/telemetry.h"
+#include "subsystems/gps/gps_datalink.h"
 /**
  * Send optical flow telemetry information
  * @param[in] *trans The transport structure to send the information over
@@ -72,12 +73,15 @@ static void opticflow_agl_cb(uint8_t sender_id, float distance);    ///< Callbac
 static void opticflow_telem_send(struct transport_tx *trans, struct link_device *dev)
 {
   pthread_mutex_lock(&opticflow_mutex);
+
+  float x = gps_datalink.ned_vel.x/100.;
+  float y = gps_datalink.ned_vel.y/100.;
   pprz_msg_send_OPTIC_FLOW_EST(trans, dev, AC_ID,
                                &opticflow_result.fps, &opticflow_result.corner_cnt,
                                &opticflow_result.tracked_cnt, &opticflow_result.flow_x,
                                &opticflow_result.flow_y, &opticflow_result.flow_der_x,
-                               &opticflow_result.flow_der_y, &opticflow_result.vel.x,
-                               &opticflow_result.vel.y, &opticflow_result.div_size,
+                               &opticflow_result.flow_der_y, &x,
+                               &y, &opticflow_result.div_size,
                                &opticflow_result.surface_roughness, &opticflow_result.divergence); // TODO: no noise measurement here...
   pthread_mutex_unlock(&opticflow_mutex);
 }
@@ -129,12 +133,12 @@ void opticflow_module_run(void)
                            opticflow_state.agl);
     //TODO Find an appropiate quality measure for the noise model in the state filter, for now it is tracked_cnt
     if (opticflow_result.tracked_cnt > 0) {
-      /*AbiSendMsgVELOCITY_ESTIMATE(OPTICFLOW_SENDER_ID, now_ts,
+      AbiSendMsgVELOCITY_ESTIMATE(OPTICFLOW_SENDER_ID, now_ts,
                                   opticflow_result.vel_body.x,
                                   opticflow_result.vel_body.y,
                                   0.0f,
                                   opticflow_result.noise_measurement
-                                 );*/
+                                 );
     }
     opticflow_got_result = false;
   }
@@ -150,7 +154,6 @@ void opticflow_module_run(void)
  */
 static struct image_t *opticflow_module_calc(struct image_t *img)
 {
-  printf("calc\n\n\n");
   // update state from
   // TODO: This assumes fixed body to cam rotation, rotate state here.
   opticflow_state.phi = stateGetNedToBodyEulers_f()->phi;

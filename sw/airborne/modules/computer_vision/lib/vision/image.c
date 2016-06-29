@@ -469,8 +469,8 @@ void image_calculate_g(struct image_t *dx, struct image_t *dy, int32_t *g)
 /**
  * Calculate the difference between two images and return the error
  * This will only work with grayscale images
- * @param[in] *img_a The image to substract from
- * @param[in] *img_b The image to substract from img_a
+ * @param[in] *img_a The image to subtract from
+ * @param[in] *img_b The image to subtract from img_a
  * @param[out] *diff The image difference (if not needed can be NULL)
  * @return The squared difference summed
  */

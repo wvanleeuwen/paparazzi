@@ -412,8 +412,8 @@ void ins_int_update_gps(struct GpsState *gps_s)
   /* simply copy horizontal pos/speed from gps */
   INT32_VECT2_SCALE_2(ins_int.ltp_pos, gps_pos_cm_ned,
                       INT32_POS_OF_CM_NUM, INT32_POS_OF_CM_DEN);
-  INT32_VECT2_SCALE_2(ins_int.ltp_speed, gps_speed_cm_s_ned,
-                      INT32_SPEED_OF_CM_S_NUM, INT32_SPEED_OF_CM_S_DEN);
+  //INT32_VECT2_SCALE_2(ins_int.ltp_speed, gps_speed_cm_s_ned,
+  //                    INT32_SPEED_OF_CM_S_NUM, INT32_SPEED_OF_CM_S_DEN);
 #endif /* USE_HFF */
 
   ins_ned_to_state();
