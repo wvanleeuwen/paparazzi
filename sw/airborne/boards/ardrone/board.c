@@ -60,6 +60,7 @@ struct video_config_t front_camera = {
 struct video_config_t bottom_camera = {
   .w = 320,
   .h = 240,
+  .fow = {0.89360857702, 0.67020643276},
   .dev_name = "/dev/video2",
   .subdev_name = NULL,
   .format = V4L2_PIX_FMT_UYVY,

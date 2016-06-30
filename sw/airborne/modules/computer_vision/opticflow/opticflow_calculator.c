@@ -52,6 +52,7 @@
 #define LINEAR_FIT 1
 
 // Camera parameters (defaults are from an ARDrone 2)
+// TODO replace with values in video device and determine real values in deg
 #ifndef OPTICFLOW_FOV_W
 #define OPTICFLOW_FOV_W 0.89360857702
 #endif
@@ -86,7 +87,7 @@ PRINT_CONFIG_VAR(OPTICFLOW_WINDOW_SIZE)
 #ifndef OPTICFLOW_SEARCH_DISTANCE
 #define OPTICFLOW_SEARCH_DISTANCE 20
 #endif
-PRINT_CONFIG_VAR(OPTICFLOW_MAX_SEARCH_DISTANCE)
+PRINT_CONFIG_VAR(OPTICFLOW_SEARCH_DISTANCE)
 
 #ifndef OPTICFLOW_SUBPIXEL_FACTOR
 #define OPTICFLOW_SUBPIXEL_FACTOR 10
@@ -126,7 +127,7 @@ PRINT_CONFIG_VAR(OPTICFLOW_FAST9_MIN_DISTANCE)
 #ifndef OPTICFLOW_FAST9_PADDING
 #define OPTICFLOW_FAST9_PADDING 20
 #endif
-PRINT_CONFIG_VAR(OPTICFLOW_FAST9_MIN_DISTANCE)
+PRINT_CONFIG_VAR(OPTICFLOW_FAST9_PADDING)
 
 // thresholds FAST9 that are currently not set from the GCS:
 #define FAST9_LOW_THRESHOLD 5
@@ -147,7 +148,7 @@ PRINT_CONFIG_VAR(OPTICFLOW_METHOD)
 PRINT_CONFIG_VAR(OPTICFLOW_DEROTATION)
 
 #ifndef CAMERA_ROTATED_180
-#define CAMERA_ROTATED 0
+#define CAMERA_ROTATED_180 0
 #endif
 PRINT_CONFIG_VAR(CAMERA_ROTATED_180)
 
@@ -290,7 +291,7 @@ void calc_fast9_lukas_kanade(struct opticflow_t *opticflow, struct opticflow_sta
     // TODO confirm scaling of analyse_linear_flow_field parameters
     result->divergence = fit_info.divergence / opticflow->subpixel_factor;
     result->surface_roughness = fit_info.surface_roughness;
-    result->focus_of_expansion.x = fit_info.focus_of_expansion_x / opticflow->subpixel_factor;
+    result->focus_of_expansion.x = fit_info.focus_of_expansion_x / opticflow->subpixel_factor;  // check
     result->focus_of_expansion.y = fit_info.focus_of_expansion_y / opticflow->subpixel_factor;
   } else {
     result->divergence = 0.0f;
@@ -487,7 +488,7 @@ void calc_edgeflow_tot(struct opticflow_t *opticflow, struct opticflow_state_t *
   result->flow_der_y =  result->flow_y;
   result->corner_cnt = getAmountPeaks(edge_hist_x, 500 , img->w);
   result->tracked_cnt = result->corner_cnt;
-  result->divergence = (float)(edgeflow.div_x + edgeflow.div_y) / (2.*(float)opticflow->subpixel_factor);
+  result->divergence = (float)(edgeflow.div_x + edgeflow.div_y) / ((float)opticflow->subpixel_factor);  // TODO check
   result->div_size = result->divergence;
   result->noise_measurement = (float)result->tracked_cnt / ((float)img->w);
 

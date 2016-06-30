@@ -81,7 +81,7 @@ bool analyze_linear_flow_field(struct flow_t *vectors, uint16_t count, float err
   // surface roughness is equal to fit error:
   info->surface_roughness = info->fit_error;
   info->divergence = 2 * info->relative_velocity_z;
-  float diverg = (fabs(info->divergence) < 1E-5) ? 1E-5 : info->divergence;
+  float diverg = (fabsf(info->divergence) < 1E-5) ? 1E-5 : info->divergence;
   info->time_to_contact = 1.0f / diverg;
 
   // return successful fit:
@@ -105,7 +105,7 @@ bool analyze_linear_flow_field(struct flow_t *vectors, uint16_t count, float err
  */
 void fit_linear_flow_field(struct flow_t *vectors, uint16_t count, float error_threshold, uint16_t n_iterations,
                            uint16_t n_samples, float *parameters_u, float *parameters_v, float *fit_error, float *min_error_u, float *min_error_v,
-                           int *n_inliers_u, int *n_inliers_v)
+                           uint16_t *n_inliers_u, uint16_t *n_inliers_v)
 {
 
   // We will solve systems of the form A x = b,
@@ -168,8 +168,8 @@ void fit_linear_flow_field(struct flow_t *vectors, uint16_t count, float error_t
   errors_pu[0] = 0.0;
   float errors_pv[n_iterations];
   errors_pv[0] = 0.0;
-  int n_inliers_pu[n_iterations];
-  int n_inliers_pv[n_iterations];
+  uint16_t n_inliers_pu[n_iterations];
+  uint16_t n_inliers_pv[n_iterations];
 
   uint16_t it, ii, i_rand, si, p;
   bool add_si;
@@ -275,7 +275,7 @@ void fit_linear_flow_field(struct flow_t *vectors, uint16_t count, float error_t
   // for vertical flow:
   min_ind = 0;
   *min_error_v = errors_pv[0];
-  for (it = 0; it < n_iterations; it++) {
+  for (it = 1; it < n_iterations; it++) {
     if (errors_pv[it] < *min_error_v) {
       *min_error_v = errors_pv[it];
       min_ind = it;
@@ -340,7 +340,6 @@ void extract_information_from_parameters(float *parameters_u, float *parameters_
   float threshold_slope = 1.0;
   float eta = 0.002;
 
-  // TODO check divide by zero below
   if (fabsf(parameters_v[1]) < eta && arv_y < threshold_slope && arv_x >= 2 * threshold_slope) {
     // there is no forward motion and not enough vertical motion, but enough horizontal motion:
     info->slope_x = parameters_u[0] / info->relative_velocity_x;
@@ -374,9 +373,9 @@ void extract_information_from_parameters(float *parameters_u, float *parameters_
     info->focus_of_expansion_x = ((parameters_u[2] * parameters_v[1] - parameters_v[2] * parameters_u[1]) / denominator);
   } else { info->focus_of_expansion_x = 0.0f; }
   // y:
-  denominator = parameters_u[1];
+  denominator = parameters_v[1];
   if (fabsf(denominator) > 1E-5) {
-    info->focus_of_expansion_y = (-(parameters_u[0] * (info->focus_of_expansion_x) + parameters_u[2]) / denominator);
+    info->focus_of_expansion_y = -(parameters_v[0] * (info->focus_of_expansion_x) + parameters_v[2]) / denominator;
   } else { info->focus_of_expansion_y = 0.0f; }
 }
 

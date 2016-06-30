@@ -36,7 +36,7 @@
 #ifndef LINEAR_FLOW_FIT
 #define LINEAR_FLOW_FIT
 
-// structure that contains all outputs of a linear flow field fit:
+// structure that contains all outputs of a linear flow field fit in subpixels:
 struct linear_flow_fit_info {
   float slope_x;      ///< Slope of the surface in x-direction - given sufficient lateral motion
   float slope_y;      ///< Slope of the surface in y-direction - given sufficient lateral motion
@@ -49,8 +49,8 @@ struct linear_flow_fit_info {
   float time_to_contact;    ///< Basically, 1 / relative_velocity_z
   float divergence;   ///< Divergence of a 2D flow field is 2 * relative_velocity_z
   float fit_error;    ///< Error of the fit (same as surface roughness)
-  int n_inliers_u;    ///< Number of inliers in the horizontal flow fit
-  int n_inliers_v;    ///< Number of inliers in the vertical flow fit
+  uint16_t n_inliers_u;    ///< Number of inliers in the horizontal flow fit
+  uint16_t n_inliers_v;    ///< Number of inliers in the vertical flow fit
 };
 
 // This is the function called externally, passing the vector of optical flow vectors and information on the number of vectors and image size:
@@ -60,7 +60,7 @@ bool analyze_linear_flow_field(struct flow_t *vectors, uint16_t count, float err
 // Fits the linear flow field with RANSAC:
 void fit_linear_flow_field(struct flow_t *vectors, uint16_t count, float error_threshold, uint16_t n_iterations,
                            uint16_t n_samples, float *parameters_u, float *parameters_v, float *fit_error, float *min_error_u, float *min_error_v,
-                           int *n_inliers_u, int *n_inliers_v);
+                           uint16_t *n_inliers_u, uint16_t *n_inliers_v);
 
 // Extracts relevant information from the fit parameters:
 void extract_information_from_parameters(float *parameters_u, float *parameters_v, uint16_t im_width,

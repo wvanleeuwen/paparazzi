@@ -681,6 +681,7 @@ bool guidance_h_set_guided_heading(float heading)
 
 bool guidance_h_set_guided_body_vel(float vx, float vy)
 {
+  // TODO: replace with a rotation with state
   struct FloatVect2 vel_enu;
   float psi = stateGetNedToBodyEulers_f()->psi;
   vel_enu.x =  cosf(-psi) * vx + sinf(-psi) * vy;
