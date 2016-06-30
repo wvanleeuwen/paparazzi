@@ -367,7 +367,7 @@ void calc_fast9_lukas_kanade(struct opticflow_t *opticflow, struct opticflow_sta
   // *************************************************************************************
   free(corners);
   free(vectors);
-  image_switch(&opticflow->img_gray, &opticflow->prev_img_gray);
+  image_swap(&opticflow->img_gray, &opticflow->prev_img_gray);
 }
 
 /**
@@ -554,18 +554,18 @@ static uint32_t timeval_diff(struct timeval *starttime, struct timeval *finishti
 }
 
 /**
- * Compare two flow vectors based on flow distance
+ * Compare two flow vectors based on magnitude of flow vector
  * Used for sorting.
  * @param[in] *a The first flow vector (should be vect flow_t)
  * @param[in] *b The second flow vector (should be vect flow_t)
- * @return Negative if b has more flow than a, 0 if the same and positive if a has more flow than b
+ * @return Negative if b larger than a, 0 if the same and positive if a larger than b
  */
 static int cmp_flow(const void *a, const void *b)
 {
   const struct flow_t *a_p = (const struct flow_t *)a;
   const struct flow_t *b_p = (const struct flow_t *)b;
-  return (a_p->flow_x * a_p->flow_x + a_p->flow_y * a_p->flow_y) - (b_p->flow_x * b_p->flow_x + b_p->flow_y *
-         b_p->flow_y);
+  return ((int32_t)a_p->flow_x * a_p->flow_x + (int32_t)a_p->flow_y * a_p->flow_y)
+           - ((int32_t)b_p->flow_x * b_p->flow_x + (int32_t)b_p->flow_y * b_p->flow_y);
 }
 
 

@@ -41,8 +41,13 @@
       <define name="OPTICFLOW_CAMERA" value="bottom_camera"/>
       <define name="OPTICFLOW_METHOD" value="0"/>
       <define name="OPTICFLOW_MAX_TRACK_CORNERS" value="80"/>
+      <define name="OPTICFLOW_DEROTATION" value="0"/>
+      <define name="OPTICFLOW_FAST9_MIN_DISTANCE" value="0"/>
       <!--define name="MAX_HORIZON" value="4"/-->
     </module>
+    <!--module name="video_rtp_stream">
+      <define name="VIEWVIDEO_CAMERA" value="bottom_camera"/>
+    </module-->
     <module name="div_ctrl.xml"/>
   </modules>
 
