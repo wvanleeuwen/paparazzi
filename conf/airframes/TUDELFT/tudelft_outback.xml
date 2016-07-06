@@ -127,10 +127,10 @@
     <set servo="SW_RIGHTFRONT" value="swashplate_mixing.commands[SW_RIGHTFRONT]"/>
     <set servo="TAIL_LEFT" value="($th_hold? 0 : (-@YAW - throttle_curve.throttle*0.25) )"/>
     <set servo="TAIL_RIGHT" value="($th_hold? 0 : (-@YAW - throttle_curve.throttle*0.25) )"/>
-    <set servo="AIL_LEFTLOW" value="@YAW"/>
-    <set servo="AIL_RIGHTLOW" value="@YAW"/>
-    <set servo="AIL_LEFTUP" value="@YAW"/>
-    <set servo="AIL_RIGHTUP" value="@YAW"/>
+    <set servo="AIL_LEFTLOW" value=" @PITCH + @YAW"/>
+    <set servo="AIL_RIGHTLOW" value="-@PITCH + @YAW"/>
+    <set servo="AIL_LEFTUP" value=" @PITCH + @YAW"/>
+    <set servo="AIL_RIGHTUP" value="-@PITCH + @YAW"/>
   </command_laws>
 
   <!-- RPM to PPRZ calculation (governer low, fixed RPM) -->
