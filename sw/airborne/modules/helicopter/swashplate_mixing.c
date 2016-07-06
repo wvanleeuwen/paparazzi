@@ -71,6 +71,8 @@ void swashplate_mixing_init()
   }
 }
 
+#include "subsystems/radio_control.h"
+
 /*
  * Run the swashplate mixing
  * This depends on the ROLL and PITCH command
@@ -80,9 +82,19 @@ void swashplate_mixing_run(pprz_t in_cmd[])
 {
   uint8_t i;
 
-  // Add advance compensation with G matrix
-  int16_t cmd_roll  = 0.8578*in_cmd[COMMAND_ROLL] + -0.3276*in_cmd[COMMAND_PITCH];
-  int16_t cmd_pitch = 0.5139*in_cmd[COMMAND_ROLL] + 0.9448*in_cmd[COMMAND_PITCH];
+  int16_t cmd_roll;
+  int16_t cmd_pitch;
+
+  if(radio_control.values[7]<-4500) {
+    // Add advance compensation with G matrix
+    cmd_roll  = 0.8578*in_cmd[COMMAND_ROLL] + -0.3276*in_cmd[COMMAND_PITCH];
+    cmd_pitch = 0.5139*in_cmd[COMMAND_ROLL] + 0.9448*in_cmd[COMMAND_PITCH];
+  }
+  else {
+    // Add advance compensation with G matrix
+    cmd_roll  = 0.7753*in_cmd[COMMAND_ROLL] + -0.6635*in_cmd[COMMAND_PITCH];
+    cmd_pitch = 0.6316*in_cmd[COMMAND_ROLL] + 0.7482*in_cmd[COMMAND_PITCH];
+  }
 
   // Go trough all the motors and calculate the command
   for (i = 0; i < SW_NB; i++) {

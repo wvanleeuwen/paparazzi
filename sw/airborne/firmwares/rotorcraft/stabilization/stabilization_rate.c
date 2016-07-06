@@ -216,7 +216,7 @@ void stabilization_rate_run(bool in_flight)
   stabilization_cmd[COMMAND_YAW]   = stabilization_rate_fb_cmd.r;
 
   // Add euler dynamics compensation
-  float compensation_ratio = ((float) radio_control.values[7]+9600.0)/9600.0/2.0;
+  float compensation_ratio = 0.5;
   stabilization_cmd[COMMAND_ROLL] =  stabilization_cmd[COMMAND_ROLL]  + 299*3.43*body_rate->q  * compensation_ratio;
   stabilization_cmd[COMMAND_PITCH] = stabilization_cmd[COMMAND_PITCH] + 120.1*-7.45*body_rate->p * compensation_ratio;
 

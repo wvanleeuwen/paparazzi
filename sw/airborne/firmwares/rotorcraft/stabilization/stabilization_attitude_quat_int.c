@@ -289,9 +289,9 @@ void stabilization_attitude_run(bool enable_integrator)
 
   // Add euler dynamics compensation
     // Add euler dynamics compensation
-  float compensation_ratio = ((float) radio_control.values[7]+9600.0)/9600.0/2.0;
-  stabilization_cmd[COMMAND_ROLL] =  stabilization_cmd[COMMAND_ROLL]  + 299*3.43*body_rate_f->q  * compensation_ratio;
-  stabilization_cmd[COMMAND_PITCH] = stabilization_cmd[COMMAND_PITCH] + 120.1*-7.45*body_rate_f->p * compensation_ratio;
+  float compensation_ratio = 0.5;
+  stabilization_cmd[COMMAND_ROLL] =  stabilization_cmd[COMMAND_ROLL]  + 648.0*2.0*body_rate_f->q  * compensation_ratio;
+  stabilization_cmd[COMMAND_PITCH] = stabilization_cmd[COMMAND_PITCH] + 128.0*-10.0*body_rate_f->p * compensation_ratio;
 
   /* bound the result */
   BoundAbs(stabilization_cmd[COMMAND_ROLL], MAX_PPRZ);
