@@ -45,6 +45,7 @@ static struct kalamos_t kalamos = {
 static uint8_t mp_msg_buf[128]  __attribute__((aligned));   ///< The message buffer for the Kalamos
 
 struct  Kalamos2PPRZPackage k2p_package;
+float kalamos_target_height;
 
 #if PERIODIC_TELEMETRY
 #include "subsystems/datalink/telemetry.h"
@@ -137,13 +138,13 @@ void kalamos_periodic() {
                                          1, sizeof(struct PPRZ2KalamosPackage), (unsigned char *)(&p2k_package));
 
   //get pprz height
-  // calculate it so that sonar is 10m high
+  // calculate it so that sonar is x meter high
   //set waypoint to that number
 
   struct EnuCoor_f *pos = stateGetPositionEnu_f();
 
-  float target_kalamos_height = 10;
-  float diff = (target_kalamos_height - k2p_package.height);
+  //float target_kalamos_height = 30;
+  float diff = (kalamos_target_height - k2p_package.height);
   float pprzheight  = pos->z + diff;
 
   waypoint_set_alt(WP_KALAMOS,pprzheight );

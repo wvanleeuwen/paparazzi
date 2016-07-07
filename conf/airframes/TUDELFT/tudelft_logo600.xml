@@ -223,6 +223,7 @@
     <define name="HOVER_KI"    value="15"/>
     <define name="NOMINAL_HOVER_THROTTLE" value="0.62"/>
     <define name="ADAPT_THROTTLE_ENABLED" value="TRUE"/>
+    <define name="REF_MAX_ZDD" value="(9.81*0.05)"/>
   </section>
 
   <section name="GUIDANCE_H" prefix="GUIDANCE_H_">
@@ -246,7 +247,7 @@
   <section name="AUTOPILOT">
     <define name="MODE_MANUAL" value="AP_MODE_RC_DIRECT"/>
     <define name="MODE_AUTO1"  value="AP_MODE_ATTITUDE_DIRECT"/>
-    <define name="MODE_AUTO2"  value="AP_MODE_HOVER_Z_HOLD"/>
+    <define name="MODE_AUTO2"  value="AP_MODE_NAV"/>
   </section>
 
   <section name="BAT">

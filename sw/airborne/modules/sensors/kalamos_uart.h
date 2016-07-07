@@ -59,7 +59,7 @@ struct PPRZ2KalamosPackage {
     float theta;
 };
 
-
+extern float kalamos_target_height;
 
 extern void kalamos_init(void);
 extern void kalamos_event(void);

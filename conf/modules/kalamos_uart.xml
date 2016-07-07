@@ -6,6 +6,13 @@
     <configure name="KALAMOS_PORT" value="UART5" description="select which uart it is connected to"/>
     <configure name="KALAMOS_BAUD" value="B115200" description="set the baudrate of the uart"/>
   </doc>
+    <settings>
+    <dl_settings NAME="kalamos">
+      <dl_settings NAME="Kalamos">
+        <dl_setting module="sensors/kalamos_uart" var="kalamos_target_height" min="1" max="100" step="1"/>
+      </dl_settings>
+    </dl_settings>
+  </settings>
   <header>
     <file name="kalamos_uart.h"/>
   </header>
