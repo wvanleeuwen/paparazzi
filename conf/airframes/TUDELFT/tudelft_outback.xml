@@ -127,10 +127,10 @@
     <set servo="SW_RIGHTFRONT" value="swashplate_mixing.commands[SW_RIGHTFRONT]"/>
     <set servo="TAIL_LEFT" value="($th_hold? 0 : (-@YAW - throttle_curve.throttle*0.25) )"/>
     <set servo="TAIL_RIGHT" value="($th_hold? 0 : (-@YAW - throttle_curve.throttle*0.25) )"/>
-    <set servo="AIL_LEFTLOW" value=" @PITCH + @YAW"/>
-    <set servo="AIL_RIGHTLOW" value="-@PITCH + @YAW"/>
-    <set servo="AIL_LEFTUP" value=" @PITCH + @YAW"/>
-    <set servo="AIL_RIGHTUP" value="-@PITCH + @YAW"/>
+    <set servo="AIL_LEFTLOW" value=" @PITCH + 3*@YAW"/>
+    <set servo="AIL_RIGHTLOW" value="-@PITCH + 3*@YAW"/>
+    <set servo="AIL_LEFTUP" value=" @PITCH + 3*@YAW"/>
+    <set servo="AIL_RIGHTUP" value="-@PITCH + 3*@YAW"/>
   </command_laws>
 
   <!-- RPM to PPRZ calculation (governer low, fixed RPM) -->
@@ -143,7 +143,7 @@
   <heli_curves>
     <curve throttle="0,6492,6492" collective="-7500,-5000,-2500"/>
     <curve throttle="6492,6492,6492" collective="-7500,-5200,-2000"/>
-    <curve throttle="6864,6864,6864" collective="-7500,-5200,-2000"/>
+    <curve throttle="6492,6492,6024" collective="-7500,-5200,0"/>
   </heli_curves>
 
   <!-- Pitch RODS white symmetric props: 56mm top links 65mm bottom links -->
@@ -204,15 +204,15 @@
     <!-- setpoints -->
     <define name="SP_MAX_P" unit="deg/s" value="280"/>
     <define name="SP_MAX_Q" unit="deg/s" value="280"/>
-    <define name="SP_MAX_R" unit="deg/s" value="140"/>
+    <define name="SP_MAX_R" unit="deg/s" value="200"/>
     <define name="DEADBAND_P" value="20"/>
     <define name="DEADBAND_Q" value="20"/>
     <define name="DEADBAND_R" value="200"/>
 
     <!-- feedback -->
-    <define name="GAIN_P" value="500"/>
-    <define name="GAIN_Q" value="500"/>
-    <define name="GAIN_R" value="2065"/>
+    <define name="GAIN_P" value="880"/>
+    <define name="GAIN_Q" value="620"/>
+    <define name="GAIN_R" value="4100"/>
 
     <define name="IGAIN_P" value="0"/>
     <define name="IGAIN_Q" value="0"/>
