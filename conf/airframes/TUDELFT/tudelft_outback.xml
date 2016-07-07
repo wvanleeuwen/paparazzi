@@ -203,7 +203,7 @@
   <section name="STABILIZATION_RATE" prefix="STABILIZATION_RATE_">
     <!-- setpoints -->
     <define name="SP_MAX_P" unit="deg/s" value="280"/>
-    <define name="SP_MAX_Q" unit="deg/s" value="280"/>
+    <define name="SP_MAX_Q" unit="deg/s" value="350"/>
     <define name="SP_MAX_R" unit="deg/s" value="200"/>
     <define name="DEADBAND_P" value="20"/>
     <define name="DEADBAND_Q" value="20"/>
@@ -215,9 +215,9 @@
     <define name="GAIN_R" value="4100"/>
 
     <!-- feedback -->
-    <define name="GAIN_FORWARD_P" value="500"/>
-    <define name="GAIN_FORWARD_Q" value="500"/>
-    <define name="GAIN_FORWARD_R" value="1500"/>
+    <define name="GAIN_FORWARD_P" value="880"/>
+    <define name="GAIN_FORWARD_Q" value="703"/>
+    <define name="GAIN_FORWARD_R" value="1295"/>
 
     <define name="IGAIN_P" value="0"/>
     <define name="IGAIN_Q" value="0"/>
