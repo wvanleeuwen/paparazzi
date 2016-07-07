@@ -214,6 +214,11 @@
     <define name="GAIN_Q" value="620"/>
     <define name="GAIN_R" value="4100"/>
 
+    <!-- feedback -->
+    <define name="GAIN_FORWARD_P" value="500"/>
+    <define name="GAIN_FORWARD_Q" value="500"/>
+    <define name="GAIN_FORWARD_R" value="1500"/>
+
     <define name="IGAIN_P" value="0"/>
     <define name="IGAIN_Q" value="0"/>
     <define name="IGAIN_R" value="50"/>
