@@ -122,17 +122,18 @@
     <call fun="throttle_curve_run(fbw_motors_on, values)"/>
     <call fun="swashplate_mixing_run(values)"/>
     <let var="th_hold" value="LessThan(RadioControlValues(RADIO_TH_HOLD), -4800)"/>
+    <let var="forward_curve" value="MoreThan(RadioControlValues(RADIO_FMODE), 4800)"/>
 
     <set servo="THROTTLE" value="($th_hold? -9600 : throttle_curve.throttle)"/>
     <set servo="SW_BACK" value="swashplate_mixing.commands[SW_BACK]"/>
     <set servo="SW_LEFTFRONT" value="swashplate_mixing.commands[SW_LEFTFRONT]"/>
     <set servo="SW_RIGHTFRONT" value="swashplate_mixing.commands[SW_RIGHTFRONT]"/>
-    <set servo="TAIL_LEFT" value="($th_hold? 0 : (-@YAW - throttle_curve.throttle*0.25) )"/>
-    <set servo="TAIL_RIGHT" value="($th_hold? 0 : (-@YAW - throttle_curve.throttle*0.25) )"/>
-    <set servo="AIL_LEFTLOW" value=" @PITCH + 3*@YAW"/>
-    <set servo="AIL_RIGHTLOW" value="-@PITCH + 3*@YAW"/>
-    <set servo="AIL_LEFTUP" value=" @PITCH + 3*@YAW"/>
-    <set servo="AIL_RIGHTUP" value="-@PITCH + 3*@YAW"/>
+    <set servo="TAIL_LEFT" value="(Or($th_hold, $forward_curve)? 0 : (-@YAW - throttle_curve.throttle*0.25) )"/>
+    <set servo="TAIL_RIGHT" value="(Or($th_hold, $forward_curve)? 0 : (-@YAW - throttle_curve.throttle*0.25) )"/>
+    <set servo="AIL_LEFTLOW"  value=" 2*@PITCH + 3*@YAW"/>
+    <set servo="AIL_RIGHTLOW" value="-2*@PITCH + 3*@YAW"/>
+    <set servo="AIL_LEFTUP"   value=" 2*@PITCH + 3*@YAW"/>
+    <set servo="AIL_RIGHTUP"  value="-2*@PITCH + 3*@YAW"/>
   </command_laws>
 
   <!-- RPM to PPRZ calculation (governer low, fixed RPM) -->
@@ -144,8 +145,8 @@
   <!-- Pitch RODS black laminated props: 52mm top links 65mm bottom links -->
   <heli_curves>
     <curve throttle="0,6492,6492" collective="-7500,-5000,-2500"/>
-    <curve throttle="6492,6492,6492" collective="-7500,-5200,-2000"/>
-    <curve throttle="6492,6492,6024" collective="-7500,-5200,0"/>
+    <curve throttle="6492,6492,6492" collective="-7500,-5200,-1000"/>
+    <curve throttle="6492,6492,6024" collective="-7500,-5200,2000"/>
   </heli_curves>
 
   <!-- Pitch RODS white symmetric props: 56mm top links 65mm bottom links -->

@@ -114,7 +114,6 @@ extern uint16_t autopilot_flight_time;
  */
 #ifdef ROTORCRAFT_IS_HELI
 #define SetRotorcraftCommands(_cmd, _in_flight,  _motor_on) { \
-    if (!(_in_flight)) { _cmd[COMMAND_YAW] = 0; }               \
     commands[COMMAND_ROLL] = _cmd[COMMAND_ROLL];                \
     commands[COMMAND_PITCH] = _cmd[COMMAND_PITCH];              \
     commands[COMMAND_YAW] = _cmd[COMMAND_YAW];                  \
