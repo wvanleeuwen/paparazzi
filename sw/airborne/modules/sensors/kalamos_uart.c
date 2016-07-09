@@ -45,7 +45,11 @@ static struct kalamos_t kalamos = {
 static uint8_t mp_msg_buf[128]  __attribute__((aligned));   ///< The message buffer for the Kalamos
 
 struct  Kalamos2PPRZPackage k2p_package;
-float kalamos_target_height;
+float kalamos_target_height = 30.0;
+float kalamos_height_gain = 0.1;
+bool kalamos_enable_landing = false;
+float kalamos_landing_decent_speed = 0.01;
+float kalamos_pos_gain = 0.1;
 
 #if PERIODIC_TELEMETRY
 #include "subsystems/datalink/telemetry.h"
@@ -87,16 +91,33 @@ static inline void kalamos_parse_msg(void)
     uint8_t size = DL_IMCU_DEBUG_msg_length(mp_msg_buf);
     uint8_t *msg = DL_IMCU_DEBUG_msg(mp_msg_buf);
 
-    for(uint8_t i = 0; i < size; i++)
+    for(uint8_t i = 0; i < size; i++) {
       k2p_package.hoer[i] = msg[i];
+    }
 
-      // Send ABI message
+    struct EnuCoor_f *pos = stateGetPositionEnu_f();
 
-    if (k2p_package.height > 1.0 && k2p_package.height < 30.0)
-      AbiSendMsgAGL(AGL_SONAR_ADC_ID, k2p_package.height);
+    float diff = (kalamos_target_height - k2p_package.height)*kalamos_height_gain;
+    float pprzheight  = pos->z + diff;
+
+    waypoint_set_alt(WP_KALAMOS,pprzheight );
 
 
+if (kalamos_enable_landing ) {
+  if (k2p_package.min_height > 5.0) {
+    kalamos_target_height -= kalamos_landing_decent_speed;
+  }
 
+  int target_x = waypoint_get_x(WP_KALAMOS) + k2p_package.target_x * kalamos_pos_gain;
+  int target_y = waypoint_get_x(WP_KALAMOS) + k2p_package.target_y * kalamos_pos_gain;
+
+  waypoint_set_xy_i(WP_KALAMOS,target_x, target_y);
+
+}
+
+
+    // Send ABI message
+    AbiSendMsgAGL(AGL_SONAR_ADC_ID, k2p_package.height);
 
     break;
   }
@@ -137,17 +158,6 @@ void kalamos_periodic() {
   pprz_msg_send_IMCU_DEBUG(&(kalamos.transport.trans_tx), kalamos.device,
                                          1, sizeof(struct PPRZ2KalamosPackage), (unsigned char *)(&p2k_package));
 
-  //get pprz height
-  // calculate it so that sonar is x meter high
-  //set waypoint to that number
-
-  struct EnuCoor_f *pos = stateGetPositionEnu_f();
-
-  //float target_kalamos_height = 30;
-  float diff = (kalamos_target_height - k2p_package.height);
-  float pprzheight  = pos->z + diff;
-
-  waypoint_set_alt(WP_KALAMOS,pprzheight );
 
 }
 

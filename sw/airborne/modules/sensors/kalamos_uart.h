@@ -47,6 +47,9 @@ struct Kalamos2PPRZPackage {
     unsigned char hoer[4];
     char endl;             // endl fix, makes it worker nicer in terminal for debugging :)
     float height;
+    float min_height;
+    float target_x;
+    float target_y;
     char status;
 };
 extern struct Kalamos2PPRZPackage k2p_package;
@@ -60,6 +63,10 @@ struct PPRZ2KalamosPackage {
 };
 
 extern float kalamos_target_height;
+extern float kalamos_height_gain;
+extern bool kalamos_enable_landing ;
+extern float kalamos_landing_decent_speed ;
+extern float kalamos_pos_gain;
 
 extern void kalamos_init(void);
 extern void kalamos_event(void);
