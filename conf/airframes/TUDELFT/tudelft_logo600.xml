@@ -223,7 +223,9 @@
     <define name="HOVER_KI"    value="15"/>
     <define name="NOMINAL_HOVER_THROTTLE" value="0.62"/>
     <define name="ADAPT_THROTTLE_ENABLED" value="TRUE"/>
-    <define name="REF_MAX_ZDD" value="(9.81*0.05)"/>
+    <!--define name="REF_MAX_ZDD" value="(9.81*0.2)"/-->
+    <!--define name="REF_MIN_ZDD" value="-(9.81*0.2)"/-->
+    <define name="REF_OMEGA" value="RadOfDeg(20.0)"/>
   </section>
 
   <section name="GUIDANCE_H" prefix="GUIDANCE_H_">
