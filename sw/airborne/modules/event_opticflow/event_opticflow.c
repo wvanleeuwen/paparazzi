@@ -38,13 +38,14 @@ void event_opticflow_init(void) {
 
 void event_opticflow_periodic(void) {
   /* read all data from uart */
-  static uint8_t buffer[UART_RX_BUFFER_SIZE];
-  static uint16_t buf_loc = 0;
+  static uint8_t buffer[UART_RX_BUFFER_SIZE]; // local communication buffer
+  static uint16_t buf_loc = 0;                // circular buffer index location
 
   while(uart_char_available(&DVS_PORT))
   {
-    buffer[buf_loc] = uart_getch(&DVS_PORT);
-    buf_loc = (buf_loc + 1) % UART_RX_BUFFER_SIZE;
+    buffer[buf_loc] = uart_getch(&DVS_PORT);          // copy over incoming data
+    buf_loc = (buf_loc + 1) % UART_RX_BUFFER_SIZE;    // implement circular buffer
   }
-  DOWNLINK_SEND_DEBUG(DefaultChannel, DefaultDevice, 128, buffer);
+  // send to ground station for debugging
+  DOWNLINK_SEND_DEBUG(DefaultChannel, DefaultDevice, 32, &(buffer[(buf_loc-32)%UART_RX_BUFFER_SIZE]));
 }

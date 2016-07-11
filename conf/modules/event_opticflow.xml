@@ -8,7 +8,7 @@
     <file name="event_opticflow.h"/>
   </header>
   <init fun="event_opticflow_init()"/>
-  <periodic fun="event_opticflow_periodic()" freq="30" autorun="TRUE"/>
+  <periodic fun="event_opticflow_periodic()" freq="100" autorun="TRUE"/>
   <makefile>
     <file name="event_opticflow.c"/>
   </makefile>
