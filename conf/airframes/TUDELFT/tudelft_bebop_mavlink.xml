@@ -67,6 +67,7 @@
       <define name="UDP1_PORT_IN" value="5000"/>
       <define name="UDP1_HOST" value="192.168.42.2"/>
       <configure name="MAVLINK_PORT" value="UDP1"/>
+      <define name="MAVLINK_SYSID" value="1"/>
     </module>
   </modules>
 
@@ -78,10 +79,10 @@
   </commands>
 
   <servos driver="Default">
-    <servo name="TOP_RIGHT" no="0" min="3000" neutral="3000" max="12000"/>
-    <servo name="TOP_LEFT" no="1" min="3000" neutral="3000" max="12000"/>
-    <servo name="BOTTOM_LEFT" no="2" min="3000" neutral="3000" max="12000"/>
-    <servo name="BOTTOM_RIGHT" no="3" min="3000" neutral="3000" max="12000"/>
+    <servo name="TOP_LEFT" no="0" min="3000" neutral="3000" max="12000"/>
+    <servo name="TOP_RIGHT" no="1" min="3000" neutral="3000" max="12000"/>
+    <servo name="BOTTOM_RIGHT" no="2" min="3000" neutral="3000" max="12000"/>
+    <servo name="BOTTOM_LEFT" no="3" min="3000" neutral="3000" max="12000"/>
   </servos>
 
   <section name="MIXING" prefix="MOTOR_MIXING_">

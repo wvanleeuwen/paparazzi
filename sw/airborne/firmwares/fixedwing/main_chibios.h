@@ -23,9 +23,14 @@
  * @file firmwares/fixedwing/main_chibios.h
  */
 
-#pragma once
+#ifndef MAIN_CHIBIOS_H
+#define MAIN_CHIBIOS_H
 
 #include <ch.h>
 
-extern thread_t *pprzThdPtr;
+/** Terminate all autopilot threads
+ *  Wait until proper stop
+ */
+extern void pprz_terminate_autopilot_threads(void);
 
+#endif /* MAIN_CHIBIOS_H */

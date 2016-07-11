@@ -19,7 +19,7 @@
  */
 
 /**
- * @file modules/computer_vision/lib/vision/edge_flow.ch
+ * @file modules/computer_vision/lib/vision/edge_flow.h
  * @brief calculate optical flow with EdgeFlow
  *
  * Edge-histogram matching, implementation by K. N. McGuire
@@ -65,8 +65,7 @@ struct edge_hist_t {
   int32_t *x;
   int32_t *y;
   struct timeval frame_time;
-  float roll;
-  float pitch;
+  struct FloatRates rates;
 };
 
 struct edgeflow_displacement_t {

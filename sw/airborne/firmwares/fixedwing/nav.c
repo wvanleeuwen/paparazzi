@@ -35,7 +35,6 @@ static unit_t unit __attribute__((unused));
 #include "firmwares/fixedwing/stabilization/stabilization_attitude.h"
 #include "firmwares/fixedwing/autopilot.h"
 #include "inter_mcu.h"
-#include "subsystems/navigation/traffic_info.h"
 #include "subsystems/gps.h"
 
 #include "generated/flight_plan.h"
@@ -172,20 +171,20 @@ void nav_glide(uint8_t start_wp, uint8_t wp)
 
 #define Goto3D(radius) {                                                \
     if (pprz_mode == PPRZ_MODE_AUTO2) {                                 \
-      int16_t yaw = fbw_state->channels[RADIO_YAW];                     \
+      int16_t yaw = imcu_get_radio(RADIO_YAW);                          \
       if (yaw > MIN_DX || yaw < -MIN_DX) {                              \
         carrot_x += FLOAT_OF_PPRZ(yaw, 0, -20.);                        \
         carrot_x = Min(carrot_x, MAX_DIST_CARROT);                      \
         carrot_x = Max(carrot_x, -MAX_DIST_CARROT);                     \
       }                                                                 \
-      int16_t pitch = fbw_state->channels[RADIO_PITCH];                 \
+      int16_t pitch = imcu_get_radio(RADIO_PITCH);                      \
       if (pitch > MIN_DX || pitch < -MIN_DX) {                          \
         carrot_y += FLOAT_OF_PPRZ(pitch, 0, -20.);                      \
         carrot_y = Min(carrot_y, MAX_DIST_CARROT);                      \
         carrot_y = Max(carrot_y, -MAX_DIST_CARROT);                     \
       }                                                                 \
       v_ctl_mode = V_CTL_MODE_AUTO_ALT;                                 \
-      int16_t roll =  fbw_state->channels[RADIO_ROLL];                  \
+      int16_t roll =  imcu_get_radio(RADIO_ROLL);                       \
       if (roll > MIN_DX || roll < -MIN_DX) {                            \
         nav_altitude += FLOAT_OF_PPRZ(roll, 0, -1.0);                   \
         nav_altitude = Max(nav_altitude, MIN_HEIGHT_CARROT+ground_alt); \
@@ -284,24 +283,30 @@ static inline bool compute_TOD(uint8_t _af, uint8_t _td, uint8_t _tod, float gli
 #define LINE_STOP_FUNCTION {}
 #endif
 
+#ifdef TRAFFIC_INFO
+#include "modules/multi/traffic_info.h"
 
-
-void nav_follow(uint8_t _ac_id, float _distance, float _height)
+void nav_follow(uint8_t ac_id, float distance, float height)
 {
-  struct ac_info_ * ac = get_ac_info(_ac_id);
+  struct EnuCoor_f *ac = acInfoGetPositionEnu_f(ac_id);
   NavVerticalAutoThrottleMode(0.);
-  NavVerticalAltitudeMode(Max(ac->alt + _height, ground_alt + SECURITY_HEIGHT), 0.);
-  float alpha = M_PI / 2 - ac->course;
+  NavVerticalAltitudeMode(Max(ac->z + height, ground_alt + SECURITY_HEIGHT), 0.);
+  float alpha = M_PI / 2 - acInfoGetCourse(ac_id);
   float ca = cosf(alpha), sa = sinf(alpha);
-  float x = ac->east - _distance * ca;
-  float y = ac->north - _distance * sa;
+  float x = ac->x - distance * ca;
+  float y = ac->y - distance * sa;
   fly_to_xy(x, y);
 #ifdef NAV_FOLLOW_PGAIN
   float s = (stateGetPositionEnu_f()->x - x) * ca + (stateGetPositionEnu_f()->y - y) * sa;
-  nav_ground_speed_setpoint = ac->gspeed + NAV_FOLLOW_PGAIN * s;
+  nav_ground_speed_setpoint = acInfoGetGspeed(ac_id) + NAV_FOLLOW_PGAIN * s;
   nav_ground_speed_loop();
 #endif
 }
+#else
+void nav_follow(uint8_t  __attribute__((unused)) _ac_id, float  __attribute__((unused)) distance,
+                float  __attribute__((unused)) height) {}
+#endif // TRAFFIC_INFO
+
 
 float nav_altitude = GROUND_ALT + MIN_HEIGHT_CARROT;
 float desired_x, desired_y;

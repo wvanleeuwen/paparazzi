@@ -36,7 +36,7 @@
     </sector>
   </sectors>
   <exceptions>
-    <exception cond="!InsideCyberZoo(GetPosX(), GetPosY())" deroute="Standby"/>
+<!--    <exception cond="!InsideCyberZoo(GetPosX(), GetPosY())" deroute="Standby"/>-->
     <!--<exception cond="datalink_time > 22" deroute="Land here"/>-->
    <!-- <exception cond="electrical.bat_low && !(nav_block == IndexOfBlock('Land')) && !(nav_block == IndexOfBlock('Flare')) && !(nav_block == IndexOfBlock('Landed'))" deroute="Land"/>
     <exception cond="electrical.bat_critical && !(nav_block == IndexOfBlock('Land')) && !(nav_block == IndexOfBlock('Flare')) && !(nav_block == IndexOfBlock('Landed'))" deroute="Land here"/>-->

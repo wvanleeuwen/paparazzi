@@ -46,10 +46,10 @@
   </commands>
 
   <servos driver="Default">
-    <servo name="TOP_RIGHT" no="0" min="3000" neutral="3000" max="12000"/>
-    <servo name="TOP_LEFT" no="1" min="3000" neutral="3000" max="12000"/>
-    <servo name="BOTTOM_LEFT" no="2" min="3000" neutral="3000" max="12000"/>
-    <servo name="BOTTOM_RIGHT" no="3" min="3000" neutral="3000" max="12000"/>
+    <servo name="TOP_LEFT" no="0" min="3000" neutral="3000" max="12000"/>
+    <servo name="TOP_RIGHT" no="1" min="3000" neutral="3000" max="12000"/>
+    <servo name="BOTTOM_RIGHT" no="2" min="3000" neutral="3000" max="12000"/>
+    <servo name="BOTTOM_LEFT" no="3" min="3000" neutral="3000" max="12000"/>
   </servos>
 
   <section name="MIXING" prefix="MOTOR_MIXING_">
@@ -89,6 +89,9 @@
     <define name="H_X" value="0.3892503"/>
     <define name="H_Y" value="0.0017972"/>
     <define name="H_Z" value="0.9211303"/>
+
+    <!-- For vibrating airfames -->
+    <define name="GRAVITY_HEURISTIC_FACTOR" value="0"/>
   </section>
 
   <section name="INS" prefix="INS_">

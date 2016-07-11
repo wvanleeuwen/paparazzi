@@ -228,10 +228,8 @@ void post_inter_mcu_received_ap(void) {};
 void pre_inter_mcu_received_ap(void) {};
 void post_inter_mcu_received_ap(void)
 {
-  int crash = 0;
   if (commands[COMMAND_FORCECRASH] >= 8000) {
     set_failsafe_mode();
-    crash = 1;
   }
 }
 #endif /* OUTBACK_CHALLENGE_VERY_DANGEROUS_RULE_AP_CAN_FORCE_FAILSAFE */
@@ -277,6 +275,8 @@ void inter_mcu_event_handle(void)
   if (inter_mcu_received_ap) {
     inter_mcu_received_ap = false;
     inter_mcu_event_task();
+
+    PPRZ_MUTEX_LOCK(ap_state_mtx);
     command_roll_trim = ap_state->command_roll_trim;
     command_pitch_trim = ap_state->command_pitch_trim;
     command_yaw_trim = ap_state->command_yaw_trim;
@@ -291,6 +291,7 @@ void inter_mcu_event_handle(void)
 #endif /* SET_AP_ONLY_COMMANDS */
     }
     fbw_new_actuators = 1;
+    PPRZ_MUTEX_UNLOCK(ap_state_mtx);
 
 #ifdef SINGLE_MCU
     inter_mcu_fill_fbw_state();

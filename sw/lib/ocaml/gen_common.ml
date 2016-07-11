@@ -24,6 +24,7 @@
 
 open Printf
 
+
 (** simple boolean expressions *)
 type bool_expr =
   | Var of string
@@ -91,8 +92,8 @@ let targets_of_field =
   let pipe = Str.regexp "|" in
   fun field default ->
     let f = ExtXml.attrib_or_default field "target" default in
-    if String.length f > 0 && String.get f 0 = '!' then
-      Not (expr_of_targets (fun x y -> Or(x,y)) (Str.split pipe (String.sub f 1 ((String.length f) - 1))))
+    if Compat.bytes_length f > 0 && Compat.bytes_get f 0 = '!' then
+      Not (expr_of_targets (fun x y -> Or(x,y)) (Str.split pipe (Compat.bytes_sub f 1 ((Compat.bytes_length f) - 1))))
     else
       expr_of_targets (fun x y -> Or(x,y)) (Str.split pipe f)
 
@@ -114,7 +115,7 @@ let get_autopilot_of_airframe = fun xml ->
  * Returns the boolean expression of targets of a module *)
 let get_targets_of_module = fun xml ->
   Xml.fold (fun a x ->
-    match String.lowercase (Xml.tag x) with
+    match Compat.bytes_lowercase (Xml.tag x) with
     | "makefile" when a = Var "" -> targets_of_field x Env.default_module_targets
     | "makefile" -> Or (a, targets_of_field x Env.default_module_targets)
     | _ -> a
@@ -127,7 +128,7 @@ let module_name = fun xml ->
 exception Subsystem of string
 let get_module = fun m global_targets ->
   match Xml.tag m with
-  | "module" ->
+  | "module" | "autoload" ->
       let name = module_name m in
       let filename =
         let modtype = ExtXml.attrib_or_default m "type" "" in
@@ -157,7 +158,19 @@ let get_module = fun m global_targets ->
       let targets = Or (extra_targets, targets) in
       { name = name; xml = xml; file = file; filename = filename; vpath = vpath;
         param = Xml.children m; targets = targets }
-  | _ -> Xml2h.xml_error "module or load"
+  | _ -> Xml2h.xml_error "module, autoload or load"
+
+(** [get_autoloaded_modules module]
+ * Return a list of modules to be automaticaly added
+ * Only works with actual modules (no subsystems) *)
+let rec get_autoloaded_modules = fun m ->
+  let m = get_module m (Var "") in
+  List.fold_left (fun l t ->
+    if ExtXml.tag_is t "autoload" then
+      let am = get_module t (Var "") in
+      (am :: ((try get_autoloaded_modules am.xml with _ -> []) @ l))
+    else l
+  ) [] (Xml.children m.xml)
 
 (** [test_targets target targets]
  * Test if [target] is allowed [targets]
@@ -188,16 +201,20 @@ let rec get_modules_of_airframe = fun ?target xml ->
     end
   in
   (* extract modules from xml tree *)
-  let rec iter_modules = fun targets modules xml ->
+  let rec iter_modules = fun ?(subsystem_fallback=true) targets modules xml ->
     match xml with
     | Xml.PCData _ -> modules
     | Xml.Element (tag, _attrs, children) when is_module tag ->
         begin try
           let m = get_module xml targets in
+          let al = get_autoloaded_modules xml in
           List.fold_left
             (fun acc xml -> iter_modules targets acc xml)
-            (m :: modules) children
-        with Subsystem _file -> modules end
+            (m :: (al @ modules)) children
+        with Subsystem file ->
+          if subsystem_fallback then modules
+          else failwith ("Unkown module " ^ file)
+        end
     | Xml.Element (tag, _attrs, children) when tag = "firmware" ->
         let name = Xml.attrib xml "name" in
         begin match firmware with
@@ -219,10 +236,10 @@ let rec get_modules_of_airframe = fun ?target xml ->
               (fun acc xml -> iter_modules targets acc xml) modules children
         | _ -> modules end
     | Xml.Element (tag, _attrs, children) ->
-        let targets =
-          if tag = "modules" then targets_of_field xml "" else targets in
+        let (targets, use_fallback) =
+          if tag = "modules" then (targets_of_field xml "", false) else (targets, true) in
         List.fold_left
-          (fun acc xml -> iter_modules targets acc xml) modules children in
+          (fun acc xml -> iter_modules ~subsystem_fallback:use_fallback targets acc xml) modules children in
   let modules = iter_modules (Var "") [] xml in
   let ap_modules =
     try
@@ -344,4 +361,3 @@ let is_element_unselected = fun ?(verbose=false) target modules name ->
         unselected
     | _ -> false
   with _ -> false
-
