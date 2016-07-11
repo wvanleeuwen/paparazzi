@@ -142,26 +142,33 @@
   <!-- 1650 RPM: 1.641ms    1.641 - 1.1 = 0.541ms    9600 / 800 * 541 = 6492 PPRZ -->
   <!-- 1800 RPM: 1.672ms    1.672 - 1.1 = 0.572ms    9600 / 800 * 572 = 6864 PPRZ -->
 
-  <!-- Pitch RODS black laminated props: 52mm top links 65mm bottom links -->
+  <!-- v3 Pitch RODS black laminated props with straight angle root and 25deg blade-grip handles: 52mm top links 65mm bottom links -->
+  <heli_curves>
+    <curve throttle="0,6492,6492" collective="-7500,-5000,-2500"/>
+    <curve throttle="6492,6492,6492" collective="-7500,-5200,-1000"/>
+    <curve throttle="6492,6492,6024" collective="-7500,5200,2000"/>
+  </heli_curves>
+
+  <!-- v2 Pitch RODS black laminated props with straight angle root and straight blade-grip handles: 63mm top links 65mm bottom links -->
+  <!--heli_curves>
+    <curve throttle="0,6492,6492" collective="-5000,-2500,0"/>
+    <curve throttle="6492,6492,6492" collective="-5000,-2700,1500"/>
+    <curve throttle="6492,6492,6024" collective="-5000,-2700,3500"/>
+  </heli_curves-->
+
+  <!-- v1 Pitch RODS black laminated props with twisted angle root and straight blade-grip handles: 52mm top links 65mm bottom links -->
   <!--heli_curves>
     <curve throttle="0,6492,6492" collective="-7500,-5000,-2500"/>
     <curve throttle="6492,6492,6492" collective="-7500,-5200,-1000"/>
     <curve throttle="6492,6492,6024" collective="-7500,-5200,2000"/>
-  </heli_curves>
+  </heli_curves-->
 
-  <!-- Pitch RODS white symmetric props: 56mm top links 65mm bottom links -->
+  <!-- v0 Pitch RODS white symmetric props: 56mm top links 65mm bottom links -->
   <!--heli_curves>
     <curve throttle="0,6024,6024" collective="0,2000,4000"/>
     <curve throttle="6024,6024,6024" collective="0,2000,4000"/>
     <curve throttle="6492,6492,6492" collective="0,2000,4000"/>
   </heli_curves-->
-
-  <!-- Pitch RODS black laminated props fathered: ??mm top links 65mm bottom links -->
-  <heli_curves>
-    <curve throttle="0,6492,6492" collective="-5000,-2500,0"/>
-    <curve throttle="6492,6492,6492" collective="-5000,-2700,1500"/>
-    <curve throttle="6492,6492,6024" collective="-5000,-2700,3500"/>
-  </heli_curves>
 
   <section name="MISC">
     <define name="NAV_CLIMB_VSPEED" value="2.5"/>
