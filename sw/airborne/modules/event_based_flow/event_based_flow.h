@@ -26,10 +26,10 @@
 #ifndef EVENT_BASED_FLOW_H
 #define EVENT_BASED_FLOW_H
 
-extern void event_based_flow_init();
-extern void event_based_flow_stop();
-extern void event_based_flow_periodic();
-extern void event_based_flow_stop();
+extern void event_based_flow_init(void);
+extern void event_based_flow_stop(void);
+extern void event_based_flow_periodic(void);
+extern void event_based_flow_stop(void);
 
 #endif
 

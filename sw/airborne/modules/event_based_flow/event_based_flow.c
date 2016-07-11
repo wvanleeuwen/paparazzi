@@ -25,8 +25,15 @@
 
 #include "modules/event_based_flow/event_based_flow.h"
 
-void event_based_flow_init() {}
-void event_based_flow_start() {}
-void event_based_flow_periodic() {}
-void event_based_flow_stop() {}
+void event_based_flow_init(void) {}
+
+void event_based_flow_start(void) {}
+
+
+void event_based_flow_periodic(void) {
+
+
+}
+
+void event_based_flow_stop(void) {}
 
