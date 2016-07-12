@@ -29,6 +29,7 @@
 #include <stdbool.h>
 #include <inttypes.h>
 #include "modules/computer_vision/lib/vision/image.h"
+#include "math/pprz_orientation_conversion.h"
 
 #define VIDEO_FILTER_DEBAYER 0x01
 
@@ -46,17 +47,20 @@ struct video_thread_t {
 };
 
 /** V4L2 device settings */
+//todo maybe find a better place for FOW and rotation matrix
 struct video_config_t {
-  int w;              ///< Width
-  int h;              ///< Height
-  char *dev_name;     ///< path to device
-  char *subdev_name;  ///< path to sub device
-  uint32_t format;    ///< Video format
-  uint8_t buf_cnt;    ///< Amount of V4L2 video device buffers
-  uint8_t filters;    ///< filters to use (bitfield with VIDEO_FILTER_x)
+  uint16_t w;             ///< Width, number of pixels in x direction of camera
+  uint16_t h;             ///< Height, number of pixels in y direction of camera
+  struct FloatVect2 fow;  ///< Field of View of camera (radians)
+  char *dev_name;         ///< path to device
+  char *subdev_name;      ///< path to sub device
+  uint32_t format;        ///< Video format
+  uint8_t buf_cnt;        ///< Amount of V4L2 video device buffers
+  uint8_t filters;        ///< filters to use (bitfield with VIDEO_FILTER_x)
   struct video_thread_t thread; ///< Information about the thread this camera is running on
   struct video_listener *pointer_to_first_listener; ///< The first listener in the linked list for this video device
-  int fps;
+  int fps;                ///< Requested frame rate of the video feed (set 0 if request fastest)
+  struct OrientationReps body_to_cam; ///< rotation matrix to rotate from body to camera axis frame
 };
 extern struct video_config_t dummy_camera;
 

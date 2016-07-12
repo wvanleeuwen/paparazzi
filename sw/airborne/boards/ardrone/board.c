@@ -48,21 +48,30 @@ struct video_config_t front_camera = {
   .format = V4L2_PIX_FMT_UYVY,
   .buf_cnt = 10,
   .filters = 0,
-  .pointer_to_first_listener=NULL,
-  .fps = 0
+  .pointer_to_first_listener = NULL,
+  .fps = 0,
+  .body_to_cam.eulers_f.phi = 90.,
+  .body_to_cam.eulers_f.theta = 0.,
+  .body_to_cam.eulers_f.psi = 90.,
+  .body_to_cam.status = (1 << ORREP_EULER_F)
 };
 
 
 struct video_config_t bottom_camera = {
   .w = 320,
   .h = 240,
+  .fow = {0.89360857702, 0.67020643276},
   .dev_name = "/dev/video2",
   .subdev_name = NULL,
   .format = V4L2_PIX_FMT_UYVY,
   .buf_cnt = 10,
   .filters = 0,
-  .pointer_to_first_listener=NULL,
-  .fps = 0
+  .pointer_to_first_listener = NULL,
+  .fps = 0,
+  .body_to_cam.eulers_f.phi = 0.,
+  .body_to_cam.eulers_f.theta = 0.,
+  .body_to_cam.eulers_f.psi = -90.,
+  .body_to_cam.status = (1 << ORREP_EULER_F)
 };
 
 int KillGracefully(char *process_name);

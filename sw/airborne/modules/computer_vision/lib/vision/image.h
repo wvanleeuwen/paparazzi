@@ -58,7 +58,7 @@ struct point_t {
 
 /* Vector structure for point differences */
 struct flow_t {
-  struct point_t pos;         ///< The original position the flow comes from
+  struct point_t pos;         ///< The original position the flow comes from in subpixels
   int16_t flow_x;             ///< The x direction flow in subpixels
   int16_t flow_y;             ///< The y direction flow in subpixels
 };
@@ -68,7 +68,7 @@ void image_add_border(struct image_t *input, struct image_t *output, uint8_t bor
 void image_create(struct image_t *img, uint16_t width, uint16_t height, enum image_type type);
 void image_free(struct image_t *img);
 void image_copy(struct image_t *input, struct image_t *output);
-void image_switch(struct image_t *a, struct image_t *b);
+void image_swap(struct image_t *a, struct image_t *b);
 void image_to_grayscale(struct image_t *input, struct image_t *output);
 uint16_t image_yuv422_colorfilt(struct image_t *input, struct image_t *output, uint8_t y_m, uint8_t y_M, uint8_t u_m,
                                 uint8_t u_M, uint8_t v_m, uint8_t v_M);

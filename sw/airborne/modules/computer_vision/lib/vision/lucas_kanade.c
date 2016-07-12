@@ -30,11 +30,8 @@
  */
 
 #include <stdlib.h>
-#include <stdio.h>
 #include <math.h>
-#include <string.h>
 #include "lucas_kanade.h"
-
 
 /**
  * @file lucas_kanade.c
@@ -76,24 +73,25 @@ struct flow_t *opticFlowLK(struct image_t *new_img, struct image_t *old_img, str
 {
 
   // if no pyramids, use the old code:
-  if(pyramid_level == 0)
-  {
+  //todo kirk why do this, why not just run with pyramid = 0?
+  if (pyramid_level == 0) {
     // use the old code in this case:
-    return opticFlowLK_flat(new_img, old_img, points, points_cnt, half_window_size, subpixel_factor, max_iterations, step_threshold, max_points);    
+    return opticFlowLK_flat(new_img, old_img, points, points_cnt, half_window_size, subpixel_factor, max_iterations,
+                            step_threshold, max_points);
   }
 
   // Allocate some memory for returning the vectors
-  struct flow_t *vectors = malloc(sizeof(struct flow_t) * max_points);
+  struct flow_t *vectors = calloc(max_points, sizeof(struct flow_t));
 
   // Determine patch sizes and initialize neighborhoods
   uint16_t patch_size = 2 * half_window_size + 1;
-  uint32_t error_threshold = (25 * 25) * (patch_size * patch_size);
+  uint32_t error_threshold = (25 * 25) * (patch_size * patch_size); // TODO: Kirk why 25?
   uint16_t padded_patch_size = patch_size + 2;
   uint8_t border_size = padded_patch_size / 2 + 2; // amount of padding added to images
 
   // Allocate memory for image pyramids
-  struct image_t *pyramid_old = malloc(sizeof(struct image_t) * (pyramid_level + 1));
-  struct image_t *pyramid_new = malloc(sizeof(struct image_t) * (pyramid_level + 1));
+  struct image_t *pyramid_old = calloc(pyramid_level + 1, sizeof(struct image_t));
+  struct image_t *pyramid_new = calloc(pyramid_level + 1, sizeof(struct image_t));
 
   // Build pyramid levels
   pyramid_build(old_img, pyramid_old, pyramid_level, border_size);
@@ -118,7 +116,7 @@ struct flow_t *opticFlowLK(struct image_t *new_img, struct image_t *old_img, str
 
     // Go through all points
     for (uint16_t i = 0; i < max_points && i < points_orig; i++) {
-      uint16_t p = i * skip_points;
+      uint16_t p = (uint16_t)(i * skip_points);
 
       if (LVL == pyramid_level) {
         // Convert point position on original image to a subpixel coordinate on the top pyramid level
@@ -237,7 +235,7 @@ struct flow_t *opticFlowLK(struct image_t *new_img, struct image_t *old_img, str
 
 /**
  * Compute the optical flow of several points using the Lucas-Kanade algorithm by Yves Bouguet
- * The initial fixed-point implementation is doen by G. de Croon and is adapted by
+ * The initial fixed-point implementation is done by G. de Croon and is adapted by
  * Freek van Tienen for the implementation in Paparazzi.
  * @param[in] *new_img The newest grayscale image (TODO: fix YUV422 support)
  * @param[in] *old_img The old grayscale image (TODO: fix YUV422 support)
@@ -251,7 +249,9 @@ struct flow_t *opticFlowLK(struct image_t *new_img, struct image_t *old_img, str
  * @return The vectors from the original *points in subpixels
  */
 struct flow_t *opticFlowLK_flat(struct image_t *new_img, struct image_t *old_img, struct point_t *points, uint16_t *points_cnt,
-                           uint16_t half_window_size, uint16_t subpixel_factor, uint8_t max_iterations, uint8_t step_threshold, uint16_t max_points) {
+                                uint16_t half_window_size, uint16_t subpixel_factor, uint8_t max_iterations, uint8_t step_threshold,
+                                uint16_t max_points)
+{
   // A straightforward one-level implementation of Lucas-Kanade.
   // For all points:
   // (1) determine the subpixel neighborhood in the old image
@@ -264,14 +264,14 @@ struct flow_t *opticFlowLK_flat(struct image_t *new_img, struct image_t *old_img
   //     [d] calculate the additional flow step and possibly terminate the iteration
 
   // Allocate some memory for returning the vectors
-  struct flow_t *vectors = malloc(sizeof(struct flow_t) * max_points);
+  struct flow_t *vectors = calloc(max_points, sizeof(struct flow_t));
   uint16_t new_p = 0;
   uint16_t points_orig = *points_cnt;
   *points_cnt = 0;
 
   // determine patch sizes and initialize neighborhoods
   uint16_t patch_size = 2 * half_window_size;
-  uint32_t error_threshold = (25 * 25) *(patch_size *patch_size);
+  uint32_t error_threshold = (25 * 25) * (patch_size * patch_size); // TODO Kirk: why 25?
   uint16_t padded_patch_size = patch_size + 2;
 
   // Create the window images
@@ -283,11 +283,16 @@ struct flow_t *opticFlowLK_flat(struct image_t *new_img, struct image_t *old_img
   image_create(&window_diff, patch_size, patch_size, IMAGE_GRADIENT);
 
   // Calculate the amount of points to skip
-  float skip_points = (points_orig > max_points) ? points_orig / max_points : 1;
+  float skip_points = (points_orig > max_points) ? (float)points_orig / max_points : 1;
 
-  // Go trough all points
+  // Go through all points
+  uint16_t p;
+  int32_t b_x, b_y;
+  int16_t step_x, step_y;
+  uint32_t error;
+  bool tracked = TRUE;
   for (uint16_t i = 0; i < max_points && i < points_orig; i++) {
-    uint16_t p = i * skip_points;
+    p = (uint16_t)(i * skip_points);
 
     // If the pixel is outside ROI, do not track it
     if (points[p].x < half_window_size || (old_img->w - points[p].x) < half_window_size
@@ -324,7 +329,7 @@ struct flow_t *opticFlowLK_flat(struct image_t *new_img, struct image_t *old_img
     // (a * Ax + (1-a) * Ax+1)  - (a * Bx + (1-a) * Bx+1)
 
     // (4) iterate over taking steps in the image to minimize the error:
-    bool tracked = TRUE;
+    tracked = true;
     for (uint8_t it = 0; it < max_iterations; it++) {
       struct point_t new_point =  {
         vectors[new_p].pos.x + vectors[new_p].flow_x,
@@ -332,8 +337,9 @@ struct flow_t *opticFlowLK_flat(struct image_t *new_img, struct image_t *old_img
       };
       // If the pixel is outside ROI, do not track it
       if (new_point.x / subpixel_factor < half_window_size || (old_img->w - new_point.x / subpixel_factor) < half_window_size
-          || new_point.y / subpixel_factor < half_window_size || (old_img->h - new_point.y / subpixel_factor) < half_window_size) {
-        tracked = FALSE;
+          || new_point.y / subpixel_factor < half_window_size
+          || (old_img->h - new_point.y / subpixel_factor) < half_window_size) {
+        tracked = false;
         break;
       }
 
@@ -342,22 +348,22 @@ struct flow_t *opticFlowLK_flat(struct image_t *new_img, struct image_t *old_img
 
       //     [b] determine the image difference between the two neighborhoods
       // TODO: also give this error back, so that it can be used for reliability
-      uint32_t error = image_difference(&window_I, &window_J, &window_diff);
+      error = image_difference(&window_I, &window_J, &window_diff);
       if (error > error_threshold && it > max_iterations / 2) {
         tracked = FALSE;
         break;
       }
 
-      int32_t b_x = image_multiply(&window_diff, &window_DX, NULL) / 255;
-      int32_t b_y = image_multiply(&window_diff, &window_DY, NULL) / 255;
+      b_x = image_multiply(&window_diff, &window_DX, NULL) / 128;
+      b_y = image_multiply(&window_diff, &window_DY, NULL) / 128;
 
       //     [d] calculate the additional flow step and possibly terminate the iteration
-      int16_t step_x = (G[3] * b_x - G[1] * b_y) / Det;
-      int16_t step_y = (G[0] * b_y - G[2] * b_x) / Det;
+      step_x = (G[3] * b_x - G[1] * b_y) / Det;
+      step_y = (G[0] * b_y - G[2] * b_x) / Det;
       vectors[new_p].flow_x += step_x;
       vectors[new_p].flow_y += step_y;
 
-      // Check if we exceeded the treshold
+      // Check if we exceeded the threshold
       if ((abs(step_x) + abs(step_y)) < step_threshold) {
         break;
       }

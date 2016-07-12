@@ -33,10 +33,9 @@
  * in the International Journal of Micro Air Vehicles, Volume 5, Number 4, pages 287 – 297, (2013)
  */
 
-#include <stdlib.h>
-#include <stdio.h>
 #include <math.h>
-#include <string.h>
+#include <stdlib.h>
+
 //#include "defs_and_types.h"
 #include "linear_flow_fit.h"
 #include "math/pprz_algebra_float.h"
@@ -47,8 +46,8 @@
 #define MAX_COUNT_PT 50
 
 #define MIN_SAMPLES_FIT 3
-#define NO_FIT 0
-#define FIT 1
+#define NO_FIT false
+#define FIT true
 
 /**
  * Analyze a linear flow field, retrieving information such as divergence, surface roughness, focus of expansion, etc.
@@ -62,7 +61,8 @@
  * @param[in] im_height Image height in pixels
  * @param[out] info Contains all info extracted from the linear flow fit.
  */
-int analyze_linear_flow_field(struct flow_t *vectors, int count, float error_threshold, int n_iterations, int n_samples, int im_width, int im_height, struct linear_flow_fit_info *info)
+bool analyze_linear_flow_field(struct flow_t *vectors, uint16_t count, float error_threshold, uint16_t n_iterations,
+                               uint16_t n_samples, uint16_t im_width, uint16_t im_height, struct linear_flow_fit_info *info)
 {
   // Are there enough flow vectors to perform a fit?
   if (count < MIN_SAMPLES_FIT) {
@@ -72,15 +72,16 @@ int analyze_linear_flow_field(struct flow_t *vectors, int count, float error_thr
 
   // fit linear flow field:
   float parameters_u[3], parameters_v[3], min_error_u, min_error_v;
-  fit_linear_flow_field(vectors, count, n_iterations, error_threshold, n_samples, parameters_u, parameters_v, &info->fit_error, &min_error_u, &min_error_v, &info->n_inliers_u, &info->n_inliers_v);
+  fit_linear_flow_field(vectors, count, n_iterations, error_threshold, n_samples, parameters_u, parameters_v,
+                        &info->fit_error, &min_error_u, &min_error_v, &info->n_inliers_u, &info->n_inliers_v);
 
   // extract information from the parameters:
   extract_information_from_parameters(parameters_u, parameters_v, im_width, im_height, info);
 
   // surface roughness is equal to fit error:
   info->surface_roughness = info->fit_error;
-  info->divergence = info->relative_velocity_z;
-  float diverg = (abs(info->divergence) < 1E-5) ? 1E-5 : info->divergence;
+  info->divergence = 2 * info->relative_velocity_z;
+  float diverg = (fabsf(info->divergence) < 1E-5) ? 1E-5 : info->divergence;
   info->time_to_contact = 1.0f / diverg;
 
   // return successful fit:
@@ -102,7 +103,9 @@ int analyze_linear_flow_field(struct flow_t *vectors, int count, float error_thr
  * @param[out] n_inliers_u* Number of inliers in the horizontal flow fit.
  * @param[out] n_inliers_v* Number of inliers in the vertical flow fit.
  */
-void fit_linear_flow_field(struct flow_t *vectors, int count, float error_threshold, int n_iterations, int n_samples, float *parameters_u, float *parameters_v, float *fit_error, float *min_error_u, float *min_error_v, int *n_inliers_u, int *n_inliers_v)
+void fit_linear_flow_field(struct flow_t *vectors, uint16_t count, float error_threshold, uint16_t n_iterations,
+                           uint16_t n_samples, float *parameters_u, float *parameters_v, float *fit_error, float *min_error_u, float *min_error_v,
+                           uint16_t *n_inliers_u, uint16_t *n_inliers_v)
 {
 
   // We will solve systems of the form A x = b,
@@ -111,7 +114,7 @@ void fit_linear_flow_field(struct flow_t *vectors, int count, float error_thresh
   // x in the system are the parameters for the horizontal (pu) or vertical (pv) flow field.
 
   // local vars for iterating, random numbers:
-  int sam, p, i_rand, si, add_si;
+  uint16_t sam;
 
   // ensure that n_samples is high enough to ensure a result for a single fit:
   n_samples = (n_samples < MIN_SAMPLES_FIT) ? MIN_SAMPLES_FIT : n_samples;
@@ -165,24 +168,24 @@ void fit_linear_flow_field(struct flow_t *vectors, int count, float error_thresh
   errors_pu[0] = 0.0;
   float errors_pv[n_iterations];
   errors_pv[0] = 0.0;
-  int n_inliers_pu[n_iterations];
-  int n_inliers_pv[n_iterations];
-  int it, ii;
-  for (it = 0; it < n_iterations; it++) {
-    // select a random sample of n_sample points:
-    int sample_indices[n_samples];
-    i_rand = 0;
+  uint16_t n_inliers_pu[n_iterations];
+  uint16_t n_inliers_pv[n_iterations];
 
+  uint16_t it, ii, i_rand, si, p;
+  bool add_si;
+  uint16_t sample_indices[n_samples]; // stores n_sample random sample points:
+  for (it = 0; it < n_iterations; it++) {
+    i_rand = 0;
     // sampling without replacement:
     while (i_rand < n_samples) {
       si = rand() % count;
-      add_si = 1;
+      add_si = true;
       for (ii = 0; ii < i_rand; ii++) {
-        if (sample_indices[ii] == si) { add_si = 0; }
+        if (sample_indices[ii] == si) { add_si = false; }
       }
       if (add_si) {
         sample_indices[i_rand] = si;
-        i_rand ++;
+        i_rand++;
       }
     }
 
@@ -226,7 +229,7 @@ void fit_linear_flow_field(struct flow_t *vectors, int count, float error_thresh
     MAT_SUB(count, 1, C, bb, bu_all);
 
     for (p = 0; p < count; p++) {
-      C[p][0] = abs(C[p][0]);
+      C[p][0] = fabsf(C[p][0]);
       if (C[p][0] < error_threshold) {
         errors_pu[it] += C[p][0];
         n_inliers_pu[it]++;
@@ -242,7 +245,7 @@ void fit_linear_flow_field(struct flow_t *vectors, int count, float error_thresh
     MAT_SUB(count, 1, C, bb, bv_all);
 
     for (p = 0; p < count; p++) {
-      C[p][0] = abs(C[p][0]);
+      C[p][0] = fabsf(C[p][0]);
       if (C[p][0] < error_threshold) {
         errors_pv[it] += C[p][0];
         n_inliers_pv[it]++;
@@ -255,12 +258,12 @@ void fit_linear_flow_field(struct flow_t *vectors, int count, float error_thresh
   // After all iterations:
   // select the parameters with lowest error:
   // for horizontal flow:
-  int param;
-  int min_ind = 0;
-  *min_error_u = (float)errors_pu[0];
+  uint16_t param;
+  uint16_t min_ind = 0;
+  *min_error_u = errors_pu[0];
   for (it = 1; it < n_iterations; it++) {
     if (errors_pu[it] < *min_error_u) {
-      *min_error_u = (float)errors_pu[it];
+      *min_error_u = errors_pu[it];
       min_ind = it;
     }
   }
@@ -271,10 +274,10 @@ void fit_linear_flow_field(struct flow_t *vectors, int count, float error_thresh
 
   // for vertical flow:
   min_ind = 0;
-  *min_error_v = (float)errors_pv[0];
-  for (it = 0; it < n_iterations; it++) {
+  *min_error_v = errors_pv[0];
+  for (it = 1; it < n_iterations; it++) {
     if (errors_pv[it] < *min_error_v) {
-      *min_error_v = (float)errors_pv[it];
+      *min_error_v = errors_pv[it];
       min_ind = it;
     }
   }
@@ -290,7 +293,7 @@ void fit_linear_flow_field(struct flow_t *vectors, int count, float error_thresh
   MAT_SUB(count, 1, C, bb, bu_all);
   *min_error_u = 0;
   for (p = 0; p < count; p++) {
-    *min_error_u += abs(C[p][0]);
+    *min_error_u += fabsf(C[p][0]);
   }
   // bb = AA * pv:
   MAT_MUL(count, 3, 1, bb, AA, pv);
@@ -298,10 +301,9 @@ void fit_linear_flow_field(struct flow_t *vectors, int count, float error_thresh
   MAT_SUB(count, 1, C, bb, bv_all);
   *min_error_v = 0;
   for (p = 0; p < count; p++) {
-    *min_error_v += abs(C[p][0]);
+    *min_error_v += fabsf(C[p][0]);
   }
   *fit_error = (*min_error_u + *min_error_v) / (2 * count);
-
 }
 /**
  * Extract information from the parameters that were fit to the optical flow field.
@@ -309,10 +311,11 @@ void fit_linear_flow_field(struct flow_t *vectors, int count, float error_thresh
  * @param[in] parameters_v* Parameters of the vertical flow field
  * @param[in] im_width Width of image in pixels
  * @param[in] im_height Height of image in pixels
- * @param[out] info Contains all info extracted from the linear flow fit
+ * @param[out] info Contains all info extracted from the linear flow fit in subpixels
  */
 
-void extract_information_from_parameters(float *parameters_u, float *parameters_v, int im_width, int im_height, struct linear_flow_fit_info *info)
+void extract_information_from_parameters(float *parameters_u, float *parameters_v, uint16_t im_width,
+    uint16_t im_height, struct linear_flow_fit_info *info)
 {
   // This method assumes a linear flow field in x- and y- direction according to the formulas:
   // u = parameters_u[0] * x + parameters_u[1] * y + parameters_u[2]
@@ -325,17 +328,19 @@ void extract_information_from_parameters(float *parameters_u, float *parameters_
 
   // translation orthogonal to the camera axis:
   // flow in the center of the image:
-  info->relative_velocity_x = -(parameters_u[2] + (im_width / 2.0f) * parameters_u[0] + (im_height / 2.0f) * parameters_u[1]);
-  info->relative_velocity_y = -(parameters_v[2] + (im_width / 2.0f) * parameters_v[0] + (im_height / 2.0f) * parameters_v[1]);
+  info->relative_velocity_x = -(parameters_u[2] + (im_width / 2.0f) * parameters_u[0] +
+                                (im_height / 2.0f) * parameters_u[1]);
+  info->relative_velocity_y = -(parameters_v[2] + (im_width / 2.0f) * parameters_v[0] +
+                                (im_height / 2.0f) * parameters_v[1]);
 
-  float arv_x = abs(info->relative_velocity_x);
-  float arv_y = abs(info->relative_velocity_y);
+  float arv_x = fabsf(info->relative_velocity_x);
+  float arv_y = fabsf(info->relative_velocity_y);
 
   // extract inclination from flow field:
   float threshold_slope = 1.0;
   float eta = 0.002;
 
-  if (abs(parameters_v[1]) < eta && arv_y < threshold_slope && arv_x >= 2 * threshold_slope) {
+  if (fabsf(parameters_v[1]) < eta && arv_y < threshold_slope && arv_x >= 2 * threshold_slope) {
     // there is no forward motion and not enough vertical motion, but enough horizontal motion:
     info->slope_x = parameters_u[0] / info->relative_velocity_x;
   } else if (arv_y >= 2 * threshold_slope) {
@@ -347,7 +352,7 @@ void extract_information_from_parameters(float *parameters_u, float *parameters_
     info->slope_x = 0.0f;
   }
 
-  if (abs(parameters_u[0]) < eta && arv_x < threshold_slope && arv_y >= 2 * threshold_slope) {
+  if (fabsf(parameters_u[0]) < eta && arv_x < threshold_slope && arv_y >= 2 * threshold_slope) {
     // there is no forward motion, little horizontal movement, but sufficient vertical motion:
     info->slope_y = parameters_v[1] / info->relative_velocity_y;
   } else if (arv_x >= 2 * threshold_slope) {
@@ -364,13 +369,13 @@ void extract_information_from_parameters(float *parameters_u, float *parameters_
   // the FoE is the point where these 2 lines intersect (flow = (0,0))
   // x:
   float denominator = parameters_v[0] * parameters_u[1] - parameters_u[0] * parameters_v[1];
-  if (abs(denominator) > 1E-5) {
+  if (fabsf(denominator) > 1E-5) {
     info->focus_of_expansion_x = ((parameters_u[2] * parameters_v[1] - parameters_v[2] * parameters_u[1]) / denominator);
   } else { info->focus_of_expansion_x = 0.0f; }
   // y:
-  denominator = parameters_u[1];
-  if (abs(denominator) > 1E-5) {
-    info->focus_of_expansion_y = (-(parameters_u[0] * (info->focus_of_expansion_x) + parameters_u[2]) / denominator);
+  denominator = parameters_v[1];
+  if (fabsf(denominator) > 1E-5) {
+    info->focus_of_expansion_y = -(parameters_v[0] * (info->focus_of_expansion_x) + parameters_v[2]) / denominator;
   } else { info->focus_of_expansion_y = 0.0f; }
 }
 

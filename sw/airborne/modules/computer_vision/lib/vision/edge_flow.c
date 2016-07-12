@@ -246,12 +246,12 @@ uint32_t getMinimum(uint32_t *a, uint32_t n)
  * @param[out] *divergence Global divergence of pixel displacements
  * @param[out] *flow  Global translational flow from pixel displacements
  * @param[in] *size Size of displacement array
- * @param[in] border  A border offset of the array that should not be considerd for the line fit
+ * @param[in] border  A border offset of the array that should not be considered for the line fit
  * @param[in] RES  Resolution to be used for the integer based linefit
  * @param[out] return  total fit error
  */
 uint32_t line_fit(int32_t *displacement, int32_t *divergence, int32_t *flow, uint32_t size, uint32_t border,
-              uint16_t RES)
+                  uint16_t RES)
 {
   int32_t x;
 

@@ -44,6 +44,8 @@
 
 #include "state.h"
 
+#include "math/pprz_algebra_float.h"
+
 #ifndef GUIDANCE_H_AGAIN
 #define GUIDANCE_H_AGAIN 0
 #endif
@@ -679,10 +681,13 @@ bool guidance_h_set_guided_heading(float heading)
 
 bool guidance_h_set_guided_body_vel(float vx, float vy)
 {
+  // TODO: replace with a rotation with state
+  struct FloatVect2 vel_enu;
   float psi = stateGetNedToBodyEulers_f()->psi;
-  vx =  cosf(-psi) * vx + sinf(-psi) * vy;
-  vy = -sinf(-psi) * vx + cosf(-psi) * vy;
-  return guidance_h_set_guided_vel(vx, vy);
+  vel_enu.x =  cosf(-psi) * vx + sinf(-psi) * vy;
+  vel_enu.y = -sinf(-psi) * vx + cosf(-psi) * vy;
+
+  return guidance_h_set_guided_vel(vel_enu.x, vel_enu.y);
 }
 
 bool guidance_h_set_guided_vel(float vx, float vy)

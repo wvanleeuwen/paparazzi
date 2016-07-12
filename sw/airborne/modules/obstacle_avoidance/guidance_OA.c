@@ -314,9 +314,9 @@ void OA_update()
     Total_Kan_y = ref_roll;
 
     opticflow_stab.desired_vx = alpha_fil *
-                                Total_Kan_y; //alpha_fil*(Repulsionforce_Kan.y+Attractforce_goal.y) + result->vel_x;
+                                Total_Kan_y; //alpha_fil*(Repulsionforce_Kan.y+Attractforce_goal.y) + result->vel.x;
     opticflow_stab.desired_vy = alpha_fil *
-                                Total_Kan_x; //alpha_fil*(Repulsionforce_Kan.x+Attractforce_goal.x) + result->vel_y;
+                                Total_Kan_x; //alpha_fil*(Repulsionforce_Kan.x+Attractforce_goal.x) + result->vel.y;
 
     v_desired_total = sqrt(opticflow_stab.desired_vx * opticflow_stab.desired_vx + opticflow_stab.desired_vy *
                            opticflow_stab.desired_vy);

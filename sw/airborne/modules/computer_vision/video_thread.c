@@ -49,10 +49,10 @@
 #include "rt_priority.h"
 
 // Frames Per Seconds
-#ifndef VIDEO_THREAD_FPS
-#define VIDEO_THREAD_FPS 30
+#ifndef VIDEO_THREAD_NICE_LEVEL
+#define VIDEO_THREAD_NICE_LEVEL 5
 #endif
-PRINT_CONFIG_VAR(VIDEO_THREAD_FPS)
+PRINT_CONFIG_VAR(VIDEO_THREAD_NICE_LEVEL)
 
 // The amount of cameras we can have
 #ifndef VIDEO_THREAD_MAX_CAMERAS
@@ -74,11 +74,14 @@ void video_thread_periodic(void)
 
 /**
  * Handles all the video streaming and saving of the image shots
- * This is a sepereate thread, so it needs to be thread safe!
+ * This is a separate thread, so it needs to be thread safe!
  */
 static void *video_thread_function(void *data)
 {
   struct video_config_t *vid = (struct video_config_t *)data;
+
+  char print_tag[80];
+  snprintf(print_tag, 80, "video_thread-%s", vid->dev_name);
 
   struct image_t img_color;
 
@@ -91,17 +94,20 @@ static void *video_thread_function(void *data)
 
   // Start the streaming of the V4L2 device
   if (!v4l2_start_capture(vid->thread.dev)) {
-    printf("[video_thread-thread] Could not start capture of %s.\n", vid->thread.dev->name);
+    fprintf(stderr, "[%s] Could not start capture.\n", print_tag);
     return 0;
   }
 
   // be nice to the more important stuff
-  set_nice_level(10);
+  set_nice_level(VIDEO_THREAD_NICE_LEVEL);
+  fprintf(stdout, "[%s] Set nice level to %i\n", print_tag, VIDEO_THREAD_NICE_LEVEL);
 
   // Initialize timing
   struct timespec time_now;
   struct timespec time_prev;
   clock_gettime(CLOCK_MONOTONIC, &time_prev);
+
+  struct image_t img;
 
   // Start streaming
   vid->thread.is_running = true;
@@ -114,17 +120,15 @@ static void *video_thread_function(void *data)
 
     // sleep remaining time to limit to specified fps
     if (vid->fps != 0) {
-      uint32_t fps_period_us = (uint32_t)(1000000. / (float)vid->fps);
+      uint32_t fps_period_us = 1000000 / vid->fps;
       if (dt_us < fps_period_us) {
         usleep(fps_period_us - dt_us);
       } else {
-        fprintf(stderr, "video_thread with size %d %d: desired %i fps, only managing %.1f fps\n",
-                vid->w, vid->h, vid->fps, 1000000.f / dt_us);
+        fprintf(stderr, "[%s] desired %i fps, only managing %.1f fps\n", print_tag, vid->fps, 1000000.f / dt_us);
       }
     }
 
     // Wait for a new frame (blocking)
-    struct image_t img;
     v4l2_image_get(vid->thread.dev, &img);
 
     // pointer to the final image to pass for saving and further processing
