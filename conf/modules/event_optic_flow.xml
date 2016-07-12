@@ -2,7 +2,7 @@
 
 <module name="event_opticflow">
   <doc>
-    <description>Event based opticflow using DVS camera</description>
+    <description>Event based optic flow using DVS camera</description>
   </doc>
   <header>
     <file name="event_opticflow.h"/>
@@ -10,7 +10,7 @@
   <init fun="event_opticflow_init()"/>
   <periodic fun="event_opticflow_periodic()" freq="100" autorun="TRUE"/>
   <makefile>
-    <file name="event_opticflow.c"/>
+    <file name="event_optic_flow.c"/>
   </makefile>
 </module>
 

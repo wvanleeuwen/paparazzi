@@ -26,8 +26,8 @@
 #ifndef EVENT_OPTICFLOW_H
 #define EVENT_OPTICFLOW_H
 
-extern void event_opticflow_init(void);
-extern void event_opticflow_periodic(void);
+extern void event_optic_flow_init(void);
+extern void event_optic_flow_periodic(void);
 
 #endif
 

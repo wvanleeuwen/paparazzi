@@ -18,13 +18,12 @@
  * <http://www.gnu.org/licenses/>.
  */
 /**
- * @file "modules/event_opticflow/event_opticflow.c"
+ * @file "modules/event_optic_flow/event_optic_flow.c"
  * @author Bas Pijnacker Hordijk
  * Event based opticflow using DVS camera
  */
 
-#include "modules/event_opticflow/event_opticflow.h"
-
+#include "event_optic_flow.h"
 #include "mcu_periph/uart.h"
 #include "subsystems/datalink/downlink.h"
 
@@ -32,11 +31,11 @@
 #error Please define uart port connected to the dvs event based camera. e.g <define name="DVS_PORT" value="uart0"/>
 #endif
 
-void event_opticflow_init(void) {
+void event_optic_flow_init(void) {
 
 }
 
-void event_opticflow_periodic(void) {
+void event_optic_flow_periodic(void) {
   /* read all data from uart */
   static uint8_t buffer[UART_RX_BUFFER_SIZE]; // local communication buffer
   static uint16_t buf_loc = 0;                // circular buffer index location
