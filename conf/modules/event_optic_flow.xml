@@ -1,14 +1,14 @@
 <!DOCTYPE module SYSTEM "module.dtd">
 
-<module name="event_opticflow">
+<module name="event_optic_flow">
   <doc>
     <description>Event based optic flow using DVS camera</description>
   </doc>
   <header>
-    <file name="event_opticflow.h"/>
+    <file name="event_optic_flow.h"/>
   </header>
-  <init fun="event_opticflow_init()"/>
-  <periodic fun="event_opticflow_periodic()" freq="100" autorun="TRUE"/>
+  <init fun="event_optic_flow_init()"/>
+  <periodic fun="event_optic_flow_periodic()" start="event_optic_flow_start()" stop="event_optic_flow_stop()" freq="100" autorun="TRUE"/>
   <makefile>
     <file name="event_optic_flow.c"/>
   </makefile>

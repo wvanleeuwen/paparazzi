@@ -43,7 +43,7 @@
   </firmware>
 
   <modules>
-  	<module name="event_opticflow">
+  	<module name="event_optic_flow">
   	  <define name="DVS_PORT" value="uart3"/>
   	</module>
   </modules>
