@@ -45,8 +45,6 @@
 
 #include "state.h"
 
-#include "math/pprz_algebra_float.h"
-
 #ifndef GUIDANCE_H_AGAIN
 #define GUIDANCE_H_AGAIN 0
 #endif

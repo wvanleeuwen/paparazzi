@@ -170,8 +170,7 @@ void opticflow_calc_init(struct opticflow_t *opticflow, uint16_t w, uint16_t h)
 
   /* Set the previous values */
   opticflow->got_first_img = false;
-  opticflow->prev_phi = 0.0;
-  opticflow->prev_theta = 0.0;
+  FLOAT_RATES_ZERO(opticflow->prev_rates);
 
   /* Set the default values */
   opticflow->method = OPTICFLOW_METHOD; //0 = LK_fast9, 1 = Edgeflow
@@ -332,16 +331,18 @@ void calc_fast9_lukas_kanade(struct opticflow_t *opticflow, struct opticflow_sta
   float diff_flow_x = 0;
   float diff_flow_y = 0;
 
-  if (opticflow->derotation) {
-    // TODO change the rotation axis to the axis of the camera i.e. reverse phi and theta here
-    diff_flow_x = (state->phi - opticflow->prev_phi) * img->w / OPTICFLOW_FOV_W;
-    diff_flow_y = (state->theta - opticflow->prev_theta) * img->h / OPTICFLOW_FOV_H;
+  /*// Flow Derotation TODO:
+  float diff_flow_x = (state->phi - opticflow->prev_phi) * img->w / OPTICFLOW_FOV_W;
+  float diff_flow_y = (state->theta - opticflow->prev_theta) * img->h / OPTICFLOW_FOV_H;*/
+
+  if (opticflow->derotation && result->tracked_cnt > 5) {
+    diff_flow_x = (state->rates.p + opticflow->prev_rates.p) / 2.0f / result->fps * img->w / OPTICFLOW_FOV_W;// * img->w / OPTICFLOW_FOV_W;
+    diff_flow_y = (state->rates.q + opticflow->prev_rates.q) / 2.0f / result->fps * img->h / OPTICFLOW_FOV_H;// * img->h / OPTICFLOW_FOV_H;
   }
 
   result->flow_der_x = result->flow_x - diff_flow_x * opticflow->subpixel_factor;
   result->flow_der_y = result->flow_y - diff_flow_y * opticflow->subpixel_factor;
-  opticflow->prev_phi = state->phi;
-  opticflow->prev_theta = state->theta;
+  opticflow->prev_rates = state->rates;
 
   // Velocity calculation
   // Right now this formula is under assumption that the flow only exist in the center axis of the camera.
@@ -356,11 +357,7 @@ void calc_fast9_lukas_kanade(struct opticflow_t *opticflow, struct opticflow_sta
 
   // Determine quality of noise measurement for state filter
   //TODO Experiment with multiple noise measurement models
-  if (result->tracked_cnt < 10) {
-    result->noise_measurement = (float)result->tracked_cnt / (float)opticflow->max_track_corners;
-  } else {
-    result->noise_measurement = 1.0;
-  }
+  result->noise_measurement = (float)result->tracked_cnt / (float)opticflow->max_track_corners;
 
   // *************************************************************************************
   // Next Loop Preparation
@@ -399,8 +396,7 @@ void calc_edgeflow_tot(struct opticflow_t *opticflow, struct opticflow_state_t *
     for (i = 0; i < MAX_HORIZON; i++) {
       edge_hist[i].x = calloc(img->w, sizeof(int32_t));
       edge_hist[i].y = calloc(img->h, sizeof(int32_t));
-      edge_hist[i].roll = 0.;
-      edge_hist[i].pitch = 0.;
+      FLOAT_RATES_ZERO(edge_hist[i].rates);
     }
   }
 
@@ -427,9 +423,8 @@ void calc_edgeflow_tot(struct opticflow_t *opticflow, struct opticflow_state_t *
   calculate_edge_histogram(img, edge_hist_y, 'y', 0);
 
   // Copy frame time and angles of image to calculated edge histogram
-  memcpy(&edge_hist[current_frame_nr].frame_time, &img->ts, sizeof(struct timeval));
-  edge_hist[current_frame_nr].pitch = state->theta;
-  edge_hist[current_frame_nr].roll = state->phi;
+  edge_hist[current_frame_nr].frame_time = img->ts;
+  edge_hist[current_frame_nr].rates = state->rates;
 
   // Calculate which previous edge_hist to compare with the current
   uint8_t previous_frame_nr[2];
@@ -446,9 +441,9 @@ void calc_edgeflow_tot(struct opticflow_t *opticflow, struct opticflow_state_t *
   // TODO doesn't allow for rotated and derotated outputs
   // TODO change the rotation axis to the axis of the camera i.e. reverse phi and theta here
   if (opticflow->derotation) {
-    der_shift_x = -(int16_t)((edge_hist[previous_frame_nr[0]].roll - edge_hist[current_frame_nr].roll) *
+    der_shift_x = -(int16_t)((edge_hist[previous_frame_nr[0]].rates.p + edge_hist[current_frame_nr].rates.p) / 2.0f *
                              (float)img->w / (OPTICFLOW_FOV_W));
-    der_shift_y = -(int16_t)((edge_hist[previous_frame_nr[1]].pitch - edge_hist[current_frame_nr].pitch) *
+    der_shift_y = -(int16_t)((edge_hist[previous_frame_nr[1]].rates.q + edge_hist[current_frame_nr].rates.q) / 2.0f *
                              (float)img->h / (OPTICFLOW_FOV_H));
   }
 
@@ -473,8 +468,9 @@ void calc_edgeflow_tot(struct opticflow_t *opticflow, struct opticflow_state_t *
 
   /* Save Resulting flow in results
    * Warning: The flow detected here is different in sign
-   * to that in the LK algorithm of the opticalflow_calculator.c
-   * following lines rotate frame to be the same
+   * and size, therefore this will be multiplied with
+   * the same subpixel factor and -1 to make it on par with
+   * the LK algorithm of t opticalflow_calculator.c
    * */
   // TODO define axis system of camera
   edgeflow.flow_x = -1 * edgeflow.flow_x;

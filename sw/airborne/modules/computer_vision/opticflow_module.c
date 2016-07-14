@@ -96,14 +96,13 @@ void opticflow_module_init(void)
   AbiBindMsgAGL(OPTICFLOW_AGL_ID, &opticflow_agl_ev, opticflow_agl_cb);
 
   // Set the opticflow state to 0
-  opticflow_state.phi = 0.;
-  opticflow_state.theta = 0.;
+  FLOAT_RATES_ZERO(opticflow_state.rates);
   opticflow_state.agl = 0.;
 
   // Initialize the opticflow calculation
   opticflow_got_result = false;
 
-  opticflow_calc_init(&opticflow, OPTICFLOW_CAMERA.w, OPTICFLOW_CAMERA.h);
+  opticflow_calc_init(&opticflow, OPTICFLOW_CAMERA.output_size.w, OPTICFLOW_CAMERA.output_size.h);
   cv_add_to_device(&OPTICFLOW_CAMERA, opticflow_module_calc);
 
 #if PERIODIC_TELEMETRY
@@ -119,9 +118,6 @@ void opticflow_module_run(void)
 {
   // Send Updated data to thread
   pthread_mutex_lock(&opticflow_mutex);
-  opticflow_state.phi = stateGetNedToBodyEulers_f()->phi;
-  opticflow_state.theta = stateGetNedToBodyEulers_f()->theta;
-
   // Update the stabilization loops on the current calculation
   if (opticflow_got_result) {
     uint32_t now_ts = get_sys_time_usec();
@@ -135,7 +131,7 @@ void opticflow_module_run(void)
                            opticflow_result.div_size,
                            opticflow_state.agl);
     //TODO Find an appropiate quality measure for the noise model in the state filter, for now it is tracked_cnt
-    if (opticflow_result.tracked_cnt > 0) {
+    if (quality > 0.8) {
       AbiSendMsgVELOCITY_ESTIMATE(OPTICFLOW_SENDER_ID, now_ts,
                                   opticflow_result.vel_body.x,
                                   opticflow_result.vel_body.y,
@@ -157,10 +153,10 @@ void opticflow_module_run(void)
  */
 static struct image_t *opticflow_module_calc(struct image_t *img)
 {
-  // update state from
+  // Copy the state
   // TODO: This assumes fixed body to cam rotation, rotate state here.
-  opticflow_state.phi = stateGetNedToBodyEulers_f()->phi;
-  opticflow_state.theta = stateGetNedToBodyEulers_f()->theta;
+  struct pose_t pose = get_rotation_at_timestamp(img->pprz_ts);
+  opticflow_state.rates = pose.rates;
 
   // Do the optical flow calculation
   struct opticflow_result_t temp_result = {}; // new initialization
@@ -183,14 +179,6 @@ static struct image_t *opticflow_module_calc(struct image_t *img)
     opticflow_result.vel_body_y = opticflow_result.vel_x;
   #endif
   */
-#if CAMERA_ROTATED_180 == 0 //Case for ARDrone 2.0
-  opticflow_result.vel_body_x = opticflow_result.vel_y;
-  opticflow_result.vel_body_y = - opticflow_result.vel_x;
-#else   // Case for Bebop 2
-  opticflow_result.vel_body_x = - opticflow_result.vel_y;
-  opticflow_result.vel_body_y = opticflow_result.vel_x;
-#endif
-
   return img;
 }
 
