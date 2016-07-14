@@ -119,6 +119,9 @@ void opticflow_module_run(void)
 {
   // Send Updated data to thread
   pthread_mutex_lock(&opticflow_mutex);
+  opticflow_state.phi = stateGetNedToBodyEulers_f()->phi;
+  opticflow_state.theta = stateGetNedToBodyEulers_f()->theta;
+
   // Update the stabilization loops on the current calculation
   if (opticflow_got_result) {
     uint32_t now_ts = get_sys_time_usec();
@@ -180,6 +183,14 @@ static struct image_t *opticflow_module_calc(struct image_t *img)
     opticflow_result.vel_body_y = opticflow_result.vel_x;
   #endif
   */
+#if CAMERA_ROTATED_180 == 0 //Case for ARDrone 2.0
+  opticflow_result.vel_body_x = opticflow_result.vel_y;
+  opticflow_result.vel_body_y = - opticflow_result.vel_x;
+#else   // Case for Bebop 2
+  opticflow_result.vel_body_x = - opticflow_result.vel_y;
+  opticflow_result.vel_body_y = opticflow_result.vel_x;
+#endif
+
   return img;
 }
 

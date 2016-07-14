@@ -49,16 +49,18 @@ struct video_thread_t {
 /** V4L2 device settings */
 //todo maybe find a better place for FOW and rotation matrix
 struct video_config_t {
-  uint16_t w;             ///< Width, number of pixels in x direction of camera
-  uint16_t h;             ///< Height, number of pixels in y direction of camera
+  struct img_size_t output_size;    ///< Output image size
+  struct img_size_t sensor_size;    ///< Original sensor size
+  struct crop_t crop;           ///< Cropped area definition
   struct FloatVect2 fow;  ///< Field of View of camera (radians)
   char *dev_name;         ///< path to device
   char *subdev_name;      ///< path to sub device
   uint32_t format;        ///< Video format
+  uint32_t subdev_format;   ///< Subdevice video format
   uint8_t buf_cnt;        ///< Amount of V4L2 video device buffers
   uint8_t filters;        ///< filters to use (bitfield with VIDEO_FILTER_x)
   struct video_thread_t thread; ///< Information about the thread this camera is running on
-  struct video_listener *pointer_to_first_listener; ///< The first listener in the linked list for this video device
+  struct video_listener *cv_listener; ///< The first computer vision listener in the linked list for this video device
   int fps;                ///< Requested frame rate of the video feed (set 0 if request fastest)
   struct OrientationReps body_to_cam; ///< rotation matrix to rotate from body to camera axis frame
 };

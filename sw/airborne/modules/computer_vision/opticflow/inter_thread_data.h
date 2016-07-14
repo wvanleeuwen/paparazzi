@@ -56,9 +56,8 @@ struct opticflow_result_t {
 
 /* The state of the drone when it took an image */
 struct opticflow_state_t {
-  float phi;      ///< roll [rad]
-  float theta;    ///< pitch [rad]
-  float agl;      ///< height above ground [m]
+  struct FloatRates rates;   ///< Body rates
+  float agl;                 ///< height above ground [m]
 };
 
 #endif

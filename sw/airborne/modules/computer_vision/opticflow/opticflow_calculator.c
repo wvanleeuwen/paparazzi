@@ -535,7 +535,6 @@ void opticflow_calc_frame(struct opticflow_t *opticflow, struct opticflow_state_
     calc_fast9_lukas_kanade(opticflow, state, img, result);
   } else if (opticflow->method == 1) {
     calc_edgeflow_tot(opticflow, state, img, result);
-  } else {
   }
 }
 
