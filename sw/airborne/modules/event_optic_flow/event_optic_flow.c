@@ -26,7 +26,7 @@
 #include "event_optic_flow.h"
 #include "mcu_periph/uart.h"
 #include "mcu_periph/sys_time.h"
-#include "subsystems/datalink/downlink.h"
+#include "subsystems/datalink/telemetry.h"
 #include "math/pprz_algebra_float.h"
 
 #include "filters/low_pass_filter.h"
@@ -108,6 +108,7 @@ struct module_state {
   struct flowStats stats;
   float lastTime;
   float moduleFrequency;
+  enum updateStatus status;
 };
 
 static struct module_state moduleState;
@@ -139,7 +140,7 @@ void decayParameterToZero(float* par, float decay);
 void decayFlowFieldParameters(struct flowField* field, float decay);
 uint8_t recomputeFlowField(struct flowField* field, struct flowStats* s);
 void derotateFlowField(struct flowField* field, struct FloatRates rates);
-void downlinkFlowFieldState(struct flowField* field, uint8_t status);
+static void sendFlowFieldState(struct transport_tx *trans, struct link_device *dev);
 
 uint16_t checkBufferFreeSpace(void);
 void incrementBufferPos(uint16_t* pos);
@@ -155,6 +156,9 @@ void event_optic_flow_init(void) {
 	struct flowStats stats = {0};
 	moduleState.field = field;
 	moduleState.stats = stats;
+
+	register_periodic_telemetry(DefaultPeriodic,
+	    PPRZ_MSG_ID_EVENT_OPTIC_FLOW_EST, sendFlowFieldState);
 }
 
 void event_optic_flow_start(void) {
@@ -195,8 +199,8 @@ void event_optic_flow_periodic(void) {
 		//TODO implement controller
 	}
 
-	// Send flow field info to ground station
-	downlinkFlowFieldState(&moduleState.field, status);
+	// Set confidence level globally
+	moduleState.status = status;
 }
 
 void event_optic_flow_stop(void) {
@@ -239,8 +243,7 @@ int32_t ringBufferGetInt32(void) {
 }
 
 bool processUARTInput(struct flowStats* s, float filterTimeConstant) {
-	// Copy UART data to buffer
-	// check buffer full
+	// Copy UART data to buffer if not full
 	while( checkBufferFreeSpace() > 0 && uart_char_available(&DVS_PORT)) {
 		uartRingBuffer[writePos] = uart_getch(&DVS_PORT);          // copy over incoming data
 		incrementBufferPos(&writePos);
@@ -273,7 +276,7 @@ bool processUARTInput(struct flowStats* s, float filterTimeConstant) {
 	    }
 	  }
 	  else {
-	    // Resynchronize at next separator
+	    // (Re)synchronize at next separator
 	    if (ringBufferGetByte() == EVENT_SEPARATOR) {
 	      synchronized = true;
 	    }
@@ -441,6 +444,14 @@ enum updateStatus recomputeFlowField(struct flowField* field, struct flowStats* 
 void derotateFlowField(struct flowField* field, struct FloatRates rates) {
 	//TODO implement
 }
-void downlinkFlowFieldState(struct flowField* field, enum updateStatus status) {
-	//TODO implement
+
+static void sendFlowFieldState(struct transport_tx *trans, struct link_device *dev) {
+  float fps = moduleState.moduleFrequency;
+  uint8_t confidence = (uint8_t) moduleState.status;
+  float eventRate = moduleState.stats.eventRate;
+  float wx = moduleState.field.wx;
+  float wy = moduleState.field.wy;
+  float D  = moduleState.field.D;
+  pprz_msg_send_EVENT_OPTIC_FLOW_EST(trans, dev, AC_ID,
+      &fps, &confidence, &eventRate, &wx, &wy, &D);
 }
