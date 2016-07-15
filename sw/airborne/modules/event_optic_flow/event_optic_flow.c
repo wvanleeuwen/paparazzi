@@ -29,6 +29,8 @@
 #include "subsystems/datalink/telemetry.h"
 #include "math/pprz_algebra_float.h"
 
+#include "state.h"
+
 #include "filters/low_pass_filter.h"
 
 #ifndef DVS_PORT
@@ -96,8 +98,10 @@ struct flowStats {
 };
 
 enum updateStatus {
-  UPDATE_SUCCES,
+  UPDATE_SUCCESS,
   UPDATE_NONE,
+  UPDATE_NOTICE_STATS,
+  UPDATE_WARNING_SINGULAR,
   UPDATE_WARNING_RATE,
   UPDATE_WARNING_SPREAD
 };
@@ -115,7 +119,7 @@ static struct module_state moduleState;
 
 // Algorithm parameters
 const float inactivityDecayPerSecond = 2;
-const float statsFilterTimeConstant = 0.01;
+const float statsFilterTimeConstant = 0.1;
 
 // Confidence thresholds
 const float minPosVariance = 100;
@@ -124,7 +128,7 @@ const float minEventRate = 100;
 
 // Constants
 const int32_t MAX_NUMBER_OF_UART_EVENTS = 100;
-const int32_t MOVING_AVERAGE_MIN_WINDOW = 10;
+const float MOVING_AVERAGE_MIN_WINDOW = 10;
 const float FLT_MIN_RESOLUTION = 1e-3;
 const float DVS128_PRINCIPAL_POINT_X = 76.70;
 const float DVS128_PRINCIPAL_POINT_Y = 56.93;
@@ -134,8 +138,8 @@ const float FLOW_INT16_TO_FLOAT = 100;
 const uint32_t eventByteSize = sizeof(struct flowEvent) + 1; // +1 for separator
 
 // Function declarations (definitions below)
-bool processUARTInput(struct flowStats* s, float filterTimeConstant);
-void updateFlowStats(struct flowStats* s, struct flowEvent e, float filterTimeConstant);
+enum updateStatus processUARTInput(struct flowStats* s, double filterTimeConstant);
+void updateFlowStats(struct flowStats* s, struct flowEvent e, double filterTimeConstant);
 void decayParameterToZero(float* par, float decay);
 void decayFlowFieldParameters(struct flowField* field, float decay);
 uint8_t recomputeFlowField(struct flowField* field, struct flowStats* s);
@@ -168,8 +172,8 @@ void event_optic_flow_start(void) {
 
 void event_optic_flow_periodic(void) {
 	// Obtain UART data if available
-	enum updateStatus status = UPDATE_NONE;
-	if (processUARTInput(&moduleState.stats, statsFilterTimeConstant)) {
+	enum updateStatus status = processUARTInput(&moduleState.stats, statsFilterTimeConstant);
+	if (status == UPDATE_NOTICE_STATS) {
 		// If new events are received, recompute flow field
 		// In case the flow field is ill-posed, do not update
 		status = recomputeFlowField(&moduleState.field, &moduleState.stats);
@@ -182,9 +186,12 @@ void event_optic_flow_periodic(void) {
 	moduleState.lastTime = currentTime;
 
 	// If no update has been performed, decay flow field parameters towards zero
-	if (status == UPDATE_NONE) {
-		decayFlowFieldParameters(&moduleState.field,
-				inactivityDecayPerSecond/moduleState.moduleFrequency);
+	if (status != UPDATE_SUCCESS) {
+	  moduleState.field.wx *= 0.95;
+	  moduleState.field.wy *= 0.95;
+	  moduleState.field.D *= 0.95;
+//		decayFlowFieldParameters(&moduleState.field,
+//				inactivityDecayPerSecond/moduleState.moduleFrequency);
 	}
 
 	// Derotate flow field
@@ -196,6 +203,7 @@ void event_optic_flow_periodic(void) {
 
 	// Set control signals
 	if (EOF_CONTROL) {
+	  //stateGetPositionNed_f();  // for alt/hieght
 		//TODO implement controller
 	}
 
@@ -242,7 +250,8 @@ int32_t ringBufferGetInt32(void) {
   return out;
 }
 
-bool processUARTInput(struct flowStats* s, float filterTimeConstant) {
+enum updateStatus processUARTInput(struct flowStats* s, double filterTimeConstant) {
+  enum updateStatus returnStatus = UPDATE_NONE;
 	// Copy UART data to buffer if not full
 	while( checkBufferFreeSpace() > 0 && uart_char_available(&DVS_PORT)) {
 		uartRingBuffer[writePos] = uart_getch(&DVS_PORT);          // copy over incoming data
@@ -250,8 +259,6 @@ bool processUARTInput(struct flowStats* s, float filterTimeConstant) {
 	}
 
 	// Now scan across received data and extract events
-	bool eventsFound = false;
-
 	// Scan until read pointer is one byte behind ith the write pointer
 	static bool synchronized;
 	while((writePos + UART_RX_BUFFER_SIZE - readPos) % UART_RX_BUFFER_SIZE > (int32_t) eventByteSize) {
@@ -268,7 +275,7 @@ bool processUARTInput(struct flowStats* s, float filterTimeConstant) {
 	    if (separator == EVENT_SEPARATOR) {
 	      // Full event received - this can be processed further
 	      updateFlowStats(s, e, filterTimeConstant);
-	      eventsFound = true;
+	      returnStatus = UPDATE_NOTICE_STATS;
 	    }
 	    else {
 	      // we are apparently out of sync - do not process event
@@ -283,10 +290,10 @@ bool processUARTInput(struct flowStats* s, float filterTimeConstant) {
 	  }
 	}
 
-	return eventsFound;
+	return returnStatus;
 }
 
-void updateFlowStats(struct flowStats* s, struct flowEvent e, float filterTimeConstant) {
+void updateFlowStats(struct flowStats* s, struct flowEvent e, double filterTimeConstant) {
   static int32_t tPrevious = 0;
 
   float x = (float) e.x;
@@ -329,6 +336,9 @@ void updateFlowStats(struct flowStats* s, struct flowEvent e, float filterTimeCo
   s->mwm += (w * m - s->mwm) * tFactor;
 
   s->eventRate += (1/dt - s->eventRate) * tFactor;
+  moduleState.field.wx = dt;
+  moduleState.field.wy = tFactor;
+  moduleState.field.D = s->muu;
 
   tPrevious = e.t;
 }
@@ -371,8 +381,9 @@ enum updateStatus recomputeFlowField(struct flowField* field, struct flowStats* 
   float varU = s->muu - pow(s->mu,2);
   float varV = s->mvv - pow(s->mv,2);
   float covUV = s->muv - s->mu * s->mv;
+  bool normalFlow = false;
   if (varU > minSpeedVariance && varV > minSpeedVariance
-      && fabs(covUV) > minSpeedVariance) {
+      && fabs(covUV) > minSpeedVariance &&false) {
     /* Normal flow method. This is more accurate but cannot handle
      * low speed variance.
      * The linear system to be solved here is
@@ -386,10 +397,11 @@ enum updateStatus recomputeFlowField(struct flowField* field, struct flowStats* 
      */
 
     // Compute determinant
+    normalFlow = true;
     float D = - s->mww * pow(s->muv,2) + 2*s->muv * s->muw * s->mvw
         - s->mvv * pow(s->muw,2) - s->muu * pow(s->mvw,2) + s->muu * s->mvv * s->mww;
     if (fabs(D) < FLT_MIN_RESOLUTION) {
-      return UPDATE_NONE;
+      return UPDATE_WARNING_SINGULAR;
     }
     // Solve system of equations
     p[0]= 1/D* (s->muw*s->mvm*s->mvw - s->mum*s->mvw*s->mvw - s->muv*s->mvm*s->mww
@@ -413,7 +425,7 @@ enum updateStatus recomputeFlowField(struct flowField* field, struct flowStats* 
     // Compute determinant
     float D = - pow(s->mx,2) - pow(s->my,2) + s->mxx + s->myy;
         if (fabs(D) < FLT_MIN_RESOLUTION) {
-          return UPDATE_NONE;
+          return UPDATE_WARNING_SINGULAR;
         }
         p[0] = 1/D*(-s->mu*pow(s->my,2) + s->mv*s->mx*s->my + s->mu*s->mxx
             + s->mu*s->myy - s->mx*s->mxu - s->mx*s->myv);
@@ -438,7 +450,7 @@ enum updateStatus recomputeFlowField(struct flowField* field, struct flowStats* 
   }
 
   // If no problem was found, update is successful
-  return UPDATE_SUCCES;
+  return UPDATE_SUCCESS;
 }
 
 void derotateFlowField(struct flowField* field, struct FloatRates rates) {
