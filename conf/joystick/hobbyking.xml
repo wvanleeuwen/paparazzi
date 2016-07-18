@@ -38,7 +38,7 @@ The basis of steering is the standard signs of aerospace convention
     <axis index="5" name="yaw"/>
   </input>
 
-  <messages period="0.1">
+  <messages period="0.05">
     <message class="datalink" name="RC_4CH" send_always="true">
       <field name="throttle" value="Fit(-throttle,-124,126,0,127)" />
       <field name="roll" value="roll" />
