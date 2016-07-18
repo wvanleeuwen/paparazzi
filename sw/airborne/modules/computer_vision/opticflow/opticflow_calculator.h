@@ -34,8 +34,8 @@
 
 #include "std.h"
 #include "inter_thread_data.h"
-#include "lib/vision/image.h"
-#include "lib/v4l/v4l2.h"
+#include "modules/computer_vision/lib/vision/image.h"
+#include "modules/computer_vision/lib/v4l/v4l2.h"
 
 struct opticflow_t {
   bool got_first_img;             ///< If we got a image to work with

@@ -1,0 +1,13 @@
+<!DOCTYPE airframe SYSTEM "../../airframe.dtd">
+
+<airframe>
+  <section name="IMU" prefix="IMU_">
+    <!-- MAGNETO CALIBRATION DELFT-->
+    <define name="MAG_X_NEUTRAL" value="-146"/>
+    <define name="MAG_Y_NEUTRAL" value="-328"/>
+    <define name="MAG_Z_NEUTRAL" value="224"/>
+    <define name="MAG_X_SENS" value="3.6959968899" integer="16"/>
+    <define name="MAG_Y_SENS" value="4.31014867242" integer="16"/>
+    <define name="MAG_Z_SENS" value="4.42776622507" integer="16"/>
+  </section>
+</airframe>

@@ -35,9 +35,7 @@
 
   <firmware name="rotorcraft">
     <target name="ap" board="lisa_s_1.0">
-      <module name="radio_control" type="datalink">
-      </module>
-      <configure name="USE_MAGNETOMETER" value="0"/>
+      <configure name="USE_MAGNETOMETER" value="1"/>
       <configure name="AHRS_PROPAGATE_FREQUENCY" value="500"/>
       <define name="USE_PERSISTENT_SETTINGS" value="TRUE"/>
     </target>
@@ -59,26 +57,27 @@
     <module name="imu" type="lisa_s_v1.0">
       <define name="LISA_S_UPSIDE_DOWN"/> <!-- Upside down is a relative term. :) -->
     </module>
-	
+    <module name="radio_control" type="datalink"/>
     <module name="gps" type="datalink"/>
     <module name="stabilization" type="int_quat"/>
     <module name="ahrs" type="int_cmpl_quat"/>
     <module name="ins"/>
   </firmware>
 
-<modules main_freq="512">
-   <module name="send_imu_mag_current"/>
-   <module name="stereocam">
-     <configure name="STEREO_UART" value="UART1"/>
-     <configure name="STEREO_BAUD" value="B115200"/>
-     <define name="SEND_STEREO" value="TRUE"/>
-   </module>
-   <module name="stereocam_state2camera">
-     <configure name="STEREO_UART" value="UART1"/>
-     <configure name="STEREO_BAUD" value="B115200"/>
-   </module>
-   <module name="stereocam_stereocam2state"/>
- </modules>
+  <modules main_freq="512">
+    <module name="send_imu_mag_current"/>
+    <module name="stereocam">
+      <configure name="STEREO_UART" value="UART1"/>
+      <configure name="STEREO_BAUD" value="B115200"/>
+      <define name="SEND_STEREO" value="FALSE"/>
+    </module>
+    <!--module name="stereocam_state2camera">
+      <configure name="STEREO_UART" value="UART1"/>
+      <configure name="STEREO_BAUD" value="B115200"/>
+    </module-->
+    <module name="stereocam_stereocam2state"/>
+    <module name="div_ctrl"/>
+  </modules>
 
   <servos driver="Pwm">
     <servo name="NE" no="0" min="0" neutral="50" max="1000"/>
@@ -114,7 +113,7 @@
     <set servo="NW" value="motor_mixing.commands[3]"/>
   </command_laws>
 
-  <include href="conf/airframes/TUDELFT/calibrations/ladybird18.xml"/>
+  <include href="conf/airframes/TUDELFT/calibrations/ladybird14.xml"/>
 
   <section name="IMU" prefix="IMU_">
     <define name="BODY_TO_IMU_PHI" value="0." unit="deg"/>
@@ -127,7 +126,7 @@
     <define name="H_X" value="0.39049610"/>
     <define name="H_Y" value="0.00278894"/>
     <define name="H_Z" value="0.92060036"/>
-    <define name="USE_GPS_HEADING" value="1"/>
+    <define name="USE_GPS_HEADING" value="0"/>
     <define name="HEADING_UPDATE_GPS_MIN_SPEED" value="0"/>
   </section>
 
@@ -214,8 +213,8 @@
  <section name="AUTOPILOT">
    <define name="MODE_STARTUP" value="AP_MODE_NAV"/>
    <define name="MODE_MANUAL" value="AP_MODE_ATTITUDE_DIRECT"/>
-   <define name="MODE_AUTO1" value="AP_MODE_GUIDED"/>
-   <define name="MODE_AUTO2" value="AP_MODE_NAV"/>
+   <define name="MODE_AUTO1" value="AP_MODE_HOVER_Z_HOLD"/>
+   <define name="MODE_AUTO2" value="AP_MODE_GUIDED"/>
    <!--define name="USE_THROTTLE_FOR_MOTOR_ARMING" value="TRUE"/-->
    <define name="NO_RC_THRUST_LIMIT" value="TRUE"/>
  </section>

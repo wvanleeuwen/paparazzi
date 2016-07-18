@@ -28,13 +28,16 @@
 #include "math/pprz_algebra_int.h"
 #include "math/pprz_algebra_float.h"
 
-#include "opticflow_module.h"
+//#include "computer_vision/opticflow_module.h"
+#include "modules/stereocam/stereocam2state/stereocam2state.h"
 
 #include "generated/flight_plan.h"
 #include "guidance/guidance_h.h"
 #include "guidance/guidance_v.h"
 
 #include "subsystems/datalink/downlink.h"
+
+#include "led.h"
 
 #ifndef FOE_GAIN
 #define FOE_GAIN 0.05
@@ -45,6 +48,9 @@
 #endif
 
 static struct FloatVect2 FOE;       // focus of expansion measured from the center of the image
+static struct FloatVect2 FOE_filtered;       // focus of expansion measured from the center of the image
+static const uint8_t max_filter_points = 4;
+static uint8_t filter_points = 0;
 static struct FloatVect2 vel_sp;    // velocity set-point
 
 float gain;                         // control gain for FOE controller
@@ -52,8 +58,8 @@ float foe_cmd;                      // reference FOE x-location command
 
 void div_ctrl_init(void)
 {
-  FOE.x = 0;
-  FOE.y = 0;
+  FLOAT_VECT2_ZERO(FOE);
+  FLOAT_VECT2_ZERO(FOE_filtered);
 
   vel_sp.x = 0.5; // fixed forward speed
   vel_sp.y = 0.;
@@ -64,13 +70,36 @@ void div_ctrl_init(void)
 
 void div_ctrl_run(void)
 {
-  // FOE is x intercept of flow field, rotate camera to x positive right, y positive up
+/*  // FOE is x intercept of flow field, rotate camera to x positive right, y positive up
   FOE.x = -(float)opticflow_result.flow_x / (opticflow_result.divergence * (float)opticflow.img_gray.w *
           (float)opticflow.subpixel_factor);
   FOE.y = -(float)opticflow_result.flow_y / (opticflow_result.divergence * (float)opticflow.img_gray.h *
           (float)opticflow.subpixel_factor);
 
-  vel_sp.y = gain * (foe_cmd - FOE.x);
+  vel_sp.y = gain * (foe_cmd - FOE.x);*/
+
+  // FOE is x intercept of flow field, rotate camera to x positive right, y positive up
+  if(stereo_motion.div.x != 0) {
+    FOE.x = 64 - stereo_motion.flow.x / stereo_motion.div.x ; // 128/2
+  } else {FOE.x = 64;}
+  if(stereo_motion.div.y != 0) {
+    FOE.y = 48 - stereo_motion.flow.y / stereo_motion.div.y; // 96/2
+  } else {FOE.y = 48;}
+
+  FOE_filtered.x *= filter_points;
+  FOE_filtered.y *= filter_points++;
+
+  FOE_filtered.x += FOE.x;
+  FOE_filtered.y += FOE.y;
+
+  FOE_filtered.x /= filter_points;
+  FOE_filtered.y /= filter_points;
+
+  if (filter_points > max_filter_points) {
+    filter_points = max_filter_points;
+  }
+
+  vel_sp.y = gain * (foe_cmd - FOE_filtered.x);
 
   BoundAbs(vel_sp.y, 1);
 
@@ -82,6 +111,11 @@ void div_ctrl_run(void)
   }
   guidance_v_set_guided_z(-1.5);
 
-  uint8_t msg[] = {(uint8_t)(opticflow_result.focus_of_expansion.x), (uint8_t)(opticflow_result.focus_of_expansion.y), (uint8_t)(FOE.x * opticflow.img_gray.w), (uint8_t)(FOE.y * opticflow.img_gray.h), vel_sp.x * 100, vel_sp.y * 100};
-  DOWNLINK_SEND_DEBUG(DefaultChannel, DefaultDevice, 6, msg);
+  uint8_t tempx = (uint8_t)FOE.x;
+  uint8_t tempy = (uint8_t)FOE.y;
+  uint8_t tempx2 = (uint8_t)FOE_filtered.x;
+  uint8_t tempy2 = (uint8_t)FOE_filtered.y;
+
+  uint8_t msg[] = {tempx, tempy, tempx2, tempy2};
+  DOWNLINK_SEND_DEBUG(DefaultChannel, DefaultDevice, 4, msg);
 }

@@ -335,7 +335,7 @@ static void baro_cb(uint8_t __attribute__((unused)) sender_id, float pressure)
 #if USE_VFF_EXTENDED
       vff_update_baro(ins_int.baro_z);
 #else
-      vff_update(ins_int.baro_z);
+      vff_update_z(ins_int.baro_z);
 #endif
     }
     ins_ned_to_state();
@@ -515,7 +515,6 @@ static void vel_est_cb(uint8_t sender_id __attribute__((unused)),
                        float x, float y, float z,
                        float noise __attribute__((unused)))
 {
-
   struct FloatVect3 vel_body = {x, y, z};
   static uint32_t last_stamp = 0;
   float dt = 0;
@@ -543,6 +542,10 @@ static void vel_est_cb(uint8_t sender_id __attribute__((unused)),
 #else
   ins_int.ltp_speed.x = SPEED_BFP_OF_REAL(vel_ned.x);
   ins_int.ltp_speed.y = SPEED_BFP_OF_REAL(vel_ned.y);
+
+  if (fabsf(z) > 0.001){
+    vff_update_z(vel_ned.z);
+  }
   if (last_stamp > 0) {
     ins_int.ltp_pos.x = ins_int.ltp_pos.x + POS_BFP_OF_REAL(dt * vel_ned.x);
     ins_int.ltp_pos.y = ins_int.ltp_pos.y + POS_BFP_OF_REAL(dt * vel_ned.y);

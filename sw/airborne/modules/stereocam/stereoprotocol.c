@@ -58,7 +58,7 @@ uint8_t stereoprot_isEndOfMsg(uint8_t *stack, uint16_t i, uint16_t buffer_size)
 }
 
 /**
- * Checks if the sequence in the array is equal to 255-0-0-171,
+ * Checks if the sequence in the array is equal to 255-0-0-175,
  * as this means a new image is starting from here
  */
 uint8_t stereoprot_isStartOfMsg(uint8_t *stack, uint16_t i, uint16_t buffer_size)
@@ -85,6 +85,7 @@ uint8_t WritePart(struct link_device *dev, uint8_t *code, uint8_t length)
   }
   return 0;
 }
+
 void stereoprot_sendArray(struct link_device *fd, uint8_t *b, uint8_t array_width, uint8_t array_height)
 {
 
@@ -95,7 +96,6 @@ void stereoprot_sendArray(struct link_device *fd, uint8_t *b, uint8_t array_widt
   code[3] = 0xAF; // 175
   while (WritePart(fd, code, 4) == 0)
     ;
-
 
   int horizontalLine = 0;
   for (horizontalLine = 0; horizontalLine < array_height; horizontalLine++) {
@@ -123,8 +123,6 @@ uint8_t handleStereoPackage(uint8_t newByte, uint16_t buffer_size, uint16_t *ins
                             uint16_t *msg_start, uint8_t *msg_buf, uint8_t *ser_read_buf, uint8_t *stereocam_datadata_new,
                             uint8_t *stereocam_datalen, uint8_t *stereocam_data_matrix_width, uint8_t *stereocam_data_matrix_height)
 {
-
-
   MsgProperties msgProperties;
   // read all data from the stereo com link, check that don't overtake extract
   if (stereoprot_add(*insert_loc, 1, buffer_size) != *extract_loc) {
@@ -132,18 +130,13 @@ uint8_t handleStereoPackage(uint8_t newByte, uint16_t buffer_size, uint16_t *ins
     *insert_loc = stereoprot_add(*insert_loc, 1, buffer_size);
   }
 
-
   // search for complete message in buffer, if found increments read location and returns immediately
 
   //while (stereoprot_diff(*insert_loc, stereoprot_add(*extract_loc,3,buffer_size),buffer_size) > 0) {
   while (stereoprot_diff(*insert_loc, *extract_loc, buffer_size) > 3) {
     if (stereoprot_isStartOfMsg(ser_read_buf, *extract_loc, buffer_size)) {
-
-
       *msg_start = *extract_loc;
     } else if (stereoprot_isEndOfMsg(ser_read_buf, *extract_loc, buffer_size)) { // process msg
-
-
       // Find the properties of the image by iterating over the complete image
       stereoprot_get_msg_properties(ser_read_buf, &msgProperties, *msg_start, buffer_size);
       // Copy array to circular buffer and remove all bytes that are indications of start and stop lines
@@ -165,7 +158,6 @@ uint8_t handleStereoPackage(uint8_t newByte, uint16_t buffer_size, uint16_t *ins
       return 1;
     }
     *extract_loc = stereoprot_add(*extract_loc, 1, buffer_size);
-
   }
   return 0;
 }

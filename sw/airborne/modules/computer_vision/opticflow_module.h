@@ -28,7 +28,7 @@
 #define OPTICFLOW_MODULE_H
 
 // Include opticflow calculator
-#include "opticflow/opticflow_calculator.h"
+#include "modules/computer_vision/opticflow/opticflow_calculator.h"
 
 // Needed for settings
 extern struct opticflow_t opticflow;

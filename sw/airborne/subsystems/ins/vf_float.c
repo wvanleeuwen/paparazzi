@@ -186,7 +186,7 @@ static inline void update_z_conf(float z_meas, float conf)
 
 }
 
-void vff_update(float z_meas)
+void vff_update_z(float z_meas)
 {
   update_z_conf(z_meas, VFF_MEAS_NOISE);
 }
