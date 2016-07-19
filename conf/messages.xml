@@ -2037,16 +2037,12 @@
   </message>
 
   <message name="STEREOCAM_OPTIC_FLOW" id="230">
-    <field name="vel_x_pixelwise"       type="int16" unit="cm/s"/>
-    <field name="vel_y_pixelwise"       type="int16" unit="cm/s"/>
-    <field name="vel_x_global"       type="int16" unit="cm/s"/>
-    <field name="vel_y_global"       type="int16" unit="cm/s"/>
-    <field name="vel_z_global"       type="int16" unit="cm/s"/>
-    <field name="vel_GT_x"       type="int16" unit="cm/s"/>
-    <field name="vel_GT_y"       type="int16" unit="cm/s"/>
-   <field name="vel_GT_z"       type="int16" unit="cm/s"/>
-    <field name="vel_avoid_x"	type="int16" unit="cm/s"/>
-    <field name="vel_avoid_y"	type="int16" unit="cm/s"/>
+    <field name="vel_x_pixelwise"       type="int16" unit="cm/s" alt_unit="m/s"/>
+    <field name="vel_y_pixelwise"       type="int16" unit="cm/s" alt_unit="m/s"/>
+    <field name="vel_z_pixelwise"       type="int16" unit="cm/s" alt_unit="m/s"/>
+    <field name="vel_x_global"       type="int16" unit="cm/s" alt_unit="m/s"/>
+    <field name="vel_y_global"       type="int16" unit="cm/s" alt_unit="m/s"/>
+    <field name="vel_z_global"       type="int16" unit="cm/s" alt_unit="m/s"/>
   </message>
 
   <message name="ROTORCRAFT_STATUS" id="231">

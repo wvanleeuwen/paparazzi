@@ -29,12 +29,12 @@
 #include <inttypes.h>
 
 struct stereocam_edgeflow_t{
-uint8_t window_size;
-uint8_t search_distance;
-uint8_t derotation;
-uint8_t adaptive_time_horizon;
-uint8_t snapshot;
-int16_t stereo_shift;
+  uint8_t window_size;
+  uint8_t search_distance;
+  uint8_t derotation;
+  uint8_t adaptive_time_horizon;
+  uint8_t snapshot;
+  uint8_t kalman;
 };
 extern struct stereocam_edgeflow_t edgeflow;
 

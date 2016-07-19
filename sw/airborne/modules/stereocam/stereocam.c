@@ -38,6 +38,24 @@
 #define SEND_STEREO TRUE
 #endif
 
+#if !defined(BODY_TO_STEREO_PHI) || !defined(BODY_TO_STEREO_THETA) || !defined(BODY_TO_STEREO_PSI)
+#warning "BODY_TO_STEREO_XXX not defined. Using default rotation angles (0,0,0)"
+#endif
+
+#ifndef BODY_TO_STEREO_PHI
+#define BODY_TO_STEREO_PHI 0
+#endif
+
+#ifndef BODY_TO_STEREO_THETA
+#define BODY_TO_STEREO_THETA 0
+#endif
+
+#ifndef BODY_TO_STEREO_PSI
+#define BODY_TO_STEREO_PSI 0
+#endif
+
+struct FloatRMat body_to_stereocam;
+
 // define coms link for stereocam
 #define STEREO_PORT   (&((UART_LINK).device))
 struct link_device *linkdev = STEREO_PORT;
@@ -76,8 +94,10 @@ void stereocam_disparity_to_meters(uint8_t *disparity, float *distancesMeters, i
   }
 }
 
-void stereocam_start(void)
+void stereocam_init(void)
 {
+  struct FloatEulers euler = {BODY_TO_STEREO_PHI, BODY_TO_STEREO_THETA, BODY_TO_STEREO_PSI};
+  float_rmat_of_eulers(&body_to_stereocam, &euler);
   // initialize local variables
   msgProperties = (MsgProperties) {0, 0, 0};
 
@@ -93,9 +113,6 @@ void stereocam_start(void)
   stereocam_data.fresh = 0;
 }
 
-void stereocam_stop(void)
-{
-}
 
 void stereocam_periodic(void)
 {

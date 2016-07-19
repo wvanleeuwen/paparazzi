@@ -24,6 +24,7 @@
  */
 
 #include "modules/stereocam/state2camera/state2camera.h"
+#include "modules/stereocam/stereocam.h"
 #include "modules/stereocam/stereoprotocol.h"
 #include "subsystems/abi.h"
 #include "state.h"
@@ -33,10 +34,6 @@
 static int frame_number_sending = 0;
 float lastKnownHeight = 0.0;
 int pleaseResetOdroid = 0;
-
-#ifndef STATE2CAMERA_SEND_DATA_TYPE
-#define STATE2CAMERA_SEND_DATA_TYPE 1
-#endif
 
 #ifndef STEREOCAM_EDGEFLOW_WINDOW_SIZE
 #define STEREOCAM_EDGEFLOW_WINDOW_SIZE 8
@@ -58,6 +55,10 @@ int pleaseResetOdroid = 0;
 #define STEREOCAM_EDGEFLOW_SNAPSHOT 0
 #endif
 
+#ifndef STEREOCAM_EDGEFLOW_KALMAN_FILTERING
+#define STEREOCAM_EDGEFLOW_KALMAN_FILTERING 0
+#endif
+
 #ifndef STEREOCAM_EDGEFLOW_STEREO_SHIFT
 #define STEREOCAM_EDGEFLOW_STEREO_SHIFT -6
 #endif
@@ -65,6 +66,7 @@ int pleaseResetOdroid = 0;
 #ifndef STATE2CAMERA_SEND_DATA_TYPE
 #define STATE2CAMERA_SEND_DATA_TYPE 1
 #endif
+
 struct stereocam_edgeflow_t edgeflow;
 
 void init_state2camera(void)
@@ -74,8 +76,7 @@ void init_state2camera(void)
 	edgeflow.search_distance = STEREOCAM_EDGEFLOW_SEARCH_DISTANCE;
 	edgeflow.window_size = STEREOCAM_EDGEFLOW_WINDOW_SIZE;
 	edgeflow.snapshot = STEREOCAM_EDGEFLOW_SNAPSHOT;
-	edgeflow.stereo_shift = STEREOCAM_EDGEFLOW_STEREO_SHIFT;
-
+	edgeflow.kalman = STEREOCAM_EDGEFLOW_KALMAN_FILTERING;
 }
 
 void write_serial_rot()
@@ -95,17 +96,26 @@ void write_serial_rot()
 #endif
 
 #if STATE2CAMERA_SEND_DATA_TYPE == 1
-  static int16_t lengthArrayInformation = 11 * sizeof(int16_t);
+  // rotate body angles to camera reference frame
+  struct FloatVect3 body_state;
+  body_state.x = stateGetNedToBodyEulers_f()->phi;
+  body_state.y = stateGetNedToBodyEulers_f()->theta;
+  body_state.z = stateGetNedToBodyEulers_f()->psi;
+
+  struct FloatVect3 cam_angles;
+  float_rmat_transp_vmult(&cam_angles, &body_to_stereocam, &body_state);
+
+  static int16_t lengthArrayInformation = 9 * sizeof(int16_t);
   uint8_t ar[lengthArrayInformation];
   int16_t *pointer = (int16_t *) ar;
-  pointer[0] =   (int16_t)(stateGetNedToBodyEulers_f()->theta*100);
-  pointer[1] =    (int16_t)(stateGetNedToBodyEulers_f()->psi*100);
+  pointer[0] =   (int16_t)(cam_angles.x*100);
+  pointer[1] =    (int16_t)(cam_angles.y*100);
   pointer[2] =    (int16_t)(edgeflow.derotation);
   pointer[3] =    (int16_t)(edgeflow.adaptive_time_horizon);
   pointer[4] =    (int16_t)(edgeflow.window_size);
   pointer[5] =    (int16_t)(edgeflow.search_distance);
   pointer[6] =    (int16_t)(edgeflow.snapshot);
-  pointer[7] =    (int16_t)(edgeflow.stereo_shift);
+  pointer[7] =    (int16_t)(edgeflow.kalman);
   pointer[8] =    (int16_t)(autopilot_mode);
 
   stereoprot_sendArray(&((UART_LINK).device), ar,lengthArrayInformation, 1);

@@ -44,7 +44,7 @@
 #endif
 
 #ifndef FOE_CMD
-#define FOE_CMD 0
+#define FOE_CMD 48
 #endif
 
 static struct FloatVect2 FOE;       // focus of expansion measured from the center of the image
@@ -61,7 +61,7 @@ void div_ctrl_init(void)
   FLOAT_VECT2_ZERO(FOE);
   FLOAT_VECT2_ZERO(FOE_filtered);
 
-  vel_sp.x = 0.5; // fixed forward speed
+  vel_sp.x = 0;//0.2; // fixed forward speed
   vel_sp.y = 0.;
 
   gain = FOE_GAIN;
@@ -79,12 +79,13 @@ void div_ctrl_run(void)
   vel_sp.y = gain * (foe_cmd - FOE.x);*/
 
   // FOE is x intercept of flow field, rotate camera to x positive right, y positive up
-  if(stereo_motion.div.x != 0) {
-    FOE.x = 64 - stereo_motion.flow.x / stereo_motion.div.x ; // 128/2
-  } else {FOE.x = 64;}
-  if(stereo_motion.div.y != 0) {
-    FOE.y = 48 - stereo_motion.flow.y / stereo_motion.div.y; // 96/2
-  } else {FOE.y = 48;}
+  // TODO find a nice min value for divergence
+  if(abs(stereo_motion.div.x) >= 1) {
+    FOE.x = 48 - stereo_motion.ventral_flow.x / stereo_motion.div.x ; // 128/2
+  } else {FOE.x = 48;}
+  if(abs(stereo_motion.div.y) >= 1) {
+    FOE.y = 64 - stereo_motion.ventral_flow.y / stereo_motion.div.y; // 96/2
+  } else {FOE.y = 64;}
 
   FOE_filtered.x *= filter_points;
   FOE_filtered.y *= filter_points++;
@@ -101,15 +102,15 @@ void div_ctrl_run(void)
 
   vel_sp.y = gain * (foe_cmd - FOE_filtered.x);
 
-  BoundAbs(vel_sp.y, 1);
+  BoundAbs(vel_sp.y, 0.3);
 
   // set x,y velocity set-point with fixed alt
-  if (stateGetSpeedEnu_f()->x > 0.3) {
+  if (stateGetSpeedEnu_f()->x > 0.1) {
     guidance_h_set_guided_body_vel(vel_sp.x, vel_sp.y);
   } else {
     guidance_h_set_guided_body_vel(vel_sp.x, 0.);
   }
-  guidance_v_set_guided_z(-1.5);
+  guidance_v_set_guided_z(-1.);
 
   uint8_t tempx = (uint8_t)FOE.x;
   uint8_t tempy = (uint8_t)FOE.y;

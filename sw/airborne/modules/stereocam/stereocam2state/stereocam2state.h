@@ -14,13 +14,11 @@
 #define STEREOCAM2STATE_H
 
 #include <std.h>
-#include "modules/stereocam/stereocam.h"
 #include "math/pprz_algebra_int.h"
 
 struct Egomotion {
-  struct Int32Vect2 div;
-  struct Int32Vect2 flow;
-  struct Int32Vect3 vel;
+  struct Int32Vect2 div; // estimated divergence
+  struct Int32Vect2 ventral_flow; // estimated ventral flow
 };
 
 extern struct Egomotion stereo_motion;
