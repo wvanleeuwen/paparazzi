@@ -30,6 +30,13 @@
 
 #define GUIDANCE_H_MODE_MODULE_SETTING GUIDANCE_H_MODE_HOVER
 
+extern uint8_t useNormalFlow;
+extern uint8_t enableDerotation;
+extern float statsFilterTimeConstant;
+extern float minPosVariance;
+extern float minSpeedVariance;
+extern float minEventRate;
+
 extern void event_optic_flow_init(void);
 extern void event_optic_flow_start(void);
 extern void event_optic_flow_periodic(void);

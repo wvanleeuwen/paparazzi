@@ -41,10 +41,32 @@
 #ifndef EOF_ENABLE_NORMALFLOW
 #define EOF_ENABLE_NORMALFLOW 0
 #endif
+PRINT_CONFIG_VAR(EOF_ENABLE_NORMALFLOW)
 
-#ifndef EOF_DEROTATION
-#define EOF_DEROTATION 0
+#ifndef EOF_ENABLE_DEROTATION
+#define EOF_ENABLE_DEROTATION 1
 #endif
+PRINT_CONFIG_VAR(EOF_ENABLE_DEROTATION)
+
+#ifndef EOF_FILTER_TIME_CONSTANT
+#define EOF_FILTER_TIME_CONSTANT 0.05
+#endif
+PRINT_CONFIG_VAR(EOF_FILTER_TIME_CONSTANT)
+
+#ifndef EOF_MIN_EVENT_RATE
+#define EOF_MIN_EVENT_RATE 100
+#endif
+PRINT_CONFIG_VAR(EOF_MIN_EVENT_RATE)
+
+#ifndef EOF_MIN_POSITION_VARIANCE
+#define EOF_MIN_POSITION_VARIANCE 100
+#endif
+PRINT_CONFIG_VAR(EOF_MIN_POSITION_VARIANCE)
+
+#ifndef EOF_MIN_SPEED_VARIANCE
+#define EOF_MIN_SPEED_VARIANCE 100
+#endif
+PRINT_CONFIG_VAR(EOF_MIN_SPEED_VARIANCE)
 
 #ifndef EOF_CONTROL_HOVER
 #define EOF_CONTROL_HOVER 0
@@ -68,13 +90,14 @@ struct module_state {
 static struct module_state moduleState;
 
 // Algorithm parameters
-const float inactivityDecayFactor = 0.9;
-const float statsFilterTimeConstant = 0.05;
+uint8_t useNormalFlow = EOF_ENABLE_NORMALFLOW;
+uint8_t enableDerotation = EOF_ENABLE_DEROTATION;
+float statsFilterTimeConstant = EOF_FILTER_TIME_CONSTANT;
 
 // Confidence thresholds
-const float minPosVariance = 100;
-const float minSpeedVariance = 100;
-const float minEventRate = 100;
+float minPosVariance = EOF_MIN_POSITION_VARIANCE;
+float minSpeedVariance = EOF_MIN_SPEED_VARIANCE;
+float minEventRate = EOF_MIN_EVENT_RATE;
 
 // Constants
 const int32_t MAX_NUMBER_OF_UART_EVENTS = 100;
@@ -82,6 +105,7 @@ const float MOVING_AVERAGE_MIN_WINDOW = 10;
 const uint8_t EVENT_SEPARATOR = 255;
 const float FLOW_INT16_TO_FLOAT = 100;
 const uint32_t eventByteSize = sizeof(struct flowEvent) + 1; // +1 for separator
+const float inactivityDecayFactor = 0.9;
 
 // Camera intrinsics definition
 struct cameraIntrinsicParameters dvs128Intrinsics = {
@@ -124,7 +148,7 @@ void event_optic_flow_periodic(void) {
 	if (status == UPDATE_STATS) {
 		// If new events are received, recompute flow field
 		// In case the flow field is ill-posed, do not update
-		status = recomputeFlowField(&moduleState.field, &moduleState.stats, EOF_ENABLE_NORMALFLOW,
+		status = recomputeFlowField(&moduleState.field, &moduleState.stats, useNormalFlow,
 		    minEventRate, minPosVariance, minSpeedVariance, dvs128Intrinsics);
 	}
 	// Timing bookkeeping, do this after the most uncertain computations,
@@ -148,7 +172,7 @@ void event_optic_flow_periodic(void) {
   moduleState.status = status;
 
 	// Derotate flow field if enabled
-	if (EOF_DEROTATION) {
+	if (enableDerotation) {
 		struct FloatRates *rates = stateGetBodyRates_f();
 		derotateFlowField(&moduleState.field, rates);
 	}
