@@ -2035,11 +2035,15 @@
 
   <message name="EVENT_OPTIC_FLOW_EST" id="230">
     <field name="fps"         		type="float"/>
-    <field name="confidence"		type="uint8"/>
+    <field name="update_confidence"	type="uint8" values="SUCCESS|NONE|STATS|SINGULAR|RATE|SPREAD"/>
     <field name="event_rate"  		type="float" unit="1/s"/>
-    <field name="ventral_flow_x"    type="float" unit="1/s"/>
-    <field name="ventral_flow_y"    type="float" unit="1/s"/>
+    <field name="ventral_flow_x"    	type="float" unit="1/s"/>
+    <field name="ventral_flow_y"    	type="float" unit="1/s"/>
     <field name="divergence"    	type="float" unit="1/s"/>
+    <field name="flow_x_der"    	type="float" unit="1/s"/>
+    <field name="flow_y_der"    	type="float" unit="1/s"/>
+    <field name="vx_est"    		type="float" unit="m/s"/>
+    <field name="vy_est"    		type="float" unit="m/s"/>
   </message>
 
   <message name="ROTORCRAFT_STATUS" id="231">

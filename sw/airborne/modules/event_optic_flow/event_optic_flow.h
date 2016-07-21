@@ -28,6 +28,8 @@
 
 #include <inttypes.h>
 
+#define GUIDANCE_H_MODE_MODULE_SETTING GUIDANCE_H_MODE_HOVER
+
 extern void event_optic_flow_init(void);
 extern void event_optic_flow_start(void);
 extern void event_optic_flow_periodic(void);

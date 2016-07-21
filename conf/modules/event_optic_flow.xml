@@ -11,6 +11,7 @@
   <periodic fun="event_optic_flow_periodic()" start="event_optic_flow_start()" stop="event_optic_flow_stop()" freq="100" autorun="TRUE"/>
   <makefile>
     <file name="event_optic_flow.c"/>
+    <file name="flow_field_estimation.c"/>
   </makefile>
 </module>
 
