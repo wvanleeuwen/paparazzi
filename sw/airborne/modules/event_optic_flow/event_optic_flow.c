@@ -38,6 +38,7 @@
 #error Please define uart port connected to the dvs event based camera. e.g <define name="DVS_PORT" value="uart0"/>
 #endif
 
+// Module settings
 #ifndef EOF_ENABLE_NORMALFLOW
 #define EOF_ENABLE_NORMALFLOW 0
 #endif
@@ -81,6 +82,7 @@ PRINT_CONFIG_VAR(EOF_MIN_SPEED_VARIANCE)
 struct module_state {
   struct flowField field;
   struct flowStats stats;
+  struct FloatRates ratesMA;
   float z_NED;
   float lastTime;
   float moduleFrequency;
@@ -106,6 +108,7 @@ const uint8_t EVENT_SEPARATOR = 255;
 const float FLOW_INT16_TO_FLOAT = 100;
 const uint32_t eventByteSize = sizeof(struct flowEvent) + 1; // +1 for separator
 const float inactivityDecayFactor = 0.9;
+const float derotationMovingAverageFactor = 0.5;
 
 // Camera intrinsics definition
 struct cameraIntrinsicParameters dvs128Intrinsics = {
@@ -140,6 +143,9 @@ void event_optic_flow_init(void) {
 void event_optic_flow_start(void) {
 	// Timing
 	moduleState.lastTime = get_sys_time_float();
+	// Reset low pass filter for rates
+	moduleState.ratesMA.p = 0;
+	moduleState.ratesMA.q = 0;
 }
 
 void event_optic_flow_periodic(void) {
@@ -174,7 +180,10 @@ void event_optic_flow_periodic(void) {
 	// Derotate flow field if enabled
 	if (enableDerotation) {
 		struct FloatRates *rates = stateGetBodyRates_f();
-		derotateFlowField(&moduleState.field, rates);
+		// Moving average filtering of body rates
+		moduleState.ratesMA.p += (moduleState.ratesMA.p - rates->p) * derotationMovingAverageFactor;
+		moduleState.ratesMA.q += (moduleState.ratesMA.q - rates->q) * derotationMovingAverageFactor;
+		derotateFlowField(&moduleState.field, &moduleState.ratesMA);
 	}
 	else {
 	  // Default: simply copy result
@@ -184,21 +193,23 @@ void event_optic_flow_periodic(void) {
 
 	// Set control signals
 	if (EOF_CONTROL_HOVER) {
-	  struct NedCoor_f *pos = stateGetPositionNed_f();  // for alt/height
-	  moduleState.z_NED = pos->z;
+	  struct NedCoor_f *pos = stateGetPositionNed_f();
+	  moduleState.z_NED = pos->z; // for downlink
 
 	  // Assuming a perfectly aligned downward facing camera,
 	  // the camera X-axis is opposite to the body Y-axis
 	  // and the Y-axis is aligned to its X-axis
-	  float vx = pos->z * moduleState.field.wyDerotated;
-	  float vy = pos->z * -moduleState.field.wxDerotated;
-	  float vz = pos->z * moduleState.field.D/2;
+	  // Further assumption: body Euler angles are small
+	  float vxNED = pos->z * moduleState.field.wyDerotated;
+	  float vyNED = pos->z * -moduleState.field.wxDerotated;
+	  float vzNED = pos->z * moduleState.field.D/2;
 	  uint32_t timestamp = get_sys_time_usec();
 	  // Update control state
-	  AbiSendMsgVELOCITY_ESTIMATE(1, timestamp,vx,vy,vz,0);
+	  AbiSendMsgVELOCITY_ESTIMATE(1, timestamp,vxNED,vyNED,vzNED,0);
 	}
-
-	//TODO implement constant divergence landing controller
+	if (EOF_CONTROL_LANDING) {
+	  //TODO implement
+	}
 	//TODO implement SD logging (use modules/loggers/sdlog_chibios/sdLog.h?)
 }
 
@@ -301,3 +312,4 @@ static void sendFlowFieldState(struct transport_tx *trans, struct link_device *d
   pprz_msg_send_EVENT_OPTIC_FLOW_EST(trans, dev, AC_ID,
       &fps, &confidence, &eventRate, &wx, &wy, &D, &wxDerotated, &wyDerotated, &vx, &vy);
 }
+
