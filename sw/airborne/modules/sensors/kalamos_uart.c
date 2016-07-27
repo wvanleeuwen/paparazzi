@@ -45,11 +45,11 @@ static struct kalamos_t kalamos = {
 static uint8_t mp_msg_buf[128]  __attribute__((aligned));   ///< The message buffer for the Kalamos
 
 struct  Kalamos2PPRZPackage k2p_package;
-float kalamos_target_height = 30.0;
-float kalamos_height_gain = 0.1;
+float kalamos_target_height = 20.0;
+float kalamos_height_gain = 1.0;
 bool kalamos_enable_landing = false;
-float kalamos_landing_decent_speed = 0.01;
-float kalamos_pos_gain = 0.1;
+float kalamos_landing_decent_speed = 0.05;
+float kalamos_pos_gain = 0.05;
 
 #if PERIODIC_TELEMETRY
 #include "subsystems/datalink/telemetry.h"
@@ -107,11 +107,15 @@ if (kalamos_enable_landing ) {
   if (k2p_package.min_height > 5.0) {
     kalamos_target_height -= kalamos_landing_decent_speed;
   }
+  float bx = (k2p_package.target_x * kalamos_pos_gain); // x is right
+  float by = k2p_package.target_y * kalamos_pos_gain; // y is nose
 
-  int target_x = waypoint_get_x(WP_KALAMOS) + k2p_package.target_x * kalamos_pos_gain;
-  int target_y = waypoint_get_x(WP_KALAMOS) + k2p_package.target_y * kalamos_pos_gain;
+  float psi = stateGetNedToBodyEulers_f()->psi;
 
-  waypoint_set_xy_i(WP_KALAMOS,target_x, target_y);
+  float target_x = waypoint_get_x(WP_KALAMOS) + cos(psi) * bx + sin(psi) * by;
+  float target_y = waypoint_get_y(WP_KALAMOS) + -sin(psi) * bx + cos(psi) * by;
+
+  waypoint_set_xy_i(WP_KALAMOS,POS_BFP_OF_REAL(target_x), POS_BFP_OF_REAL(target_y));
 
 }
 
