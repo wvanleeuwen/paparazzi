@@ -91,7 +91,7 @@ enum updateStatus {
  * Performs an update of all flow field statistics with a new event.
  */
 void updateFlowStats(struct flowStats* s, struct flowEvent e, float filterTimeConstant,
-    int32_t movingAverageWindow);
+    float movingAverageWindow);
 
 /**
  * Recomputation of the flow field using the latest statistics.

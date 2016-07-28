@@ -17,8 +17,8 @@
         <define name="RADIO_MODE" value="RADIO_AUX2"/>
       </module>
       <configure name="NO_LUFTBOOT" value="1"/>
-      <configure name="USE_BARO_BOARD" value="FALSE"/>
-      <configure name="USE_MAGNETOMETER" value="0"/>
+      <!--configure name="USE_BARO_BOARD" value="TRUE"/-->
+      <configure name="USE_MAGNETOMETER" value="1"/>
       <!-- MPU6000 is configured to output data at 2kHz, but polled at 512Hz PERIODIC_FREQUENCY -->
     </target>
 
@@ -29,7 +29,7 @@
     <module name="telemetry"     type="xbee_api"/>
     <module name="imu"           type="aspirin_v2.2"/>
     <module name="gps"           type="optitrack"/>
-    <module name="stabilization" type="indi"/>
+    <module name="stabilization" type="int_quat"/><!--indi"/-->
     <module name="ahrs"          type="int_cmpl_quat">
       <define name="AHRS_GRAVITY_HEURISTIC_FACTOR" value="30"/>
     </module>
@@ -43,6 +43,10 @@
   </firmware>
 
   <modules>
+    <module name="logger_spi_link">
+      <define name="HS_LOG_SPI_DEV" value="SPI1"/>
+      <define name="HS_LOG_SPI_SLAVE_IDX" value="SPI_SLAVE1"/>
+    </module>
   	<module name="event_optic_flow">
   	  <define name="DVS_PORT" value="uart3"/>
   	</module>
@@ -107,7 +111,7 @@
     <define name="H_X" value="0.3770441"/>
     <define name="H_Y" value="0.0193986"/>
     <define name="H_Z" value="0.9259921"/>
-    <define name="USE_GPS_HEADING" value="1"/>
+    <define name="USE_GPS_HEADING" value="0"/>
   </section>
 
   <section name="STABILIZATION_RATE" prefix="STABILIZATION_RATE_">

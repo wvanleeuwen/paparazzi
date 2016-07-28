@@ -27,9 +27,26 @@
 #define EVENT_OPTICFLOW_H
 
 #include <inttypes.h>
+#include "flow_field_estimation.h"
 
-#define GUIDANCE_H_MODE_MODULE_SETTING GUIDANCE_H_MODE_HOVER
+// Guidance definitions
+//#define GUIDANCE_H_MODE_MODULE_SETTING GUIDANCE_H_MODE_HOVER
+//#define GUIDANCE_V_MODE_MODULE_SETTING GUIDANCE_V_MODE_MODULE
 
+// Module state (extern here, since the high speed logger module uses the info in this state
+struct module_state {
+  struct flowField field;
+  struct flowStats stats;
+  struct FloatRates ratesMA;
+  float z_NED;
+  float lastTime;
+  float moduleFrequency;
+  enum updateStatus status;
+};
+
+extern struct module_state eofState;
+
+// Setting variables
 extern uint8_t useNormalFlow;
 extern uint8_t enableDerotation;
 extern float statsFilterTimeConstant;
@@ -37,6 +54,7 @@ extern float minPosVariance;
 extern float minSpeedVariance;
 extern float minEventRate;
 
+// Module main functions
 extern void event_optic_flow_init(void);
 extern void event_optic_flow_start(void);
 extern void event_optic_flow_periodic(void);

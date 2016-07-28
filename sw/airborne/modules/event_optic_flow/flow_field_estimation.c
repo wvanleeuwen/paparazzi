@@ -10,7 +10,7 @@
 float FLT_MIN_RESOLUTION = 1e-3;
 
 void updateFlowStats(struct flowStats* s, struct flowEvent e, float filterTimeConstant,
-    int32_t movingAverageWindow) {
+    float movingAverageWindow) {
   static int32_t tPrevious = 0;
 
   float x = (float) e.x;

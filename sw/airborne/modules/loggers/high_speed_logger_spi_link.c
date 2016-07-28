@@ -22,6 +22,8 @@
 
 #include "high_speed_logger_spi_link.h"
 
+#include "modules/event_optic_flow/event_optic_flow.h"
+
 #include "subsystems/imu.h"
 #include "mcu_periph/spi.h"
 
@@ -65,19 +67,24 @@ void high_speed_logger_spi_link_periodic(void)
     // copy the counter into the SPI datablock
     high_speed_logger_spi_link_data.id = counter;
 
+    // MODIFIED IN THIS BRANCH FOR EVENT_BASED OPTIC FLOW LOGGING
+    // USES DATA FROM EVENT_OPTIC_FLOW MODULE
+    // The standard data slot assignment is used, but we store data differently
     high_speed_logger_spi_link_ready = false;
-    high_speed_logger_spi_link_data.gyro_p     = imu.gyro_unscaled.p;
-    high_speed_logger_spi_link_data.gyro_q     = imu.gyro_unscaled.q;
-    high_speed_logger_spi_link_data.gyro_r     = imu.gyro_unscaled.r;
-    high_speed_logger_spi_link_data.acc_x      = imu.accel_unscaled.x;
-    high_speed_logger_spi_link_data.acc_y      = imu.accel_unscaled.y;
-    high_speed_logger_spi_link_data.acc_z      = imu.accel_unscaled.z;
-    high_speed_logger_spi_link_data.mag_x      = imu.mag_unscaled.x;
-    high_speed_logger_spi_link_data.mag_y      = imu.mag_unscaled.y;
-    high_speed_logger_spi_link_data.mag_z      = imu.mag_unscaled.z;
+    high_speed_logger_spi_link_data.gyro_p     = eofState.ratesMA.p;
+    high_speed_logger_spi_link_data.gyro_q     = eofState.ratesMA.q;
+    high_speed_logger_spi_link_data.gyro_r     = eofState.ratesMA.r;
+    high_speed_logger_spi_link_data.acc_x      = eofState.field.wx;
+    high_speed_logger_spi_link_data.acc_y      = eofState.field.wy;
+    high_speed_logger_spi_link_data.acc_z      = eofState.field.D;
+    high_speed_logger_spi_link_data.mag_x      = eofState.stats.eventRate;
+    high_speed_logger_spi_link_data.mag_y      = eofState.z_NED;
+    high_speed_logger_spi_link_data.mag_z      = eofState.status;
 
     spi_submit(&(HIGH_SPEED_LOGGER_SPI_LINK_DEVICE), &high_speed_logger_spi_link_transaction);
   }
+
+  high_speed_logger_spi_link_data.id++;
 }
 
 static void high_speed_logger_spi_link_trans_cb(struct spi_transaction *trans __attribute__((unused)))

@@ -24,7 +24,6 @@
  */
 
 #include "event_optic_flow.h"
-#include "flow_field_estimation.h"
 
 #include "mcu_periph/uart.h"
 #include "mcu_periph/sys_time.h"
@@ -50,24 +49,34 @@ PRINT_CONFIG_VAR(EOF_ENABLE_NORMALFLOW)
 PRINT_CONFIG_VAR(EOF_ENABLE_DEROTATION)
 
 #ifndef EOF_FILTER_TIME_CONSTANT
-#define EOF_FILTER_TIME_CONSTANT 0.05
+#define EOF_FILTER_TIME_CONSTANT 0.05f
 #endif
 PRINT_CONFIG_VAR(EOF_FILTER_TIME_CONSTANT)
 
 #ifndef EOF_MIN_EVENT_RATE
-#define EOF_MIN_EVENT_RATE 100
+#define EOF_MIN_EVENT_RATE 100.0f
 #endif
 PRINT_CONFIG_VAR(EOF_MIN_EVENT_RATE)
 
 #ifndef EOF_MIN_POSITION_VARIANCE
-#define EOF_MIN_POSITION_VARIANCE 100
+#define EOF_MIN_POSITION_VARIANCE 100.0f
 #endif
 PRINT_CONFIG_VAR(EOF_MIN_POSITION_VARIANCE)
 
 #ifndef EOF_MIN_SPEED_VARIANCE
-#define EOF_MIN_SPEED_VARIANCE 100
+#define EOF_MIN_SPEED_VARIANCE 100.0f
 #endif
 PRINT_CONFIG_VAR(EOF_MIN_SPEED_VARIANCE)
+
+#ifndef EOF_DIVERGENCE_CONTROL_PGAIN
+#define EOF_DIVERGENCE_CONTROL_PGAIN 1.0f
+#endif
+PRINT_CONFIG_VAR(EOF_DIVERGENCE_CONTROL_PGAIN)
+
+#ifndef EOF_DIVERGENCE_CONTROL_DIV_SETPOINT
+#define EOF_DIVERGENCE_CONTROL_DIV_SETPOINT 0.3f
+#endif
+PRINT_CONFIG_VAR(EOF_DIVERGENCE_CONTROL_DIV_SETPOINT)
 
 #ifndef EOF_CONTROL_HOVER
 #define EOF_CONTROL_HOVER 0
@@ -77,24 +86,15 @@ PRINT_CONFIG_VAR(EOF_MIN_SPEED_VARIANCE)
 #define EOF_CONTROL_LANDING 0
 #endif
 
-
-// Module state - made static so that it is available in all module functions
-struct module_state {
-  struct flowField field;
-  struct flowStats stats;
-  struct FloatRates ratesMA;
-  float z_NED;
-  float lastTime;
-  float moduleFrequency;
-  enum updateStatus status;
-};
-
-static struct module_state moduleState;
+// State redeclaration
+struct module_state eofState;
 
 // Algorithm parameters
 uint8_t useNormalFlow = EOF_ENABLE_NORMALFLOW;
 uint8_t enableDerotation = EOF_ENABLE_DEROTATION;
 float statsFilterTimeConstant = EOF_FILTER_TIME_CONSTANT;
+float divergenceControlGainP = EOF_DIVERGENCE_CONTROL_PGAIN;
+float divergenceControlSetpoint = EOF_DIVERGENCE_CONTROL_DIV_SETPOINT;
 
 // Confidence thresholds
 float minPosVariance = EOF_MIN_POSITION_VARIANCE;
@@ -103,19 +103,19 @@ float minEventRate = EOF_MIN_EVENT_RATE;
 
 // Constants
 const int32_t MAX_NUMBER_OF_UART_EVENTS = 100;
-const float MOVING_AVERAGE_MIN_WINDOW = 10;
+const float MOVING_AVERAGE_MIN_WINDOW = 10.0f;
 const uint8_t EVENT_SEPARATOR = 255;
-const float FLOW_INT16_TO_FLOAT = 100;
-const uint32_t eventByteSize = sizeof(struct flowEvent) + 1; // +1 for separator
-const float inactivityDecayFactor = 0.9;
-const float derotationMovingAverageFactor = 0.5;
+const float FLOW_INT16_TO_FLOAT = 100.0f;
+const uint32_t EVENT_BYTE_SIZE = sizeof(struct flowEvent) + 1; // +1 for separator
+const float inactivityDecayFactor = 0.9f;
+const float derotationMovingAverageFactor = 0.5f;
 
 // Camera intrinsics definition
 struct cameraIntrinsicParameters dvs128Intrinsics = {
-    .principalPointX = 76.70,
-    .principalPointY = 56.93,
-    .focalLengthX = 115,
-    .focalLengthY = 115
+    .principalPointX = 76.70f,
+    .principalPointY = 56.93f,
+    .focalLengthX = 115.0f,
+    .focalLengthY = 115.0f
 };
 
 // Internal function declarations (definitions below)
@@ -126,15 +126,16 @@ void incrementBufferPos(uint16_t* pos);
 uint8_t ringBufferGetByte(void);
 int16_t ringBufferGetInt16(void);
 int32_t ringBufferGetInt32(void);
+void divergenceLandingControllerInit(void);
+void divergenceLandingControllerRun(void);
 
 // ----- Implementations start here -----
 void event_optic_flow_init(void) {
-	// Fast initialization, setting all struct members to zero
-	// with short calls
-	struct flowField field = {0};
-	struct flowStats stats = {0};
-	moduleState.field = field;
-	moduleState.stats = stats;
+	struct flowField field = {0., 0., 0., 0., 0., 0};
+	struct flowStats stats = {0., 0., 0., 0., 0., 0., 0., 0., 0.,
+	    0., 0., 0.,0., 0., 0.,0., 0., 0.,};
+	eofState.field = field;
+	eofState.stats = stats;
 
 	register_periodic_telemetry(DefaultPeriodic,
 	    PPRZ_MSG_ID_EVENT_OPTIC_FLOW_EST, sendFlowFieldState);
@@ -142,73 +143,83 @@ void event_optic_flow_init(void) {
 
 void event_optic_flow_start(void) {
 	// Timing
-	moduleState.lastTime = get_sys_time_float();
+	eofState.lastTime = get_sys_time_float();
 	// Reset low pass filter for rates
-	moduleState.ratesMA.p = 0;
-	moduleState.ratesMA.q = 0;
+	eofState.ratesMA.p = 0;
+	eofState.ratesMA.q = 0;
+	eofState.moduleFrequency = 100.0f;
+	eofState.z_NED = 0.0f;
+  struct flowField field = {0., 0., 0., 0., 0., 0};
+  struct flowStats stats = {0., 0., 0., 0., 0., 0., 0., 0., 0.,
+      0., 0., 0.,0., 0., 0.,0., 0., 0.,};
+  eofState.field = field;
+  eofState.stats = stats;
 }
 
 void event_optic_flow_periodic(void) {
 	// Obtain UART data if available
-	enum updateStatus status = processUARTInput(&moduleState.stats, statsFilterTimeConstant);
+	enum updateStatus status = processUARTInput(&eofState.stats, statsFilterTimeConstant);
 	if (status == UPDATE_STATS) {
 		// If new events are received, recompute flow field
 		// In case the flow field is ill-posed, do not update
-		status = recomputeFlowField(&moduleState.field, &moduleState.stats, useNormalFlow,
+		status = recomputeFlowField(&eofState.field, &eofState.stats, useNormalFlow,
 		    minEventRate, minPosVariance, minSpeedVariance, dvs128Intrinsics);
 	}
 	// Timing bookkeeping, do this after the most uncertain computations,
 	// but before operations where timing info is necessary
 	float currentTime = get_sys_time_float();
-	float dt = currentTime - moduleState.lastTime;
-	moduleState.moduleFrequency = 1/dt;
-	moduleState.lastTime = currentTime;
+	float dt = currentTime - eofState.lastTime;
+	eofState.moduleFrequency = 1/dt;
+	eofState.lastTime = currentTime;
 
 	// If no update has been performed, decay flow field parameters towards zero
 	if (status != UPDATE_SUCCESS) {
-	  moduleState.field.wx *= inactivityDecayFactor;
-	  moduleState.field.wy *= inactivityDecayFactor;
-	  moduleState.field.D *= inactivityDecayFactor;
+	  eofState.field.wx *= inactivityDecayFactor;
+	  eofState.field.wy *= inactivityDecayFactor;
+	  eofState.field.D *= inactivityDecayFactor;
 	}
 	else {
 	  // Assign timestamp to last update
-	  moduleState.field.t = currentTime;
+	  eofState.field.t = currentTime;
 	}
   // Set confidence level globally
-  moduleState.status = status;
+  eofState.status = status;
 
 	// Derotate flow field if enabled
 	if (enableDerotation) {
 		struct FloatRates *rates = stateGetBodyRates_f();
 		// Moving average filtering of body rates
-		moduleState.ratesMA.p += (moduleState.ratesMA.p - rates->p) * derotationMovingAverageFactor;
-		moduleState.ratesMA.q += (moduleState.ratesMA.q - rates->q) * derotationMovingAverageFactor;
-		derotateFlowField(&moduleState.field, &moduleState.ratesMA);
+		eofState.ratesMA.p += (rates->p - eofState.ratesMA.p) * derotationMovingAverageFactor;
+		eofState.ratesMA.q += (rates->q - eofState.ratesMA.q) * derotationMovingAverageFactor;
+		derotateFlowField(&eofState.field, &eofState.ratesMA);
 	}
 	else {
 	  // Default: simply copy result
-	  moduleState.field.wxDerotated = moduleState.field.wx;
-	  moduleState.field.wyDerotated = moduleState.field.wy;
+	  eofState.field.wxDerotated = eofState.field.wx;
+	  eofState.field.wyDerotated = eofState.field.wy;
 	}
+
+	// Update height from Optitrack
+  struct NedCoor_f *pos = stateGetPositionNed_f();
+  eofState.z_NED = pos->z; // for downlink
 
 	// Set control signals
 	if (EOF_CONTROL_HOVER) {
-	  struct NedCoor_f *pos = stateGetPositionNed_f();
-	  moduleState.z_NED = pos->z; // for downlink
 
 	  // Assuming a perfectly aligned downward facing camera,
 	  // the camera X-axis is opposite to the body Y-axis
 	  // and the Y-axis is aligned to its X-axis
 	  // Further assumption: body Euler angles are small
-	  float vxNED = pos->z * moduleState.field.wyDerotated;
-	  float vyNED = pos->z * -moduleState.field.wxDerotated;
-	  float vzNED = pos->z * moduleState.field.D/2;
+	  float vxNED = eofState.z_NED * eofState.field.wyDerotated;
+	  float vyNED = eofState.z_NED * -eofState.field.wxDerotated;
+	  float vzNED = eofState.z_NED * eofState.field.D/2;
 	  uint32_t timestamp = get_sys_time_usec();
+
 	  // Update control state
 	  AbiSendMsgVELOCITY_ESTIMATE(1, timestamp,vxNED,vyNED,vzNED,0);
 	}
 	if (EOF_CONTROL_LANDING) {
-	  //TODO implement
+	  divergenceLandingControllerRun();
 	}
 	//TODO implement SD logging (use modules/loggers/sdlog_chibios/sdLog.h?)
 }
@@ -263,7 +274,7 @@ enum updateStatus processUARTInput(struct flowStats* s, double filterTimeConstan
 	// Now scan across received data and extract events
 	// Scan until read pointer is one byte behind ith the write pointer
 	static bool synchronized;
-	while((writePos + UART_RX_BUFFER_SIZE - readPos) % UART_RX_BUFFER_SIZE > (int32_t) eventByteSize) {
+	while((writePos + UART_RX_BUFFER_SIZE - readPos) % UART_RX_BUFFER_SIZE > (int32_t) EVENT_BYTE_SIZE) {
 	  if (synchronized) {
 	    // Next data contains a new event
 	    struct flowEvent e;
@@ -294,22 +305,30 @@ enum updateStatus processUARTInput(struct flowStats* s, double filterTimeConstan
 	    }
 	  }
 	}
-
 	return returnStatus;
 }
 
 static void sendFlowFieldState(struct transport_tx *trans, struct link_device *dev) {
-  float fps = moduleState.moduleFrequency;
-  uint8_t confidence = (uint8_t) moduleState.status;
-  float eventRate = moduleState.stats.eventRate;
-  float wx = moduleState.field.wx;
-  float wy = moduleState.field.wy;
-  float D  = moduleState.field.D;
-  float wxDerotated = moduleState.field.wxDerotated;
-  float wyDerotated = moduleState.field.wyDerotated;
-  float vx = moduleState.z_NED * wyDerotated;
-  float vy = moduleState.z_NED * -wxDerotated;
+  float fps = eofState.moduleFrequency;
+  uint8_t confidence = (uint8_t) eofState.status;
+  float eventRate = eofState.stats.eventRate;
+  float wx = eofState.field.wx;
+  float wy = eofState.field.wy;
+  float D  = eofState.field.D;
+  float wxDerotated = eofState.field.wxDerotated;
+  float wyDerotated = eofState.field.wyDerotated;
+  float vx = eofState.z_NED * wyDerotated;
+  float vy = eofState.z_NED * -wxDerotated;
+
   pprz_msg_send_EVENT_OPTIC_FLOW_EST(trans, dev, AC_ID,
-      &fps, &confidence, &eventRate, &wx, &wy, &D, &wxDerotated, &wyDerotated, &vx, &vy);
+      &fps, &confidence, &eventRate, &wx, &wy, &D, &wxDerotated, &wyDerotated,&vx,&vy);
+}
+
+void divergenceLandingControllerInit(void) {
+  //TODO implement
+}
+
+void divergenceLandingControllerRun(void) {
+  //TODO implement
 }
 
