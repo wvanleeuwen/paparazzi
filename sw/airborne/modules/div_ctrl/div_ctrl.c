@@ -51,7 +51,9 @@
 
 enum {
   WINDOW_TRACKING,
-  WINDOW_FLY_THROUGH
+  WINDOW_FLY_THROUGH,
+  WINDOW_FLY_OPTITRACK,
+  WINDOW_STANDBY
 };
 
 #ifndef WINDOW_MODE
@@ -123,73 +125,96 @@ static void georeference_project_target(void)
   VECT3_SUM(geo.target_abs, *stateGetPositionNed_i(), geo.target_rel);
 }
 
+uint32_t time;
+
 void div_ctrl_run(void)
 {
   if(autopilot_mode == AP_MODE_GUIDED) {
-    if (window_mode == WINDOW_FLY_THROUGH) {
-    /*  // FOE is x intercept of flow field, rotate camera to x positive right, y positive up
-      FOE.x = -(float)opticflow_result.flow_x / (opticflow_result.divergence * (float)opticflow.img_gray.w *
-              (float)opticflow.subpixel_factor);
-      FOE.y = -(float)opticflow_result.flow_y / (opticflow_result.divergence * (float)opticflow.img_gray.h *
-              (float)opticflow.subpixel_factor);
+    switch (window_mode) {
+      case WINDOW_FLY_THROUGH:
+        /*  // FOE is x intercept of flow field, rotate camera to x positive right, y positive up
+        FOE.x = -(float)opticflow_result.flow_x / (opticflow_result.divergence * (float)opticflow.img_gray.w *
+                (float)opticflow.subpixel_factor);
+        FOE.y = -(float)opticflow_result.flow_y / (opticflow_result.divergence * (float)opticflow.img_gray.h *
+                (float)opticflow.subpixel_factor);
 
-      vel_sp.y = gain * (foe_cmd - FOE.x);*/
+        vel_sp.y = gain * (foe_cmd - FOE.x);*/
 
-      // FOE is x intercept of flow field, rotate camera to x positive right, y positive up
-      // TODO find a nice min value for divergence
-      if(abs(stereo_motion.div.x) >= 1) {
-        FOE.x = 48 - stereo_motion.ventral_flow.x / stereo_motion.div.x; // 128/2
-      } else {FOE.x = 48;}
-      if(abs(stereo_motion.div.y) >= 1) {
-        FOE.y = 64 - stereo_motion.ventral_flow.y / stereo_motion.div.y; // 96/2
-      } else {FOE.y = 64;}
+        /*
+        // FOE is x intercept of flow field, rotate camera to x positive right, y positive up
+        // TODO find a nice min value for divergence
+        if(abs(stereo_motion.div.x) >= 1) {
+          FOE.x = 48 - stereo_motion.ventral_flow.x / stereo_motion.div.x; // 128/2
+        } else {FOE.x = 48;}
+        if(abs(stereo_motion.div.y) >= 1) {
+          FOE.y = 64 - stereo_motion.ventral_flow.y / stereo_motion.div.y; // 96/2
+        } else {FOE.y = 64;}
 
-      FOE_filtered.x *= filter_points;
-      FOE_filtered.y *= filter_points++;
+        FOE_filtered.x *= filter_points;
+        FOE_filtered.y *= filter_points++;
 
-      FOE_filtered.x += FOE.x;
-      FOE_filtered.y += FOE.y;
+        FOE_filtered.x += FOE.x;
+        FOE_filtered.y += FOE.y;
 
-      FOE_filtered.x /= filter_points;
-      FOE_filtered.y /= filter_points;
+        FOE_filtered.x /= filter_points;
+        FOE_filtered.y /= filter_points;
 
-      if (filter_points > max_filter_points) {
-        filter_points = max_filter_points;
-      }
-
-      //tracked_x, tracked_y;
-
-      vel_sp.y = gain * (foe_cmd - FOE_filtered.x);
-
-      BoundAbs(vel_sp.y, 0.3);
-
-      // set x,y velocity set-point with fixed alt
-      if (stateGetHorizontalSpeedNorm_f() > 0.1) {
-        guidance_h_set_guided_body_vel(vel_sp.x, vel_sp.y);
-      } else {
-        guidance_h_set_guided_body_vel(vel_sp.x, 0.);
-      }
-
-      uint8_t tempx = (uint8_t)FOE.x;
-      uint8_t tempy = (uint8_t)FOE.y;
-      uint8_t tempx2 = (uint8_t)FOE_filtered.x;
-      uint8_t tempy2 = (uint8_t)FOE_filtered.y;
-
-      //guidance_h_set_guided_pos(POS_FLOAT_OF_BFP(geo.target_abs.x), POS_FLOAT_OF_BFP(geo.target_abs.y));
-    } else if( window_mode == WINDOW_TRACKING ){
-      if ( win_cert < 50 ) {
-        georeference_project_target();
-        guidance_h_set_guided_heading_rate(0);
-        if (win_x > 70) {
-          guidance_h_set_guided_body_vel(0., 0.1);
-        } else if (win_x < 58){
-          guidance_h_set_guided_body_vel(0., -0.1);
+        if (filter_points > max_filter_points) {
+          filter_points = max_filter_points;
         }
-      } else {
-        guidance_h_set_guided_body_vel(0., 0.);
-        guidance_h_set_guided_heading_rate(0.1);
-      }
-      //guidance_h_set_guided_body_vel(0., 0.);
+
+        //tracked_x, tracked_y;
+
+        vel_sp.y = gain * (foe_cmd - FOE_filtered.x);
+
+        BoundAbs(vel_sp.y, 0.3);
+
+        // set x,y velocity set-point with fixed alt
+        if (stateGetHorizontalSpeedNorm_f() > 0.1) {
+          guidance_h_set_guided_body_vel(vel_sp.x, vel_sp.y);
+        } else {
+          guidance_h_set_guided_body_vel(vel_sp.x, 0.);
+        }
+
+        uint8_t tempx = (uint8_t)FOE.x;
+        uint8_t tempy = (uint8_t)FOE.y;
+        uint8_t tempx2 = (uint8_t)FOE_filtered.x;
+        uint8_t tempy2 = (uint8_t)FOE_filtered.y;*/
+
+        if (sys_time.nb_sec > time + 5) {
+          guidance_h_set_guided_body_vel(0., 0.);
+          window_mode = WINDOW_STANDBY;
+        }
+        break;
+      case WINDOW_FLY_OPTITRACK:    // fly to a geolocation using optitrack
+        if ( win_cert < 50  && win_size > 40) {   // if window in sight and sure its not noise (noise usually small window)
+          georeference_project_target();
+          guidance_h_set_guided_pos(POS_FLOAT_OF_BFP(geo.target_abs.x), POS_FLOAT_OF_BFP(geo.target_abs.y));
+          window_mode = WINDOW_STANDBY;
+        }
+        break;
+      case WINDOW_TRACKING:   // actuate to place window near window center
+        if ( win_cert < 50 ) {  // threshold for positive window detection, lower is more likely window
+          if (win_x > 70) {   // place window near center of frame
+            guidance_h_set_guided_body_vel(0., 0.2);
+          } else if (win_x < 58) {
+            guidance_h_set_guided_body_vel(0., -0.2);
+          } else {
+            guidance_h_set_guided_body_vel(0.5, 0.);
+            if (win_size > 40) {  // when window is large enough in frame fly thrugh
+              window_mode = WINDOW_FLY_OPTITRACK;
+              /*
+               window_mode = WINDOW_FLY_THROUGH;
+               time = sys_time.nb_sec;
+               */
+            }
+          }
+        }
+        break;
+      case WINDOW_STANDBY:  // wait for user instruction
+        break;
+      default:
+        break;
     }
   }
 }

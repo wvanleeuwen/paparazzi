@@ -518,6 +518,7 @@ void autopilot_set_mode(uint8_t new_autopilot_mode)
         guidance_v_mode_changed(GUIDANCE_V_MODE_FLIP);
         break;
       case AP_MODE_GUIDED:
+        // TO ROLAND: important, this switches from RC control to altitude hold control
         guidance_v_mode_changed(GUIDANCE_V_MODE_RC_DIRECT);
         //guidance_v_mode_changed(GUIDANCE_V_MODE_GUIDED);
         break;
