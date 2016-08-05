@@ -515,20 +515,18 @@ static void vel_est_cb(uint8_t sender_id __attribute__((unused)),
                        float x, float y, float z,
                        float noise __attribute__((unused)))
 {
-  struct FloatVect3 vel_body = {x, y, z};
   static uint32_t last_stamp = 0;
-  float dt = 0;
+
+  struct FloatVect3 vel_body = {x, y, z};
+  float dt = 0.;
 
   /* rotate velocity estimate to nav/ltp frame */
-  struct FloatQuat q_b2n = *stateGetNedToBodyQuat_f();
-  QUAT_INVERT(q_b2n, q_b2n);
   struct FloatVect3 vel_ned;
-  float_quat_vmult(&vel_ned, &q_b2n, &vel_body);
+  float_rmat_transp_vmult(&vel_ned, stateGetNedToBodyRMat_f(), &vel_body);
 
   if (last_stamp > 0) {
     dt = (float)(stamp - last_stamp) * 1e-6;
   }
-
   last_stamp = stamp;
 
 #if USE_HFF
@@ -540,17 +538,19 @@ static void vel_est_cb(uint8_t sender_id __attribute__((unused)),
   b2_hff_update_vel(vel,  Rvel);
   ins_update_from_hff();
 #else
+  // set horizontal speed est
   ins_int.ltp_speed.x = SPEED_BFP_OF_REAL(vel_ned.x);
   ins_int.ltp_speed.y = SPEED_BFP_OF_REAL(vel_ned.y);
 
-  if (fabsf(z) > 0.001){
-    vff_update_z(vel_ned.z);
-  }
+  // crude odometry: integrate speed to position estimate
   if (last_stamp > 0) {
     ins_int.ltp_pos.x = ins_int.ltp_pos.x + POS_BFP_OF_REAL(dt * vel_ned.x);
     ins_int.ltp_pos.y = ins_int.ltp_pos.y + POS_BFP_OF_REAL(dt * vel_ned.y);
   }
 #endif
+
+  // propagate vertical speed est
+  vff_update_vz_conf(vel_ned.z, 2);
 
   ins_ned_to_state();
 

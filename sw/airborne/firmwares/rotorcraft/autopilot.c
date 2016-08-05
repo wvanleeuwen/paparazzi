@@ -518,7 +518,8 @@ void autopilot_set_mode(uint8_t new_autopilot_mode)
         guidance_v_mode_changed(GUIDANCE_V_MODE_FLIP);
         break;
       case AP_MODE_GUIDED:
-        guidance_v_mode_changed(GUIDANCE_V_MODE_GUIDED);
+        guidance_v_mode_changed(GUIDANCE_V_MODE_RC_DIRECT);
+        //guidance_v_mode_changed(GUIDANCE_V_MODE_GUIDED);
         break;
       default:
         break;

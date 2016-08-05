@@ -324,7 +324,7 @@ void extract_information_from_parameters(float *parameters_u, float *parameters_
   // and v is the vertical flow at image coordinate (x,y)
 
   // relative velocities:
-  info->relative_velocity_z = (parameters_u[0] + parameters_v[1]) / 2.0f; // divergence / 2
+  info->relative_velocity_z = (parameters_u[0] + parameters_v[1]) / 4.0f; // divergence / 2
 
   // translation orthogonal to the camera axis:
   // flow in the center of the image:

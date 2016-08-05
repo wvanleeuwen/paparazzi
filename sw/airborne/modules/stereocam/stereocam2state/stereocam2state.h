@@ -19,7 +19,12 @@
 struct Egomotion {
   struct Int32Vect2 div; // estimated divergence
   struct Int32Vect2 ventral_flow; // estimated ventral flow
+  struct Int32Vect2 foe;  // estimated focus of expansion
 };
+
+extern uint8_t tracked_x, tracked_y;
+extern uint8_t win_x, win_y, win_cert, win_size;
+extern uint16_t win_dist;
 
 extern struct Egomotion stereo_motion;
 

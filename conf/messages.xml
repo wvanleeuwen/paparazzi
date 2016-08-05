@@ -2037,12 +2037,22 @@
   </message>
 
   <message name="STEREOCAM_OPTIC_FLOW" id="230">
-    <field name="vel_x_pixelwise"       type="int16" unit="cm/s" alt_unit="m/s"/>
-    <field name="vel_y_pixelwise"       type="int16" unit="cm/s" alt_unit="m/s"/>
-    <field name="vel_z_pixelwise"       type="int16" unit="cm/s" alt_unit="m/s"/>
-    <field name="vel_x_global"       type="int16" unit="cm/s" alt_unit="m/s"/>
-    <field name="vel_y_global"       type="int16" unit="cm/s" alt_unit="m/s"/>
-    <field name="vel_z_global"       type="int16" unit="cm/s" alt_unit="m/s"/>
+    <field name="fps"       type="uint8"/>
+    <field name="agl"       type="uint8" alt_unit="m" alt_unit_coef="0.1"/>
+    <field name="vel_x_pixelwise"       type="int16" alt_unit="m/s" alt_unit_coef="0.00390625"/>
+    <field name="vel_z_pixelwise"       type="int16" alt_unit="m/s" alt_unit_coef="0.00390625"/>
+    <field name="vel_x_global"       type="int16" alt_unit="m/s" alt_unit_coef="0.00390625"/>
+    <field name="vel_y_global"       type="int16" alt_unit="m/s" alt_unit_coef="0.00390625"/>
+    <field name="vel_z_global"       type="int16" alt_unit="m/s" alt_unit_coef="0.00390625"/>
+    <field name="x"          type="uint8"/>
+    <field name="y"          type="uint8"/>
+    <field name="winX"       type="uint8"/>
+    <field name="winY"       type="uint8"/>
+    <field name="winCert"    type="uint8"/>
+    <field name="winSize"    type="uint8"/>
+    <field name="winDist"    type="uint16" unit="cm" alt_unit="m"/>
+    <field name="foe_x"    type="int8"/>
+    <field name="foe_y"    type="int8"/>
   </message>
 
   <message name="ROTORCRAFT_STATUS" id="231">
@@ -2234,7 +2244,11 @@
       <field name="yaw_c"  type="float"/>
   </message>
 
-   <!--251 is free -->
+  <message name="TESTING" id="251">
+     <field name="x"  type="int32" unit="1e7deg" alt_unit="deg" alt_unit_coef="0.00390625"></field>
+    <field name="y"  type="int32" unit="1e7deg" alt_unit="deg" alt_unit_coef="0.00390625"></field>
+    <field name="z"  type="int32" unit="1e7deg" alt_unit="deg" alt_unit_coef="0.00390625"></field>
+  </message>
 
    <message name="GPS_SMALL" id="252">
     <field name="multiplex_speed"  type="uint32">bits 31-21 course in decideg : bits 20-10 ground speed in cm/s : bits 9-0 climb speed in cm/s</field>

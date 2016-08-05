@@ -38,20 +38,20 @@
 #define SEND_STEREO TRUE
 #endif
 
-#if !defined(BODY_TO_STEREO_PHI) || !defined(BODY_TO_STEREO_THETA) || !defined(BODY_TO_STEREO_PSI)
-#warning "BODY_TO_STEREO_XXX not defined. Using default rotation angles (0,0,0)"
+#if !defined(STEREO_BODY_TO_STEREO_PHI) || !defined(STEREO_BODY_TO_STEREO_THETA) || !defined(STEREO_BODY_TO_STEREO_PSI)
+#warning "STEREO_BODY_TO_STEREO_XXX not defined. Using default Euler rotation angles (0,0,0)"
 #endif
 
-#ifndef BODY_TO_STEREO_PHI
-#define BODY_TO_STEREO_PHI 0
+#ifndef STEREO_BODY_TO_STEREO_PHI
+#define STEREO_BODY_TO_STEREO_PHI 0
 #endif
 
-#ifndef BODY_TO_STEREO_THETA
-#define BODY_TO_STEREO_THETA 0
+#ifndef STEREO_BODY_TO_STEREO_THETA
+#define STEREO_BODY_TO_STEREO_THETA 0
 #endif
 
-#ifndef BODY_TO_STEREO_PSI
-#define BODY_TO_STEREO_PSI 0
+#ifndef STEREO_BODY_TO_STEREO_PSI
+#define STEREO_BODY_TO_STEREO_PSI 0
 #endif
 
 struct FloatRMat body_to_stereocam;
@@ -96,8 +96,9 @@ void stereocam_disparity_to_meters(uint8_t *disparity, float *distancesMeters, i
 
 void stereocam_init(void)
 {
-  struct FloatEulers euler = {BODY_TO_STEREO_PHI, BODY_TO_STEREO_THETA, BODY_TO_STEREO_PSI};
+  struct FloatEulers euler = {RadOfDeg(STEREO_BODY_TO_STEREO_PHI), RadOfDeg(STEREO_BODY_TO_STEREO_THETA), RadOfDeg(STEREO_BODY_TO_STEREO_PSI)};
   float_rmat_of_eulers(&body_to_stereocam, &euler);
+
   // initialize local variables
   msgProperties = (MsgProperties) {0, 0, 0};
 
@@ -120,7 +121,7 @@ void stereocam_periodic(void)
   while (linkdev->char_available(linkdev->periph) && stereoprot_add(insert_loc, 1, STEREO_BUF_SIZE) != extract_loc) {
     if (handleStereoPackage(StereoGetch(), STEREO_BUF_SIZE, &insert_loc, &extract_loc, &msg_start, msg_buf, ser_read_buf,
                             &stereocam_data.fresh, &stereocam_data.len, &stereocam_data.matrix_width, &stereocam_data.matrix_height)) {
-      LED_TOGGLE(MODEM_LED);
+//      LED_TOGGLE(MODEM_LED);
       freq_counter++;
       if ((sys_time.nb_tick - previous_time) > sys_time.ticks_per_sec) {  // 1s has past
         frequency = (uint8_t)((freq_counter * (sys_time.nb_tick - previous_time)) / sys_time.ticks_per_sec);

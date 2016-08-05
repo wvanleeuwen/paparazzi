@@ -25,7 +25,6 @@
  */
 
 #include "stereoprotocol.h"
-
 /**
  * Increment circular buffer counter by i
  */
@@ -50,8 +49,8 @@ uint16_t stereoprot_diff(uint16_t counter, uint16_t i, uint16_t buffer_size)
 uint8_t stereoprot_isEndOfMsg(uint8_t *stack, uint16_t i, uint16_t buffer_size)
 {
 
-  if (stack[i] == 255 && (stack[stereoprot_add(i, 1, buffer_size)] == 0)
-      && (stack[stereoprot_add(i, 2, buffer_size)] == 0) && stack[stereoprot_add(i, 3, buffer_size)] == 171) {
+  if (stack[i] == 0xFF && (stack[stereoprot_add(i, 1, buffer_size)] == 0)
+      && (stack[stereoprot_add(i, 2, buffer_size)] == 0) && stack[stereoprot_add(i, 3, buffer_size)] == 0xAB) {
     return 1;
   }
   return 0;
@@ -64,8 +63,8 @@ uint8_t stereoprot_isEndOfMsg(uint8_t *stack, uint16_t i, uint16_t buffer_size)
 uint8_t stereoprot_isStartOfMsg(uint8_t *stack, uint16_t i, uint16_t buffer_size)
 {
   //printf("Checking start: %d %d %d %d \n",stack[i],stack[stereoprot_add(i, 1,buffer_size)],stack[stereoprot_add(i, 2,buffer_size)],stack[stereoprot_add(i, 3,buffer_size)]);
-  if (stack[i] == 255 && (stack[stereoprot_add(i, 1, buffer_size)] == 0)
-      && (stack[stereoprot_add(i, 2, buffer_size)] == 0) && stack[stereoprot_add(i, 3, buffer_size)] == 175) {
+  if (stack[i] == 0xFF && (stack[stereoprot_add(i, 1, buffer_size)] == 0)
+      && (stack[stereoprot_add(i, 2, buffer_size)] == 0) && stack[stereoprot_add(i, 3, buffer_size)] == 0xAF) {
     return 1;
   }
   return 0;
@@ -74,7 +73,7 @@ uint8_t stereoprot_isStartOfMsg(uint8_t *stack, uint16_t i, uint16_t buffer_size
 //void stereoprot_get_msg_properties(uint8_t *, MsgProperties *, uint16_t,uint16_t);
 
 
-uint8_t WritePart(struct link_device *dev, uint8_t *code, uint8_t length)
+uint8_t WritePart(struct link_device *dev, uint8_t *code, uint16_t length)
 {
   long fd = 0;
   if (dev->check_free_space(dev->periph, &fd, length)) {
@@ -86,7 +85,7 @@ uint8_t WritePart(struct link_device *dev, uint8_t *code, uint8_t length)
   return 0;
 }
 
-void stereoprot_sendArray(struct link_device *fd, uint8_t *b, uint8_t array_width, uint8_t array_height)
+void stereoprot_sendArray(struct link_device *fd, uint8_t *b, uint16_t array_width, uint16_t array_height)
 {
 
   uint8_t code[4];
@@ -97,7 +96,7 @@ void stereoprot_sendArray(struct link_device *fd, uint8_t *b, uint8_t array_widt
   while (WritePart(fd, code, 4) == 0)
     ;
 
-  int horizontalLine = 0;
+  uint16_t horizontalLine = 0;
   for (horizontalLine = 0; horizontalLine < array_height; horizontalLine++) {
     code[3] = 0x80;//128
     while (WritePart(fd, code, 4) == 0)
@@ -172,14 +171,14 @@ void stereoprot_get_msg_properties(uint8_t *raw, MsgProperties *properties, uint
   uint16_t i = start, startOfLine = start;
   while (1) {
     // Check the first 3 bytes for the pattern 255-0-0, then check what special byte is encoded next
-    if ((raw[i] == 255) && (raw[stereoprot_add(i, 1, buffer_size)] == 0) && (raw[stereoprot_add(i, 2, buffer_size)] == 0)) {
-      if (raw[stereoprot_add(i, 3, buffer_size)] == 171) { // End of image
+    if ((raw[i] == 0xFF) && (raw[stereoprot_add(i, 1, buffer_size)] == 0) && (raw[stereoprot_add(i, 2, buffer_size)] == 0)) {
+      if (raw[stereoprot_add(i, 3, buffer_size)] == 0xAB) { // End of image
         break;
       }
-      if (raw[stereoprot_add(i, 3, buffer_size)] == 128) { // Start of line
+      if (raw[stereoprot_add(i, 3, buffer_size)] == 0x80) { // Start of line
         startOfLine = i;
       }
-      if (raw[stereoprot_add(i, 3, buffer_size)] == 218) { // End of line
+      if (raw[stereoprot_add(i, 3, buffer_size)] == 0xDA) { // End of line
         properties->height++;
         properties->width = stereoprot_diff(i, startOfLine + 4,
                                             buffer_size); // removed 4 for the indication bits at the end of line
