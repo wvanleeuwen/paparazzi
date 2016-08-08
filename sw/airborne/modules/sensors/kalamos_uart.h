@@ -44,22 +44,23 @@ struct kalamos_t {
 
 //should be exactly the same as pprz.h
 struct Kalamos2PPRZPackage {
-    unsigned char hoer[4];
-    char endl;             // endl fix, makes it worker nicer in terminal for debugging :)
     float height;
     float min_height;
     float target_x;
     float target_y;
+    float flow_x;
+    float flow_y;
     char status;
 };
 extern struct Kalamos2PPRZPackage k2p_package;
 
 //should be exactly the same as pprz.h
 struct PPRZ2KalamosPackage {
-    unsigned char hoer[4];
-    char endl;             // endl fix, makes it worker nicer in terminal for debugging :)
     float phi;
     float theta;
+    float gpsx;
+    float gpsy;
+    float gpsz;
 };
 
 extern float kalamos_target_height;

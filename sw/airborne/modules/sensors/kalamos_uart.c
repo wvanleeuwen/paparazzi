@@ -56,7 +56,6 @@ float kalamos_pos_gain = 0.05;
 
 static void kalamos_raw_downlink(struct transport_tx *trans, struct link_device *dev)
 {
-  k2p_package.endl = k2p_package.height; //tmp?!?!?
   pprz_msg_send_DEBUG(trans, dev, AC_ID, sizeof(struct Kalamos2PPRZPackage), (unsigned char *) &k2p_package);
 }
 #endif
@@ -82,17 +81,17 @@ static inline void kalamos_parse_msg(void)
 
   /* Parse the kalamos message */
   uint8_t msg_id = mp_msg_buf[1];
-  k2p_package.hoer[0] = 'h';
 
   switch (msg_id) {
 
-  /* Got a magneto message */
+  /* Got a kalamos message */
   case DL_IMCU_DEBUG: {
     uint8_t size = DL_IMCU_DEBUG_msg_length(mp_msg_buf);
     uint8_t *msg = DL_IMCU_DEBUG_msg(mp_msg_buf);
 
+    unsigned char * tmp = (unsigned char*)&k2p_package;
     for(uint8_t i = 0; i < size; i++) {
-      k2p_package.hoer[i] = msg[i];
+      tmp[i] = msg[i];
     }
 
     struct EnuCoor_f *pos = stateGetPositionEnu_f();
@@ -149,13 +148,12 @@ void kalamos_periodic() {
   struct PPRZ2KalamosPackage p2k_package;
   p2k_package.phi = att->phi;
   p2k_package.theta = att->theta;
+  p2k_package.gpsx = stateGetPositionEnu_f()->x;
+  p2k_package.gpsy = stateGetPositionEnu_f()->y;
+  p2k_package.gpsz = stateGetPositionEnu_f()->z;
 
-  unsigned char hoer[] = "hoer";
-  for(uint8_t i = 0; i < 4; i++)
-      p2k_package.hoer[i] = hoer[i];
 
-
-        // Send Telemetry report
+  // Send Telemetry report
   DOWNLINK_SEND_SONAR(DefaultChannel, DefaultDevice, 0, &k2p_package.height);
 
 
