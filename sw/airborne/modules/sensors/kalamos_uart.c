@@ -144,13 +144,15 @@ void kalamos_event() {
 void kalamos_periodic() {
 
   struct FloatEulers *att = stateGetNedToBodyEulers_f();
+  struct EnuCoor_f *pos = stateGetPositionEnu_f();
+
 
   struct PPRZ2KalamosPackage p2k_package;
   p2k_package.phi = att->phi;
   p2k_package.theta = att->theta;
-  p2k_package.gpsx = stateGetPositionEnu_f()->x;
-  p2k_package.gpsy = stateGetPositionEnu_f()->y;
-  p2k_package.gpsz = stateGetPositionEnu_f()->z;
+  p2k_package.gpsx = pos->x;
+  p2k_package.gpsy = pos->y;
+  p2k_package.gpsz = pos->z;
 
 
   // Send Telemetry report
