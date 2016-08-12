@@ -71,9 +71,13 @@ void kalamos_init() {
 #endif
 
   NavSetWaypointHere(WP_KALAMOS);
+  k2p_package.height = -0.01;
+  k2p_package.status = 1;
 
 
 }
+
+static int timeoutcount = 0;
 
 /* Parse the InterMCU message */
 static inline void kalamos_parse_msg(void)
@@ -93,6 +97,7 @@ static inline void kalamos_parse_msg(void)
     for(uint8_t i = 0; i < size; i++) {
       tmp[i] = msg[i];
     }
+    timeoutcount = 100;
 
     struct EnuCoor_f *pos = stateGetPositionEnu_f();
 
@@ -102,7 +107,7 @@ static inline void kalamos_parse_msg(void)
     waypoint_set_alt(WP_KALAMOS,pprzheight );
 
 
-if (kalamos_enable_landing ) {
+if (kalamos_enable_landing && timeoutcount > 0) {
   if (k2p_package.min_height > 5.0) {
     kalamos_target_height -= kalamos_landing_decent_speed;
   }
@@ -120,7 +125,9 @@ if (kalamos_enable_landing ) {
 
 
     // Send ABI message
-    AbiSendMsgAGL(AGL_SONAR_ADC_ID, k2p_package.height);
+    if (timeoutcount > 0) {
+      AbiSendMsgAGL(AGL_SONAR_ADC_ID, k2p_package.height);
+    }
 
     break;
   }
@@ -154,9 +161,15 @@ void kalamos_periodic() {
   p2k_package.gpsy = pos->y;
   p2k_package.gpsz = pos->z;
 
+  if (timeoutcount > 0) {
+    timeoutcount--;
+  } else {
+    k2p_package.status = 1;
+  }
+  uint16_t status = k2p_package.status;
 
   // Send Telemetry report
-  DOWNLINK_SEND_SONAR(DefaultChannel, DefaultDevice, 0, &k2p_package.height);
+  DOWNLINK_SEND_SONAR(DefaultChannel, DefaultDevice, &status, &k2p_package.height);
 
 
   pprz_msg_send_IMCU_DEBUG(&(kalamos.transport.trans_tx), kalamos.device,
