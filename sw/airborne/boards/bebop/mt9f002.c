@@ -58,7 +58,11 @@ struct video_config_t front_camera = {
   },
   .dev_name = "/dev/video1",
   .subdev_name = "/dev/v4l-subdev1",
+#if MT9F002_RGB_OUTPUT
+  .format = V4L2_PIX_FMT_BGR32,
+#else
   .format = V4L2_PIX_FMT_UYVY,
+#endif
   .subdev_format = V4L2_MBUS_FMT_SGRBG10_1X10,
   .buf_cnt = 3,
   .filters = VIDEO_FILTER_ISP,

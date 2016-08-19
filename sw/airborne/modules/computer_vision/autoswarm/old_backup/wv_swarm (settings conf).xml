@@ -1,0 +1,18 @@
+<!DOCTYPE settings SYSTEM "../settings.dtd">
+
+<settings>
+  <dl_settings>
+    <dl_settings NAME="Swarm">
+    	<dl_setting var="WV_SWARM_AMAX" 		min="0.1" 	step="0.1" 	max="20" 	module="computer_vision/wv_swarm/wv_swarm" shortname="Max Acc. (m/s2)"/> 
+      	<dl_setting var="WV_SWARM_VMAX" 		min="0.1" 	step="0.1" 	max="20" 	module="computer_vision/wv_swarm/wv_swarm" shortname="Max Vel. (m/s)"/> 
+      	<dl_setting var="WV_SWARM_YAWRATEMAX" 	min="0" 	step="1" 	max="360" 	module="computer_vision/wv_swarm/wv_swarm" shortname="Max Yaw (deg/s)"/>
+    	<dl_setting var="WV_SWARM_MODE" 		min="1" 	step="1" 	max="2" 	module="computer_vision/wv_swarm/wv_swarm" shortname="Swarm Mode" values="See where you fly|Look towards global attractor"/>
+      	<dl_setting var="WV_SWARM_SEPERATION" 	min="1" 	step="0.1" 	max="2.5" 	module="computer_vision/wv_swarm/wv_swarm" shortname="Seperation (m)"/>
+      	<dl_setting var="WV_GLOBAL_ATTRACTOR" 	min="0" 	step="1" 	max="3" 	module="computer_vision/wv_swarm/wv_swarm" shortname="Attractor mode" values="POINT|BUCKET|CW CIRCLE|CC CIRCLE"/>
+      	<dl_setting var="WV_GLOBAL_CIRCLE_R" 	min="0.5" 	step="0.1" 	max="2.5" 	module="computer_vision/wv_swarm/wv_swarm" shortname="Circle radius (m)"/> 
+      	<dl_setting var="WV_SWARM_GLOBAL" 		min="0" 	step="0.01" max="1" 	module="computer_vision/wv_swarm/wv_swarm" shortname="Gl. Str. (% vmax)"/>
+		<dl_setting var="WV_SWARM_E" 			min="0.0001" step="0.0001" max="0.02" module="computer_vision/wv_swarm/wv_swarm" shortname="Repulsive Str."/>
+      	<dl_setting var="WV_SWARM_EPS" 			min="0.01" 	step="0.01" max="0.1" 	module="computer_vision/wv_swarm/wv_swarm" shortname="Diff. Str."/>      		
+    </dl_settings>
+  </dl_settings>
+</settings>

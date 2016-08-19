@@ -1,0 +1,71 @@
+<!DOCTYPE airframe SYSTEM "../../airframe.dtd">
+
+<airframe name="TUBB18"> <!-- The name of your airframe, not that important -->
+	<firmware name="rotorcraft">
+    	<target name="ap" board="bebop"/>
+    	<define name="FAILSAFE_DESCENT_SPEED" value="0.5"/>
+		<configure name="HOST" value="192.168.40.5"/>
+		<configure name="MODEM_HOST" value="192.168.40.255"/>
+	
+		<!--define name="USE_SONAR" value="TRUE"/-->  <!-- As we have a height from Optitrack we dont need to use the sonar -->
+		<!-- Subsystem section -->
+		<subsystem name="telemetry" type="transparent_udp"/>
+    	<subsystem name="radio_control" type="datalink"/> <!-- We control the bebop through wifi -->
+    	<subsystem name="motor_mixing"/>
+    	<subsystem name="actuators" type="bebop"/>
+    	<subsystem name="imu" type="bebop"/>
+    	<subsystem name="gps" type="datalink"/> <!-- The GPS information also comes over this wifi, as we are sitting in the cyberzoo all the time --> 
+    	<subsystem name="stabilization" type="indi">
+    		<define name="STABILIZATION_INDI_USE_ADAPTIVE" value="FALSE"/>
+		</subsystem>
+    	<subsystem name="guidance" 		type="indi"/> <!-- using GRAVITY_HEURISTIC_FACTOR = 0 -->
+    	<subsystem name="ahrs" type="int_cmpl_quat">
+      		<configure name="USE_MAGNETOMETER" value="FALSE"/>
+      		<define name="AHRS_USE_GPS_HEADING" value="TRUE"/>
+	  		<!-- <define name="AHRS_USE_GPS_HEADING" value="0"/> should be something related to heading & min speed -->   
+    	</subsystem>
+    	<subsystem name="ins" type="extended"/>
+	</firmware>   
+	<modules main_freq="512">
+  		<load name="bebop_front_camera.xml">    
+			<define name="BEBOP_FRONT_CAMERA_SHOT_PATH" value="/data/ftp/internal_000/images" />
+			<define name="BEBOP_FRONT_CAMERA_FPS" value="8"/>
+			<define name="BEBOP_FRONT_CAMERA_WIDTH" value="2048"/>
+			<define name="BEBOP_FRONT_CAMERA_HEIGHT" value="2024"/>
+			<define name="BEBOP_FRONT_CAMERA_ISP_SCALAR" value="0.615384615"/>
+    	</load>   
+    	<load name="cv_swarm.xml"> 
+    		<define name="WV_INIT_GLOBAL_ATTRACTOR" value="2"/>
+    	</load>
+  	</modules>
+  	
+<!-- The IMU calibration can be quite important -->
+<!-- Follow the MAVLab video to see how you can calibrate it -->
+<!-- If your drone tends to always go forward check your primary flight display -->
+<!-- Put the drone on a table, if the horizon is not perfectly straight you might want -->
+<!-- to adjust your body to imu variables until it is -->
+  <section name="IMU" prefix="IMU_">
+    <!-- Magneto calibration -->
+    <define name="MAG_X_NEUTRAL" value="18"/>
+    <define name="MAG_Y_NEUTRAL" value="157"/>
+    <define name="MAG_Z_NEUTRAL" value="49"/>
+    <define name="MAG_X_SENS" value="10.5007722373" integer="16"/>
+    <define name="MAG_Y_SENS" value="11.1147400462" integer="16"/>
+    <define name="MAG_Z_SENS" value="11.6479371722" integer="16"/>
+
+    <!-- Magneto current calibration -->
+    <define name="MAG_X_CURRENT_COEF" value="0.0"/>
+    <define name="MAG_Y_CURRENT_COEF" value="0.0"/>
+    <define name="MAG_Z_CURRENT_COEF" value="0.0"/>
+
+    <define name="ACCEL_X_NEUTRAL" value="0"/>
+    <define name="ACCEL_Y_NEUTRAL" value="0"/>
+    <define name="ACCEL_Z_NEUTRAL" value="0.0"/>
+
+    <define name="BODY_TO_IMU_PHI" value="0." unit="deg"/>
+    <define name="BODY_TO_IMU_THETA" value="0." unit="deg"/>
+    <define name="BODY_TO_IMU_PSI" value="0." unit="deg"/>
+  </section>
+  
+   	<include href="conf/airframes/TUDELFT/autoswarm/basic_swarm.xml"/>
+</airframe>

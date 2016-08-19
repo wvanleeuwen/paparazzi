@@ -1,0 +1,25 @@
+<!DOCTYPE settings SYSTEM "../settings.dtd">
+<settings>
+  <dl_settings>
+    <dl_settings NAME="Swarm">
+    	<dl_setting var="WV_SWARM_AMAX" 		min="0.1" 	step="0.1" 	max="20" 	module="computer_vision/autoswarm/autoswarm_opencv" shortname="Max Acc. (m/s2)"/> 
+      	<dl_setting var="WV_SWARM_VMAX" 		min="0.1" 	step="0.1" 	max="20" 	module="computer_vision/autoswarm/autoswarm_opencv" shortname="Max Vel. (m/s)"/> 
+      	<dl_setting var="WV_SWARM_YAWRATEMAX" 	min="0" 	step="1" 	max="360" 	module="computer_vision/autoswarm/autoswarm_opencv" shortname="Max Yaw (deg/s)"/>
+    	<dl_setting var="WV_SWARM_MODE" 		min="1" 	step="1" 	max="2" 	module="computer_vision/autoswarm/autoswarm_opencv" shortname="Swarm Mode" values="See where you fly|Look towards global attractor"/>
+      	<dl_setting var="WV_SWARM_SEPERATION" 	min="1" 	step="0.1" 	max="2.5" 	module="computer_vision/autoswarm/autoswarm_opencv" shortname="Seperation (m)"/>
+      	<dl_setting var="WV_GLOBAL_ATTRACTOR" 	min="0" 	step="1" 	max="3" 	module="computer_vision/autoswarm/autoswarm_opencv" shortname="Attractor mode" values="POINT|BUCKET|CW CIRCLE|CC CIRCLE"/>
+      	<dl_setting var="WV_GLOBAL_CIRCLE_R" 	min="0.5" 	step="0.1" 	max="2.5" 	module="computer_vision/autoswarm/autoswarm_opencv" shortname="Circle radius (m)"/> 
+      	<dl_setting var="WV_SWARM_GLOBAL" 		min="0" 	step="0.01" max="1" 	module="computer_vision/autoswarm/autoswarm_opencv" shortname="Gl. Str. (% vmax)"/>
+		<dl_setting var="WV_SWARM_E" 			min="0.0001" step="0.0001" max="0.02" module="computer_vision/autoswarm/autoswarm_opencv" shortname="Repulsive Str."/>
+      	<dl_setting var="WV_SWARM_EPS" 			min="0.01" 	step="0.01" max="0.1" 	module="computer_vision/autoswarm/autoswarm_opencv" shortname="Diff. Str."/>      		
+    </dl_settings>
+    <dl_settings NAME="Filter">
+    	<dl_setting var="WV_TRACK_RND_PIX_SAMPLE" 		min="1000" 	step="100" 	max="25000" 	module="computer_vision/autoswarm/autoswarm_opencv" shortname="Filter sample size"/> 
+    	<dl_setting var="WV_TRACK_GREY_THRESHOLD" 		min="2" 	step="1" 	max="255" 	module="computer_vision/autoswarm/autoswarm_opencv" shortname="Filter Threshold"/> 
+      	<dl_setting var="WV_FILTER_CR" 	min="0" 	step="0.01" 	max="2" 	module="computer_vision/autoswarm/autoswarm_opencv" shortname="Filter Red constant"/>
+    	<dl_setting var="WV_FILTER_CG" 	min="0" 	step="0.01" 	max="2" 	module="computer_vision/autoswarm/autoswarm_opencv" shortname="Filter Green constant"/>
+      	<dl_setting var="WV_FILTER_CB" 	min="0" 	step="0.01" 	max="2" 	module="computer_vision/autoswarm/autoswarm_opencv" shortname="Filter Blue constant"/>	
+      	<dl_setting var="WV_TRACK_IMAGE_CROP_FOVY" 	min="1" 		step="1" 	max="145" 	module="computer_vision/autoswarm/autoswarm_opencv" shortname="Vertical FOV clipping"/> 	
+    </dl_settings>
+  </dl_settings>
+</settings>

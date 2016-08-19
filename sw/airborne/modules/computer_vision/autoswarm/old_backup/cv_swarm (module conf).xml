@@ -1,0 +1,45 @@
+<!DOCTYPE module SYSTEM "module.dtd">
+<module name="cv_swarm" dir="computer_vision/wv_swarm">
+  <doc>
+    <description>opencv</description>
+  </doc>
+  <header>
+    <file name="cv_swarm.h"/>
+  </header>
+  <init fun="cv_swarm_init()"/>
+  <makefile>
+  	<file name="cv_swarm.c"/>
+    <file name="wv_swarm.cpp"/> 
+    <file name="cv.c" dir="modules/computer_vision"/>
+   	<!-- Include the needed Computer Vision files -->
+    <include name="modules/computer_vision"/>
+    <include name="modules/computer_vision/lib/MT9F002"/>    
+    <!-- OpenCV flags -->	
+    <flag name="CXXFLAGS" value="I$(PAPARAZZI_HOME)/sw/ext/opencv_bebop/install/include" />
+	
+    <flag name="CXXFLAGS" value="I$(PAPARAZZI_HOME)/sw/airborne" />
+	<flag name="CXXFLAGS" value="I$(PAPARAZZI_HOME)/sw/include" />
+	
+	<flag name="CXXFLAGS" value="I$(PAPARAZZI_HOME)/sw/ext" />	
+	<flag name="CXXFLAGS" value="I$(PAPARAZZI_HOME)/var/include" />
+	<flag name="CXXFLAGS" value="I$(PAPARAZZI_HOME)/sw/airborne/modules" />	
+	<flag name="CXXFLAGS" value="I$(PAPARAZZI_HOME)/sw/airborne/firmwares/rotorcraft" />
+	
+	<flag name="CXXFLAGS" value="I$(PAPARAZZI_HOME)/sw/airborne/arch/linux" />
+	<flag name="CXXFLAGS" value="I$(PAPARAZZI_HOME)/var/aircrafts/$(AIRCRAFT)/ap" />
+	
+  	<flag name="LDFLAGS" value="L$(PAPARAZZI_HOME)/sw/ext/opencv_bebop/install/lib" />
+	<flag name="LDFLAGS" value="lopencv_imgcodecs" />
+	<flag name="LDFLAGS" value="lopencv_imgproc" />
+	<flag name="LDFLAGS" value="lopencv_core" />
+	<flag name="LDFLAGS" value="L$(PAPARAZZI_HOME)/sw/ext/opencv_bebop/install/share/OpenCV/3rdparty/lib" />
+	<flag name="LDFLAGS" value="lzlib" />
+	<flag name="LDFLAGS" value="llibpng" />
+	<flag name="LDFLAGS" value="lstdc++" />
+	<flag name="LDFLAGS" value="ldl" />
+	<flag name="LDFLAGS" value="lm" />
+	<flag name="LDFLAGS" value="lpthread" />
+	<flag name="LDFLAGS" value="lrt" />	
+  </makefile>
+</module>
+ 

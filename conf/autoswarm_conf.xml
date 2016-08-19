@@ -1,0 +1,57 @@
+<conf>
+  <aircraft
+   name="TUBB04"
+   ac_id="204"
+   airframe="airframes/TUDELFT/autoswarm/TUBB04.xml"
+   radio="radios/cockpitSX.xml"
+   telemetry="telemetry/default_rotorcraft_slow.xml"
+   flight_plan="flight_plans/TUDELFT/autoswarm/follow_object.xml"
+   settings="settings/rotorcraft_basic.xml settings/control/rotorcraft_guidance.xml settings/modules/autoswarm.xml settings/control/stabilization_indi.xml"
+   settings_modules="modules/imu_common.xml modules/gps.xml modules/geo_mag.xml modules/air_data.xml modules/video_rtp_stream.xml"
+   gui_color="#ce38ce3422fb"
+  />
+  <aircraft
+   name="TUBB05"
+   ac_id="205"
+   airframe="airframes/TUDELFT/autoswarm/TUBB05.xml"
+   radio="radios/cockpitSX.xml"
+   telemetry="telemetry/default_rotorcraft_slow.xml"
+   flight_plan="flight_plans/TUDELFT/autoswarm/follow_object.xml"
+   settings="settings/rotorcraft_basic.xml settings/control/rotorcraft_guidance.xml [settings/estimation/ahrs_float_mlkf.xml] [settings/control/stabilization_att_int_quat.xml] settings/modules/autoswarm.xml"
+   settings_modules="modules/bebop_front_camera.xml"
+   gui_color="#ce38ce3422fb"
+  />
+  <aircraft
+   name="TUBB09"
+   ac_id="209"
+   airframe="airframes/TUDELFT/autoswarm/TUBB09.xml"
+   radio="radios/cockpitSX.xml"
+   telemetry="telemetry/default_rotorcraft_slow.xml"
+   flight_plan="flight_plans/TUDELFT/autoswarm/follow_object.xml"
+   settings="settings/rotorcraft_basic.xml settings/control/rotorcraft_guidance.xml [settings/estimation/ahrs_float_mlkf.xml] [settings/control/stabilization_att_int_quat.xml] settings/modules/autoswarm.xml"
+   settings_modules="modules/bebop_front_camera.xml"
+   gui_color="#d9c42a5c2a5c"
+  />
+  <aircraft
+   name="TUBB18"
+   ac_id="218"
+   airframe="airframes/TUDELFT/autoswarm/TUBB18.xml"
+   radio="radios/cockpitSX.xml"
+   telemetry="telemetry/default_rotorcraft_slow.xml"
+   flight_plan="flight_plans/TUDELFT/autoswarm/follow_object.xml"
+   settings="settings/rotorcraft_basic.xml settings/control/rotorcraft_guidance.xml [settings/estimation/ahrs_float_mlkf.xml] [settings/control/stabilization_att_int_quat.xml] settings/modules/autoswarm.xml"
+   settings_modules="modules/bebop_front_camera.xml"
+   gui_color="#3c864f6d9f00"
+  />
+  <aircraft
+   name="bebop"
+   ac_id="33"
+   airframe="airframes/TUDELFT/tudelft_bebop_indi.xml"
+   radio="radios/dummy.xml"
+   telemetry="telemetry/default_rotorcraft.xml"
+   flight_plan="flight_plans/rotorcraft_basic.xml"
+   settings="settings/rotorcraft_basic.xml settings/control/rotorcraft_guidance.xml settings/nps.xml settings/control/stabilization_indi.xml"
+   settings_modules="modules/imu_common.xml modules/gps.xml modules/geo_mag.xml modules/air_data.xml"
+   gui_color="red"
+  />
+</conf>
