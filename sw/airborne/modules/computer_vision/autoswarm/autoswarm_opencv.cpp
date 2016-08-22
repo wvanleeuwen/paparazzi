@@ -30,6 +30,7 @@
 #include <math.h>					// Used for sin/cos/tan/M_PI
 #include <ctime> 					// Used to write time to results.txt
 #include <algorithm> 				// Used for min() and max()
+#include <string>					// Used for strlen
 //#include <random>
 
 extern "C" {
@@ -46,13 +47,14 @@ using namespace cv;
 #include "modules/computer_vision/opencv_image_functions.h"
 
 // Defining function that require opencv to be loaded
-static void 			trackGreyObjects	(Mat& sourceFrame, Mat& greyFrame, vector<trackResults>* trackRes, Rect ROI = cvRect(0, 0, 0, 0));
+static void 			trackGreyObjects	(Mat& sourceFrame, Mat& greyFrame, vector<trackResults>* trackRes);
+static void 			addContour			(vector<Point> contour, vector<trackResults>* trackRes);
 static void 			identifyNeighbours	(vector<trackResults> trackRes);
 static void 			updateWaypoints 	(struct NedCoor_f *pos, vector<double> cPos, vector<double> totV);
 static void 			cam2body 			(trackResults* trackRes);
 static void 			body2world 			(trackResults* trackRes, struct NedCoor_f *pos, struct 	FloatEulers * eulerAngles);
 static bool 			rndRedGrayscale		(Mat& sourceFrame, Mat& destFrame, int sampleSize);
-static bool 			pixFindContour		(Mat& sourceFrame, Mat& destFrame, int row, int col, int prevDir);
+static bool 			pixFindContour		(Mat& sourceFrame, Mat& destFrame, int row, int col, int prevDir, bool cascade);
 static double 			correctRadius		(double r, double f, double k);
 static Rect 			setISPvars 			(int width, int height, bool crop = false);
 static vector<double> 	calcLocalVelocity	(struct NedCoor_f *pos);
@@ -63,17 +65,22 @@ static vector<double> 	calcGlobalVelocity 	(struct NedCoor_f *pos);
 static vector<double> 	limitYaw 			(struct NedCoor_f *pos, vector<double> cPos);
 static vector<double> 	limitVelocityYaw	(vector<double> totV);
 static vector<double> 	limitNorm			(vector<double> totV, double maxNorm);
+static void 			saveBuffer			(char * img, Mat sourceFrame, const char *filename);
+static void 			addObject			(void);
+static Rect 			enlargeRectangle	(Mat& sourceFrame, Rect rectangle, double scale);
+static bool 			inRectangle			(Point pt, Rect rectangle);
 
 // Debug options
 #define WV_DEBUG_SHOW_REJECT 		 0
-#define WV_DEBUG_SHOW_WAYPOINT 		 1
-#define WV_DEBUG_SHOW_MEM			 1
+#define WV_DEBUG_SHOW_WAYPOINT 		 0
+#define WV_DEBUG_SHOW_MEM			 0
 
 // Runtime options
-#define WV_OPT_WRITE_RESULTS 		 1
-#define WV_OPT_MOD_VIDEO 			 1
+#define WV_OPT_WRITE_RESULTS 		 0
+#define WV_OPT_MOD_VIDEO 			 0
 #define WV_OPT_CALIBRATE_CAM 		 0
-#define AUTOSWARM_EVALUATE_FILTER 	 0
+#define WV_OPT_BENCHMARK 			 1
+#define WV_OPT_CV_CONTOURS 			 0
 
 // Global options definitions
 #define WV_GLOBAL_POINT 			0
@@ -81,27 +88,48 @@ static vector<double> 	limitNorm			(vector<double> totV, double maxNorm);
 #define WV_GLOBAL_CIRCLE_CW 		2
 #define WV_GLOBAL_CIRCLE_CC 		3
 
+// Filter sample styles
+#define FILTER_STYLE_FULL			0
+#define FILTER_STYLE_GRID			1
+#define FILTER_STYLE_RANDOM			2
+// Filter flood styles
+#define FILTER_FLOOD_OMNI 			0
+#define FILTER_FLOOD_CW				1
+
+//Optional function declarations
 #if WV_OPT_CALIBRATE_CAM
 static void 			calibrateEstimation (vector<trackResults> trackRes);
 #endif
 #if WV_OPT_MOD_VIDEO
 static void 			mat2Buffer			(Mat& source, char* buf, bool greyscale = false);
 #endif
+#if WV_OPT_BENCHMARK
+static void 			initBenchmark		(void);
+static void 			addBenchmark		(const char * title);
+static void 			showBenchmark		(void);
+#endif
 
 // Set up tracking parameters
 int 	WV_TRACK_MIN_CROP_AREA 		= 600;
-int 	WV_TRACK_RND_PIX_SAMPLE 	= 10000;
-int 	AUTOSWARM_MAX_LAYERS  		= 10000;
+int 	WV_TRACK_RND_PIX_SAMPLE 	= 5000;
+int 	AUTOSWARM_MAX_LAYERS  		= 100000;
 double 	WV_TRACK_MIN_CIRCLE_SIZE 	= 260;
 double 	WV_TRACK_MAX_CIRCLE_DEF 	= 0.4;
-double  WV_FILTER_CR 				= 1;
-double  WV_FILTER_CG 				= 0.3;
-double  WV_FILTER_CB 				= 0.3;
-int 	WV_TRACK_GREY_THRESHOLD 	= 1; 		// [TEST 20160602 in optitrack] [HOME: 120] [OLD ZOO: 140] [OLD PPRZ 60]
+
+int 	FILTER_SAMPLE_STYLE 		= FILTER_STYLE_RANDOM;
+int 	FILTER_FLOOD_STYLE 			= FILTER_FLOOD_CW;
+int 	WV_FILTER_Y_MIN 			= 0;  // 0
+int 	WV_FILTER_Y_MAX 			= 255; // 255
+int 	WV_FILTER_CB_MIN 			= 84; // 84
+int 	WV_FILTER_CB_MAX 			= 113; // 113
+int 	WV_FILTER_CR_MIN 			= 218; // 218 -> 150?
+int 	WV_FILTER_CR_MAX 			= 240; // 240 -> 255?
 int 	WV_TRACK_IMAGE_CROP_FOVY 	= 45; 		// Degrees
+int 	WV_FILTER_SAVE_RESULTS 		= 0;
+double 	WV_FILTER_CROP_X 			= 1.2;
 
 // Set up platform parameters
-int 	WV_BEBOP_CAMERA_ANGLE 		= -20; 		// Degrees
+int 	WV_BEBOP_CAMERA_ANGLE 		= -13; 		// Degrees
 double 	WV_BEBOP_CAMERA_OFFSET_X 	= 0.10; 	// Meters
 
 // Set up swarm parameters
@@ -128,57 +156,38 @@ struct 	NedCoor_f * 	groundSpeed;
 double 	ispScalar;
 int 	ispWidth;
 int 	ispHeight;
+int 	cropCol;
 int 	runCount = 0;
 int 	pixCount = 0;
+int 	pixSucCount = 0;
+int 	shotSucces 	= 0;
+int 	shotFail 	= 0;
 int 	maxId = 0;
 vector<memoryBlock> neighbourMem;
 extern uint8_t nav_block;
 static const char * flight_blocks[] = FP_BLOCKS;
+Rect 	objCrop;
+vector<Rect> cropAreas;
+vector<Point> objCont;
+vector<vector<Point> > allContours;
 
-#if AUTOSWARM_COLOR_CALIBRATION
-int YMin 	= 256;
-int YMax 	= 0;
-int CrMin 	= 256;
-int CrMax 	= 0;
-int CbMin 	= 256;
-int CbMax 	= 0;
+#if WV_OPT_BENCHMARK
+vector<double> benchmark_time;
+vector<double> benchmark_avg_time;
+vector<const char*> benchmark_title;
+clock_t bench_start, bench_end;
 #endif
 
 #if WV_OPT_WRITE_RESULTS
-FILE * 	pFile;
-time_t 	startTime;
-char	resultFile [50];
 time_t 	currentTime;
 int 	curT;
+time_t 	startTime;
+FILE * 	pFile;
+char	resultFile [50];
 #endif
 
 int layerDepth = 0;
 int sample = 0;
-
-/* EXAMPLE
-int opencv_example(char *img, int width, int height)
-{
-  // Create a new image, using the original bebop image.
-  Mat M(height, width, CV_8UC2, img);
-  Mat image;
-  // If you want a color image, uncomment this line
-   cvtColor(M, image, CV_YUV2BGR_Y422);
-  // For a grayscale image, use this one
-//  cvtColor(M, image, CV_YUV2GRAY_Y422);
-
-  // Blur it, because we can
-  blur(image, image, Size(5, 5));
-
-  // Canny edges, only works with grayscale image
-//  int edgeThresh = 35;
-//  Canny(image, image, edgeThresh, edgeThresh * 3);
-
-  // Convert back to YUV422, and put it in place of the original image
-//  grayscale_opencv_to_yuv422(image, img, width, height);
-  colorrgb_opencv_to_yuv422(image, img, width, height);
-
-  return 0;
-} */
 
 void autoswarm_opencv_init(int globalMode)
 {
@@ -192,90 +201,151 @@ void autoswarm_opencv_init(int globalMode)
 	fclose(pFile);
 #endif
 	WV_GLOBAL_ATTRACTOR = globalMode;
-	printf("AUTOSWARM initialized\n");
+	if(!WV_OPT_CV_CONTOURS && FILTER_FLOOD_STYLE != FILTER_FLOOD_CW)
+	{
+		printf("[AS-CFG-ERR] No openCV contours is only possible with clockwise flooding.\n");
+	}
+	printf("[AS] initialized\n");
 	return;
 }
 
-char* autoswarm_opencv_run(char* img, int width, int height)
+void autoswarm_opencv_run(char* img, int width, int height)
 {
-	//if(nav_block < 3){ return img; }	// Engines have not started yet, lets save some battery life and skip image processing for now
 	// Computer vision compatibility function used to call trackObjects and (optionally) parse modified data back to rtp stream as YUV
-#if WV_OPT_WRITE_RESULTS 											// See if we want to write results
-	currentTime = time(0); 											// Get the current time
-	pFile 		= fopen("/data/ftp/internal_000/results.txt","a");	// Open file for appending TODO: Check for errors opening file
-	curT 		= difftime(currentTime,startTime); 					// Calculate time-difference between startTime and currentTime
+	//if(nav_block < 3){ return img; }	// Engines have not started yet, lets save some battery life and skip image processing for now
+#if WV_OPT_BENCHMARK
+	if(runCount > 0)
+	{
+		addBenchmark("Lost time");
+		showBenchmark();
+	}
+	initBenchmark();
+#endif
+	eulerAngles 			= stateGetNedToBodyEulers_f(); 	// Get Euler angles
+	struct NedCoor_f *pos 	= stateGetPositionNed_f(); 		// Get your current position
+	Mat sourceFrame(height, width, CV_8UC2, img); 	// Initialize current frame in openCV (UYVY) 2 channel
+#if WV_OPT_BENCHMARK
+	addBenchmark("Read image");
+#endif
+	runCount++; 									// Update global run-counter
+	groundSpeed = stateGetSpeedNed_f(); 			// Get groundspeed
+	Rect crop 	= setISPvars(width, height, true); 	// Calculate ISP related parameters
+	sourceFrame = sourceFrame(crop); 				// Crop the frame
+	Mat frameGrey; 									// Initialize frameGrey (to hold the thresholded image)
+	if(FILTER_FLOOD_STYLE != FILTER_FLOOD_CW || WV_OPT_CV_CONTOURS)
+	{
+		Mat frameGrey(sourceFrame.rows, sourceFrame.cols, CV_8UC1, cvScalar(0.0)); 	// Only when using opencv contours the frame is filled with zeros
+	}
+#if WV_OPT_BENCHMARK
+	addBenchmark("Declared variables");
 #endif
 	vector<trackResults> trackRes; 							// Create empty struct _trackResults to store our neighbours in
-#if MT9F002_RGB_OUTPUT
-	Mat sourceFrame(height, width, CV_8UC4, img); 				// Initialize current frame in openCV (sRGB) 4 channel
-#else
-	Mat sourceFrame(height, width, CV_8UC2, img); 				// Initialize current frame in openCV (UYVY) 2 channel
-#endif
-	runCount++; 											// Update global run-counter
-	eulerAngles = stateGetNedToBodyEulers_f(); 				// Get Euler angles
-	groundSpeed = stateGetSpeedNed_f(); 					// Get groundspeed
-	Rect crop 	= setISPvars(width, height, true); 			// Calculate ISP related parameters
-	sourceFrame 	= sourceFrame(crop);
-	Mat frameGrey(sourceFrame.rows, sourceFrame.cols, CV_8UC1, cvScalar(0.0));
-	trackGreyObjects(sourceFrame, frameGrey, &trackRes, crop); 				// Track objects in sourceFrame
-#if AUTOSWARM_COLOR_CALIBRATION
-	printf("Y[%i, %i] Cb[%i, %i] Cr[%i, %i]\n",YMin, YMax, CbMin, CbMax, CrMin, CrMax);
+	trackGreyObjects(sourceFrame, frameGrey, &trackRes); 	// Track objects in sourceFrame
+#if WV_OPT_BENCHMARK
+	addBenchmark("Tracked objects");
 #endif
 #if WV_OPT_MOD_VIDEO
-	vector<Mat> channels;
-	Mat fullYUVFrame;
-	Mat fullYFrame(height, width, CV_8UC1, cvScalar(0.0)); 		// Create empty matrix (Y channel)
-	Mat fullUVFrame(height, width, CV_8UC1, cvScalar(127.0)); 	// Create empty matrix (UV channel)
-	frameGrey.copyTo(fullYFrame(crop));
-	channels.push_back(fullUVFrame);
-	channels.push_back(fullYFrame);
-	merge(channels, fullYUVFrame);
-	fullYFrame.release();
-	fullUVFrame.release();
+	if(FILTER_FLOOD_STYLE != FILTER_FLOOD_CW || WV_OPT_CV_CONTOURS)
+	{
+		sourceFrame.setTo(Scalar(0.0, 127.0)); 	// Make sourceFrame black
+		frameGrey.copyTo(sourceFrame); 			// Copy threshold result to black frame
+	}
+#if WV_OPT_BENCHMARK
+	addBenchmark("Initialized frames");
 #endif
-	struct NedCoor_f *pos = stateGetPositionNed_f(); 		// Get your current position
+#endif
 	for(unsigned int r=0; r < trackRes.size(); r++)			// Convert angles & Write/Print output
 	{
 		cam2body(&trackRes[r]);								// Convert from camera angles to body angles (correct for roll)
 		body2world(&trackRes[r], pos, eulerAngles); 		// Convert from body angles to world coordinates (correct yaw and pitch)
+	}
+#if WV_OPT_BENCHMARK
+	addBenchmark("Body and World transformations done");
+#endif
 #if WV_OPT_MOD_VIDEO
-		circle(fullYUVFrame,cvPoint(trackRes[r].x_p, trackRes[r].y_p), sqrt(trackRes[r].area_p / M_PI), cvScalar(0,0,255), 5);
-#endif
-	}
-	identifyNeighbours(trackRes);
-	vector<double> totV(3), cPos, li, gi, di; 				// Initialize total contribution for output
-	li 		= calcLocalVelocity(pos);
-	gi 		= calcGlobalVelocity(pos); 						// Get the contribution due to the "attraction" towards global origin
-	di 		= calcDiffVelocity();
-	totV[0] = li[0] + gi[0] + di[0]; 						// Average the X local contribution (#neighbours independent) and add the X global contribution
-	totV[1] = li[1] + gi[1] + di[1]; 						// Do the same for Y
-	totV[2] = li[2] + gi[2] + di[2]; 						// Do the same for Z
-	totV 	= limitNorm(totV, WV_SWARM_AMAX / ((double) WV_SWARM_FPS)); 							// Check if ideal velocity exceeds WV_SWARM_AMAX
-	// Inputting totV as an acceleration
-	totV[0] = groundSpeed->x / ((double) WV_SWARM_FPS) + totV[0];
-	totV[1] = groundSpeed->y / ((double) WV_SWARM_FPS) + totV[1];
-	// Limit it again (otherwise speed could escalate)
-	totV 		= limitNorm(totV, WV_SWARM_VMAX / ((double) WV_SWARM_FPS));
-	if(WV_SWARM_MODE!=2) 	totV = limitVelocityYaw(totV); 	// Limit the velocity when relative angle gets larger
-	cPos = calcCamPosition(pos, totV, gi);
-	cPos = limitYaw(pos, cPos);
-	for(unsigned int r=0; r < neighbourMem.size(); r++) 	// Print to file & terminal
+	for(unsigned int r=0; r < trackRes.size(); r++)			// Convert angles & Write/Print output
 	{
-		char memChar = 'm'; int memInt = 0;
-		if(neighbourMem[r].lastSeen == runCount){ memChar = 'w'; memInt = 1; }
-		if(WV_DEBUG_SHOW_MEM) printf("Object (%c %i) at (%0.2f m, %0.2f m, %0.2f m) pos(%0.2f, %0.2f, %0.2f)\n", memChar, neighbourMem[r].id, neighbourMem[r].x_w, neighbourMem[r].y_w, neighbourMem[r].z_w, pos->x, pos->y, pos->z); 														// Print to terminal
+		circle(sourceFrame,cvPoint(trackRes[r].x_p - cropCol, trackRes[r].y_p), sqrt(trackRes[r].area_p / M_PI), cvScalar(0,255,255), 5);
+		char text[10];
+		sprintf(text,"frame %i", runCount);
+		putText(sourceFrame, text, Point(100,sourceFrame.rows-100), FONT_HERSHEY_SIMPLEX, 3, Scalar(0,255,255), 5);
+	}
+	line(sourceFrame, Point(0,0), Point(0, sourceFrame.rows-1), Scalar(0,255,255), 5);
+	line(sourceFrame, Point(sourceFrame.cols - 1,0), Point(sourceFrame.cols - 1, sourceFrame.rows-1), Scalar(0,255,255), 5);
+	if(FILTER_FLOOD_STYLE != FILTER_FLOOD_CW || WV_OPT_CV_CONTOURS)
+	{
+		for(unsigned int r=0; r < cropAreas.size(); r++)
+		{
+			if(cropAreas[r].x != 0 && cropAreas[r].width != 0)
+			{
+				rectangle(sourceFrame, cropAreas[r], Scalar(0,255,255), 5);
+			}
+		}
+	}
+#if WV_OPT_BENCHMARK
+	addBenchmark("Drew circles, lines and rectangles");
+#endif
+#endif
+	sourceFrame.release();			// Release Mat
+	frameGrey.release(); 			// Release Mat
+#if WV_OPT_BENCHMARK
+	addBenchmark("Released Frames");
+#endif
+	identifyNeighbours(trackRes); 	// ID neighbours according to previous location
+#if WV_OPT_BENCHMARK
+	addBenchmark("Identified neighbours");
+#endif
+	vector<double> totV(3), cPos, li, gi, di; 							// Initialize total contribution for output
+	li 		= calcLocalVelocity(pos);									// Get the contribution due to the neighbours we see and have memorized
+	gi 		= calcGlobalVelocity(pos); 									// Get the contribution due to the "attraction" towards global origin
+	di 		= calcDiffVelocity(); 										// TODO: Include this?
+	totV[0] = li[0] + gi[0] + di[0]; 									// Average the X local contribution (#neighbours independent) and add the X global contribution
+	totV[1] = li[1] + gi[1] + di[1]; 									// Do the same for Y
+	totV[2] = li[2] + gi[2] + di[2]; 									// Do the same for Z
+	totV 	= limitNorm(totV, WV_SWARM_AMAX / ((double) WV_SWARM_FPS)); // Check if ideal velocity exceeds WV_SWARM_AMAX
+	totV[0] = groundSpeed->x / ((double) WV_SWARM_FPS) + totV[0]; 		// Inputting totV as an acceleration
+	totV[1] = groundSpeed->y / ((double) WV_SWARM_FPS) + totV[1]; 		// Inputting totV as an acceleration
+	totV 	= limitNorm(totV, WV_SWARM_VMAX / ((double) WV_SWARM_FPS)); // Limit it again (otherwise speed could escalate)
+	if(WV_SWARM_MODE!=2) totV = limitVelocityYaw(totV); 				// Limit the velocity when relative angle gets larger
+	cPos 	= calcCamPosition(pos, totV, gi); 							// Calculate CAM/heading
+	cPos 	= limitYaw(pos, cPos); 										// Limit yaw
+#if WV_OPT_BENCHMARK
+	addBenchmark("Calculated swarming dynamics");
+#endif
+	updateWaypoints(pos,cPos,totV); 									// Translate velocity contribution to updated waypoint
+	if(!strcmp("Swarm",flight_blocks[nav_block]) || !strcmp("Swarm Home",flight_blocks[nav_block]))
+	{
+		nav_set_heading_towards_waypoint(WP__CAM); 					// Currently in block "Swarm" or "Swarm Home" so update heading
+	}
+#if WV_OPT_BENCHMARK
+	addBenchmark("Updated waypoints and heading");
+#endif
+#if WV_OPT_WRITE_RESULTS 												// See if we want to write results
+	currentTime = time(0); 												// Get the current time
+	curT 		= difftime(currentTime,startTime); 						// Calculate time-difference between startTime and currentTime
+	pFile 		= fopen("/data/ftp/internal_000/results.txt","a");		// Open file for appending TODO: Check for errors opening file
+#endif
+	if(WV_OPT_WRITE_RESULTS==1 || WV_DEBUG_SHOW_MEM)
+	{
+		for(unsigned int r=0; r < neighbourMem.size(); r++) 			// Print to file & terminal
+		{
+			char memChar = 'm'; int memInt = 0;
+			if(neighbourMem[r].lastSeen == runCount){ memChar = 'w'; memInt = 1; }
+			if(WV_DEBUG_SHOW_MEM) printf("%i - Object (%c %i) at (%0.2f m, %0.2f m, %0.2f m) pos(%0.2f, %0.2f, %0.2f)\n", runCount, memChar, neighbourMem[r].id, neighbourMem[r].x_w, neighbourMem[r].y_w, neighbourMem[r].z_w, pos->x, pos->y, pos->z); 														// Print to terminal
 #if WV_OPT_WRITE_RESULTS
-		fprintf(pFile, "%i\t%i\t%i\t%i\t%0.2f\t%0.2f\t%0.2f\t%0.2f\t%0.2f\t%0.2f\t%0.2f\t%0.2f\t%0.2f\t%0.2f\t%0.2f\t%0.2f\t%0.2f\t%0.2f\t%0.2f\t%0.2f\n", neighbourMem[r].id, memInt, runCount, curT, pos->x, pos->y, pos->z, neighbourMem[r].x_w, neighbourMem[r].y_w, neighbourMem[r].z_w, cPos[0], cPos[1], totV[0], totV[1], gi[0], gi[1], li[0], li[1], di[0], di[1]); // if file writing is enabled, write to file
+			fprintf(pFile, "%i\t%i\t%i\t%i\t%0.2f\t%0.2f\t%0.2f\t%0.2f\t%0.2f\t%0.2f\t%0.2f\t%0.2f\t%0.2f\t%0.2f\t%0.2f\t%0.2f\t%0.2f\t%0.2f\t%0.2f\t%0.2f\n", neighbourMem[r].id, memInt, runCount, curT, pos->x, pos->y, pos->z, neighbourMem[r].x_w, neighbourMem[r].y_w, neighbourMem[r].z_w, cPos[0], cPos[1], totV[0], totV[1], gi[0], gi[1], li[0], li[1], di[0], di[1]); // if file writing is enabled, write to file
 #endif
+		}
 	}
-	updateWaypoints(pos,cPos,totV); 					// Translate velocity contribution to updated waypoint
-	if(!strcmp("Swarm",flight_blocks[nav_block]) || !strcmp("Swarm Home",flight_blocks[nav_block])) // Check if currently in block "Swarm" or "Swarm Home"
-	{
-		nav_set_heading_towards_waypoint(WP__CAM);
-	}
-	if((WV_DEBUG_SHOW_MEM && neighbourMem.size() > 0) || WV_DEBUG_SHOW_WAYPOINT) printf("\n"); 										// Separate terminal output by newline
 #if WV_OPT_WRITE_RESULTS
 	fclose(pFile);	// Close file
+#if WV_OPT_BENCHMARK
+	addBenchmark("Wrote to terminal/file");
+#endif
+#endif
+	if((WV_DEBUG_SHOW_MEM==1 && neighbourMem.size() > 0) || WV_DEBUG_SHOW_WAYPOINT==1 || WV_OPT_BENCHMARK==1) printf("\n"); // Separate terminal output by newline
+#if WV_OPT_BENCHMARK
+	addBenchmark("Complete");
 #endif
 #if WV_OPT_CALIBRATE_CAM
 	if(runCount==10) // First and second frame are often not yet detected properly so let's calibrate the tenth frame
@@ -283,14 +353,7 @@ char* autoswarm_opencv_run(char* img, int width, int height)
 		calibrateEstimation(trackRes);
 	}
 #endif
-#if WV_OPT_MOD_VIDEO 	 											// See if we want to modify the video steam
-	//coloryuv_opencv_to_yuv422(fullYUVFrame, img, width, height);
-	mat2Buffer(fullYUVFrame, img, false);  							// Write openCV Mat to image_t buffer
-	fullYUVFrame.release();
-#endif
-	sourceFrame.release();											// Release Mat
-	frameGrey.release(); 										// Release Mat
-	return img;													// Return image buffer as pointer
+	return;
 }
 
 void identifyNeighbours(vector<trackResults> trackRes)
@@ -323,6 +386,8 @@ void identifyNeighbours(vector<trackResults> trackRes)
 						neighbourMem[i].x_w 		= trackRes[r].x_w;
 						neighbourMem[i].y_w 		= trackRes[r].y_w;
 						neighbourMem[i].z_w 		= trackRes[r].z_w;
+						neighbourMem[i].x_p 		= trackRes[r].x_p;
+						neighbourMem[i].y_p 		= trackRes[r].y_p;
 						identified = true;
 						break;
 					}
@@ -337,6 +402,8 @@ void identifyNeighbours(vector<trackResults> trackRes)
 			curN.x_w 		= trackRes[r].x_w;
 			curN.y_w 		= trackRes[r].y_w;
 			curN.z_w 		= trackRes[r].z_w;
+			curN.x_p 		= trackRes[r].x_p;
+			curN.y_p 		= trackRes[r].y_p;
 			neighbourMem.push_back(curN);
 			maxId++;
 		}
@@ -566,9 +633,10 @@ Rect setISPvars(int width, int height, bool crop)
 		double fovY 			= WV_TRACK_IMAGE_CROP_FOVY * M_PI / 180;
 		double cmosPixelSize 	= 0.0000014; 	// 1.4um (see manual of CMOS sensor)
 		double focalLength		= (2400 * cmosPixelSize * 1000 / ispScalar) / (4 * sin(M_PI / 4));
-		double cY 				= round(sin((eulerAngles->theta - WV_BEBOP_CAMERA_ANGLE * M_PI / 180) / 4) * 2 * focalLength * ispScalar / (1000 * cmosPixelSize));
+		double cY 				= round(sin((-eulerAngles->theta - WV_BEBOP_CAMERA_ANGLE * M_PI / 180)) * 2 * focalLength * ispScalar / (1000 * cmosPixelSize));
 		double desHeight 		= round(sin(fovY / 4) * 4 * focalLength * ispScalar / (1000 * cmosPixelSize) + ispWidth * tan(eulerAngles->phi));
-		double desOffset 		= cY + round((heightRange * ispScalar - desHeight) / 2);
+		double desOffset 		= round((ispHeight - desHeight) / 2) + cY;
+
 		if(desOffset < 0) 			desOffset = 0;
 		if(desOffset > ispHeight) 	desOffset = 0;
 
@@ -579,96 +647,232 @@ Rect setISPvars(int width, int height, bool crop)
 		{
 			desOffset = ispHeight - desHeight;
 		}
-		Rect crop = cvRect(desOffset,0,desHeight,ispWidth);
+		cropCol 	= desOffset;
+		Rect crop 	= cvRect(desOffset,0,desHeight,ispWidth);
 		return crop;
 	}else{
 		return cvRect(0, 0, width, height);
 	}
 }
 
-void trackGreyObjects(Mat& sourceFrame, Mat& frameGrey, vector<trackResults>* trackRes, Rect ROI)
+void trackGreyObjects(Mat& sourceFrame, Mat& frameGrey, vector<trackResults>* trackRes)
 {
 	// Main function for tracking object on a frame
-	vector<vector<Point> > contours;
-	//Mat frameGrey(sourceFrame.rows, sourceFrame.cols, CV_8UC1, cvScalar(0.0));
-	//redGrayscale(sourceFrame, frameGrey);
-	pixCount = 0;
+	pixCount 	= 0;
+	pixSucCount = 0;
 	rndRedGrayscale(sourceFrame, frameGrey, WV_TRACK_RND_PIX_SAMPLE);
-	printf("Pixels processed: %i\n",pixCount);
-	findContours(frameGrey.clone(), contours, CV_RETR_EXTERNAL, CV_CHAIN_APPROX_SIMPLE);
-	for(unsigned int tc=0; tc < contours.size(); tc++)
+#if WV_OPT_BENCHMARK
+	addBenchmark("image Thresholded");
+#endif
+	if(FILTER_FLOOD_STYLE == FILTER_FLOOD_CW && !WV_OPT_CV_CONTOURS)
 	{
-		double contArea = contourArea(contours[tc]);
-		if (contArea > (WV_TRACK_MIN_CROP_AREA * ispScalar * ispScalar))
+		//printf("Pixels processed: %i, pixel passed: %i\n",pixCount, pixSucCount);
+		for(unsigned int tc=0; tc < allContours.size(); tc++)
 		{
-			Point2f objCentre;
-			float 	objRadius;
-			minEnclosingCircle(contours[tc],objCentre,objRadius);
-			float objArea = M_PI*objRadius*objRadius;
-			if(objArea > (WV_TRACK_MIN_CIRCLE_SIZE * ispScalar * ispScalar) && contArea > objArea*WV_TRACK_MAX_CIRCLE_DEF)
+			addContour(allContours[tc], trackRes);
+		}
+	}else{
+		vector<vector<Point> > contours;
+		for(unsigned int r=0; r < cropAreas.size(); r++)
+		{
+			if(cropAreas[r].x != 0 && cropAreas[r].width != 0)
 			{
-				trackResults curRes;
-				vector<double> position(3);
-				curRes.x_p 		= objCentre.x + ROI.x;
-				curRes.y_p 		= objCentre.y;
-				curRes.area_p 	= objArea;
-				position 		= estimatePosition(curRes.x_p, curRes.y_p, curRes.area_p); // Estimate position in camera reference frame based on pixel location and area
-				curRes.x_c 		= position[0];
-				curRes.y_c 		= position[1];
-				curRes.r_c 		= position[2];
-				trackRes->push_back(curRes); 	// Save results and push into trackRes
-			}else if(WV_DEBUG_SHOW_REJECT) 	printf("Rejected. object %f, area %f, fill %f < min fill %f.\n",objArea, contArea, contArea / objArea, WV_TRACK_MAX_CIRCLE_DEF);
-		}else if(WV_DEBUG_SHOW_REJECT) 	printf("Rejected. Area %0.1f\n",contArea);
+				contours.clear();
+#if WV_OPT_MOD_VIDEO
+				findContours(frameGrey(cropAreas[r]).clone(), contours, CV_RETR_EXTERNAL, CV_CHAIN_APPROX_SIMPLE);
+#else
+				findContours(frameGrey(cropAreas[r]), contours, CV_RETR_EXTERNAL, CV_CHAIN_APPROX_SIMPLE);
+#endif
+				for(unsigned int tc=0; tc < contours.size(); tc++)
+				{
+					addContour(contours[tc], trackRes);
+				}
+			}
+		}
 	}
+#if WV_OPT_BENCHMARK
+	addBenchmark("Contours found");
+#endif
+	return;
+}
+
+void addContour(vector<Point> contour, vector<trackResults>* trackRes)
+{
+	double contArea = contourArea(contour);
+	if (contArea > (WV_TRACK_MIN_CROP_AREA * ispScalar * ispScalar))
+	{
+		Point2f objCentre;
+		float 	objRadius;
+		minEnclosingCircle(contour,objCentre,objRadius);
+		float objArea = M_PI*objRadius*objRadius;
+		if(objArea > (WV_TRACK_MIN_CIRCLE_SIZE * ispScalar * ispScalar) && contArea > objArea*WV_TRACK_MAX_CIRCLE_DEF)
+		{
+			trackResults curRes;
+			vector<double> position(3);
+			curRes.x_p 		= objCentre.x + cropCol;
+			curRes.y_p 		= objCentre.y;
+			//printf("Object at pixel location: %0.2f px %0.2f px\n",objCentre.x, objCentre.y);
+			curRes.area_p 	= objArea;
+			position 		= estimatePosition(curRes.x_p, curRes.y_p, curRes.area_p); // Estimate position in camera reference frame based on pixel location and area
+			curRes.x_c 		= position[0];
+			curRes.y_c 		= position[1];
+			curRes.r_c 		= position[2];
+			trackRes->push_back(curRes); 	// Save results and push into trackRes
+		}else if(WV_DEBUG_SHOW_REJECT) 	printf("Rejected. object %f, area %f, fill %f < min fill %f.\n",objArea, contArea, contArea / objArea, WV_TRACK_MAX_CIRCLE_DEF);
+	}else if(WV_DEBUG_SHOW_REJECT) 	printf("Rejected. Area %0.1f\n",contArea);
 	return;
 }
 
 bool rndRedGrayscale(Mat& sourceFrame, Mat& destFrame, int sampleSize)
 {
 	bool obj_detected = false;
+	if(FILTER_FLOOD_STYLE == FILTER_FLOOD_CW && !WV_OPT_CV_CONTOURS)
+	{
+		allContours.clear();
+	}else{
+		cropAreas.clear();
+	}
 	if (sourceFrame.cols > 0 && sourceFrame.rows > 0)
 	{
-		//std::random_device rd;
-		//std::mt19937 gen(rd());
-		//std::uniform_int_distribution<> rowDis(0,sourceFrame.rows);
-		//std::uniform_int_distribution<> colDis(0,sourceFrame.cols);
-		int rndRow, rndCol;
-		for(int i = 0; i<sampleSize; i++)
+		if(FILTER_SAMPLE_STYLE > 0)
 		{
-			layerDepth = 0;
-			sample++;
-			//pixFindContour(sourceFrame, destFrame, rowDis(gen), colDis(gen));
-			rndRow = (int) round(((double) rand())/((double) RAND_MAX)*(sourceFrame.rows-1));
-			rndCol = (int) round(((double) rand())/((double) RAND_MAX)*(sourceFrame.cols-1));
-
-			if(pixFindContour(sourceFrame, destFrame, rndRow, rndCol, 0))
+			for(unsigned int r=0; r < neighbourMem.size(); r++)
 			{
-				obj_detected = true;
+				if(FILTER_FLOOD_STYLE == FILTER_FLOOD_CW && !WV_OPT_CV_CONTOURS)
+				{
+					objCont.clear();
+				}else{
+					objCrop.x 		= neighbourMem[r].x_p - cropCol;
+					objCrop.y 		= neighbourMem[r].y_p;
+					objCrop.width 	= 0;
+					objCrop.height 	= 0;
+				}
+				if(!pixFindContour(sourceFrame, destFrame, neighbourMem[r].y_p, neighbourMem[r].x_p - cropCol, 0, true)){
+					if(!pixFindContour(sourceFrame, destFrame, neighbourMem[r].y_p + 100, neighbourMem[r].x_p - cropCol, 0, true)){
+						if(!pixFindContour(sourceFrame, destFrame, neighbourMem[r].y_p + 100, neighbourMem[r].x_p - cropCol + 100, 0, true)){
+							if(!pixFindContour(sourceFrame, destFrame, neighbourMem[r].y_p, neighbourMem[r].x_p - cropCol + 100, 0, true)){
+								if(!pixFindContour(sourceFrame, destFrame, neighbourMem[r].y_p - 100, neighbourMem[r].x_p - cropCol + 100, 0, true)){
+									if(!pixFindContour(sourceFrame, destFrame, neighbourMem[r].y_p - 100, neighbourMem[r].x_p - cropCol, 0, true)){
+										if(!pixFindContour(sourceFrame, destFrame, neighbourMem[r].y_p - 100, neighbourMem[r].x_p - cropCol - 100, 0, true)){
+											if(!pixFindContour(sourceFrame, destFrame, neighbourMem[r].y_p, neighbourMem[r].x_p - cropCol - 100, 0, true)){
+												if(!pixFindContour(sourceFrame, destFrame, neighbourMem[r].y_p + 100, neighbourMem[r].x_p - cropCol - 100, 0, true)){
+													break;
+												}
+											}
+										}
+									}
+								}
+							}
+						}
+					}
+				}
+				if(FILTER_FLOOD_STYLE == FILTER_FLOOD_CW && !WV_OPT_CV_CONTOURS)
+				{
+					allContours.push_back(objCont);
+				}else{
+					objCrop = enlargeRectangle(sourceFrame, objCrop, WV_FILTER_CROP_X);
+					addObject();
+				}
 			}
-			//printf("Finished random pixel\n");
+		}
+		switch(FILTER_SAMPLE_STYLE)
+		{
+		case FILTER_STYLE_FULL : // FULL
+		{
+			for(int r = 0; r < sourceFrame.rows; r++)
+			{
+				for(int c= 0; c < sourceFrame.cols; c++)
+				{
+					layerDepth = 0;
+					if(pixFindContour(sourceFrame, destFrame, r, c, 0, false))
+					{
+						obj_detected = true;
+					}
+				}
+			}
+			break;
+		}
+		case FILTER_STYLE_GRID :
+		{
+			int spacing = (int) sqrt((sourceFrame.rows * sourceFrame.cols) / sampleSize);
+			for(int r = spacing; r < sourceFrame.rows; r+=spacing)
+			{
+				for(int c=spacing; c < sourceFrame.cols; c+=spacing)
+				{
+					layerDepth = 0;
+					sample++;
+					if(FILTER_FLOOD_STYLE == FILTER_FLOOD_CW && !WV_OPT_CV_CONTOURS)
+					{
+						objCont.clear();
+					}else{
+						objCrop.x 		= c;
+						objCrop.y 		= r;
+						objCrop.width 	= 0;
+						objCrop.height 	= 0;
+					}
+					if(pixFindContour(sourceFrame, destFrame, r, c, 0, true))
+					{
+						if(FILTER_FLOOD_STYLE == FILTER_FLOOD_CW && !WV_OPT_CV_CONTOURS)
+						{
+							allContours.push_back(objCont);
+						}else{
+							objCrop = enlargeRectangle(sourceFrame, objCrop, WV_FILTER_CROP_X);
+							addObject();
+						}
+						obj_detected = true;
+					}
+				}
+			}
+			break;
+		}
+		case FILTER_STYLE_RANDOM :
+		{
+			int rndRow, rndCol;
+			for(int i = 0; i<sampleSize; i++)
+			{
+				layerDepth = 0;
+				sample++;
+				//pixFindContour(sourceFrame, destFrame, rowDis(gen), colDis(gen));
+				rndRow = (int) round(((double) rand())/((double) RAND_MAX)*(sourceFrame.rows-1));
+				rndCol = (int) round(((double) rand())/((double) RAND_MAX)*(sourceFrame.cols-1));
+				if(FILTER_FLOOD_STYLE == FILTER_FLOOD_CW && !WV_OPT_CV_CONTOURS)
+				{
+					objCont.clear();
+				}else{
+					objCrop.x 		= rndCol;
+					objCrop.y 		= rndRow;
+					objCrop.width 	= 0;
+					objCrop.height 	= 0;
+				}
+				if(pixFindContour(sourceFrame, destFrame, rndRow, rndCol, 0, true))
+				{
+					if(FILTER_FLOOD_STYLE == FILTER_FLOOD_CW && !WV_OPT_CV_CONTOURS)
+					{
+						allContours.push_back(objCont);
+					}else{
+						objCrop = enlargeRectangle(sourceFrame, objCrop, WV_FILTER_CROP_X);
+						addObject();
+					}
+					obj_detected = true;
+				}
+			}
+			break;
+		}
 		}
 	}
 	return obj_detected;
 }
 
-bool pixFindContour(Mat& sourceFrame, Mat& destFrame, int row, int col, int prevDir)
+bool pixFindContour(Mat& sourceFrame, Mat& destFrame, int row, int col, int prevDir, bool cascade)
 {
 	layerDepth++;
 	pixCount++;
-	int gr;
-	if(layerDepth > AUTOSWARM_MAX_LAYERS || row < 0 || col < 0 || row > destFrame.rows-1 || col > destFrame.cols-1 || destFrame.at<uint8_t>(row,col) > 0)
+	if(layerDepth > AUTOSWARM_MAX_LAYERS || row < 0 || col < 0 || row > sourceFrame.rows-1 || col > sourceFrame.cols-1 || sourceFrame.at<Vec2b>(row,col)[1] == 1)
 	{
 		return false;
 	}
-#if MT9F002_RGB_OUTPUT // FOR BGR
-	int R, G, B;
-	B 		= sourceFrame.at<Vec4b>(row,col)[0];
-	G 		= sourceFrame.at<Vec4b>(row,col)[1];
-	R 		= sourceFrame.at<Vec4b>(row,col)[2];
-	gr 		= (int) (WV_FILTER_CR * R * R - WV_FILTER_CB * B * B - WV_FILTER_CG * G * G) / (255 * WV_FILTER_CR);
-#else // FOR YUV422
-	int Cb, Y, Cr, R, G, B;
-	if ((col & 1) == 0)
+	int Cb, Y, Cr;
+	if (((col & 1) == 0 && (cropCol & 1) == 0) || ((col & 1) == 1 && (cropCol & 1) == 1))
 	{
 		// Even col number
 		Cb = sourceFrame.at<Vec2b>(row,col  )[0]; // U1
@@ -680,42 +884,90 @@ bool pixFindContour(Mat& sourceFrame, Mat& destFrame, int row, int col, int prev
 		Cr = sourceFrame.at<Vec2b>(row,col  )[0]; // V2
 		Y  = sourceFrame.at<Vec2b>(row,col  )[1]; // Y2
 	}
-	R 	= std::max((double) 0, std::min((double) 255, 1.164*(Y - 16) + 1.793*(Cr - 128)));
-	G 	= std::max((double) 0, std::min((double) 255, 1.164*(Y - 16) - 0.534*(Cr - 128) - 0.213*(Cb - 128)));
-	B 	= std::max((double) 0, std::min((double) 255, 1.164*(Y - 16) + 2.115*(Cr - 128)));
-	gr 	= (int) std::max((double) 0, std::min((double) 255, (WV_FILTER_CR * pow(R,2) - WV_FILTER_CB * pow(B,2) - WV_FILTER_CG * pow(G,2)) / (25 * WV_FILTER_CR)));
-#endif
-#if AUTOSWARM_EVALUATE_FILTER
-	if (gr > 1)
+	if(Y >= WV_FILTER_Y_MIN && Y <= WV_FILTER_Y_MAX && Cb >= WV_FILTER_CB_MIN && Cb <= WV_FILTER_CB_MAX && Cr >= WV_FILTER_CR_MIN && Cr <= WV_FILTER_CR_MAX)
 	{
-		destFrame.at<uint8_t>(row,col) = gr;
-	}
-	if(gr >= WV_TRACK_GREY_THRESHOLD)
+		if(cascade)
 		{
-#else
-	if(gr >= WV_TRACK_GREY_THRESHOLD)
-	{
-		destFrame.at<uint8_t>(row,col) = 255;
-#endif
-		if(prevDir==3 || row<=0 || !pixFindContour(sourceFrame, destFrame, row - 1, col, 1))
-		{
-			if(layerDepth > AUTOSWARM_MAX_LAYERS) return false;
-			if(prevDir==4 || col>=(sourceFrame.cols - 1) || !pixFindContour(sourceFrame, destFrame, row, col+1, 2))
+			if(prevDir != 0 && (FILTER_FLOOD_STYLE != FILTER_FLOOD_CW || WV_OPT_CV_CONTOURS))
 			{
-				if(layerDepth > AUTOSWARM_MAX_LAYERS) return false;
-				if(prevDir==1 || row>=(sourceFrame.rows - 1) || !pixFindContour(sourceFrame, destFrame, row+1, col, 3))
+				pixSucCount++;
+				destFrame.at<uint8_t>(row,col) = 255;
+			}
+			sourceFrame.at<Vec2b>(row,col  )[1] = 1;
+			switch(FILTER_FLOOD_STYLE)
+			{
+			case FILTER_FLOOD_OMNI :
+			{
+				if(prevDir==3 || row<=0 || !pixFindContour(sourceFrame, destFrame, row - 1, col, 1, true))
 				{
 					if(layerDepth > AUTOSWARM_MAX_LAYERS) return false;
-					if(prevDir==2 || col<=0 || !pixFindContour(sourceFrame, destFrame, row, col-1, 4))
+					if(prevDir==4 || col>=(sourceFrame.cols - 1) || !pixFindContour(sourceFrame, destFrame, row, col+1, 2, true))
 					{
-						return false;
+						if(layerDepth > AUTOSWARM_MAX_LAYERS) return false;
+						if(prevDir==1 || row>=(sourceFrame.rows - 1) || !pixFindContour(sourceFrame, destFrame, row+1, col, 3, true))
+						{
+							if(layerDepth > AUTOSWARM_MAX_LAYERS) return false;
+							if(prevDir==2 || col<=0 || !pixFindContour(sourceFrame, destFrame, row, col-1, 4, true))
+							{
+								return false;
+							}
+						}
 					}
 				}
+				break;
 			}
+			case FILTER_FLOOD_CW :
+			{
+				switch(prevDir)
+				{
+				case 0 : // No previous direction
+					if(row > 0 && pixFindContour(sourceFrame, destFrame, row - 1, col, 0, true)) break;																// UP
+					if(!WV_OPT_CV_CONTOURS) objCont.push_back(Point(col,row));
+					if(col < (sourceFrame.cols -1) && pixFindContour(sourceFrame, destFrame, row, col + 1, 2, true)) break; 										// RIGHT
+					if(row < (sourceFrame.rows -1) && col < (sourceFrame.cols -1) && pixFindContour(sourceFrame, destFrame, row + 1, col + 1, 2, true)) break; 		// DOWN-RIGHT
+					break;
+				case 1 : // Came from pixel below
+					if(col > 0) pixFindContour(sourceFrame, destFrame, row, col - 1, 4, true); 								// LEFT
+					if(row > 0 && pixFindContour(sourceFrame, destFrame, row - 1, col, 1, true)) break;						// UP
+					if(!WV_OPT_CV_CONTOURS) objCont.push_back(Point(col,row));
+					if(col < (sourceFrame.cols -1) && pixFindContour(sourceFrame, destFrame, row, col + 1, 2, true)) break; // RIGHT
+					break;
+				case 2 : // Came from pixel left
+					if(row > 0) pixFindContour(sourceFrame, destFrame, row - 1, col, 1, true);								// UP
+					if(col < (sourceFrame.cols -1) && pixFindContour(sourceFrame, destFrame, row, col + 1, 2, true)) break; // RIGHT
+					if(!WV_OPT_CV_CONTOURS) objCont.push_back(Point(col,row));
+					if(row < (sourceFrame.rows -1) && pixFindContour(sourceFrame, destFrame, row + 1, col, 3, true)) break;	// DOWN
+					break;
+				case 3 : // Came from pixel above
+					if(col < (sourceFrame.cols -1)) pixFindContour(sourceFrame, destFrame, row, col + 1, 2, true); 			// RIGHT
+					if(row < (sourceFrame.rows -1) && pixFindContour(sourceFrame, destFrame, row + 1, col, 3, true)) break;	// DOWN
+					if(!WV_OPT_CV_CONTOURS) objCont.push_back(Point(col,row));
+					if(col > 0 && pixFindContour(sourceFrame, destFrame, row, col - 1, 4, true)) break; 					// LEFT
+					break;
+				case 4 : // Came from pixel right
+					if(row < (sourceFrame.rows -1)) pixFindContour(sourceFrame, destFrame, row + 1, col, 3, true);			// DOWN
+					if(col > 0 && pixFindContour(sourceFrame, destFrame, row, col - 1, 4, true)) break; 					// LEFT
+					if(!WV_OPT_CV_CONTOURS) objCont.push_back(Point(col,row));
+					if(row > 0 && pixFindContour(sourceFrame, destFrame, row - 1, col, 1, true)) break;						// UP
+					break;
+				}
+				break;
+			}
+			default : 	break;
+			}
+			if(FILTER_FLOOD_STYLE != FILTER_FLOOD_CW || WV_OPT_CV_CONTOURS)
+			{
+				objCrop.width 		= max(objCrop.x + objCrop.width, col) - min(objCrop.x, col);
+				objCrop.height 		= max(objCrop.y + objCrop.height, row) - min(objCrop.y, row);
+				objCrop.x 			= min(objCrop.x, col);
+				objCrop.y 			= min(objCrop.y, row);
+			}
+			return true;
+		}else{
+			return true;
 		}
-		return true;
 	}else{
-		destFrame.at<uint8_t>(row,col) = 1;
+		sourceFrame.at<Vec2b>(row,col  )[1] = 1;
 		return false;
 	}
 }
@@ -917,6 +1169,88 @@ void calibrateEstimation(vector<trackResults> trackRes)
 }
 #endif
 
+void saveBuffer(char * img, Mat sourceFrame, const char *filename)
+{
+	char path[100];
+	sprintf(path,"/data/ftp/internal_000/%s", filename);
+	FILE * iFile = fopen(path,"w");
+	printf("Writing imagebuffer(%i x %i) to file %s  ... ", sourceFrame.rows, sourceFrame.cols, path);
+	for(int row = 0; row < sourceFrame.rows; row++)
+	{
+		for(int col = 0; col < sourceFrame.cols; col++)
+		{
+			fprintf(iFile, "%i,%i", img[(row*sourceFrame.cols+col)*2+0], img[(row*sourceFrame.cols+col)*2+1]);
+			if(col != sourceFrame.cols-1)
+			{
+				fprintf(iFile, ",");
+			}
+		}
+		fprintf(iFile,"\n");
+	}
+	fclose(iFile);
+	printf(" done.\n");
+}
+
+void addObject(void)
+{
+	for(unsigned int r=0; r < cropAreas.size(); r++)
+	{
+		bool overlap = false;
+		if(!overlap && (inRectangle(Point(objCrop.x, objCrop.y), cropAreas[r]) || inRectangle(Point(objCrop.x + objCrop.width, objCrop.y), cropAreas[r]) || inRectangle(Point(objCrop.x + objCrop.width, objCrop.y + objCrop.height), cropAreas[r]) || inRectangle(Point(objCrop.x, objCrop.y + objCrop.height), cropAreas[r])))
+		{
+			overlap = true; // One of the corner points is inside the cropAreas rectangle
+		}
+		if(!overlap && objCrop.x >= cropAreas[r].x && (objCrop.x + objCrop.width) <= (cropAreas[r].x + cropAreas[r].width) && objCrop.y <= cropAreas[r].y && (objCrop.y + objCrop.height) >= (cropAreas[r].y + cropAreas[r].height))
+		{
+			overlap = true; // less wide, yet fully overlapping in height
+		}
+		if(!overlap && objCrop.y >= cropAreas[r].y && (objCrop.y + objCrop.height) <= (cropAreas[r].y + cropAreas[r].height) && objCrop.x <= cropAreas[r].x && (objCrop.x + objCrop.width) >= (cropAreas[r].x + cropAreas[r].width))
+		{
+			overlap = true; // less high, yet fully overlapping in width
+		}
+		if(!overlap && (inRectangle(Point(cropAreas[r].x, cropAreas[r].y), objCrop) || inRectangle(Point(cropAreas[r].x + cropAreas[r].width, cropAreas[r].y), objCrop) || inRectangle(Point(cropAreas[r].x + cropAreas[r].width, cropAreas[r].y + cropAreas[r].height), objCrop) || inRectangle(Point(cropAreas[r].x, cropAreas[r].y + cropAreas[r].height), objCrop)))
+		{
+			overlap = true; // One of the corner points is inside the objCrop rectangle
+		}
+		if(overlap == true)
+		{
+			objCrop.width 		= max(objCrop.x + objCrop.width, cropAreas[r].x + cropAreas[r].width) - min(objCrop.x, cropAreas[r].x);
+			objCrop.height 		= max(objCrop.y + objCrop.height, cropAreas[r].y + cropAreas[r].height) - min(objCrop.y, cropAreas[r].y);
+			objCrop.x 			= min(objCrop.x, cropAreas[r].x);
+			objCrop.y 			= min(objCrop.y, cropAreas[r].y);
+			cropAreas[r].x 		= 0;
+			cropAreas[r].y 		= 0;
+			cropAreas[r].width 	= 0;
+			cropAreas[r].height = 0;
+		}
+	}
+	if(objCrop.width * objCrop.height >= WV_TRACK_MIN_CROP_AREA)
+	{
+		cropAreas.push_back(objCrop);
+	}
+	return;
+}
+
+bool inRectangle(Point pt, Rect rectangle)
+{
+	if(pt.x >= rectangle.x && pt.x <= (rectangle.x + rectangle.width) && pt.y >= rectangle.y && pt.y <= (rectangle.y + rectangle.height))
+	{
+		return true;
+	}else{
+		return false;
+	}
+}
+
+Rect enlargeRectangle(Mat& sourceFrame, Rect rectangle, double scale){
+	int Hincrease = round(scale / 2 * rectangle.width);
+	int Vincrease = round(scale / 2 * rectangle.height);
+	rectangle.width = min(sourceFrame.cols - 1, rectangle.x + rectangle.width + Hincrease) - max(0, rectangle.x - Hincrease);
+	rectangle.height = min(sourceFrame.rows - 1, rectangle.y + rectangle.height + Vincrease) - max(0, rectangle.y - Vincrease);
+	rectangle.x = max(0, rectangle.x - Hincrease);
+	rectangle.y = max(0, rectangle.y - Vincrease);
+	return rectangle;
+}
+
 #if WV_OPT_MOD_VIDEO
 void mat2Buffer(Mat& source,char* buf, bool greyscale)
 {
@@ -935,5 +1269,62 @@ void mat2Buffer(Mat& source,char* buf, bool greyscale)
 		}
 	}
 	return;
+}
+#endif
+
+#if WV_OPT_BENCHMARK
+void initBenchmark()
+{
+	bench_start = clock();
+	benchmark_time.clear();
+	benchmark_title.clear();
+}
+
+void addBenchmark(const char * title)
+{
+	bench_end 	= clock();
+	double time = ((double) (bench_end - bench_start)) / 1000000;
+	bench_start = bench_end;
+	benchmark_time.push_back(time);
+	benchmark_title.push_back(title);
+}
+
+void showBenchmark()
+{
+	double totalTime = 0;
+	unsigned int maxlength = 0;
+	for(unsigned int i=0; i < benchmark_time.size(); i++)
+	{
+		totalTime += benchmark_time[i];
+		if(runCount==1)
+		{
+			benchmark_avg_time.push_back(0);
+		}
+		if(strlen(benchmark_title[i]) > maxlength)
+		{
+			maxlength = strlen(benchmark_title[i]);
+		}
+	}
+	for(unsigned int i=0; i < benchmark_time.size(); i++)
+	{
+		benchmark_avg_time[i] = (benchmark_avg_time[i] * (runCount - 1) + benchmark_time[i]/totalTime*100) / runCount;
+		if(strlen(benchmark_title[i]) < maxlength - 18)
+		{
+			printf("%s\t\t\t\t%2.2f percent\n", benchmark_title[i], benchmark_avg_time[i]);
+		}else{
+			if(strlen(benchmark_title[i]) < maxlength - 12)
+			{
+				printf("%s\t\t\t%2.2f percent\n", benchmark_title[i], benchmark_avg_time[i]);
+			}else{
+				if(strlen(benchmark_title[i]) < maxlength - 5)
+				{
+					printf("%s\t\t%2.2f percent\n", benchmark_title[i], benchmark_avg_time[i]);
+				}else{
+					printf("%s\t%2.2f percent\n", benchmark_title[i], benchmark_avg_time[i]);
+				}
+			}
+		}
+
+	}
 }
 #endif

@@ -48,6 +48,8 @@ typedef struct _trackResults {
 typedef struct _memBlock {
 	int lastSeen;
 	int id;
+	int     x_p;
+	int     y_p;
 	double x_w;
 	double y_w;
 	double z_w;
@@ -69,6 +71,14 @@ extern double  	WV_FILTER_CB;
 extern int 		WV_TRACK_GREY_THRESHOLD;
 extern int 		WV_TRACK_IMAGE_CROP_FOVY;
 extern int 		WV_TRACK_RND_PIX_SAMPLE;
+extern int 		WV_FILTER_Y_MIN;
+extern int 		WV_FILTER_Y_MAX;
+extern int 		WV_FILTER_CB_MIN;
+extern int 		WV_FILTER_CB_MAX;
+extern int 		WV_FILTER_CR_MIN;
+extern int 		WV_FILTER_CR_MAX;
+extern int		FILTER_SAMPLE_STYLE;
+extern int 		FILTER_FLOOD_STYLE;
 
 // Initialize global attractor
 struct originPoint { double cx; double cy; double cz;};
@@ -78,7 +88,7 @@ static inline bool setGlobalMode(int mode){ WV_GLOBAL_ATTRACTOR = mode; return f
 static inline bool setSwarmMode(int mode){ 	WV_SWARM_MODE = mode; return false; };
 
 void autoswarm_opencv_init(int globalMode);
-char* autoswarm_opencv_run(char* img, int width, int height);
+void autoswarm_opencv_run(char* img, int width, int height);
 bool amIhome(void);
 
 #ifdef __cplusplus

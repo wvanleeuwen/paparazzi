@@ -226,22 +226,6 @@ int configure_isp(struct v4l2_device *dev)
         .clip_gu = {{ .clip_min = _gumin, .clip_max = _gumax }},        \
         .clip_bv = {{ .clip_min = _bvmin, .clip_max = _bvmax }}
 
-#if MT9F002_RGB_OUTPUT
-	printf("no UYVY conversion!\n");
-	struct avi_isp_chroma_regs chr = {
-			AVI_CONV_MATRIX(  1, 0, 0,
-			                  0, 1, 0,
-			                  0, 0, 1),
-
-			AVI_CONV_OFFSETS(0, 0,
-			                 0, 0,
-			                 0, 0),
-
-			AVI_CONV_CLIPS(0, 255,
-			               0, 255,
-			               0, 255),
-		};
-#else
 	struct avi_isp_chroma_regs chr = {
 		AVI_CONV_MATRIX(  0.213,  0.715,  0.072,
 		                 -0.100, -0.336,  0.436,
@@ -255,7 +239,6 @@ int configure_isp(struct v4l2_device *dev)
 		               16, 240,
 		               16, 240),
 	};
-#endif
 
 	if(open_isp_fd(&isp_ctx, dev->fd) < 0)
 		return -1;

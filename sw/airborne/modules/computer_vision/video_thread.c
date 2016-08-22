@@ -93,6 +93,7 @@ static void *video_thread_function(void *data)
   if (vid->filters & VIDEO_FILTER_DEBAYER) {
     // fixme: don't hardcode size, works for bebop front camera for now
 #define IMG_FLT_SIZE 272
+    //image_create(&img_color, IMG_FLT_SIZE, IMG_FLT_SIZE, IMAGE_YUV422);
     image_create(&img_color, IMG_FLT_SIZE, IMG_FLT_SIZE, IMAGE_YUV422);
   }
 
@@ -104,7 +105,7 @@ static void *video_thread_function(void *data)
 
   // Configure ISP if needed
   if (vid->filters & VIDEO_FILTER_ISP) {
-    configure_isp(vid->thread.dev);
+	  configure_isp(vid->thread.dev);
   }
 
   // be nice to the more important stuff
@@ -144,7 +145,7 @@ static void *video_thread_function(void *data)
 
     // run selected filters
     if (vid->filters & VIDEO_FILTER_DEBAYER) {
-      BayerToYUV(&img, &img_color, 0, 0);
+    	BayerToYUV(&img, &img_color, 0, 0);
       // use color image for further processing
       img_final = &img_color;
     }

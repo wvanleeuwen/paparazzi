@@ -79,11 +79,22 @@
 #define MT9F002_TARGET_FPS 5
 #endif
 
-/* Option to get the front camera frame in RGB instead of UYVY */
-#ifndef MT9F002_RGB_OUTPUT
-#define MT9F002_RGB_OUTPUT false
+/* Set the colour balance gains */
+#ifndef MT9F002_GAIN_GREEN1
+#define MT9F002_GAIN_GREEN1 2.0
 #endif
 
+#ifndef MT9F002_GAIN_GREEN2
+#define MT9F002_GAIN_GREEN2 2.0
+#endif
+
+#ifndef MT9F002_GAIN_RED
+#define MT9F002_GAIN_RED 2.0
+#endif
+
+#ifndef MT9F002_GAIN_BLUE
+#define MT9F002_GAIN_BLUE 2.0
+#endif
 
 /** uart connected to GPS internally */
 #define UART1_DEV /dev/ttyPA1

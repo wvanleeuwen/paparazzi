@@ -43,7 +43,7 @@ struct image_t* autoswarm_func(struct image_t* img)
   if (img->type == IMAGE_YUV422)
   {
 	  // Call OpenCV (C++ from paparazzi C function)
-	  img->buf = autoswarm_opencv_run((char*) img->buf, img->w, img->h);
+	  autoswarm_opencv_run((char*) img->buf, img->w, img->h);
   }
   return img;
 }
@@ -51,6 +51,7 @@ struct image_t* autoswarm_func(struct image_t* img)
 void autoswarm_init(void)
 {
 	autoswarm_opencv_init(WV_INIT_GLOBAL_ATTRACTOR);
+	//cv_add_to_device_async(&AUTOSWARM_CAMERA, autoswarm_func, 5);
 	cv_add_to_device(&AUTOSWARM_CAMERA, autoswarm_func);
 }
 
