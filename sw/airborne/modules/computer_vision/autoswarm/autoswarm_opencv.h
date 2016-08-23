@@ -80,6 +80,8 @@ extern int 		WV_FILTER_CR_MAX;
 extern int		FILTER_SAMPLE_STYLE;
 extern int 		FILTER_FLOOD_STYLE;
 
+extern void mt9f002_set_resolution(struct mt9f002_t *mt);
+
 // Initialize global attractor
 struct originPoint { double cx; double cy; double cz;};
 struct originPoint globalOrigin;

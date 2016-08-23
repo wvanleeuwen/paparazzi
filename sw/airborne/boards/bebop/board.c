@@ -100,36 +100,34 @@ void board_init2(void)
   mt9v117_init(&mt9v117);
 
   /* Initialize MT9F002 chipset (Front camera) */
-  struct mt9f002_t mt9f002 = {
-    // Precomputed values to go from InputCLK of (26/2)MHz to 96MH
-    .interface = MT9F002_PARALLEL,
-    .input_clk_freq = (26 / 2),
-    .vt_pix_clk_div = 7,
-    .vt_sys_clk_div = 1,
-    .pre_pll_clk_div = 1,
-    .pll_multiplier = 59,
-    .op_pix_clk_div = 8,
-    .op_sys_clk_div = 1,
-    .shift_vt_pix_clk_div = 1,
-    .rowSpeed_2_0 = 1,
-    .row_speed_10_8 = 1,
+  // Precomputed values to go from InputCLK of (26/2)MHz to 96MH
+  mt9f002.interface = MT9F002_PARALLEL;
+  mt9f002.input_clk_freq = (26 / 2);
+  mt9f002.vt_pix_clk_div = 7;
+  mt9f002.vt_sys_clk_div = 1;
+  mt9f002.pre_pll_clk_div = 1;
+  mt9f002.pll_multiplier = 59;
+  mt9f002.op_pix_clk_div = 8;
+  mt9f002.op_sys_clk_div = 1;
+  mt9f002.shift_vt_pix_clk_div = 1;
+  mt9f002.rowSpeed_2_0 = 1;
+  mt9f002.row_speed_10_8 = 1;
 
-    // Initial values
-    .target_fps = MT9F002_TARGET_FPS,
-    .target_exposure = MT9F002_TARGET_EXPOSURE,
-    .gain_green1 = MT9F002_GAIN_GREEN1,
-    .gain_blue = MT9F002_GAIN_BLUE,
-    .gain_red = MT9F002_GAIN_RED,
-    .gain_green2 = MT9F002_GAIN_GREEN2,
-    .output_width = MT9F002_OUTPUT_WIDTH,
-    .output_height = MT9F002_OUTPUT_HEIGHT,
-    .output_scaler = MT9F002_OUTPUT_SCALER,
-    .offset_x = MT9F002_INITIAL_OFFSET_X,
-    .offset_y = MT9F002_INITIAL_OFFSET_Y,
+  // Initial values
+  mt9f002.target_fps = MT9F002_TARGET_FPS;
+  mt9f002.target_exposure = MT9F002_TARGET_EXPOSURE;
+  mt9f002.gain_green1 = MT9F002_GAIN_GREEN1;
+  mt9f002.gain_blue = MT9F002_GAIN_BLUE;
+  mt9f002.gain_red = MT9F002_GAIN_RED;
+  mt9f002.gain_green2 = MT9F002_GAIN_GREEN2;
+  mt9f002.output_width = MT9F002_OUTPUT_WIDTH;
+  mt9f002.output_height = MT9F002_OUTPUT_HEIGHT;
+  mt9f002.output_scaler = MT9F002_OUTPUT_SCALER;
+  mt9f002.offset_x = MT9F002_INITIAL_OFFSET_X;
+  mt9f002.offset_y = MT9F002_INITIAL_OFFSET_Y;
 
-    // I2C connection port
-    .i2c_periph = &i2c0
-  };
+  // I2C connection port
+  mt9f002.i2c_periph = &i2c0;
 
   mt9f002_init(&mt9f002);
 }

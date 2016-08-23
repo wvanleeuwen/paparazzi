@@ -45,6 +45,7 @@ using namespace std;
 #include <opencv2/imgproc/imgproc.hpp>
 using namespace cv;
 #include "modules/computer_vision/opencv_image_functions.h"
+#include "boards/bebop/mt9f002.h"
 
 // Defining function that require opencv to be loaded
 static void 			trackGreyObjects	(Mat& sourceFrame, Mat& greyFrame, vector<trackResults>* trackRes);
@@ -71,16 +72,18 @@ static Rect 			enlargeRectangle	(Mat& sourceFrame, Rect rectangle, double scale)
 static bool 			inRectangle			(Point pt, Rect rectangle);
 
 // Debug options
-#define WV_DEBUG_SHOW_REJECT 		 0
-#define WV_DEBUG_SHOW_WAYPOINT 		 0
-#define WV_DEBUG_SHOW_MEM			 0
+#define WV_DEBUG_SHOW_REJECT 		 0 		// Show why shapes are rejected
+#define WV_DEBUG_SHOW_WAYPOINT 		 0 		// Show the updated positions of the waypoints
+#define WV_DEBUG_SHOW_MEM			 1 		// Show the neighbours identified and their location
 
 // Runtime options
-#define WV_OPT_WRITE_RESULTS 		 0
-#define WV_OPT_MOD_VIDEO 			 0
-#define WV_OPT_CALIBRATE_CAM 		 0
-#define WV_OPT_BENCHMARK 			 1
-#define WV_OPT_CV_CONTOURS 			 0
+#define WV_OPT_WRITE_RESULTS 		 0 		// Write measurements to text file
+#define WV_OPT_MOD_VIDEO 			 1 		// Modify the frame to show relevant info
+#define WV_OPT_CALIBRATE_CAM 		 0 		// Calibrate the camera
+#define WV_OPT_BENCHMARK 			 0 		// Print benchmark table
+#define WV_OPT_CV_CONTOURS 			 0 		// Use opencv to detect contours
+#define WV_OPT_ISP_CROP 			 0 		// Use the ISP to crop the frame according to FOV-Y
+#define WV_OPT_MEASURE_FPS 			 1 		// Measure the FPS using built-in clock and framecount
 
 // Global options definitions
 #define WV_GLOBAL_POINT 			0
@@ -118,12 +121,12 @@ double 	WV_TRACK_MAX_CIRCLE_DEF 	= 0.4;
 
 int 	FILTER_SAMPLE_STYLE 		= FILTER_STYLE_RANDOM;
 int 	FILTER_FLOOD_STYLE 			= FILTER_FLOOD_CW;
-int 	WV_FILTER_Y_MIN 			= 0;  // 0
+int 	WV_FILTER_Y_MIN 			= 0;  // 0 					[0,65 84,135 170,255]zoo 45
 int 	WV_FILTER_Y_MAX 			= 255; // 255
-int 	WV_FILTER_CB_MIN 			= 84; // 84
-int 	WV_FILTER_CB_MAX 			= 113; // 113
-int 	WV_FILTER_CR_MIN 			= 218; // 218 -> 150?
-int 	WV_FILTER_CR_MAX 			= 240; // 240 -> 255?
+int 	WV_FILTER_CB_MIN 			= 80; // 84
+int 	WV_FILTER_CB_MAX 			= 135; // 113
+int 	WV_FILTER_CR_MIN 			= 170; // 218 -> 150?
+int 	WV_FILTER_CR_MAX 			= 255; // 240 -> 255?
 int 	WV_TRACK_IMAGE_CROP_FOVY 	= 45; 		// Degrees
 int 	WV_FILTER_SAVE_RESULTS 		= 0;
 double 	WV_FILTER_CROP_X 			= 1.2;
@@ -178,10 +181,18 @@ vector<const char*> benchmark_title;
 clock_t bench_start, bench_end;
 #endif
 
-#if WV_OPT_WRITE_RESULTS
+#if WV_OPT_MEASURE_FPS
+time_t 	startTime;
 time_t 	currentTime;
 int 	curT;
+#endif
+
+#if WV_OPT_WRITE_RESULTS
+#if !WV_OPT_MEASURE_FPS
 time_t 	startTime;
+time_t 	currentTime;
+int 	curT;
+#endif
 FILE * 	pFile;
 char	resultFile [50];
 #endif
@@ -191,8 +202,13 @@ int sample = 0;
 
 void autoswarm_opencv_init(int globalMode)
 {
-#if WV_OPT_WRITE_RESULTS
+#if WV_OPT_MEASURE_FPS
 	startTime 			= time(0);
+#endif
+#if WV_OPT_WRITE_RESULTS
+#if !WV_OPT_MEASURE_FPS
+	startTime 			= time(0);
+#endif
 	//tm * startTM 		= localtime(&startTime);
 	//sprintf(resultFile, "/data/ftp/internal_000/%d-%02d-%02d_%02d-%02d-%02d.txt", startTM->tm_year, startTM->tm_mon, startTM->tm_mday, startTM->tm_hour, startTM->tm_min, startTM->tm_sec);
 	//printf("Writing tracking results to: %s\n", resultFile);
@@ -213,6 +229,14 @@ void autoswarm_opencv_run(char* img, int width, int height)
 {
 	// Computer vision compatibility function used to call trackObjects and (optionally) parse modified data back to rtp stream as YUV
 	//if(nav_block < 3){ return img; }	// Engines have not started yet, lets save some battery life and skip image processing for now
+#if WV_OPT_MEASURE_FPS
+	if(runCount > 0)
+	{
+		currentTime 	= time(0); 												// Get the current time
+		curT 			= difftime(currentTime,startTime); 						// Calculate time-difference between startTime and currentTime
+		printf("Measured FPS: %0.2f\n", runCount / ((double) curT));
+	}
+#endif
 #if WV_OPT_BENCHMARK
 	if(runCount > 0)
 	{
@@ -230,7 +254,9 @@ void autoswarm_opencv_run(char* img, int width, int height)
 	runCount++; 									// Update global run-counter
 	groundSpeed = stateGetSpeedNed_f(); 			// Get groundspeed
 	Rect crop 	= setISPvars(width, height, true); 	// Calculate ISP related parameters
+#if !WV_OPT_ISP_CROP
 	sourceFrame = sourceFrame(crop); 				// Crop the frame
+#endif
 	Mat frameGrey; 									// Initialize frameGrey (to hold the thresholded image)
 	if(FILTER_FLOOD_STYLE != FILTER_FLOOD_CW || WV_OPT_CV_CONTOURS)
 	{
@@ -266,9 +292,13 @@ void autoswarm_opencv_run(char* img, int width, int height)
 	for(unsigned int r=0; r < trackRes.size(); r++)			// Convert angles & Write/Print output
 	{
 		circle(sourceFrame,cvPoint(trackRes[r].x_p - cropCol, trackRes[r].y_p), sqrt(trackRes[r].area_p / M_PI), cvScalar(0,255,255), 5);
-		char text[10];
+		char text[15];
+#if WV_OPT_MEASURE_FPS
+		sprintf(text,"FPS: %0.2f", runCount / ((double) curT));
+#else
 		sprintf(text,"frame %i", runCount);
-		putText(sourceFrame, text, Point(100,sourceFrame.rows-100), FONT_HERSHEY_SIMPLEX, 3, Scalar(0,255,255), 5);
+#endif
+		putText(sourceFrame, text, Point(10,sourceFrame.rows-100), FONT_HERSHEY_SIMPLEX, 2, Scalar(0,255,255), 5);
 	}
 	line(sourceFrame, Point(0,0), Point(0, sourceFrame.rows-1), Scalar(0,255,255), 5);
 	line(sourceFrame, Point(sourceFrame.cols - 1,0), Point(sourceFrame.cols - 1, sourceFrame.rows-1), Scalar(0,255,255), 5);
@@ -321,8 +351,10 @@ void autoswarm_opencv_run(char* img, int width, int height)
 	addBenchmark("Updated waypoints and heading");
 #endif
 #if WV_OPT_WRITE_RESULTS 												// See if we want to write results
+#if !WV_OPT_MEASURE_FPS
 	currentTime = time(0); 												// Get the current time
 	curT 		= difftime(currentTime,startTime); 						// Calculate time-difference between startTime and currentTime
+#endif
 	pFile 		= fopen("/data/ftp/internal_000/results.txt","a");		// Open file for appending TODO: Check for errors opening file
 #endif
 	if(WV_OPT_WRITE_RESULTS==1 || WV_DEBUG_SHOW_MEM)
@@ -626,8 +658,13 @@ Rect setISPvars(int width, int height, bool crop)
 {
 	int heightRange = 3288; // Property of CMOS sensor
 	ispScalar 		= (double) 16 / round(16 / ((double) width / heightRange)); // (re)Calculate the scalar set originally in bebop_front_camera.c
-	ispHeight 		= width; 	// Save width and rotate 90degrees cc
-	ispWidth 		= height; 	// Save height and rotate 90degrees cc
+#if WV_OPT_ISP_CROP
+	ispHeight 		= MT9F002_OUTPUT_WIDTH;
+	ispWidth 		= MT9F002_OUTPUT_HEIGHT;
+#else
+	ispHeight 		= width;
+	ispWidth 		= height;
+#endif
 	if (crop==true)
 	{
 		double fovY 			= WV_TRACK_IMAGE_CROP_FOVY * M_PI / 180;
@@ -647,8 +684,16 @@ Rect setISPvars(int width, int height, bool crop)
 		{
 			desOffset = ispHeight - desHeight;
 		}
+#if WV_OPT_ISP_CROP
+		cropCol 	= 0;
+		Rect crop 	= cvRect(0,0,desHeight,ispWidth);
+		mt9f002.offset_x = MT9F002_INITIAL_OFFSET_X + desOffset;
+		mt9f002.output_width = desHeight / ispScalar;
+		mt9f002_set_resolution(&mt9f002);
+#else
 		cropCol 	= desOffset;
 		Rect crop 	= cvRect(desOffset,0,desHeight,ispWidth);
+#endif
 		return crop;
 	}else{
 		return cvRect(0, 0, width, height);

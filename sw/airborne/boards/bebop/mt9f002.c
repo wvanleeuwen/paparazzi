@@ -781,6 +781,29 @@ static void mt9f002_set_gains(struct mt9f002_t *mt)
   write_reg(mt, MT9F002_GREEN2_GAIN, mt9f002_calc_gain(mt->gain_green2), 2);
 }
 
+void mt9f002_set_resolution(struct mt9f002_t *mt)
+{
+	/* Set output resolution */
+	  write_reg(mt, MT9F002_X_OUTPUT_SIZE, mt->output_width, 2);
+	  write_reg(mt, MT9F002_Y_OUTPUT_SIZE, mt->output_height, 2);
+
+	  /* Set scaling */
+	  uint16_t scaleFactor = ceil((float)MT9F002_SCALER_N / mt->output_scaler);
+	  mt->output_scaler = (float)MT9F002_SCALER_N / scaleFactor;
+	  mt->scaled_width = ceil((float)mt->output_width / mt->output_scaler);
+	  mt->scaled_height = ceil((float)mt->output_height / mt->output_scaler);
+	  if (mt->output_scaler != 1.0)
+	  {
+	    write_reg(mt, MT9F002_SCALING_MODE, 2, 2); // Vertical and horizontal scaling
+	    write_reg(mt, MT9F002_SCALE_M, scaleFactor, 2);
+	  }
+
+	  /* Set position (based on offset) */
+	  write_reg(mt, MT9F002_X_ADDR_START, mt->offset_x , 2);
+	  write_reg(mt, MT9F002_X_ADDR_END  , mt->offset_x + mt->scaled_width - 1, 2);
+	  write_reg(mt, MT9F002_Y_ADDR_START, mt->offset_y, 2);
+	  write_reg(mt, MT9F002_Y_ADDR_END  , mt->offset_y + mt->scaled_height - 1, 2);
+}
 /**
  * Initialisation of the Aptina MT9F002 CMOS sensor
  * (front camera)
@@ -816,26 +839,7 @@ void mt9f002_init(struct mt9f002_t *mt)
     mt9f002_parallel_stage2(mt);
   }
 
-  /* Set output resolution */
-  write_reg(mt, MT9F002_X_OUTPUT_SIZE, mt->output_width, 2);
-  write_reg(mt, MT9F002_Y_OUTPUT_SIZE, mt->output_height, 2);
-
-  /* Set scaling */
-  uint16_t scaleFactor = ceil((float)MT9F002_SCALER_N / mt->output_scaler);
-  mt->output_scaler = (float)MT9F002_SCALER_N / scaleFactor;
-  mt->scaled_width = ceil((float)mt->output_width / mt->output_scaler);
-  mt->scaled_height = ceil((float)mt->output_height / mt->output_scaler);
-  if (mt->output_scaler != 1.0)
-  {
-    write_reg(mt, MT9F002_SCALING_MODE, 2, 2); // Vertical and horizontal scaling
-    write_reg(mt, MT9F002_SCALE_M, scaleFactor, 2);
-  }
-
-  /* Set position (based on offset) */
-  write_reg(mt, MT9F002_X_ADDR_START, mt->offset_x , 2);
-  write_reg(mt, MT9F002_X_ADDR_END  , mt->offset_x + mt->scaled_width - 1, 2);
-  write_reg(mt, MT9F002_Y_ADDR_START, mt->offset_y, 2);
-  write_reg(mt, MT9F002_Y_ADDR_END  , mt->offset_y + mt->scaled_height - 1, 2);
+  mt9f002_set_resolution(mt);
 
   /* Update blanking (based on FPS) */
   mt9f002_set_blanking(mt);
