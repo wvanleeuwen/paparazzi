@@ -48,6 +48,8 @@ struct Kalamos2PPRZPackage {
     float min_height;
     float target_x;
     float target_y;
+    float land_gpsx;
+    float land_gpsy;
     float flow_x;
     float flow_y;
     char status;
@@ -58,6 +60,7 @@ extern struct Kalamos2PPRZPackage k2p_package;
 struct PPRZ2KalamosPackage {
     float phi;
     float theta;
+    float psi;
     float gpsx;
     float gpsy;
     float gpsz;

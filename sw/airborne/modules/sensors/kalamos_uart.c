@@ -34,6 +34,7 @@
 #include "state.h"
 #include "subsystems/navigation/waypoints.h"
 #include "firmwares/rotorcraft/navigation.h"
+#include "subsystems/gps.h"
 
  #include "generated/flight_plan.h"
 
@@ -106,6 +107,8 @@ static inline void kalamos_parse_msg(void)
 
     waypoint_set_alt(WP_KALAMOS,pprzheight );
 
+    waypoint_set_xy_i(WP_LANDING,POS_BFP_OF_REAL(k2p_package.land_gpsx), POS_BFP_OF_REAL(k2p_package.land_gpsy));
+
 
 if (kalamos_enable_landing && timeoutcount > 0) {
   if (k2p_package.min_height > 5.0) {
@@ -157,9 +160,10 @@ void kalamos_periodic() {
   struct PPRZ2KalamosPackage p2k_package;
   p2k_package.phi = att->phi;
   p2k_package.theta = att->theta;
+  p2k_package.psi = att->psi;
   p2k_package.gpsx = pos->x;
   p2k_package.gpsy = pos->y;
-  p2k_package.gpsz = pos->z;
+  p2k_package.gpsz = gps.lla_pos.alt;
 
   if (timeoutcount > 0) {
     timeoutcount--;
