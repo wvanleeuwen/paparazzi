@@ -74,17 +74,17 @@ static bool 			inRectangle			(Point pt, Rect rectangle);
 // Debug options
 #define WV_DEBUG_SHOW_REJECT 		 0 		// Show why shapes are rejected
 #define WV_DEBUG_SHOW_WAYPOINT 		 0 		// Show the updated positions of the waypoints
-#define WV_DEBUG_SHOW_MEM			 1 		// Show the neighbours identified and their location
+#define WV_DEBUG_SHOW_MEM			 0 		// Show the neighbours identified and their location
 
 // Runtime options
-#define WV_OPT_WRITE_RESULTS 		 0 		// Write measurements to text file
-#define WV_OPT_MOD_VIDEO 			 1 		// Modify the frame to show relevant info
+#define WV_OPT_WRITE_RESULTS 		 1		// Write measurements to text file
+#define WV_OPT_MOD_VIDEO 			 0 		// Modify the frame to show relevant info
 #define WV_OPT_CALIBRATE_CAM 		 0 		// Calibrate the camera
 #define WV_OPT_BENCHMARK 			 0 		// Print benchmark table
 #define WV_OPT_CV_CONTOURS 			 0 		// Use opencv to detect contours
 #define WV_OPT_ISP_CROP 			 0 		// Use the ISP to crop the frame according to FOV-Y
-#define WV_OPT_MEASURE_FPS 			 1 		// Measure the FPS using built-in clock and framecount
-
+#define WV_OPT_MEASURE_FPS 			 0 		// Measure the FPS using built-in clock and framecount
+#define WV_OPT_BODYFRAME 			 0 		// Fake euler angles and pos to be 0
 // Global options definitions
 #define WV_GLOBAL_POINT 			0
 #define WV_GLOBAL_BUCKET 			1
@@ -283,7 +283,19 @@ void autoswarm_opencv_run(char* img, int width, int height)
 	for(unsigned int r=0; r < trackRes.size(); r++)			// Convert angles & Write/Print output
 	{
 		cam2body(&trackRes[r]);								// Convert from camera angles to body angles (correct for roll)
+#if WV_OPT_BODYFRAME
+		struct NedCoor_f fakePos;
+		fakePos.x = 0.0;
+		fakePos.y = 0.0;
+		fakePos.z = 0.0;
+		struct 	FloatEulers fakeEulerAngles;
+		fakeEulerAngles.phi 	= 0.0;
+		fakeEulerAngles.psi 	= 0.0;
+		fakeEulerAngles.theta 	= 0.0;
+		body2world(&trackRes[r], &fakePos, &fakeEulerAngles); 		// Convert from body angles to world coordinates (correct yaw and pitch)
+#else
 		body2world(&trackRes[r], pos, eulerAngles); 		// Convert from body angles to world coordinates (correct yaw and pitch)
+#endif
 	}
 #if WV_OPT_BENCHMARK
 	addBenchmark("Body and World transformations done");
@@ -1021,9 +1033,9 @@ vector<double> estimatePosition(int xp, int yp, double area, double k, int calAr
 {
 	// This function estimates the 3D position (in camera  coordinate system) according to pixel position
 	// (Default) calibration parameters
-	if(k==0) 		k 		= 1.085; // Fisheye correction factor
-	if(calArea==0) 	calArea = 5330; // Calibrate at full resolution
-	if(orbDiag==0) 	orbDiag = 2200; // Measured circular image diagonal using resolution of 2024x2048 org: 2400
+	if(k==0) 		k 		= 1.142; // Fisheye correction factor (1.085)
+	if(calArea==0) 	calArea = 5100; // Calibrate at full resolution (5330)
+	if(orbDiag==0) 	orbDiag = 1900; // Measured circular image diagonal using resolution of 2024x2048 org: 2400 (2200)
 	// Calculate corrected calibration parameters
 	calArea 				= (int) round(calArea * (ispWidth / 2048.0) * (ispWidth / 2048.0));
 	orbDiag 				= (int) round(orbDiag * (ispWidth / 2048.0));
@@ -1127,31 +1139,31 @@ void calibrateEstimation(vector<trackResults> trackRes)
 	fakePos.x = 0.0;
 	fakePos.y = 0.0;
 	fakePos.z = 0.0;
+	struct 	FloatEulers	fakeEulerAngles;
+	fakeEulerAngles.phi 	= 0.0;
+	fakeEulerAngles.psi 	= 0.0;
+	fakeEulerAngles.theta 	= 0.0;
 
 	vector< vector<double> > calPositions(6, vector<double>(3));
 	calPositions[0][0] 	=  1.00;
 	calPositions[0][1] 	=  0.00;
 	calPositions[0][2] 	=  0.25;
 
-	calPositions[1][0] 	=  2.00;
-	calPositions[1][1] 	=  0.00;
+	calPositions[1][0] 	=  1.00;
+	calPositions[1][1] 	=  -1.00;
 	calPositions[1][2] 	=  0.25;
 
-	calPositions[2][0] 	=  2.00;
-	calPositions[2][1] 	= -1.00;
+	calPositions[2][0] 	=  1.00;
+	calPositions[2][1] 	= 1.00;
 	calPositions[2][2] 	=  0.25;
 
-	calPositions[3][0] 	=  1.00;
-	calPositions[3][1] 	= -1.00;
+	calPositions[3][0] 	=  2.00;
+	calPositions[3][1] 	= -0.50;
 	calPositions[3][2] 	=  0.25;
 
-	calPositions[4][0] 	=  1.00;
-	calPositions[4][1] 	=  1.00;
+	calPositions[4][0] 	=  2.00;
+	calPositions[4][1] 	=  0.50;
 	calPositions[4][2] 	=  0.25;
-
-	calPositions[5][0] 	=  1.00;
-	calPositions[5][1] 	=  2.00;
-	calPositions[5][2]	=  0.25;
 
 	double k_opt;
 	double k_min 		= 1.0;
@@ -1185,11 +1197,11 @@ void calibrateEstimation(vector<trackResults> trackRes)
 					trackRes[r].y_c = position[1];
 					trackRes[r].r_c = position[2];
 					cam2body(&trackRes[r]);							// Convert from camera angles to body angles (correct for roll)
-					body2world(&trackRes[r], &fakePos , eulerAngles); 	// Convert from body angles to world coordinates (correct yaw and pitch)
+					body2world(&trackRes[r], &fakePos , &fakeEulerAngles); 	// Convert from body angles to world coordinates (correct yaw and pitch)
 					double ball_err = 1000;
 					for(unsigned int i=0; i < calPositions.size(); i++)
 					{
-						double cur_ball_err = pow(trackRes[r].x_w - calPositions[i][0], 2.0) + pow(trackRes[r].y_w - calPositions[i][1], 2.0) + pow(trackRes[r].z_w - calPositions[i][2], 2.0);
+						double cur_ball_err = pow(trackRes[r].x_w - calPositions[i][0], 2.0) + pow(trackRes[r].y_w - calPositions[i][1], 2.0);// + pow(trackRes[r].z_w - calPositions[i][2], 2.0);
 						if(cur_ball_err < ball_err)
 						{
 							ball_err = cur_ball_err;

@@ -1,5 +1,4 @@
 <!DOCTYPE airframe SYSTEM "../../airframe.dtd">
-
 <airframe name="stock_bebop">
 
   <firmware name="rotorcraft">
@@ -9,8 +8,8 @@
 	<define name="MT9F002_INITIAL_OFFSET_X" value="680"/>
 	<define name="MT9F002_INITIAL_OFFSET_Y" value="0"/>
 	<define name="MT9F002_OUTPUT_SCALER" 	value="0.615384615"/>
-	<define name="MT9F002_TARGET_FPS" 		value="25"/>
-	<define name="MT9F002_TARGET_EXPOSURE" 	value="10"/>
+	<define name="MT9F002_TARGET_FPS" 		value="60"/>
+	<define name="MT9F002_TARGET_EXPOSURE" 	value="40"/> <!--  Daylight: 10 -->
 	<define name="MT9F002_GAIN_GREEN1" 		value="1.6"/>
 	<define name="MT9F002_GAIN_GREEN2" 		value="1.6"/>
     <target name="nps" board="pc">
@@ -37,10 +36,10 @@
     <module name="guidance" type="indi"/>
   </firmware>
 
-  <modules main_freq="512">
+  <modules main_freq="1024">
   	<module name="geo_mag"/>
     <module name="air_data"/>
-    <module name="send_imu_mag_current"/>
+    <!-- <module name="send_imu_mag_current"/> -->
     
   	<module name="video_thread">
     </module>
@@ -50,14 +49,13 @@
     	<define name="WV_INIT_GLOBAL_ATTRACTOR" value="2"/>
     </module>
     
-     <!-- 
   	<module name="video_rtp_stream">
        	<define name="VIEWVIDEO_CAMERA" value="front_camera"/>
        	<define name="VIEWVIDEO_DOWNSIZE_FACTOR" value="4"/>
        	<define name="VIEWVIDEO_QUALITY_FACTOR" value="50"/> 
        	<define name="VIEWVIDEO_SHOT_PATH" value="/data/ftp/internal_000"/>
     </module>
-     -->
+    
     
     <!--module name="logger_file">
       <define name="FILE_LOGGER_PATH" value="/data/ftp/internal_000"/>
