@@ -47,7 +47,7 @@
     </subsystem>
     <module name="heli" type="throttle_curve"/>
     <define name="RC_LOST_FBW_MODE" value="FBW_MODE_FAILSAFE"/><!-- Switch to Failsafe or to Autopilot on RC loss? -->
-    <define name="RC_LOST_IN_AUTO_FBW_MODE" value="FBW_MODE_FAILSAFE"/><!-- Switch to Failsafe with a working autopilot on RC loss? -->
+    <define name="RC_LOST_IN_AUTO_FBW_MODE" value="FBW_MODE_AP"/><!-- Switch to Failsafe with a working autopilot on RC loss? -->
     <define name="AP_LOST_FBW_MODE" value="FBW_MODE_MANUAL"/><!-- Switch to Failsafe or to Manual on AP loss? -->
 
     <subsystem name="intermcu"     type="uart">
@@ -230,7 +230,7 @@
 
   <section name="GUIDANCE_H" prefix="GUIDANCE_H_">
     <define name="MAX_BANK" value="25" unit="deg"/>
-    <define name="REF_MAX_SPEED" value="2" unit="m/s"/>
+    <define name="REF_MAX_SPEED" value="5" unit="m/s"/>
     <define name="USE_SPEED_REF" value="TRUE"/>
     <define name="PGAIN" value="20"/>
     <define name="DGAIN" value="50"/>

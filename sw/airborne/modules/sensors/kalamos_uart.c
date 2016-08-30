@@ -36,7 +36,7 @@
 #include "firmwares/rotorcraft/navigation.h"
 #include "subsystems/gps.h"
 
- #include "generated/flight_plan.h"
+#include "generated/flight_plan.h"
 
  /* Main magneto structure */
 static struct kalamos_t kalamos = {
@@ -46,9 +46,11 @@ static struct kalamos_t kalamos = {
 static uint8_t mp_msg_buf[128]  __attribute__((aligned));   ///< The message buffer for the Kalamos
 
 struct  Kalamos2PPRZPackage k2p_package;
-float kalamos_target_height = 20.0;
+float kalamos_search_height = 35.0;
+float kalamos_descend_height = 30.0;
 float kalamos_height_gain = 1.0;
 bool kalamos_enable_landing = false;
+bool kalamos_enable_spotsearch = false;
 float kalamos_landing_decent_speed = 0.05;
 float kalamos_pos_gain = 0.05;
 
@@ -71,7 +73,7 @@ void kalamos_init() {
   register_periodic_telemetry(DefaultPeriodic, PPRZ_MSG_ID_DEBUG, kalamos_raw_downlink);
 #endif
 
-  NavSetWaypointHere(WP_KALAMOS);
+  NavSetWaypointHere(WP_LANDING);
   k2p_package.height = -0.01;
   k2p_package.status = 1;
 
@@ -102,29 +104,40 @@ static inline void kalamos_parse_msg(void)
 
     struct EnuCoor_f *pos = stateGetPositionEnu_f();
 
-    float diff = (kalamos_target_height - k2p_package.height)*kalamos_height_gain;
-    float pprzheight  = pos->z + diff;
+    float diff_landing = (kalamos_descend_height - k2p_package.height)*kalamos_height_gain;
+    float pprzheight_landing  = pos->z + diff_landing;
 
-    waypoint_set_alt(WP_KALAMOS,pprzheight );
+    waypoint_set_alt(WP_LANDING,pprzheight_landing);
 
-    waypoint_set_xy_i(WP_LANDING,POS_BFP_OF_REAL(k2p_package.land_gpsx), POS_BFP_OF_REAL(k2p_package.land_gpsy));
+    float diff_search = (kalamos_search_height - k2p_package.height)*kalamos_height_gain;
+    float pprzheight_search  = pos->z + diff_search;
+    waypoint_set_alt(WP_JOE,pprzheight_search);
+
+    if (kalamos_enable_spotsearch) {
+      waypoint_set_xy_i(WP_LANDING,POS_BFP_OF_REAL(k2p_package.land_gpsx), POS_BFP_OF_REAL(k2p_package.land_gpsy));
+    }
+
+    if (k2p_package.height < 5.0) {
+        kalamos_enable_landing = false;
+    }
+
+    if (kalamos_enable_landing && timeoutcount > 0) {
+      if (k2p_package.min_height > 5.0) {
+        kalamos_descend_height -= kalamos_landing_decent_speed;
+      }
 
 
-if (kalamos_enable_landing && timeoutcount > 0) {
-  if (k2p_package.min_height > 5.0) {
-    kalamos_target_height -= kalamos_landing_decent_speed;
-  }
-  float bx = (k2p_package.target_x * kalamos_pos_gain); // x is right
-  float by = k2p_package.target_y * kalamos_pos_gain; // y is nose
+      float bx = (k2p_package.target_x * kalamos_pos_gain); // x is right
+      float by = k2p_package.target_y * kalamos_pos_gain; // y is nose
 
-  float psi = stateGetNedToBodyEulers_f()->psi;
+      float psi = stateGetNedToBodyEulers_f()->psi;
 
-  float target_x = waypoint_get_x(WP_KALAMOS) + cos(psi) * bx + sin(psi) * by;
-  float target_y = waypoint_get_y(WP_KALAMOS) + -sin(psi) * bx + cos(psi) * by;
+      float target_x = waypoint_get_x(WP_LANDING) + cos(psi) * bx + sin(psi) * by;
+      float target_y = waypoint_get_y(WP_LANDING) + -sin(psi) * bx + cos(psi) * by;
 
-  waypoint_set_xy_i(WP_KALAMOS,POS_BFP_OF_REAL(target_x), POS_BFP_OF_REAL(target_y));
+      waypoint_set_xy_i(WP_LANDING,POS_BFP_OF_REAL(target_x), POS_BFP_OF_REAL(target_y));
 
-}
+    }
 
 
     // Send ABI message
@@ -164,6 +177,11 @@ void kalamos_periodic() {
   p2k_package.gpsx = pos->x;
   p2k_package.gpsy = pos->y;
   p2k_package.gpsz = gps.lla_pos.alt;
+  p2k_package.enables = 0;
+  if (kalamos_enable_landing)
+    p2k_package.enables |= 0b1;
+  if (kalamos_enable_spotsearch)
+    p2k_package.enables |= 0b10;
 
   if (timeoutcount > 0) {
     timeoutcount--;
@@ -178,8 +196,12 @@ void kalamos_periodic() {
 
   pprz_msg_send_IMCU_DEBUG(&(kalamos.transport.trans_tx), kalamos.device,
                                          1, sizeof(struct PPRZ2KalamosPackage), (unsigned char *)(&p2k_package));
-
-
 }
 
+void enableLandingspotSearch(bool b) {
+  kalamos_enable_spotsearch = b;
+}
 
+void enableKalamosDescent(bool b) {
+  kalamos_enable_landing = b;
+}

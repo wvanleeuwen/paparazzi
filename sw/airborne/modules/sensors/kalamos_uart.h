@@ -64,17 +64,23 @@ struct PPRZ2KalamosPackage {
     float gpsx;
     float gpsy;
     float gpsz;
+    unsigned char enables;
 };
 
-extern float kalamos_target_height;
+extern float kalamos_descend_height;
+extern float kalamos_search_height;
 extern float kalamos_height_gain;
 extern bool kalamos_enable_landing ;
 extern float kalamos_landing_decent_speed ;
 extern float kalamos_pos_gain;
+extern bool kalamos_enable_spotsearch ;
 
 extern void kalamos_init(void);
 extern void kalamos_event(void);
 extern void kalamos_periodic(void);
+
+extern void enableLandingspotSearch(bool b);
+extern void enableKalamosDescent(bool b);
 
 #endif
 
