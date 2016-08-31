@@ -35,7 +35,7 @@
       <call fun="enableKalamosDescent(false)" loop="false"/>
       <stay wp="TD"/>
     </block>
-    <block name="Circle_joe" pre_call="nav_set_heading_towards(navigation_target.x,navigation_target.y)">
+    <block name="Circle_joe" pre_call="nav_set_heading_towards(POS_FLOAT_OF_BFP(navigation_target.x),POS_FLOAT_OF_BFP(navigation_target.y))">
       <call fun="enableLandingspotSearch(true)" loop="false"/>
       <call fun="enableKalamosDescent(false)" loop="false"/>
       <circle wp="JOE" radius="75" until="block_time>180"/>
