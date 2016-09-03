@@ -342,3 +342,12 @@ void gps_ubx_msg(void)
   gps_ubx.msg_available = false;
 }
 
+#ifdef UBX_M8P_RTK
+/**
+ * Override the default GPS packet injector to inject the data
+ */
+void gps_inject_data(uint8_t packet_id, uint8_t length, uint8_t *data)
+{
+	ubx_send_bytes(&(UBX_GPS_LINK).device, length, data);
+}
+#endif

@@ -115,8 +115,10 @@ void dl_parse_msg(void)
 
 #if USE_GPS
       case DL_GPS_INJECT : {
+#ifndef UBX_M8P_RTK
         // Check if the GPS is for this AC
         if (DL_GPS_INJECT_ac_id(dl_buffer) != AC_ID) { break; }
+#endif // UBX_M8P_RTK
 
         // GPS parse data
         gps_inject_data(

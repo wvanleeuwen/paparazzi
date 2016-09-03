@@ -1,5 +1,6 @@
 /*
- * Copyright (C) 2015 Freek van Tienen <freek.v.tienen@gmail.com>
+ * Copyright (C) 2016 Wilco Vlenterie, Anand Sundaresan.
+ * Contact: Anand Sundaresan <nomail@donotmailme.com>
  *
  * This file is part of Paparazzi.
  *
@@ -20,11 +21,11 @@
  */
 
  /**
- * \file sbp2ivy.c
- * \brief SBP GPS packets to Ivy for DGPS and RTK
+ * \file rtcm2ivy.c
+ * \brief RTCM3 GPS packets to Ivy for DGPS and RTK
  *
- * This communicates with an SBP GPS receiver like an
- * Swift-Nav Piksi. Tjis then forwards the Observed messages
+ * This communicates with an RTCM3 GPS receiver like an
+ * ublox M8P. This then forwards the Observed messages
  * over the Ivy bus to inject them for DGPS and RTK positioning.
  */
 
@@ -36,18 +37,18 @@
 #include <ctype.h>
 #include <Ivy/ivy.h>
 #include <Ivy/ivyglibloop.h>
-#include <libsbp/sbp.h>
-#include <libsbp/observation.h>
+#include <rtcm3.h>
+#include <math/pprz_geodetic_float.h>
 
 #include "std.h"
 #include "serial_port.h"
 
 /** Used variables **/
 struct SerialPort *serial_port;
-sbp_state_t sbp_state;
-sbp_msg_callbacks_node_t sbp_obs_node;
-sbp_msg_callbacks_node_t sbp_obs_dep_a_node;
-sbp_msg_callbacks_node_t base_pos_node;
+rtcm3_state_t rtcm3_state;
+rtcm3_msg_callbacks_node_t rtcm3_obs_node;
+rtcm3_msg_callbacks_node_t rtcm3_obs_dep_a_node;
+rtcm3_msg_callbacks_node_t base_pos_node;
 
 /** Default values **/
 uint8_t ac_id = 0;
@@ -67,9 +68,9 @@ char *ivy_bus                   = "127.255.255.255:2010";
 
 /*
  * Read bytes from the Piksi UART connection
- * This is a wrapper functions used in the libsbp library
+ * This is a wrapper functions used in the librtcm3 library
  */
-static uint32_t sbp_read(uint8_t *buff, uint32_t n, void *context __attribute__((unused)))
+static uint32_t rtcm3_read(unsigned char (*buff)[], uint32_t n, void *context __attribute__((unused)))
 {
   int ret = read(serial_port->fd, buff, n);
   if(ret > 0)
@@ -95,43 +96,65 @@ static void ivy_send_message(uint8_t packet_id, uint8_t len, uint8_t msg[]) {
 /*
  * Callback for the OBS observation message to send it trough GPS_INJECT
  */
-static void sbp_obs_callback(uint16_t sender_id __attribute__((unused)),
+struct EcefCoor_f posEcef;
+struct LlaCoor_f posLla;
+
+static void rtcm3_1005_callback(uint16_t sender_id __attribute__((unused)),
                                   uint8_t len,
                                   uint8_t msg[],
                                   void *context __attribute__((unused)))
 {
+  printf("Sending 1005 message\n");
   if(len > 0) {
-    ivy_send_message(SBP_MSG_OBS, len, msg);
+    u16 StaId      = RTCMgetbitu(msg, 24 + 12, 12);
+    u8 ItRef       = RTCMgetbitu(msg, 24 + 24, 6);
+    u8 indGPS      = RTCMgetbitu(msg, 24 + 30, 1);
+    u8 indGlonass  = RTCMgetbitu(msg, 24 + 31, 1);
+    u8 indGalileo  = RTCMgetbitu(msg, 24 + 32, 1);
+    u8 indRefS     = RTCMgetbitu(msg, 24 + 33, 1);
+    posEcef.x      = RTCMgetbits_38(msg, 24 + 34) * 0.0001;
+    posEcef.y      = RTCMgetbits_38(msg, 24 + 74) * 0.0001;
+    posEcef.z      = RTCMgetbits_38(msg, 24 + 114) * 0.0001;
+    printf("x: %f, y: %f, z: %f\n", posEcef.x, posEcef.y, posEcef.z);
+    lla_of_ecef_f(&posLla, &posEcef);
+    printf("Lat: %f, Lon: %f, Alt: %f\n", posLla.lat / (2 * M_PI) * 360, posLla.lon / (2 * M_PI) * 360, posLla.alt);
+    // Send spoof gpsd message to GCS to plot groundstation position
+    IvySendMsg("%s %s %s %f %f %f %f %f %f %f %f %f %f %f %d %f", "ground", "FLIGHT_PARAM", "GCS", 0.0, 0.0, 0.0, posLla.lat / (2 * M_PI) * 360, posLla.lon / (2 * M_PI) * 360, 0.0, 0.0, posLla.alt, 0.0, 0.0, 0.0, 0,  0.0);
+    // Send UBX_RTK_GROUNDSTATION message to GCS for RTK info
+    IvySendMsg("%s %s %s %i %i %i %i %i %i %f %f %f", "ground", "UBX_RTK_GROUNDSTATION", "GCS", StaId, ItRef, indGPS, indGlonass, indGalileo, indRefS, posLla.lat / (2 * M_PI) * 360, posLla.lon / (2 * M_PI) * 360, posLla.alt);
+    ivy_send_message(RTCM3_MSG_1005, len, msg);
   }
   printf_debug("Parsed OBS callback\n");
 }
 
 /*
- * Callback for the old OBS observation message to send it trough GPS_INJECT
+ * Callback for the OBS observation message to send it trough GPS_INJECT
  */
-static void sbp_obs_dep_a_callback(uint16_t sender_id __attribute__((unused)),
+static void rtcm3_1077_callback(uint16_t sender_id __attribute__((unused)),
                                   uint8_t len,
                                   uint8_t msg[],
                                   void *context __attribute__((unused)))
 {
+  printf("Sending 1077 message\n");
   if(len > 0) {
-    ivy_send_message(SBP_MSG_OBS_DEP_A, len, msg);
+    ivy_send_message(RTCM3_MSG_1077, len, msg);
   }
-  printf_debug("Parsed OBS_DEP_A callback\n");
+  printf_debug("Parsed OBS callback\n");
 }
 
 /*
- * Callback for the BASE_POS observation message to send it trough GPS_INJECT
+ * Callback for the OBS observation message to send it trough GPS_INJECT
  */
-static void sbp_base_pos_callback(uint16_t sender_id __attribute__((unused)),
+static void rtcm3_1087_callback(uint16_t sender_id __attribute__((unused)),
                                   uint8_t len,
                                   uint8_t msg[],
                                   void *context __attribute__((unused)))
 {
+  printf("Sending 1087 message\n");
   if(len > 0) {
-    ivy_send_message(SBP_MSG_BASE_POS, len, msg);
+    ivy_send_message(RTCM3_MSG_1087, len, msg);
   }
-  printf_debug("Parsed BASE_POS callback\n");
+  printf_debug("Parsed OBS callback\n");
 }
 
 /**
@@ -139,7 +162,7 @@ static void sbp_base_pos_callback(uint16_t sender_id __attribute__((unused)),
  */
 static gboolean parse_device_data(GIOChannel *chan, GIOCondition cond, gpointer data)
 {
-  sbp_process(&sbp_state, &sbp_read);
+  rtcm3_process(&rtcm3_state, &rtcm3_read);
   return TRUE;
 }
 
@@ -206,12 +229,12 @@ int main(int argc, char** argv)
     exit(EXIT_FAILURE);
   }
 
-  // Setup SBP callbacks
-  printf_debug("Setup SBP callbacks...\n");
-  sbp_state_init(&sbp_state);
-  sbp_register_callback(&sbp_state, SBP_MSG_OBS, &sbp_obs_callback, NULL, &sbp_obs_node);
-  sbp_register_callback(&sbp_state, SBP_MSG_OBS_DEP_A, &sbp_obs_dep_a_callback, NULL, &sbp_obs_dep_a_node);
-  sbp_register_callback(&sbp_state, SBP_MSG_BASE_POS, &sbp_base_pos_callback, NULL, &base_pos_node);
+  // Setup RTCM3 callbacks
+  printf_debug("Setup RTCM3 callbacks...\n");
+  rtcm3_state_init(&rtcm3_state);
+  rtcm3_register_callback(&rtcm3_state, RTCM3_MSG_1005, &rtcm3_1005_callback, NULL, &rtcm3_obs_node);
+  rtcm3_register_callback(&rtcm3_state, RTCM3_MSG_1077, &rtcm3_1077_callback, NULL, &rtcm3_obs_dep_a_node);
+  rtcm3_register_callback(&rtcm3_state, RTCM3_MSG_1087, &rtcm3_1087_callback, NULL, &base_pos_node);
 
   // Add IO watch for tty connection
   printf_debug("Adding IO watch...\n");
@@ -219,7 +242,7 @@ int main(int argc, char** argv)
   g_io_add_watch(sk, G_IO_IN, parse_device_data, NULL);
 
   // Run the main loop
-  printf_debug("Started sbp2ivy for aircraft id %d!\n", ac_id);
+  printf_debug("Started rtcm2ivy for aircraft id %d!\n", ac_id);
   g_main_loop_run(ml);
 
   return 0;
