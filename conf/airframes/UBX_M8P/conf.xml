@@ -1,0 +1,35 @@
+<conf>
+  <aircraft
+   name="ardrone2"
+   ac_id="31"
+   airframe="airframes/UBX_M8P/ardrone2.xml"
+   radio="radios/dummy.xml"
+   telemetry="telemetry/default_rotorcraft.xml"
+   flight_plan="flight_plans/rotorcraft_basic.xml"
+   settings="settings/rotorcraft_basic.xml settings/control/rotorcraft_guidance.xml settings/control/stabilization_att_int_quat.xml settings/estimation/ahrs_int_cmpl_quat.xml settings/nps.xml"
+   settings_modules="modules/imu_common.xml modules/gps.xml modules/air_data.xml modules/geo_mag.xml"
+   gui_color="red"
+  />
+  <aircraft
+   name="bebop"
+   ac_id="33"
+   airframe="airframes/UBX_M8P/bebop.xml"
+   radio="radios/dummy.xml"
+   telemetry="telemetry/default_rotorcraft.xml"
+   flight_plan="flight_plans/rotorcraft_basic.xml"
+   settings="settings/rotorcraft_basic.xml settings/control/rotorcraft_guidance.xml settings/estimation/ahrs_float_mlkf.xml settings/control/stabilization_att_int_quat.xml settings/nps.xml"
+   settings_modules="modules/imu_common.xml modules/gps.xml modules/geo_mag.xml modules/air_data.xml modules/video_rtp_stream.xml"
+   gui_color="red"
+  />
+  <aircraft
+   name="bebop2"
+   ac_id="203"
+   airframe="airframes/UBX_M8P/bebop2_indi.xml"
+   radio="radios/dummy.xml"
+   telemetry="telemetry/default_rotorcraft.xml"
+   flight_plan="flight_plans/rotorcraft_basic.xml"
+   settings="settings/rotorcraft_basic.xml settings/control/rotorcraft_guidance.xml settings/control/stabilization_indi.xml settings/control/rotorcraft_speed.xml"
+   settings_modules="modules/imu_common.xml modules/gps.xml [modules/geo_mag.xml] modules/air_data.xml modules/gps_ubx_ucenter.xml"
+   gui_color="red"
+  />
+</conf>

@@ -52,7 +52,7 @@ rtcm3_msg_callbacks_node_t base_pos_node;
 
 /** Default values **/
 uint8_t ac_id = 0;
-char *serial_device   = "/dev/ttyUSB0";
+char *serial_device   = "/dev/ttyACM0";
 uint32_t serial_baud  = B9600;
 
 /** Debugging options */
