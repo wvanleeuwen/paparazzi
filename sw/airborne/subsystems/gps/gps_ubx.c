@@ -348,6 +348,7 @@ void gps_ubx_msg(void)
  */
 void gps_inject_data(uint8_t packet_id, uint8_t length, uint8_t *data)
 {
+	printf("Writing bytes to UBX\n");
 	ubx_send_bytes(&(UBX_GPS_LINK).device, length, data);
 }
 #endif

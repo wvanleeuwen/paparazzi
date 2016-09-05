@@ -46,9 +46,9 @@
 /** Used variables **/
 struct SerialPort *serial_port;
 rtcm3_state_t rtcm3_state;
-rtcm3_msg_callbacks_node_t rtcm3_obs_node;
-rtcm3_msg_callbacks_node_t rtcm3_obs_dep_a_node;
-rtcm3_msg_callbacks_node_t base_pos_node;
+rtcm3_msg_callbacks_node_t rtcm3_1005_node;
+rtcm3_msg_callbacks_node_t rtcm3_1077_node;
+rtcm3_msg_callbacks_node_t rtcm3_1087_node;
 
 /** Default values **/
 uint8_t ac_id = 0;
@@ -63,7 +63,7 @@ bool verbose = FALSE;
 #ifdef __APPLE__
 char *ivy_bus                   = "224.255.255.255";
 #else
-char *ivy_bus                   = "127.255.255.255:2010";
+char *ivy_bus                   = "127.255.255.255:2010"; // 192.168.1.255   127.255.255.255
 #endif
 
 /*
@@ -83,12 +83,13 @@ static void ivy_send_message(uint8_t packet_id, uint8_t len, uint8_t msg[]) {
   char gps_packet[512], number[5];
   uint8_t i;
 
-  snprintf(gps_packet, 512, "0 GPS_INJECT %d %d %d", ac_id, packet_id, msg[0]); //AC_ID
+  snprintf(gps_packet, 512, "0 RTCM_INJECT %d %d %d", packet_id, len, msg[0]); //AC_ID
+  //snprintf(gps_packet, 512, "datalink RTCM_INJECT %d %d", packet_id, msg[0]); //AC_ID
   for(i = 1; i < len; i++) {
     snprintf(number, 5, ",%d", msg[i]);
     strcat(gps_packet, number);
   }
-
+  printf("%s\n\n", gps_packet);
   IvySendMsg("%s", gps_packet);
   printf_debug("Ivy send: %s\n", gps_packet);
 }
@@ -104,8 +105,8 @@ static void rtcm3_1005_callback(uint16_t sender_id __attribute__((unused)),
                                   uint8_t msg[],
                                   void *context __attribute__((unused)))
 {
-  printf("Sending 1005 message\n");
   if(len > 0) {
+	printf("Sending 1005 message\n");
     u16 StaId      = RTCMgetbitu(msg, 24 + 12, 12);
     u8 ItRef       = RTCMgetbitu(msg, 24 + 24, 6);
     u8 indGPS      = RTCMgetbitu(msg, 24 + 30, 1);
@@ -135,8 +136,8 @@ static void rtcm3_1077_callback(uint16_t sender_id __attribute__((unused)),
                                   uint8_t msg[],
                                   void *context __attribute__((unused)))
 {
-  printf("Sending 1077 message\n");
   if(len > 0) {
+	printf("Sending 1077 message\n");
     ivy_send_message(RTCM3_MSG_1077, len, msg);
   }
   printf_debug("Parsed OBS callback\n");
@@ -150,8 +151,8 @@ static void rtcm3_1087_callback(uint16_t sender_id __attribute__((unused)),
                                   uint8_t msg[],
                                   void *context __attribute__((unused)))
 {
-  printf("Sending 1087 message\n");
   if(len > 0) {
+	printf("Sending 1087 message\n");
     ivy_send_message(RTCM3_MSG_1087, len, msg);
   }
   printf_debug("Parsed OBS callback\n");
@@ -216,7 +217,7 @@ int main(int argc, char** argv)
 
   // Create the Ivy Client
   GMainLoop *ml =  g_main_loop_new(NULL, FALSE);
-  IvyInit("natnet2ivy", "natnet2ivy READY", 0, 0, 0, 0);
+  IvyInit("Paparazzi server", "Paparazzi server READY", 0, 0, 0, 0);
   IvyStart(ivy_bus);
 
   // Start the tty device
@@ -232,9 +233,9 @@ int main(int argc, char** argv)
   // Setup RTCM3 callbacks
   printf_debug("Setup RTCM3 callbacks...\n");
   rtcm3_state_init(&rtcm3_state);
-  rtcm3_register_callback(&rtcm3_state, RTCM3_MSG_1005, &rtcm3_1005_callback, NULL, &rtcm3_obs_node);
-  rtcm3_register_callback(&rtcm3_state, RTCM3_MSG_1077, &rtcm3_1077_callback, NULL, &rtcm3_obs_dep_a_node);
-  rtcm3_register_callback(&rtcm3_state, RTCM3_MSG_1087, &rtcm3_1087_callback, NULL, &base_pos_node);
+  rtcm3_register_callback(&rtcm3_state, RTCM3_MSG_1005, &rtcm3_1005_callback, NULL, &rtcm3_1005_node);
+  rtcm3_register_callback(&rtcm3_state, RTCM3_MSG_1077, &rtcm3_1077_callback, NULL, &rtcm3_1077_node);
+  rtcm3_register_callback(&rtcm3_state, RTCM3_MSG_1087, &rtcm3_1087_callback, NULL, &rtcm3_1087_node);
 
   // Add IO watch for tty connection
   printf_debug("Adding IO watch...\n");
