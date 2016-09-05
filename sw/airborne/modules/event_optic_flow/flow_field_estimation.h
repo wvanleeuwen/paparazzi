@@ -34,6 +34,7 @@ struct flowField {
   float wxDerotated;
   float wyDerotated;
   float D;
+  float p[3];
   int32_t t;
 };
 
@@ -61,11 +62,9 @@ struct flowField {
  */
 struct flowStats {
   float mx, my, mu, mv;
-  float mxx, myy;
-  float mxu, myv;
-  float muu, mvv, mww;
-  float muv, mvw, muw;
-  float mum, mvm, mwm;
+  float mxx, myy, mxu, myv;
+  float mwx, mwy;
+  float sx, sy, sxy, sxx, syy;
   float eventRate;
 };
 
@@ -97,14 +96,14 @@ enum updateStatus {
 /**
  * Performs an update of all flow field statistics with a new event.
  */
-void updateFlowStats(struct flowStats* s, struct flowEvent e, float filterTimeConstant,
-    float movingAverageWindow);
+void updateFlowStats(struct flowStats* s, struct flowEvent e, struct flowField lastField,
+    float filterTimeConstant, float movingAverageWindow, float maxSpeedDifference);
 
 /**
  * Recomputation of the flow field using the latest statistics.
  */
 enum updateStatus recomputeFlowField(struct flowField* field, struct flowStats* s,
-    bool enableNormalFlow, float minEventRate, float minSpeedVariance, float minPosVariance,
+    float minEventRate, float minPosVariance,
     struct cameraIntrinsicParameters intrinsics);
 
 /**

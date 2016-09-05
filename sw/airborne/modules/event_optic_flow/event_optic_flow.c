@@ -38,11 +38,6 @@
 #endif
 
 // Module settings
-#ifndef EOF_ENABLE_NORMALFLOW
-#define EOF_ENABLE_NORMALFLOW 0
-#endif
-PRINT_CONFIG_VAR(EOF_ENABLE_NORMALFLOW)
-
 #ifndef EOF_ENABLE_DEROTATION
 #define EOF_ENABLE_DEROTATION 1
 #endif
@@ -53,6 +48,11 @@ PRINT_CONFIG_VAR(EOF_ENABLE_DEROTATION)
 #endif
 PRINT_CONFIG_VAR(EOF_FILTER_TIME_CONSTANT)
 
+#ifndef EOF_FLOW_MAX_SPEED_DIFF
+#define EOF_FLOW_MAX_SPEED_DIFF 20.0f
+#endif
+PRINT_CONFIG_VAR(EOF_FLOW_MAX_SPEED_DIFF)
+
 #ifndef EOF_MIN_EVENT_RATE
 #define EOF_MIN_EVENT_RATE 100.0f
 #endif
@@ -62,11 +62,6 @@ PRINT_CONFIG_VAR(EOF_MIN_EVENT_RATE)
 #define EOF_MIN_POSITION_VARIANCE 100.0f
 #endif
 PRINT_CONFIG_VAR(EOF_MIN_POSITION_VARIANCE)
-
-#ifndef EOF_MIN_SPEED_VARIANCE
-#define EOF_MIN_SPEED_VARIANCE 100.0f
-#endif
-PRINT_CONFIG_VAR(EOF_MIN_SPEED_VARIANCE)
 
 #ifndef EOF_DIVERGENCE_CONTROL_PGAIN
 #define EOF_DIVERGENCE_CONTROL_PGAIN 1.0f
@@ -90,20 +85,19 @@ PRINT_CONFIG_VAR(EOF_DIVERGENCE_CONTROL_DIV_SETPOINT)
 struct module_state eofState;
 
 // Algorithm parameters
-uint8_t useNormalFlow = EOF_ENABLE_NORMALFLOW;
 uint8_t enableDerotation = EOF_ENABLE_DEROTATION;
 float statsFilterTimeConstant = EOF_FILTER_TIME_CONSTANT;
+float flowMaxSpeedDiff = EOF_FLOW_MAX_SPEED_DIFF;
 float divergenceControlGainP = EOF_DIVERGENCE_CONTROL_PGAIN;
 float divergenceControlSetpoint = EOF_DIVERGENCE_CONTROL_DIV_SETPOINT;
 
 // Confidence thresholds
 float minPosVariance = EOF_MIN_POSITION_VARIANCE;
-float minSpeedVariance = EOF_MIN_SPEED_VARIANCE;
 float minEventRate = EOF_MIN_EVENT_RATE;
 
 // Constants
 const int32_t MAX_NUMBER_OF_UART_EVENTS = 100;
-const float MOVING_AVERAGE_MIN_WINDOW = 10.0f;
+const float MOVING_AVERAGE_MIN_WINDOW = 5.0f;
 const uint8_t EVENT_SEPARATOR = 255;
 const float FLOW_INT16_TO_FLOAT = 100.0f;
 const uint32_t EVENT_BYTE_SIZE = sizeof(struct flowEvent) + 1; // +1 for separator
@@ -131,9 +125,13 @@ void divergenceLandingControllerRun(void);
 
 // ----- Implementations start here -----
 void event_optic_flow_init(void) {
-	struct flowField field = {0., 0., 0., 0., 0., 0};
+	struct flowField field = {0., 0., 0., 0., 0., {0.,0.,0.},0.};
+	field.p[0] = 0;
+	field.p[1] = 0;
+	field.p[2] = 0;
+	field.t = 0;
 	struct flowStats stats = {0., 0., 0., 0., 0., 0., 0., 0., 0.,
-	    0., 0., 0.,0., 0., 0.,0., 0., 0.,};
+	    0., 0., 0.,0., 0., 0.,0.};
 	eofState.field = field;
 	eofState.stats = stats;
 
@@ -149,10 +147,14 @@ void event_optic_flow_start(void) {
 	eofState.ratesMA.q = 0;
 	eofState.moduleFrequency = 100.0f;
 	eofState.z_NED = 0.0f;
-  struct flowField field = {0., 0., 0., 0., 0., 0};
-  struct flowStats stats = {0., 0., 0., 0., 0., 0., 0., 0., 0.,
-      0., 0., 0.,0., 0., 0.,0., 0., 0.,};
-  eofState.field = field;
+	struct flowField field = {0., 0., 0., 0., 0., {0.,0.,0.},0.};
+	field.p[0] = 0;
+	field.p[1] = 0;
+	field.p[2] = 0;
+	field.t = 0;
+	struct flowStats stats = {0., 0., 0., 0., 0., 0., 0., 0., 0.,
+	    0., 0., 0.,0., 0., 0.,0.};
+	eofState.field = field;
   eofState.stats = stats;
 }
 
@@ -162,8 +164,8 @@ void event_optic_flow_periodic(void) {
 	if (status == UPDATE_STATS) {
 		// If new events are received, recompute flow field
 		// In case the flow field is ill-posed, do not update
-		status = recomputeFlowField(&eofState.field, &eofState.stats, useNormalFlow,
-		    minEventRate, minPosVariance, minSpeedVariance, dvs128Intrinsics);
+		status = recomputeFlowField(&eofState.field, &eofState.stats,
+		    minEventRate, minPosVariance, dvs128Intrinsics);
 	}
 	// Timing bookkeeping, do this after the most uncertain computations,
 	// but before operations where timing info is necessary
@@ -290,7 +292,7 @@ enum updateStatus processUARTInput(struct flowStats* s, double filterTimeConstan
 	    separator = ringBufferGetByte();
 	    if (separator == EVENT_SEPARATOR) {
 	      // Full event received - this can be processed further
-	      updateFlowStats(s, e, filterTimeConstant, MOVING_AVERAGE_MIN_WINDOW);
+	      updateFlowStats(s, e, eofState.field, filterTimeConstant, MOVING_AVERAGE_MIN_WINDOW, flowMaxSpeedDiff);
 	      returnStatus = UPDATE_STATS;
 	    }
 	    else {

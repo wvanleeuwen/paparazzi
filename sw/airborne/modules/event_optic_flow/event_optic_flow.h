@@ -47,11 +47,10 @@ struct module_state {
 extern struct module_state eofState;
 
 // Setting variables
-extern uint8_t useNormalFlow;
 extern uint8_t enableDerotation;
 extern float statsFilterTimeConstant;
+extern float flowMaxSpeedDiff;
 extern float minPosVariance;
-extern float minSpeedVariance;
 extern float minEventRate;
 
 // Module main functions
