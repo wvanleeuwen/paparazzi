@@ -26,6 +26,7 @@
 
 #include "subsystems/imu.h"
 #include "mcu_periph/spi.h"
+#include "mcu_periph/sys_time.h"
 
 
 struct high_speed_logger_spi_link_data high_speed_logger_spi_link_data;
@@ -71,15 +72,16 @@ void high_speed_logger_spi_link_periodic(void)
     // USES DATA FROM EVENT_OPTIC_FLOW MODULE
     // The standard data slot assignment is used, but we store data differently
     high_speed_logger_spi_link_ready = false;
-    high_speed_logger_spi_link_data.gyro_p     = eofState.ratesMA.p;
-    high_speed_logger_spi_link_data.gyro_q     = eofState.ratesMA.q;
-    high_speed_logger_spi_link_data.gyro_r     = eofState.ratesMA.r;
-    high_speed_logger_spi_link_data.acc_x      = eofState.field.wx;
-    high_speed_logger_spi_link_data.acc_y      = eofState.field.wy;
-    high_speed_logger_spi_link_data.acc_z      = eofState.field.D;
-    high_speed_logger_spi_link_data.mag_x      = eofState.stats.eventRate;
-    high_speed_logger_spi_link_data.mag_y      = eofState.z_NED;
+    high_speed_logger_spi_link_data.gyro_p     = eofState.ratesMA.p*1000;
+    high_speed_logger_spi_link_data.gyro_q     = eofState.ratesMA.q*1000;
+    high_speed_logger_spi_link_data.gyro_r     = eofState.ratesMA.r*1000;
+    high_speed_logger_spi_link_data.acc_x      = eofState.field.wx*1000000;
+    high_speed_logger_spi_link_data.acc_y      = eofState.field.wy*1000000;
+    high_speed_logger_spi_link_data.acc_z      = eofState.field.D*1000000;
+    high_speed_logger_spi_link_data.mag_x      = eofState.stats.eventRate*1000;
+    high_speed_logger_spi_link_data.mag_y      = eofState.z_NED*1000000;
     high_speed_logger_spi_link_data.mag_z      = eofState.status;
+    high_speed_logger_spi_link_data.phi        = get_sys_time_usec();
 
     spi_submit(&(HIGH_SPEED_LOGGER_SPI_LINK_DEVICE), &high_speed_logger_spi_link_transaction);
   }

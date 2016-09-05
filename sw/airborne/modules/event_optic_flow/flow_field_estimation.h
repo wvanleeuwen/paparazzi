@@ -44,13 +44,17 @@ struct flowField {
  * N previous vector coordinates or the mean of cross-products of two
  * vector coordinates.
  *
- * E.g. 's<x><x>' refers to Sum_i^N {<x_i>*<x_i>} / N.
+ * E.g. 's<x><x>' refers to \f$\sum_i^N {<x_i>*<x_i>} / N \f$.
  *
  * These mean values can be used to compute, among others, variance:
- * Var{x} = (Sum_i^N {x_i^2} - (Sum_i^N {x_i})^2) / N
+ * \f[
+ * Var{x} = (\sum_i^N {x_i^2} - \left(\sum_i^N {x_i}\right)^2) / N
  *      = mxx - mx^2
+ * \f]
  * And similarly, covariance:
+ * \f[
  * Cov{x,y} = mxy - mx * my
+ * \f]
  *
  * And ultimately they are used for computing the flow field as a
  * least-squares solution.
@@ -67,6 +71,9 @@ struct flowStats {
 
 /**
  * Camera intrinsic parameters struct.
+ *
+ * Contains the principal point coordinates (x,y) and the focal lengths for x and y.
+ * Note that these are scaled by
  */
 struct cameraIntrinsicParameters {
   float principalPointX;

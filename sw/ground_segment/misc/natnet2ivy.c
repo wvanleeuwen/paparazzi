@@ -62,7 +62,7 @@ uint8_t natnet_minor            = 9;
 FILE *fp;
 char *nameOfLogfile             = "natnet_log.dat";
 bool log_exists = 0;
-bool must_log = 0;
+bool must_log = 1;
 
 /** Ivy Bus default */
 #ifdef __APPLE__
@@ -111,6 +111,12 @@ struct RigidBody {
   int nVelocitySamples;             ///< Number of velocity samples gathered
   int totalVelocitySamples;         ///< Total amount of velocity samples possible
   int nVelocityTransmit;            ///< Amount of transmits since last valid velocity transmit
+
+  struct EnuCoor_d pos, speed;      ///< Actually transmitted position and speed
+  struct EcefCoor_d ecef_pos;       ///< Actually transmitted ECEF position
+  struct LlaCoor_d lla_pos;         ///< Actually LLA position
+  double heading;                   ///< Actually transmitted heading
+  uint32_t tow;                     ///< Actually transmitted tow
 };
 struct RigidBody rigidBodies[MAX_RIGIDBODIES];    ///< All rigid bodies which are tracked
 
@@ -121,6 +127,10 @@ struct Aircraft {
   bool connected;
 };
 struct Aircraft aircrafts[MAX_RIGIDBODIES];                  ///< Mapping from rigid body ID to aircraft ID
+
+/** Global declaration of shared states (for faster logging, independent of ivy transmission) */
+uint32_t freq_transmit_ivy = 30;
+bool firstDataAvailable = FALSE;
 
 /** Natnet socket connections */
 struct UdpSocket natnet_data, natnet_cmd;
@@ -517,20 +527,17 @@ gboolean timeout_transmit_callback(gpointer data)
     aircrafts[rigidBodies[i].id].lastSample = natnet_latency;
 
     // Defines to make easy use of paparazzi math
-    struct EnuCoor_d pos, speed;
-    struct EcefCoor_d ecef_pos;
-    struct LlaCoor_d lla_pos;
     struct DoubleQuat orient;
     struct DoubleEulers orient_eulers;
 
     // Add the Optitrack angle to the x and y positions
-    pos.x = cos(tracking_offset_angle) * rigidBodies[i].x - sin(tracking_offset_angle) * rigidBodies[i].y;
-    pos.y = sin(tracking_offset_angle) * rigidBodies[i].x + cos(tracking_offset_angle) * rigidBodies[i].y;
-    pos.z = rigidBodies[i].z;
+    rigidBodies[i].pos.x = cos(tracking_offset_angle) * rigidBodies[i].x - sin(tracking_offset_angle) * rigidBodies[i].y;
+    rigidBodies[i].pos.y = sin(tracking_offset_angle) * rigidBodies[i].x + cos(tracking_offset_angle) * rigidBodies[i].y;
+    rigidBodies[i].pos.z = rigidBodies[i].z;
 
     // Convert the position to ecef and lla based on the Optitrack LTP
-    ecef_of_enu_point_d(&ecef_pos , &tracking_ltp , &pos);
-    lla_of_ecef_d(&lla_pos, &ecef_pos);
+    ecef_of_enu_point_d(&rigidBodies[i].ecef_pos , &tracking_ltp , &rigidBodies[i].pos);
+    lla_of_ecef_d(&rigidBodies[i].lla_pos, &rigidBodies[i].ecef_pos);
 
     // Check if we have enough samples to estimate the velocity
     rigidBodies[i].nVelocityTransmit++;
@@ -543,12 +550,12 @@ gboolean timeout_transmit_callback(gpointer data)
       rigidBodies[i].vel_z = rigidBodies[i].vel_z / sample_time;
 
       // Add the Optitrack angle to the x and y velocities
-      speed.x = cos(tracking_offset_angle) * rigidBodies[i].vel_x - sin(tracking_offset_angle) * rigidBodies[i].vel_y;
-      speed.y = sin(tracking_offset_angle) * rigidBodies[i].vel_x + cos(tracking_offset_angle) * rigidBodies[i].vel_y;
-      speed.z = rigidBodies[i].vel_z;
+      rigidBodies[i].speed.x = cos(tracking_offset_angle) * rigidBodies[i].vel_x - sin(tracking_offset_angle) * rigidBodies[i].vel_y;
+      rigidBodies[i].speed.y = sin(tracking_offset_angle) * rigidBodies[i].vel_x + cos(tracking_offset_angle) * rigidBodies[i].vel_y;
+      rigidBodies[i].speed.z = rigidBodies[i].vel_z;
 
       // Conver the speed to ecef based on the Optitrack LTP
-      ecef_of_enu_vect_d(&rigidBodies[i].ecef_vel , &tracking_ltp , &speed);
+      ecef_of_enu_vect_d(&rigidBodies[i].ecef_vel , &tracking_ltp , &rigidBodies[i].speed);
     }
 
     // Copy the quaternions and convert to euler angles for the heading
@@ -559,14 +566,14 @@ gboolean timeout_transmit_callback(gpointer data)
     double_eulers_of_quat(&orient_eulers, &orient);
 
     // Calculate the heading by adding the Natnet offset angle and normalizing it
-    double heading = -orient_eulers.psi + 90.0 / 57.6 -
+    rigidBodies[i].heading = -orient_eulers.psi + 90.0 / 57.6 -
                      tracking_offset_angle; //the optitrack axes are 90 degrees rotated wrt ENU
-    NormRadAngle(heading);
+    NormRadAngle(rigidBodies[i].heading);
 
     printf_debug("[%d -> %d]Samples: %d\t%d\t\tTiming: %3.3f latency\n", rigidBodies[i].id,
                  aircrafts[rigidBodies[i].id].ac_id
                  , rigidBodies[i].nSamples, rigidBodies[i].nVelocitySamples, natnet_latency);
-    printf_debug("    Heading: %f\t\tPosition: %f\t%f\t%f\t\tVelocity: %f\t%f\t%f\n", DegOfRad(heading),
+    printf_debug("    Heading: %f\t\tPosition: %f\t%f\t%f\t\tVelocity: %f\t%f\t%f\n", DegOfRad(rigidBodies[i].heading),
                  rigidBodies[i].x, rigidBodies[i].y, rigidBodies[i].z,
                  rigidBodies[i].ecef_vel.x, rigidBodies[i].ecef_vel.y, rigidBodies[i].ecef_vel.z);
 
@@ -576,8 +583,75 @@ gboolean timeout_transmit_callback(gpointer data)
     gettimeofday(&now, NULL);
     struct tm *ts = localtime(&now.tv_sec);
 
-    uint32_t tow = ts->tm_wday * (24 * 60 * 60 * 1000) + ts->tm_hour * (60 * 60 * 1000) + ts->tm_min *
+    rigidBodies[i].tow = ts->tm_wday * (24 * 60 * 60 * 1000) + ts->tm_hour * (60 * 60 * 1000) + ts->tm_min *
                    (60 * 1000) + ts->tm_sec * 1000 + now.tv_usec / 1000 ;
+
+    if (must_log) {
+      if (log_exists == 0) {
+        fp = fopen(nameOfLogfile, "w");
+        fprintf(stderr,"#pragma message: Opened log file.");
+        log_exists = 1;
+      }
+
+      if (fp == NULL) {
+        printf("I couldn't open file for writing.\n");
+        exit(0);
+      } else {
+        struct timeval cur_time;
+        gettimeofday(&cur_time, NULL);
+        fprintf(fp, "%d %d %d %d %d %d %d %d %d %d %d %d %d\n",
+                aircrafts[rigidBodies[i].id].ac_id,
+                rigidBodies[i].nMarkers,                          //uint8 Number of markers (sv_num)
+                (int)(rigidBodies[i].pos.x * 1000.0),              //int32 ECEF X in CM
+                (int)(rigidBodies[i].pos.y * 1000.0),              //int32 ECEF Y in CM
+                (int)(rigidBodies[i].pos.z * 1000.0),              //int32 ECEF Z in CM
+                (int)(rigidBodies[i].speed.x * 1000.0),            //int32 ECEF speed X in CM
+                (int)(rigidBodies[i].speed.y * 1000.0),            //int32 ECEF speed Y in CM
+                (int)(rigidBodies[i].speed.z * 1000.0),            //int32 ECEF speed Z in CM
+                (int)(orient_eulers.phi*10000000.0),              //int32 Roll angle in rad*1e7
+                (int)(orient_eulers.theta*10000000.0),            //int32 Pitch angle in rad*1e7
+                (int)((-orient_eulers.psi+90.0/57.6)*10000000.0), //int32 Heading angle in rad*1e7
+                (int)cur_time.tv_sec,                             //int32 Time in seconds
+                (int)cur_time.tv_usec);                           //int32 Time decimal part in microseconds
+      }
+    }
+
+    // Reset the velocity differentiator if we calculated the velocity
+    if (rigidBodies[i].nVelocitySamples >= min_velocity_samples) {
+      rigidBodies[i].vel_x = 0;
+      rigidBodies[i].vel_y = 0;
+      rigidBodies[i].vel_z = 0;
+      rigidBodies[i].nVelocitySamples = 0;
+      rigidBodies[i].totalVelocitySamples = 0;
+      rigidBodies[i].nVelocityTransmit = 0;
+    }
+
+    rigidBodies[i].nSamples = 0;
+  }
+  // Now that all data is computed, set transmission flag to true
+  firstDataAvailable = TRUE;
+
+  return TRUE;
+}
+
+/**
+ * New callback function to transmit data over ivy separately from file logging
+ */
+gboolean timeout_send_ivy_callback(gpointer data) {
+  // Check if data is allocated before first transmission, else, perform early return
+  if (!firstDataAvailable) {
+    return TRUE;
+  }
+
+  // Loop trough all the available rigidbodies
+  int i;
+  for (i = 0; i < MAX_RIGIDBODIES; i++) {
+    struct EnuCoor_d pos = rigidBodies[i].pos;
+    struct EnuCoor_d speed = rigidBodies[i].speed;
+    struct EcefCoor_d ecef_pos = rigidBodies[i].ecef_pos;
+    struct LlaCoor_d lla_pos = rigidBodies[i].lla_pos;
+    double heading = rigidBodies[i].heading;
+    uint32_t tow = rigidBodies[i].tow;
 
     // Transmit the REMOTE_GPS packet on the ivy bus (either small or big)
     if (small_packets) {
@@ -641,75 +715,29 @@ gboolean timeout_transmit_callback(gpointer data)
        * increases the probability that a complete message will be accepted
        */
       IvySendMsg("0 REMOTE_GPS_SMALL %d %d %d %d %d",
-                 (int16_t)(heading * 10000),       // int16_t heading in rad*1e4 (2 bytes)
-                 pos_xyz,                          // uint32 ENU X, Y and Z in CM (4 bytes)
-                 speed_xyz,                        // uint32 ENU velocity X, Y, Z in cm/s (4 bytes)
-                 tow,                              // uint32_t time of day
-                 aircrafts[rigidBodies[i].id].ac_id); // uint8 rigid body ID (1 byte)
+          (int16_t)(heading * 10000),       // int16_t heading in rad*1e4 (2 bytes)
+          pos_xyz,                          // uint32 ENU X, Y and Z in CM (4 bytes)
+          speed_xyz,                        // uint32 ENU velocity X, Y, Z in cm/s (4 bytes)
+          tow,                              // uint32_t time of day
+          aircrafts[rigidBodies[i].id].ac_id); // uint8 rigid body ID (1 byte)
 
     } else {
       IvySendMsg("0 REMOTE_GPS %d %d %d %d %d %d %d %d %d %d %d %d %d %d", aircrafts[rigidBodies[i].id].ac_id,
-                 rigidBodies[i].nMarkers,                //uint8 Number of markers (sv_num)
-                 (int)(ecef_pos.x * 100.0),              //int32 ECEF X in CM
-                 (int)(ecef_pos.y * 100.0),              //int32 ECEF Y in CM
-                 (int)(ecef_pos.z * 100.0),              //int32 ECEF Z in CM
-                 (int)(DegOfRad(lla_pos.lat) * 10000000.0),        //int32 LLA latitude in deg*1e7
-                 (int)(DegOfRad(lla_pos.lon) * 10000000.0),        //int32 LLA longitude in deg*1e7
-                 (int)(lla_pos.alt * 1000.0),            //int32 LLA altitude in mm above elipsoid
-                 (int)(rigidBodies[i].z * 1000.0),       //int32 HMSL height above mean sea level in mm
-                 (int)(rigidBodies[i].ecef_vel.x * 100.0), //int32 ECEF velocity X in cm/s
-                 (int)(rigidBodies[i].ecef_vel.y * 100.0), //int32 ECEF velocity Y in cm/s
-                 (int)(rigidBodies[i].ecef_vel.z * 100.0), //int32 ECEF velocity Z in cm/s
-                 tow,
-                 (int)(heading * 10000000.0));           //int32 Course in rad*1e7
+          rigidBodies[i].nMarkers,                //uint8 Number of markers (sv_num)
+          (int)(ecef_pos.x * 100.0),              //int32 ECEF X in CM
+          (int)(ecef_pos.y * 100.0),              //int32 ECEF Y in CM
+          (int)(ecef_pos.z * 100.0),              //int32 ECEF Z in CM
+          (int)(DegOfRad(lla_pos.lat) * 10000000.0),        //int32 LLA latitude in deg*1e7
+          (int)(DegOfRad(lla_pos.lon) * 10000000.0),        //int32 LLA longitude in deg*1e7
+          (int)(lla_pos.alt * 1000.0),            //int32 LLA altitude in mm above elipsoid
+          (int)(rigidBodies[i].z * 1000.0),       //int32 HMSL height above mean sea level in mm
+          (int)(rigidBodies[i].ecef_vel.x * 100.0), //int32 ECEF velocity X in cm/s
+          (int)(rigidBodies[i].ecef_vel.y * 100.0), //int32 ECEF velocity Y in cm/s
+          (int)(rigidBodies[i].ecef_vel.z * 100.0), //int32 ECEF velocity Z in cm/s
+          tow,
+          (int)(heading * 10000000.0));           //int32 Course in rad*1e7
     }
-    if (must_log) {
-      if (log_exists == 0) {
-        fp = fopen(nameOfLogfile, "w");
-        log_exists = 1;
-      }
-
-      if (fp == NULL) {
-        printf("I couldn't open file for writing.\n");
-        exit(0);
-      } else {
-        struct timeval cur_time;
-        gettimeofday(&cur_time, NULL);
-        fprintf(fp, "%d %d %d %d %d %d %d %d %d %d %d %d %d %d %d\n", aircrafts[rigidBodies[i].id].ac_id,
-                rigidBodies[i].nMarkers,                //uint8 Number of markers (sv_num)
-                (int)(ecef_pos.x * 100.0),              //int32 ECEF X in CM
-                (int)(ecef_pos.y * 100.0),              //int32 ECEF Y in CM
-                (int)(ecef_pos.z * 100.0),              //int32 ECEF Z in CM
-                (int)(DegOfRad(lla_pos.lat) * 1e7),     //int32 LLA latitude in deg*1e7
-                (int)(DegOfRad(lla_pos.lon) * 1e7),     //int32 LLA longitude in deg*1e7
-                (int)(lla_pos.alt * 1000.0),            //int32 LLA altitude in mm above elipsoid
-                (int)(rigidBodies[i].z * 1000.0),       //int32 HMSL height above mean sea level in mm
-                (int)(rigidBodies[i].ecef_vel.x * 100.0), //int32 ECEF velocity X in cm/s
-                (int)(rigidBodies[i].ecef_vel.y * 100.0), //int32 ECEF velocity Y in cm/s
-                (int)(rigidBodies[i].ecef_vel.z * 100.0), //int32 ECEF velocity Z in cm/s
-                (int)(heading * 10000000.0),            //int32 Course in rad*1e7
-                (int)cur_time.tv_sec,
-                (int)cur_time.tv_usec);
-      }
-    }
-
-
-
-
-
-    // Reset the velocity differentiator if we calculated the velocity
-    if (rigidBodies[i].nVelocitySamples >= min_velocity_samples) {
-      rigidBodies[i].vel_x = 0;
-      rigidBodies[i].vel_y = 0;
-      rigidBodies[i].vel_z = 0;
-      rigidBodies[i].nVelocitySamples = 0;
-      rigidBodies[i].totalVelocitySamples = 0;
-      rigidBodies[i].nVelocityTransmit = 0;
-    }
-
-    rigidBodies[i].nSamples = 0;
   }
-
   return TRUE;
 }
 
@@ -947,6 +975,7 @@ int main(int argc, char **argv)
   printf_debug("Starting transmitting and sampling timeouts (transmitting frequency: %dHz, minimum velocity samples: %d)\n",
                freq_transmit, min_velocity_samples);
   g_timeout_add(1000 / freq_transmit, timeout_transmit_callback, NULL);
+  g_timeout_add(1000 / freq_transmit_ivy, timeout_send_ivy_callback, NULL);
 
   GIOChannel *sk = g_io_channel_unix_new(natnet_data.sockfd);
   g_io_add_watch(sk, G_IO_IN | G_IO_NVAL | G_IO_HUP,

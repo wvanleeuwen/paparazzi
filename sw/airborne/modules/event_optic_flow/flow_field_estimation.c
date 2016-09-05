@@ -9,6 +9,14 @@
 
 float FLT_MIN_RESOLUTION = 1e-3;
 
+/**
+ * Recomputation of optic flow statistics with a newly arrived flow event.
+ *
+ * @param s The flow statistics to be updated.
+ * @param e The new flow event.
+ * @param filterTimeConstant The time constant for the low pass filter.
+ * @param movingAverageWindow The fallback moving average window, for when the time difference is too high.
+ */
 void updateFlowStats(struct flowStats* s, struct flowEvent e, float filterTimeConstant,
     float movingAverageWindow) {
   static int32_t tPrevious = 0;
@@ -141,6 +149,12 @@ enum updateStatus recomputeFlowField(struct flowField* field, struct flowStats* 
   return UPDATE_SUCCESS;
 }
 
+/**
+ * Simple derotation of the optic flow field parameters.
+ *
+ * @param field The flow field to be derotated.
+ * @param rates The input body rates.
+ */
 void derotateFlowField(struct flowField* field, struct FloatRates* rates) {
   float p = rates->p;
   float q = rates->q;
