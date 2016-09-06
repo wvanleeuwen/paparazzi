@@ -342,13 +342,33 @@ void gps_ubx_msg(void)
   gps_ubx.msg_available = false;
 }
 
-#ifdef UBX_M8P_RTK
+
+/*
+ * Write bytes to the ublox UART connection
+ * This is a wrapper functions used in the librtcm library
+ */
+uint32_t gps_ublox_write(uint8_t *buff, uint32_t n, void *context __attribute__((unused)))
+{
+  uint32_t i = 0;
+  for (i = 0; i < n; i++) {
+    uart_put_byte(&(UBX_GPS_LINK), 0, buff[i]);
+  }
+  return n;
+}
 /**
  * Override the default GPS packet injector to inject the data
  */
 void gps_inject_data(uint8_t packet_id, uint8_t length, uint8_t *data)
 {
-	printf("Writing bytes to UBX\n");
-	ubx_send_bytes(&(UBX_GPS_LINK).device, length, data);
+	switch(packet_id)
+	{
+	case 105 : printf("Type: 1005 (length: %i)\n", length); break;
+	case 177 : printf("Type: 1077 (length: %i)\n", length); break;
+	case 187 : printf("Type: 1087 (length: %i)\n", length); break;
+	default: printf("Unknown type: %i", packet_id); break;
+	}
+	int n;
+	n = gps_ublox_write(data, length, NULL);
+	printf("Written %i bytes to ublox\n",n);
+	nanosleep((const struct timespec[]){{0, 100000000L}}, NULL);
 }
-#endif

@@ -10,7 +10,7 @@
     </target>
 
     <define name="USE_SONAR" value="TRUE"/>
-    <define name="UBX_M8P_RTK" value="TRUE"/>
+    <configure name="UBX_M8P_RTK" value="TRUE"/>
 	<!-- Subsystem section -->
     <module name="telemetry" type="transparent_udp"/>
     <module name="radio_control" type="datalink"/>

@@ -56,7 +56,6 @@ void dl_parse_msg(void)
 {
   uint8_t sender_id = SenderIdOfPprzMsg(dl_buffer);
   uint8_t msg_id = IdOfPprzMsg(dl_buffer);
-  printf("Got message %i from sender %i\n", msg_id, sender_id);
   /* parse telemetry messages coming from other AC */
   if (sender_id != 0) {
     switch (msg_id) {
@@ -127,17 +126,16 @@ void dl_parse_msg(void)
       break;
 #ifndef UBX_M8P_RTK
       case DL_RTCM_INJECT : {
-              printf("Parsing inject gps data\n");
               // GPS parse data
               gps_inject_data(
-                DL_GPS_INJECT_packet_id(dl_buffer),
-                DL_GPS_INJECT_data_length(dl_buffer),
-                DL_GPS_INJECT_data(dl_buffer)
+                DL_RTCM_INJECT_packet_id(dl_buffer),
+				DL_RTCM_INJECT_data_length(dl_buffer),
+				DL_RTCM_INJECT_data(dl_buffer)
               );
             }
             break;
 #endif // UBX_M8P_RTK
-#endif  // USE_GPS
+#endif // USE_GPS
       default:
         break;
     }

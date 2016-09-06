@@ -63,7 +63,7 @@ bool verbose = FALSE;
 #ifdef __APPLE__
 char *ivy_bus                   = "224.255.255.255";
 #else
-char *ivy_bus                   = "127.255.255.255:2010"; // 192.168.1.255   127.255.255.255
+char *ivy_bus                   = "192.168.1.255"; // 192.168.1.255   127.255.255.255
 #endif
 
 /*
@@ -80,11 +80,9 @@ static uint32_t rtcm3_read(unsigned char (*buff)[], uint32_t n, void *context __
 }
 
 static void ivy_send_message(uint8_t packet_id, uint8_t len, uint8_t msg[]) {
-  char gps_packet[512], number[5];
+  char gps_packet[4146], number[5]; // 1024 + 6 = max msg_len --> *4 for int representation in string (255,) + 25 ivy_msg description + 1 null character = 4146
   uint8_t i;
-
-  snprintf(gps_packet, 512, "0 RTCM_INJECT %d %d %d", packet_id, len, msg[0]); //AC_ID
-  //snprintf(gps_packet, 512, "datalink RTCM_INJECT %d %d", packet_id, msg[0]); //AC_ID
+  snprintf(gps_packet, 4146, "rtcm2ivy RTCM_INJECT %d %d", packet_id, msg[0]);
   for(i = 1; i < len; i++) {
     snprintf(number, 5, ",%d", msg[i]);
     strcat(gps_packet, number);
