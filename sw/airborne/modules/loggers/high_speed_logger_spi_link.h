@@ -26,7 +26,9 @@
 #include "std.h"
 
 extern void high_speed_logger_spi_link_init(void);
+extern void high_speed_logger_spi_link_start(void);
 extern void high_speed_logger_spi_link_periodic(void);
+extern void high_speed_logger_spi_link_stop(void);
 
 #define PACKED __attribute__((__packed__))
 

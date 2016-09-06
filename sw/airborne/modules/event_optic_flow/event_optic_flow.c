@@ -126,10 +126,6 @@ void divergenceLandingControllerRun(void);
 // ----- Implementations start here -----
 void event_optic_flow_init(void) {
 	struct flowField field = {0., 0., 0., 0., 0., {0.,0.,0.},0.};
-	field.p[0] = 0;
-	field.p[1] = 0;
-	field.p[2] = 0;
-	field.t = 0;
 	struct flowStats stats = {0., 0., 0., 0., 0., 0., 0., 0., 0.,
 	    0., 0., 0.,0., 0., 0.,0.};
 	eofState.field = field;
@@ -145,13 +141,14 @@ void event_optic_flow_start(void) {
 	// Reset low pass filter for rates
 	eofState.ratesMA.p = 0;
 	eofState.ratesMA.q = 0;
+	// (Re-)initialization
 	eofState.moduleFrequency = 100.0f;
 	eofState.z_NED = 0.0f;
+	eofState.wxTruth = 0.0f;
+	eofState.wyTruth = 0.0f;
+	eofState.DTruth = 0.0f;
+
 	struct flowField field = {0., 0., 0., 0., 0., {0.,0.,0.},0.};
-	field.p[0] = 0;
-	field.p[1] = 0;
-	field.p[2] = 0;
-	field.t = 0;
 	struct flowStats stats = {0., 0., 0., 0., 0., 0., 0., 0., 0.,
 	    0., 0., 0.,0., 0., 0.,0.};
 	eofState.field = field;
@@ -201,9 +198,23 @@ void event_optic_flow_periodic(void) {
 	  eofState.field.wyDerotated = eofState.field.wy;
 	}
 
-	// Update height from Optitrack
+	// Update height/ground truth speeds from Optitrack
   struct NedCoor_f *pos = stateGetPositionNed_f();
+  struct NedCoor_f *vel = stateGetSpeedNed_f();
+//  struct FloatRMat *rot = stateGetNedToBodyRMat_f();
+  struct FloatEulers *ang = stateGetNedToBodyEulers_f();
   eofState.z_NED = pos->z; // for downlink
+  //TODO implement transformation below for orientation corrected ground truth
+  /*struct NedCoor_f velB;
+  // Transformation of speeds to body frame
+  velB.x = rot->m[0][0] * vel->x + rot->m[0][1] * vel->y + rot->m[0][2] * vel->z;
+  velB.y = rot->m[1][0] * vel->x + rot->m[1][1] * vel->y + rot->m[1][2] * vel->z;
+  velB.z = rot->m[2][0] * vel->x + rot->m[2][1] * vel->y + rot->m[2][2] * vel->z;
+  float R = -pos->z/(cosf(ang->theta)*cosf(ang->phi));*/
+  //TODO verify signs in calculation below
+  eofState.wxTruth = -vel->y*cosf(ang->psi) -vel->x*sinf(ang->psi);
+  eofState.wyTruth = -vel->x*cosf(ang->psi) -vel->y*sinf(ang->psi);
+  eofState.DTruth = 2*vel->z/pos->z;
 
 	// Set control signals
 	if (EOF_CONTROL_HOVER) {
@@ -319,11 +330,13 @@ static void sendFlowFieldState(struct transport_tx *trans, struct link_device *d
   float D  = eofState.field.D;
   float wxDerotated = eofState.field.wxDerotated;
   float wyDerotated = eofState.field.wyDerotated;
-  float vx = eofState.z_NED * wyDerotated;
-  float vy = eofState.z_NED * -wxDerotated;
+  float wxTruth = eofState.wxTruth;
+  float wyTruth = eofState.wyTruth;
+  float DTruth = eofState.DTruth;
 
   pprz_msg_send_EVENT_OPTIC_FLOW_EST(trans, dev, AC_ID,
-      &fps, &confidence, &eventRate, &wx, &wy, &D, &wxDerotated, &wyDerotated,&vx,&vy);
+      &fps, &confidence, &eventRate, &wx, &wy, &D, &wxDerotated, &wyDerotated,
+      &wxTruth,&wyTruth,&DTruth);
 }
 
 void divergenceLandingControllerInit(void) {

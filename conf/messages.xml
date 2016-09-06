@@ -2042,8 +2042,9 @@
     <field name="divergence"    	type="float" unit="1/s"/>
     <field name="flow_x_der"    	type="float" unit="1/s"/>
     <field name="flow_y_der"    	type="float" unit="1/s"/>
-    <field name="vx_est"    		type="float" unit="m/s"/>
-    <field name="vy_est"    		type="float" unit="m/s"/>
+    <field name="wx_T"    		type="float" unit="1/s"/>
+    <field name="wy_T"    		type="float" unit="1/s"/>
+    <field name="D_T"    		type="float" unit="1/s"/>
   </message>
 
   <message name="ROTORCRAFT_STATUS" id="231">

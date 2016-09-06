@@ -39,6 +39,7 @@ struct module_state {
   struct flowStats stats;
   struct FloatRates ratesMA;
   float z_NED;
+  float wxTruth, wyTruth,DTruth;
   float lastTime;
   float moduleFrequency;
   enum updateStatus status;
