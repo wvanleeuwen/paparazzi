@@ -96,7 +96,7 @@
       </block>
     </message>
     
-    <message name="HPPOSECEF" ID="0x13">
+    <message name="HPPOSECEF" ID="0x13" length="28">
     	<field name="ITOW" format="U4" unit="ms"/>
     	<field name="ECEF_X" format="I4" unit="cm"/>
     	<field name="ECEF_Y" format="I4" unit="cm"/>
@@ -108,7 +108,7 @@
     	<field name="Pacc" format="U4" scaling="1e-1" unit="mm"/>
     </message>
     
-    <message name="HPPOSLLH" ID="0x13">
+    <message name="HPPOSLLH" ID="0x13" length="36">
     	<field name="ITOW" format="U4" unit="ms"/>
         <field name="LON" format="I4" scaling="1e-7" unit="deg"/>
         <field name="LAT" format="I4" scaling="1e-7" unit="deg"/>
@@ -122,7 +122,7 @@
         <field name="Vacc" format="U4" scaling="1e-1" unit="mm"/> 
     </message>
     
-    <message name="RELPOSNED" ID="0x3C">
+    <message name="RELPOSNED" ID="0x3C" length="40">
     	<field name="ITOW" format="U4" unit="ms"/>
     	<field name="RELPOSN" format="I4" unit="cm"/>
     	<field name="RELPOSE" format="I4" unit="cm"/>
