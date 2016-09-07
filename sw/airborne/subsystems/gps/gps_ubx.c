@@ -51,10 +51,13 @@
 
 struct GpsUbx gps_ubx;
 
+extern int gps_ubx_ucenter_get_status(void);
+
 #if USE_GPS_UBX_RXM_RAW
 struct GpsUbxRaw gps_ubx_raw;
 #endif
 
+bool safeToInject = true;
 struct GpsTimeSync gps_ubx_time_sync;
 
 void gps_ubx_init(void)
@@ -160,10 +163,16 @@ void gps_ubx_read_message(void)
       gps_ubx.state.fix = UBX_NAV_STATUS_GPSfix(gps_ubx.msg_buf);
       gps_ubx.status_flags = UBX_NAV_STATUS_Flags(gps_ubx.msg_buf);
       gps_ubx.sol_flags = UBX_NAV_SOL_Flags(gps_ubx.msg_buf);
+    } else if (gps_ubx.msg_id == UBX_NAV_HPPOSECEF_ID) {
+    	//printf("UBX_NAV_HPPOSECEF\n");
+    } else if (gps_ubx.msg_id == UBX_NAV_HPPOSLLH_ID) {
+    	//printf("UBX_NAV_HPPOSLLH\n");
+    } else if (gps_ubx.msg_id == UBX_NAV_RELPOSNED_ID){
+    	//printf("UBX_NAV_RELPOSNED\n");
     }
   }
-#if USE_GPS_UBX_RXM_RAW
   else if (gps_ubx.msg_class == UBX_RXM_ID) {
+#if USE_GPS_UBX_RXM_RAW
     if (gps_ubx.msg_id == UBX_RXM_RAW_ID) {
       gps_ubx_raw.iTOW = UBX_RXM_RAW_iTOW(gps_ubx.msg_buf);
       gps_ubx_raw.week = UBX_RXM_RAW_week(gps_ubx.msg_buf);
@@ -180,8 +189,16 @@ void gps_ubx_read_message(void)
         gps_ubx_raw.measures[i].lli = UBX_RXM_RAW_lli(gps_ubx.msg_buf, i);
       }
     }
+#ifdef USE_GPS_UBX_RTCM
+    else
+#endif // USE_GPS_UBX_RXM_RAW
+#endif // USE_GPS_UBX_RTCM
+#ifdef USE_GPS_UBX_RTCM
+    if (gps_ubx.msg_class == UBX_RXM_RTCM_ID) {
+    	printf("UBX_RXM_RTCM\n");
+    }
+#endif // USE_GPS_UBX_RTCM
   }
-#endif
 }
 
 #if LOG_RAW_GPS
@@ -347,29 +364,50 @@ void gps_ubx_msg(void)
  * Write bytes to the ublox UART connection
  * This is a wrapper functions used in the librtcm library
  */
-uint32_t gps_ublox_write(uint8_t *buff, uint32_t n, void *context __attribute__((unused)))
+void gps_ublox_write(struct link_device *dev, uint8_t *buff, uint32_t n)
 {
   uint32_t i = 0;
   for (i = 0; i < n; i++) {
-    uart_put_byte(&(UBX_GPS_LINK), 0, buff[i]);
+	  dev->put_byte(dev->periph, 0, buff[i]);
   }
-  return n;
+  dev->send_message(dev->periph, 0);
+  return;
 }
 /**
  * Override the default GPS packet injector to inject the data
  */
 void gps_inject_data(uint8_t packet_id, uint8_t length, uint8_t *data)
 {
-	switch(packet_id)
+	if(safeToInject == false)
 	{
-	case 105 : printf("Type: 1005 (length: %i)\n", length); break;
-	case 177 : printf("Type: 1077 (length: %i)\n", length); break;
-	case 187 : printf("Type: 1087 (length: %i)\n", length); break;
-	default: printf("Unknown type: %i", packet_id); break;
+		printf("Already writing, discarding message %i\n", packet_id);
+	}else{
+		safeToInject = false;
+#ifdef GPS_UBX_UCENTER
+		if(gps_ubx_ucenter_get_status() == 0)
+		{
+			switch(packet_id)
+			{
+			case 105 : printf("Type: 1005 (length: %i)\n", length); break;
+			case 177 : printf("Type: 1077 (length: %i)\n", length); break;
+			case 187 : printf("Type: 1087 (length: %i)\n", length); break;
+			default: printf("Unknown type: %i", packet_id); break;
+			}
+			//ubx_send_bytes(&(UBX_GPS_LINK).device, length, data);
+			gps_ublox_write(&(UBX_GPS_LINK).device, data, length);
+			//printf("Written %i bytes to ublox\n",n);
+			//nanosleep((const struct timespec[]){{0, 100000000L}}, NULL);
+		}
+#else
+		switch(packet_id)
+		{
+		case 105 : printf("Type: 1005 (length: %i)\n", length); break;
+		case 177 : printf("Type: 1077 (length: %i)\n", length); break;
+		case 187 : printf("Type: 1087 (length: %i)\n", length); break;
+		default: printf("Unknown type: %i", packet_id); break;
+		}
+		gps_ublox_write(&(UBX_GPS_LINK).device, data, length);
+#endif
+		safeToInject = true;
 	}
-	int n;
-	//ubx_send_bytes(&(UBX_GPS_LINK).device, length, data);
-	n = gps_ublox_write(data, length, NULL);
-	printf("Written %i bytes to ublox\n",n);
-	nanosleep((const struct timespec[]){{0, 100000000L}}, NULL);
 }

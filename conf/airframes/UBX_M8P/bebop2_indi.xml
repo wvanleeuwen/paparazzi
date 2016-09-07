@@ -16,6 +16,9 @@
       <define name="STABILIZATION_INDI_G2_R" value="0.0"/>
     </target>
 
+    <define name="USE_GPS_UBX_RTCM" value="TRUE"/>
+    <define name="PRINT_DEBUG_GPS_UBX_UCENTER" value="TRUE"/>
+    <define name="DEBUG_GPS_UBX_UCENTER" value="TRUE"/>
 	  <!-- Subsystem section -->
     <module name="telemetry" type="transparent_udp"/>
     <module name="radio_control" type="datalink"/>
@@ -35,7 +38,7 @@
     <module name="geo_mag"/>
     <module name="air_data"/>
     <module name="send_imu_mag_current"/>
-    <!-- <module name="gps" type="ubx_ucenter"/> -->
+    <module name="gps" type="ubx_ucenter"/>
     <module name="logger_file">
       <define name="FILE_LOGGER_PATH" value="/data/ftp/internal_000"/>
     </module>

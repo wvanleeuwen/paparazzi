@@ -63,7 +63,7 @@ bool verbose = FALSE;
 #ifdef __APPLE__
 char *ivy_bus                   = "224.255.255.255";
 #else
-char *ivy_bus                   = "192.168.1.255"; // 192.168.1.255   127.255.255.255
+char *ivy_bus                   = "192.168.40.255"; // 192.168.1.255   127.255.255.255
 #endif
 
 /*

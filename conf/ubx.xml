@@ -97,6 +97,9 @@
     </message>
     
     <message name="HPPOSECEF" ID="0x13" length="28">
+    	<field name="VERSION" format="U1"/>
+    	<field name="RES1" format="U2"/>
+    	<field name="RES2" format="U1"/>
     	<field name="ITOW" format="U4" unit="ms"/>
     	<field name="ECEF_X" format="I4" unit="cm"/>
     	<field name="ECEF_Y" format="I4" unit="cm"/>
@@ -104,11 +107,14 @@
     	<field name="ECEF_XHP" format="I1" scaling="1e-1" unit="mm"/>
     	<field name="ECEF_YHP" format="I1" scaling="1e-1" unit="mm"/>
     	<field name="ECEF_ZHP" format="I1" scaling="1e-1" unit="mm"/>
-    	<field name="RES1" format="U1"/>
+    	<field name="RES3" format="U1"/>
     	<field name="Pacc" format="U4" scaling="1e-1" unit="mm"/>
     </message>
     
-    <message name="HPPOSLLH" ID="0x13" length="36">
+    <message name="HPPOSLLH" ID="0x14" length="36">
+        <field name="VERSION" format="U1"/>
+    	<field name="RES1" format="U2"/>
+    	<field name="RES2" format="U1"/>
     	<field name="ITOW" format="U4" unit="ms"/>
         <field name="LON" format="I4" scaling="1e-7" unit="deg"/>
         <field name="LAT" format="I4" scaling="1e-7" unit="deg"/>
@@ -116,13 +122,16 @@
         <field name="HMSL" format="I4" unit="mm"/>
         <field name="LONHP" format="I1" scaling="1e-9" unit="deg"/>
         <field name="LATHP" format="I1" scaling="1e-9" unit="deg"/>
-        <field name="HEIGHTHP" format="I4" scaling="1e-1" unit="mm"/>
-        <field name="HMSLHP" format="I4" scaling="1e-1" unit="mm"/>
+        <field name="HEIGHTHP" format="I1" scaling="1e-1" unit="mm"/>
+        <field name="HMSLHP" format="I1" scaling="1e-1" unit="mm"/>
         <field name="Hacc" format="U4" scaling="1e-1" unit="mm"/>
         <field name="Vacc" format="U4" scaling="1e-1" unit="mm"/> 
     </message>
     
     <message name="RELPOSNED" ID="0x3C" length="40">
+        <field name="VERSION" format="U1"/>
+    	<field name="RES1" format="U2"/>
+    	<field name="RES2" format="U1"/>
     	<field name="ITOW" format="U4" unit="ms"/>
     	<field name="RELPOSN" format="I4" unit="cm"/>
     	<field name="RELPOSE" format="I4" unit="cm"/>
@@ -130,7 +139,7 @@
     	<field name="RELPOSNHP" format="I1" scaling="1e-1" unit="mm"/>
     	<field name="RELPOSEHP" format="I1" scaling="1e-1" unit="mm"/>
     	<field name="RELPOSDHP" format="I1" scaling="1e-1" unit="mm"/>
-    	<field name="RES1" format="U1"/>
+    	<field name="RES3" format="U1"/>
     	<field name="Nacc" format="U4" scaling="1e-1" unit="mm"/>
     	<field name="Eacc" format="U4" scaling="1e-1" unit="mm"/>
     	<field name="Dacc" format="U4" scaling="1e-1" unit="mm"/>
@@ -232,10 +241,34 @@
       <field name="res3" format="U4"/>
       <field name="res4" format="U4"/>
     </message>
+    
+    <message name="NAV5_HPG" ID="0x24" length="36">
+      <field name="mask"   format="U2"/>
+      <field name="dynModel" format="U1"/>
+      <field name="fixModel" format="U1"/>
+      <field name="fixedAlt" format="I4"/>
+      <field name="fixedAltVar" format="U4"/>
+      <field name="minElev" format="I1"/>
+      <field name="drLimit" format="U1"/>
+      <field name="dDop" format="U2"/>
+      <field name="tDop" format="U2"/>
+      <field name="pAcc" format="U2"/>
+      <field name="tAcc" format="U2"/>
+      <field name="staticHoldThresh" format="U1"/>
+      <field name="dgnssTimeout" format="U1" unit="s"/>
+      <field name="cnoThreshNumSVs" format="U1"/>
+      <field name="cnoThresh" format="U1" unit="dBHz"/>
+      <field name="res1" format="U2"/>
+      <field name="staticHoldMaxDist" format="U2" unit="m"/>
+      <field name="utcStandard" format="U1"/>
+      <field name="res2" format="U4"/>
+      <field name="res3" format="U1"/>
+    </message>
 
     <message name="DGNSS" ID="0x70" length="4">
       <field name="dgnssMode" format="U1"/>
-      <field name="reserved1" format="U3"/>
+      <field name="RES1" format="U2"/>
+      <field name="RES2" format="U1"/>
     </message>
   </msg_class>
 
@@ -294,11 +327,12 @@ supported.
       <field name="dwrd9" format="U4"/>
     </message>
 
-    <message name="RTCM" ID="0x31" length="8">
-       <field name="flags"      format="U1"/>
-       <field name="reserved1"  format="U2"/>
+    <message name="RTCM" ID="0x32" length="8">
+       <field name="version" format="U1"/>
+       <field name="flags" format="U1"/>
+       <field name="reserved1" format="U2"/>
        <field name="refStation" format="U2"/>
-       <field name="msgType"    format="U2"/>
+       <field name="msgType" format="U2"/>
     </message>
   </msg_class>
 

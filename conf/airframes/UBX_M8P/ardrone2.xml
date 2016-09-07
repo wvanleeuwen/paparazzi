@@ -10,7 +10,9 @@
     </target>
 
     <define name="USE_SONAR" value="TRUE"/>
-    <configure name="UBX_M8P_RTK" value="TRUE"/>
+    <define name="USE_GPS_UBX_RTCM" value="TRUE"/>
+    <define name="PRINT_DEBUG_GPS_UBX_UCENTER" value="TRUE"/>
+    <define name="DEBUG_GPS_UBX_UCENTER" value="TRUE"/>
 	<!-- Subsystem section -->
     <module name="telemetry" type="transparent_udp"/>
     <module name="radio_control" type="datalink"/>
