@@ -95,6 +95,47 @@
         <field name="PRRes" format="I4" unit="cm"/>
       </block>
     </message>
+    
+    <message name="HPPOSECEF" ID="0x13">
+    	<field name="ITOW" format="U4" unit="ms"/>
+    	<field name="ECEF_X" format="I4" unit="cm"/>
+    	<field name="ECEF_Y" format="I4" unit="cm"/>
+    	<field name="ECEF_Z" format="I4" unit="cm"/>
+    	<field name="ECEF_XHP" format="I1" scaling="1e-1" unit="mm"/>
+    	<field name="ECEF_YHP" format="I1" scaling="1e-1" unit="mm"/>
+    	<field name="ECEF_ZHP" format="I1" scaling="1e-1" unit="mm"/>
+    	<field name="RES1" format="U1"/>
+    	<field name="Pacc" format="U4" scaling="1e-1" unit="mm"/>
+    </message>
+    
+    <message name="HPPOSLLH" ID="0x13">
+    	<field name="ITOW" format="U4" unit="ms"/>
+        <field name="LON" format="I4" scaling="1e-7" unit="deg"/>
+        <field name="LAT" format="I4" scaling="1e-7" unit="deg"/>
+        <field name="HEIGHT" format="I4" unit="mm"/>
+        <field name="HMSL" format="I4" unit="mm"/>
+        <field name="LONHP" format="I1" scaling="1e-9" unit="deg"/>
+        <field name="LATHP" format="I1" scaling="1e-9" unit="deg"/>
+        <field name="HEIGHTHP" format="I4" scaling="1e-1" unit="mm"/>
+        <field name="HMSLHP" format="I4" scaling="1e-1" unit="mm"/>
+        <field name="Hacc" format="U4" scaling="1e-1" unit="mm"/>
+        <field name="Vacc" format="U4" scaling="1e-1" unit="mm"/> 
+    </message>
+    
+    <message name="RELPOSNED" ID="0x3C">
+    	<field name="ITOW" format="U4" unit="ms"/>
+    	<field name="RELPOSN" format="I4" unit="cm"/>
+    	<field name="RELPOSE" format="I4" unit="cm"/>
+    	<field name="RELPOSD" format="I4" unit="cm"/>
+    	<field name="RELPOSNHP" format="I1" scaling="1e-1" unit="mm"/>
+    	<field name="RELPOSEHP" format="I1" scaling="1e-1" unit="mm"/>
+    	<field name="RELPOSDHP" format="I1" scaling="1e-1" unit="mm"/>
+    	<field name="RES1" format="U1"/>
+    	<field name="Nacc" format="U4" scaling="1e-1" unit="mm"/>
+    	<field name="Eacc" format="U4" scaling="1e-1" unit="mm"/>
+    	<field name="Dacc" format="U4" scaling="1e-1" unit="mm"/>
+    	<field name="Flags" format="U4"/>
+    </message>
 
   </msg_class>
 
