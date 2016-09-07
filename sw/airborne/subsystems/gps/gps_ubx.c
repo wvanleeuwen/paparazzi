@@ -368,6 +368,7 @@ void gps_inject_data(uint8_t packet_id, uint8_t length, uint8_t *data)
 	default: printf("Unknown type: %i", packet_id); break;
 	}
 	int n;
+	//ubx_send_bytes(&(UBX_GPS_LINK).device, length, data);
 	n = gps_ublox_write(data, length, NULL);
 	printf("Written %i bytes to ublox\n",n);
 	nanosleep((const struct timespec[]){{0, 100000000L}}, NULL);

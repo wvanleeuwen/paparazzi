@@ -3,6 +3,8 @@
 <airframe name="bebop2_indi">
 
   <firmware name="rotorcraft">
+    <configure name="HOST" value="192.168.40.30" />
+    <configure name="MODEM_HOST" value="192.168.40.255" />
     <target name="ap" board="bebop2">
       <define name="STABILIZATION_INDI_G2_R" value="0.20"/>
     </target>
@@ -33,7 +35,7 @@
     <module name="geo_mag"/>
     <module name="air_data"/>
     <module name="send_imu_mag_current"/>
-    <module name="gps" type="ubx_ucenter"/>
+    <!-- <module name="gps" type="ubx_ucenter"/> -->
     <module name="logger_file">
       <define name="FILE_LOGGER_PATH" value="/data/ftp/internal_000"/>
     </module>
