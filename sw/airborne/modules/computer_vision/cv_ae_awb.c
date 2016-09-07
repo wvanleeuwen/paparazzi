@@ -23,8 +23,6 @@
  * Auto exposure and Auto white balancing for the Bebop 1 and 2
  */
 
-#include <stdio.h>
-
 #include "modules/computer_vision/cv_ae_awb.h"
 #include "lib/isp/libisp.h"
 
@@ -67,7 +65,7 @@ void cv_ae_awb_periodic(void) {
 
     // Fix saturated pixels
     if(saturated_pixels > max_saturated_pixels) {
-      adjustment = 1.0f - ((float)(saturated_pixels - max_saturated_pixels)) / yuv_stats.nb_valid_Y;
+      adjustment = 1.0f - ((float)(saturated_pixels - max_saturated_pixels))/yuv_stats.nb_valid_Y;
     }
     // Fix bright pixels
     else if (bright_pixels < target_bright_pixels) {
@@ -102,7 +100,7 @@ void cv_ae_awb_periodic(void) {
     if (avgU - avgV + targetAWB < -fTolerance) {
       // Want more red
 #if CV_AE_AWB_VERBOSE
-      printf("Too red...\r\n");
+      printf("Too red... %f\r\n", avgU - avgV);
 #endif
       mt9f002.gain_blue += 0.1;
       mt9f002.gain_red  -= 0.1;
@@ -113,7 +111,7 @@ void cv_ae_awb_periodic(void) {
     else if(avgU - avgV + targetAWB > fTolerance) {
       // Want more blue
 #if CV_AE_AWB_VERBOSE
-      printf("Too blue...\r\n");
+      printf("Too blue... %f\r\n", avgU - avgV);
 #endif
       mt9f002.gain_blue -= 0.1;
       mt9f002.gain_red  += 0.1;
