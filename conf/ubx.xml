@@ -233,6 +233,10 @@
       <field name="res4" format="U4"/>
     </message>
 
+    <message name="DGNSS" ID="0x70" length="4">
+      <field name="dgnssMode" format="U1"/>
+      <field name="reserved1" format="U3"/>
+    </message>
   </msg_class>
 
   <msg_class name="ACK" ID="0x05">
@@ -290,6 +294,12 @@ supported.
       <field name="dwrd9" format="U4"/>
     </message>
 
+    <message name="RTCM" ID="0x31" length="8">
+       <field name="flags"      format="U1"/>
+       <field name="reserved1"  format="U2"/>
+       <field name="refStation" format="U2"/>
+       <field name="msgType"    format="U2"/>
+    </message>
   </msg_class>
 
   <msg_class name="MON" ID="0x0A">
