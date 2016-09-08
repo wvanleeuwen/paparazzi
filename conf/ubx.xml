@@ -130,8 +130,8 @@
     
     <message name="RELPOSNED" ID="0x3C" length="40">
         <field name="VERSION" format="U1"/>
-    	<field name="RES1" format="U2"/>
-    	<field name="RES2" format="U1"/>
+    	<field name="RES1" format="U1"/>
+    	<field name="refStationId" format="U2"/>
     	<field name="ITOW" format="U4" unit="ms"/>
     	<field name="RELPOSN" format="I4" unit="cm"/>
     	<field name="RELPOSE" format="I4" unit="cm"/>
@@ -139,7 +139,7 @@
     	<field name="RELPOSNHP" format="I1" scaling="1e-1" unit="mm"/>
     	<field name="RELPOSEHP" format="I1" scaling="1e-1" unit="mm"/>
     	<field name="RELPOSDHP" format="I1" scaling="1e-1" unit="mm"/>
-    	<field name="RES3" format="U1"/>
+    	<field name="RES2" format="U1"/>
     	<field name="Nacc" format="U4" scaling="1e-1" unit="mm"/>
     	<field name="Eacc" format="U4" scaling="1e-1" unit="mm"/>
     	<field name="Dacc" format="U4" scaling="1e-1" unit="mm"/>
