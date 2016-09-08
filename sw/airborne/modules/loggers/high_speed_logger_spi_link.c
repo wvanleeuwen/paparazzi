@@ -56,7 +56,12 @@ void high_speed_logger_spi_link_init(void)
 }
 
 void high_speed_logger_spi_link_start(void) {
-  Set_IR_LEDS_Servo(SERVO_IR_LEDS_MAX);
+  /*if (irLedSwitch == 1) {
+    irLedSwitch = 0;
+    double time = get_sys_time_msec();
+    while (get_sys_time_msec() - time < 1000);
+  }*/
+  irLedSwitch = 1;
 }
 
 void high_speed_logger_spi_link_periodic(void)
@@ -97,7 +102,7 @@ void high_speed_logger_spi_link_periodic(void)
 }
 
 void high_speed_logger_spi_link_stop(void) {
-  Set_IR_LEDS_Servo(SERVO_IR_LEDS_MIN);
+  irLedSwitch = 0;
 }
 
 static void high_speed_logger_spi_link_trans_cb(struct spi_transaction *trans __attribute__((unused)))

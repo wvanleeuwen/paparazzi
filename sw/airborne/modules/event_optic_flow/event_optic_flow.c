@@ -81,6 +81,8 @@ PRINT_CONFIG_VAR(EOF_DIVERGENCE_CONTROL_DIV_SETPOINT)
 #define EOF_CONTROL_LANDING 0
 #endif
 
+#define IR_LEDS_SWITCH 0
+
 // State redeclaration
 struct module_state eofState;
 
@@ -94,6 +96,9 @@ float divergenceControlSetpoint = EOF_DIVERGENCE_CONTROL_DIV_SETPOINT;
 // Confidence thresholds
 float minPosVariance = EOF_MIN_POSITION_VARIANCE;
 float minEventRate = EOF_MIN_EVENT_RATE;
+
+// logging controls
+bool irLedSwitch = IR_LEDS_SWITCH;
 
 // Constants
 const int32_t MAX_NUMBER_OF_UART_EVENTS = 100;
@@ -229,7 +234,7 @@ void event_optic_flow_periodic(void) {
 	  uint32_t timestamp = get_sys_time_usec();
 
 	  // Update control state
-	  AbiSendMsgVELOCITY_ESTIMATE(1, timestamp,vxNED,vyNED,vzNED,0);
+	  AbiSendMsgVELOCITY_ESTIMATE(1, timestamp,vxNED,vyNED,vzNED,0);  // the velocity components here should be in body frame not NED frame, might just be naming convention
 	}
 	if (EOF_CONTROL_LANDING) {
 	  divergenceLandingControllerRun();

@@ -53,6 +53,7 @@ extern float statsFilterTimeConstant;
 extern float flowMaxSpeedDiff;
 extern float minPosVariance;
 extern float minEventRate;
+extern bool irLedSwitch;
 
 // Module main functions
 extern void event_optic_flow_init(void);

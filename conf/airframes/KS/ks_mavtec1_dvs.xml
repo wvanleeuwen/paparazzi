@@ -58,7 +58,7 @@
     <servo name="MOTOR_2" no="2" min="1148" neutral="1200" max="1832"/>
     <servo name="MOTOR_3" no="3" min="1148" neutral="1200" max="1832"/>
     <!-- IR LED control through servo -->
-    <servo name="IR_LEDS" no="4" min="1100" neutral="1500" max="2100"/>
+    <servo name="IR_LEDS" no="4" min="0" neutral="0" max="2500"/>
   </servos>
 
   <commands>
@@ -79,6 +79,7 @@
     <set servo="MOTOR_1"  value="motor_mixing.commands[MOTOR_FRONT_RIGHT]"/>
     <set servo="MOTOR_2"  value="motor_mixing.commands[MOTOR_BACK_RIGHT]"/>
     <set servo="MOTOR_3"  value="motor_mixing.commands[MOTOR_BACK_LEFT]"/>
+    <set servo="IR_LEDS"  value="(2*irLedSwitch-1)*MAX_PPRZ"/>
   </command_laws>
 
   <section name="MISC">
