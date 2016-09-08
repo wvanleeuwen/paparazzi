@@ -186,11 +186,11 @@ if (gps_ubx.state.fix == GPS_FIX_3D) {
 				uint32_t accN 			= UBX_NAV_RELPOSNED_Nacc(gps_ubx.msg_buf);
 				uint32_t accE 			= UBX_NAV_RELPOSNED_Eacc(gps_ubx.msg_buf);
 				uint32_t accD 			= UBX_NAV_RELPOSNED_Dacc(gps_ubx.msg_buf);
-				uint32_t flags 			= UBX_NAV_RELPOSNED_Flags(gps_ubx.msg_buf);
-				bool carrSoln 			= RTCMgetbitu(&flags, 27, 1);
-				bool relPosValid 		= RTCMgetbitu(&flags, 29, 1);
-				bool diffSoln 			= RTCMgetbitu(&flags, 30, 1);
-				bool gnssFixOK 			= RTCMgetbitu(&flags, 31, 1);
+				uint8_t flags 			= UBX_NAV_RELPOSNED_Flags(gps_ubx.msg_buf);
+				uint8_t carrSoln 		= RTCMgetbitu(&flags, 3, 2);
+				bool relPosValid 		= RTCMgetbitu(&flags, 5, 1);
+				bool diffSoln 			= RTCMgetbitu(&flags, 6, 1);
+				bool gnssFixOK 			= RTCMgetbitu(&flags, 7, 1);
 				printf("GNSS Fix OK: %i\tDGNSS: %i\tRTK: %i\trelPosValid: %i\trefStationId: %i\n", gnssFixOK, diffSoln, carrSoln, relPosValid, refStationId);
 			}
 		}
@@ -222,7 +222,7 @@ else
 		if(version == RXM_RTCM_VERSION)
 		{
 			uint8_t flags 		= UBX_RXM_RTCM_flags(gps_ubx.msg_buf);
-			bool crcFailed 		= (bool) RTCMgetbitu(&flags, 6, 1);
+			bool crcFailed 		= RTCMgetbitu(&flags, 7, 1);
 			uint16_t refStation = UBX_RXM_RTCM_refStation(gps_ubx.msg_buf);
 			uint16_t msgType 	= UBX_RXM_RTCM_msgType(gps_ubx.msg_buf);
 			printf("Message %i from refStation %i processed (CRCfailed: %i)\n", msgType, refStation, crcFailed);
