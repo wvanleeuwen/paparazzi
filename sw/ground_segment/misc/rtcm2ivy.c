@@ -59,7 +59,10 @@ uint32_t serial_baud  = B9600;
 
 /** Debugging options */
 bool verbose = FALSE;
+bool logger = FALSE;
 #define printf_debug    if(verbose == TRUE) printf
+
+FILE * 	pFile;
 
 /** Ivy Bus default */
 #ifdef __APPLE__
@@ -91,6 +94,12 @@ static void ivy_send_message(uint8_t packet_id, uint8_t len, uint8_t msg[]) {
 	}
 	//printf("%s\n\n", gps_packet);
 	IvySendMsg("%s", gps_packet);
+	if(logger == TRUE)
+	{
+		pFile = fopen("./RTCM3_log.txt","a");
+		fprintf(pFile,"%s\n", gps_packet);
+		fclose(pFile);
+	}
 	printf_debug("Ivy send: %s\n", gps_packet);
 }
 
@@ -167,6 +176,7 @@ static void rtcm3_1087_callback(uint16_t sender_id __attribute__((unused)),
 			ivy_send_message(RTCM3_MSG_1087, len, msg);
 			msg_cnt++;
 			printf("%i: Sending 1087 message (CRC check passed)\n", msg_cnt);
+
 		}else{
 			printf("Skipping 1087 message (CRC check failed)\n");
 		}
@@ -199,7 +209,7 @@ int main(int argc, char** argv)
 {
 	// Parse the options from cmdline
 	char c;
-	while ((c = getopt (argc, argv, "hvd:b:i:")) != EOF) {
+	while ((c = getopt (argc, argv, "hvld:b:i:")) != EOF) {
 		switch (c) {
 		case 'h':
 			print_usage(argc, argv);
@@ -207,6 +217,9 @@ int main(int argc, char** argv)
 			break;
 		case 'v':
 			verbose = TRUE;
+			break;
+		case 'l':
+			logger = TRUE;
 			break;
 		case 'd':
 			serial_device = optarg;
@@ -230,7 +243,6 @@ int main(int argc, char** argv)
 			abort();
 		}
 	}
-
 	// Create the Ivy Client
 	GMainLoop *ml =  g_main_loop_new(NULL, FALSE);
 	IvyInit("Paparazzi server", "Paparazzi server READY", 0, 0, 0, 0);

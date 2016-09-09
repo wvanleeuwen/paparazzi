@@ -421,13 +421,17 @@ void gps_inject_data(uint8_t packet_id, uint8_t length, uint8_t *data)
 			gps_ublox_write(&(UBX_GPS_LINK).device, data, length);
 			switch(packet_id)
 			{
-			case 105 : printf("Type: 1005 (CRC passed) (length: %i)\n", length); break;
-			case 177 : printf("Type: 1077 (CRC passed) (length: %i)\n", length); break;
-			case 187 : printf("Type: 1087 (CRC passed) (length: %i)\n", length); break;
+			case 105 : break;
+			case 177 : break;
+			case 187 : break;
 			default: printf("Unknown type: %i", packet_id); break;
 			}
 		}else{
-			printf("Skipping message %i (CRC failed)\n", packet_id);
+			printf("Skipping message %i (CRC failed) - %d", packet_id, data[0]);
+			for (i = 1; i < length; i++) {
+				printf(",%d", data[i]);
+			}
+			printf("\n");
 		}
 #ifdef GPS_UBX_UCENTER
 	}
