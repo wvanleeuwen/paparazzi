@@ -33,9 +33,9 @@
 #include "modules/pose_history/pose_history.h"
 #include "modules/sonar/sonar_bebop.h"
 
-//#include "modules/computer_vision/imav2016markers.h"            // Colorfilters and blob detectors
-#include "modules/computer_vision/opencv_imav_landingpad.h"     // OpenCV contour based marker detection
+#include "modules/computer_vision/blob/blob_finder.h"
 
+#include "modules/computer_vision/opencv_imav_landingpad.h"     // OpenCV contour based marker detection
 #include "modules/computer_vision/marker/marker_checkers.h"     // OpenCV feature based marker detection
 
 static bool SHOW_MARKER = true;
@@ -105,6 +105,53 @@ static void geo_locate_marker(struct image_t* img) {
 
 static struct image_t *detect_colored_blob(struct image_t* img) {
 
+    // Color Filter
+    struct image_filter_t filter;
+    filter.y_min = 0;    // red
+    filter.y_max = 110;
+    filter.u_min = 52;
+    filter.u_max = 140;
+    filter.v_min = 140;
+    filter.v_max = 255;
+
+    int threshold = 50;
+
+    // Output image
+    struct image_t dst;
+    image_create(&dst, img->w, img->h, IMAGE_GRADIENT);
+
+    // Labels
+    uint16_t labels_count = 512;
+    struct image_label_t labels[512];
+
+    // Blob finder
+    image_labeling(img, &dst, &filter, 1, labels, &labels_count);
+
+    int largest_id = -1;
+    int largest_size = 0;
+
+    // Find largest
+    for (int i=0; i<labels_count; i++) {
+        // Only consider large blobs
+        if (labels[i].pixel_cnt > threshold) {
+            if (labels[i].pixel_cnt > largest_size) {
+                largest_size = labels[i].pixel_cnt;
+                largest_id = i;
+            }
+        }
+    }
+
+    if (largest_id >= 0) {
+        marker.detected = true;
+        marker.pixel.x   = labels[largest_id].x_sum / labels[largest_id].pixel_cnt * 2;
+        marker.pixel.y   = labels[largest_id].y_sum / labels[largest_id].pixel_cnt;
+    } else {
+        marker.detected = false;
+    }
+
+    image_free(&dst);
+
+//    fprintf(stderr, "[blob] fps %.2f \n", (1000000.f / img->dt));
 
     return NULL;
 }
@@ -176,9 +223,10 @@ void detector_init(void)
 //    helipad_listener->maximum_fps = 10;
 //    cv_add_to_device(&DETECTOR_CAMERA1, detect_helipad_marker);
 
-    init_detect_checkers();
+//    init_detect_checkers();
+//    cv_add_to_device(&DETECTOR_CAMERA1, detect_marker_checkers);
 
-    cv_add_to_device(&DETECTOR_CAMERA1, detect_marker_checkers);
+    cv_add_to_device(&DETECTOR_CAMERA1, detect_colored_blob);
 
     cv_add_to_device(&DETECTOR_CAMERA1, draw_target_marker);
 }

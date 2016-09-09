@@ -20,6 +20,8 @@
         <!-- Main detector -->
         <file name="marker/detector.c"/>
 
+        <file name="blob/blob_finder.c"/>
+
         <file name="opencv_imav_landingpad.cpp"/>
         <file name="marker/marker_checkers.cpp"/>
 
