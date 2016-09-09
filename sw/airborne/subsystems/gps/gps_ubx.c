@@ -428,6 +428,7 @@ void gps_inject_data(uint8_t packet_id, uint8_t length, uint8_t *data)
 			}
 		}else{
 			printf("Skipping message %i (CRC failed) - %d", packet_id, data[0]);
+			int i;
 			for (i = 1; i < length; i++) {
 				printf(",%d", data[i]);
 			}
