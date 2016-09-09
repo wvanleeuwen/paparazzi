@@ -174,11 +174,11 @@ void detector_init(void)
     // Add detection function to CV
 //    helipad_listener = cv_add_to_device_async(&DETECTOR_CAMERA1, detect_helipad_marker, 5);
 //    helipad_listener->maximum_fps = 10;
-    cv_add_to_device(&DETECTOR_CAMERA1, detect_helipad_marker);
+//    cv_add_to_device(&DETECTOR_CAMERA1, detect_helipad_marker);
 
-//    init_detect_checkers();
-//
-//    cv_add_to_device(&DETECTOR_CAMERA1, detect_marker_checkers);
+    init_detect_checkers();
+
+    cv_add_to_device(&DETECTOR_CAMERA1, detect_marker_checkers);
 
     cv_add_to_device(&DETECTOR_CAMERA1, draw_target_marker);
 }

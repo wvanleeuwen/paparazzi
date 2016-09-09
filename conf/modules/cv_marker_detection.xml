@@ -20,10 +20,8 @@
         <!-- Main detector -->
         <file name="marker/detector.c"/>
 
-        <file name="marker/marker_checkers.cpp"/>
-
-        <!-- Helipad detection -->
         <file name="opencv_imav_landingpad.cpp"/>
+        <file name="marker/marker_checkers.cpp"/>
 
         <!-- OpenCV compilation requirements -->
         <file name="opencv_image_functions.cpp"/>
