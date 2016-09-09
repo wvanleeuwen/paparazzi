@@ -105,6 +105,7 @@ const int32_t MAX_NUMBER_OF_UART_EVENTS = 100;
 const float MOVING_AVERAGE_MIN_WINDOW = 5.0f;
 const uint8_t EVENT_SEPARATOR = 255;
 const float FLOW_INT16_TO_FLOAT = 100.0f;
+const float LENS_DISTANCE_TO_CENTER = 0.13f; // approximate distance of lens focal length to OptiTrack center
 const uint32_t EVENT_BYTE_SIZE = sizeof(struct flowEvent) + 1; // +1 for separator
 const float inactivityDecayFactor = 0.9f;
 const float derotationMovingAverageFactor = 0.5f;
@@ -217,9 +218,9 @@ void event_optic_flow_periodic(void) {
   velB.z = rot->m[2][0] * vel->x + rot->m[2][1] * vel->y + rot->m[2][2] * vel->z;
   float R = -pos->z/(cosf(ang->theta)*cosf(ang->phi));*/
   //TODO verify signs in calculation below
-  eofState.wxTruth = -vel->y*cosf(ang->psi) -vel->x*sinf(ang->psi);
-  eofState.wyTruth = -vel->x*cosf(ang->psi) -vel->y*sinf(ang->psi);
-  eofState.DTruth = 2*vel->z/pos->z;
+  eofState.wxTruth = -(vel->y*cosf(-ang->psi) -vel->x*sinf(-ang->psi)) / (pos->z + LENS_DISTANCE_TO_CENTER);
+  eofState.wyTruth = -(vel->x*cosf(-ang->psi) +vel->y*sinf(-ang->psi)) / (pos->z + LENS_DISTANCE_TO_CENTER);
+  eofState.DTruth = 2*vel->z / (pos->z + LENS_DISTANCE_TO_CENTER);
 
 	// Set control signals
 	if (EOF_CONTROL_HOVER) {
@@ -228,13 +229,13 @@ void event_optic_flow_periodic(void) {
 	  // the camera X-axis is opposite to the body Y-axis
 	  // and the Y-axis is aligned to its X-axis
 	  // Further assumption: body Euler angles are small
-	  float vxNED = eofState.z_NED * eofState.field.wyDerotated;
-	  float vyNED = eofState.z_NED * -eofState.field.wxDerotated;
-	  float vzNED = eofState.z_NED * eofState.field.D/2;
+	  float vxB = eofState.z_NED * eofState.field.wyDerotated;
+	  float vyB = eofState.z_NED * -eofState.field.wxDerotated;
+	  float vzB = eofState.z_NED * eofState.field.D/2;
 	  uint32_t timestamp = get_sys_time_usec();
 
 	  // Update control state
-	  AbiSendMsgVELOCITY_ESTIMATE(1, timestamp,vxNED,vyNED,vzNED,0);  // the velocity components here should be in body frame not NED frame, might just be naming convention
+	  AbiSendMsgVELOCITY_ESTIMATE(1, timestamp, vxB, vyB, vzB, 0);
 	}
 	if (EOF_CONTROL_LANDING) {
 	  divergenceLandingControllerRun();

@@ -92,8 +92,8 @@ enum updateStatus recomputeFlowField(struct flowField* field, struct flowStats* 
   if (d < 0) {
     return UPDATE_WARNING_SPREAD;
   }
-  float eig1 = (varX + varY + d)/2;
-  float eig2 = (varX + varY - d)/2;
+  float eig1 = (varX + varY + sqrtf(d))/2;
+  float eig2 = (varX + varY - sqrtf(d))/2;
 
   if (eig1 < minPosVariance || eig2 < minPosVariance) {
     return UPDATE_WARNING_SPREAD;

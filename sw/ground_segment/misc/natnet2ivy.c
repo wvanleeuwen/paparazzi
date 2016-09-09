@@ -646,6 +646,9 @@ gboolean timeout_send_ivy_callback(gpointer data) {
   // Loop trough all the available rigidbodies
   int i;
   for (i = 0; i < MAX_RIGIDBODIES; i++) {
+    if (aircrafts[rigidBodies[i].id].connected == FALSE) {
+      continue;
+    }
     struct EnuCoor_d pos = rigidBodies[i].pos;
     struct EnuCoor_d speed = rigidBodies[i].speed;
     struct EcefCoor_d ecef_pos = rigidBodies[i].ecef_pos;

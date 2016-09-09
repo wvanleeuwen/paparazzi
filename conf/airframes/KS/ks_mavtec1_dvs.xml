@@ -19,6 +19,7 @@
       <configure name="NO_LUFTBOOT" value="1"/>
       <!--configure name="USE_BARO_BOARD" value="TRUE"/-->
       <configure name="USE_MAGNETOMETER" value="1"/>
+      <configure name="FLASH_MODE" value="SWD" />
       <!-- MPU6000 is configured to output data at 2kHz, but polled at 512Hz PERIODIC_FREQUENCY -->
     </target>
 
