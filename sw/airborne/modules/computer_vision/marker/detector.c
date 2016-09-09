@@ -30,13 +30,13 @@
 #include "modules/computer_vision/cv.h"
 #include "modules/computer_vision/marker/detector.h"
 
-#include "modules/computer_vision/cv_georeference.h"
 #include "modules/pose_history/pose_history.h"
 #include "modules/sonar/sonar_bebop.h"
 
-#include "modules/computer_vision/opencv_imav_landingpad.h"
+//#include "modules/computer_vision/imav2016markers.h"            // Colorfilters and blob detectors
+#include "modules/computer_vision/opencv_imav_landingpad.h"     // OpenCV contour based marker detection
 
-#include "modules/computer_vision/marker/marker_checkers.h"
+#include "modules/computer_vision/marker/marker_checkers.h"     // OpenCV feature based marker detection
 
 static bool SHOW_MARKER = true;
 
@@ -102,6 +102,14 @@ static void geo_locate_marker(struct image_t* img) {
     //fprintf(stderr, "[marker] found! %.3f, %.3f, %.3f, %.3f\n", geo_relative.x, geo_relative.y, marker.geo_location.x, marker.geo_location.y);
 }
 
+
+static struct image_t *detect_colored_blob(struct image_t* img) {
+
+
+    return NULL;
+}
+
+
 static struct image_t *detect_marker_checkers(struct image_t* img) {
 
     struct resultsc marker_checkers = opencv_detect_checkers((char*) img->buf, img->w, img->h, img->dt);
@@ -126,8 +134,8 @@ static struct image_t *detect_helipad_marker(struct image_t* img)
             img->w,
             img->h,
             2, //squares
-            220, //binary threshold
-            0); //modify image
+            210, //binary threshold
+            1, img->dt); //modify image
 
     if (helipad_marker.marker) {
         marker.detected = true;
@@ -166,10 +174,11 @@ void detector_init(void)
     // Add detection function to CV
 //    helipad_listener = cv_add_to_device_async(&DETECTOR_CAMERA1, detect_helipad_marker, 5);
 //    helipad_listener->maximum_fps = 10;
+    cv_add_to_device(&DETECTOR_CAMERA1, detect_helipad_marker);
 
-    init_detect_checkers();
-
-    cv_add_to_device(&DETECTOR_CAMERA1, detect_marker_checkers);
+//    init_detect_checkers();
+//
+//    cv_add_to_device(&DETECTOR_CAMERA1, detect_marker_checkers);
 
     cv_add_to_device(&DETECTOR_CAMERA1, draw_target_marker);
 }

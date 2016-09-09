@@ -34,8 +34,10 @@ using namespace cv;
 // Output
 struct results landing;
 
+float detector2_fps = 30; // initial estimate of fps
+float detector2_fps_epsilon = 0.2; // used to smoothen fps
 
-struct results opencv_imav_landing(char *img, int width, int height, int v_squares, int binary_threshold, int mod)
+struct results opencv_imav_landing(char *img, int width, int height, int v_squares, int binary_threshold, int mod, int dt)
 {
     Mat M(height, width, CV_8UC2, img);
     Mat image;
@@ -44,7 +46,7 @@ struct results opencv_imav_landing(char *img, int width, int height, int v_squar
 //    int thresh = 230; //For outdoor landing pad
 //    int thresh = 210; //For indoor helipad
 
-    int z = 4; // z-score for outdoor, this needs to be tuned!
+    int z = 2; // z-score for outdoor, this needs to be tuned!
 //    int z = 2; // z-score for indoor, this needs to be tuned!
 
 
@@ -82,10 +84,10 @@ struct results opencv_imav_landing(char *img, int width, int height, int v_squar
     for( int i = 0; (unsigned)i < contours.size(); i++ )
     {
         double Area = contourArea(contours[i]);
-        if (Area > 250)
+        if (Area > 100)
         {
             convexHull(Mat(contours[i]), hull[i], false );
-            approxPolyDP(Mat(hull[i]), approx[i], arcLength(Mat(hull[i]), true)*0.1, true);
+            approxPolyDP(Mat(hull[i]), approx[i], arcLength(Mat(hull[i]), true)*0.12, true);
             int sides = approx[i].size();
             if (sides  == 4)
             {
@@ -94,7 +96,7 @@ struct results opencv_imav_landing(char *img, int width, int height, int v_squar
                 mc[i] = Point2f( mu[i].m10/mu[i].m00 , mu[i].m01/mu[i].m00 );
                 centroidsx.push_back (mc.at(i).x);
                 centroidsy.push_back (mc.at(i).y);
-                if (mod) {drawContours( binim, approx, i, 200 , 5, 8, vector<cv::Vec4i>(), 0, cv::Point() ); }
+                if (mod) {drawContours( imcopy, approx, i, 200 , 2, 8, vector<cv::Vec4i>(), 0, cv::Point() ); }
             }
         }
     }
@@ -179,7 +181,7 @@ struct results opencv_imav_landing(char *img, int width, int height, int v_squar
         ybar = (ysum / n_filtcentroids);
         landing.maxx = xbar;
         landing.maxy = ybar;
-        if (mod) { circle(binim, Point(xbar,ybar), 20, 200, 10); }
+        if (mod) { circle(imcopy, Point(xbar,ybar), 20, 200, 5); }
     } else
     {
         landing.marker = 0;
@@ -187,7 +189,14 @@ struct results opencv_imav_landing(char *img, int width, int height, int v_squar
         landing.maxy   = 0;
     }
 
-    grayscale_opencv_to_yuv422(binim, img, width, height);
+    // Update FPS estimate
+    detector2_fps = (1 - detector2_fps_epsilon) * detector2_fps + detector2_fps_epsilon * (1000000.f / dt);
+
+    // Draw FPS on image
+    char text[50]; sprintf(text, "FPS: %0.2f", detector2_fps);
+    putText(imcopy, text, Point(10, image.rows-10), FONT_HERSHEY_SIMPLEX, 0.5, Scalar(255), 2);
+
+    grayscale_opencv_to_yuv422(imcopy, img, width, height);
 
     return landing;
 }
