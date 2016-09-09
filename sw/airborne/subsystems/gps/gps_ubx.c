@@ -411,12 +411,21 @@ void gps_ublox_write(struct link_device *dev, uint8_t *buff, uint32_t n)
 /**
  * Override the default GPS packet injector to inject the data
  */
-void gps_inject_data(uint8_t packet_id, uint8_t length, uint8_t *data)
+void gpss_inject_data(uint8_t packet_id, uint8_t length, uint8_t *data)
 {
 #ifdef GPS_UBX_UCENTER
 	if(gps_ubx_ucenter_get_status() == 0)
 	{
 #endif
+		if(length>124)
+		{
+			int i;
+			for(i=124; i<(length - 2); i++)
+			{
+				data[i] = data[i+2];
+			}
+			length -= 2;
+		}
 		if (crc24q(data, length - 3) == RTCMgetbitu(data, (length - 3) * 8, 24)) {
 			gps_ublox_write(&(UBX_GPS_LINK).device, data, length);
 			switch(packet_id)

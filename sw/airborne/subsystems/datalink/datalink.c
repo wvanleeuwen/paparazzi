@@ -124,17 +124,15 @@ void dl_parse_msg(void)
         );
       }
       break;
-#ifndef UBX_M8P_RTK
       case DL_RTCM_INJECT : {
               // GPS parse data
-              gps_inject_data(
+              gpss_inject_data(
                 DL_RTCM_INJECT_packet_id(dl_buffer),
 				DL_RTCM_INJECT_data_length(dl_buffer),
 				DL_RTCM_INJECT_data(dl_buffer)
               );
             }
             break;
-#endif // UBX_M8P_RTK
 #endif // USE_GPS
       default:
         break;

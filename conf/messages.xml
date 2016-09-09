@@ -2690,7 +2690,7 @@
 
   <message name="RTCM_INJECT" id="156" link="broadcasted">
     <field name="packet_id" type="uint8"/>
-    <field name="data" type="uint8[]" />
+    <field name="data" type="uint8[]"/>
   </message>
 
 </msg_class>

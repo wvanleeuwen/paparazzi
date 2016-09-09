@@ -85,14 +85,19 @@ static uint32_t rtcm3_read(unsigned char (*buff)[], uint32_t n, void *context __
 }
 
 static void ivy_send_message(uint8_t packet_id, uint8_t len, uint8_t msg[]) {
-	char gps_packet[4146], number[5]; // 1024 + 6 = max msg_len --> *4 for int representation in string (255,) + 25 ivy_msg description + 1 null character = 4146
+	char gps_packet[4146], number[10]; // 1024 + 6 = max msg_len --> *4 for int representation in string (255,) + 25 ivy_msg description + 1 null character = 4146
 	uint8_t i;
 	snprintf(gps_packet, 4146, "rtcm2ivy RTCM_INJECT %d %d", packet_id, msg[0]);
 	for(i = 1; i < len; i++) {
-		snprintf(number, 5, ",%d", msg[i]);
+		if(i==124)
+		{
+			snprintf(number, 10, ",5,5,%d", msg[i]);
+		}else{
+			snprintf(number, 10, ",%d", msg[i]);
+		}
 		strcat(gps_packet, number);
 	}
-	//printf("%s\n\n", gps_packet);
+	printf("%s\n\n", gps_packet);
 	IvySendMsg("%s", gps_packet);
 	if(logger == TRUE)
 	{
@@ -157,6 +162,7 @@ static void rtcm3_1077_callback(uint16_t sender_id __attribute__((unused)),
 			printf("%i: Sending 1077 message (CRC check passed)\n", msg_cnt);
 
 		}else{
+			ivy_send_message(RTCM3_MSG_1077, len, msg);
 			printf("Skipping 1077 message (CRC check failed)\n");
 		}
 	}
