@@ -144,6 +144,8 @@ void waypoint_set_xy_i(uint8_t wp_id, int32_t x, int32_t y)
     waypoints[wp_id].enu_f.x = POS_FLOAT_OF_BFP(waypoints[wp_id].enu_i.x);
     waypoints[wp_id].enu_f.y = POS_FLOAT_OF_BFP(waypoints[wp_id].enu_i.y);
     waypoint_globalize(wp_id);
+    DOWNLINK_SEND_WP_MOVED_ENU(DefaultChannel, DefaultDevice, &wp_id,&x,
+                               &y, &(waypoints[wp_id].enu_i.z));
   }
 }
 
