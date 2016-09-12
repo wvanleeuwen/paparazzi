@@ -1,6 +1,5 @@
 <!DOCTYPE flight_plan SYSTEM "../flight_plan.dtd">
-
-<flight_plan alt="180" ground_alt="150" lat0="51 24 20.2212" lon0="4 27 33.192" max_dist_from_home="500" name="Logo600_landing" security_height="2">
+<flight_plan alt="180" ground_alt="150" lat0="52.1707480" lon0="4.4092508" max_dist_from_home="500" name="Logo600_landing" security_height="2">
   <header>
 #include "autopilot.h"
   </header>
@@ -10,6 +9,7 @@
     <waypoint name="CAM" x="-20" y="-50" height="2."/>
     <waypoint name="TD" x="5.6" y="-10.9"/>
     <waypoint name="JOE" x="0.0" y="-50.0"/>
+    <waypoint name="CIRCLE" x="0.0" y="-50.0"/>
     <waypoint name="LANDING" x="10.0" y="10.0"/>
   </waypoints>
   <blocks>
@@ -19,10 +19,11 @@
     </block>
     <block name="Geo init">
       <while cond="LessThan(NavBlockTime(), 10)"/>
-      <call fun="NavSetGroundReferenceHere()"/>
-      <!--<call fun="NavSetAltitudeReferenceHere()"/>-->
+      <!--call fun="NavSetGroundReferenceHere()"/ -->
+      <call fun="NavSetAltitudeReferenceHere()"/>
     </block>
     <block name="Holding point">
+      <call fun="setZeroHeight()" loop="false"/>
       <call fun="enableLandingspotSearch(false)" loop="false"/>
       <call fun="enableKalamosDescent(false)" loop="false"/>
       <call fun="NavKillThrottle()"/>
@@ -38,7 +39,7 @@
     <block name="Circle_joe" pre_call="nav_set_heading_towards(POS_FLOAT_OF_BFP(navigation_target.x),POS_FLOAT_OF_BFP(navigation_target.y))">
       <call fun="enableLandingspotSearch(true)" loop="false"/>
       <call fun="enableKalamosDescent(false)" loop="false"/>
-      <circle wp="JOE" radius="75" until="block_time>180"/>
+      <circle wp="CIRCLE" radius="75" until="block_time>180"/>
     </block>
     <block name="HoldPositionOnCircle">
       <call fun="enableLandingspotSearch(false)" loop="false"/>
