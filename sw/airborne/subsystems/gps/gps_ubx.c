@@ -62,6 +62,11 @@ extern int gps_ubx_ucenter_get_status(void);
 struct GpsUbxRaw gps_ubx_raw;
 #endif
 
+#ifdef USE_GPS_UBX_RTCM
+extern struct GpsRelposNED gps_relposned;
+extern struct RtcmMan rtcm_man;
+#endif
+
 bool safeToInject = true;
 struct GpsTimeSync gps_ubx_time_sync;
 
@@ -97,7 +102,7 @@ void gps_ubx_read_message(void)
 			gps_ubx_time_sync.t0_tow_frac   = UBX_NAV_SOL_Frac(gps_ubx.msg_buf);
 			gps_ubx.state.tow        = UBX_NAV_SOL_ITOW(gps_ubx.msg_buf);
 			gps_ubx.state.week       = UBX_NAV_SOL_week(gps_ubx.msg_buf);
-			gps_ubx.state.fix        = UBX_NAV_SOL_GPSfix(gps_ubx.msg_buf);
+			//gps_ubx.state.fix        = UBX_NAV_SOL_GPSfix(gps_ubx.msg_buf);
 			gps_ubx.state.ecef_pos.x = UBX_NAV_SOL_ECEF_X(gps_ubx.msg_buf);
 			gps_ubx.state.ecef_pos.y = UBX_NAV_SOL_ECEF_Y(gps_ubx.msg_buf);
 			gps_ubx.state.ecef_pos.z = UBX_NAV_SOL_ECEF_Z(gps_ubx.msg_buf);
@@ -164,7 +169,9 @@ if (gps_ubx.state.fix == GPS_FIX_3D) {
 				gps_ubx.state.svinfos[i].azim = UBX_NAV_SVINFO_Azim(gps_ubx.msg_buf, i);
 			}
 		} else if (gps_ubx.msg_id == UBX_NAV_STATUS_ID) {
+#ifndef USE_GPS_UBX_RTCM
 			gps_ubx.state.fix = UBX_NAV_STATUS_GPSfix(gps_ubx.msg_buf);
+#endif
 			gps_ubx.status_flags = UBX_NAV_STATUS_Flags(gps_ubx.msg_buf);
 			gps_ubx.sol_flags = UBX_NAV_SOL_Flags(gps_ubx.msg_buf);
 		} else if (gps_ubx.msg_id == UBX_NAV_HPPOSECEF_ID) {
@@ -175,23 +182,39 @@ if (gps_ubx.state.fix == GPS_FIX_3D) {
 			uint8_t version = UBX_NAV_RELPOSNED_VERSION(gps_ubx.msg_buf);
 			if(version == NAV_RELPOSNED_VERSION)
 			{
-				uint32_t iTOW 			= UBX_NAV_RELPOSNED_ITOW(gps_ubx.msg_buf);
-				uint16_t refStationId   = UBX_NAV_RELPOSNED_refStationId(gps_ubx.msg_buf);
-				uint32_t relPosN 		= UBX_NAV_RELPOSNED_RELPOSN(gps_ubx.msg_buf);
-				uint32_t relPosE 		= UBX_NAV_RELPOSNED_RELPOSE(gps_ubx.msg_buf);
-				uint32_t relPosD 		= UBX_NAV_RELPOSNED_RELPOSD(gps_ubx.msg_buf) ;
-				uint8_t relPosHPN 		= UBX_NAV_RELPOSNED_RELPOSNHP(gps_ubx.msg_buf);
-				uint8_t relPosHPE 		= UBX_NAV_RELPOSNED_RELPOSEHP(gps_ubx.msg_buf);
-				uint8_t relPosHPD 		= UBX_NAV_RELPOSNED_RELPOSDHP(gps_ubx.msg_buf);
-				uint32_t accN 			= UBX_NAV_RELPOSNED_Nacc(gps_ubx.msg_buf);
-				uint32_t accE 			= UBX_NAV_RELPOSNED_Eacc(gps_ubx.msg_buf);
-				uint32_t accD 			= UBX_NAV_RELPOSNED_Dacc(gps_ubx.msg_buf);
-				uint8_t flags 			= UBX_NAV_RELPOSNED_Flags(gps_ubx.msg_buf);
-				uint8_t carrSoln 		= RTCMgetbitu(&flags, 3, 2);
-				bool relPosValid 		= RTCMgetbitu(&flags, 5, 1);
-				bool diffSoln 			= RTCMgetbitu(&flags, 6, 1);
-				bool gnssFixOK 			= RTCMgetbitu(&flags, 7, 1);
-				printf("GNSS Fix OK: %i\tDGNSS: %i\tRTK: %i\trelPosValid: %i\trefStationId: %i\n", gnssFixOK, diffSoln, carrSoln, relPosValid, refStationId);
+				gps_relposned.iTOW 	        = UBX_NAV_RELPOSNED_ITOW(gps_ubx.msg_buf);
+				gps_relposned.refStationId  = UBX_NAV_RELPOSNED_refStationId(gps_ubx.msg_buf);
+				gps_relposned.relPosN 		= UBX_NAV_RELPOSNED_RELPOSN(gps_ubx.msg_buf);
+				gps_relposned.relPosE 		= UBX_NAV_RELPOSNED_RELPOSE(gps_ubx.msg_buf);
+				gps_relposned.relPosD 		= UBX_NAV_RELPOSNED_RELPOSD(gps_ubx.msg_buf) ;
+				gps_relposned.relPosHPN 	= UBX_NAV_RELPOSNED_RELPOSNHP(gps_ubx.msg_buf);
+				gps_relposned.relPosHPE 	= UBX_NAV_RELPOSNED_RELPOSEHP(gps_ubx.msg_buf);
+				gps_relposned.relPosHPD 	= UBX_NAV_RELPOSNED_RELPOSDHP(gps_ubx.msg_buf);
+				gps_relposned.accN 			= UBX_NAV_RELPOSNED_Nacc(gps_ubx.msg_buf);
+				gps_relposned.accE 			= UBX_NAV_RELPOSNED_Eacc(gps_ubx.msg_buf);
+				gps_relposned.accD 			= UBX_NAV_RELPOSNED_Dacc(gps_ubx.msg_buf);
+				uint8_t flags 			    = UBX_NAV_RELPOSNED_Flags(gps_ubx.msg_buf);
+				gps_relposned.carrSoln 		= RTCMgetbitu(&flags, 3, 2);
+				gps_relposned.relPosValid 	= RTCMgetbitu(&flags, 5, 1);
+				gps_relposned.diffSoln 		= RTCMgetbitu(&flags, 6, 1);
+				gps_relposned.gnssFixOK 	= RTCMgetbitu(&flags, 7, 1);
+				if(gps_relposned.gnssFixOK > 0)
+				{
+					if(gps_relposned.diffSoln > 0)
+					{
+						if(gps_relposned.carrSoln == 2)
+						{
+							gps_ubx.state.fix = 5; // rtk
+						}else{
+							gps_ubx.state.fix = 4; // dgnss
+						}
+					}else{
+						gps_ubx.state.fix = 3; // 3D
+					}
+				}else{
+					gps_ubx.state.fix =0;
+				}
+				printf("GNSS Fix OK: %i\tDGNSS: %i\tRTK: %i\trelPosValid: %i\trefStationId: %i\n", gps_relposned.gnssFixOK, gps_relposned.diffSoln, gps_relposned.carrSoln, gps_relposned.relPosValid, gps_relposned.refStationId);
 			}
 		}
 	} else if (gps_ubx.msg_class == UBX_RXM_ID) {
@@ -221,12 +244,33 @@ else
 		uint8_t version 	= UBX_RXM_RTCM_version(gps_ubx.msg_buf);
 		if(version == RXM_RTCM_VERSION)
 		{
+//			uint8_t flags 		= UBX_RXM_RTCM_flags(gps_ubx.msg_buf);
+//			bool crcFailed 		= RTCMgetbitu(&flags, 7, 1);
+//			uint16_t refStation = UBX_RXM_RTCM_refStation(gps_ubx.msg_buf);
+//			uint16_t msgType 	= UBX_RXM_RTCM_msgType(gps_ubx.msg_buf);
+//			printf("Message %i from refStation %i processed (CRCfailed: %i)\n", msgType, refStation, crcFailed);
+
+			rtcm_man.RefStation  = UBX_RXM_RTCM_refStation(gps_ubx.msg_buf);
+			rtcm_man.MsgType     = UBX_RXM_RTCM_msgType(gps_ubx.msg_buf);
 			uint8_t flags 		= UBX_RXM_RTCM_flags(gps_ubx.msg_buf);
 			bool crcFailed 		= RTCMgetbitu(&flags, 7, 1);
-			uint16_t refStation = UBX_RXM_RTCM_refStation(gps_ubx.msg_buf);
-			uint16_t msgType 	= UBX_RXM_RTCM_msgType(gps_ubx.msg_buf);
-			printf("Message %i from refStation %i processed (CRCfailed: %i)\n", msgType, refStation, crcFailed);
-		}else{
+			switch (rtcm_man.MsgType)
+			{
+			case 1005:
+				rtcm_man.Cnt105 += 1;
+				rtcm_man.Crc105 += crcFailed;
+				break;
+			case 1077:
+				rtcm_man.Cnt177 += 1;
+				rtcm_man.Crc177 += crcFailed;;
+				break;
+			case 1087:
+				rtcm_man.Cnt187 += 1;
+				rtcm_man.Crc187 += crcFailed;;
+				break;
+			}
+		}
+		else{
 			printf("Unknown RXM_RTCM version: %i\n", version);
 		}
 	}
