@@ -202,11 +202,9 @@ void kalamos_periodic() {
   } else {
     k2p_package.status = 1;
   }
-  uint16_t status = k2p_package.status;
 
   // Send Telemetry report
-  DOWNLINK_SEND_SONAR(DefaultChannel, DefaultDevice, &status, &k2p_package.height);
-
+  DOWNLINK_SEND_KALAMOS(DefaultChannel, DefaultDevice, &k2p_package.status, &k2p_package.height,&k2p_package.min_height,&k2p_package.joe_enu_x,&k2p_package.joe_enu_y,&k2p_package.land_enu_x,&k2p_package.land_enu_y,&k2p_package.flow_x,&k2p_package.flow_y);
 
 
   pprz_msg_send_IMCU_DEBUG(&(kalamos.transport.trans_tx), kalamos.device,
