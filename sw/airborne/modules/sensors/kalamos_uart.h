@@ -46,10 +46,10 @@ struct kalamos_t {
 struct Kalamos2PPRZPackage {
     float height;
     float min_height;
-    float target_x;
-    float target_y;
-    float land_gpsx;
-    float land_gpsy;
+    float joe_enu_x;
+    float joe_enu_y;
+    float land_enu_x;
+    float land_enu_y;
     float flow_x;
     float flow_y;
     char status;
@@ -85,6 +85,7 @@ extern void kalamos_periodic(void);
 
 extern void enableLandingspotSearch(bool b);
 extern void enableKalamosDescent(bool b);
+extern void setZeroHeight(void);
 
 #endif
 

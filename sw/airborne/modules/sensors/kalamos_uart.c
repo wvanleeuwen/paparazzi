@@ -47,13 +47,13 @@ static uint8_t mp_msg_buf[128]  __attribute__((aligned));   ///< The message buf
 
 struct  Kalamos2PPRZPackage k2p_package;
 float kalamos_search_height = 35.0;
-float kalamos_descend_height = 30.0;
+float kalamos_descend_height = 20.0;
 float kalamos_height_gain = 1.0;
 bool kalamos_enable_landing = false;
 bool kalamos_enable_spotsearch = false;
 float kalamos_landing_decent_speed = 0.05;
 float kalamos_pos_gain = 0.05;
-
+int32_t zeroheight;
 #if PERIODIC_TELEMETRY
 #include "subsystems/datalink/telemetry.h"
 
@@ -105,16 +105,17 @@ static inline void kalamos_parse_msg(void)
     struct EnuCoor_f *pos = stateGetPositionEnu_f();
 
     float diff_landing = (kalamos_descend_height - k2p_package.height)*kalamos_height_gain;
+
+    if (gps.hmsl < 20000) // above 20 meters stereo not reliable
+      diff_landing = 0;
     float pprzheight_landing  = pos->z + diff_landing;
 
     waypoint_set_alt(WP_LANDING,pprzheight_landing);
 
     float diff_search = (kalamos_search_height - k2p_package.height)*kalamos_height_gain;
-    float pprzheight_search  = pos->z + diff_search;
-    waypoint_set_alt(WP_JOE,pprzheight_search);
 
     if (kalamos_enable_spotsearch) {
-      waypoint_set_xy_i(WP_LANDING,POS_BFP_OF_REAL(k2p_package.land_gpsx), POS_BFP_OF_REAL(k2p_package.land_gpsy));
+      waypoint_set_xy_i(WP_LANDING,POS_BFP_OF_REAL(k2p_package.land_enu_x), POS_BFP_OF_REAL(k2p_package.land_enu_y));
     }
 
     if (k2p_package.height < 5.0) {
@@ -125,7 +126,7 @@ static inline void kalamos_parse_msg(void)
       if (k2p_package.min_height > 5.0) {
         kalamos_descend_height -= kalamos_landing_decent_speed;
       }
-
+/*
       struct FloatQuat *att = stateGetNedToBodyQuat_f();
 
       struct FloatRMat ltp_to_kalamos_rmat;
@@ -141,8 +142,10 @@ static inline void kalamos_parse_msg(void)
       float_rmat_transp_vmult(&measured_ltp, &ltp_to_kalamos_rmat, &joe);
 
       waypoint_set_xy_i(WP_LANDING,POS_BFP_OF_REAL(measured_ltp.x), POS_BFP_OF_REAL(measured_ltp.y));
+      */
 
     }
+    waypoint_set_xy_i(WP_JOE,POS_BFP_OF_REAL(k2p_package.joe_enu_x), POS_BFP_OF_REAL(k2p_package.joe_enu_y));
 
 
     // Send ABI message
@@ -171,6 +174,7 @@ void kalamos_event() {
 
 void kalamos_periodic() {
 
+
   struct FloatEulers *attE = stateGetNedToBodyEulers_f();
   struct FloatQuat *att = stateGetNedToBodyQuat_f();
   struct EnuCoor_f *pos = stateGetPositionEnu_f();
@@ -186,7 +190,7 @@ void kalamos_periodic() {
   p2k_package.qz = att->qz;
   p2k_package.gpsx = pos->x;
   p2k_package.gpsy = pos->y;
-  p2k_package.gpsz = gps.lla_pos.alt;
+  p2k_package.gpsz = (float)(gps.hmsl - zeroheight)/1000;
   p2k_package.enables = 0;
   if (kalamos_enable_landing)
     p2k_package.enables |= 0b1;
@@ -204,6 +208,7 @@ void kalamos_periodic() {
   DOWNLINK_SEND_SONAR(DefaultChannel, DefaultDevice, &status, &k2p_package.height);
 
 
+
   pprz_msg_send_IMCU_DEBUG(&(kalamos.transport.trans_tx), kalamos.device,
                                          1, sizeof(struct PPRZ2KalamosPackage), (unsigned char *)(&p2k_package));
 }
@@ -215,3 +220,9 @@ void enableLandingspotSearch(bool b) {
 void enableKalamosDescent(bool b) {
   kalamos_enable_landing = b;
 }
+
+
+void setZeroHeight(void){
+  zeroheight = gps.hmsl;
+}
+
