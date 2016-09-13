@@ -124,6 +124,7 @@ void dl_parse_msg(void)
         );
       }
       break;
+#ifdef USE_GPS_UBX_RTCM
       case DL_RTCM_INJECT : {
               // GPS parse data
               gpss_inject_data(
@@ -133,6 +134,7 @@ void dl_parse_msg(void)
               );
             }
             break;
+#endif
 #endif // USE_GPS
       default:
         break;

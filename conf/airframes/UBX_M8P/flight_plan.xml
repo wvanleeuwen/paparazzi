@@ -1,6 +1,6 @@
 <!DOCTYPE flight_plan SYSTEM "../../flight_plans/flight_plan.dtd">
 
-<flight_plan alt="151" ground_alt="147" lat0="51.9907" lon0="4.3784" max_dist_from_home="150" name="Rotorcraft Basic (Enac)" security_height="2">
+<flight_plan alt="148" ground_alt="147" lat0="51.9907" lon0="4.3784" max_dist_from_home="150" name="Rotorcraft Basic (Enac)" security_height="2">
   <header>
 #include "autopilot.h"
   </header>
@@ -49,11 +49,13 @@
     <block name="flare">
       <exception cond="NavDetectGround()" deroute="Holding point"/>
       <exception cond="!nav_is_in_flight()" deroute="landed"/>
+      <exception cond="0.08 > stateGetPositionEnu_f()->z" deroute="landed"/>
       <call fun="NavStartDetectGround()"/>
       <stay climb="nav_descend_vspeed" vmode="climb" wp="TD"/>
     </block>
     <block name="landed">
       <attitude pitch="0" roll="0" throttle="0" vmode="throttle" until="FALSE"/>
+      <call fun="NavKillThrottle()"/>
     </block>
   </blocks>
 </flight_plan>

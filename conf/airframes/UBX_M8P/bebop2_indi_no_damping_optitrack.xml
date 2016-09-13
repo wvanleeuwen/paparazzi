@@ -4,27 +4,25 @@
 
   <firmware name="rotorcraft">
     <target name="ap" board="bebop2"/>
-    <!-- Use for swarmhub
     <configure name="HOST" value="192.168.40.30" />
     <configure name="MODEM_HOST" value="192.168.40.255" />
-    -->
     <target name="nps" board="pc">
       <module name="fdm" type="jsbsim"/>
       <module name="udp"/>
     </target>
-    <define name="USE_GPS_UBX_RTCM" value="TRUE"/>
+    <!--<define name="USE_GPS_UBX_RTCM" value="TRUE"/>-->
     <module name="telemetry" type="transparent_udp"/>
     <module name="radio_control" type="datalink"/>
     <module name="motor_mixing"/>
     <module name="actuators" type="bebop"/>
     <module name="imu" type="bebop"/>
-    <module name="gps" type="ublox"/>
+    <module name="gps" type="datalink"/>
     <module name="stabilization" type="indi"/>
     <module name="stabilization" type="rate_indi" />
     <module name="guidance" type="indi"/>
     <module name="ahrs" type="int_cmpl_quat">
-      <configure name="USE_MAGNETOMETER" value="TRUE"/>
-      <define name="AHRS_USE_GPS_HEADING" value="FALSE"/>
+      <configure name="USE_MAGNETOMETER" value="FALSE"/>
+      <define name="AHRS_USE_GPS_HEADING" value="TRUE"/>
     </module>
     <module name="ins" type="extended"/>
   </firmware>
@@ -33,7 +31,6 @@
     <module name="geo_mag"/>
     <module name="air_data"/>
     <module name="send_imu_mag_current"/>
-    <module name="gps" type="ubx_ucenter"/>
     <module name="logger_file">
       <define name="FILE_LOGGER_PATH" value="/data/ftp/internal_000"/>
     </module>
@@ -90,6 +87,9 @@
   <!-- http://wiki.paparazziuav.org/wiki/Subsystem/ahrs#Local_Magnetic_Field -->
   <section name="AHRS" prefix="AHRS_">
     <!-- values used if no GPS fix, on 3D fix is update by geo_mag module -->
+<!-- values used if no GPS fix, on 3D fix is update by geo_mag module -->
+    <define name="HEADING_UPDATE_GPS_MIN_SPEED" value="0" />
+    <define name="GRAVITY_HEURISTIC_FACTOR" value="0" />   <!-- Fix the noise in INDI guidance for bebop -->
     <!-- Delft -->
     <define name="H_X" value="0.3892503"/>
     <define name="H_Y" value="0.0017972"/>
@@ -99,8 +99,8 @@
   <section name="INS" prefix="INS_">
     <define name="SONAR_MAX_RANGE" value="2.2"/>
     <define name="SONAR_UPDATE_ON_AGL" value="TRUE"/>
-    <!-- <define name="USE_GPS_ALT" value="1"/> does this also work outside? -->
-    <!-- <define name="VFF_R_GPS" value="0.01"/> should this be set for M8P RTK? -->
+    <define name="USE_GPS_ALT" value="1"/>
+    <define name="VFF_R_GPS" value="0.01"/>
   </section>
 
 
@@ -141,12 +141,10 @@
 
     <!-- Here it is assumed that your removed the damping from your bebop2!
          The dampers do not really damp, but cause oscillation. By removing/
-         fixing them, the bebop2 will fly much better-->
-    <!-- Not needed for tape fix?
+         fixing them, the bebop2 will fly much better-
     <define name="FILTER_ROLL_RATE" value="FALSE"/>
     <define name="FILTER_PITCH_RATE" value="FALSE"/>
-    <define name="FILTER_YAW_RATE" value="FALSE"/>
-    -->
+    <define name="FILTER_YAW_RATE" value="FALSE"/> -->
 
     <!-- reference acceleration for attitude control -->
     <define name="REF_ERR_P" value="600.0"/>
@@ -174,9 +172,9 @@
 
   <section name="GUIDANCE_V" prefix="GUIDANCE_V_">
     <define name="HOVER_KP" value="350"/>
-    <define name="HOVER_KD" value="85"/>
-    <define name="HOVER_KI" value="20"/>
-    <define name="NOMINAL_HOVER_THROTTLE" value="0.655"/>
+    <define name="HOVER_KD" value="85"/> <!-- orig: 85 / 100 -->
+    <define name="HOVER_KI" value="20"/> <!-- orig: 20 / 43 -->
+    <define name="NOMINAL_HOVER_THROTTLE" value="0.52"/>
     <define name="ADAPT_THROTTLE_ENABLED" value="TRUE"/>
     <define name="ADAPT_INITIAL_HOVER_THROTTLE" value="0.55" /> 	<!-- Default = 0.3 // 0.52 almost perfect -->
     <define name="ADAPT_MIN_HOVER_THROTTLE" value="0.48" /> 		<!-- Default = 0.2 // -->
@@ -187,9 +185,9 @@
   <section name="GUIDANCE_H" prefix="GUIDANCE_H_">
     <define name="REF_MAX_SPEED" value="2" unit="m/s"/>
     <define name="MAX_BANK" value="32" unit="deg"/>
-    <define name="PGAIN" value="120"/>
-    <define name="DGAIN" value="100"/>
-    <define name="IGAIN" value="30"/>
+    <define name="PGAIN" value="120"/> <!-- orig: 120 / 100 -->
+    <define name="DGAIN" value="100"/> <!-- orig: 100 / 150 -->
+    <define name="IGAIN" value="30"/> <!-- orig: 30 / 50 -->
   </section>
 
   <section name="NAVIGATION" prefix="NAV_">
@@ -208,6 +206,7 @@
     <define name="MODE_MANUAL" value="AP_MODE_ATTITUDE_DIRECT"/>
     <define name="MODE_AUTO1" value="AP_MODE_ATTITUDE_Z_HOLD"/>
     <define name="MODE_AUTO2" value="AP_MODE_NAV"/>
+
     <define name="NO_RC_THRUST_LIMIT" value="TRUE"/>
   </section>
 

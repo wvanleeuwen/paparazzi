@@ -75,11 +75,8 @@ PRINT_CONFIG_VAR(SECONDARY_GPS)
 struct GpsState gps;
 
 struct GpsTimeSync gps_time_sync;
-#ifdef USE_GPS_UBX_RTCM
 struct GpsRelposNED gps_relposned;
 struct RtcmMan rtcm_man;
-
-#endif
 
 #ifdef SECONDARY_GPS
 static uint8_t current_gps_id = 0;
@@ -145,8 +142,6 @@ static void send_gps(struct transport_tx *trans, struct link_device *dev)
   send_svinfo_available(trans, dev);
 }
 
-
-#ifdef USE_GPS_UBX_RTCM
 static void send_gps_rtk(struct transport_tx *trans, struct link_device *dev)
 {
 	pprz_msg_send_GPS_RTK(trans, dev, AC_ID,
@@ -171,9 +166,6 @@ static void send_gps_rxmrtcm(struct transport_tx *trans, struct link_device *dev
 								&rtcm_man.Crc177,
 								&rtcm_man.Crc187);
 }
-
-
-#endif
 
 static void send_gps_int(struct transport_tx *trans, struct link_device *dev)
 {

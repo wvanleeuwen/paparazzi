@@ -118,8 +118,6 @@ struct GpsTimeSync {
 };
 
 /** data structures for GPS with RTK capabilities */
-#ifdef USE_GPS_UBX_RTCM
-
 struct GpsRelposNED {
 	uint32_t iTOW;
 	uint16_t refStationId;
@@ -148,8 +146,6 @@ struct RtcmMan {
 	uint32_t Crc177;
 	uint32_t Crc187;
 };
-#endif
-
 
 /** global GPS state */
 extern struct GpsState gps;

@@ -1,5 +1,5 @@
 <?xml version="1.0"?>
-<!DOCTYPE telemetry SYSTEM "telemetry.dtd">
+<!DOCTYPE telemetry SYSTEM "../../telemetry/telemetry.dtd">
 <telemetry>
 
 
@@ -30,7 +30,7 @@
       <message name="VECTORNAV_INFO"      period="0.5"/>
     </mode>
  
-    <mode name="RXMRTCM" >
+   <mode name="RXMRTCM" >
       <message name="GPS_RXMRTCM"               period="1"/> 
       <message name="GPS_INT"                period=".25"/>
       <message name="GPS_RTK"               period="1"/>
