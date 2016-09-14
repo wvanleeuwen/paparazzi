@@ -85,6 +85,8 @@ void kalman_filter_opticflow_velocity(float *velocity_x ,  float *velocity_y, fl
                                       float *measurement_noise, bool reinitialize_kalman);
 void kalman_filter(float *measurements, float *covariance, float *state
                    , float *process_noise, float *measurement_noise, float fps);
+void kalman_filter_opticflow_rate(float *rate_p, float *rate_q, float *angle_measurement, float fps,
+                                      float *measurement_noise, bool reinitialize_kalman);
 
 #endif /* OPTICFLOW_CALCULATOR_H */
 
