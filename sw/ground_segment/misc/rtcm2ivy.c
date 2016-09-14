@@ -46,10 +46,14 @@
 
 /** Used variables **/
 struct SerialPort *serial_port;
-rtcm3_state_t rtcm3_state;
+
+/* ubx structure definitions*/
+msg_state_t msg_state;
 rtcm3_msg_callbacks_node_t rtcm3_1005_node;
 rtcm3_msg_callbacks_node_t rtcm3_1077_node;
 rtcm3_msg_callbacks_node_t rtcm3_1087_node;
+
+rtcm3_msg_callbacks_node_t ubx_nav_svin_node;
 
 /** Default values **/
 uint8_t ac_id = 0;
@@ -75,7 +79,7 @@ char *ivy_bus                   = "127.255.255.255"; // 192.168.1.255   127.255.
  * Read bytes from the Piksi UART connection
  * This is a wrapper functions used in the librtcm3 library
  */
-static uint32_t rtcm3_read(unsigned char (*buff)[], uint32_t n, void *context __attribute__((unused)))
+static uint32_t uart_read(unsigned char (*buff)[], uint32_t n) //, void *context __attribute__((unused))
 {
 	int ret = read(serial_port->fd, buff, n);
 	if(ret > 0)
@@ -114,10 +118,7 @@ static void ivy_send_message(uint8_t packet_id, uint8_t len, uint8_t msg[]) {
 struct EcefCoor_f posEcef;
 struct LlaCoor_f posLla;
 
-static void rtcm3_1005_callback(uint16_t sender_id __attribute__((unused)),
-		uint8_t len,
-		uint8_t msg[],
-		void *context __attribute__((unused)))
+static void rtcm3_1005_callback(uint8_t len, uint8_t msg[])
 {
 	if(len > 0) {
 		if (crc24q(msg, len - 3) == RTCMgetbitu(msg, (len - 3) * 8, 24)) {
@@ -150,10 +151,7 @@ static void rtcm3_1005_callback(uint16_t sender_id __attribute__((unused)),
 /*
  * Callback for the OBS observation message to send it trough GPS_INJECT
  */
-static void rtcm3_1077_callback(uint16_t sender_id __attribute__((unused)),
-		uint8_t len,
-		uint8_t msg[],
-		void *context __attribute__((unused)))
+static void rtcm3_1077_callback(uint8_t len, uint8_t msg[])
 {
 	if(len > 0) {
 		if (crc24q(msg, len - 3) == RTCMgetbitu(msg, (len - 3) * 8, 24)) {
@@ -172,10 +170,7 @@ static void rtcm3_1077_callback(uint16_t sender_id __attribute__((unused)),
 /*
  * Callback for the OBS observation message to send it trough GPS_INJECT
  */
-static void rtcm3_1087_callback(uint16_t sender_id __attribute__((unused)),
-		uint8_t len,
-		uint8_t msg[],
-		void *context __attribute__((unused)))
+static void rtcm3_1087_callback(uint8_t len, uint8_t msg[])
 {
 	if(len > 0) {
 		if (crc24q(msg, len - 3) == RTCMgetbitu(msg, (len - 3) * 8, 24)) {
@@ -190,12 +185,46 @@ static void rtcm3_1087_callback(uint16_t sender_id __attribute__((unused)),
 	printf_debug("Parsed 1087 callback\n");
 }
 
+
+/*
+ * Callback for UBX message
+ */
+
+static void ubx_navsvin_callback(uint8_t len, uint8_t msg[])
+
+{
+   if (len>0) {
+		u32 iTow      = RTCMgetbitu(msg, 48 + 32, 32);
+		u32 dur       = RTCMgetbitu(msg, 48 + 64, 32);
+		u32 meanAcc   = RTCMgetbitu(msg, 48 + 224, 32);
+		u8 valid      = RTCMgetbitu(msg, 48 + 288, 8);
+		u8 active     = RTCMgetbitu(msg, 48 + 296, 8);
+  printf ("iTow: %i \t dur: %i \t meaAcc: %i \t valid: %i \t active: %i \n", iTow, dur, meanAcc,valid,active);
+   }
+}
 /**
  * Parse the tty data when bytes are available
  */
 static gboolean parse_device_data(GIOChannel *chan, GIOCondition cond, gpointer data)
 {
-	rtcm3_process(&rtcm3_state, &rtcm3_read);
+	unsigned char buff[1000];
+	int c;
+	c = uart_read(&buff, 1);
+
+	if(msg_state.msg_class == RTCM_CLASS)
+	{
+		//printf("rtcm message\n");
+		rtcm3_process(&msg_state, buff[0]);
+	}else if(msg_state.msg_class == UBX_CLASS)
+	{
+		//printf("ubx message\n");
+		ubx_process(&msg_state, buff[0]);
+	}else{
+		//printf("Looking for rtcm preamble\n");
+		rtcm3_process(&msg_state, buff[0]);
+		//printf("Looking for ubx preamble\n");
+		ubx_process(&msg_state, buff[0]);
+	}
 	return TRUE;
 }
 
@@ -266,10 +295,13 @@ int main(int argc, char** argv)
 
 	// Setup RTCM3 callbacks
 	printf_debug("Setup RTCM3 callbacks...\n");
-	rtcm3_state_init(&rtcm3_state);
-	rtcm3_register_callback(&rtcm3_state, RTCM3_MSG_1005, &rtcm3_1005_callback, NULL, &rtcm3_1005_node);
-	rtcm3_register_callback(&rtcm3_state, RTCM3_MSG_1077, &rtcm3_1077_callback, NULL, &rtcm3_1077_node);
-	rtcm3_register_callback(&rtcm3_state, RTCM3_MSG_1087, &rtcm3_1087_callback, NULL, &rtcm3_1087_node);
+	msg_state_init(&msg_state);
+	rtcm3_register_callback(&msg_state, RTCM3_MSG_1005, &rtcm3_1005_callback, &rtcm3_1005_node);
+	rtcm3_register_callback(&msg_state, RTCM3_MSG_1077, &rtcm3_1077_callback, &rtcm3_1077_node);
+	rtcm3_register_callback(&msg_state, RTCM3_MSG_1087, &rtcm3_1087_callback, &rtcm3_1087_node);
+
+	rtcm3_register_callback(&msg_state, UBX_NAV_SVIN, &ubx_navsvin_callback, &ubx_nav_svin_node);
+
 
 	// Add IO watch for tty connection
 	printf_debug("Adding IO watch...\n");
