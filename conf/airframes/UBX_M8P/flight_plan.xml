@@ -1,15 +1,15 @@
 <!DOCTYPE flight_plan SYSTEM "../../flight_plans/flight_plan.dtd">
 
-<flight_plan alt="148" ground_alt="147" lat0="51.9907" lon0="4.3784" max_dist_from_home="150" name="Rotorcraft Basic (Enac)" security_height="2">
+<flight_plan alt="149" ground_alt="147" lat0="51.9907" lon0="4.3784" max_dist_from_home="150" name="Rotorcraft Basic (Enac)" security_height="1">
   <header>
 #include "autopilot.h"
   </header>
   <waypoints>
     <waypoint name="HOME" x="0.0" y="0.0"/>
     <waypoint name="STDBY" x="0.0" y="0.0"/>
-    <waypoint name="p1" x="4.0" y="-4.0"/>
-    <waypoint name="p2" x="8.0" y="-4.0"/>
-    <waypoint name="p3" x="8.0" y="4.0"/>
+    <waypoint name="p1" x="-4.0" y="4.0"/>
+    <waypoint name="p2" x="-4.0" y="8.0"/>
+    <waypoint name="p3" x="4.0" y="8.0"/>
     <waypoint name="p4" x="4.0" y="4.0"/>
     <waypoint name="TD" x="0.0" y="0.0"/>
   </waypoints>
@@ -60,7 +60,7 @@
     </block>
     <block name="Stay p3">
       <exception cond="NavBlockTime() > 5" deroute="Go p4"/>
-      <stay wp="p4"/>
+      <stay wp="p3"/>
     </block>
     <block name="Go p4">
       <go wp="p4"/>
