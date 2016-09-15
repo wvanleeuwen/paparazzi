@@ -4,8 +4,8 @@
 
   <firmware name="rotorcraft">
     <target name="ap" board="bebop2"/>
-    <configure name="HOST" value="192.168.40.30" />
-    <configure name="MODEM_HOST" value="192.168.40.255" />
+    <!--<configure name="HOST" value="192.168.40.30" />
+    <configure name="MODEM_HOST" value="192.168.40.255" />-->
     <target name="nps" board="pc">
       <module name="fdm" type="jsbsim"/>
       <module name="udp"/>
@@ -19,7 +19,9 @@
     <module name="gps" type="datalink"/>
     <module name="stabilization" type="indi"/>
     <module name="stabilization" type="rate_indi" />
-    <module name="guidance" type="indi"/>
+    <module name="guidance" type="indi">
+      <define name="GUIDANCE_INDI_SPECIFIC_FORCE_GAIN" value="-500.0"/>
+    </module>
     <module name="ahrs" type="int_cmpl_quat">
       <configure name="USE_MAGNETOMETER" value="FALSE"/>
       <define name="AHRS_USE_GPS_HEADING" value="TRUE"/>

@@ -29,7 +29,7 @@
    telemetry="../conf/airframes/UBX_M8P/default_rotorcraft.xml"
    flight_plan="../conf/airframes/UBX_M8P/flight_plan.xml"
    settings="settings/rotorcraft_basic.xml settings/control/rotorcraft_guidance.xml settings/control/stabilization_indi.xml settings/control/rotorcraft_speed.xml"
-   settings_modules="modules/imu_common.xml modules/gps.xml [modules/geo_mag.xml] modules/air_data.xml modules/gps_ubx_ucenter.xml"
+   settings_modules="modules/imu_common.xml modules/gps.xml [modules/geo_mag.xml] modules/air_data.xml"
    gui_color="red"
   />
 </conf>
