@@ -101,7 +101,7 @@ static void ivy_send_message(uint8_t packet_id, uint8_t len, uint8_t msg[]) {
 		}
 		strcat(gps_packet, number);
 	}
-	printf("%s\n\n", gps_packet);
+	//printf("%s\n\n", gps_packet);
 	IvySendMsg("%s", gps_packet);
 	if(logger == TRUE)
 	{
@@ -124,7 +124,6 @@ static void rtcm3_1005_callback(uint8_t len, uint8_t msg[])
 		if (crc24q(msg, len - 3) == RTCMgetbitu(msg, (len - 3) * 8, 24)) {
 			ivy_send_message(RTCM3_MSG_1005, len, msg);
 			msg_cnt++;
-			printf("%i: Sending 1005 message (CRC check passed)\n", msg_cnt);
 			u16 StaId      = RTCMgetbitu(msg, 24 + 12, 12);
 			u8 ItRef       = RTCMgetbitu(msg, 24 + 24, 6);
 			u8 indGPS      = RTCMgetbitu(msg, 24 + 30, 1);
@@ -134,7 +133,6 @@ static void rtcm3_1005_callback(uint8_t len, uint8_t msg[])
 			posEcef.x      = RTCMgetbits_38(msg, 24 + 34) * 0.0001;
 			posEcef.y      = RTCMgetbits_38(msg, 24 + 74) * 0.0001;
 			posEcef.z      = RTCMgetbits_38(msg, 24 + 114) * 0.0001;
-			//printf("x: %f, y: %f, z: %f\n", posEcef.x, posEcef.y, posEcef.z);
 			lla_of_ecef_f(&posLla, &posEcef);
 			//printf("Lat: %f, Lon: %f, Alt: %f\n", posLla.lat / (2 * M_PI) * 360, posLla.lon / (2 * M_PI) * 360, posLla.alt);
 			// Send spoof gpsd message to GCS to plot groundstation position
@@ -157,8 +155,6 @@ static void rtcm3_1077_callback(uint8_t len, uint8_t msg[])
 		if (crc24q(msg, len - 3) == RTCMgetbitu(msg, (len - 3) * 8, 24)) {
 			ivy_send_message(RTCM3_MSG_1077, len, msg);
 			msg_cnt++;
-			printf("%i: Sending 1077 message (CRC check passed)\n", msg_cnt);
-
 		}else{
 			ivy_send_message(RTCM3_MSG_1077, len, msg);
 			printf("Skipping 1077 message (CRC check failed)\n");
@@ -176,8 +172,6 @@ static void rtcm3_1087_callback(uint8_t len, uint8_t msg[])
 		if (crc24q(msg, len - 3) == RTCMgetbitu(msg, (len - 3) * 8, 24)) {
 			ivy_send_message(RTCM3_MSG_1087, len, msg);
 			msg_cnt++;
-			printf("%i: Sending 1087 message (CRC check passed)\n", msg_cnt);
-
 		}else{
 			printf("Skipping 1087 message (CRC check failed)\n");
 		}
@@ -194,12 +188,13 @@ static void ubx_navsvin_callback(uint8_t len, uint8_t msg[])
 
 {
    if (len>0) {
-		u32 iTow      = RTCMgetbitu(msg, 48 + 32, 32);
-		u32 dur       = RTCMgetbitu(msg, 48 + 64, 32);
-		u32 meanAcc   = RTCMgetbitu(msg, 48 + 224, 32);
-		u8 valid      = RTCMgetbitu(msg, 48 + 288, 8);
-		u8 active     = RTCMgetbitu(msg, 48 + 296, 8);
-  printf ("iTow: %i \t dur: %i \t meaAcc: %i \t valid: %i \t active: %i \n", iTow, dur, meanAcc,valid,active);
+
+		u32 iTow      = UBX_NAV_SVIN_ITOW(msg);
+		u32 dur       = UBX_NAV_SVIN_dur (msg);
+		float meanAcc = (float) 0.1 * UBX_NAV_SVIN_meanACC(msg);
+		u8 valid      = UBX_NAV_SVIN_Valid(msg);
+		u8 active     = UBX_NAV_SVIN_Active(msg);
+  printf ("iTow: %u \t dur: %u \t meaAcc: %f \t valid: %u \t active: %u \n", iTow, dur, meanAcc,valid,active);
    }
 }
 /**
@@ -210,20 +205,22 @@ static gboolean parse_device_data(GIOChannel *chan, GIOCondition cond, gpointer 
 	unsigned char buff[1000];
 	int c;
 	c = uart_read(&buff, 1);
-
-	if(msg_state.msg_class == RTCM_CLASS)
+	if(c > 0)
 	{
-		//printf("rtcm message\n");
-		rtcm3_process(&msg_state, buff[0]);
-	}else if(msg_state.msg_class == UBX_CLASS)
-	{
-		//printf("ubx message\n");
-		ubx_process(&msg_state, buff[0]);
-	}else{
-		//printf("Looking for rtcm preamble\n");
-		rtcm3_process(&msg_state, buff[0]);
-		//printf("Looking for ubx preamble\n");
-		ubx_process(&msg_state, buff[0]);
+		if(msg_state.msg_class == RTCM_CLASS)
+		{
+			rtcm3_process(&msg_state, buff[0]);
+		}else if(msg_state.msg_class == UBX_CLASS)
+		{
+			ubx_process(&msg_state, buff[0]);
+		}else{
+			msg_state.state = UNINIT;
+			rtcm3_process(&msg_state, buff[0]);
+			if(msg_state.msg_class != RTCM_CLASS)
+			{
+				ubx_process(&msg_state, buff[0]);
+			}
+		}
 	}
 	return TRUE;
 }
