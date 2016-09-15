@@ -10,6 +10,9 @@
       <module name="udp"/>
     </target>
 
+    <!--define name="USE_BARO_BOARD" value="FALSE"/>
+    <define name="USE_SONAR" value="TRUE"/-->
+
 	<!-- Subsystem section -->
     <module name="telemetry" type="transparent_udp"/>
     <module name="radio_control" type="datalink"/>
@@ -29,7 +32,9 @@
     <module name="geo_mag"/>
     <module name="air_data"/>
     <module name="send_imu_mag_current"/>
-    <module name="sonar_bebop"/> <!-- Needed for relative height est for velocity calc from opt flow-->
+    <module name="sonar_bebop">
+<define name="SENSOR_SYNC_SEND_SONAR" value="TRUE"/>
+     </module> <!-- Needed for relative height est for velocity calc from opt flow-->
     <module name="pose_history"/>
     <module name="video_thread"/>
 
@@ -110,9 +115,10 @@
   </section>
 
   <section name="INS" prefix="INS_">
-    <define name="SONAR_MAX_RANGE" value="2.2"/>
+    <!--define name="SONAR_MAX_RANGE" value="2.2"/-->
     <define name="SONAR_UPDATE_ON_AGL" value="TRUE"/>
     <!--define name="USE_HFF"/-->
+    <define name ="INT_GPS_ID" value="ABI_DISABLE"/>
   </section>
 
   <section name="RC_SETPOINT" prefix="STABILIZATION_ATTITUDE_">
