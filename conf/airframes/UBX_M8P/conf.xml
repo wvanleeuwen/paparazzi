@@ -24,12 +24,23 @@
   <aircraft
    name="bebop2"
    ac_id="230"
-   airframe="airframes/UBX_M8P/bebop2_indi_no_damping.xml"
+   airframe="airframes/UBX_M8P/bebop2_indi_no_damping_optitrack.xml"
    radio="radios/dummy.xml"
    telemetry="../conf/airframes/UBX_M8P/default_rotorcraft.xml"
-   flight_plan="../conf/airframes/UBX_M8P/flight_plan.xml"
+   flight_plan="../conf/airframes/UBX_M8P/flight_plan_optitrack.xml"
    settings="settings/rotorcraft_basic.xml settings/control/rotorcraft_guidance.xml settings/control/stabilization_indi.xml settings/control/rotorcraft_speed.xml"
    settings_modules="modules/imu_common.xml modules/gps.xml [modules/geo_mag.xml] modules/air_data.xml"
    gui_color="red"
+  />
+  <aircraft
+   name="bebop2-33"
+   ac_id="233"
+   airframe="airframes/UBX_M8P/bebop2_indi_no_damping_optitrack_33.xml"
+   radio="radios/dummy.xml"
+   telemetry="../conf/airframes/UBX_M8P/default_rotorcraft.xml"
+   flight_plan="../conf/airframes/UBX_M8P/flight_plan_optitrack.xml"
+   settings="settings/rotorcraft_basic.xml settings/control/rotorcraft_guidance.xml settings/control/stabilization_indi.xml settings/control/rotorcraft_speed.xml"
+   gui_color="red"
+   settings_modules="modules/imu_common.xml modules/gps.xml modules/geo_mag.xml modules/air_data.xml"
   />
 </conf>

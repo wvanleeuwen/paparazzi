@@ -1,0 +1,104 @@
+<!DOCTYPE flight_plan SYSTEM "../../flight_plans/flight_plan.dtd">
+
+<flight_plan alt="1.5" ground_alt="0" lat0="51.9907" lon0="4.3784" max_dist_from_home="150" name="Rotorcraft Basic (Enac)" security_height="0.5">
+  <header>
+#include "autopilot.h"
+  </header>
+  <waypoints>
+    <waypoint name="HOME" x="0.0" y="0.0"/>
+    <waypoint name="STDBY" x="0.0" y="0.0"/>
+    <waypoint name="p1" x="-4.0" y="4.0"/>
+    <waypoint name="p2" x="-4.0" y="8.0"/>
+    <waypoint name="p3" x="4.0" y="8.0"/>
+    <waypoint name="p4" x="4.0" y="4.0"/>
+    <waypoint name="TD" x="0.0" y="0.0"/>
+    <waypoint lat="51.9906247" lon="4.3768589" name="CZ1"/>
+    <waypoint lat="51.9905917" lon="4.3767725" name="CZ2"/>
+    <waypoint lat="51.9906440" lon="4.3767191" name="CZ3"/>
+    <waypoint lat="51.9906774" lon="4.3768026" name="CZ4"/>
+  </waypoints>
+  <sectors>
+    <sector color="red" name="CyberZoo">
+      <corner name="CZ1"/>
+      <corner name="CZ2"/>
+      <corner name="CZ3"/>
+      <corner name="CZ4"/>
+    </sector>
+  </sectors>
+  <exceptions>
+  </exceptions>
+  <blocks>
+    <block name="Wait GPS">
+      <call fun="NavKillThrottle()"/>
+      <while cond="!GpsFixValid()"/>
+    </block>
+    <block name="Geo init">
+      <while cond="LessThan(NavBlockTime(), 10)"/>
+      <call fun="NavSetGroundReferenceHere()"/>
+      <!--<call fun="NavSetAltitudeReferenceHere()"/>-->
+    </block>
+    <block name="Holding point">
+      <call fun="NavKillThrottle()"/>
+      <attitude pitch="0" roll="0" throttle="0" vmode="throttle" until="FALSE"/>
+    </block>
+    <block name="Start Engine">
+      <call fun="NavResurrect()"/>
+      <attitude pitch="0" roll="0" throttle="0" vmode="throttle" until="FALSE"/>
+    </block>
+    <block name="Takeoff" strip_button="Takeoff" strip_icon="takeoff.png">
+      <exception cond="stateGetPositionEnu_f()->z > 1.0" deroute="Standby"/>
+      <call fun="NavSetWaypointHere(WP_STDBY)"/>
+      <call fun="NavSetWaypointHere(WP_TD)"/>
+      <stay wp="STDBY"/>
+    </block>
+    <block name="Standby" strip_button="Standby" strip_icon="home.png">
+      <call fun="NavSetWaypointHere(WP_STDBY)"/>
+      <stay wp="STDBY"/>
+    </block>
+    <block name="Go p1">
+      <go wp="p1"/>
+    </block>
+    <block name="Stay p1">
+      <exception cond="NavBlockTime() > 5" deroute="Go p2"/>
+      <stay wp="p1"/>
+    </block>
+    <block name="Go p2">
+      <go wp="p2"/>
+    </block>
+    <block name="Stay p2">
+      <exception cond="NavBlockTime() > 5" deroute="Go p3"/>
+      <stay wp="p2"/>
+    </block>
+    <block name="Go p3">
+      <go wp="p3"/>
+    </block>
+    <block name="Stay p3">
+      <exception cond="NavBlockTime() > 5" deroute="Go p4"/>
+      <stay wp="p3"/>
+    </block>
+    <block name="Go p4">
+      <go wp="p4"/>
+    </block>
+    <block name="Stay p4">
+      <exception cond="NavBlockTime() > 5" deroute="Go p1"/>
+      <stay wp="p4"/>
+    </block>
+    <block name="land here" strip_button="Land Here" strip_icon="land-right.png">
+      <call fun="NavSetWaypointHere(WP_TD)"/>
+    </block>
+    <block name="land">
+      <go wp="TD"/>
+    </block>
+    <block name="flare">
+      <exception cond="NavDetectGround()" deroute="Holding point"/>
+      <exception cond="!nav_is_in_flight()" deroute="landed"/>
+      <exception cond="0.08 > stateGetPositionEnu_f()->z" deroute="landed"/>
+      <call fun="NavStartDetectGround()"/>
+      <stay climb="nav_descend_vspeed" vmode="climb" wp="TD"/>
+    </block>
+    <block name="landed">
+      <call fun="NavKillThrottle()"/>
+      <attitude pitch="0" roll="0" throttle="0" vmode="throttle" until="FALSE"/>
+    </block>
+  </blocks>
+</flight_plan>
