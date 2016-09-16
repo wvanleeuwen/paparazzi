@@ -23,7 +23,7 @@
     <module name="stabilization" type="indi"/>
     <module name="ahrs" type="int_cmpl_quat">
       <configure name="USE_MAGNETOMETER" value="FALSE"/>
-      <define name="AHRS_USE_GPS_HEADING" value="FALSE"/>
+      <define name="AHRS_USE_GPS_HEADING" value="TRUE"/>
     </module>
     <module name="ins" type="extended"/>
   </firmware>
@@ -181,11 +181,11 @@
   </section>
 
   <section name="GUIDANCE_V" prefix="GUIDANCE_V_">
-    <define name="HOVER_KP" value="283"/>
-    <define name="HOVER_KD" value="82"/>
-    <define name="HOVER_KI" value="70"/>
+    <define name="HOVER_KP" value="2000"/>
+    <define name="HOVER_KD" value="450"/>
+    <define name="HOVER_KI" value="0"/>
     <define name="NOMINAL_HOVER_THROTTLE" value="0.55"/>
-    <define name="ADAPT_THROTTLE_ENABLED" value="FALSE"/>
+    <!--define name="ADAPT_THROTTLE_ENABLED" value="TRUE"/-->
   </section>
 
   <section name="GUIDANCE_H" prefix="GUIDANCE_H_">
