@@ -145,6 +145,8 @@ static struct image_t *detect_colored_blob(struct image_t* img) {
         marker.detected = true;
         marker.pixel.x   = labels[largest_id].x_sum / labels[largest_id].pixel_cnt * 2;
         marker.pixel.y   = labels[largest_id].y_sum / labels[largest_id].pixel_cnt;
+
+        geo_locate_marker(img);
     } else {
         marker.detected = false;
     }
