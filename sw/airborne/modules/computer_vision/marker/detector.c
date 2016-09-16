@@ -36,7 +36,7 @@
 #include "modules/computer_vision/blob/blob_finder.h"
 
 #include "modules/computer_vision/opencv_imav_landingpad.h"     // OpenCV contour based marker detection
-#include "modules/computer_vision/marker/marker_checkers.h"     // OpenCV feature based marker detection
+//#include "modules/computer_vision/marker/marker_checkers.h"     // OpenCV feature based marker detection
 
 static bool SHOW_MARKER = true;
 
@@ -157,20 +157,20 @@ static struct image_t *detect_colored_blob(struct image_t* img) {
 }
 
 
-static struct image_t *detect_marker_checkers(struct image_t* img) {
-
-    struct resultsc marker_checkers = opencv_detect_checkers((char*) img->buf, img->w, img->h, img->dt);
-
-    if (marker_checkers.detected) {
-        marker.detected = true;
-        marker.pixel.x = marker_checkers.x;
-        marker.pixel.y = marker_checkers.y;
-    } else {
-        marker.detected = false;
-    }
-
-    return NULL;
-}
+//static struct image_t *detect_marker_checkers(struct image_t* img) {
+//
+//    struct resultsc marker_checkers = opencv_detect_checkers((char*) img->buf, img->w, img->h, img->dt);
+//
+//    if (marker_checkers.detected) {
+//        marker.detected = true;
+//        marker.pixel.x = marker_checkers.x;
+//        marker.pixel.y = marker_checkers.y;
+//    } else {
+//        marker.detected = false;
+//    }
+//
+//    return NULL;
+//}
 
 
 // Function
