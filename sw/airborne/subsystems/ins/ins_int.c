@@ -518,7 +518,10 @@ static void vel_est_cb(uint8_t sender_id __attribute__((unused)),
 
   struct FloatVect3 vel_body = {x, y, z};
   static uint32_t last_stamp = 0;
-  float dt = 0;
+  static float dt = 0.;
+  static float sum_vx = 0., sum_vy = 0.;
+  static float counter = 0;
+
 
   /* rotate velocity estimate to nav/ltp frame */
   struct FloatQuat q_b2n = *stateGetNedToBodyQuat_f();
@@ -526,8 +529,12 @@ static void vel_est_cb(uint8_t sender_id __attribute__((unused)),
   struct FloatVect3 vel_ned;
   float_quat_vmult(&vel_ned, &q_b2n, &vel_body);
 
+  // du to time tep resolution on bebop need to average velocity over longer time window for int position resolution
   if (last_stamp > 0) {
-    dt = (float)(stamp - last_stamp) * 1e-6;
+    dt += (float)(stamp - last_stamp) * 1e-6;
+    sum_vx += vel_ned.x;
+    sum_vy += vel_ned.y;
+    counter++;
   }
 
   last_stamp = stamp;
@@ -543,9 +550,13 @@ static void vel_est_cb(uint8_t sender_id __attribute__((unused)),
 #else
   ins_int.ltp_speed.x = SPEED_BFP_OF_REAL(vel_ned.x);
   ins_int.ltp_speed.y = SPEED_BFP_OF_REAL(vel_ned.y);
-  if (last_stamp > 0) {
-    ins_int.ltp_pos.x = ins_int.ltp_pos.x + POS_BFP_OF_REAL(dt * vel_ned.x);
-    ins_int.ltp_pos.y = ins_int.ltp_pos.y + POS_BFP_OF_REAL(dt * vel_ned.y);
+  if (dt > 0.03) {
+    ins_int.ltp_pos.x = ins_int.ltp_pos.x + POS_BFP_OF_REAL(dt * sum_vx / counter);
+    ins_int.ltp_pos.y = ins_int.ltp_pos.y + POS_BFP_OF_REAL(dt * sum_vy / counter);
+    dt = 0;
+    sum_vx = 0;
+    sum_vy = 0;
+    counter = 0;
   }
 #endif
 
