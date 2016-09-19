@@ -20,16 +20,30 @@
 /**
  * @file "modules/computer_vision/opencv_IMAV_landingpad.cpp"
  * @author J. Lee
- * Module for detecting outdoor landing pad in IMAV 2016
+ * Module for detecting landing pad in IMAV 2016
  */
 
 #include "opencv_imav_landingpad.h"
-
 using namespace std;
 #include <opencv2/core/core.hpp>
 #include <opencv2/imgproc/imgproc.hpp>
 using namespace cv;
 #include "opencv_image_functions.h"
+
+// Predicate for sort
+bool lexico_compare(const cv::Point2f& p1, const cv::Point2f& p2) {
+    if(p1.x < p2.x) { return true; }
+    if(p1.x > p2.x) { return false; }
+    return (p1.y < p2.y);
+}
+
+
+// Predicate for unique
+int centroid_thresh = 10;
+bool points_are_equal(const cv::Point2f& p1, const cv::Point2f& p2) {
+//    return ((p1.x == p2.x) && (p1.y == p2.y));
+    return ((p1.x < p2.x+centroid_thresh) && (p1.x > p2.x-centroid_thresh) && (p1.y < p2.y+centroid_thresh) && (p1.y > p2.y-centroid_thresh));
+}
 
 // Output
 struct results landing;
@@ -43,12 +57,9 @@ struct results opencv_imav_landing(char *img, int width, int height, int v_squar
     Mat image;
     Mat binim;
     Mat imcopy;
-//    int thresh = 230; //For outdoor landing pad
-//    int thresh = 210; //For indoor helipad
 
-    int z = 2; // z-score for outdoor, this needs to be tuned!
-//    int z = 2; // z-score for indoor, this needs to be tuned!
-
+    // Z-score for squares
+    int z = 2;
 
     // Grayscale image
     cvtColor(M, image, CV_YUV2GRAY_Y422);
@@ -77,29 +88,43 @@ struct results opencv_imav_landing(char *img, int width, int height, int v_squar
     int detected_squares = 0;
     vector<Moments> mu(contours.size() );
     vector<Point2f> mc( contours.size() );
-    vector<float> centroidsx;
-    vector<float> centroidsy;
 
     // For contours that are above a certain size, check if it has four sides(square), then obtain centroids
     for( int i = 0; (unsigned)i < contours.size(); i++ )
     {
         double Area = contourArea(contours[i]);
-        if (Area > 100)
+        if (Area > 150)
         {
             convexHull(Mat(contours[i]), hull[i], false );
             approxPolyDP(Mat(hull[i]), approx[i], arcLength(Mat(hull[i]), true)*0.12, true);
             int sides = approx[i].size();
             if (sides  == 4)
             {
-                detected_squares += 1;
                 mu[i] = moments(contours[i], false);
                 mc[i] = Point2f( mu[i].m10/mu[i].m00 , mu[i].m01/mu[i].m00 );
-                centroidsx.push_back (mc.at(i).x);
-                centroidsy.push_back (mc.at(i).y);
-                if (mod) {drawContours( imcopy, approx, i, 200 , 2, 8, vector<cv::Vec4i>(), 0, cv::Point() ); }
+//                if (mod) {drawContours( imcopy, approx, i, 20 , 2, 8, vector<cv::Vec4i>(), 0, cv::Point() ); }
             }
         }
     }
+
+    // Sort detected centroids
+    sort(mc.begin(), mc.end(), lexico_compare);
+    // Delete repeated centroids
+    mc.erase(unique(mc.begin(), mc.end(), points_are_equal), mc.end());
+
+    vector<float> centroidsx;
+    vector<float> centroidsy;
+
+    for( int i = 0; i < mc.size(); i++ )
+    {
+        if (mc[i].x != 0 && mc[i].y != 0)
+        {
+            detected_squares += 1;
+            centroidsx.push_back (mc[i].x);
+            centroidsy.push_back (mc[i].y);
+        }
+    }
+
 
     float sumx = 0;
     float sumy = 0;
@@ -111,6 +136,7 @@ struct results opencv_imav_landing(char *img, int width, int height, int v_squar
     {
         sumx += centroidsx[i];
         sumy += centroidsy[i];
+        if (mod) { circle(imcopy, Point(centroidsx[i],centroidsy[i]), 5, 50, 2); }
     }
     avgx = sumx / detected_squares;
     avgy = sumy / detected_squares;
@@ -136,14 +162,21 @@ struct results opencv_imav_landing(char *img, int width, int height, int v_squar
     vector<float> filt_centroidy;
     vector<float> ffilt_centroidx;
     vector<float> ffilt_centroidy;
+    float zx;
+    float zy;
+    vector<float> filt_zx;
+    vector<float> ffilt_zx;
+    vector<float> ffilt_zy;
 
     // Filter out outlier centroids using z-score
     for(int i = 0; (unsigned)i < centroidsx.size(); i++)
     {
-        if (abs((centroidsx[i]-avgx)/stdx) <= z)
+        zx = fabs((centroidsx[i]-avgx)/stdx);
+        if (zx <= z)
         {
             filt_centroidx.push_back (centroidsx[i]);
             filt_centroidy.push_back (centroidsy[i]);
+            filt_zx.push_back (zx);
         }
     }
 
@@ -151,14 +184,19 @@ struct results opencv_imav_landing(char *img, int width, int height, int v_squar
     int n_filtcentroids = 0;
     for(int i = 0; (unsigned)i < filt_centroidy.size(); i++)
     {
-        if (abs((filt_centroidy[i]-avgy)/stdy) <= z)
+        zy = fabs((filt_centroidy[i]-avgy)/stdy);
+        if (zy <= z)
         {
             n_filtcentroids += 1;
             ffilt_centroidx.push_back (filt_centroidx[i]);
             ffilt_centroidy.push_back (filt_centroidy[i]);
+            ffilt_zx.push_back (filt_zx[i]);
+            ffilt_zy.push_back (zy);
         }
     }
 
+    char text5[50]; sprintf(text5, "FPS: %d", n_filtcentroids);
+    putText(imcopy, text5, Point(10, image.rows), FONT_HERSHEY_SIMPLEX, 0.5, Scalar(255), 2);
 
     int xsum = 0;
     int ysum = 0;
@@ -166,22 +204,137 @@ struct results opencv_imav_landing(char *img, int width, int height, int v_squar
     int ybar = 0;
 
     // Find the mean of filtered centroids and assume it to be the center of the marker
+    // We only use this for the case when we have 2 detected squares
     for(int i = 0; (unsigned)i < ffilt_centroidx.size(); i++)
     {
         xsum += ffilt_centroidx[i];
         ysum += ffilt_centroidy[i];
     }
 
+    //calculate distance to median
+    float fmedx = 0;
+    float fmedy = 0;
+
+    // Convert separate centroids to Point
+    vector<Point2f> ffilt_centroids(ffilt_centroidx.size());
+
+    for(int i = 0; i < ffilt_centroidx.size(); i++)
+    {
+        ffilt_centroids[i] = Point2f (ffilt_centroidx[i], ffilt_centroidy[i]);
+    }
+
+    // sort
+    sort(ffilt_centroids.begin(), ffilt_centroids.end(), lexico_compare);
+
+
+    vector<float> fffilt_centroidx;
+    vector<float> fffilt_centroidy;
+
+    for( int i = 0; i < ffilt_centroids.size(); i++ )
+    {
+        fffilt_centroidx.push_back (ffilt_centroids[i].x);
+        fffilt_centroidy.push_back (ffilt_centroids[i].y);
+    }
+
+    for(int i = 0; (unsigned)i < fffilt_centroidx.size(); i++)
+    {
+        if (fffilt_centroidx.size() % 2== 0)
+        {
+            fmedx = (fffilt_centroidx[fffilt_centroidx.size() / 2 - 1] + fffilt_centroidx[fffilt_centroidx.size() / 2]) / 2;
+        }
+        else
+        {
+            fmedx = fffilt_centroidx[fffilt_centroidx.size() / 2];
+        }
+    }
+
+    for(int i = 0; (unsigned)i < fffilt_centroidy.size(); i++)
+    {
+        if (fffilt_centroidy.size() % 2== 0)
+        {
+            fmedy = (fffilt_centroidy[fffilt_centroidy.size() / 2 - 1] + fffilt_centroidy[fffilt_centroidy.size() / 2]) / 2;
+        }
+        else
+        {
+            fmedy = fffilt_centroidy[fffilt_centroidy.size() / 2];
+        }
+    }
+
+    vector<float> distance_medx;
+    vector<float> distance_medy;
+    for(int i = 0; i < fffilt_centroidx.size(); i++)
+    {
+        distance_medx.push_back ( fffilt_centroidx[i]-fmedx );
+        distance_medy.push_back ( fffilt_centroidy[i]-fmedy );
+    }
+
 
     // If the number of filtered centroids are larger than the predetermined counter, landing pad detected
+    // If the number of filtered centroids exceed 2, then we take the average of two centroids with smallest z-scores
+    // as our final centroid
+
     if (n_filtcentroids >= v_squares)
     {
         landing.marker = 1;
-        xbar = (xsum / n_filtcentroids);
-        ybar = (ysum / n_filtcentroids);
+
+        if (fffilt_centroidx.size() > 2)
+        {
+            vector<float> distance_xy;
+            for(int i = 0; i < distance_medx.size(); i++)
+            {
+                distance_xy.push_back (sqrt( pow(distance_medx[i],2) + pow(distance_medy[i],2)));
+            }
+            //large number
+            int first_index = 0;
+            int second_index = 1;
+            float first = distance_xy[first_index];
+            float second = distance_xy[second_index];
+
+            if (second < first)
+            {
+                float temp = first;
+                first = second;
+                second = temp;
+                int temp_index = first_index;
+                first_index = second_index;
+                second_index = temp_index;
+            }
+
+            for(int i = 2; i < distance_xy.size(); i++)
+            {
+                if (distance_xy[i] < first)
+                {
+                    second = first;
+                    second_index = first_index;
+                    first = distance_xy[i];
+                    first_index = i;
+                }
+                else
+                {
+                    if (distance_xy[i] < second)
+                    {
+                        second = distance_xy[i];
+                        second_index = i;
+                    }
+                }
+            }
+
+
+            if (mod) { circle(imcopy, Point(fffilt_centroidx[first_index],fffilt_centroidy[first_index]), 20, 20, 5); }
+            if (mod) { circle(imcopy, Point(fffilt_centroidx[second_index],fffilt_centroidy[second_index]), 20, 20, 5); }
+
+            xbar = (fffilt_centroidx[first_index]+fffilt_centroidx[second_index])/2;
+            ybar = (fffilt_centroidy[first_index]+fffilt_centroidy[second_index])/2;
+        }
+        else
+        {
+            xbar = (xsum / n_filtcentroids);
+            ybar = (ysum / n_filtcentroids);
+        }
+
         landing.maxx = xbar;
         landing.maxy = ybar;
-        if (mod) { circle(imcopy, Point(xbar,ybar), 20, 200, 5); }
+        if (mod) { circle(imcopy, Point(xbar,ybar), 20, 0, 5); }
     } else
     {
         landing.marker = 0;
