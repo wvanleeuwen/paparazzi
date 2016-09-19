@@ -51,6 +51,16 @@
       <while cond="1"/>
     </block>
 
+    <block name="Detect Landing Pad">
+      <call_once fun="detector_locate_helipad()"/>
+      <while cond="1"/>
+    </block>
+
+    <block name="Detect Bucket">
+      <call_once fun="detector_locate_blob()"/>
+      <while cond="1"/>
+    </block>
+
     <!--<block name="MOVE">-->
       <!--<call fun="guidance_h_set_guided_body_vel(0, 1)"/>-->
     <!--</block>-->

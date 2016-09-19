@@ -45,6 +45,7 @@ struct Marker marker;
 
 // Helipad detection
 static struct video_listener* helipad_listener;
+static struct video_listener* blob_listener;
 
 
 static void geo_locate_marker(struct image_t* img) {
@@ -221,14 +222,25 @@ static struct image_t *draw_target_marker(struct image_t* img)
 void detector_init(void)
 {
     // Add detection function to CV
-//    helipad_listener = cv_add_to_device_async(&DETECTOR_CAMERA1, detect_helipad_marker, 5);
-//    helipad_listener->maximum_fps = 10;
-//    cv_add_to_device(&DETECTOR_CAMERA1, detect_helipad_marker);
+    helipad_listener = cv_add_to_device_async(&DETECTOR_CAMERA1, detect_helipad_marker, 5);
+    helipad_listener->maximum_fps = 20;
+//    helipad_listener = cv_add_to_device(&DETECTOR_CAMERA1, detect_helipad_marker);
 
-//    init_detect_checkers();
-//    cv_add_to_device(&DETECTOR_CAMERA1, detect_marker_checkers);
-
-    cv_add_to_device(&DETECTOR_CAMERA1, detect_colored_blob);
+    blob_listener = cv_add_to_device(&DETECTOR_CAMERA1, detect_colored_blob);
 
     cv_add_to_device(&DETECTOR_CAMERA1, draw_target_marker);
+
+    detector_locate_helipad();
+}
+
+void detector_locate_blob(void)
+{
+    blob_listener->active = true;
+    helipad_listener->active = false;
+}
+
+void detector_locate_helipad(void)
+{
+    blob_listener->active = false;
+    helipad_listener->active = true;
 }

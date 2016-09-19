@@ -38,4 +38,7 @@ extern struct Marker marker;
 
 void detector_init(void);
 
+void detector_locate_blob(void);
+void detector_locate_helipad(void);
+
 #endif
