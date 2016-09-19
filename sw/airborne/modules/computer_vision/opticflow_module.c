@@ -152,6 +152,7 @@ struct image_t *opticflow_module_calc(struct image_t *img)
   // Copy the state
   struct pose_t pose = get_rotation_at_timestamp(img->pprz_ts);
   struct opticflow_state_t temp_state;
+  temp_state.angles = pose.eulers;
   temp_state.agl = opticflow_state.agl;
   temp_state.rates = pose.rates;
 
@@ -161,6 +162,7 @@ struct image_t *opticflow_module_calc(struct image_t *img)
 
   // Copy the result if finished
   pthread_mutex_lock(&opticflow_mutex);
+  memcpy(&opticflow_state, &temp_state, sizeof(struct opticflow_state_t));
   memcpy(&opticflow_result, &temp_result, sizeof(struct opticflow_result_t));
   opticflow_got_result = true;
 
@@ -169,8 +171,7 @@ struct image_t *opticflow_module_calc(struct image_t *img)
   * ARdrone and Bebop, however this can be different for other quadcopters
   * ALWAYS double check!
   */
-  opticflow_result.vel_body_x = opticflow_result.vel_y;
-  opticflow_result.vel_body_y = - opticflow_result.vel_x;
+
 
   // release the mutex as we are done with editing the opticflow result
   pthread_mutex_unlock(&opticflow_mutex);

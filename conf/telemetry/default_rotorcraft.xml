@@ -110,6 +110,8 @@
       <message name="INS_Z"             period=".05"/>
       <message name="INS"               period=".11"/>
       <message name="INS_REF"           period="5.1"/>
+      <message name="SONAR"             period="0.06"/>
+      <message name="GPS_INT"                period=".25"/>
     </mode>
 
     <mode name="vel_guidance" key_press="q">

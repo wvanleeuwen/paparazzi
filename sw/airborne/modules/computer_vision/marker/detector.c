@@ -30,13 +30,13 @@
 #include "modules/computer_vision/cv.h"
 #include "modules/computer_vision/marker/detector.h"
 
-#include "modules/computer_vision/cv_georeference.h"
 #include "modules/pose_history/pose_history.h"
 #include "modules/sonar/sonar_bebop.h"
 
-#include "modules/computer_vision/opencv_imav_landingpad.h"
+#include "modules/computer_vision/blob/blob_finder.h"
 
-#include "modules/computer_vision/marker/marker_checkers.h"
+#include "modules/computer_vision/opencv_imav_landingpad.h"     // OpenCV contour based marker detection
+//#include "modules/computer_vision/marker/marker_checkers.h"     // OpenCV feature based marker detection
 
 static bool SHOW_MARKER = true;
 
@@ -45,6 +45,7 @@ struct Marker marker;
 
 // Helipad detection
 static struct video_listener* helipad_listener;
+static struct video_listener* blob_listener;
 
 
 static void geo_locate_marker(struct image_t* img) {
@@ -102,20 +103,77 @@ static void geo_locate_marker(struct image_t* img) {
     //fprintf(stderr, "[marker] found! %.3f, %.3f, %.3f, %.3f\n", geo_relative.x, geo_relative.y, marker.geo_location.x, marker.geo_location.y);
 }
 
-static struct image_t *detect_marker_checkers(struct image_t* img) {
 
-    struct resultsc marker_checkers = opencv_detect_checkers((char*) img->buf, img->w, img->h, img->dt);
+static struct image_t *detect_colored_blob(struct image_t* img) {
 
-    if (marker_checkers.detected) {
+    // Color Filter
+    struct image_filter_t filter;
+    filter.y_min = 0;    // red
+    filter.y_max = 110;
+    filter.u_min = 52;
+    filter.u_max = 140;
+    filter.v_min = 140;
+    filter.v_max = 255;
+
+    int threshold = 50;
+
+    // Output image
+    struct image_t dst;
+    image_create(&dst, img->w, img->h, IMAGE_GRADIENT);
+
+    // Labels
+    uint16_t labels_count = 512;
+    struct image_label_t labels[512];
+
+    // Blob finder
+    image_labeling(img, &dst, &filter, 1, labels, &labels_count);
+
+    int largest_id = -1;
+    int largest_size = 0;
+
+    // Find largest
+    for (int i=0; i<labels_count; i++) {
+        // Only consider large blobs
+        if (labels[i].pixel_cnt > threshold) {
+            if (labels[i].pixel_cnt > largest_size) {
+                largest_size = labels[i].pixel_cnt;
+                largest_id = i;
+            }
+        }
+    }
+
+    if (largest_id >= 0) {
         marker.detected = true;
-        marker.pixel.x = marker_checkers.x;
-        marker.pixel.y = marker_checkers.y;
+        marker.pixel.x   = labels[largest_id].x_sum / labels[largest_id].pixel_cnt * 2;
+        marker.pixel.y   = labels[largest_id].y_sum / labels[largest_id].pixel_cnt;
+
+        geo_locate_marker(img);
     } else {
         marker.detected = false;
     }
 
+    image_free(&dst);
+
+//    fprintf(stderr, "[blob] fps %.2f \n", (1000000.f / img->dt));
+
     return NULL;
 }
+
+
+//static struct image_t *detect_marker_checkers(struct image_t* img) {
+//
+//    struct resultsc marker_checkers = opencv_detect_checkers((char*) img->buf, img->w, img->h, img->dt);
+//
+//    if (marker_checkers.detected) {
+//        marker.detected = true;
+//        marker.pixel.x = marker_checkers.x;
+//        marker.pixel.y = marker_checkers.y;
+//    } else {
+//        marker.detected = false;
+//    }
+//
+//    return NULL;
+//}
 
 
 // Function
@@ -126,8 +184,8 @@ static struct image_t *detect_helipad_marker(struct image_t* img)
             img->w,
             img->h,
             2, //squares
-            220, //binary threshold
-            0); //modify image
+            210, //binary threshold
+            1, img->dt); //modify image
 
     if (helipad_marker.marker) {
         marker.detected = true;
@@ -164,12 +222,25 @@ static struct image_t *draw_target_marker(struct image_t* img)
 void detector_init(void)
 {
     // Add detection function to CV
-//    helipad_listener = cv_add_to_device_async(&DETECTOR_CAMERA1, detect_helipad_marker, 5);
-//    helipad_listener->maximum_fps = 10;
+    helipad_listener = cv_add_to_device_async(&DETECTOR_CAMERA1, detect_helipad_marker, 5);
+    helipad_listener->maximum_fps = 20;
+//    helipad_listener = cv_add_to_device(&DETECTOR_CAMERA1, detect_helipad_marker);
 
-    init_detect_checkers();
-
-    cv_add_to_device(&DETECTOR_CAMERA1, detect_marker_checkers);
+    blob_listener = cv_add_to_device(&DETECTOR_CAMERA1, detect_colored_blob);
 
     cv_add_to_device(&DETECTOR_CAMERA1, draw_target_marker);
+
+    detector_locate_helipad();
+}
+
+void detector_locate_blob(void)
+{
+    blob_listener->active = true;
+    helipad_listener->active = false;
+}
+
+void detector_locate_helipad(void)
+{
+    blob_listener->active = false;
+    helipad_listener->active = true;
 }

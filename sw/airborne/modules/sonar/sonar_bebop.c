@@ -72,7 +72,9 @@ static void *sonar_bebop_read(void *data __attribute__((unused)))
 #ifndef SITL
     uint16_t i;
     uint16_t adc_buffer[8192];
+    static float prev_distance[5] = {0, 0, 0, 0, 0};
 
+    bool do_send_sonar = true;
 
     /* Start ADC and send sonar output */
     adc_enable(&adc0, 1);
@@ -112,10 +114,26 @@ static void *sonar_bebop_read(void *data __attribute__((unused)))
     /* Calculate the distance from the peeks */
     uint16_t diff = stop_send - start_send;
     int16_t peek_distance = first_peek - (stop_send - diff/2);
+
+
     if(first_peek <= stop_send || diff > 250)
       peek_distance = 0;
 
+
     sonar_bebop.distance = peek_distance / 1000.0;
+
+
+
+
+    if(fabs(prev_distance[0]-sonar_bebop.distance)>0.20f || fabs(prev_distance[1]-sonar_bebop.distance)>0.2f||fabs(prev_distance[2]-sonar_bebop.distance)>0.2f)
+    	do_send_sonar =false;
+
+    int x;
+    for(x=0;x<5;x++)
+    	prev_distance[x+1]=prev_distance[x];
+
+    prev_distance[0] = sonar_bebop.distance;
+
 #else // SITL
     sonar_bebop.distance = stateGetPositionEnu_f()->z;
     Bound(sonar_bebop.distance, 0.1f, 7.0f);
@@ -124,7 +142,7 @@ static void *sonar_bebop_read(void *data __attribute__((unused)))
 
     usleep(10000);
 
-    if(peek_distance > 0)
+    if(peek_distance > 0 && do_send_sonar)
     {
       // Send ABI message
       AbiSendMsgAGL(AGL_SONAR_ADC_ID, sonar_bebop.distance);

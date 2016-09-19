@@ -27,7 +27,7 @@ void init_detect_checkers(void) {
     detector->setScaleFactor(1.3f);
     detector->setEdgeThreshold(7);
     detector->setPatchSize(7);
-    detector->setMaxFeatures(50);
+    detector->setMaxFeatures(20);
 
     // Create FLANN matcher (see cv::flann::IndexParams docs for algorithm settings)
     matcher = new FlannBasedMatcher(new cv::flann::LshIndexParams(6, 12, 1));
@@ -35,6 +35,8 @@ void init_detect_checkers(void) {
     // Find keypoints and descriptors in template image
     std::vector<KeyPoint> keypoints;
     detector->detectAndCompute(marker_template, mask, keypoints, marker_descriptors);
+
+    detector->setMaxFeatures(50);
 }
 
 
@@ -67,8 +69,8 @@ struct resultsc opencv_detect_checkers(char *img, int width, int height, int dt)
         }
     }
 
-    // There are at least 5 good matches
-    if (good.size() > 5) {
+    // There are at least X good matches
+    if (good.size() > 7) {
         // Set marker detected to true
         marker.detected = true;
 

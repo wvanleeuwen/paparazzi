@@ -35,7 +35,7 @@ struct results {
     int marker;
 };
 
-struct results opencv_imav_landing(char *img, int width, int height, int v_squares, int binary_threshold, int mod);
+struct results opencv_imav_landing(char *img, int width, int height, int v_squares, int binary_threshold, int mod, int dt);
 
 #ifdef __cplusplus
 }

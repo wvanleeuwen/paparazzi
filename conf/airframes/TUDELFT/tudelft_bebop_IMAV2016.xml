@@ -15,8 +15,8 @@
     <module name="gps" type="optitrack"/>
     <module name="stabilization" type="indi"/>
     <module name="ahrs" type="int_cmpl_quat">
-      <configure name="USE_MAGNETOMETER" value="TRUE"/>
-      <define name="AHRS_USE_GPS_HEADING" value="FALSE"/>
+      <configure name="USE_MAGNETOMETER" value="FALSE"/>
+      <define name="AHRS_USE_GPS_HEADING" value="TRUE"/>
     </module>
     <module name="ins" type="extended"/>
   </firmware>
@@ -36,13 +36,13 @@
 
     <module name="cv_opticflow">
       <define name="OPTICFLOW_CAMERA" value="bottom_camera"/>
-      <define name="MAX_HORIZON" value="2"/>
-      <!--define name="CAMERA_ROTATED_180" value="1"/-->
-      <define name="OPTICFLOW_DEROTATION" value="1"/>
+      <define name="MAX_HORIZON" value="10"/>
       <define name="OPTICFLOW_FX" value="347.22222222"/> <!-- 2.5 / (3.6 * 2.0) * 1000 -->
       <define name="OPTICFLOW_FY" value="347.22222222"/> <!-- 2.5 / (3.6 * 2.0) * 1000 -->
       <define name="OPTICFLOW_FOV_W" value="0.665499265"/> <!-- 2 * arctan(240 / (2*347.22222222)) -->
       <define name="OPTICFLOW_FOV_H" value="0.665499265"/> <!-- 2 * arctan(240 / (2*347.22222222)) -->
+      <define name="OPTICFLOW_DEROTATION_CORRECTION_FACTOR_X" value="0.8"/> <!--Obtained from a linefit-->
+      <define name="OPTICFLOW_DEROTATION_CORRECTION_FACTOR_Y" value="0.85"/> <!--Obtained from a linefit-->
     </module>
 
 
@@ -97,9 +97,7 @@
   </servos>
 
   <section name="MIXING" prefix="MOTOR_MIXING_">
-    <define name="TRIM_ROLL" value="0"/>
-    <define name="TRIM_PITCH" value="0"/>
-    <define name="TRIM_YAW" value="0"/>
+    <!-- Time cross layout (X), with order NW (CW), NE (CCW), SE (CW), SW (CCW) -->
     <define name="TYPE" value="QUAD_X"/>
   </section>
 
@@ -117,7 +115,7 @@
     <define name="CALC_AMSL_BARO" value="TRUE"/>
   </section>
 
-  <include href="conf/airframes/TUDELFT/calibrations/bebop10.xml" />
+  <include href="conf/airframes/TUDELFT/calibrations/bebopTUBB17.xml"/>
 
   <section name="IMU" prefix="IMU_">
     <define name="BODY_TO_IMU_PHI" value="0." unit="deg"/>
@@ -136,17 +134,17 @@
   </section>
 
   <section name="INS" prefix="INS_">
-    <define name="SONAR_MAX_RANGE" value="2.2"/>
-    <define name="SONAR_UPDATE_ON_AGL" value="FALSE"/>  <!-- FALSE = Baro; TRUE = Sonar; -->
-    <define name="USE_GPS_ALT" value="FALSE"/>          <!-- FALSE = Baro; TRUE = GPS; -->
-    <define name="VFF_R_GPS" value="0.01"/>
+    <!--define name="SONAR_MAX_RANGE" value="2.2"/-->
+    <define name="SONAR_UPDATE_ON_AGL" value="TRUE"/>
+    <!--define name="USE_HFF"/-->
+    <define name ="INT_GPS_ID" value="ABI_DISABLE"/>
   </section>
 
   <section name="RC_SETPOINT" prefix="STABILIZATION_ATTITUDE_">
     <!-- setpoint limits for attitude stabilization rc flight -->
     <define name="SP_MAX_PHI" value="45" unit="deg"/>
     <define name="SP_MAX_THETA" value="45" unit="deg"/>
-    <define name="SP_MAX_R" value="300" unit="deg/s"/>
+    <define name="SP_MAX_R" value="100" unit="deg/s"/>
     <define name="DEADBAND_A" value="0"/>
     <define name="DEADBAND_E" value="0"/>
     <define name="DEADBAND_R" value="50"/>
@@ -171,11 +169,17 @@
   </section>
 
   <section name="STABILIZATION_ATTITUDE_INDI" prefix="STABILIZATION_INDI_">
-    <!-- control effectiveness -->
-    <define name="G1_P" value="0.0639"/>
-    <define name="G1_Q" value="0.0361"/>
-    <define name="G1_R" value="0.0022"/>
-    <define name="G2_R" value="0.1450"/>
+    <!-- control effectiveness with gripper and legs -->
+    <!--<define name="G1_P" value="0.021"/>-->
+    <!--<define name="G1_Q" value="0.014"/>-->
+    <!--<define name="G1_R" value="0.00095"/>-->
+    <!--<define name="G2_R" value="0.06307"/>-->
+
+    <!-- bebop normal -->
+    <define name="G1_P" value="0.052669"/>
+    <define name="G1_Q" value="0.03326"/>
+    <define name="G1_R" value="0.002377"/>
+    <define name="G2_R" value="0.136936"/>
 
     <!-- reference acceleration for attitude control -->
     <define name="REF_ERR_P" value="600.0"/>
@@ -202,18 +206,25 @@
   </section>
 
   <section name="GUIDANCE_V" prefix="GUIDANCE_V_">
-    <define name="HOVER_KP" value="350"/>
-    <define name="HOVER_KD" value="82"/>
-    <define name="HOVER_KI" value="70"/>
-    <define name="NOMINAL_HOVER_THROTTLE" value="0.5"/>
-    <define name="ADAPT_THROTTLE_ENABLED" value="TRUE"/>
+    <define name="HOVER_KP" value="2000"/>
+    <define name="HOVER_KD" value="450"/>
+    <define name="HOVER_KI" value="0"/>
+    <define name="NOMINAL_HOVER_THROTTLE" value="0.55"/>
+    <!--define name="ADAPT_THROTTLE_ENABLED" value="TRUE"/-->
   </section>
 
   <section name="GUIDANCE_H" prefix="GUIDANCE_H_">
+    <!--<define name="USE_SPEED_REF" value="TRUE"/>-->
+    <define name="REF_MAX_SPEED" value="0.5" unit="m/s"/>
+
+    <!-- Good weather -->
     <define name="MAX_BANK" value="20" unit="deg"/>
-    <define name="PGAIN" value="100"/>
-    <define name="DGAIN" value="40"/>
-    <define name="IGAIN" value="0"/>
+    <!-- Bad weather -->
+    <!-- define name="MAX_BANK" value="32" unit="deg"/ -->
+
+    <define name="PGAIN" value="70"/>
+    <define name="DGAIN" value="170"/>
+    <define name="IGAIN" value="20"/>
   </section>
 
   <section name="NAVIGATION" prefix="NAV_">
