@@ -65,7 +65,7 @@ struct results opencv_imav_landing(char *img, int width, int height, int v_squar
     cvtColor(M, image, CV_YUV2GRAY_Y422);
 
     // copy image
-    cvtColor(M, imcopy, CV_YUV2GRAY_Y422);
+    if (mod == 1) { cvtColor(M, imcopy, CV_YUV2GRAY_Y422); }
 
     // Gaussian Blur
     blur(image, image, Size(5,5));
@@ -75,7 +75,6 @@ struct results opencv_imav_landing(char *img, int width, int height, int v_squar
 
     // Canny edges
     Canny(binim, image, 66, 133);
-
 
     vector<vector<Point> > contours;
     vector<Vec4i> hierarchy;
@@ -194,9 +193,6 @@ struct results opencv_imav_landing(char *img, int width, int height, int v_squar
             ffilt_zy.push_back (zy);
         }
     }
-
-    char text5[50]; sprintf(text5, "FPS: %d", n_filtcentroids);
-    putText(imcopy, text5, Point(10, image.rows), FONT_HERSHEY_SIMPLEX, 0.5, Scalar(255), 2);
 
     int xsum = 0;
     int ysum = 0;
@@ -346,10 +342,13 @@ struct results opencv_imav_landing(char *img, int width, int height, int v_squar
     detector2_fps = (1 - detector2_fps_epsilon) * detector2_fps + detector2_fps_epsilon * (1000000.f / dt);
 
     // Draw FPS on image
-    char text[50]; sprintf(text, "FPS: %0.2f", detector2_fps);
-    putText(imcopy, text, Point(10, image.rows-10), FONT_HERSHEY_SIMPLEX, 0.5, Scalar(255), 2);
+    if (mod == 1) {
+        char text[50];
+        sprintf(text, "FPS: %0.2f", detector2_fps);
+        putText(imcopy, text, Point(10, image.rows - 10), FONT_HERSHEY_SIMPLEX, 0.5, Scalar(255), 2);
 
-    grayscale_opencv_to_yuv422(imcopy, img, width, height);
+        grayscale_opencv_to_yuv422(imcopy, img, width, height);
+    }
 
     return landing;
 }
