@@ -61,6 +61,12 @@
       <while cond="1"/>
     </block>
 
+  <block name="Experimental Landing">
+      <call fun="Land(0.1)"/>             <!-- this call blocks until altitude < 0.1 -->
+      <call_once fun="KillEngines()"/>
+      <while cond="1"/>                   <!-- wait indefinitely -->
+  </block>
+
     <!--<block name="MOVE">-->
       <!--<call fun="guidance_h_set_guided_body_vel(0, 1)"/>-->
     <!--</block>-->

@@ -91,6 +91,20 @@ uint8_t MoveForward(float vx) {
     return false;
 }
 
+
+bool Land(float end_altitude) {
+    // return true if not completed
+
+    guidance_v_set_guided_z(0);
+
+    if (stateGetPositionEnu_f()->z > end_altitude) {
+        return true;
+    }
+
+    return false;
+}
+
+
 void marker_detection_periodic(void) {
 
     if (marker.detected) {
