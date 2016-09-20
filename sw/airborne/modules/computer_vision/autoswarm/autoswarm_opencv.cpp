@@ -77,14 +77,14 @@ static bool 			inRectangle			(Point pt, Rect rectangle);
 #define WV_DEBUG_SHOW_MEM			 0 		// Show the neighbours identified and their location
 
 // Runtime options
-#define WV_OPT_WRITE_RESULTS 		 1		// Write measurements to text file
-#define WV_OPT_MOD_VIDEO 			 0 		// Modify the frame to show relevant info
+#define WV_OPT_WRITE_RESULTS 		 0		// Write measurements to text file
+#define WV_OPT_MOD_VIDEO 			 1 		// Modify the frame to show relevant info
 #define WV_OPT_CALIBRATE_CAM 		 0 		// Calibrate the camera
 #define WV_OPT_BENCHMARK 			 0 		// Print benchmark table
 #define WV_OPT_CV_CONTOURS 			 0 		// Use opencv to detect contours
 #define WV_OPT_ISP_CROP 			 0 		// Use the ISP to crop the frame according to FOV-Y
-#define WV_OPT_MEASURE_FPS 			 0 		// Measure the FPS using built-in clock and framecount
-#define WV_OPT_BODYFRAME 			 0 		// Fake euler angles and pos to be 0
+#define WV_OPT_MEASURE_FPS 			 1 		// Measure the FPS using built-in clock and framecount
+#define WV_OPT_BODYFRAME 			 1 		// Fake euler angles and pos to be 0
 // Global options definitions
 #define WV_GLOBAL_POINT 			0
 #define WV_GLOBAL_BUCKET 			1
