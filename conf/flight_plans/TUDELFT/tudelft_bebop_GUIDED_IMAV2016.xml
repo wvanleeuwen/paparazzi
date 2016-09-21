@@ -6,7 +6,7 @@
         ground_alt="0"
         security_height="0.4"
         max_dist_from_home="8"
-        alt="1.5">
+        alt="2.0">
 
   <!--<header>-->
     <!--#include "autopilot.h"-->
@@ -41,14 +41,27 @@
 
     <block name="TakeOff">
       <call fun="StartEngines()"/>
-      <call fun="TakeOff(1.0)"/>
-      <call fun="WaitUntilAltitude(1.5)"/>
+      <call fun="Hover(1.5)"/>
+      <call fun="RotateToHeading(0)"/> <!-- not yet working -->
     </block>
 
      <!--Hover at the current location-->
     <block name="Hover">
       <call fun="Hover(1.5)"/>
       <while cond="1"/>
+      <exception cond="marker.detected && marker.found_time > 3.0" deroute="Experimental Landing"/>
+    </block>
+
+    <!--<block name="Move">-->
+      <!--<call fun="MoveForward(0.2)"/>-->
+      <!--<while cond="1"/>-->
+      <!--<exception cond="marker.detected" deroute="Hover"/>-->
+    <!--</block>-->
+
+    <block name="Experimental Landing">
+      <call fun="Land(0.1)"/>             <!-- this call blocks until altitude < 0.1 -->
+      <call_once fun="KillEngines()"/>
+      <while cond="1"/>                   <!-- wait indefinitely -->
     </block>
 
     <block name="Detect Landing Pad">
@@ -61,15 +74,6 @@
       <while cond="1"/>
     </block>
 
-  <block name="Experimental Landing">
-      <call fun="Land(0.1)"/>             <!-- this call blocks until altitude < 0.1 -->
-      <call_once fun="KillEngines()"/>
-      <while cond="1"/>                   <!-- wait indefinitely -->
-  </block>
-
-    <!--<block name="MOVE">-->
-      <!--<call fun="guidance_h_set_guided_body_vel(0, 1)"/>-->
-    <!--</block>-->
 
     <!-- Start the bucket mission -->
     <!--<block name="Start Bucket">-->

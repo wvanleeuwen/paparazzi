@@ -38,6 +38,8 @@ extern uint8_t ResetAlt(void);
 extern uint8_t Hover(float altitude);
 extern uint8_t MoveForward(float vx);
 
+extern bool RotateToHeading(float heading);
+
 extern bool TakeOff(float climb_rate);
 extern bool WaitUntilAltitude(float altitude);
 extern bool Land(float end_altitude);

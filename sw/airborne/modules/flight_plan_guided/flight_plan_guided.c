@@ -42,11 +42,19 @@ void flight_plan_guided_init(void) {} // Dummy
 
 
 /* Kill throttle */
-uint8_t KillEngines(void) {if (autopilot_mode == AP_MODE_GUIDED) { autopilot_set_motors_on(FALSE); } return false;}
+uint8_t KillEngines(void) {
+    autopilot_set_motors_on(FALSE);
+
+    return false;
+}
 
 
 /* Start throttle */
-uint8_t StartEngines(void) {if (autopilot_mode == AP_MODE_GUIDED) { autopilot_set_motors_on(TRUE); } return false;}
+uint8_t StartEngines(void) {
+    autopilot_set_motors_on(TRUE);
+
+    return false;
+}
 
 
 /* Reset the altitude reference to the current GPS alt if GPS is used */
@@ -69,10 +77,14 @@ bool WaitUntilAltitude(float altitude) {
     return false;
 }
 
-/* Take off */
+bool RotateToHeading(float heading) {
+    guidance_h_set_guided_heading(heading);
+
+    return false;
+}
+
 uint8_t Hover(float altitude) {
     if (autopilot_mode != AP_MODE_GUIDED) { return true; }
-
     // Horizontal velocities are set to zero
     guidance_h_set_guided_body_vel(0, 0);
 
@@ -83,13 +95,15 @@ uint8_t Hover(float altitude) {
 }
 
 /* Move forward */
-uint8_t MoveForward(float vx) {
-    if (autopilot_mode == AP_MODE_GUIDED) {
-        // Move forward
-        guidance_h_set_guided_body_vel(vx, 0);
-    }
-    return false;
-}
+//uint8_t MoveForward(float vx) {
+//    if (autopilot_mode != AP_MODE_GUIDED) { return true; }
+//
+//    if (autopilot_mode == AP_MODE_GUIDED) {
+//        // Move forward
+//        guidance_h_set_guided_body_vel(vx, 0);
+//    }
+//    return false;
+//}
 
 
 bool Land(float end_altitude) {
