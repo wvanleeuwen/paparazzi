@@ -95,15 +95,25 @@ uint8_t Hover(float altitude) {
 }
 
 /* Move forward */
-//uint8_t MoveForward(float vx) {
-//    if (autopilot_mode != AP_MODE_GUIDED) { return true; }
-//
-//    if (autopilot_mode == AP_MODE_GUIDED) {
-//        // Move forward
-//        guidance_h_set_guided_body_vel(vx, 0);
-//    }
-//    return false;
-//}
+uint8_t MoveForward(float vx) {
+    if (autopilot_mode != AP_MODE_GUIDED) { return true; }
+
+    if (autopilot_mode == AP_MODE_GUIDED) {
+        guidance_h_set_guided_body_vel(vx, 0);
+    }
+    return false;
+}
+
+/* Move Right */
+uint8_t MoveRight(float vy) {
+    if (autopilot_mode != AP_MODE_GUIDED) { return true; }
+
+    if (autopilot_mode == AP_MODE_GUIDED) {
+        guidance_h_set_guided_body_vel(0, vy);
+    }
+    return false;
+}
+
 
 
 bool Land(float end_altitude) {

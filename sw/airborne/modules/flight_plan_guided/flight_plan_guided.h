@@ -37,6 +37,7 @@ extern uint8_t StartEngines(void);
 extern uint8_t ResetAlt(void);
 extern uint8_t Hover(float altitude);
 extern uint8_t MoveForward(float vx);
+extern uint8_t MoveRight(float vy);
 
 extern bool RotateToHeading(float heading);
 

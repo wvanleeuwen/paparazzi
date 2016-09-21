@@ -141,7 +141,7 @@ static void marker_not_detected(struct image_t* img)
     marker.detected = false;
 //    marker.mid = false;
 
-    marker.found_time -= 2 * img->dt / 1000000.f;
+    marker.found_time -= 1.5 * img->dt / 1000000.f;
     if (marker.found_time < 0) { marker.found_time = 0; }
 }
 
@@ -209,7 +209,7 @@ static struct image_t *detect_helipad_marker(struct image_t* img)
             img->h,
             2, //squares
             210, //binary threshold
-            1, img->dt); //modify image
+            0, img->dt); //modify image, time taken
 
     if (helipad_marker.marker)
     {
