@@ -53,16 +53,17 @@ struct mt9f002_t mt9f002 = {
   // Initial values
   .target_fps = MT9F002_TARGET_FPS,
   .target_exposure = MT9F002_TARGET_EXPOSURE,
-  .gain_green1 = 2.0,
+  .gain_green1 = 3.0,
   .gain_blue = 5.0,
-  .gain_red = 2.0,
-  .gain_green2 = 2.0,
+  .gain_red = 3.0,
+  .gain_green2 = 3.0,
   .output_width = MT9F002_OUTPUT_WIDTH,
   .output_height = MT9F002_OUTPUT_HEIGHT,
   .output_scaler = MT9F002_OUTPUT_SCALER,
   .offset_x = MT9F002_INITIAL_OFFSET_X,
   .offset_y = MT9F002_INITIAL_OFFSET_Y,
-
+  .x_odd_inc = MT9F002_X_ODD_INC_VAL,
+  .y_odd_inc = MT9F002_Y_ODD_INC_VAL,
   // I2C connection port
   .i2c_periph = &i2c0
 };

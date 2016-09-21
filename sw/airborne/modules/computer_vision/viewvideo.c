@@ -149,6 +149,7 @@ struct image_t *viewvideo_function(struct image_t *img)
     // Only resize when needed
     if (viewvideo.downsize_factor != 1) {
       image_yuv422_downsample(img, &img_small, viewvideo.downsize_factor);
+    	//subsample_yuv422_downsample(img, &img_small, 2);
       jpeg_encode_image(&img_small, &img_jpeg, VIEWVIDEO_QUALITY_FACTOR, VIEWVIDEO_USE_NETCAT);
     } else {
       jpeg_encode_image(img, &img_jpeg, VIEWVIDEO_QUALITY_FACTOR, VIEWVIDEO_USE_NETCAT);

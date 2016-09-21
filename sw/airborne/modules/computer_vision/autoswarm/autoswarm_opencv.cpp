@@ -23,7 +23,7 @@
  * Autonomous bebop swarming module based on vision
  */
 
-#define BOARD_CONFIG "boards/bebop.h"
+//#define BOARD_CONFIG "boards/bebop.h"
 
 #include "autoswarm_opencv.h"
 
@@ -37,7 +37,30 @@ extern "C" {
 #include <firmwares/rotorcraft/navigation.h>
 #include <subsystems/navigation/waypoints.h>
 #include <state.h>
-#include <generated/flight_plan.h>
+//#include <generated/flight_plan.h>
+
+#define COMPLEMENT_2(i, r) (((i) >= 0) ? (r) : (~(r) + 1) & 0x3fff)
+#define Q311(i) (COMPLEMENT_2(i, (unsigned)(((ABS(i)) * (1 << 11)) + 0.5)))
+
+#define WP__TD 2
+#define WP__GOAL 4
+#define WP__CAM 5
+#define WP_GLOBAL 6
+#define FP_BLOCKS { \
+ "Wait GPS" , \
+ "Geo init" , \
+ "Holding point" , \
+ "Start Engine" , \
+ "Takeoff" , \
+ "Standby" , \
+ "Swarm" , \
+ "Swarm Home" , \
+ "Land here" , \
+ "Land" , \
+ "Flare" , \
+ "Landed" , \
+ "HOME" , \
+}
 }
 
 using namespace std;
@@ -45,7 +68,6 @@ using namespace std;
 #include <opencv2/imgproc/imgproc.hpp>
 using namespace cv;
 #include "modules/computer_vision/opencv_image_functions.h"
-#include "boards/bebop/mt9f002.h"
 
 // Defining function that require opencv to be loaded
 static void 			trackGreyObjects	(Mat& sourceFrame, Mat& greyFrame, vector<trackResults>* trackRes);
@@ -202,6 +224,8 @@ int sample = 0;
 
 void autoswarm_opencv_init(int globalMode)
 {
+	printf("Coefficients:\n %i %i\n%i %i\n%i %i\n%i %i\n%i\n", Q311(0.213), Q311(0.715), Q311(0.072), Q311(-0.100), Q311(-0.336), Q311(0.436), Q311(0.615), Q311(-0.515), Q311(-0.100));
+
 #if WV_OPT_MEASURE_FPS
 	startTime 			= time(0);
 #endif

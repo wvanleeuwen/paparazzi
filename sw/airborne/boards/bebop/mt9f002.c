@@ -60,7 +60,7 @@ struct video_config_t front_camera = {
   .subdev_name = "/dev/v4l-subdev1",
   .format = V4L2_PIX_FMT_UYVY,
   .subdev_format = V4L2_MBUS_FMT_SGRBG10_1X10,
-  .buf_cnt = 3,
+  .buf_cnt = 5,
   .filters = VIDEO_FILTER_ISP,
   .cv_listener = NULL,
   .fps = MT9F002_TARGET_FPS
@@ -799,12 +799,14 @@ void mt9f002_set_resolution(struct mt9f002_t *mt)
 	    write_reg(mt, MT9F002_SCALE_M, scaleFactor, 2);
 	  }
 	  printf("OUTPUT_SIZE: (%i, %i)\tSCALED_SIZE: (%i, %i)\n", mt->output_width, mt->output_height, mt->scaled_width, mt->scaled_height);
+	  printf("Stage 0\n");
 	  /* Set position (based on offset and subsample increment) */
 	  if(mt->offset_x % (x_skip_factor * 8) != 0)
 	  {
 		  mt->offset_x = round(mt->offset_x / (x_skip_factor * 8)) * (x_skip_factor * 8);
 		  printf("[MT9F002] Warning, offset_x not a multiple of %i, changing to %i\n", 8 * x_skip_factor, mt->offset_x);
 	  }
+	  printf("Stage 1\n");
 	  if(mt->offset_y % (y_skip_factor * 8) != 0)
 	  {
 		  mt->offset_y = round(mt->offset_y / (y_skip_factor * 8)) * (y_skip_factor * 8);

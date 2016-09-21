@@ -197,18 +197,18 @@ uint16_t image_yuv422_colorfilt(struct image_t *input, struct image_t *output, u
 /**
 * Simplified high-speed low CPU downsample function without averaging
 *  downsample factor must be 1, 2, 4, 8 ... 2^X
-*  image of typ UYVY expected. Only one color UV per 2 pixels
+*  image of type UYVY expected. Only one color UV per 2 pixels
 *
 *  we keep the UV color of the first pixel pair
 *  and sample the intensity evenly 1-3-5-7-... or 1-5-9-...
 *
 *  input:         u1y1 v1y2 u3y3 v3y4 u5y5 v5y6 u7y7 v7y8 ...
 *  downsample=1   u1y1 v1y2 u3y3 v3y4 u5y5 v5y6 u7y7 v7y8 ...
-*  downsample=2   u1y1v1 (skip2) y3 (skip2) u5y5v5 (skip2 y7 (skip2) ...
+*  downsample=2   u1y1v1 (skip2) y3 (skip2) u5y5v5 (skip2) y7 (skip2) ...
 *  downsample=4   u1y1v1 (skip6) y5 (skip6) ...
 * @param[in] *input The input YUV422 image
 * @param[out] *output The downscaled YUV422 image
-* @param[in] downsample The downsampel facter (must be downsample=2^X)
+* @param[in] downsample The downsample factor (must be downsample=2^X)
 */
 void image_yuv422_downsample(struct image_t *input, struct image_t *output, uint16_t downsample)
 {
@@ -218,7 +218,7 @@ void image_yuv422_downsample(struct image_t *input, struct image_t *output, uint
 
   // Copy the creation timestamp (stays the same)
   output->ts = input->ts;
-
+  uint8_t rowCnt = 0;
   // Go trough all the pixels
   for (uint16_t y = 0; y < output->h; y++) {
     for (uint16_t x = 0; x < output->w; x += 2) {
@@ -231,7 +231,13 @@ void image_yuv422_downsample(struct image_t *input, struct image_t *output, uint
       source += pixelskip;
     }
     // read 1 in every 'downsample' rows, so skip (downsample-1) rows after reading the first
-    source += (downsample - 1) * input->w * 2;
+    source += (downsample - 1) * input->w * 2 ;
+    rowCnt++;
+    if(rowCnt == 8)
+    {
+    	rowCnt = 0;
+    	source += 32 * downsample;
+    }
   }
 }
 
