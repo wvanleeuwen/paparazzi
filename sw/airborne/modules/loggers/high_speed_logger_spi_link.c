@@ -35,6 +35,8 @@ struct spi_transaction high_speed_logger_spi_link_transaction;
 
 static volatile bool high_speed_logger_spi_link_ready = true;
 
+uint32_t startTime;
+
 static void high_speed_logger_spi_link_trans_cb(struct spi_transaction *trans);
 
 void high_speed_logger_spi_link_init(void)
@@ -53,6 +55,8 @@ void high_speed_logger_spi_link_init(void)
   high_speed_logger_spi_link_transaction.input_length  = 0;
   high_speed_logger_spi_link_transaction.input_buf     = NULL;
   high_speed_logger_spi_link_transaction.after_cb      = high_speed_logger_spi_link_trans_cb;
+
+  startTime = 0;
 }
 
 void high_speed_logger_spi_link_start(void) {
@@ -62,6 +66,7 @@ void high_speed_logger_spi_link_start(void) {
     while (get_sys_time_msec() - time < 1000);
   }*/
   irLedSwitch = 1;
+  startTime = get_sys_time_usec();
 }
 
 void high_speed_logger_spi_link_periodic(void)
@@ -93,7 +98,7 @@ void high_speed_logger_spi_link_periodic(void)
     high_speed_logger_spi_link_data.phi        = eofState.wxTruth*1000000;
     high_speed_logger_spi_link_data.theta      = eofState.wyTruth*1000000;
     high_speed_logger_spi_link_data.psi        = eofState.DTruth *1000000;
-    high_speed_logger_spi_link_data.extra1     = get_sys_time_usec();
+    high_speed_logger_spi_link_data.extra1     = get_sys_time_usec()-startTime;
 
     spi_submit(&(HIGH_SPEED_LOGGER_SPI_LINK_DEVICE), &high_speed_logger_spi_link_transaction);
   }
