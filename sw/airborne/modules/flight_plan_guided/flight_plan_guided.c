@@ -69,10 +69,8 @@ bool WaitUntilAltitude(float altitude) {
     return false;
 }
 
-/* Take off */
 uint8_t Hover(float altitude) {
     if (autopilot_mode != AP_MODE_GUIDED) { return true; }
-
     // Horizontal velocities are set to zero
     guidance_h_set_guided_body_vel(0, 0);
 
@@ -83,13 +81,15 @@ uint8_t Hover(float altitude) {
 }
 
 /* Move forward */
-uint8_t MoveForward(float vx) {
-    if (autopilot_mode == AP_MODE_GUIDED) {
-        // Move forward
-        guidance_h_set_guided_body_vel(vx, 0);
-    }
-    return false;
-}
+//uint8_t MoveForward(float vx) {
+//    if (autopilot_mode != AP_MODE_GUIDED) { return true; }
+//
+//    if (autopilot_mode == AP_MODE_GUIDED) {
+//        // Move forward
+//        guidance_h_set_guided_body_vel(vx, 0);
+//    }
+//    return false;
+//}
 
 
 bool Land(float end_altitude) {

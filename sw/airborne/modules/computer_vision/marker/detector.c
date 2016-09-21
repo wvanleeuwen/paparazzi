@@ -36,9 +36,9 @@
 #include "modules/computer_vision/blob/blob_finder.h"
 
 #include "modules/computer_vision/opencv_imav_landingpad.h"     // OpenCV contour based marker detection
-//#include "modules/computer_vision/marker/marker_checkers.h"     // OpenCV feature based marker detection
 
 static bool SHOW_MARKER = true;
+static float MARKER_FOUND_TIME_MAX = 20.0;
 
 // General outputs
 struct Marker marker;
@@ -142,14 +142,15 @@ static struct image_t *detect_colored_blob(struct image_t* img) {
         }
     }
 
-    if (largest_id >= 0) {
-        marker.detected = true;
-        marker.pixel.x   = labels[largest_id].x_sum / labels[largest_id].pixel_cnt * 2;
-        marker.pixel.y   = labels[largest_id].y_sum / labels[largest_id].pixel_cnt;
-
-        geo_locate_marker(img);
-    } else {
-        marker.detected = false;
+    if (largest_id >= 0)
+    {
+        int xloc   = labels[largest_id].x_sum / labels[largest_id].pixel_cnt * 2;
+        int yloc   = labels[largest_id].y_sum / labels[largest_id].pixel_cnt;
+        marker_detected(img, xloc, yloc);
+    }
+    else
+    {
+        marker_not_detected(img);
     }
 
     image_free(&dst);
@@ -159,24 +160,6 @@ static struct image_t *detect_colored_blob(struct image_t* img) {
     return NULL;
 }
 
-
-//static struct image_t *detect_marker_checkers(struct image_t* img) {
-//
-//    struct resultsc marker_checkers = opencv_detect_checkers((char*) img->buf, img->w, img->h, img->dt);
-//
-//    if (marker_checkers.detected) {
-//        marker.detected = true;
-//        marker.pixel.x = marker_checkers.x;
-//        marker.pixel.y = marker_checkers.y;
-//    } else {
-//        marker.detected = false;
-//    }
-//
-//    return NULL;
-//}
-
-
-// Function
 static struct image_t *detect_helipad_marker(struct image_t* img)
 {
     struct results helipad_marker = opencv_imav_landing(
@@ -187,21 +170,50 @@ static struct image_t *detect_helipad_marker(struct image_t* img)
             210, //binary threshold
             1, img->dt); //modify image
 
-    if (helipad_marker.marker) {
-        marker.detected = true;
-        marker.pixel.x = helipad_marker.maxx;
-        marker.pixel.y = helipad_marker.maxy;
-
-        geo_locate_marker(img);
-//        fprintf(stderr, "[marker] found! %i, %i\n", marker.pixel.x, marker.pixel.y);
-    } else {
-        marker.detected = false;
-
-        //fprintf(stderr, "[marker] not found!\n");
+    if (helipad_marker.marker)
+    {
+        marker_detected(img, helipad_marker.maxx, helipad_marker.maxy);
+    }
+    else
+    {
+        marker_not_detected(img);
     }
     return NULL;
 }
 
+static void marker_detected(struct image_t* img, int pixelx, int pixely)
+{
+    marker.detected = true;
+
+    // store marker pixel location
+    marker.pixel.x = pixelx;
+    marker.pixel.y = pixely;
+
+    // calculate geo location
+    geo_locate_marker(img);
+
+    // Increase marker detected time and mid counter
+    if (marker.pixel.x < 120 + MARKER_WINDOW &&
+        marker.pixel.x > 120 - MARKER_WINDOW &&
+        marker.pixel.y < 120 + MARKER_WINDOW &&
+        marker.pixel.y > 120 - MARKER_WINDOW)
+    {
+//        marker.mid = true;
+//        marker.mid_counter += img->dt;
+        marker.found_time += img->dt;
+
+        if (marker.found_time > MARKER_FOUND_TIME_MAX) { marker.found_time = MARKER_FOUND_TIME_MAX; }
+    }
+}
+
+static void marker_not_detected(struct image_t* img)
+{
+    marker.detected = false;
+//    marker.mid = false;
+//    marker.mid_counter -= img->dt;
+    marker.found_time -= img->dt;
+    if (marker.found_time < 0) { marker.found_time = 0; }
+}
 
 static struct image_t *draw_target_marker(struct image_t* img)
 {
