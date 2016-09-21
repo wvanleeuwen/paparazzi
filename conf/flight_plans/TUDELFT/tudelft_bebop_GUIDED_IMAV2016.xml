@@ -50,7 +50,7 @@
     <block name="Hover">
       <call fun="Hover(1.5)"/>
       <while cond="1"/>
-      <exception cond="marker.detected && marker.found_time > 5.0" deroute="Experimental Landing"/>
+      <exception cond="marker.detected && marker.found_time > 3.0" deroute="Experimental Landing"/>
     </block>
 
     <!--<block name="Move">-->

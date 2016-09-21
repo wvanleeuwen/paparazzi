@@ -36,9 +36,10 @@
 #include "modules/computer_vision/blob/blob_finder.h"
 
 #include "modules/computer_vision/opencv_imav_landingpad.h"     // OpenCV contour based marker detection
+#include "subsystems/datalink/telemetry.h"
 
 static bool SHOW_MARKER = true;
-static float MARKER_FOUND_TIME_MAX = 20.0;
+static float MARKER_FOUND_TIME_MAX = 5.0;
 static int MARKER_WINDOW = 15;
 
 // General outputs
@@ -117,25 +118,30 @@ static void marker_detected(struct image_t* img, int pixelx, int pixely)
     geo_locate_marker(img);
 
     // Increase marker detected time and mid counter
-    if (marker.pixel.x < 120 + MARKER_WINDOW &&
-        marker.pixel.x > 120 - MARKER_WINDOW &&
-        marker.pixel.y < 120 + MARKER_WINDOW &&
-        marker.pixel.y > 120 - MARKER_WINDOW)
-    {
-//        marker.mid = true;
-//        marker.mid_counter += img->dt;
-        marker.found_time += img->dt;
 
-        if (marker.found_time > MARKER_FOUND_TIME_MAX) { marker.found_time = MARKER_FOUND_TIME_MAX; }
-    }
+    marker.found_time += img->dt / 1000000.f;
+
+    if (marker.found_time > MARKER_FOUND_TIME_MAX) { marker.found_time = MARKER_FOUND_TIME_MAX; }
+
+
+//    if (marker.pixel.x < 120 + MARKER_WINDOW &&
+//        marker.pixel.x > 120 - MARKER_WINDOW &&
+//        marker.pixel.y < 120 + MARKER_WINDOW &&
+//        marker.pixel.y > 120 - MARKER_WINDOW)
+//    {
+//        marker.mid = true;
+//    } else {
+//        marker.mid = false;
+//    }
+
 }
 
 static void marker_not_detected(struct image_t* img)
 {
     marker.detected = false;
 //    marker.mid = false;
-//    marker.mid_counter -= img->dt;
-    marker.found_time -= img->dt;
+
+    marker.found_time -= 2 * img->dt / 1000000.f;
     if (marker.found_time < 0) { marker.found_time = 0; }
 }
 
@@ -228,6 +234,12 @@ static struct image_t *draw_target_marker(struct image_t* img)
         image_draw_line(img, &l, &r);
     }
 
+    DOWNLINK_SEND_DETECTOR(DefaultChannel, DefaultDevice,
+                           &marker.detected,
+                           &marker.pixel.x,
+                           &marker.pixel.y,
+                           &marker.found_time);
+
     return img;
 }
 
@@ -242,6 +254,9 @@ void detector_init(void)
     blob_listener = cv_add_to_device(&DETECTOR_CAMERA1, detect_colored_blob);
 
     cv_add_to_device(&DETECTOR_CAMERA1, draw_target_marker);
+
+    marker.detected = false;
+    marker.found_time = 0;
 
     detector_locate_helipad();
 }
