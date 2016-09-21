@@ -39,6 +39,7 @@
 
 static bool SHOW_MARKER = true;
 static float MARKER_FOUND_TIME_MAX = 20.0;
+static int MARKER_WINDOW = 15;
 
 // General outputs
 struct Marker marker;
@@ -103,6 +104,40 @@ static void geo_locate_marker(struct image_t* img) {
     //fprintf(stderr, "[marker] found! %.3f, %.3f, %.3f, %.3f\n", geo_relative.x, geo_relative.y, marker.geo_location.x, marker.geo_location.y);
 }
 
+
+static void marker_detected(struct image_t* img, int pixelx, int pixely)
+{
+    marker.detected = true;
+
+    // store marker pixel location
+    marker.pixel.x = pixelx;
+    marker.pixel.y = pixely;
+
+    // calculate geo location
+    geo_locate_marker(img);
+
+    // Increase marker detected time and mid counter
+    if (marker.pixel.x < 120 + MARKER_WINDOW &&
+        marker.pixel.x > 120 - MARKER_WINDOW &&
+        marker.pixel.y < 120 + MARKER_WINDOW &&
+        marker.pixel.y > 120 - MARKER_WINDOW)
+    {
+//        marker.mid = true;
+//        marker.mid_counter += img->dt;
+        marker.found_time += img->dt;
+
+        if (marker.found_time > MARKER_FOUND_TIME_MAX) { marker.found_time = MARKER_FOUND_TIME_MAX; }
+    }
+}
+
+static void marker_not_detected(struct image_t* img)
+{
+    marker.detected = false;
+//    marker.mid = false;
+//    marker.mid_counter -= img->dt;
+    marker.found_time -= img->dt;
+    if (marker.found_time < 0) { marker.found_time = 0; }
+}
 
 static struct image_t *detect_colored_blob(struct image_t* img) {
 
@@ -179,40 +214,6 @@ static struct image_t *detect_helipad_marker(struct image_t* img)
         marker_not_detected(img);
     }
     return NULL;
-}
-
-static void marker_detected(struct image_t* img, int pixelx, int pixely)
-{
-    marker.detected = true;
-
-    // store marker pixel location
-    marker.pixel.x = pixelx;
-    marker.pixel.y = pixely;
-
-    // calculate geo location
-    geo_locate_marker(img);
-
-    // Increase marker detected time and mid counter
-    if (marker.pixel.x < 120 + MARKER_WINDOW &&
-        marker.pixel.x > 120 - MARKER_WINDOW &&
-        marker.pixel.y < 120 + MARKER_WINDOW &&
-        marker.pixel.y > 120 - MARKER_WINDOW)
-    {
-//        marker.mid = true;
-//        marker.mid_counter += img->dt;
-        marker.found_time += img->dt;
-
-        if (marker.found_time > MARKER_FOUND_TIME_MAX) { marker.found_time = MARKER_FOUND_TIME_MAX; }
-    }
-}
-
-static void marker_not_detected(struct image_t* img)
-{
-    marker.detected = false;
-//    marker.mid = false;
-//    marker.mid_counter -= img->dt;
-    marker.found_time -= img->dt;
-    if (marker.found_time < 0) { marker.found_time = 0; }
 }
 
 static struct image_t *draw_target_marker(struct image_t* img)
