@@ -41,9 +41,8 @@
 
     <block name="TakeOff">
       <call fun="StartEngines()"/>
-      <call fun="TakeOff(0.2)"/>
-      <call fun="WaitUntilAltitude(1.5)"/>
-      <!--<exception cond="(stateGetPositionEnu_f()->z == 1.5)" deroute="Hover"/>-->
+      <call fun="Hover(1.5)"/>
+      <call fun="RotateToHeading(0)"/> <!-- not yet working -->
     </block>
 
      <!--Hover at the current location-->

@@ -256,6 +256,8 @@ void detector_init(void)
     cv_add_to_device(&DETECTOR_CAMERA1, draw_target_marker);
 
     marker.detected = false;
+    marker.pixel.x = 0;
+    marker.pixel.y = 0;
     marker.found_time = 0;
 
     detector_locate_helipad();

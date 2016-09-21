@@ -42,11 +42,19 @@ void flight_plan_guided_init(void) {} // Dummy
 
 
 /* Kill throttle */
-uint8_t KillEngines(void) {if (autopilot_mode == AP_MODE_GUIDED) { autopilot_set_motors_on(FALSE); } return false;}
+uint8_t KillEngines(void) {
+    autopilot_set_motors_on(FALSE);
+
+    return false;
+}
 
 
 /* Start throttle */
-uint8_t StartEngines(void) {if (autopilot_mode == AP_MODE_GUIDED) { autopilot_set_motors_on(TRUE); } return false;}
+uint8_t StartEngines(void) {
+    autopilot_set_motors_on(TRUE);
+
+    return false;
+}
 
 
 /* Reset the altitude reference to the current GPS alt if GPS is used */
@@ -65,6 +73,12 @@ bool WaitUntilAltitude(float altitude) {
     if (autopilot_mode != AP_MODE_GUIDED) { return true; }
 
     if (stateGetPositionEnu_f()->z < altitude) { return true; }
+
+    return false;
+}
+
+bool RotateToHeading(float heading) {
+    guidance_h_set_guided_heading(heading);
 
     return false;
 }
