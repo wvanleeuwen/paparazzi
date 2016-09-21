@@ -129,7 +129,7 @@ struct Aircraft {
 struct Aircraft aircrafts[MAX_RIGIDBODIES];                  ///< Mapping from rigid body ID to aircraft ID
 
 /** Global declaration of shared states (for faster logging, independent of ivy transmission) */
-uint32_t freq_transmit_ivy = 30;
+uint32_t freq_transmit_log = 100;
 bool firstDataAvailable = FALSE;
 
 /** Natnet socket connections */
@@ -544,7 +544,7 @@ gboolean timeout_transmit_callback(gpointer data)
     if (rigidBodies[i].nVelocitySamples >= min_velocity_samples) {
       // Calculate the derevative of the sum to get the correct velocity     (1 / freq_transmit) * (samples / total_samples)
       double sample_time = //((double)rigidBodies[i].nVelocitySamples / (double)rigidBodies[i].totalVelocitySamples) /
-        ((double)rigidBodies[i].nVelocityTransmit / (double)freq_transmit);
+        ((double)rigidBodies[i].nVelocityTransmit / (double)freq_transmit_log);
       rigidBodies[i].vel_x = rigidBodies[i].vel_x / sample_time;
       rigidBodies[i].vel_y = rigidBodies[i].vel_y / sample_time;
       rigidBodies[i].vel_z = rigidBodies[i].vel_z / sample_time;
@@ -610,7 +610,7 @@ gboolean timeout_transmit_callback(gpointer data)
                 (int)(rigidBodies[i].speed.z * 1000.0),            //int32 ECEF speed Z in CM
                 (int)(orient_eulers.phi*10000000.0),              //int32 Roll angle in rad*1e7
                 (int)(orient_eulers.theta*10000000.0),            //int32 Pitch angle in rad*1e7
-                (int)((-orient_eulers.psi+90.0/57.6)*10000000.0), //int32 Heading angle in rad*1e7
+                (int)(-orient_eulers.psi*10000000.0),             //int32 Yaw angle in rad*1e7
                 (int)cur_time.tv_sec,                             //int32 Time in seconds
                 (int)cur_time.tv_usec);                           //int32 Time decimal part in microseconds
       }
@@ -977,8 +977,8 @@ int main(int argc, char **argv)
   // Create the main timers
   printf_debug("Starting transmitting and sampling timeouts (transmitting frequency: %dHz, minimum velocity samples: %d)\n",
                freq_transmit, min_velocity_samples);
-  g_timeout_add(1000 / freq_transmit, timeout_transmit_callback, NULL);
-  g_timeout_add(1000 / freq_transmit_ivy, timeout_send_ivy_callback, NULL);
+  g_timeout_add(1000 / freq_transmit_log, timeout_transmit_callback, NULL);
+  g_timeout_add(1000 / freq_transmit, timeout_send_ivy_callback, NULL);
 
   GIOChannel *sk = g_io_channel_unix_new(natnet_data.sockfd);
   g_io_add_watch(sk, G_IO_IN | G_IO_NVAL | G_IO_HUP,
