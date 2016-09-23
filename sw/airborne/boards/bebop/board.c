@@ -134,16 +134,5 @@ void board_init2(void)
   };
   mt9v117_init(&mt9v117);
 
-  if (MT9F002_X_ODD_INC_VAL != 1 && MT9F002_X_ODD_INC_VAL != 3 && MT9F002_X_ODD_INC_VAL != 7 &&
-      MT9F002_X_ODD_INC_VAL != 15 && MT9F002_X_ODD_INC_VAL != 31) {
-    printf("[MT9F002] Warning, illegal option set for x_odd_inc only 1, 3, 7, 15, 31 allowed\n");
-    mt9f002.x_odd_inc = 1;
-  }
-  if (MT9F002_Y_ODD_INC_VAL != 1 && MT9F002_Y_ODD_INC_VAL != 3 && MT9F002_Y_ODD_INC_VAL != 7 &&
-      MT9F002_Y_ODD_INC_VAL != 15 && MT9F002_Y_ODD_INC_VAL != 31) {
-    printf("[MT9F002] Warning, illegal option set for y_odd_inc only 1, 3, 7, 15, 31 allowed\n");
-    mt9f002.y_odd_inc = 1;
-  }
-
   mt9f002_init(&mt9f002);
 }

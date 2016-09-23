@@ -156,7 +156,7 @@ static struct image_t *detect_colored_blob(struct image_t* img, struct image_fil
     struct image_label_t labels[512];
 
     // Blob finder
-    image_labeling(img, &dst, &filter, 1, labels, &labels_count);
+    image_labeling(img, &dst, filter, 1, labels, &labels_count);
 
     int largest_id = -1;
     int largest_size = 0;
@@ -269,8 +269,10 @@ void detector_init(void)
     helipad_listener->maximum_fps = 20;
 //    helipad_listener = cv_add_to_device(&DETECTOR_CAMERA1, detect_helipad_marker);
 
-    blob_listener = cv_add_to_device(&DETECTOR_CAMERA1, detect_bottom_bucket);
+//    blob_listener = cv_add_to_device(&DETECTOR_CAMERA1, detect_bottom_bucket);
 //    blob_listener = cv_add_to_device(&DETECTOR_CAMERA2, detect_front_bucket);
+    blob_listener = cv_add_to_device_async(&DETECTOR_CAMERA2, detect_front_bucket, 5);
+    blob_listener->maximum_fps = 20;
 
     cv_add_to_device(&DETECTOR_CAMERA2, draw_target_marker);
 
