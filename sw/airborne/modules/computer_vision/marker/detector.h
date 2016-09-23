@@ -32,8 +32,10 @@ struct Marker {
     volatile bool detected;
     struct point_t pixel;
     struct NedCoor_f geo_location;
+    struct FloatVect3 geo_relative;
     float found_time;
-//    float mid;
+    float mid;
+    float mid_time;
 
 };
 

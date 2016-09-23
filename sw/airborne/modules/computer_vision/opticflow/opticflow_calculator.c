@@ -720,7 +720,7 @@ void kalman_filter_opticflow_rate(float *rate_p, float *rate_q, float *angle_mea
    *       = [1 dt ; 0 1];
    * */
   float model[4] =  {1.0f, 1.0f / fps , 0.0f , 1.0f};
-  float process_noise[2] = {0.1f, 0.1f};
+  float process_noise[2] = {0.01f, 0.01f};
 
   // Measurements from velocity_x of optical flow and acceleration directly from scaled accelerometers
   measurements_x[0] = angle_measurement[0];

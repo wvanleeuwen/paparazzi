@@ -39,8 +39,9 @@
 #include "subsystems/datalink/telemetry.h"
 
 static bool SHOW_MARKER = true;
-static float MARKER_FOUND_TIME_MAX = 5.0;
-static int MARKER_WINDOW = 15;
+static float MARKER_FOUND_TIME_MAX = 10.0;
+static float MARKER_MID_TIME_MAX = 4;
+static int MARKER_WINDOW = 25;
 
 // General outputs
 struct Marker marker1;
@@ -67,11 +68,10 @@ static void geo_locate_marker(struct Marker *marker, struct image_t* img) {
     float_rmat_of_eulers(&ned_to_body, &pose.eulers);
 
     // Rotate the pixel vector from body frame to the north-east-down frame
-    struct FloatVect3 geo_relative;
-    float_rmat_transp_vmult(&geo_relative, &ned_to_body, &pixel_relative);
+    float_rmat_transp_vmult(&marker->geo_relative, &ned_to_body, &pixel_relative);
 
     // Divide by z-component to normalize the projection vector
-    float zi = geo_relative.z;
+    float zi = marker->geo_relative.z;
 
     // Pointing up or horizontal -> no ground projection
     if (zi <= 0.) { return; }
@@ -80,16 +80,16 @@ static void geo_locate_marker(struct Marker *marker, struct image_t* img) {
     struct NedCoor_f *pos = stateGetPositionNed_f();
     float agl = sonar_bebop.distance; // -pos->z
 
-    geo_relative.x *= agl/zi;
-    geo_relative.y *= agl/zi;
-    geo_relative.z = agl;
+    marker->geo_relative.x *= agl/zi;
+    marker->geo_relative.y *= agl/zi;
+    marker->geo_relative.z = agl;
 
     // TODO filter this location over time to reduce the jitter in output
     // TODO use difference in position as a velocity estimate along side opticflow in hff...
 
     // NED
-    marker->geo_location.x = pos->x + geo_relative.x;
-    marker->geo_location.y = pos->y + geo_relative.y;
+    marker->geo_location.x = pos->x + marker->geo_relative.x;
+    marker->geo_location.y = pos->y + marker->geo_relative.y;
     marker->geo_location.z = 0;
 }
 
@@ -110,6 +110,21 @@ static void marker_detected(struct Marker *marker, struct image_t* img, int pixe
     marker->found_time += img->dt / 1000000.f;
 
     if (marker->found_time > MARKER_FOUND_TIME_MAX) { marker->found_time = MARKER_FOUND_TIME_MAX; }
+    if (marker->mid_time > MARKER_MID_TIME_MAX) { marker->mid_time = MARKER_MID_TIME_MAX; }
+
+    if (marker->pixel.x < 120 + MARKER_WINDOW &&
+        marker->pixel.x > 120 - MARKER_WINDOW &&
+        marker->pixel.y < 100 + MARKER_WINDOW && //To account for gripper in the back
+        marker->pixel.y > 100 - MARKER_WINDOW)
+    {
+        marker->mid = true;
+        marker->mid_time += img-> dt / 1000000.f;
+    } else {
+        marker->mid = false;
+        marker->mid_time -= 0.1 * img-> dt / 1000000.f;
+        if (marker->mid_time < 0) { marker->mid_time = 0; }
+    }
+
 }
 
 static void marker_not_detected(struct Marker *marker, struct image_t* img)
@@ -118,7 +133,9 @@ static void marker_not_detected(struct Marker *marker, struct image_t* img)
 //    marker.mid = false;
 
     marker->found_time -= 1.5 * img->dt / 1000000.f;
+    marker->mid_time -= img-> dt / 1000000.f;
     if (marker->found_time < 0) { marker->found_time = 0; }
+    if (marker->mid_time < 0) { marker->mid_time = 0; }
 }
 
 static struct image_t *detect_bottom_bucket(struct image_t* img) {
@@ -162,7 +179,7 @@ static struct image_t *detect_bottom_bucket(struct image_t* img) {
     if (largest_id >= 0)
     {
         int xloc   = labels[largest_id].x_sum / labels[largest_id].pixel_cnt * 2;
-        int yloc   = labels[largest_id].y_sum / labels[largest_id].pixel_cnt;
+        int yloc   = labels[largest_id].y_sum / labels[largest_id].pixel_cnt - 20; //-20 is for the gripper position bias
         marker_detected(&marker1, img, xloc, yloc);
     }
     else
@@ -277,23 +294,23 @@ static struct image_t *draw_target_marker1(struct image_t* img)
 
 static struct image_t *draw_target_marker2(struct image_t* img)
 {
-    if (marker2.detected && SHOW_MARKER) {
-        struct point_t t = {marker2.pixel.x, marker2.pixel.y - 50},
-                b = {marker2.pixel.x, marker2.pixel.y + 50},
-                l = {marker2.pixel.x - 50, marker2.pixel.y},
-                r = {marker2.pixel.x + 50, marker2.pixel.y};
+  if (marker2.detected && SHOW_MARKER) {
+    struct point_t t = {marker2.pixel.x, marker2.pixel.y - 50},
+            b = {marker2.pixel.x, marker2.pixel.y + 50},
+            l = {marker2.pixel.x - 50, marker2.pixel.y},
+            r = {marker2.pixel.x + 50, marker2.pixel.y};
 
-        image_draw_line(img, &t, &b);
-        image_draw_line(img, &l, &r);
-    }
+    image_draw_line(img, &t, &b);
+    image_draw_line(img, &l, &r);
+  }
 
-    DOWNLINK_SEND_DETECTOR(DefaultChannel, DefaultDevice,
-                           &marker2.detected,
-                           &marker2.pixel.x,
-                           &marker2.pixel.y,
-                           &marker2.found_time);
+  DOWNLINK_SEND_DETECTOR(DefaultChannel, DefaultDevice,
+                         &marker2.detected,
+                         &marker2.pixel.x,
+                         &marker2.pixel.y,
+                         &marker2.found_time);
 
-    return img;
+  return img;
 }
 
 void detector_locate_bucket(void)
@@ -314,6 +331,7 @@ void detector_init(void)
     marker1.pixel.x = 0;
     marker1.pixel.y = 0;
     marker1.found_time = 0;
+    marker1.mid_time = 0;
 
     helipad_listener = cv_add_to_device_async(&DETECTOR_CAMERA1, detect_helipad_marker, 5);
     helipad_listener->maximum_fps = 20;
