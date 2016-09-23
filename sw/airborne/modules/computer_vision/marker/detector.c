@@ -66,11 +66,10 @@ static void geo_locate_marker(struct image_t* img) {
     float_rmat_of_eulers(&ned_to_body, &pose.eulers);
 
     // Rotate the pixel vector from body frame to the north-east-down frame
-    struct FloatVect3 geo_relative;
-    float_rmat_transp_vmult(&geo_relative, &ned_to_body, &pixel_relative);
+    float_rmat_transp_vmult(&marker.geo_relative, &ned_to_body, &pixel_relative);
 
     // Divide by z-component to normalize the projection vector
-    float zi = geo_relative.z;
+    float zi = marker.geo_relative.z;
 
     // Pointing up or horizontal -> no ground projection
     if (zi <= 0.) { return; }
@@ -79,17 +78,18 @@ static void geo_locate_marker(struct image_t* img) {
     struct NedCoor_f *pos = stateGetPositionNed_f();
     float agl = sonar_bebop.distance; // -pos->z
 
-    geo_relative.x *= agl/zi;
-    geo_relative.y *= agl/zi;
-    geo_relative.z = agl;
+    marker.geo_relative.x *= agl/zi;
+    marker.geo_relative.y *= agl/zi;
+    marker.geo_relative.z = agl;
 
     // TODO filter this location over time to reduce the jitter in output
     // TODO use difference in position as a velocity estimate along side opticflow in hff...
 
     // NED
-    marker.geo_location.x = pos->x + geo_relative.x;
-    marker.geo_location.y = pos->y + geo_relative.y;
+    marker.geo_location.x = pos->x + marker.geo_relative.x;
+    marker.geo_location.y = pos->y + marker.geo_relative.y;
     marker.geo_location.z = 0;
+
 
     //  OLD METHOD
 //    struct camera_frame_t cam;
@@ -235,7 +235,6 @@ static struct image_t *draw_target_marker(struct image_t* img)
                 b = {marker.pixel.x, marker.pixel.y + 50},
                 l = {marker.pixel.x - 50, marker.pixel.y},
                 r = {marker.pixel.x + 50, marker.pixel.y};
-
         image_draw_line(img, &t, &b);
         image_draw_line(img, &l, &r);
     }
