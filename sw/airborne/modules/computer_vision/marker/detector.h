@@ -33,7 +33,8 @@ struct Marker {
     struct point_t pixel;
     struct NedCoor_f geo_location;
     float found_time;
-//    float mid;
+    float mid;
+    float mid_time;
 
 };
 

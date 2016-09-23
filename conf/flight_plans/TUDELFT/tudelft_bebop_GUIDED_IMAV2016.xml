@@ -41,50 +41,31 @@
 
     <block name="TakeOff">
       <call fun="StartEngines()"/>
-      <call fun="Hover(2.5)"/>
+      <call fun="Hover(1.5)"/>
       <call fun="RotateToHeading(0)"/> <!-- not yet working -->
     </block>
 
      <!--Hover at the current location-->
     <block name="Hover">
-      <call fun="Hover(2.5)"/>
+      <call fun="Hover(1.5)"/>
       <while cond="1"/>
-      <!--<exception cond="" deroute="Move Forward"/>-->
-      <exception cond="marker.detected && marker.found_time > 3.0" deroute="Experimental Landing"/>
+      <exception cond="marker.detected && marker.mid && marker.found_time > 7.0 && marker.mid_time > 3" deroute="Experimental Landing"/>
     </block>
 
-    <block name="Move Forward">
-      <call fun="MoveForward(0.2)"/>
-      <while cond="1"/>
-      <exception cond="block_time > 2" deroute="Move Right"/>
-      <exception cond="marker.detected" deroute="Hover"/>
-    </block>
+    <!--<block name="Move Forward">-->
+      <!--<call fun="MoveForward(0.2)"/>-->
+      <!--<while cond="1"/>-->
+      <!--<exception cond="block_time > 2" deroute="Move Right"/>-->
+      <!--<exception cond="marker.detected" deroute="Hover"/>-->
+    <!--</block>-->
 
-    <block name="Move Right">
-      <call fun="MoveRight(0.2)"/>
-      <while cond="1"/>
-      <exception cond="block_time > 2" deroute="Move Back"/>
-      <exception cond="marker.detected" deroute="Hover"/>
-    </block>
-
-    <block name="Move Back">
-      <call fun="MoveForward(-0.2)"/>
-      <while cond="1"/>
-      <exception cond="block_time > 2" deroute="Move Left"/>
-      <exception cond="marker.detected" deroute="Hover"/>
-    </block>
-
-    <block name="Move Left">
-      <call fun="MoveRight(-0.2)"/>
-      <while cond="1"/>
-      <exception cond="block_time > 2" deroute="Move Forward"/>
-      <exception cond="marker.detected" deroute="Hover"/>
-    </block>
 
     <block name="Experimental Landing">
-      <call fun="Land(0.1)"/>             <!-- this call blocks until altitude < 0.1 -->
+      <call fun="Land(0.35)"/>             <!-- this call blocks until altitude < 0.1 -->
       <call_once fun="KillEngines()"/>
       <while cond="1"/>                   <!-- wait indefinitely -->
+      <exception cond="!marker.detected" deroute="Hover"/>
+      <!--<exception cond="2.7 > marker.mid_time" deroute="Hover"/>-->
     </block>
 
     <block name="Detect Landing Pad">
@@ -120,10 +101,6 @@
       <!--<exception cond="marker" deroute="Land"/>-->
     <!--</block>-->
 
-    <!--<block name="Land">-->
-      <!--<call fun="start_autonomous_landing()"/>-->
-      <!--<while cond="1"/>-->
-    <!--</block>-->
 
   </blocks>
 </flight_plan>

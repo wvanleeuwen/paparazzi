@@ -39,8 +39,9 @@
 #include "subsystems/datalink/telemetry.h"
 
 static bool SHOW_MARKER = true;
-static float MARKER_FOUND_TIME_MAX = 5.0;
-static int MARKER_WINDOW = 15;
+static float MARKER_FOUND_TIME_MAX = 10.0;
+static float MARKER_MID_TIME_MAX = 4;
+static int MARKER_WINDOW = 25;
 
 // General outputs
 struct Marker marker;
@@ -122,17 +123,20 @@ static void marker_detected(struct image_t* img, int pixelx, int pixely)
     marker.found_time += img->dt / 1000000.f;
 
     if (marker.found_time > MARKER_FOUND_TIME_MAX) { marker.found_time = MARKER_FOUND_TIME_MAX; }
+    if (marker.mid_time > MARKER_MID_TIME_MAX) { marker.mid_time = MARKER_MID_TIME_MAX; }
 
-
-//    if (marker.pixel.x < 120 + MARKER_WINDOW &&
-//        marker.pixel.x > 120 - MARKER_WINDOW &&
-//        marker.pixel.y < 120 + MARKER_WINDOW &&
-//        marker.pixel.y > 120 - MARKER_WINDOW)
-//    {
-//        marker.mid = true;
-//    } else {
-//        marker.mid = false;
-//    }
+    if (marker.pixel.x < 120 + MARKER_WINDOW &&
+        marker.pixel.x > 120 - MARKER_WINDOW &&
+        marker.pixel.y < 100 + MARKER_WINDOW && //To account for gripper in the back
+        marker.pixel.y > 100 - MARKER_WINDOW)
+    {
+        marker.mid = true;
+        marker.mid_time += img-> dt / 1000000.f;
+    } else {
+        marker.mid = false;
+        marker.mid_time -= 0.1 * img-> dt / 1000000.f;
+        if (marker.mid_time < 0) { marker.mid_time = 0; }
+    }
 
 }
 
@@ -142,7 +146,9 @@ static void marker_not_detected(struct image_t* img)
 //    marker.mid = false;
 
     marker.found_time -= 1.5 * img->dt / 1000000.f;
+    marker.mid_time -= img-> dt / 1000000.f;
     if (marker.found_time < 0) { marker.found_time = 0; }
+    if (marker.mid_time < 0) { marker.mid_time = 0; }
 }
 
 static struct image_t *detect_colored_blob(struct image_t* img) {
@@ -186,7 +192,7 @@ static struct image_t *detect_colored_blob(struct image_t* img) {
     if (largest_id >= 0)
     {
         int xloc   = labels[largest_id].x_sum / labels[largest_id].pixel_cnt * 2;
-        int yloc   = labels[largest_id].y_sum / labels[largest_id].pixel_cnt;
+        int yloc   = labels[largest_id].y_sum / labels[largest_id].pixel_cnt - 20; //-20 is for the gripper position bias
         marker_detected(img, xloc, yloc);
     }
     else
@@ -238,7 +244,8 @@ static struct image_t *draw_target_marker(struct image_t* img)
                            &marker.detected,
                            &marker.pixel.x,
                            &marker.pixel.y,
-                           &marker.found_time);
+                           &marker.found_time,
+                           &marker.mid_time);
 
     return img;
 }
@@ -259,6 +266,7 @@ void detector_init(void)
     marker.pixel.x = 0;
     marker.pixel.y = 0;
     marker.found_time = 0;
+    marker.mid_time = 0;
 
     detector_locate_helipad();
 }
