@@ -131,8 +131,8 @@ bool Land(float end_altitude) {
 
 void marker_detection_periodic(void) {
 
-    if (marker.detected) {
-        guidance_h_set_guided_pos(marker.geo_location.x, marker.geo_location.y);
+    if (marker1.detected) {
+        guidance_h_set_guided_pos(marker1.geo_location.x, marker1.geo_location.y);
     }
 
 }

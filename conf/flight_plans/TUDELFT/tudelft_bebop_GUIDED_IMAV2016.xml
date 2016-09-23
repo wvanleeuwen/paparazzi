@@ -50,35 +50,7 @@
       <call fun="Hover(2.5)"/>
       <while cond="1"/>
       <!--<exception cond="" deroute="Move Forward"/>-->
-      <exception cond="marker.detected && marker.found_time > 3.0" deroute="Experimental Landing"/>
-    </block>
-
-    <block name="Move Forward">
-      <call fun="MoveForward(0.2)"/>
-      <while cond="1"/>
-      <exception cond="block_time > 2" deroute="Move Right"/>
-      <exception cond="marker.detected" deroute="Hover"/>
-    </block>
-
-    <block name="Move Right">
-      <call fun="MoveRight(0.2)"/>
-      <while cond="1"/>
-      <exception cond="block_time > 2" deroute="Move Back"/>
-      <exception cond="marker.detected" deroute="Hover"/>
-    </block>
-
-    <block name="Move Back">
-      <call fun="MoveForward(-0.2)"/>
-      <while cond="1"/>
-      <exception cond="block_time > 2" deroute="Move Left"/>
-      <exception cond="marker.detected" deroute="Hover"/>
-    </block>
-
-    <block name="Move Left">
-      <call fun="MoveRight(-0.2)"/>
-      <while cond="1"/>
-      <exception cond="block_time > 2" deroute="Move Forward"/>
-      <exception cond="marker.detected" deroute="Hover"/>
+      <exception cond="marker1.detected && marker1.found_time > 3.0" deroute="Experimental Landing"/>
     </block>
 
     <block name="Experimental Landing">
@@ -93,7 +65,7 @@
     </block>
 
     <block name="Detect Bucket">
-      <call_once fun="detector_locate_blob()"/>
+      <call_once fun="detector_locate_bucket()"/>
       <while cond="1"/>
     </block>
 
