@@ -187,10 +187,10 @@
 
   <section name="STABILIZATION_ATTITUDE_INDI" prefix="STABILIZATION_INDI_">
     <!--&lt;!&ndash; control effectiveness with gripper and legs &ndash;&gt;-->
-    <define name="G1_P" value="0.034"/>
-    <define name="G1_Q" value="0.012867"/>
-    <define name="G1_R" value="0.001564"/>
-    <define name="G2_R" value="0.055332"/>
+    <!--<define name="G1_P" value="0.034"/>-->
+    <!--<define name="G1_Q" value="0.012867"/>-->
+    <!--<define name="G1_R" value="0.001564"/>-->
+    <!--<define name="G2_R" value="0.055332"/>-->
 
     <!-- bebop normal (Other Wilco's drone) -->
     <!--<define name="G1_P" value="0.029458"/>-->
@@ -199,10 +199,10 @@
     <!--<define name="G2_R" value="0.071307"/>-->
 
     <!-- bebop normal -->
-    <!--<define name="G1_P" value="0.056419"/>-->
-    <!--<define name="G1_Q" value="0.033347"/>-->
-    <!--<define name="G1_R" value="0.002401"/>-->
-    <!--<define name="G2_R" value="0.154231"/>-->
+    <define name="G1_P" value="0.056419"/>
+    <define name="G1_Q" value="0.033347"/>
+    <define name="G1_R" value="0.002401"/>
+    <define name="G2_R" value="0.154231"/>
 
     <!-- bebop legs -->
     <!--<define name="G1_P" value="0.026041"/>-->

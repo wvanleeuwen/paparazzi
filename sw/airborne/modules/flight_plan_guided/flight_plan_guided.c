@@ -136,3 +136,21 @@ void marker_detection_periodic(void) {
     }
 
 }
+
+void bucket_heading_change(void) {
+    if (marker2.detected && !marker2.processed) {
+        marker2.processed = true;
+        int relative_heading = marker2.pixel.y - 320;
+
+        if (relative_heading > 150) {
+            guidance_h_set_guided_heading_rate(1);
+        }else if (relative_heading < -150) {
+            guidance_h_set_guided_heading_rate(-1);
+        } else {
+            guidance_h_set_guided_heading_rate(0);
+            guidance_h_set_guided_body_vel(0.3, 0);
+        }
+
+        fprintf(stderr, "[detect] heading %i.\n", relative_heading);
+    }
+}

@@ -125,6 +125,7 @@ static void marker_detected(struct Marker *marker, struct image_t* img, int pixe
         if (marker->mid_time < 0) { marker->mid_time = 0; }
     }
 
+    marker->processed = false;
 }
 
 static void marker_not_detected(struct Marker *marker, struct image_t* img)
@@ -304,12 +305,6 @@ static struct image_t *draw_target_marker2(struct image_t* img)
     image_draw_line(img, &l, &r);
   }
 
-  DOWNLINK_SEND_DETECTOR(DefaultChannel, DefaultDevice,
-                         &marker2.detected,
-                         &marker2.pixel.x,
-                         &marker2.pixel.y,
-                         &marker2.found_time);
-
   return img;
 }
 
@@ -341,6 +336,7 @@ void detector_init(void)
     cv_add_to_device(&DETECTOR_CAMERA1, draw_target_marker1);
 
     marker2.detected = false;
+    marker2.processed = true;
     marker2.pixel.x = 0;
     marker2.pixel.y = 0;
     marker2.found_time = 0;
