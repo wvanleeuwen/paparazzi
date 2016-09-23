@@ -32,6 +32,7 @@
   <exceptions>
     <exception cond="!InsideCyberZoo(GetPosX(), GetPosY())" deroute="Land here"/>
     <exception cond="LessThan(5, datalink_time)" deroute="Land here"/>
+    <exception cond="!GpsFixValid()" deroute="Land here" />
   </exceptions>
   <blocks>
     <block name="Wait GPS">
@@ -74,6 +75,7 @@
     </block>
     <block key="l" name="Land here" strip_button="Land Here" strip_icon="land-right.png">
       <call fun="NavSetWaypointHere(WP__TD)"/>
+      <go wp="_TD"/>
     </block>
     <block name="Land">
       <go wp="_TD"/>
@@ -87,6 +89,34 @@
     <block name="Landed">
       <call fun="NavKillThrottle()"/>
       <attitude pitch="0" roll="0" throttle="0" until="FALSE" vmode="throttle"/>
+    </block>
+    <block name="circle_cw">
+      <set var="WV_GLOBAL_ATTRACTOR" value="2"/>
+      <deroute block="Swarm"/>
+    </block>
+    <block name="circle_ccw">
+      <set var="WV_GLOBAL_ATTRACTOR" value="3"/>
+      <deroute block="Swarm"/>
+    </block>
+    <block name="bucket">
+      <set var="WV_GLOBAL_ATTRACTOR" value="1"/>
+      <deroute block="Swarm"/>
+    </block>
+    <block name="spread_out">
+      <set var="WV_SWARM_SEPERATION" value="WV_SWARM_SEPERATION+0.125"/>
+      <deroute block="Swarm"/>
+    </block>
+    <block name="spread_in">
+      <set var="WV_SWARM_SEPERATION" value="WV_SWARM_SEPERATION-0.125"/>
+      <deroute block="Swarm"/>
+    </block>
+    <block name="inc_circle">
+      <set var="WV_GLOBAL_CIRCLE_R" value="WV_GLOBAL_CIRCLE_R+0.125"/>
+      <deroute block="Swarm"/>
+    </block>
+    <block name="dec_circle">
+      <set var="WV_GLOBAL_CIRCLE_R" value="WV_GLOBAL_CIRCLE_R-0.125"/>
+      <deroute block="Swarm"/>
     </block>
   </blocks>
 </flight_plan>

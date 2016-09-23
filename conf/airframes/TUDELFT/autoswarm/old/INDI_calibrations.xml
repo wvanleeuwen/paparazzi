@@ -1,0 +1,75 @@
+<!-- bebop 230 -->
+    <define name="G1_P" value="0.050862"/> <!-- was 0.05   -->
+    <define name="G1_Q" value="0.036516"/> <!-- was 0.04   -->
+    <define name="G1_R" value="0.000639"/> <!-- was 0.0022 -->
+    <define name="G2_R" value="0.295431"/> <!-- was 0.20   -->
+<!-- bebop 233 -->
+    <define name="G1_P" value="0.038745"/> <!-- was 0.05   -->
+    <define name="G1_Q" value="0.029648"/> <!-- was 0.04   -->
+    <define name="G1_R" value="0.001252"/> <!-- was 0.0022 -->
+    <define name="G2_R" value="0.23183"/> <!-- was 0.20   --> 
+<!-- bebop 237 -->
+    <define name="G1_P" value="0.040701"/> <!-- was 0.05   -->
+    <define name="G1_Q" value="0.031123"/> <!-- was 0.04   -->
+    <define name="G1_R" value="0.001099"/> <!-- was 0.0022 -->
+    <define name="G2_R" value="0.244256"/> <!-- was 0.20   --> 
+<!-- bebop 238 (shaky) -->
+    <define name="G1_P" value="0.03557"/> <!-- was 0.05   -->
+    <define name="G1_Q" value="0.030476"/> <!-- was 0.04   -->
+    <define name="G1_R" value="0.00294"/> <!-- was 0.0022 -->
+    <define name="G2_R" value="0.225581"/> <!-- was 0.20   --> 
+<!-- bebop 239 -->
+    <define name="G1_P" value="0.040638"/> <!-- was 0.05   -->
+    <define name="G1_Q" value="0.030627"/> <!-- was 0.04   -->
+    <define name="G1_R" value="0.001528"/> <!-- was 0.0022 -->
+    <define name="G2_R" value="0.24843"/> <!-- was 0.20   --> 
+<!-- bebop 240 -->
+    <define name="G1_P" value="0.041061"/> <!-- was 0.05   -->
+    <define name="G1_Q" value="0.03181"/> <!-- was 0.04   -->
+    <define name="G1_R" value="0.001215"/> <!-- was 0.0022 -->
+    <define name="G2_R" value="0.265559"/> <!-- was 0.20   -->
+<!-- bebop 241 (shaky) -->
+    <define name="G1_P" value="0.039199"/> <!-- was 0.05   -->
+    <define name="G1_Q" value="0.031928"/> <!-- was 0.04   -->
+    <define name="G1_R" value="0.003441"/> <!-- was 0.0022 -->
+    <define name="G2_R" value="0.184981"/> <!-- was 0.20   -->
+<!-- bebop 242 (bit shaky)-->
+    <define name="G1_P" value="0.036873"/> <!-- was 0.05   -->
+    <define name="G1_Q" value="0.027536"/> <!-- was 0.04   -->
+    <define name="G1_R" value="0.002756"/> <!-- was 0.0022 -->
+    <define name="G2_R" value="0.247794"/> <!-- was 0.20   -->
+<!-- bebop 243 -->
+    <define name="G1_P" value="0.034532"/> <!-- was 0.05   -->
+    <define name="G1_Q" value="0.026864"/> <!-- was 0.04   -->
+    <define name="G1_R" value="0.001771"/> <!-- was 0.0022 -->
+    <define name="G2_R" value="0.169598"/> <!-- was 0.20   -->
+<!-- bebop 244 -->
+    <define name="G1_P" value="0.039372"/> <!-- was 0.05   -->
+    <define name="G1_Q" value="0.024953"/> <!-- was 0.04   -->
+    <define name="G1_R" value="0.001186"/> <!-- was 0.0022 -->
+    <define name="G2_R" value="0.219647"/> <!-- was 0.20   -->
+<!-- bebop 245 -->
+    <define name="G1_P" value="0.039906"/> <!-- was 0.05   -->
+    <define name="G1_Q" value="0.032353"/> <!-- was 0.04   -->
+    <define name="G1_R" value="0.001943"/> <!-- was 0.0022 -->
+    <define name="G2_R" value="0.197979"/> <!-- was 0.20   -->
+<!-- bebop 246 -->
+    <define name="G1_P" value="0.035848"/> <!-- was 0.05   -->
+    <define name="G1_Q" value="0.022113"/> <!-- was 0.04   -->
+    <define name="G1_R" value="0.001072"/> <!-- was 0.0022 -->
+    <define name="G2_R" value="0.222592"/> <!-- was 0.20   -->
+<!-- bebop 247 -->
+    <define name="G1_P" value="0.041446"/> <!-- was 0.05   -->
+    <define name="G1_Q" value="0.03051"/> <!-- was 0.04   -->
+    <define name="G1_R" value="0.002283"/> <!-- was 0.0022 -->
+    <define name="G2_R" value="0.227027"/> <!-- was 0.20   -->
+<!-- bebop 248 (bit shaky + noise) -->
+    <define name="G1_P" value="0.031576"/> <!-- was 0.05   -->
+    <define name="G1_Q" value="0.025623"/> <!-- was 0.04   -->
+    <define name="G1_R" value="0.002327"/> <!-- was 0.0022 -->
+    <define name="G2_R" value="0.213268"/> <!-- was 0.20   -->
+<!-- bebop 249 -->
+    <define name="G1_P" value="0.036223"/> <!-- was 0.05   -->
+    <define name="G1_Q" value="0.031671"/> <!-- was 0.04   -->
+    <define name="G1_R" value="0.000573"/> <!-- was 0.0022 -->
+    <define name="G2_R" value="0.276573"/> <!-- was 0.20   -->

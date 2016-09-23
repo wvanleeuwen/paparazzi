@@ -1,0 +1,75 @@
+<!-- bebop 230 -->
+    <define name="G1_P" value="0.0520"/> <!-- was 0.05   -->
+    <define name="G1_Q" value="0.0380"/> <!-- was 0.04   -->
+    <define name="G1_R" value="0.0007"/> <!-- was 0.0022 -->
+    <define name="G2_R" value="0.3000"/> <!-- was 0.20   -->
+<!-- bebop 233 -->
+    <define name="G1_P" value="0.0420"/> <!-- was 0.05   -->
+    <define name="G1_Q" value="0.0310"/> <!-- was 0.04   -->
+    <define name="G1_R" value="0.0015"/> <!-- was 0.0022 -->
+    <define name="G2_R" value="0.2000"/> <!-- was 0.20   -->
+<!-- bebop 237 -->
+    <define name="G1_P" value="0.0370"/> <!-- was 0.05   -->
+    <define name="G1_Q" value="0.0230"/> <!-- was 0.04   -->
+    <define name="G1_R" value="0.0018"/> <!-- was 0.0022 -->
+    <define name="G2_R" value="0.1800"/> <!-- was 0.20   -->
+<!-- bebop 238 -->
+    <define name="G1_P" value="0.0420"/> <!-- was 0.05   -->
+    <define name="G1_Q" value="0.0260"/> <!-- was 0.04   -->
+    <define name="G1_R" value="0.0026"/> <!-- was 0.0022 -->
+    <define name="G2_R" value="0.2200"/> <!-- was 0.20   -->
+<!-- bebop 239 -->
+    <define name="G1_P" value="0.0485"/> <!-- was 0.05   -->
+    <define name="G1_Q" value="0.0250"/> <!-- was 0.04   -->
+    <define name="G1_R" value="0.0018"/> <!-- was 0.0022 -->
+    <define name="G2_R" value="0.2500"/> <!-- was 0.20   -->
+<!-- bebop 240 -->
+    <define name="G1_P" value="0.03100"/> <!-- was 0.05   -->
+    <define name="G1_Q" value="0.02650"/> <!-- was 0.04   -->
+    <define name="G1_R" value="0.00165"/> <!-- was 0.0022 -->
+    <define name="G2_R" value="0.19000"/> <!-- was 0.20   -->
+<!-- bebop 241 -->
+    <define name="G1_P" value="0.0460"/> <!-- was 0.05   -->
+    <define name="G1_Q" value="0.0340"/> <!-- was 0.04   -->
+    <define name="G1_R" value="0.00255"/> <!-- was 0.0022 -->
+    <define name="G2_R" value="0.1900"/> <!-- was 0.20   -->
+<!-- bebop 242 -->
+    <define name="G1_P" value="0.0380"/> <!-- was 0.05   -->
+    <define name="G1_Q" value="0.0300"/> <!-- was 0.04   -->
+    <define name="G1_R" value="0.0020"/> <!-- was 0.0022 -->
+    <define name="G2_R" value="0.2310"/> <!-- was 0.20   -->
+<!-- bebop 243 -->
+    <define name="G1_P" value="0.0345"/> <!-- was 0.05   -->
+    <define name="G1_Q" value="0.0240"/> <!-- was 0.04   -->
+    <define name="G1_R" value="0.00101"/> <!-- was 0.0022 -->
+    <define name="G2_R" value="0.2000"/> <!-- was 0.20   -->
+<!-- bebop 244 -->
+    <define name="G1_P" value="0.0355"/> <!-- was 0.05   -->
+    <define name="G1_Q" value="0.0265"/> <!-- was 0.04   -->
+    <define name="G1_R" value="0.00116"/> <!-- was 0.0022 -->
+    <define name="G2_R" value="0.1800"/> <!-- was 0.20   -->
+<!-- bebop 245 -->
+    <define name="G1_P" value="0.0502"/> <!-- was 0.05   -->
+    <define name="G1_Q" value="0.0270"/> <!-- was 0.04   -->
+    <define name="G1_R" value="0.0013"/> <!-- was 0.0022 -->
+    <define name="G2_R" value="0.2200"/> <!-- was 0.20   -->
+<!-- bebop 246 -->
+    <define name="G1_P" value="0.0320"/> <!-- was 0.05   -->
+    <define name="G1_Q" value="0.0251"/> <!-- was 0.04   -->
+    <define name="G1_R" value="0.0016"/> <!-- was 0.0022 -->
+    <define name="G2_R" value="0.1500"/> <!-- was 0.20   -->
+<!-- bebop 247 -->
+    <define name="G1_P" value="0.0382"/> <!-- was 0.05   -->
+    <define name="G1_Q" value="0.030"/> <!-- was 0.04   -->
+    <define name="G1_R" value="0.0025"/> <!-- was 0.0022 -->
+    <define name="G2_R" value="0.2450"/> <!-- was 0.20   -->
+<!-- bebop 248 -->
+    <define name="G1_P" value="0.0490"/> <!-- was 0.05   -->
+    <define name="G1_Q" value="0.0384"/> <!-- was 0.04   -->
+    <define name="G1_R" value="0.00085"/> <!-- was 0.0022 -->
+    <define name="G2_R" value="0.220"/> <!-- was 0.20   -->
+<!-- bebop 249 -->
+    <define name="G1_P" value="0.0440"/> <!-- was 0.05   -->
+    <define name="G1_Q" value="0.0250"/> <!-- was 0.04   -->
+    <define name="G1_R" value="0.0004"/> <!-- was 0.0022 -->
+    <define name="G2_R" value="0.1200"/> <!-- was 0.20   -->

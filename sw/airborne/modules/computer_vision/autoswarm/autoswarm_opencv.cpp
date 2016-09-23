@@ -37,10 +37,7 @@ extern "C" {
 #include <firmwares/rotorcraft/navigation.h>
 #include <subsystems/navigation/waypoints.h>
 #include <state.h>
-//#include <generated/flight_plan.h>
-
-#define COMPLEMENT_2(i, r) (((i) >= 0) ? (r) : (~(r) + 1) & 0x3fff)
-#define Q311(i) (COMPLEMENT_2(i, (unsigned)(((ABS(i)) * (1 << 11)) + 0.5)))
+#include <generated/flight_plan.h>
 
 #define WP__TD 2
 #define WP__GOAL 4
@@ -59,6 +56,13 @@ extern "C" {
  "Land" , \
  "Flare" , \
  "Landed" , \
+ "circle_cw" , \
+ "circle_ccw" , \
+ "bucket" , \
+ "spread_out" , \
+ "spread_in" , \
+ "inc_circle" , \
+ "dec_circle" , \
  "HOME" , \
 }
 }
@@ -100,13 +104,13 @@ static bool 			inRectangle			(Point pt, Rect rectangle);
 
 // Runtime options
 #define WV_OPT_WRITE_RESULTS 		 0		// Write measurements to text file
-#define WV_OPT_MOD_VIDEO 			 1 		// Modify the frame to show relevant info
+#define WV_OPT_MOD_VIDEO 			 0 		// Modify the frame to show relevant info
 #define WV_OPT_CALIBRATE_CAM 		 0 		// Calibrate the camera
 #define WV_OPT_BENCHMARK 			 0 		// Print benchmark table
 #define WV_OPT_CV_CONTOURS 			 0 		// Use opencv to detect contours
 #define WV_OPT_ISP_CROP 			 0 		// Use the ISP to crop the frame according to FOV-Y
-#define WV_OPT_MEASURE_FPS 			 1 		// Measure the FPS using built-in clock and framecount
-#define WV_OPT_BODYFRAME 			 1 		// Fake euler angles and pos to be 0
+#define WV_OPT_MEASURE_FPS 			 0 		// Measure the FPS using built-in clock and framecount
+#define WV_OPT_BODYFRAME 			 0 		// Fake euler angles and pos to be 0
 // Global options definitions
 #define WV_GLOBAL_POINT 			0
 #define WV_GLOBAL_BUCKET 			1
@@ -135,7 +139,7 @@ static void 			showBenchmark		(void);
 #endif
 
 // Set up tracking parameters
-int 	WV_TRACK_MIN_CROP_AREA 		= 600;
+int 	WV_TRACK_MIN_CROP_AREA 		= 300;
 int 	WV_TRACK_RND_PIX_SAMPLE 	= 5000;
 int 	AUTOSWARM_MAX_LAYERS  		= 100000;
 double 	WV_TRACK_MIN_CIRCLE_SIZE 	= 260;
@@ -159,20 +163,20 @@ double 	WV_BEBOP_CAMERA_OFFSET_X 	= 0.10; 	// Meters
 
 // Set up swarm parameters
 int 	WV_SWARM_MODE 				= 2; // 0: follow (deprecated), 1: look in direction of flight, 2: look in direction of global component
-double 	WV_SWARM_SEPERATION 		= 1.8;
-double 	WV_SWARM_E 					= 0.0009; // Was 0.01x - 0.0005 at 12m/s OK (but close)
+double 	WV_SWARM_SEPERATION 		= 2.0;
+double 	WV_SWARM_E 					= 0.003; // Was 0.01x - 0.0005 at 12m/s OK (but close)
 double 	WV_SWARM_EPS 				= 0.05;
 double 	WV_SWARM_GLOBAL 			= 0.9;
-int    	WV_SWARM_FPS 				= 8;
+int    	WV_SWARM_FPS 				= 15;
 double 	WV_SWARM_AMAX 				= 8; 	// m/s			// 4m/s op 90% global = CRASH!
-double 	WV_SWARM_VMAX 				= 10; 	// m/s
+double 	WV_SWARM_VMAX 				= 8; 	// m/s
 double 	WV_SWARM_YAWRATEMAX 		= 70; 	// deg/s
-int    	WV_SWARM_MEMORY 			= 3; 	// seconds
+int    	WV_SWARM_MEMORY 			= 1.5; 	// seconds
 double 	WV_SWARM_HOME 				= 0.3;
 
 // Set up global attractor parameters
 int 	WV_GLOBAL_ATTRACTOR			= 1;
-double 	WV_GLOBAL_CIRCLE_R 			= 1.5;
+double 	WV_GLOBAL_CIRCLE_R 			= 2.0;
 double 	WV_GLOBAL_DEADZONE 			= 0.1;
 
 // Initialize parameters to be assigned during runtime
@@ -224,8 +228,6 @@ int sample = 0;
 
 void autoswarm_opencv_init(int globalMode)
 {
-	printf("Coefficients:\n %i %i\n%i %i\n%i %i\n%i %i\n%i\n", Q311(0.213), Q311(0.715), Q311(0.072), Q311(-0.100), Q311(-0.336), Q311(0.436), Q311(0.615), Q311(-0.515), Q311(-0.100));
-
 #if WV_OPT_MEASURE_FPS
 	startTime 			= time(0);
 #endif
@@ -252,7 +254,7 @@ void autoswarm_opencv_init(int globalMode)
 void autoswarm_opencv_run(char* img, int width, int height)
 {
 	// Computer vision compatibility function used to call trackObjects and (optionally) parse modified data back to rtp stream as YUV
-	//if(nav_block < 3){ return img; }	// Engines have not started yet, lets save some battery life and skip image processing for now
+	if(nav_block < 3){ return img; }	// Engines have not started yet, lets save some battery life and skip image processing for now
 #if WV_OPT_MEASURE_FPS
 	if(runCount > 0)
 	{
@@ -1057,9 +1059,9 @@ vector<double> estimatePosition(int xp, int yp, double area, double k, int calAr
 {
 	// This function estimates the 3D position (in camera  coordinate system) according to pixel position
 	// (Default) calibration parameters
-	if(k==0) 		k 		= 1.142; // Fisheye correction factor (1.085)
-	if(calArea==0) 	calArea = 5100; // Calibrate at full resolution (5330)
-	if(orbDiag==0) 	orbDiag = 1900; // Measured circular image diagonal using resolution of 2024x2048 org: 2400 (2200)
+	if(k==0) 		k 		= 1.0; // Fisheye correction factor (1.085)
+	if(calArea==0) 	calArea = 3390; // Calibrate at full resolution (5330)
+	if(orbDiag==0) 	orbDiag = 2500; // Measured circular image diagonal using resolution of 2024x2048 org: 2400 (2200)
 	// Calculate corrected calibration parameters
 	calArea 				= (int) round(calArea * (ispWidth / 2048.0) * (ispWidth / 2048.0));
 	orbDiag 				= (int) round(orbDiag * (ispWidth / 2048.0));
@@ -1195,8 +1197,8 @@ void calibrateEstimation(vector<trackResults> trackRes)
 	double k_step 		= 0.0025;
 
 	int calArea_opt;
-	int calArea_min 	= 5100;
-	int calArea_max 	= 6100;
+	int calArea_min 	= 1100;
+	int calArea_max 	= 5100;
 	int calArea_step 	=   10;
 
 	int orbDiag_opt;

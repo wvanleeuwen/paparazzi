@@ -8,7 +8,7 @@
       <module name="fdm" type="jsbsim"/>
       <module name="udp"/>
     </target>
-    <configure name="HOST" value="192.168.40.30" />
+    <configure name="HOST" value="192.168.40.43" />
     <configure name="MODEM_HOST" value="192.168.40.255" />
     <define name="MT9F002_OUTPUT_HEIGHT" value="1648" /> <!-- 1648 -->
 	<define name="MT9F002_OUTPUT_WIDTH" value="1672" /> <!-- 1672 -->
@@ -50,6 +50,7 @@
 		<define name="AUTOSWARM_CAMERA" value="front_camera" />
 		<define name="WV_INIT_GLOBAL_ATTRACTOR" value="2" />
 	</module>
+	<!-- 
 	<module name="video_rtp_stream">
 		<configure name="VIEWVIDEO_HOST" value="192.168.40.222" />
 		<configure name="VIEWVIDEO_BROADCAST" value="FALSE" />
@@ -57,7 +58,7 @@
 		<define name="VIEWVIDEO_DOWNSIZE_FACTOR" value="4" />
 		<define name="VIEWVIDEO_QUALITY_FACTOR" value="50" />
 		<define name="VIEWVIDEO_SHOT_PATH" value="/data/ftp/internal_000" />
-	</module>
+	</module> -->
 	<module name="cv_ae_awb"/>
 	<module name="logger_file">
       <define name="FILE_LOGGER_PATH" value="/data/ftp/internal_000"/>
@@ -97,7 +98,7 @@
   <section name="AIR_DATA" prefix="AIR_DATA_">
     <define name="CALC_AIRSPEED" value="FALSE"/>
     <define name="CALC_TAS_FACTOR" value="FALSE"/>
-    <define name="CALC_AMSL_BARO" value="TRUE"/>
+    <define name="CALC_AMSL_BARO" value="FALSE"/>
   </section>
 
   <!-- Magnetometer still needs to be calibrated -->
@@ -109,6 +110,14 @@
 <define name="MAG_X_SENS" value="7.61887090248" integer="16"/>
 <define name="MAG_Y_SENS" value="7.69470968438" integer="16"/>
 <define name="MAG_Z_SENS" value="7.82064847944" integer="16"/>
+
+<define name="ACCEL_X_NEUTRAL" value="50" />
+<define name="ACCEL_Y_NEUTRAL" value="-45" />
+<define name="ACCEL_Z_NEUTRAL" value="0.0" />
+
+<define name="BODY_TO_IMU_PHI" value="0." unit="deg" />
+<define name="BODY_TO_IMU_THETA" value="0." unit="deg" />
+<define name="BODY_TO_IMU_PSI" value="0." unit="deg" />
   </section>
 
   <!-- local magnetic field -->
@@ -162,17 +171,17 @@
 
   <section name="STABILIZATION_ATTITUDE_INDI" prefix="STABILIZATION_INDI_">
     <!-- control effectiveness -->
-    <define name="G1_P" value="0.05"/>
-    <define name="G1_Q" value="0.04"/>
-    <define name="G1_R" value="0.0022"/>
-    <define name="G2_R" value="0.20"/>
+    <define name="G1_P" value="0.0345"/> <!-- was 0.05   -->
+    <define name="G1_Q" value="0.0240"/> <!-- was 0.04   -->
+    <define name="G1_R" value="0.00101"/> <!-- was 0.0022 -->
+    <define name="G2_R" value="0.2000"/> <!-- was 0.20   -->
 
     <!-- Here it is assumed that your removed the damping from your bebop2!
          The dampers do not really damp, but cause oscillation. By removing/
-         fixing them, the bebop2 will fly much better-
+         fixing them, the bebop2 will fly much better -->
     <define name="FILTER_ROLL_RATE" value="FALSE"/>
     <define name="FILTER_PITCH_RATE" value="FALSE"/>
-    <define name="FILTER_YAW_RATE" value="FALSE"/> -->
+    <define name="FILTER_YAW_RATE" value="FALSE"/>
 
     <!-- reference acceleration for attitude control -->
     <define name="REF_ERR_P" value="600.0"/>
@@ -195,7 +204,7 @@
 
     <!-- Adaptive Learning Rate -->
     <define name="USE_ADAPTIVE" value="FALSE"/>
-    <define name="ADAPTIVE_MU" value="0.0001"/>
+    <define name="ADAPTIVE_MU" value="0.00005"/>
   </section>
 
   <section name="GUIDANCE_V" prefix="GUIDANCE_V_">
@@ -219,8 +228,8 @@
   </section>
 
   <section name="NAVIGATION" prefix="NAV_">
-    <define name="CLIMB_VSPEED" value="1.0"/>
-    <define name="DESCEND_VSPEED" value="-0.55"/>
+    <define name="CLIMB_VSPEED" value="1.5"/>
+    <define name="DESCEND_VSPEED" value="-0.75"/>
   </section>
 
   <section name="SIMULATOR" prefix="NPS_">
