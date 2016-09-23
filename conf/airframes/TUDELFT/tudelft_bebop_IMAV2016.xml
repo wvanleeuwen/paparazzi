@@ -48,6 +48,7 @@
 
     <module name="cv_marker_detection">
       <define name="DETECTOR_CAMERA1" value="bottom_camera"/>
+      <define name="DETECTOR_CAMERA2" value="front_camera"/>
     </module>
 
     <!-- /////////////////////////////////////////////////////////////////////////////////////////// -->
@@ -76,8 +77,11 @@
 
     <module name="video_rtp_stream">
       <define name="VIEWVIDEO_CAMERA" value="front_camera"/>
-      <define name="VIEWVIDEO_DOWNSIZE_FACTOR" value="2"/>
+      <define name="VIEWVIDEO_DOWNSIZE_FACTOR" value="4"/>
       <define name="VIEWVIDEO_QUALITY_FACTOR" value="40"/>
+      <!--<define name="VIEWVIDEO_CAMERA" value="bottom_camera"/>-->
+      <!--<define name="VIEWVIDEO_DOWNSIZE_FACTOR" value="1"/>-->
+      <!--<define name="VIEWVIDEO_QUALITY_FACTOR" value="60"/>-->
 
       <configure name="VIEWVIDEO_BROADCAST" value="FALSE"/>
       <configure name="VIEWVIDEO_HOST" value="192.168.42.68"/>

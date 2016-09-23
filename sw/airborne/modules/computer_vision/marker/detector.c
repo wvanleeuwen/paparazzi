@@ -145,18 +145,7 @@ static void marker_not_detected(struct image_t* img)
     if (marker.found_time < 0) { marker.found_time = 0; }
 }
 
-static struct image_t *detect_colored_blob(struct image_t* img) {
-
-    // Color Filter
-    struct image_filter_t filter;
-    filter.y_min = 0;    // red
-    filter.y_max = 110;
-    filter.u_min = 52;
-    filter.u_max = 140;
-    filter.v_min = 140;
-    filter.v_max = 255;
-
-    int threshold = 50;
+static struct image_t *detect_colored_blob(struct image_t* img, struct image_filter_t *filter, int threshold) {
 
     // Output image
     struct image_t dst;
@@ -196,7 +185,36 @@ static struct image_t *detect_colored_blob(struct image_t* img) {
 
     image_free(&dst);
 
-//    fprintf(stderr, "[blob] fps %.2f \n", (1000000.f / img->dt));
+    return NULL;
+}
+
+static struct image_t *detect_front_bucket(struct image_t* img)
+{
+    struct image_filter_t filter;
+    filter.y_min = 0;    // red
+    filter.y_max = 110;
+    filter.u_min = 52;
+    filter.u_max = 140;
+    filter.v_min = 140;
+    filter.v_max = 255;
+
+    detect_colored_blob(img, &filter, 50);
+
+    return NULL;
+}
+
+static struct image_t *detect_bottom_bucket(struct image_t* img)
+{
+    // Color Filter
+    struct image_filter_t filter;
+    filter.y_min = 0;    // red
+    filter.y_max = 110;
+    filter.u_min = 52;
+    filter.u_max = 140;
+    filter.v_min = 140;
+    filter.v_max = 255;
+
+    detect_colored_blob(img, &filter, 50);
 
     return NULL;
 }
@@ -251,16 +269,17 @@ void detector_init(void)
     helipad_listener->maximum_fps = 20;
 //    helipad_listener = cv_add_to_device(&DETECTOR_CAMERA1, detect_helipad_marker);
 
-    blob_listener = cv_add_to_device(&DETECTOR_CAMERA1, detect_colored_blob);
+    blob_listener = cv_add_to_device(&DETECTOR_CAMERA1, detect_bottom_bucket);
+//    blob_listener = cv_add_to_device(&DETECTOR_CAMERA2, detect_front_bucket);
 
-    cv_add_to_device(&DETECTOR_CAMERA1, draw_target_marker);
+    cv_add_to_device(&DETECTOR_CAMERA2, draw_target_marker);
 
     marker.detected = false;
     marker.pixel.x = 0;
     marker.pixel.y = 0;
     marker.found_time = 0;
 
-    detector_locate_helipad();
+    detector_locate_blob();
 }
 
 void detector_locate_blob(void)

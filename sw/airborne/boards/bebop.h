@@ -41,7 +41,7 @@
 #endif
 
 #ifndef MT9F002_INITIAL_OFFSET_Y
-#define MT9F002_INITIAL_OFFSET_Y 649 // pixels in the raw sensor(please make steps of 2 for ISP)!!
+#define MT9F002_INITIAL_OFFSET_Y ((4608 - MT9F002_OUTPUT_HEIGHT) / 4) + 1 // pixels in the raw sensor(please make steps of 2 for ISP)!!
 #endif
 
 /** Our output is only OUTPUT_SCALER of the pixels we take of the sensor
