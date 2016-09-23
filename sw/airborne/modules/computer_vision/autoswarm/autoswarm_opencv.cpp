@@ -37,7 +37,7 @@ extern "C" {
 #include <firmwares/rotorcraft/navigation.h>
 #include <subsystems/navigation/waypoints.h>
 #include <state.h>
-#include <generated/flight_plan.h>
+//#include <generated/flight_plan.h>
 
 #define WP__TD 2
 #define WP__GOAL 4
@@ -254,7 +254,7 @@ void autoswarm_opencv_init(int globalMode)
 void autoswarm_opencv_run(char* img, int width, int height)
 {
 	// Computer vision compatibility function used to call trackObjects and (optionally) parse modified data back to rtp stream as YUV
-	if(nav_block < 3){ return img; }	// Engines have not started yet, lets save some battery life and skip image processing for now
+	if(nav_block < 3){ return; }	// Engines have not started yet, lets save some battery life and skip image processing for now
 #if WV_OPT_MEASURE_FPS
 	if(runCount > 0)
 	{
