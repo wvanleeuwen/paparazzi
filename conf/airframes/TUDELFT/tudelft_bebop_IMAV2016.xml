@@ -6,6 +6,17 @@
   <firmware name="rotorcraft">
     <target name="ap" board="bebop"/>
 
+    <define name="MT9F002_OUTPUT_HEIGHT" value="1648" />
+    <define name="MT9F002_OUTPUT_WIDTH" value="1672" />
+    <define name="MT9F002_INITIAL_OFFSET_X" value="672" />
+    <define name="MT9F002_INITIAL_OFFSET_Y" value="0" />
+    <define name="MT9F002_X_ODD_INC_VAL" value="3" />
+    <define name="MT9F002_Y_ODD_INC_VAL" value="3" />
+
+    <define name="MT9F002_OUTPUT_SCALER" value="1" />
+    <define name="MT9F002_TARGET_FPS" value="30" />
+    <define name="MT9F002_TARGET_EXPOSURE" value="40" />
+
 	<!-- Subsystem section -->
     <module name="telemetry" type="transparent_udp"/>
     <module name="radio_control" type="datalink"/>
@@ -77,8 +88,8 @@
 
     <module name="video_rtp_stream">
       <define name="VIEWVIDEO_CAMERA" value="front_camera"/>
-      <define name="VIEWVIDEO_DOWNSIZE_FACTOR" value="4"/>
-      <define name="VIEWVIDEO_QUALITY_FACTOR" value="40"/>
+      <define name="VIEWVIDEO_DOWNSIZE_FACTOR" value="1"/>
+      <define name="VIEWVIDEO_QUALITY_FACTOR" value="20"/>
       <!--<define name="VIEWVIDEO_CAMERA" value="bottom_camera"/>-->
       <!--<define name="VIEWVIDEO_DOWNSIZE_FACTOR" value="1"/>-->
       <!--<define name="VIEWVIDEO_QUALITY_FACTOR" value="60"/>-->
