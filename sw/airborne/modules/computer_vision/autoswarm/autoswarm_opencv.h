@@ -30,6 +30,49 @@
 extern "C" {
 #endif
 
+// Global options definitions
+#define WV_GLOBAL_POINT 			0
+#define WV_GLOBAL_BUCKET 			1
+#define WV_GLOBAL_CIRCLE_CW 		2
+#define WV_GLOBAL_CIRCLE_CC 		3
+// Filter sample styles
+#define FILTER_STYLE_FULL			0
+#define FILTER_STYLE_GRID			1
+#define FILTER_STYLE_RANDOM			2
+// Filter flood styles
+#define FILTER_FLOOD_OMNI 			0
+#define FILTER_FLOOD_CW				1
+
+
+#define WP__TD 2
+#define WP__GOAL 4
+#define WP__CAM 5
+#define WP_GLOBAL 6
+#define FP_BLOCKS { \
+ "Wait GPS" , \
+ "Geo init" , \
+ "Holding point" , \
+ "Start Engine" , \
+ "Takeoff" , \
+ "Standby" , \
+ "Swarm" , \
+ "Swarm Home" , \
+ "Land here" , \
+ "Land" , \
+ "Flare" , \
+ "Landed" , \
+ "circle_cw" , \
+ "circle_ccw" , \
+ "bucket" , \
+ "spread_out" , \
+ "spread_in" , \
+ "inc_circle" , \
+ "dec_circle" , \
+ "HOME" , \
+}
+
+
+
 typedef struct _trackResults {
     int     x_p;
     int     y_p;

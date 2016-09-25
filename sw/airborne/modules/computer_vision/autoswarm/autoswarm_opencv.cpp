@@ -38,33 +38,6 @@ extern "C" {
 #include <subsystems/navigation/waypoints.h>
 #include <state.h>
 //#include <generated/flight_plan.h>
-
-#define WP__TD 2
-#define WP__GOAL 4
-#define WP__CAM 5
-#define WP_GLOBAL 6
-#define FP_BLOCKS { \
- "Wait GPS" , \
- "Geo init" , \
- "Holding point" , \
- "Start Engine" , \
- "Takeoff" , \
- "Standby" , \
- "Swarm" , \
- "Swarm Home" , \
- "Land here" , \
- "Land" , \
- "Flare" , \
- "Landed" , \
- "circle_cw" , \
- "circle_ccw" , \
- "bucket" , \
- "spread_out" , \
- "spread_in" , \
- "inc_circle" , \
- "dec_circle" , \
- "HOME" , \
-}
 }
 
 using namespace std;
@@ -92,7 +65,6 @@ static vector<double> 	calcGlobalVelocity 	(struct NedCoor_f *pos);
 static vector<double> 	limitYaw 			(struct NedCoor_f *pos, vector<double> cPos);
 static vector<double> 	limitVelocityYaw	(vector<double> totV);
 static vector<double> 	limitNorm			(vector<double> totV, double maxNorm);
-static void 			saveBuffer			(char * img, Mat sourceFrame, const char *filename);
 static void 			addObject			(void);
 static Rect 			enlargeRectangle	(Mat& sourceFrame, Rect rectangle, double scale);
 static bool 			inRectangle			(Point pt, Rect rectangle);
@@ -111,19 +83,7 @@ static bool 			inRectangle			(Point pt, Rect rectangle);
 #define WV_OPT_ISP_CROP 			 0 		// Use the ISP to crop the frame according to FOV-Y
 #define WV_OPT_MEASURE_FPS 			 0 		// Measure the FPS using built-in clock and framecount
 #define WV_OPT_BODYFRAME 			 0 		// Fake euler angles and pos to be 0
-// Global options definitions
-#define WV_GLOBAL_POINT 			0
-#define WV_GLOBAL_BUCKET 			1
-#define WV_GLOBAL_CIRCLE_CW 		2
-#define WV_GLOBAL_CIRCLE_CC 		3
-
-// Filter sample styles
-#define FILTER_STYLE_FULL			0
-#define FILTER_STYLE_GRID			1
-#define FILTER_STYLE_RANDOM			2
-// Filter flood styles
-#define FILTER_FLOOD_OMNI 			0
-#define FILTER_FLOOD_CW				1
+#define WV_OPT_SAVE_FRAME 			 0 		// Save a frame for post-processing
 
 //Optional function declarations
 #if WV_OPT_CALIBRATE_CAM
@@ -136,6 +96,9 @@ static void 			mat2Buffer			(Mat& source, char* buf, bool greyscale = false);
 static void 			initBenchmark		(void);
 static void 			addBenchmark		(const char * title);
 static void 			showBenchmark		(void);
+#endif
+#if WV_OPT_SAVE_FRAME
+static void 			saveBuffer			(char * img, Mat sourceFrame, const char *filename);
 #endif
 
 // Set up tracking parameters
@@ -163,8 +126,8 @@ double 	WV_BEBOP_CAMERA_OFFSET_X 	= 0.10; 	// Meters
 
 // Set up swarm parameters
 int 	WV_SWARM_MODE 				= 2; // 0: follow (deprecated), 1: look in direction of flight, 2: look in direction of global component
-double 	WV_SWARM_SEPERATION 		= 2.0;
-double 	WV_SWARM_E 					= 0.003; // Was 0.01x - 0.0005 at 12m/s OK (but close)
+double 	WV_SWARM_SEPERATION 		= 1.75;
+double 	WV_SWARM_E 					= 0.005; // Was 0.01x - 0.0005 at 12m/s OK (but close)
 double 	WV_SWARM_EPS 				= 0.05;
 double 	WV_SWARM_GLOBAL 			= 0.9;
 int    	WV_SWARM_FPS 				= 15;
@@ -176,7 +139,7 @@ double 	WV_SWARM_HOME 				= 0.3;
 
 // Set up global attractor parameters
 int 	WV_GLOBAL_ATTRACTOR			= 1;
-double 	WV_GLOBAL_CIRCLE_R 			= 2.0;
+double 	WV_GLOBAL_CIRCLE_R 			= 2.25;
 double 	WV_GLOBAL_DEADZONE 			= 0.1;
 
 // Initialize parameters to be assigned during runtime
@@ -192,6 +155,8 @@ int 	pixSucCount = 0;
 int 	shotSucces 	= 0;
 int 	shotFail 	= 0;
 int 	maxId = 0;
+int 	layerDepth = 0;
+int 	sample = 0;
 vector<memoryBlock> neighbourMem;
 extern uint8_t nav_block;
 static const char * flight_blocks[] = FP_BLOCKS;
@@ -222,9 +187,6 @@ int 	curT;
 FILE * 	pFile;
 char	resultFile [50];
 #endif
-
-int layerDepth = 0;
-int sample = 0;
 
 void autoswarm_opencv_init(int globalMode)
 {
@@ -326,6 +288,7 @@ void autoswarm_opencv_run(char* img, int width, int height)
 #if WV_OPT_BENCHMARK
 	addBenchmark("Body and World transformations done");
 #endif
+
 #if WV_OPT_MOD_VIDEO
 	for(unsigned int r=0; r < trackRes.size(); r++)			// Convert angles & Write/Print output
 	{
@@ -388,6 +351,7 @@ void autoswarm_opencv_run(char* img, int width, int height)
 #if WV_OPT_BENCHMARK
 	addBenchmark("Updated waypoints and heading");
 #endif
+
 #if WV_OPT_WRITE_RESULTS 												// See if we want to write results
 #if !WV_OPT_MEASURE_FPS
 	currentTime = time(0); 												// Get the current time
@@ -395,18 +359,27 @@ void autoswarm_opencv_run(char* img, int width, int height)
 #endif
 	pFile 		= fopen("/data/ftp/internal_000/results.txt","a");		// Open file for appending TODO: Check for errors opening file
 #endif
-	if(WV_OPT_WRITE_RESULTS==1 || WV_DEBUG_SHOW_MEM)
-	{
+
+#if WV_OPT_WRITE_RESULTS || WV_DEBUG_SHOW_MEM
 		for(unsigned int r=0; r < neighbourMem.size(); r++) 			// Print to file & terminal
 		{
-			char memChar = 'm'; int memInt = 0;
-			if(neighbourMem[r].lastSeen == runCount){ memChar = 'w'; memInt = 1; }
-			if(WV_DEBUG_SHOW_MEM) printf("%i - Object (%c %i) at (%0.2f m, %0.2f m, %0.2f m) pos(%0.2f, %0.2f, %0.2f)\n", runCount, memChar, neighbourMem[r].id, neighbourMem[r].x_w, neighbourMem[r].y_w, neighbourMem[r].z_w, pos->x, pos->y, pos->z); 														// Print to terminal
+#if WV_DEBUG_SHOW_MEM
+			char memChar = 'm';
+			if(neighbourMem[r].lastSeen == runCount){ memChar = 'w';}
+#endif
+#if WV_OPT_WRITE_RESULTS
+			int memInt = 0;
+			if(neighbourMem[r].lastSeen == runCount){ memInt = 1; }
+#endif
+#if WV_DEBUG_SHOW_MEM
+			printf("%i - Object (%c %i) at (%0.2f m, %0.2f m, %0.2f m) pos(%0.2f, %0.2f, %0.2f)\n", runCount, memChar, neighbourMem[r].id, neighbourMem[r].x_w, neighbourMem[r].y_w, neighbourMem[r].z_w, pos->x, pos->y, pos->z); 														// Print to terminal
+#endif
 #if WV_OPT_WRITE_RESULTS
 			fprintf(pFile, "%i\t%i\t%i\t%i\t%0.2f\t%0.2f\t%0.2f\t%0.2f\t%0.2f\t%0.2f\t%0.2f\t%0.2f\t%0.2f\t%0.2f\t%0.2f\t%0.2f\t%0.2f\t%0.2f\t%0.2f\t%0.2f\n", neighbourMem[r].id, memInt, runCount, curT, pos->x, pos->y, pos->z, neighbourMem[r].x_w, neighbourMem[r].y_w, neighbourMem[r].z_w, cPos[0], cPos[1], totV[0], totV[1], gi[0], gi[1], li[0], li[1], di[0], di[1]); // if file writing is enabled, write to file
 #endif
 		}
-	}
+#endif
+
 #if WV_OPT_WRITE_RESULTS
 	fclose(pFile);	// Close file
 #if WV_OPT_BENCHMARK
@@ -706,7 +679,7 @@ Rect setISPvars(int width, int height, bool crop)
 	if (crop==true)
 	{
 		double fovY 			= WV_TRACK_IMAGE_CROP_FOVY * M_PI / 180;
-		double cmosPixelSize 	= 0.0000014; 	// 1.4um (see manual of CMOS sensor)
+		double cmosPixelSize 	= 0.0000014; 	// 1.4um (see manual of mt9f002 CMOS sensor)
 		double focalLength		= (2400 * cmosPixelSize * 1000 / ispScalar) / (4 * sin(M_PI / 4));
 		double cY 				= round(sin((-eulerAngles->theta - WV_BEBOP_CAMERA_ANGLE * M_PI / 180)) * 2 * focalLength * ispScalar / (1000 * cmosPixelSize));
 		double desHeight 		= round(sin(fovY / 4) * 4 * focalLength * ispScalar / (1000 * cmosPixelSize) + ispWidth * tan(eulerAngles->phi));
@@ -1252,6 +1225,7 @@ void calibrateEstimation(vector<trackResults> trackRes)
 }
 #endif
 
+#if WV_OPT_SAVE_FRAME
 void saveBuffer(char * img, Mat sourceFrame, const char *filename)
 {
 	char path[100];
@@ -1273,6 +1247,7 @@ void saveBuffer(char * img, Mat sourceFrame, const char *filename)
 	fclose(iFile);
 	printf(" done.\n");
 }
+#endif
 
 void addObject(void)
 {

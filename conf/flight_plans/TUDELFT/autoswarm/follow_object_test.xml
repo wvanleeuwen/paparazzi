@@ -15,11 +15,10 @@
     <waypoint name="_GOAL" 	x="1.0" y="0.0"/>
     <waypoint name="_CAM" 	x="1.0" y="0.0"/>
     <waypoint name="GLOBAL" lat="51.9906375" lon="4.3767963"/>
-
-    <waypoint lat="51.9906301" lon="4.3768521" name="CZ1"/>
-    <waypoint lat="51.9905989" lon="4.3767776" name="CZ2"/>
-    <waypoint lat="51.9906409" lon="4.3767329" name="CZ3"/>
-    <waypoint lat="51.9906710" lon="4.3768046" name="CZ4"/>
+    <waypoint lat="51.9906258" lon="4.3768571" name="CZ1"/>
+    <waypoint lat="51.9905925" lon="4.3767779" name="CZ2"/>
+    <waypoint lat="51.9906426" lon="4.3767220" name="CZ3"/>
+    <waypoint lat="51.9906763" lon="4.3768037" name="CZ4"/>
   </waypoints>
   <sectors>
     <sector color="red" name="CyberZoo">
