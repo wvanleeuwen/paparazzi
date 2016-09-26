@@ -38,7 +38,7 @@
     <module name="air_data"/>
     <module name="send_imu_mag_current"/>
     <module name="sonar_bebop">
-      <define name="SENSOR_SYNC_SEND_SONAR" value="TRUE"/>
+      <define name="SENSOR_SYNC_SEND_SONAR" value="FALSE"/>
     </module>
     <module name="pose_history"/>
     <module name="video_thread"/>
@@ -87,12 +87,13 @@
     <!-- /////////////////////////////////////////////////////////////////////////////////////////// -->
 
     <module name="video_rtp_stream">
-      <define name="VIEWVIDEO_CAMERA" value="front_camera"/>
+      <define name="VIEWVIDEO_CAMERA" value="bottom_camera"/>
       <define name="VIEWVIDEO_DOWNSIZE_FACTOR" value="1"/>
       <define name="VIEWVIDEO_QUALITY_FACTOR" value="60"/>
 
       <configure name="VIEWVIDEO_BROADCAST" value="FALSE"/>
-      <configure name="VIEWVIDEO_HOST" value="192.168.42.68"/>
+      <!--<configure name="VIEWVIDEO_HOST" value="192.168.42.68"/>-->
+      <configure name="VIEWVIDEO_HOST" value="192.168.42.30"/>
     </module>
 
     <module name="cv_ae_awb"/>
@@ -198,11 +199,18 @@
     <!--<define name="G1_R" value="0.000986"/>-->
     <!--<define name="G2_R" value="0.071307"/>-->
 
-    <!-- bebop normal -->
-    <define name="G1_P" value="0.056419"/>
-    <define name="G1_Q" value="0.033347"/>
-    <define name="G1_R" value="0.002401"/>
-    <define name="G2_R" value="0.154231"/>
+     <!--&lt;!&ndash;bebop normal &ndash;&gt;-->
+    <!--<define name="G1_P" value="0.056419"/>-->
+    <!--<define name="G1_Q" value="0.033347"/>-->
+    <!--<define name="G1_R" value="0.002401"/>-->
+    <!--<define name="G2_R" value="0.154231"/>-->
+
+    <!--bebop normal red -->
+    <define name="G1_P" value="0.034276"/>
+    <define name="G1_Q" value="0.027164"/>
+    <define name="G1_R" value="0.001052"/>
+    <define name="G2_R" value="0.092951"/>
+
 
     <!-- bebop legs -->
     <!--<define name="G1_P" value="0.026041"/>-->

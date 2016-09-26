@@ -119,7 +119,11 @@ uint8_t MoveRight(float vy) {
 bool Land(float end_altitude) {
     // return true if not completed
 
-    guidance_v_set_guided_vz(0.2);
+    //For bucket
+//    guidance_v_set_guided_vz(0.2);
+    //For landing pad
+    guidance_v_set_guided_vz(1);
+
 
     if (stateGetPositionEnu_f()->z > end_altitude) {
         return true;

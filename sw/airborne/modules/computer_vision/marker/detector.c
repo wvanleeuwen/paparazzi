@@ -41,7 +41,12 @@
 static bool SHOW_MARKER = true;
 static float MARKER_FOUND_TIME_MAX = 10.0;
 static float MARKER_MID_TIME_MAX = 4;
-static int MARKER_WINDOW = 25;
+
+//This is for bucket
+//static int MARKER_WINDOW = 25;
+
+//This is for landing pad
+static int MARKER_WINDOW = 40;
 
 // General outputs
 struct Marker marker1;
@@ -112,10 +117,17 @@ static void marker_detected(struct Marker *marker, struct image_t* img, int pixe
     if (marker->found_time > MARKER_FOUND_TIME_MAX) { marker->found_time = MARKER_FOUND_TIME_MAX; }
     if (marker->mid_time > MARKER_MID_TIME_MAX) { marker->mid_time = MARKER_MID_TIME_MAX; }
 
+    // This is for bucket
+//    if (marker->pixel.x < 120 + MARKER_WINDOW &&
+//        marker->pixel.x > 120 - MARKER_WINDOW &&
+//        marker->pixel.y < 100 + MARKER_WINDOW && //To account for gripper in the back
+//        marker->pixel.y > 100 - MARKER_WINDOW)
+
+    // This is for landing pad
     if (marker->pixel.x < 120 + MARKER_WINDOW &&
         marker->pixel.x > 120 - MARKER_WINDOW &&
-        marker->pixel.y < 100 + MARKER_WINDOW && //To account for gripper in the back
-        marker->pixel.y > 100 - MARKER_WINDOW)
+        marker->pixel.y < 120 + MARKER_WINDOW && //To account for gripper in the back
+        marker->pixel.y > 120 - MARKER_WINDOW)
     {
         marker->mid = true;
         marker->mid_time += img-> dt / 1000000.f;
@@ -131,10 +143,15 @@ static void marker_detected(struct Marker *marker, struct image_t* img, int pixe
 static void marker_not_detected(struct Marker *marker, struct image_t* img)
 {
     marker->detected = false;
-//    marker.mid = false;
+    marker->mid = false;
 
-    marker->found_time -= 1.5 * img->dt / 1000000.f;
-    marker->mid_time -= img-> dt / 1000000.f;
+    //This is for bucket
+//    marker->found_time -= 1.5 * img->dt / 1000000.f;
+//    marker->mid_time -= 1* img-> dt / 1000000.f;
+    //This is for landing pad
+    marker->found_time -= 1 * img->dt / 1000000.f;
+    marker->mid_time -= 0.5* img-> dt / 1000000.f;
+
     if (marker->found_time < 0) { marker->found_time = 0; }
     if (marker->mid_time < 0) { marker->mid_time = 0; }
 }
@@ -258,7 +275,7 @@ static struct image_t *detect_helipad_marker(struct image_t* img)
             img->w,
             img->h,
             2, //squares
-            210, //binary threshold
+            220, //binary threshold
             0, img->dt); //modify image, time taken
 
     if (helipad_marker.marker)
@@ -288,7 +305,8 @@ static struct image_t *draw_target_marker1(struct image_t* img)
                            &marker1.detected,
                            &marker1.pixel.x,
                            &marker1.pixel.y,
-                           &marker1.found_time);
+                           &marker1.found_time,
+                           &marker1.mid_time);
 
     return img;
 }
@@ -323,6 +341,7 @@ void detector_locate_helipad(void)
 void detector_init(void)
 {
     marker1.detected = false;
+    marker1.mid = false;
     marker1.pixel.x = 0;
     marker1.pixel.y = 0;
     marker1.found_time = 0;
