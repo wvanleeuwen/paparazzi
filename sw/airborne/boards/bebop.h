@@ -93,7 +93,7 @@
 #endif
 
 #ifndef MT9F002_GAIN_BLUE
-#define MT9F002_GAIN_BLUE 5.0
+#define MT9F002_GAIN_BLUE 4.0
 #endif
 
 /* Set subsampling */

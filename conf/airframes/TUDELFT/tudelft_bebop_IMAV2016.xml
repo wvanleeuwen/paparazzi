@@ -9,7 +9,8 @@
     <define name="MT9F002_OUTPUT_HEIGHT" value="640" />  <!-- full height 4608 -->
     <define name="MT9F002_OUTPUT_WIDTH" value="480" />  <!-- full width 2592 (3288) -->
     <define name="MT9F002_INITIAL_OFFSET_Y" value="384" />
-    <define name="MT9F002_INITIAL_OFFSET_X" value="1280" />
+    <define name="MT9F002_INITIAL_OFFSET_X" value="1216" />
+    <!--<define name="MT9F002_INITIAL_OFFSET_X" value="1280" />-->
     <define name="MT9F002_X_ODD_INC_VAL" value="7" /> <!-- downsize x4 -->
     <define name="MT9F002_Y_ODD_INC_VAL" value="7" />
 
@@ -39,6 +40,7 @@
     <module name="send_imu_mag_current"/>
     <module name="sonar_bebop">
       <define name="SENSOR_SYNC_SEND_SONAR" value="FALSE"/>
+      <!--<define name="SENSOR_SYNC_SEND_SONAR" value="TRUE"/>-->
     </module>
     <module name="pose_history"/>
     <module name="video_thread"/>

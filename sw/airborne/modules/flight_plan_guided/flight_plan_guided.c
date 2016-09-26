@@ -142,20 +142,65 @@ void marker_detection_periodic(void) {
 
 }
 
-void bucket_heading_change(void) {
-    if (marker2.detected && !marker2.processed) {
-        marker2.processed = true;
-        int relative_heading = marker2.pixel.y - 320;
+static int BUCKET_HEADING_MARGIN = 60;
+static int BUCKET_HEADING_RATE = 1;
 
-        if (relative_heading > 150) {
-            guidance_h_set_guided_heading_rate(1);
-        }else if (relative_heading < -150) {
-            guidance_h_set_guided_heading_rate(-1);
-        } else {
-            guidance_h_set_guided_heading_rate(0);
-            guidance_h_set_guided_body_vel(0.3, 0);
-        }
+bool bucket_heading_change(void) {
+  guidance_h_set_guided_body_vel(0, 0);
 
-        fprintf(stderr, "[detect] heading %i.\n", relative_heading);
+  if (marker2.detected) {
+    if (!marker2.processed) {
+      // Marker detected and not processed
+      marker2.processed = true;
+      int relative_heading = marker2.pixel.y - 320;
+
+      if (relative_heading > BUCKET_HEADING_MARGIN) {
+        // Marker is to the right
+        guidance_h_set_guided_heading_rate(BUCKET_HEADING_RATE);
+      } else if (relative_heading < -BUCKET_HEADING_MARGIN) {
+        // Marker is to the left
+        guidance_h_set_guided_heading_rate(-BUCKET_HEADING_RATE);
+      } else {
+        // Marker is more or less centered
+        guidance_h_set_guided_heading_rate(0);
+        return false;
+//            guidance_h_set_guided_body_vel(0.3, 0);
+      }
+    } else {
+      // Marker detected but already processed
+      // ** just wait **
     }
+  } else {
+    // Marker not detected
+    guidance_h_set_guided_heading_rate(0);
+  }
+
+  return true;
+}
+
+static int BUCKET_POSITION_MARGIN = 30;
+static int BUCKET_DRIFT_CORRECTION_RATE = 0.1;
+
+bool bucket_approach(void) {
+  if (marker2.detected) {
+    if (!marker2.processed) {
+      int relative_pos = marker2.pixel.y - 320;
+
+      if (relative_pos > BUCKET_POSITION_MARGIN) {
+        guidance_h_set_guided_body_vel(0, BUCKET_DRIFT_CORRECTION_RATE);
+      } else if (relative_pos < -BUCKET_POSITION_MARGIN) {
+        guidance_h_set_guided_body_vel(0, -BUCKET_DRIFT_CORRECTION_RATE);
+      } else {
+        guidance_h_set_guided_body_vel(0, 0);
+      }
+    } else {
+      // Marker detected but already processed
+      // ** just wait **
+    }
+  } else {
+    // Marker not detected
+    // TODO: go back to search mode
+  }
+
+  return true;
 }

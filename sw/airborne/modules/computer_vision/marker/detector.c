@@ -216,12 +216,12 @@ static struct image_t *detect_front_bucket(struct image_t* img) {
 
     // Color Filter
     struct image_filter_t filter;
-    filter.y_min = 0;    // red
-    filter.y_max = 110;
-    filter.u_min = 52;
-    filter.u_max = 140;
-    filter.v_min = 140;
-    filter.v_max = 255;
+    filter.y_min = 56;    // red
+    filter.y_max = 99;
+    filter.u_min = 100;
+    filter.u_max = 136;
+    filter.v_min = 154;
+    filter.v_max = 193;
 
     int threshold = 50;
 
@@ -275,7 +275,7 @@ static struct image_t *detect_helipad_marker(struct image_t* img)
             img->w,
             img->h,
             2, //squares
-            220, //binary threshold
+            210, //binary threshold
             0, img->dt); //modify image, time taken
 
     if (helipad_marker.marker)
@@ -340,8 +340,11 @@ void detector_locate_helipad(void)
 
 void detector_init(void)
 {
+    // BOTTOM MARKER
+
     marker1.detected = false;
     marker1.mid = false;
+    marker1.processed = true;
     marker1.pixel.x = 0;
     marker1.pixel.y = 0;
     marker1.found_time = 0;
@@ -354,6 +357,7 @@ void detector_init(void)
 
     cv_add_to_device(&DETECTOR_CAMERA1, draw_target_marker1);
 
+    // FRONT MARKER
     marker2.detected = false;
     marker2.processed = true;
     marker2.pixel.x = 0;
@@ -365,5 +369,6 @@ void detector_init(void)
 
     cv_add_to_device(&DETECTOR_CAMERA2, draw_target_marker2);
 
+    // INITIAL STATE
     detector_locate_bucket();
 }

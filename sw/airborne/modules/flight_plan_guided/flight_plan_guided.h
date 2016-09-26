@@ -46,6 +46,7 @@ extern bool WaitUntilAltitude(float altitude);
 extern bool Land(float end_altitude);
 
 void marker_detection_periodic(void);
-void bucket_heading_change(void);
+bool bucket_heading_change(void);
+bool bucket_approach(void);
 
 #endif
