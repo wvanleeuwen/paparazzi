@@ -122,7 +122,8 @@ bool Land(float end_altitude) {
     //For bucket
 //    guidance_v_set_guided_vz(0.2);
     //For landing pad
-    guidance_v_set_guided_vz(1);
+    guidance_v_set_guided_vz(1.5);
+    guidance_h_set_guided_body_vel(0, 0);
 
 
     if (stateGetPositionEnu_f()->z > end_altitude) {
