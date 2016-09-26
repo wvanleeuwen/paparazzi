@@ -52,6 +52,14 @@
       <exception cond="marker1.mid && marker1.mid_time > 3" deroute="Experimental Landing"/>
     </block>
 
+    <block name="Find bucket">
+      <call fun="bucket_heading_change()"/>
+    </block>
+
+    <block name="Approach bucket">
+      <call fun="bucket_approach()"/>
+    </block>
+
     <!--<block name="Move Forward">-->
       <!--<call fun="MoveForward(0.2)"/>-->
       <!--<while cond="1"/>-->

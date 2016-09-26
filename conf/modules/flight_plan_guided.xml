@@ -13,8 +13,7 @@
 
   <init fun="flight_plan_guided_init()"/>
 
-  <periodic fun="marker_detection_periodic()" freq="512" autorun="TRUE"/>
-  <periodic fun="bucket_heading_change()" freq="10" autorun="TRUE"/>
+  <periodic fun="marker_detection_periodic()" freq="128" autorun="TRUE"/>
 
   <makefile>
     <file name="flight_plan_guided.c"/>
