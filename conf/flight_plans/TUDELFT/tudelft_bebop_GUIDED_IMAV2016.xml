@@ -41,8 +41,8 @@
 
     <block name="TakeOff">
       <call fun="StartEngines()"/>
-      <call fun="Hover(2.5)"/>
-      <call fun="RotateToHeading(0)"/> <!-- not yet working -->
+      <call fun="Hover(1.5)"/>
+      <!--<call fun="RotateToHeading(0)"/> &lt;!&ndash; not yet working &ndash;&gt;-->
     </block>
 
      <!--Hover at the current location-->
@@ -54,7 +54,7 @@
       <!--<exception cond="marker1.mid && marker1.mid_time > 2" deroute="Experimental Landing"/>-->
 
       <!--This is for landing-->
-      <exception cond="marker1.mid && marker1.mid_time > 1.2" deroute="Experimental Landing"/>
+      <exception cond="marker1.mid && marker1.mid_time > 1.0" deroute="Experimental Landing"/>
 
     </block>
 
@@ -80,7 +80,7 @@
       <while cond="1"/>                   <!-- wait indefinitely -->
 
       <!--This is for landing pad-->
-      <exception cond="1.15 > marker1.mid_time" deroute="Hover"/>
+      <exception cond="0.95 > marker1.mid_time" deroute="Hover"/>
 
       <!--This is for red bucket-->
       <!--<exception cond="!marker1.detected" deroute="Hover"/>-->

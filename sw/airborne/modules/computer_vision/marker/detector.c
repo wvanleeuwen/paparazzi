@@ -40,7 +40,7 @@
 
 static bool SHOW_MARKER = true;
 static float MARKER_FOUND_TIME_MAX = 10.0;
-static float MARKER_MID_TIME_MAX = 1.2;
+static float MARKER_MID_TIME_MAX = 1.0;
 
 //This is for bucket
 //static int MARKER_WINDOW = 25;
