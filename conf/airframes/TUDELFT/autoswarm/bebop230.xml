@@ -10,10 +10,10 @@
     </target>
     <configure name="HOST" value="192.168.40.30" />
     <configure name="MODEM_HOST" value="192.168.40.255" />
-    <define name="MT9F002_OUTPUT_HEIGHT" value="1648" /> <!-- 1648 -->
-	<define name="MT9F002_OUTPUT_WIDTH" value="1672" /> <!-- 1672 -->
-	<define name="MT9F002_INITIAL_OFFSET_X" value="672" />
-	<define name="MT9F002_INITIAL_OFFSET_Y" value="0" />
+    <define name="MT9F002_OUTPUT_HEIGHT" value="1664" /> <!-- 1648 / 1688-->
+	<define name="MT9F002_OUTPUT_WIDTH" value="2048" /> <!-- 1672 -->
+	<define name="MT9F002_INITIAL_OFFSET_X" value="288" /> <!-- 672 -->
+	<define name="MT9F002_INITIAL_OFFSET_Y" value="12" />
 	<define name="MT9F002_OUTPUT_SCALER" value="1" /> <!-- 16/26 -->
 	<define name="MT9F002_TARGET_FPS" value="30" />
 	<define name="MT9F002_TARGET_EXPOSURE" value="0.348262" /> <!-- Daylight: 10 -->
@@ -46,20 +46,25 @@
     <module name="send_imu_mag_current"/>
     <module name="video_thread">
     </module>
+    <module name="cv_active_random_filter">
+    	<define name="AR_FILTER_CAMERA" value="front_camera" />
+    </module> 
 	<module name="autoswarm">
 		<define name="AUTOSWARM_CAMERA" value="front_camera" />
 		<define name="WV_INIT_GLOBAL_ATTRACTOR" value="2" />
 	</module>
-	<!-- 
 	<module name="video_rtp_stream">
 		<configure name="VIEWVIDEO_HOST" value="192.168.40.222" />
 		<configure name="VIEWVIDEO_BROADCAST" value="FALSE" />
 		<define name="VIEWVIDEO_CAMERA" value="front_camera" />
 		<define name="VIEWVIDEO_DOWNSIZE_FACTOR" value="4" />
-		<define name="VIEWVIDEO_QUALITY_FACTOR" value="50" />
+		<define name="VIEWVIDEO_QUALITY_FACTOR" value="80" />
 		<define name="VIEWVIDEO_SHOT_PATH" value="/data/ftp/internal_000" />
-	</module> -->
-	<module name="cv_ae_awb"/>
+		<define name="VIEWVIDEO_FPS" value="4" />
+	</module>
+	<module name="cv_ae_awb">
+	  <define name="CV_AE_AWB_AV" value="1.5" />
+	</module>
 	<module name="logger_file">
       <define name="FILE_LOGGER_PATH" value="/data/ftp/internal_000"/>
     </module>

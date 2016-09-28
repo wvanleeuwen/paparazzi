@@ -31,17 +31,17 @@ extern "C" {
 #endif
 
 // Global options definitions
-#define WV_GLOBAL_POINT 			0
-#define WV_GLOBAL_BUCKET 			1
-#define WV_GLOBAL_CIRCLE_CW 		2
-#define WV_GLOBAL_CIRCLE_CC 		3
-// Filter sample styles
-#define FILTER_STYLE_FULL			0
-#define FILTER_STYLE_GRID			1
-#define FILTER_STYLE_RANDOM			2
-// Filter flood styles
-#define FILTER_FLOOD_OMNI 			0
-#define FILTER_FLOOD_CW				1
+#define AUTOSWARM_POINT 			0
+#define AUTOSWARM_BUCKET 			1
+#define AUTOSWARM_CIRCLE_CW 		2
+#define AUTOSWARM_CIRCLE_CC 		3
+//// Filter sample styles
+//#define FILTER_STYLE_FULL			0
+//#define FILTER_STYLE_GRID			1
+//#define FILTER_STYLE_RANDOM			2
+//// Filter flood styles
+//#define FILTER_FLOOD_OMNI 			0
+//#define FILTER_FLOOD_CW				1
 
 
 #define WP__TD 2
@@ -71,23 +71,6 @@ extern "C" {
  "HOME" , \
 }
 
-
-
-typedef struct _trackResults {
-    int     x_p;
-    int     y_p;
-    double  area_p;
-    double 	x_c;
-    double 	y_c;
-    double 	r_c;
-    double  x_b;
-    double  y_b;
-    double  z_b;
-    double  x_w;
-    double  y_w;
-    double  z_w;
-} trackResults;
-
 typedef struct _memBlock {
 	int lastSeen;
 	int id;
@@ -98,42 +81,26 @@ typedef struct _memBlock {
 	double z_w;
 } memoryBlock;
 
-extern double 	WV_GLOBAL_CIRCLE_R;
-extern double 	WV_SWARM_SEPERATION;
-extern int 		WV_GLOBAL_ATTRACTOR;
-extern double 	WV_SWARM_AMAX;
-extern double 	WV_SWARM_VMAX;
-extern double	WV_SWARM_YAWRATEMAX;
-extern double 	WV_SWARM_GLOBAL;
-extern int 		WV_SWARM_MODE;
-extern double 	WV_SWARM_E;
-extern double 	WV_SWARM_EPS;
-extern double  	WV_FILTER_CR;
-extern double  	WV_FILTER_CG;
-extern double  	WV_FILTER_CB;
-extern int 		WV_TRACK_GREY_THRESHOLD;
-extern int 		WV_TRACK_IMAGE_CROP_FOVY;
-extern int 		WV_TRACK_RND_PIX_SAMPLE;
-extern int 		WV_FILTER_Y_MIN;
-extern int 		WV_FILTER_Y_MAX;
-extern int 		WV_FILTER_CB_MIN;
-extern int 		WV_FILTER_CB_MAX;
-extern int 		WV_FILTER_CR_MIN;
-extern int 		WV_FILTER_CR_MAX;
-extern int		FILTER_SAMPLE_STYLE;
-extern int 		FILTER_FLOOD_STYLE;
-
-//extern void mt9f002_set_resolution(struct mt9f002_t *mt);
+extern double 	AUTOSWARM_CIRCLE_R;
+extern double 	AUTOSWARM_SEPERATION;
+extern int 		AUTOSWARM_ATTRACTOR;
+extern double 	AUTOSWARM_AMAX;
+extern double 	AUTOSWARM_VMAX;
+extern double	AUTOSWARM_YAWRATEMAX;
+extern double 	AUTOSWARM_GLOBAL;
+extern int 		AUTOSWARM_MODE;
+extern double 	AUTOSWARM_E;
+extern double 	AUTOSWARM_EPS;
 
 // Initialize global attractor
 struct originPoint { double cx; double cy; double cz;};
 struct originPoint globalOrigin;
 static inline void setGlobalOrigin(double x, double y, double z){ globalOrigin.cx = x; globalOrigin.cy = y; globalOrigin.cz = z;};
-static inline bool setGlobalMode(int mode){ WV_GLOBAL_ATTRACTOR = mode; return false; };
-static inline bool setSwarmMode(int mode){ 	WV_SWARM_MODE = mode; return false; };
+static inline bool setGlobalMode(int mode){ AUTOSWARM_ATTRACTOR = mode; return false; };
+static inline bool setSwarmMode(int mode){ 	AUTOSWARM_MODE = mode; return false; };
 
 void autoswarm_opencv_init(int globalMode);
-void autoswarm_opencv_run(char* img, int width, int height);
+void autoswarm_opencv_run(void);
 bool amIhome(void);
 
 #ifdef __cplusplus
