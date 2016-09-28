@@ -39,24 +39,17 @@
       <while cond="1"/>
     </block>
 
-    <block name="TakeOff">
+    <!--Hover at the current location-->
+    <block name="Hover and wait">
+      <call fun="Hover(1.5)"/>
+      <while cond="1"/>
+    </block>
+
+    <block name="Take off">
       <call fun="StartEngines()"/>
       <call fun="TakeOff(1)"/>
       <call fun="WaitUntilAltitude(1)"/>
       <call fun="Hover(1.5)"/>
-    </block>
-
-     <!--Hover at the current location-->
-    <block name="Hover">
-      <call fun="Hover(1.5)"/>
-      <while cond="1"/>
-
-      <!--This is for bucket-->
-      <!--<exception cond="marker1.mid && marker1.mid_time > 2" deroute="Experimental Landing"/>-->
-
-      <!--This is for landing-->
-      <!--exception cond="marker1.mid && marker1.mid_time > 1.2" deroute="Experimental Landing"/-->
-
     </block>
 
     <block name="Find bucket">
@@ -73,15 +66,7 @@
       <exception cond="marker_lost == true" deroute="Find bucket"/>
     </block>
 
-    <!--<block name="Move Forward">-->
-      <!--<call fun="MoveForward(0.2)"/>-->
-      <!--<while cond="1"/>-->
-      <!--<exception cond="block_time > 2" deroute="Move Right"/>-->
-      <!--<exception cond="marker.detected" deroute="Hover"/>-->
-    <!--</block>-->
-
-
-    <block name="Experimental Landing">
+    <block name="Land bucket">
       <call fun="Land(0.2)"/>             <!-- this call blocks until altitude < 0.38 -->
       <call_once fun="KillEngines()"/>
       <while cond="1"/>                   <!-- wait indefinitely -->
@@ -92,6 +77,13 @@
       <!--This is for red bucket-->
       <!--<exception cond="!marker1.detected" deroute="Hover"/>-->
     </block>
+
+    <!--<block name="Move Forward">-->
+      <!--<call fun="MoveForward(0.2)"/>-->
+      <!--<while cond="1"/>-->
+      <!--<exception cond="block_time > 2" deroute="Move Right"/>-->
+      <!--<exception cond="marker.detected" deroute="Hover"/>-->
+    <!--</block>-->
 
     <!--<block name="Detect Landing Pad">-->
       <!--<call_once fun="detector_locate_helipad()"/>-->
