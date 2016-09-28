@@ -110,7 +110,9 @@ class RtpViewer:
 
 
 if __name__ == '__main__':
-    viewer = RtpViewer("rtp_stream.sdp")
+    import sys
+
+    viewer = RtpViewer(sys.argv[1])
 
     if not viewer.cap.isOpened():
         viewer.cleanup()

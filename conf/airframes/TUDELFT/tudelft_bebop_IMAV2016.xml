@@ -7,9 +7,9 @@
     <target name="ap" board="bebop"/>
 
     <define name="MT9F002_OUTPUT_HEIGHT" value="640" />  <!-- full height 4608 -->
-    <define name="MT9F002_OUTPUT_WIDTH" value="480" />  <!-- full width 2592 (3288) -->
+    <define name="MT9F002_OUTPUT_WIDTH" value="640" />  <!-- full width 2592 (3288) -->
     <define name="MT9F002_INITIAL_OFFSET_Y" value="384" />
-    <define name="MT9F002_INITIAL_OFFSET_X" value="1216" />
+    <define name="MT9F002_INITIAL_OFFSET_X" value="512" />
     <!--<define name="MT9F002_INITIAL_OFFSET_X" value="1280" />-->
     <define name="MT9F002_X_ODD_INC_VAL" value="7" /> <!-- downsize x4 -->
     <define name="MT9F002_Y_ODD_INC_VAL" value="7" />
@@ -89,13 +89,14 @@
     <!-- /////////////////////////////////////////////////////////////////////////////////////////// -->
 
     <module name="video_rtp_stream">
-      <define name="VIEWVIDEO_CAMERA" value="front_camera"/>
+      <define name="VIEWVIDEO_CAMERA" value="bottom_camera"/>
+      <define name="VIEWVIDEO_CAMERA2" value="front_camera"/>
+
       <define name="VIEWVIDEO_DOWNSIZE_FACTOR" value="1"/>
       <define name="VIEWVIDEO_QUALITY_FACTOR" value="60"/>
 
       <configure name="VIEWVIDEO_BROADCAST" value="FALSE"/>
       <configure name="VIEWVIDEO_HOST" value="192.168.42.68"/>
-      <!--<configure name="VIEWVIDEO_HOST" value="192.168.42.30"/>-->
     </module>
 
     <module name="cv_ae_awb"/>
