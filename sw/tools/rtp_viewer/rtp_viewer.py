@@ -72,7 +72,7 @@ class RtpViewer:
             self.mouse['start'] = None
 
     def on_mouse(self, event, x, y, flags, param):
-        if event == cv2.EVENT_LBUTTONDOWN and self.rotate == 0:
+        if event == cv2.EVENT_LBUTTONDOWN and self.rotate == 0 and False:
             self.mouse['start'] = (x, y)
 
         if event == cv2.EVENT_RBUTTONDOWN:

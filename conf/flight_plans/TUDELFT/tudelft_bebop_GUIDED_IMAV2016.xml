@@ -68,6 +68,11 @@
       <exception cond="marker_lost == true" deroute="Find bucket"/>
     </block>
 
+    <block name="Center bucket">
+      <call fun="bucket_center()"/>
+      <exception cond="marker_lost == true" deroute="Find bucket"/>
+    </block>
+
     <!--<block name="Move Forward">-->
       <!--<call fun="MoveForward(0.2)"/>-->
       <!--<while cond="1"/>-->
@@ -82,45 +87,21 @@
       <while cond="1"/>                   <!-- wait indefinitely -->
 
       <!--This is for landing pad-->
-      <exception cond="1.15 > marker1.mid_time" deroute="Hover"/>
+      <!--<exception cond="1.15 > marker1.mid_time" deroute="Hover"/>-->
 
       <!--This is for red bucket-->
       <!--<exception cond="!marker1.detected" deroute="Hover"/>-->
     </block>
 
-    <block name="Detect Landing Pad">
-      <call_once fun="detector_locate_helipad()"/>
-      <while cond="1"/>
-    </block>
-
-    <block name="Detect Bucket">
-      <call_once fun="detector_locate_bucket()"/>
-      <while cond="1"/>
-    </block>
-
-
-    <!-- Start the bucket mission -->
-    <!--<block name="Start Bucket">-->
-      <!--<call fun="start_color_tracking_front()"/>-->
-      <!--<call fun="start_color_tracking_bottom()"/>-->
+    <!--<block name="Detect Landing Pad">-->
+      <!--<call_once fun="detector_locate_helipad()"/>-->
       <!--<while cond="1"/>-->
     <!--</block>-->
 
-    <!--&lt;!&ndash; Stop the bucket mission &ndash;&gt;-->
-    <!--<block name="Stop Bucket">-->
-      <!--<call fun="stop_color_tracking_front()"/>-->
-      <!--<call fun="stop_color_tracking_bottom()"/>-->
-      <!--<deroute block="Hover"/>-->
-    <!--</block>-->
-
-    <!--&lt;!&ndash; Start the landing on a moving platform &ndash;&gt;-->
-    <!--<block name="Start LandingMovingPlatform">-->
-      <!--<call fun="start_helipad()"/>-->
-      <!--<call fun="MoveForward(0.1)"/>-->
+    <!--<block name="Detect Bucket">-->
+      <!--<call_once fun="detector_locate_bucket()"/>-->
       <!--<while cond="1"/>-->
-      <!--<exception cond="marker" deroute="Land"/>-->
     <!--</block>-->
-
 
   </blocks>
 </flight_plan>

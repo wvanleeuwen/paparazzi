@@ -190,11 +190,6 @@
   </section>
 
   <section name="STABILIZATION_ATTITUDE_INDI" prefix="STABILIZATION_INDI_">
-    <!--&lt;!&ndash; control effectiveness with gripper and legs &ndash;&gt;-->
-    <!--<define name="G1_P" value="0.034"/>-->
-    <!--<define name="G1_Q" value="0.012867"/>-->
-    <!--<define name="G1_R" value="0.001564"/>-->
-    <!--<define name="G2_R" value="0.055332"/>-->
 
     <!-- bebop TUBB05 (no legs, no bumpers) -->
     <!--<define name="G1_P" value="0.063"/>-->
@@ -208,17 +203,11 @@
     <define name="G1_R" value="0.0020"/>
     <define name="G2_R" value="0.12"/>
 
-    <!--&lt;!&ndash;bebop normal &ndash;&gt;-->
-    <!--<define name="G1_P" value="0.056419"/>-->
-    <!--<define name="G1_Q" value="0.033347"/>-->
-    <!--<define name="G1_R" value="0.002401"/>-->
-    <!--<define name="G2_R" value="0.154231"/>-->
-
-    <!-- bebop legs -->
-    <!--<define name="G1_P" value="0.026041"/>-->
-    <!--<define name="G1_Q" value="0.022646"/>-->
-    <!--<define name="G1_R" value="0.001148"/>-->
-    <!--<define name="G2_R" value="0.094271"/>-->
+    <!-- bebop TUBB04 (steel legs) -->
+    <!--<define name="G1_P" value="0.0148"/>-->
+    <!--<define name="G1_Q" value="0.0126"/>-->
+    <!--<define name="G1_R" value="0.0012"/>-->
+    <!--<define name="G2_R" value="0.092"/>-->
 
 
     <!-- reference acceleration for attitude control -->
@@ -246,8 +235,8 @@
   </section>
 
   <section name="GUIDANCE_V" prefix="GUIDANCE_V_">
-    <define name="HOVER_KP" value="500"/>
-    <define name="HOVER_KD" value="150"/>
+    <define name="HOVER_KP" value="2000"/>
+    <define name="HOVER_KD" value="450"/>
     <define name="HOVER_KI" value="0"/>
     <define name="NOMINAL_HOVER_THROTTLE" value="0.55"/>
     <define name="ADAPT_THROTTLE_ENABLED" value="TRUE"/>
