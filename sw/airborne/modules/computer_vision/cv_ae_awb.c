@@ -23,8 +23,14 @@
  * Auto exposure and Auto white balancing for the Bebop 1 and 2
  */
 
+#include <stdio.h>
+
 #include "modules/computer_vision/cv_ae_awb.h"
 #include "lib/isp/libisp.h"
+
+#ifndef CV_AE_AWB_AV
+#define CV_AE_AWB_AV 1
+#endif
 
 #define MAX_HIST_Y 256-30
 
@@ -57,7 +63,7 @@ void cv_ae_awb_periodic(void) {
 
     // Fix saturated pixels
     if(saturated_pixels > max_saturated_pixels) {
-      adjustment = 1.0f - ((float)(saturated_pixels - max_saturated_pixels))/yuv_stats.nb_valid_Y;
+      adjustment = 1.0f - ((float)(saturated_pixels - max_saturated_pixels)) / yuv_stats.nb_valid_Y;
     }
     // Fix bright pixels
     else if (bright_pixels < target_bright_pixels) {
@@ -75,7 +81,7 @@ void cv_ae_awb_periodic(void) {
 
     // Calculate exposure
     Bound(adjustment, 1/16.0f, 4.0);
-    float desiredExposure = mt9f002.real_exposure * adjustment;
+    float desiredExposure = mt9f002.real_exposure * adjustment * CV_AE_AWB_AV;
     mt9f002.target_exposure = desiredExposure;
     mt9f002_set_exposure(&mt9f002);
     printf("New exposure: %f (old: %f)\r\n", desiredExposure, mt9f002.real_exposure);

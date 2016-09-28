@@ -218,7 +218,7 @@ void image_yuv422_downsample(struct image_t *input, struct image_t *output, uint
 
   // Copy the creation timestamp (stays the same)
   output->ts = input->ts;
-  uint8_t rowCnt = 0;
+  //uint8_t rowCnt = 0;
   // Go trough all the pixels
   for (uint16_t y = 0; y < output->h; y++) {
     for (uint16_t x = 0; x < output->w; x += 2) {
@@ -232,12 +232,12 @@ void image_yuv422_downsample(struct image_t *input, struct image_t *output, uint
     }
     // read 1 in every 'downsample' rows, so skip (downsample-1) rows after reading the first
     source += (downsample - 1) * input->w * 2 ;
-    rowCnt++;
+    /*rowCnt++;
     if(rowCnt == 8)
     {
     	rowCnt = 0;
     	source += 32 * downsample;
-    }
+    }*/
   }
 }
 
