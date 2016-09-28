@@ -38,17 +38,25 @@ typedef struct _trackResults {
     double  z_w;
 } trackResults;
 
-extern int 		WV_TRACK_GREY_THRESHOLD;
-extern int 		WV_TRACK_IMAGE_CROP_FOVY;
-extern int 		WV_TRACK_RND_PIX_SAMPLE;
-extern int 		WV_FILTER_Y_MIN;
-extern int 		WV_FILTER_Y_MAX;
-extern int 		WV_FILTER_CB_MIN;
-extern int 		WV_FILTER_CB_MAX;
-extern int 		WV_FILTER_CR_MIN;
-extern int 		WV_FILTER_CR_MAX;
-extern int		FILTER_SAMPLE_STYLE;
-extern int 		FILTER_FLOOD_STYLE;
+extern int 		AR_FILTER_GREY_THRESHOLD;
+extern int 		AR_FILTER_IMAGE_CROP_FOVY;
+extern int 		AR_FILTER_RND_PIX_SAMPLE;
+extern int 		AR_FILTER_Y_MIN;
+extern int 		AR_FILTER_Y_MAX;
+extern int 		AR_FILTER_CB_MIN;
+extern int 		AR_FILTER_CB_MAX;
+extern int 		AR_FILTER_CR_MIN;
+extern int 		AR_FILTER_CR_MAX;
+extern int		AR_FILTER_SAMPLE_STYLE;
+extern int 		AR_FILTER_FLOOD_STYLE;
+
+// Filter sample styles
+#define AR_FILTER_STYLE_FULL   0
+#define AR_FILTER_STYLE_GRID   1
+#define AR_FILTER_STYLE_RANDOM 2
+// Filter flood styles
+#define AR_FILTER_FLOOD_OMNI   0
+#define AR_FILTER_FLOOD_CW     1
 
 #ifdef __cplusplus
 extern "C" {

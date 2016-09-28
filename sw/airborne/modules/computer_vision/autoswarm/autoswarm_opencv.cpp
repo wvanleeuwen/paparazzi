@@ -23,15 +23,12 @@
  * Autonomous bebop swarming module based on vision
  */
 
-//#define BOARD_CONFIG "boards/bebop.h"
-
 #include "autoswarm_opencv.h"
-
+#include <computer_vision/active_random_filter.h>
 #include <math.h>					// Used for sin/cos/tan/M_PI
 #include <ctime> 					// Used to write time to results.txt
 #include <algorithm> 				// Used for min() and max()
 #include <string>					// Used for strlen
-//#include <random>
 
 extern "C" {
 #include <firmwares/rotorcraft/navigation.h>
@@ -43,49 +40,46 @@ using namespace std;
 #include <opencv2/core/core.hpp>
 #include <opencv2/imgproc/imgproc.hpp>
 using namespace cv;
-#include <computer_vision/active_random_filter.h>
 
 // Defining function that require opencv to be loaded
-static void 			identifyNeighbours	(vector<trackResults> trackRes);
-static void 			updateWaypoints 	(struct NedCoor_f *pos, vector<double> cPos, vector<double> totV);
-static vector<double> 	calcLocalVelocity	(struct NedCoor_f *pos);
-static vector<double> 	calcDiffVelocity	(void);
-static vector<double> 	calcCamPosition		(struct NedCoor_f *pos, vector<double> totV, vector<double> gi);
-static vector<double> 	calcGlobalVelocity 	(struct NedCoor_f *pos);
-static vector<double> 	limitYaw 			(struct NedCoor_f *pos, vector<double> cPos);
-static vector<double> 	limitVelocityYaw	(vector<double> totV);
-static vector<double> 	limitNorm			(vector<double> totV, double maxNorm);
-// Debug options
-#define AUTOSWARM_SHOW_WAYPOINT 		 0 		// Show the updated positions of the waypoints
-#define AUTOSWARM_SHOW_MEM			 0 		// Show the neighbours identified and their location
-
-// Runtime options
-#define AUTOSWARM_WRITE_RESULTS 		 0		// Write measurements to text file
-#define AUTOSWARM_CALIBRATE_CAM 		 0 		// Calibrate the camera
-#define AUTOSWARM_BENCHMARK 			 0 		// Print benchmark table
-#define AUTOSWARM_MEASURE_FPS 			 1 		// Measure the FPS using built-in clock and framecount
-#define AUTOSWARM_BODYFRAME 			 0 		// Fake euler angles and pos to be 0
-#define AUTOSWARM_SAVE_FRAME 			 0 		// Save a frame for post-processing
-
+static void            identifyNeighbours  (vector<trackResults> trackRes);
+static void            updateWaypoints     (struct NedCoor_f *pos, vector<double> cPos, vector<double> totV);
+static vector<double>  calcLocalVelocity   (struct NedCoor_f *pos);
+static vector<double>  calcDiffVelocity    (void);
+static vector<double>  calcCamPosition     (struct NedCoor_f *pos, vector<double> totV, vector<double> gi);
+static vector<double>  calcGlobalVelocity  (struct NedCoor_f *pos);
+static vector<double>  limitYaw            (struct NedCoor_f *pos, vector<double> cPos);
+static vector<double>  limitVelocityYaw    (vector<double> totV);
+static vector<double>  limitNorm           (vector<double> totV, double maxNorm);
 //Optional function declarations
 #if AUTOSWARM_BENCHMARK
-static void 			initBenchmark		(void);
-static void 			addBenchmark		(const char * title);
-static void 			showBenchmark		(void);
+static void            initBenchmark       (void);
+static void            addBenchmark        (const char * title);
+static void            showBenchmark       (void);
 #endif
 
+// Debug options
+#define AUTOSWARM_SHOW_WAYPOINT  0 // Show the updated positions of the waypoints
+#define AUTOSWARM_SHOW_MEM       0 // Show the neighbours identified and their location
+#define AUTOSWARM_WRITE_RESULTS  0 // Write measurements to text file
+#define AUTOSWARM_CALIBRATE_CAM  0 // Calibrate the camera
+#define AUTOSWARM_BENCHMARK      0 // Print benchmark table
+#define AUTOSWARM_MEASURE_FPS    0 // Measure the FPS using built-in clock and framecount
+#define AUTOSWARM_BODYFRAME      0 // Fake euler angles and pos to be 0
+#define AUTOSWARM_SAVE_FRAME     0 // Save a frame for post-processing
+
 // Set up swarm parameters
-int 	AUTOSWARM_MODE 				= 2; // 0: follow (deprecated), 1: look in direction of flight, 2: look in direction of global component
-double 	AUTOSWARM_SEPERATION 		= 1.75;
-double 	AUTOSWARM_E 					= 0.005; // Was 0.01x - 0.0005 at 12m/s OK (but close)
-double 	AUTOSWARM_EPS 				= 0.05;
-double 	AUTOSWARM_GLOBAL 			= 0.9;
-int    	AUTOSWARM_FPS 				= 15;
-double 	AUTOSWARM_AMAX 				= 12; 	// m/s			// 4m/s op 90% global = CRASH!
-double 	AUTOSWARM_VMAX 				= 12; 	// m/s
-double 	AUTOSWARM_YAWRATEMAX 		= 70; 	// deg/s
-int    	AUTOSWARM_MEMORY 			= 1.5; 	// seconds
-double 	AUTOSWARM_HOME 				= 0.3;
+int 	AUTOSWARM_MODE           = 2;     // 0: follow (deprecated), 1: look in direction of flight, 2: look in direction of global component
+double 	AUTOSWARM_SEPERATION     = 1.75;  // m
+double 	AUTOSWARM_E              = 0.005; // Was 0.01x - 0.0005 at 12m/s OK (but close)
+double 	AUTOSWARM_EPS            = 0.05;
+double 	AUTOSWARM_GLOBAL         = 0.9;   // % of V_MAX
+int    	AUTOSWARM_FPS            = 15;    // Frames per second
+double 	AUTOSWARM_AMAX           = 0.6;   // m/s			// 4m/s op 90% global = CRASH!
+double 	AUTOSWARM_VMAX           = 1; 	  // m/s
+double 	AUTOSWARM_YAWRATEMAX     = 70;    // deg/s
+int    	AUTOSWARM_MEMORY         = 1.5;   // seconds
+double 	AUTOSWARM_HOME           = 0.3;   // m
 
 // Set up global attractor parameters
 int 	AUTOSWARM_ATTRACTOR			= 1;
@@ -94,12 +88,12 @@ double 	AUTOSWARM_DEADZONE 			= 0.1;
 
 // Initialize parameters to be assigned during runtime
 static struct FloatEulers * eulerAngles;
-static struct NedCoor_f * 	groundSpeed;
-static struct NedCoor_f * 	pos;
-vector<memoryBlock> 	neighbourMem;
+static struct NedCoor_f *   groundSpeed;
+static struct NedCoor_f *   pos;
+static vector <memoryBlock> neighbourMem;
 
-static int 	runCount 				= 0;
-int 	maxId 						= 0;
+static int runCount = 0;
+static int maxId = 0;
 static const char * flight_blocks[] = FP_BLOCKS;
 extern uint8_t nav_block;
 extern vector<trackResults> trackRes;
@@ -334,8 +328,8 @@ vector<double> calcGlobalVelocity(struct NedCoor_f *pos)
 		double cr 	= sqrt(pow(globalOrigin.cx - pos->x, 2.0) + pow(globalOrigin.cy - pos->y, 2.0));
 		if (cr > AUTOSWARM_DEADZONE)
 		{
-			gi[0] 			= AUTOSWARM_GLOBAL * AUTOSWARM_AMAX / ((double) AUTOSWARM_FPS) * (globalOrigin.cx - pos->x) / cr;
-			gi[1] 			= AUTOSWARM_GLOBAL * AUTOSWARM_AMAX / ((double) AUTOSWARM_FPS) * (globalOrigin.cy - pos->y) / cr;
+			gi[0] 			= AUTOSWARM_GLOBAL * AUTOSWARM_AMAX * (globalOrigin.cx - pos->x) / cr;
+			gi[1] 			= AUTOSWARM_GLOBAL * AUTOSWARM_AMAX * (globalOrigin.cy - pos->y) / cr;
 			gi[2] 			= 0;
 		}else{
 			gi[0] = 0.0;
@@ -351,8 +345,8 @@ vector<double> calcGlobalVelocity(struct NedCoor_f *pos)
 		if (cr > AUTOSWARM_DEADZONE)
 		{
 			double gScalar 	= AUTOSWARM_GLOBAL * (1 - 1 / (1 + exp(4 / AUTOSWARM_SEPERATION * (cr - AUTOSWARM_SEPERATION))));
-			gi[0] 			= gScalar * AUTOSWARM_AMAX / ((double) AUTOSWARM_FPS) * (globalOrigin.cx - pos->x) / cr;
-			gi[1] 			= gScalar * AUTOSWARM_AMAX / ((double) AUTOSWARM_FPS) * (globalOrigin.cy - pos->y) / cr;
+			gi[0] 			= gScalar * AUTOSWARM_AMAX * (globalOrigin.cx - pos->x) / cr;
+			gi[1] 			= gScalar * AUTOSWARM_AMAX * (globalOrigin.cy - pos->y) / cr;
 			gi[2] 			= 0;
 		}else{
 			gi[0] = 0.0;
@@ -376,8 +370,8 @@ vector<double> calcGlobalVelocity(struct NedCoor_f *pos)
 				angle = 90 + 90 * (AUTOSWARM_CIRCLE_R - cr) / AUTOSWARM_CIRCLE_R;  // From 90 to 180 over the length of AUTOSWARM_CIRCLE_R
 			}
 			if (AUTOSWARM_ATTRACTOR != AUTOSWARM_CIRCLE_CC) 	angle = -angle; 	// Switch between cc (+) and cw (-)
-			double xContrib = AUTOSWARM_GLOBAL * AUTOSWARM_AMAX / ((double) AUTOSWARM_FPS) * (globalOrigin.cx - pos->x) / cr;
-			double yContrib = AUTOSWARM_GLOBAL * AUTOSWARM_AMAX / ((double) AUTOSWARM_FPS) * (globalOrigin.cy - pos->y) / cr;
+			double xContrib = AUTOSWARM_GLOBAL * AUTOSWARM_AMAX * (globalOrigin.cx - pos->x) / cr;
+			double yContrib = AUTOSWARM_GLOBAL * AUTOSWARM_AMAX * (globalOrigin.cy - pos->y) / cr;
 			gi[0] 			= cos(angle / 180 * M_PI) * xContrib - sin(angle / 180 * M_PI) * yContrib;
 			gi[1] 			= sin(angle / 180 * M_PI) * xContrib + cos(angle / 180 * M_PI) * yContrib;
 			gi[2] 			= 0;
@@ -396,8 +390,8 @@ vector<double> calcGlobalVelocity(struct NedCoor_f *pos)
 vector<double> calcDiffVelocity(void)
 {
 	vector<double> di(3);
-	di[0] = - AUTOSWARM_EPS * groundSpeed->x / ((double) AUTOSWARM_FPS);
-	di[1] = - AUTOSWARM_EPS * groundSpeed->y / ((double) AUTOSWARM_FPS);
+	di[0] = - AUTOSWARM_EPS * groundSpeed->x;
+	di[1] = - AUTOSWARM_EPS * groundSpeed->y;
 	di[2] = 0; //- AUTOSWARM_EPS * groundSpeed->z;
 	return di;
 }
