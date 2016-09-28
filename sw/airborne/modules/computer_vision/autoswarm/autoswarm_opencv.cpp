@@ -35,7 +35,6 @@
 
 extern "C" {
 #include <firmwares/rotorcraft/navigation.h>
-#include <subsystems/navigation/waypoints.h>
 #include <state.h>
 //#include <generated/flight_plan.h>
 }
@@ -44,7 +43,6 @@ using namespace std;
 #include <opencv2/core/core.hpp>
 #include <opencv2/imgproc/imgproc.hpp>
 using namespace cv;
-#include "modules/computer_vision/opencv_image_functions.h"
 
 // Defining function that require opencv to be loaded
 static void 			trackGreyObjects	(Mat& sourceFrame, Mat& greyFrame, vector<trackResults>* trackRes);
@@ -76,7 +74,7 @@ static bool 			inRectangle			(Point pt, Rect rectangle);
 
 // Runtime options
 #define WV_OPT_WRITE_RESULTS 		 0		// Write measurements to text file
-#define WV_OPT_MOD_VIDEO 			 0 		// Modify the frame to show relevant info
+#define WV_OPT_MOD_VIDEO 			 1 		// Modify the frame to show relevant info
 #define WV_OPT_CALIBRATE_CAM 		 0 		// Calibrate the camera
 #define WV_OPT_BENCHMARK 			 0 		// Print benchmark table
 #define WV_OPT_CV_CONTOURS 			 0 		// Use opencv to detect contours
@@ -102,10 +100,10 @@ static void 			saveBuffer			(char * img, Mat sourceFrame, const char *filename);
 #endif
 
 // Set up tracking parameters
-int 	WV_TRACK_MIN_CROP_AREA 		= 300;
+int 	WV_TRACK_MIN_CROP_AREA 		= 170;
 int 	WV_TRACK_RND_PIX_SAMPLE 	= 5000;
 int 	AUTOSWARM_MAX_LAYERS  		= 100000;
-double 	WV_TRACK_MIN_CIRCLE_SIZE 	= 260;
+double 	WV_TRACK_MIN_CIRCLE_SIZE 	= 200;
 double 	WV_TRACK_MAX_CIRCLE_DEF 	= 0.4;
 
 int 	FILTER_SAMPLE_STYLE 		= FILTER_STYLE_RANDOM;
@@ -131,8 +129,8 @@ double 	WV_SWARM_E 					= 0.005; // Was 0.01x - 0.0005 at 12m/s OK (but close)
 double 	WV_SWARM_EPS 				= 0.05;
 double 	WV_SWARM_GLOBAL 			= 0.9;
 int    	WV_SWARM_FPS 				= 15;
-double 	WV_SWARM_AMAX 				= 8; 	// m/s			// 4m/s op 90% global = CRASH!
-double 	WV_SWARM_VMAX 				= 8; 	// m/s
+double 	WV_SWARM_AMAX 				= 12; 	// m/s			// 4m/s op 90% global = CRASH!
+double 	WV_SWARM_VMAX 				= 12; 	// m/s
 double 	WV_SWARM_YAWRATEMAX 		= 70; 	// deg/s
 int    	WV_SWARM_MEMORY 			= 1.5; 	// seconds
 double 	WV_SWARM_HOME 				= 0.3;
@@ -216,7 +214,7 @@ void autoswarm_opencv_init(int globalMode)
 void autoswarm_opencv_run(char* img, int width, int height)
 {
 	// Computer vision compatibility function used to call trackObjects and (optionally) parse modified data back to rtp stream as YUV
-	if(nav_block < 3){ return; }	// Engines have not started yet, lets save some battery life and skip image processing for now
+	//if(nav_block < 3){ return; }	// Engines have not started yet, lets save some battery life and skip image processing for now
 #if WV_OPT_MEASURE_FPS
 	if(runCount > 0)
 	{

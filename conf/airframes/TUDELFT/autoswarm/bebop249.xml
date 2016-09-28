@@ -16,7 +16,7 @@
 	<define name="MT9F002_INITIAL_OFFSET_Y" value="0" />
 	<define name="MT9F002_OUTPUT_SCALER" value="1" /> <!-- 16/26 -->
 	<define name="MT9F002_TARGET_FPS" value="30" />
-	<define name="MT9F002_TARGET_EXPOSURE" value="40" /> <!-- Daylight: 10 -->
+	<define name="MT9F002_TARGET_EXPOSURE" value="0.348262" /> <!-- Daylight: 10 -->
 	<define name="MT9F002_GAIN_GREEN1" value="2.0" />
 	<define name="MT9F002_GAIN_GREEN2" value="2.0" />
 	<define name="MT9F002_X_ODD_INC_VAL" value="3" />

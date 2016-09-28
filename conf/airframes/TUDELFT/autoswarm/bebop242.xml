@@ -16,7 +16,7 @@
 	<define name="MT9F002_INITIAL_OFFSET_Y" value="0" />
 	<define name="MT9F002_OUTPUT_SCALER" value="1" /> <!-- 16/26 -->
 	<define name="MT9F002_TARGET_FPS" value="30" />
-	<define name="MT9F002_TARGET_EXPOSURE" value="40" /> <!-- Daylight: 10 -->
+	<define name="MT9F002_TARGET_EXPOSURE" value="0.348262" /> <!-- Daylight: 10 -->
 	<define name="MT9F002_GAIN_GREEN1" value="2.0" />
 	<define name="MT9F002_GAIN_GREEN2" value="2.0" />
 	<define name="MT9F002_X_ODD_INC_VAL" value="3" />
@@ -50,7 +50,6 @@
 		<define name="AUTOSWARM_CAMERA" value="front_camera" />
 		<define name="WV_INIT_GLOBAL_ATTRACTOR" value="2" />
 	</module>
-	<!-- 
 	<module name="video_rtp_stream">
 		<configure name="VIEWVIDEO_HOST" value="192.168.40.222" />
 		<configure name="VIEWVIDEO_BROADCAST" value="FALSE" />
@@ -58,7 +57,7 @@
 		<define name="VIEWVIDEO_DOWNSIZE_FACTOR" value="4" />
 		<define name="VIEWVIDEO_QUALITY_FACTOR" value="50" />
 		<define name="VIEWVIDEO_SHOT_PATH" value="/data/ftp/internal_000" />
-	</module> -->
+	</module>
 	<module name="cv_ae_awb"/>
 	<module name="logger_file">
       <define name="FILE_LOGGER_PATH" value="/data/ftp/internal_000"/>
