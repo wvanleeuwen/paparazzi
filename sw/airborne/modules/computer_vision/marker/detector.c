@@ -305,8 +305,7 @@ static struct image_t *draw_target_marker1(struct image_t* img)
                            &marker1.detected,
                            &marker1.pixel.x,
                            &marker1.pixel.y,
-                           &marker1.found_time,
-                           &marker1.mid_time);
+                           &marker1.found_time);
 
     return img;
 }

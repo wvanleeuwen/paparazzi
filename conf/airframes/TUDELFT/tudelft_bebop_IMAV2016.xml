@@ -27,8 +27,8 @@
     <module name="gps" type="optitrack"/>
     <module name="stabilization" type="indi"/>
     <module name="ahrs" type="int_cmpl_quat">
-      <configure name="USE_MAGNETOMETER" value="FALSE"/>
-      <define name="AHRS_USE_GPS_HEADING" value="TRUE"/>
+      <configure name="USE_MAGNETOMETER" value="TRUE"/>
+      <define name="AHRS_USE_GPS_HEADING" value="FALSE"/>
     </module>
     <module name="ins" type="extended"/>
   </firmware>
@@ -89,13 +89,13 @@
     <!-- /////////////////////////////////////////////////////////////////////////////////////////// -->
 
     <module name="video_rtp_stream">
-      <define name="VIEWVIDEO_CAMERA" value="bottom_camera"/>
+      <define name="VIEWVIDEO_CAMERA" value="front_camera"/>
       <define name="VIEWVIDEO_DOWNSIZE_FACTOR" value="1"/>
       <define name="VIEWVIDEO_QUALITY_FACTOR" value="60"/>
 
       <configure name="VIEWVIDEO_BROADCAST" value="FALSE"/>
-      <!--<configure name="VIEWVIDEO_HOST" value="192.168.42.68"/>-->
-      <configure name="VIEWVIDEO_HOST" value="192.168.42.30"/>
+      <configure name="VIEWVIDEO_HOST" value="192.168.42.68"/>
+      <!--<configure name="VIEWVIDEO_HOST" value="192.168.42.30"/>-->
     </module>
 
     <module name="cv_ae_awb"/>
@@ -154,7 +154,7 @@
   </section>
 
   <section name="INS" prefix="INS_">
-    <!--define name="SONAR_MAX_RANGE" value="2.2"/-->
+    <define name="SONAR_BARO_THRESHOLD" value="2.5"/>
     <define name="SONAR_UPDATE_ON_AGL" value="TRUE"/>
     <!--define name="USE_HFF"/-->
     <define name ="INT_GPS_ID" value="ABI_DISABLE"/>
@@ -195,24 +195,23 @@
     <!--<define name="G1_R" value="0.001564"/>-->
     <!--<define name="G2_R" value="0.055332"/>-->
 
-    <!-- bebop normal (Other Wilco's drone) -->
-    <!--<define name="G1_P" value="0.029458"/>-->
-    <!--<define name="G1_Q" value="0.027468"/>-->
-    <!--<define name="G1_R" value="0.000986"/>-->
-    <!--<define name="G2_R" value="0.071307"/>-->
+    <!-- bebop TUBB05 (no legs, no bumpers) -->
+    <!--<define name="G1_P" value="0.063"/>-->
+    <!--<define name="G1_Q" value="0.044"/>-->
+    <!--<define name="G1_R" value="0.0022"/>-->
+    <!--<define name="G2_R" value="0.14"/>-->
 
-     <!--&lt;!&ndash;bebop normal &ndash;&gt;-->
+    <!-- bebop TUBB05 (no legs, with bumpers) -->
+    <define name="G1_P" value="0.057"/>
+    <define name="G1_Q" value="0.042"/>
+    <define name="G1_R" value="0.0020"/>
+    <define name="G2_R" value="0.12"/>
+
+    <!--&lt;!&ndash;bebop normal &ndash;&gt;-->
     <!--<define name="G1_P" value="0.056419"/>-->
     <!--<define name="G1_Q" value="0.033347"/>-->
     <!--<define name="G1_R" value="0.002401"/>-->
     <!--<define name="G2_R" value="0.154231"/>-->
-
-    <!--bebop normal red -->
-    <define name="G1_P" value="0.034276"/>
-    <define name="G1_Q" value="0.027164"/>
-    <define name="G1_R" value="0.001052"/>
-    <define name="G2_R" value="0.092951"/>
-
 
     <!-- bebop legs -->
     <!--<define name="G1_P" value="0.026041"/>-->
@@ -246,11 +245,11 @@
   </section>
 
   <section name="GUIDANCE_V" prefix="GUIDANCE_V_">
-    <define name="HOVER_KP" value="2000"/>
-    <define name="HOVER_KD" value="450"/>
+    <define name="HOVER_KP" value="500"/>
+    <define name="HOVER_KD" value="150"/>
     <define name="HOVER_KI" value="0"/>
     <define name="NOMINAL_HOVER_THROTTLE" value="0.55"/>
-    <!--define name="ADAPT_THROTTLE_ENABLED" value="TRUE"/-->
+    <define name="ADAPT_THROTTLE_ENABLED" value="TRUE"/>
   </section>
 
   <section name="GUIDANCE_H" prefix="GUIDANCE_H_">

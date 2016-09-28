@@ -28,6 +28,8 @@
 
 #include <std.h>
 
+extern bool marker_lost;
+
 // Module functions
 void flight_plan_guided_init(void);
 
