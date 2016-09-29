@@ -88,15 +88,15 @@
 
     <!-- /////////////////////////////////////////////////////////////////////////////////////////// -->
 
-    <module name="video_rtp_stream">
-      <define name="VIEWVIDEO_CAMERA" value="bottom_camera"/>
-      <define name="VIEWVIDEO_DOWNSIZE_FACTOR" value="1"/>
-      <define name="VIEWVIDEO_QUALITY_FACTOR" value="60"/>
+    <!--<module name="video_rtp_stream">-->
+      <!--<define name="VIEWVIDEO_CAMERA" value="bottom_camera"/>-->
+      <!--<define name="VIEWVIDEO_DOWNSIZE_FACTOR" value="1"/>-->
+      <!--<define name="VIEWVIDEO_QUALITY_FACTOR" value="60"/>-->
 
-      <configure name="VIEWVIDEO_BROADCAST" value="FALSE"/>
-      <!--<configure name="VIEWVIDEO_HOST" value="192.168.42.68"/>-->
-      <configure name="VIEWVIDEO_HOST" value="192.168.42.30"/>
-    </module>
+      <!--<configure name="VIEWVIDEO_BROADCAST" value="FALSE"/>-->
+      <!--&lt;!&ndash;<configure name="VIEWVIDEO_HOST" value="192.168.42.68"/>&ndash;&gt;-->
+      <!--<configure name="VIEWVIDEO_HOST" value="192.168.42.30"/>-->
+    <!--</module>-->
 
     <module name="cv_ae_awb"/>
 
@@ -190,10 +190,10 @@
 
   <section name="STABILIZATION_ATTITUDE_INDI" prefix="STABILIZATION_INDI_">
     <!--&lt;!&ndash; control effectiveness with gripper and legs &ndash;&gt;-->
-    <!--<define name="G1_P" value="0.034"/>-->
-    <!--<define name="G1_Q" value="0.012867"/>-->
-    <!--<define name="G1_R" value="0.001564"/>-->
-    <!--<define name="G2_R" value="0.055332"/>-->
+    <!--<define name="G1_P" value="0.01848"/>-->
+    <!--<define name="G1_Q" value="0.010655"/>-->
+    <!--<define name="G1_R" value="0.001678"/>-->
+    <!--<define name="G2_R" value="0.067948"/>-->
 
     <!-- bebop normal (Other Wilco's drone) -->
     <!--<define name="G1_P" value="0.029458"/>-->
@@ -208,17 +208,16 @@
     <!--<define name="G2_R" value="0.154231"/>-->
 
     <!--bebop normal red -->
-    <define name="G1_P" value="0.034276"/>
-    <define name="G1_Q" value="0.027164"/>
-    <define name="G1_R" value="0.001052"/>
-    <define name="G2_R" value="0.092951"/>
+    <!--<define name="G1_P" value="0.034276"/>-->
+    <!--<define name="G1_Q" value="0.027164"/>-->
+    <!--<define name="G1_R" value="0.001052"/>-->
+    <!--<define name="G2_R" value="0.092951"/>-->
 
-
-    <!-- bebop legs -->
-    <!--<define name="G1_P" value="0.026041"/>-->
-    <!--<define name="G1_Q" value="0.022646"/>-->
-    <!--<define name="G1_R" value="0.001148"/>-->
-    <!--<define name="G2_R" value="0.094271"/>-->
+    <!--bebop legs ver2-->
+    <define name="G1_P" value="0.014813"/>
+    <define name="G1_Q" value="0.012648"/>
+    <define name="G1_R" value="0.001221"/>
+    <define name="G2_R" value="0.091957"/>
 
 
     <!-- reference acceleration for attitude control -->

@@ -33,6 +33,7 @@ struct SonarBebop {
   uint16_t meas;          ///< Raw ADC value
   uint16_t offset;        ///< Sonar offset in ADC units
   float distance;         ///< Distance measured in meters
+  float current_alg;       ///< Altitude above ground measured in meters
 };
 
 extern struct SonarBebop sonar_bebop;
