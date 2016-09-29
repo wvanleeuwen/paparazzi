@@ -70,8 +70,8 @@ static uint8_t get_index_from_offset(uint8_t index, int8_t offset, uint8_t limit
   return (index - offset + limit) % limit;
 }
 
-#define SLOPE_THRESH 10.        // gradient threshold for outlier detections [m/s]
-#define OBSTACLE_ACCEPTANCE 2   // number of outliers before it is accepted as an obstacle
+#define SLOPE_THRESH 5.        // gradient threshold for outlier detections [m/s]
+#define OBSTACLE_ACCEPTANCE 8   // number of outliers before it is accepted as an obstacle
 #define DT 0.01                 // sample period of sensor (100 Hz)
 
 
@@ -91,6 +91,8 @@ static void *sonar_bebop_read(void *data __attribute__((unused))) {
     static uint8_t curr_meas_index = 0;
     static bool outlier_detected = false;
     static int k_outliers = 0;
+    static int sonar_diff_pos = 0;
+    static int sonar_diff_neg = 0;
 
     /* Start ADC and send sonar output */
     adc_enable(&adc0, 1);
@@ -137,36 +139,41 @@ static void *sonar_bebop_read(void *data __attribute__((unused))) {
 
     sonar_bebop.distance = peek_distance / 1000.0;
 
-//    increment_circular_index(&curr_meas_index, OBSTACLE_ACCEPTANCE);
-//    prev_meas_distances[curr_meas_index] = sonar_bebop.distance;
 
-    if ( fabs(sonar_bebop.distance - prev_sent_distance) / ((k_outliers + 1) * DT) > SLOPE_THRESH) {
+    float sonar_diff = (sonar_bebop.distance - prev_sent_distance);
+    if ( fabs(sonar_diff) / ((k_outliers + 1) * DT) > SLOPE_THRESH) {
       // sharp outlier detected, track to determine if noise or obstacle
       outlier_detected = true;
       k_outliers++;
-    } /*else if (fabs(sonar_bebop.distance - prev_meas_distances[get_index_from_offset(curr_meas_index, 1 - OBSTACLE_ACCEPTANCE, OBSTACLE_ACCEPTANCE)])
-        / ((OBSTACLE_ACCEPTANCE - 1) * DT) > SLOPE_THRESH && outlier_detected == false) {
-      // found gentle height shoulder which breaks gradient threshold
-      k_outliers = OBSTACLE_ACCEPTANCE;
-    } */else {
+
+      //Find the sign convention of difference
+      if (sonar_diff > 0) {
+        sonar_diff_pos++;
+      }
+      else{
+        sonar_diff_neg++;
+      }
+
+    }
+    else {
       // no noise or new obstacle
       outlier_detected = false;
       k_outliers = 0;
+      sonar_diff_pos = 0;
+      sonar_diff_neg = 0;
     }
 
     // Analyse new data point for outlier and obstacle identification
-    if (k_outliers >= OBSTACLE_ACCEPTANCE) {
+    if ( (k_outliers >= OBSTACLE_ACCEPTANCE) && ( (sonar_diff_pos >= OBSTACLE_ACCEPTANCE-1) || (sonar_diff_neg >= OBSTACLE_ACCEPTANCE-1) ) ) {
       outlier_detected = false;
       k_outliers = 0;
+      sonar_diff_pos = 0;
+      sonar_diff_neg = 0;
       current_obstacle_height += prev_sent_distance - sonar_bebop.distance;    // use average from prev_distance
       // assume small obstacles are just the ground, this will help reset any errors in the obstacle height estimation
       if (fabs(current_obstacle_height) < 0.1) {
         current_obstacle_height = 0.;
       }
-      // reset previous distances
-//      for(i = 0; i < OBSTACLE_ACCEPTANCE; i++){
-//        prev_meas_distances[i] = sonar_bebop.distance;
-//      }
     }
 
 
