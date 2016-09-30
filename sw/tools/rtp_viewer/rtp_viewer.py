@@ -72,7 +72,7 @@ class RtpViewer:
             self.mouse['start'] = None
 
     def on_mouse(self, event, x, y, flags, param):
-        if event == cv2.EVENT_LBUTTONDOWN and self.rotate == 0:
+        if event == cv2.EVENT_LBUTTONDOWN and self.rotate == 0 and False:
             self.mouse['start'] = (x, y)
 
         if event == cv2.EVENT_RBUTTONDOWN:
@@ -110,7 +110,9 @@ class RtpViewer:
 
 
 if __name__ == '__main__':
-    viewer = RtpViewer("rtp_stream.sdp")
+    import sys
+
+    viewer = RtpViewer(sys.argv[1])
 
     if not viewer.cap.isOpened():
         viewer.cleanup()

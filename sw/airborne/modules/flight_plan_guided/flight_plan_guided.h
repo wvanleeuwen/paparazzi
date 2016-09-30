@@ -28,6 +28,8 @@
 
 #include <std.h>
 
+extern bool marker_lost;
+
 // Module functions
 void flight_plan_guided_init(void);
 
@@ -45,8 +47,8 @@ extern bool TakeOff(float climb_rate);
 extern bool WaitUntilAltitude(float altitude);
 extern bool Land(float end_altitude);
 
-void marker_detection_periodic(void);
 bool bucket_heading_change(void);
 bool bucket_approach(void);
+bool bucket_center(void);
 
 #endif

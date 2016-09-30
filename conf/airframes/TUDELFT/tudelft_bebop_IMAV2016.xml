@@ -7,9 +7,9 @@
     <target name="ap" board="bebop"/>
 
     <define name="MT9F002_OUTPUT_HEIGHT" value="640" />  <!-- full height 4608 -->
-    <define name="MT9F002_OUTPUT_WIDTH" value="480" />  <!-- full width 2592 (3288) -->
+    <define name="MT9F002_OUTPUT_WIDTH" value="640" />  <!-- full width 2592 (3288) -->
     <define name="MT9F002_INITIAL_OFFSET_Y" value="384" />
-    <define name="MT9F002_INITIAL_OFFSET_X" value="1216" />
+    <define name="MT9F002_INITIAL_OFFSET_X" value="512" />
     <!--<define name="MT9F002_INITIAL_OFFSET_X" value="1280" />-->
     <define name="MT9F002_X_ODD_INC_VAL" value="7" /> <!-- downsize x4 -->
     <define name="MT9F002_Y_ODD_INC_VAL" value="7" />
@@ -27,8 +27,8 @@
     <module name="gps" type="optitrack"/>
     <module name="stabilization" type="indi"/>
     <module name="ahrs" type="int_cmpl_quat">
-      <configure name="USE_MAGNETOMETER" value="FALSE"/>
-      <define name="AHRS_USE_GPS_HEADING" value="TRUE"/>
+      <configure name="USE_MAGNETOMETER" value="TRUE"/>
+      <define name="AHRS_USE_GPS_HEADING" value="FALSE"/>
     </module>
     <module name="ins" type="extended"/>
   </firmware>
@@ -57,7 +57,6 @@
       <define name="OPTICFLOW_DEROTATION_CORRECTION_FACTOR_X" value="0.8"/> <!--Obtained from a linefit-->
       <define name="OPTICFLOW_DEROTATION_CORRECTION_FACTOR_Y" value="0.85"/> <!--Obtained from a linefit-->
     </module>
-
 
     <module name="cv_marker_detection">
       <define name="DETECTOR_CAMERA1" value="bottom_camera"/>
@@ -88,15 +87,16 @@
 
     <!-- /////////////////////////////////////////////////////////////////////////////////////////// -->
 
-    <!--<module name="video_rtp_stream">-->
-      <!--<define name="VIEWVIDEO_CAMERA" value="bottom_camera"/>-->
-      <!--<define name="VIEWVIDEO_DOWNSIZE_FACTOR" value="1"/>-->
-      <!--<define name="VIEWVIDEO_QUALITY_FACTOR" value="60"/>-->
+    <module name="video_rtp_stream">
+      <define name="VIEWVIDEO_CAMERA" value="bottom_camera"/>
+      <define name="VIEWVIDEO_CAMERA2" value="front_camera"/>
 
-      <!--<configure name="VIEWVIDEO_BROADCAST" value="FALSE"/>-->
-      <!--&lt;!&ndash;<configure name="VIEWVIDEO_HOST" value="192.168.42.68"/>&ndash;&gt;-->
-      <!--<configure name="VIEWVIDEO_HOST" value="192.168.42.30"/>-->
-    <!--</module>-->
+      <define name="VIEWVIDEO_DOWNSIZE_FACTOR" value="1"/>
+      <define name="VIEWVIDEO_QUALITY_FACTOR" value="60"/>
+
+      <configure name="VIEWVIDEO_BROADCAST" value="FALSE"/>
+      <configure name="VIEWVIDEO_HOST" value="192.168.42.68"/>
+    </module>
 
     <module name="cv_ae_awb"/>
 
@@ -154,7 +154,7 @@
   </section>
 
   <section name="INS" prefix="INS_">
-    <!--define name="SONAR_MAX_RANGE" value="2.2"/-->
+    <define name="SONAR_BARO_THRESHOLD" value="2.5"/>
     <define name="SONAR_UPDATE_ON_AGL" value="TRUE"/>
     <!--define name="USE_HFF"/-->
     <define name ="INT_GPS_ID" value="ABI_DISABLE"/>
@@ -189,42 +189,30 @@
   </section>
 
   <section name="STABILIZATION_ATTITUDE_INDI" prefix="STABILIZATION_INDI_">
-    <!--&lt;!&ndash; control effectiveness with gripper and legs &ndash;&gt;-->
-    <!--<define name="G1_P" value="0.01848"/>-->
-    <!--<define name="G1_Q" value="0.010655"/>-->
-    <!--<define name="G1_R" value="0.001678"/>-->
-    <!--<define name="G2_R" value="0.067948"/>-->
 
-    <!-- bebop normal (Other Wilco's drone) -->
-    <!--<define name="G1_P" value="0.029458"/>-->
-    <!--<define name="G1_Q" value="0.027468"/>-->
-    <!--<define name="G1_R" value="0.000986"/>-->
-    <!--<define name="G2_R" value="0.071307"/>-->
+    <!-- bebop TUBB05 (no legs, no bumpers) -->
+    <!--<define name="G1_P" value="0.063"/>-->
+    <!--<define name="G1_Q" value="0.044"/>-->
+    <!--<define name="G1_R" value="0.0022"/>-->
+    <!--<define name="G2_R" value="0.14"/>-->
 
-     <!--&lt;!&ndash;bebop normal &ndash;&gt;-->
-    <!--<define name="G1_P" value="0.056419"/>-->
-    <!--<define name="G1_Q" value="0.033347"/>-->
-    <!--<define name="G1_R" value="0.002401"/>-->
-    <!--<define name="G2_R" value="0.154231"/>-->
+    <!-- bebop TUBB05 (no legs, with bumpers) -->
+    <define name="G1_P" value="0.057"/>
+    <define name="G1_Q" value="0.042"/>
+    <define name="G1_R" value="0.0020"/>
+    <define name="G2_R" value="0.12"/>
 
-    <!--bebop normal red -->
-    <!--<define name="G1_P" value="0.034276"/>-->
-    <!--<define name="G1_Q" value="0.027164"/>-->
-    <!--<define name="G1_R" value="0.001052"/>-->
-    <!--<define name="G2_R" value="0.092951"/>-->
+    <!-- bebop TUBB04 (steel legs) -->
+    <!--<define name="G1_P" value="0.01304"/>-->
+    <!--<define name="G1_Q" value="0.00976"/>-->
+    <!--<define name="G1_R" value="0.00443"/>-->
+    <!--<define name="G2_R" value="0.01448"/>-->
 
-    <!--tubb05 bebop legs ver1-->
-    <define name="G1_P" value="0.036052"/>
-    <define name="G1_Q" value="0.021228"/>
-    <define name="G1_R" value="0.002187"/>
-    <define name="G2_R" value="0.127996"/>
-
-    <!--bebop legs ver2-->
-    <!--<define name="G1_P" value="0.014813"/>-->
-    <!--<define name="G1_Q" value="0.012648"/>-->
-    <!--<define name="G1_R" value="0.001221"/>-->
-    <!--<define name="G2_R" value="0.091957"/>-->
-
+    <!-- bebop TUBB05 (plastic legs) -->
+    <!--<define name="G1_P" value="0.036052"/>-->
+    <!--<define name="G1_Q" value="0.021228"/>-->
+    <!--<define name="G1_R" value="0.002187"/>-->
+    <!--<define name="G2_R" value="0.127996"/>-->
 
     <!-- reference acceleration for attitude control -->
     <define name="REF_ERR_P" value="600.0"/>
@@ -255,7 +243,7 @@
     <define name="HOVER_KD" value="450"/>
     <define name="HOVER_KI" value="0"/>
     <define name="NOMINAL_HOVER_THROTTLE" value="0.55"/>
-    <!--define name="ADAPT_THROTTLE_ENABLED" value="TRUE"/-->
+    <!--<define name="ADAPT_THROTTLE_ENABLED" value="TRUE"/>-->
   </section>
 
   <section name="GUIDANCE_H" prefix="GUIDANCE_H_">

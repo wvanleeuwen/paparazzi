@@ -103,6 +103,7 @@ PRINT_CONFIG_VAR(VIEWVIDEO_FPS)
 PRINT_CONFIG_MSG("[viewvideo] Using netcat.")
 #else
 struct UdpSocket video_sock;
+struct UdpSocket video_sock2;
 PRINT_CONFIG_MSG("[viewvideo] Using RTP/UDP stream.")
 PRINT_CONFIG_VAR(VIEWVIDEO_USE_RTP)
 #endif
@@ -125,8 +126,19 @@ struct viewvideo_t viewvideo = {
  * Handles all the video streaming and saving of the image shots
  * This is a sepereate thread, so it needs to be thread safe!
  */
-struct image_t *viewvideo_function(struct image_t *img);
-struct image_t *viewvideo_function(struct image_t *img)
+struct image_t *viewvideo_function(struct UdpSocket *socket, struct image_t *img);
+
+static struct image_t *viewvideo_function1(struct image_t *img) {
+  viewvideo_function(&video_sock, img);
+  return NULL;
+}
+
+static struct image_t *viewvideo_function2(struct image_t *img) {
+  viewvideo_function(&video_sock2, img);
+  return NULL;
+}
+
+struct image_t *viewvideo_function(struct UdpSocket *socket, struct image_t *img)
 {
   // Resize image if needed
   struct image_t img_small;
@@ -181,7 +193,7 @@ struct image_t *viewvideo_function(struct image_t *img)
 
       // Send image with RTP
       rtp_frame_send(
-        &video_sock,              // UDP socket
+        socket,              // UDP socket
         &img_jpeg,
         0,                        // Format 422
         VIEWVIDEO_QUALITY_FACTOR, // Jpeg-Quality
@@ -214,8 +226,11 @@ void viewvideo_init(void)
 {
   char save_name[512];
 
-  struct video_listener *listener = cv_add_to_device_async(&VIEWVIDEO_CAMERA, viewvideo_function, VIEWVIDEO_NICE_LEVEL);
+  struct video_listener *listener = cv_add_to_device_async(&VIEWVIDEO_CAMERA, viewvideo_function1, VIEWVIDEO_NICE_LEVEL);
   listener->maximum_fps = VIEWVIDEO_FPS;
+
+  struct video_listener *listener2 = cv_add_to_device_async(&VIEWVIDEO_CAMERA2, viewvideo_function2, VIEWVIDEO_NICE_LEVEL);
+  listener2->maximum_fps = VIEWVIDEO_FPS;
 
   viewvideo.is_streaming = true;
 
@@ -238,6 +253,7 @@ void viewvideo_init(void)
 #else
   // Open udp socket
   udp_socket_create(&video_sock, STRINGIFY(VIEWVIDEO_HOST), VIEWVIDEO_PORT_OUT, -1, VIEWVIDEO_BROADCAST);
+  udp_socket_create(&video_sock2, STRINGIFY(VIEWVIDEO_HOST), 6000, -1, VIEWVIDEO_BROADCAST);
 
   // Create an SDP file for the streaming
   sprintf(save_name, "%s/stream.sdp", STRINGIFY(VIEWVIDEO_SHOT_PATH));
