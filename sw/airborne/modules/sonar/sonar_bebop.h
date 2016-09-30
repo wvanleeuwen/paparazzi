@@ -30,6 +30,9 @@
 #include "std.h"
 
 struct SonarBebop {
+  uint32_t slope_threshold;
+  uint32_t obstacle_slope_threshold;
+  uint32_t obstacle_acceptance_threshold;
   uint16_t meas;          ///< Raw ADC value
   uint16_t offset;        ///< Sonar offset in ADC units
   float distance;         ///< Distance measured in meters

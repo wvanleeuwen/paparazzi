@@ -36,6 +36,14 @@
 #include "state.h"
 #endif
 
+#ifndef SONAR_BEBOP_SLOPE_THRES_OBS
+#define SONAR_BEBOP_SLOPE_THRESH_OBS 6.        // gradient threshold for outlier detections when trying to hold altitude [m/s]
+#endif
+#define SONAR_BEBOP_SLOPE_THRESH 6.        // gradient threshold for outlier detections when changing altitude [m/s]
+#define SONAR_BEBOP_OBSTACLE_ACCEPTANCE 4   // number of outliers before it is accepted as an obstacle
+#define DT 0.01                 // sample period of sensor (100 Hz)
+
+
 static bool obstacle_mode = false;
 
 
@@ -57,6 +65,9 @@ void sonar_bebop_init(void) {
   sonar_bebop_spi_t.input_buf = NULL;
   sonar_bebop_spi_t.input_length = 0;
   sonar_bebop.current_alg = 0;
+  sonar_bebop.obstacle_slope_threshold = SONAR_BEBOP_SLOPE_THRESH_OBS;
+  sonar_bebop.slope_threshold = SONAR_BEBOP_SLOPE_THRESH;
+  sonar_bebop.obstacle_acceptance_threshold = SONAR_BEBOP_OBSTACLE_ACCEPTANCE;
 
   int rc = pthread_create(&sonar_bebop_thread, NULL, sonar_bebop_read, NULL);
   if (rc < 0) {
@@ -82,11 +93,6 @@ void sonar_obstacle_detect_off(void)
 }
 
 
-#define SLOPE_THRESH_OBS 6.        // gradient threshold for outlier detections when trying to hold altitude [m/s]
-#define SLOPE_THRESH 6.        // gradient threshold for outlier detections when changing altitude [m/s]
-#define OBSTACLE_ACCEPTANCE 4   // number of outliers before it is accepted as an obstacle
-#define DT 0.01                 // sample period of sensor (100 Hz)
-
 
 /**
  * Read ADC value to update sonar measurement
@@ -100,7 +106,7 @@ static void *sonar_bebop_read(void *data __attribute__((unused))) {
     uint16_t adc_buffer[8192];
     static float current_obstacle_height = 0.;
     static float prev_sent_distance = 0.;
-    static float prev_meas_distances[OBSTACLE_ACCEPTANCE] = {0.};
+//    static float prev_meas_distances[sonar_bebop.obstacle_acceptance_threshold] = {0.};
     static uint8_t curr_meas_index = 0;
     static bool outlier_detected = false;
     static int k_outliers = 0;
@@ -154,7 +160,7 @@ static void *sonar_bebop_read(void *data __attribute__((unused))) {
 
     if (obstacle_mode == true) {
       float sonar_diff = (sonar_bebop.distance - prev_sent_distance);
-      if (fabs(sonar_diff) / ((k_outliers + 1) * DT) > SLOPE_THRESH_OBS) {
+      if (fabs(sonar_diff) / ((k_outliers + 1) * DT) > sonar_bebop.obstacle_slope_threshold) {
         // sharp outlier detected, track to determine if noise or obstacle
         outlier_detected = true;
         k_outliers++;
@@ -177,8 +183,8 @@ static void *sonar_bebop_read(void *data __attribute__((unused))) {
       }
 
       // Analyse new data point for outlier and obstacle identification
-      if ((k_outliers >= OBSTACLE_ACCEPTANCE) &&
-          ((sonar_diff_pos >= OBSTACLE_ACCEPTANCE - 1) || (sonar_diff_neg >= OBSTACLE_ACCEPTANCE - 1))) {
+      if ((k_outliers >= sonar_bebop.obstacle_acceptance_threshold) &&
+          ((sonar_diff_pos >= sonar_bebop.obstacle_acceptance_threshold - 1) || (sonar_diff_neg >= sonar_bebop.obstacle_acceptance_threshold - 1))) {
         outlier_detected = false;
         k_outliers = 0;
         sonar_diff_pos = 0;
@@ -194,7 +200,7 @@ static void *sonar_bebop_read(void *data __attribute__((unused))) {
     {
       current_obstacle_height = 0;
       float sonar_diff = (sonar_bebop.distance - prev_sent_distance);
-      if (fabs(sonar_diff) / ((k_outliers + 1) * DT) > SLOPE_THRESH) {
+      if (fabs(sonar_diff) / ((k_outliers + 1) * DT) > sonar_bebop.slope_threshold) {
         // sharp outlier detected, noise
         outlier_detected = true;
         k_outliers++;

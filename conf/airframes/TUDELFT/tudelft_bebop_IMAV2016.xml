@@ -213,11 +213,17 @@
     <!--<define name="G1_R" value="0.001052"/>-->
     <!--<define name="G2_R" value="0.092951"/>-->
 
+    <!--tubb05 bebop legs ver1-->
+    <define name="G1_P" value="0.036052"/>
+    <define name="G1_Q" value="0.021228"/>
+    <define name="G1_R" value="0.002187"/>
+    <define name="G2_R" value="0.127996"/>
+
     <!--bebop legs ver2-->
-    <define name="G1_P" value="0.014813"/>
-    <define name="G1_Q" value="0.012648"/>
-    <define name="G1_R" value="0.001221"/>
-    <define name="G2_R" value="0.091957"/>
+    <!--<define name="G1_P" value="0.014813"/>-->
+    <!--<define name="G1_Q" value="0.012648"/>-->
+    <!--<define name="G1_R" value="0.001221"/>-->
+    <!--<define name="G2_R" value="0.091957"/>-->
 
 
     <!-- reference acceleration for attitude control -->

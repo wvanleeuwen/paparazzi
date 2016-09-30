@@ -41,22 +41,24 @@
 
     <block name="TakeOff">
       <call_once fun="sonar_obstacle_detect_off()"/>
-      <!--<call fun="StartEngines()"/>-->
-      <call fun="Hover(1.5)"/>
+      <call fun="StartEngines()"/>
+      <call fun="TakeOff(0.1)"/>
+      <call fun="WaitUntilAltitude(1)"/>
+
       <!--<call fun="RotateToHeading(0)"/> &lt;!&ndash; not yet working &ndash;&gt;-->
     </block>
 
      <!--Hover at the current location-->
     <block name="Hover">
       <call_once fun="sonar_obstacle_detect_on()"/>
-      <call fun="Hover(2.5)"/>
+      <call fun="Hover(1)"/>
       <while cond="1"/>
 
       <!--This is for bucket-->
-      <!--<exception cond="marker1.mid && marker1.mid_time > 2" deroute="Experimental Landing"/>-->
+      <exception cond="marker1.mid && marker1.mid_time > 2" deroute="Experimental Landing"/>
 
       <!--This is for landing-->
-      <exception cond="marker1.mid && marker1.mid_time > 1.0" deroute="Experimental Landing"/>
+      <!--<exception cond="marker1.mid && marker1.mid_time > 1.0" deroute="Experimental Landing"/>-->
 
     </block>
 
@@ -92,7 +94,7 @@
     <block name="Detect Landing Pad">
       <call_once fun="detector_locate_helipad()"/>
       <!--This is only for testing-->
-      <call_once fun="sonar_obstacle_detect_on()"/>
+      <!--<call_once fun="sonar_obstacle_detect_on()"/>-->
 
       <while cond="1"/>
     </block>
@@ -100,7 +102,7 @@
     <block name="Detect Bucket">
       <call_once fun="detector_locate_bucket()"/>
       <!--This is only for testing-->
-      <call_once fun="sonar_obstacle_detect_off()"/>
+      <!--<call_once fun="sonar_obstacle_detect_off()"/>-->
       <while cond="1"/>
     </block>
 
