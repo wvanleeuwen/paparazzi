@@ -238,7 +238,7 @@ bool bucket_center(void) {
 
       struct EnuCoor_f *speed = stateGetSpeedEnu_f();
 
-      if (marker1.found_time > 2 && marker1.mid && abs(speed->x) < 0.5 && abs(speed->y) < 0.5) {
+      if (marker1.found_time > 5 && marker1.mid && abs(speed->x) < 0.1 && abs(speed->y) < 0.1) {
         return false;
       }
 
