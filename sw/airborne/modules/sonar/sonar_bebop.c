@@ -75,14 +75,6 @@ void sonar_bebop_init(void) {
   }
 }
 
-static void increment_circular_index(uint8_t *index, uint8_t limit){
-  *index = (*index + 1) % limit;
-}
-
-static uint8_t get_index_from_offset(uint8_t index, int8_t offset, uint8_t limit){
-  return (index - offset + limit) % limit;
-}
-
 void sonar_obstacle_detect_on(void)
 {
   obstacle_mode = true;
@@ -107,7 +99,6 @@ static void *sonar_bebop_read(void *data __attribute__((unused))) {
     static float current_obstacle_height = 0.;
     static float prev_sent_distance = 0.;
 //    static float prev_meas_distances[sonar_bebop.obstacle_acceptance_threshold] = {0.};
-    static uint8_t curr_meas_index = 0;
     static bool outlier_detected = false;
     static int k_outliers = 0;
     static int sonar_diff_pos = 0;
