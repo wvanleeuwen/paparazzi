@@ -46,13 +46,17 @@
       <while cond="1"/>
     </block>
 
-    <block name="TakeOff">
+    <block name="Take off">
       <call_once fun="sonar_obstacle_detect_off()"/>
       <call fun="StartEngines()"/>
       <call fun="TakeOff(0.1)"/>
       <call fun="WaitUntilAltitude(1)"/>
+    </block>
 
-      <!--<call fun="RotateToHeading(0)"/> &lt;!&ndash; not yet working &ndash;&gt;-->
+    <block name="Hover 2 sec">
+      <call_once fun="sonar_obstacle_detect_on()"/>
+      <call fun="Hover(1.5)"/>
+      <while cond="2 > block_time"/>
     </block>
 
     <block name="Find bucket">
