@@ -58,7 +58,6 @@
       <define name="OPTICFLOW_DEROTATION_CORRECTION_FACTOR_Y" value="0.85"/> <!--Obtained from a linefit-->
     </module>
 
-
     <module name="cv_marker_detection">
       <define name="DETECTOR_CAMERA1" value="bottom_camera"/>
       <define name="DETECTOR_CAMERA2" value="front_camera"/>
@@ -204,11 +203,16 @@
     <define name="G2_R" value="0.12"/>
 
     <!-- bebop TUBB04 (steel legs) -->
-    <!--<define name="G1_P" value="0.0148"/>-->
-    <!--<define name="G1_Q" value="0.0126"/>-->
-    <!--<define name="G1_R" value="0.0012"/>-->
-    <!--<define name="G2_R" value="0.092"/>-->
+    <!--<define name="G1_P" value="0.01304"/>-->
+    <!--<define name="G1_Q" value="0.00976"/>-->
+    <!--<define name="G1_R" value="0.00443"/>-->
+    <!--<define name="G2_R" value="0.01448"/>-->
 
+    <!-- bebop TUBB05 (plastic legs) -->
+    <!--<define name="G1_P" value="0.036052"/>-->
+    <!--<define name="G1_Q" value="0.021228"/>-->
+    <!--<define name="G1_R" value="0.002187"/>-->
+    <!--<define name="G2_R" value="0.127996"/>-->
 
     <!-- reference acceleration for attitude control -->
     <define name="REF_ERR_P" value="600.0"/>

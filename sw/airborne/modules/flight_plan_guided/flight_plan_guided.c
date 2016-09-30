@@ -139,7 +139,7 @@ bool Land(float end_altitude) {
 }
 
 static int BUCKET_HEADING_MARGIN = 60;  // px
-static int BUCKET_HEADING_RATE = 1; // rad/s
+static float BUCKET_HEADING_RATE = 0.5; // rad/s
 
 bool bucket_heading_change(void) {
   if (autopilot_mode != AP_MODE_GUIDED) { return true; }
