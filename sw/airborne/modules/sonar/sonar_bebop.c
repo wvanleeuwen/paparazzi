@@ -36,6 +36,8 @@
 #include "state.h"
 #endif
 
+static bool obstacle_mode = false;
+
 
 struct SonarBebop sonar_bebop;
 static uint8_t sonar_bebop_spi_d[16] = {0xF0, 0xF0, 0xF0, 0xF0, 0xF0, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
@@ -70,8 +72,19 @@ static uint8_t get_index_from_offset(uint8_t index, int8_t offset, uint8_t limit
   return (index - offset + limit) % limit;
 }
 
-#define SLOPE_THRESH 5.        // gradient threshold for outlier detections [m/s]
-#define OBSTACLE_ACCEPTANCE 8   // number of outliers before it is accepted as an obstacle
+void sonar_obstacle_detect_on(void)
+{
+  obstacle_mode = true;
+}
+void sonar_obstacle_detect_off(void)
+{
+  obstacle_mode = false;
+}
+
+
+#define SLOPE_THRESH_OBS 6.        // gradient threshold for outlier detections when trying to hold altitude [m/s]
+#define SLOPE_THRESH 6.        // gradient threshold for outlier detections when changing altitude [m/s]
+#define OBSTACLE_ACCEPTANCE 4   // number of outliers before it is accepted as an obstacle
 #define DT 0.01                 // sample period of sensor (100 Hz)
 
 
@@ -139,40 +152,57 @@ static void *sonar_bebop_read(void *data __attribute__((unused))) {
 
     sonar_bebop.distance = peek_distance / 1000.0;
 
+    if (obstacle_mode == true) {
+      float sonar_diff = (sonar_bebop.distance - prev_sent_distance);
+      if (fabs(sonar_diff) / ((k_outliers + 1) * DT) > SLOPE_THRESH_OBS) {
+        // sharp outlier detected, track to determine if noise or obstacle
+        outlier_detected = true;
+        k_outliers++;
 
-    float sonar_diff = (sonar_bebop.distance - prev_sent_distance);
-    if ( fabs(sonar_diff) / ((k_outliers + 1) * DT) > SLOPE_THRESH) {
-      // sharp outlier detected, track to determine if noise or obstacle
-      outlier_detected = true;
-      k_outliers++;
+        //Find the sign convention of difference
+        if (sonar_diff > 0) {
+          sonar_diff_pos++;
+        }
+        else {
+          sonar_diff_neg++;
+        }
 
-      //Find the sign convention of difference
-      if (sonar_diff > 0) {
-        sonar_diff_pos++;
       }
-      else{
-        sonar_diff_neg++;
+      else {
+        // no noise or new obstacle
+        outlier_detected = false;
+        k_outliers = 0;
+        sonar_diff_pos = 0;
+        sonar_diff_neg = 0;
       }
 
+      // Analyse new data point for outlier and obstacle identification
+      if ((k_outliers >= OBSTACLE_ACCEPTANCE) &&
+          ((sonar_diff_pos >= OBSTACLE_ACCEPTANCE - 1) || (sonar_diff_neg >= OBSTACLE_ACCEPTANCE - 1))) {
+        outlier_detected = false;
+        k_outliers = 0;
+        sonar_diff_pos = 0;
+        sonar_diff_neg = 0;
+        current_obstacle_height += prev_sent_distance - sonar_bebop.distance;    // use average from prev_distance
+        // assume small obstacles are just the ground, this will help reset any errors in the obstacle height estimation
+        if (fabs(current_obstacle_height) < 0.1) {
+          current_obstacle_height = 0.;
+        }
+      }
     }
-    else {
-      // no noise or new obstacle
-      outlier_detected = false;
-      k_outliers = 0;
-      sonar_diff_pos = 0;
-      sonar_diff_neg = 0;
-    }
-
-    // Analyse new data point for outlier and obstacle identification
-    if ( (k_outliers >= OBSTACLE_ACCEPTANCE) && ( (sonar_diff_pos >= OBSTACLE_ACCEPTANCE-1) || (sonar_diff_neg >= OBSTACLE_ACCEPTANCE-1) ) ) {
-      outlier_detected = false;
-      k_outliers = 0;
-      sonar_diff_pos = 0;
-      sonar_diff_neg = 0;
-      current_obstacle_height += prev_sent_distance - sonar_bebop.distance;    // use average from prev_distance
-      // assume small obstacles are just the ground, this will help reset any errors in the obstacle height estimation
-      if (fabs(current_obstacle_height) < 0.1) {
-        current_obstacle_height = 0.;
+    else // We use this mode if we are trying to change the altitude
+    {
+      current_obstacle_height = 0;
+      float sonar_diff = (sonar_bebop.distance - prev_sent_distance);
+      if (fabs(sonar_diff) / ((k_outliers + 1) * DT) > SLOPE_THRESH) {
+        // sharp outlier detected, noise
+        outlier_detected = true;
+        k_outliers++;
+      }
+      else {
+        // no noise
+        outlier_detected = false;
+        k_outliers = 0;
       }
     }
 
@@ -191,12 +221,12 @@ static void *sonar_bebop_read(void *data __attribute__((unused))) {
 
 #ifdef SENSOR_SYNC_SEND_SONAR
       // Send Telemetry report
-      DOWNLINK_SEND_SONAR(DefaultChannel, DefaultDevice, &sonar_bebop.distance, &current_obstacle_height, &sonar_bebop.current_alg, &k_outliers, &outlier_detected, &prev_sent_distance);
+      DOWNLINK_SEND_SONAR(DefaultChannel, DefaultDevice, &sonar_bebop.distance, &current_obstacle_height, &sonar_bebop.current_alg, &k_outliers, &obstacle_mode);
 #endif
     }
   }
-
-  usleep(10000);  // 100Hz
+  usleep(10000); //100Hz
   return NULL;
 }
+
 
