@@ -1939,9 +1939,6 @@
   </message>
 
   <message name="STAB_ATTITUDE_INDI" id="216">
-    <field name="angular_rate_p" type="float" unit="rad/s"/>
-    <field name="angular_rate_q" type="float" unit="rad/s"/>
-    <field name="angular_rate_r" type="float" unit="rad/s"/>
     <field name="angular_accel_p" type="float"/>
     <field name="angular_accel_q" type="float"/>
     <field name="angular_accel_r" type="float"/>
@@ -2257,11 +2254,7 @@
       <field name="yaw_c"  type="float"/>
   </message>
 
-  <message name="TESTING" id="251">
-     <field name="x"  type="int32" unit="1e7deg" alt_unit="deg" alt_unit_coef="0.00390625"></field>
-    <field name="y"  type="int32" unit="1e7deg" alt_unit="deg" alt_unit_coef="0.00390625"></field>
-    <field name="z"  type="int32" unit="1e7deg" alt_unit="deg" alt_unit_coef="0.00390625"></field>
-  </message>
+   <!--251 is free -->
 
    <message name="GPS_SMALL" id="252">
     <field name="multiplex_speed"  type="uint32">bits 31-21 course in decideg : bits 20-10 ground speed in cm/s : bits 9-0 climb speed in cm/s</field>

@@ -40,6 +40,8 @@ struct Int16Vect3 vel_pixel_i, vel_global_i;
 uint8_t agl; // in dm
 uint8_t fps;
 
+uint16_t range_finder[4]; // distance from range finder in mm clockwise starting with front
+
 void stereocam_to_state(void);
 
 #if PERIODIC_TELEMETRY
@@ -65,6 +67,8 @@ void stereo_to_state_init(void)
 #if PERIODIC_TELEMETRY
   register_periodic_telemetry(DefaultPeriodic, PPRZ_MSG_ID_STEREOCAM_OPTIC_FLOW, stereocam_telem_send);
 #endif
+
+  memset(range_finder, 0, sizeof(range_finder));
 }
 
 void stereo_to_state_periodic(void)
@@ -76,14 +80,22 @@ void stereo_to_state_periodic(void)
     tracked_x = stereocam_data.data[0];
     tracked_y = stereocam_data.data[1];
     stereocam_data.fresh = 0;
-  } else if (stereocam_data.fresh && stereocam_data.len == 8) {  // length of WINDOW message
+  } else if (stereocam_data.fresh && stereocam_data.len == 8) {  // array from range finders
+    uint16_t *int16Arrray = (uint16_t)stereocam_data.data;
+    range_finder[0] = int16Arrray[0];
+    range_finder[1] = int16Arrray[1];
+    range_finder[2] = int16Arrray[2];
+    range_finder[3] = int16Arrray[3];
+    printf("%d %d %d %d\n", range_finder[0], range_finder[1], range_finder[2], range_finder[3]);
+    stereocam_data.fresh = 0;
+  } /*else if (stereocam_data.fresh && stereocam_data.len == 8) {  // length of WINDOW message
     win_x = stereocam_data.data[0];
     win_y = stereocam_data.data[1];
     win_cert = stereocam_data.data[2];
     win_size = stereocam_data.data[6];
     win_dist = (uint16_t)stereocam_data.data[8] | ((uint16_t)stereocam_data.data[7] << 8);
     stereocam_data.fresh = 0;
-  }
+  }*/
 }
 
 void stereocam_to_state(void)

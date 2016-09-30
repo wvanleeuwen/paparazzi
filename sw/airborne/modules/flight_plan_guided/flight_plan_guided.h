@@ -44,6 +44,9 @@ extern bool TakeOff(float climb_rate);
 extern bool WaitUntilAltitude(float altitude);
 extern bool Land(float end_altitude);
 
+extern bool close_gripper(void);
+extern bool open_gripper(void);
+
 void marker_detection_periodic(void);
 
 #endif

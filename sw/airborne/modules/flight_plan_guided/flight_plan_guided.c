@@ -37,6 +37,10 @@
 
 #include "modules/computer_vision/marker/detector.h"
 
+#include "mcu_periph/uart.h"
+#include "modules/stereocam/stereocam.h"
+#include "modules/stereocam/stereoprotocol.h"
+
 
 void flight_plan_guided_init(void) {} // Dummy
 
@@ -125,4 +129,16 @@ void marker_detection_periodic(void) {
         guidance_h_set_guided_pos(marker.geo_location.x, marker.geo_location.y);
     }
 
+}
+
+bool open_gripper(void) {
+  uint8_t msg[1]; msg[0] = 0;
+  stereoprot_sendArray(&((UART_LINK).device), msg, 1, 1);
+  return false;
+}
+
+bool close_gripper(void) {
+  uint8_t msg[1]; msg[0] = 1;
+  stereoprot_sendArray(&((UART_LINK).device), msg, 1, 1);
+  return false;
 }
