@@ -6,8 +6,8 @@
    radio="radios/dummy.xml"
    telemetry="telemetry/default_rotorcraft.xml"
    flight_plan="flight_plans/TUDELFT/tudelft_bebop_GUIDED_IMAV2016.xml"
-   settings="settings/rotorcraft_basic.xml settings/control/rotorcraft_guidance.xml settings/estimation/ahrs_int_cmpl_quat.xml settings/control/stabilization_indi.xml"
-   settings_modules="modules/imu_common.xml modules/gps.xml modules/geo_mag.xml modules/air_data.xml modules/cv_opticflow.xml modules/video_rtp_stream.xml modules/stereocam_state2camera.xml"
+   settings="settings/rotorcraft_basic.xml settings/control/rotorcraft_guidance.xml settings/control/stabilization_indi.xml"
+   settings_modules="modules/imu_common.xml modules/gps.xml modules/ahrs_int_cmpl_quat.xml modules/geo_mag.xml modules/air_data.xml modules/sonar_bebop.xml modules/cv_opticflow.xml modules/video_rtp_stream.xml modules/stereocam_state2camera.xml"
    gui_color="#fffff996b847"
   />
 </conf>

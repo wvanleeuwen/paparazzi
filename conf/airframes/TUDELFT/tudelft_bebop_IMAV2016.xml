@@ -6,6 +6,18 @@
   <firmware name="rotorcraft">
     <target name="ap" board="bebop"/>
 
+    <define name="MT9F002_OUTPUT_HEIGHT" value="640"/>  <!-- full height 4608 -->
+    <define name="MT9F002_OUTPUT_WIDTH" value="640"/>  <!-- full width 2592 (3288) -->
+    <define name="MT9F002_INITIAL_OFFSET_Y" value="384"/>
+    <define name="MT9F002_INITIAL_OFFSET_X" value="512"/>
+    <!--<define name="MT9F002_INITIAL_OFFSET_X" value="1280" />-->
+    <define name="MT9F002_X_ODD_INC_VAL" value="7"/> <!-- downsize x4 -->
+    <define name="MT9F002_Y_ODD_INC_VAL" value="7"/>
+
+    <define name="MT9F002_OUTPUT_SCALER" value="1"/>
+    <define name="MT9F002_TARGET_FPS" value="30"/>
+    <define name="MT9F002_TARGET_EXPOSURE" value="60"/>
+
 	<!-- Subsystem section -->
     <module name="telemetry" type="transparent_udp"/>
     <module name="radio_control" type="datalink"/>
@@ -15,8 +27,8 @@
     <module name="gps" type="optitrack"/>
     <module name="stabilization" type="indi"/>
     <module name="ahrs" type="int_cmpl_quat">
-      <configure name="USE_MAGNETOMETER" value="FALSE"/>
-      <define name="AHRS_USE_GPS_HEADING" value="TRUE"/>
+      <configure name="USE_MAGNETOMETER" value="TRUE"/>
+      <define name="AHRS_USE_GPS_HEADING" value="FALSE"/>
     </module>
     <module name="ins" type="extended"/>
   </firmware>
@@ -48,6 +60,7 @@
 
     <module name="cv_marker_detection">
       <define name="DETECTOR_CAMERA1" value="bottom_camera"/>
+      <define name="DETECTOR_CAMERA2" value="front_camera"/>
     </module>
 
     <!-- /////////////////////////////////////////////////////////////////////////////////////////// -->
@@ -76,9 +89,16 @@
 
     <module name="video_rtp_stream">
       <define name="VIEWVIDEO_CAMERA" value="bottom_camera"/>
+      <define name="VIEWVIDEO_CAMERA2" value="front_camera"/>
+
       <define name="VIEWVIDEO_DOWNSIZE_FACTOR" value="1"/>
       <define name="VIEWVIDEO_QUALITY_FACTOR" value="60"/>
+
+      <configure name="VIEWVIDEO_BROADCAST" value="FALSE"/>
+      <configure name="VIEWVIDEO_HOST" value="192.168.42.68"/>
     </module>
+    
+    <module name="cv_ae_awb"/>
 
     <module name="stereocam">
       <configure name="STEREO_UART" value="UART2"/>
@@ -93,6 +113,7 @@
       <define name="STEREO_BODY_TO_STEREO_THETA" value="0."/>
       <define name="STEREO_BODY_TO_STEREO_PSI" value="90."/-->
     </module>
+
     <module name="stereocam_state2camera">
       <define name="STEREOCAM_EDGEFLOW_DEROTATION" value="1"/>
       <define name="STEREOCAM_EDGEFLOW_ADAPT_HORIZON" value="1"/>
@@ -157,10 +178,10 @@
   </section>
 
   <section name="INS" prefix="INS_">
-    <!--define name="SONAR_MAX_RANGE" value="2.2"/-->
+    <define name="SONAR_BARO_THRESHOLD" value="2.5"/>
     <define name="SONAR_UPDATE_ON_AGL" value="TRUE"/>
     <!--define name="USE_HFF"/-->
-    <define name ="INT_GPS_ID" value="ABI_DISABLE"/>
+    <define name="INT_GPS_ID" value="ABI_DISABLE"/>
   </section>
 
   <section name="RC_SETPOINT" prefix="STABILIZATION_ATTITUDE_">
@@ -192,17 +213,30 @@
   </section>
 
   <section name="STABILIZATION_ATTITUDE_INDI" prefix="STABILIZATION_INDI_">
-    <!-- control effectiveness with gripper and legs -->
-    <!--<define name="G1_P" value="0.021"/>-->
-    <!--<define name="G1_Q" value="0.014"/>-->
-    <!--<define name="G1_R" value="0.00095"/>-->
-    <!--<define name="G2_R" value="0.06307"/>-->
 
-    <!-- bebop normal -->
-    <define name="G1_P" value="0.052669"/>
-    <define name="G1_Q" value="0.03326"/>
-    <define name="G1_R" value="0.002377"/>
-    <define name="G2_R" value="0.136936"/>
+    <!-- bebop TUBB05 (no legs, no bumpers) -->
+    <!--<define name="G1_P" value="0.063"/>-->
+    <!--<define name="G1_Q" value="0.044"/>-->
+    <!--<define name="G1_R" value="0.0022"/>-->
+    <!--<define name="G2_R" value="0.14"/>-->
+
+    <!-- bebop TUBB05 (no legs, with bumpers) -->
+    <!--<define name="G1_P" value="0.057"/>-->
+    <!--<define name="G1_Q" value="0.042"/>-->
+    <!--<define name="G1_R" value="0.0020"/>-->
+    <!--<define name="G2_R" value="0.12"/>-->
+
+    <!-- bebop TUBB04 (steel legs) -->
+    <!--<define name="G1_P" value="0.01304"/>-->
+    <!--<define name="G1_Q" value="0.00976"/>-->
+    <!--<define name="G1_R" value="0.00443"/>-->
+    <!--<define name="G2_R" value="0.01448"/>-->
+
+    <!-- bebop TUBB05 (plastic legs) -->
+    <define name="G1_P" value="0.037038"/>
+    <define name="G1_Q" value="0.026524"/>
+    <define name="G1_R" value="0.002187"/>
+    <define name="G2_R" value="0.181954"/>
 
     <!-- reference acceleration for attitude control -->
     <define name="REF_ERR_P" value="600.0"/>
@@ -233,7 +267,7 @@
     <define name="HOVER_KD" value="450"/>
     <define name="HOVER_KI" value="0"/>
     <define name="NOMINAL_HOVER_THROTTLE" value="0.55"/>
-    <!--define name="ADAPT_THROTTLE_ENABLED" value="TRUE"/-->
+    <!--<define name="ADAPT_THROTTLE_ENABLED" value="TRUE"/>-->
   </section>
 
   <section name="GUIDANCE_H" prefix="GUIDANCE_H_">
@@ -245,8 +279,8 @@
     <!-- Bad weather -->
     <!-- define name="MAX_BANK" value="32" unit="deg"/ -->
 
-    <define name="PGAIN" value="70"/>
-    <define name="DGAIN" value="170"/>
+    <define name="PGAIN" value="120"/>
+    <define name="DGAIN" value="140"/>
     <define name="IGAIN" value="20"/>
   </section>
 
