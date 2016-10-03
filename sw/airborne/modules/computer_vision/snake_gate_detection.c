@@ -96,6 +96,15 @@ uint8_t cr_center  = 0;
 #define radians_per_pix_w 0.006666667 //2.1 rad(60deg)/315
 #define radians_per_pix_h 0.0065625   //1.05rad / 160
 
+//original settings
+/*<define name="MT9F002_OUTPUT_WIDTH" value="160"/><!--128-->
+<define name="MT9F002_OUTPUT_HEIGHT" value="315"/>
+
+<define name="MT9F002_OUTPUT_SCALER" value="0.125"/>
+<define name="MT9F002_INITIAL_OFFSET_X" value="2050"/>      <!--2034--><!--2050-->
+
+<define name="MT9F002_INITIAL_OFFSET_Y" value="476"/><!--700-->*/
+
 // gate location relative to drone in body frame (assume forward camera)
 float x_dist = 0;
 float y_dist = 0;
