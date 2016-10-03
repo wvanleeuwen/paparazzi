@@ -13,10 +13,12 @@
 #include <stdlib.h>
 
 // camera params: TODO: would be better to get from elsewhere!!!
+// TODO KIRK find correct
 #define FOV_W (120.0f/180.0f)*PI
 #define FOV_H (90.0f/180.0f)*PI
 
 // gate params: TODO: would also be better to put elsewhere, centrally:
+// TODO KIRK find correct
 #define GATE_SIZE 1.0f  // m
 #define HALF_GATE_SIZE 0.5f
 
