@@ -7,14 +7,27 @@
 /**
  * @file "modules/stereocam/stereocam2state/stereocam2state.h"
  * @author Kimberly McGuire
- * This module sends the data retreived from an external stereocamera modules, to the state filter of the drone. This is done so that the guidance modules can use that information for couadcopter
+ * This module sends the data retrieved from an external stereocamera modules, to the state filter of the drone. This is done so that the guidance modules can use that information for couadcopter
  */
 
 #ifndef STEREOCAM2STATE_H
 #define STEREOCAM2STATE_H
 
 #include <std.h>
-#include "modules/stereocam/stereocam.h"
+#include "math/pprz_algebra_float.h"
+
+struct Egomotion {
+  struct FloatVect2 div; // estimated divergence
+  struct FloatVect2 ventral_flow; // estimated ventral flow
+  struct FloatVect2 foe;  // estimated focus of expansion
+};
+
+extern uint8_t tracked_x, tracked_y;
+extern uint8_t win_x, win_y, win_cert, win_size;
+extern uint16_t win_dist;
+extern uint16_t range_finder[]; // distance from range finder in mm clockwise starting with front
+
+extern struct Egomotion stereo_motion;
 
 extern void stereo_to_state_init(void);
 extern void stereo_to_state_periodic(void);

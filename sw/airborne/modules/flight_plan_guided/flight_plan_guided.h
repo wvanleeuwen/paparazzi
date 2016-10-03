@@ -28,6 +28,8 @@
 
 #include <std.h>
 
+extern bool marker_lost;
+
 // Module functions
 void flight_plan_guided_init(void);
 
@@ -37,6 +39,7 @@ extern uint8_t StartEngines(void);
 extern uint8_t ResetAlt(void);
 extern uint8_t Hover(float altitude);
 extern uint8_t MoveForward(float vx);
+extern uint8_t MoveRight(float vy);
 
 extern bool RotateToHeading(float heading);
 
@@ -44,6 +47,11 @@ extern bool TakeOff(float climb_rate);
 extern bool WaitUntilAltitude(float altitude);
 extern bool Land(float end_altitude);
 
-void marker_detection_periodic(void);
+extern bool close_gripper(void);
+extern bool open_gripper(void);
+
+bool bucket_heading_change(void);
+bool bucket_approach(void);
+bool bucket_center(void);
 
 #endif
