@@ -83,9 +83,9 @@
    radio="radios/cockpitSX.xml"
    telemetry="telemetry/TUDELFT/autoswarm/autoswarm.xml"
    flight_plan="flight_plans/TUDELFT/autoswarm/follow_object_test.xml"
-   settings="settings/rotorcraft_basic.xml settings/control/rotorcraft_guidance.xml settings/modules/autoswarm.xml settings/control/stabilization_indi.xml"
-   settings_modules="modules/imu_common.xml modules/gps.xml modules/geo_mag.xml modules/air_data.xml modules/video_rtp_stream.xml"
+   settings="settings/rotorcraft_basic.xml settings/control/rotorcraft_guidance.xml settings/modules/autoswarm.xml settings/control/stabilization_indi.xml settings/modules/cv_active_random_filter.xml"
    gui_color="#ce38ce3422fb"
+   settings_modules="modules/imu_common.xml modules/gps.xml modules/geo_mag.xml modules/air_data.xml modules/video_rtp_stream.xml"
   />
   <aircraft
    name="bebop243"

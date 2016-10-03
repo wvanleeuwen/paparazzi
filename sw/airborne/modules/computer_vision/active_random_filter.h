@@ -38,6 +38,16 @@ typedef struct _trackResults {
     double  z_w;
 } trackResults;
 
+typedef struct _memBlock {
+	int lastSeen;
+	int id;
+	int     x_p;
+	int     y_p;
+	double x_w;
+	double y_w;
+	double z_w;
+} memoryBlock;
+
 extern int 		AR_FILTER_GREY_THRESHOLD;
 extern int 		AR_FILTER_IMAGE_CROP_FOVY;
 extern int 		AR_FILTER_RND_PIX_SAMPLE;
@@ -57,6 +67,23 @@ extern int 		AR_FILTER_FLOOD_STYLE;
 // Filter flood styles
 #define AR_FILTER_FLOOD_OMNI   0
 #define AR_FILTER_FLOOD_CW     1
+// Filter flood directions
+#define ARF_NONE      -1
+#define ARF_SEARCH     0
+#define ARF_UP         1
+#define ARF_UP_RIGHT   2
+#define ARF_RIGHT      3
+#define ARF_RIGHT_DOWN 4
+#define ARF_DOWN       5
+#define ARF_DOWN_LEFT  6
+#define ARF_LEFT       7
+#define ARF_LEFT_UP    8
+// Filter return status
+#define ARF_FINISHED   2
+#define ARF_SUCCESS    1
+#define ARF_NO_FOUND   0
+#define ARF_DUPLICATE -1
+#define ARF_ERROR     -2
 
 #ifdef __cplusplus
 extern "C" {

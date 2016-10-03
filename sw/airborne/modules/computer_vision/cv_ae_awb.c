@@ -32,6 +32,10 @@
 #define CV_AE_AWB_AV 1
 #endif
 
+#ifndef CV_AE_AWB_VERBOSE
+#define CV_AE_AWB_VERBOSE 0
+#endif
+
 #define MAX_HIST_Y 256-30
 
 #include "boards/bebop/mt9f002.h"
@@ -84,19 +88,22 @@ void cv_ae_awb_periodic(void) {
     float desiredExposure = mt9f002.real_exposure * adjustment * CV_AE_AWB_AV;
     mt9f002.target_exposure = desiredExposure;
     mt9f002_set_exposure(&mt9f002);
+#if CV_AE_AWB_VERBOSE
     printf("New exposure: %f (old: %f)\r\n", desiredExposure, mt9f002.real_exposure);
-
-
+#endif
     // Calculate AWB
     float avgU = (float) yuv_stats.awb_sum_U / (float) yuv_stats.nb_valid_Y;
     float avgV = (float) yuv_stats.awb_sum_V / (float) yuv_stats.nb_valid_Y;
     float fTolerance = 0.2f;
     float targetAWB = 0.0f;
-
+#if CV_AE_AWB_VERBOSE
     printf("U-V: %f\r\n", avgU - avgV);
+#endif
     if (avgU - avgV + targetAWB < -fTolerance) {
       // Want more red
+#if CV_AE_AWB_VERBOSE
       printf("Too red...\r\n");
+#endif
       mt9f002.gain_blue += 0.1;
       mt9f002.gain_red  -= 0.1;
       Bound(mt9f002.gain_blue, 2, 50);
@@ -105,7 +112,9 @@ void cv_ae_awb_periodic(void) {
     }
     else if(avgU - avgV + targetAWB > fTolerance) {
       // Want more blue
+#if CV_AE_AWB_VERBOSE
       printf("Too blue...\r\n");
+#endif
       mt9f002.gain_blue -= 0.1;
       mt9f002.gain_red  += 0.1;
       Bound(mt9f002.gain_blue, 2, 50);

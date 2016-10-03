@@ -71,16 +71,6 @@ extern "C" {
  "HOME" , \
 }
 
-typedef struct _memBlock {
-	int lastSeen;
-	int id;
-	int     x_p;
-	int     y_p;
-	double x_w;
-	double y_w;
-	double z_w;
-} memoryBlock;
-
 extern double 	AUTOSWARM_CIRCLE_R;
 extern double 	AUTOSWARM_SEPERATION;
 extern int 		AUTOSWARM_ATTRACTOR;

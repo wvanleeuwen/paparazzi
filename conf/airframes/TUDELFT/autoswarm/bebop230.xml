@@ -16,7 +16,7 @@
 	<define name="MT9F002_INITIAL_OFFSET_Y" value="12" />
 	<define name="MT9F002_OUTPUT_SCALER" value="1" /> <!-- 16/26 -->
 	<define name="MT9F002_TARGET_FPS" value="30" />
-	<define name="MT9F002_TARGET_EXPOSURE" value="0.348262" /> <!-- Daylight: 10 -->
+	<define name="MT9F002_TARGET_EXPOSURE" value="0.348262" /> <!-- Daylight: 0.348262 -->
 	<define name="MT9F002_GAIN_GREEN1" value="2.0" />
 	<define name="MT9F002_GAIN_GREEN2" value="2.0" />
 	<define name="MT9F002_X_ODD_INC_VAL" value="3" />
@@ -60,7 +60,7 @@
 		<define name="VIEWVIDEO_DOWNSIZE_FACTOR" value="4" />
 		<define name="VIEWVIDEO_QUALITY_FACTOR" value="80" />
 		<define name="VIEWVIDEO_SHOT_PATH" value="/data/ftp/internal_000" />
-		<define name="VIEWVIDEO_FPS" value="4" />
+		<define name="VIEWVIDEO_FPS" value="1" />
 	</module>
 	<module name="cv_ae_awb">
 	  <define name="CV_AE_AWB_AV" value="1.5" />

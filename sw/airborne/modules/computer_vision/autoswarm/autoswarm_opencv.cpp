@@ -42,7 +42,6 @@ using namespace std;
 using namespace cv;
 
 // Defining function that require opencv to be loaded
-static void            identifyNeighbours  (vector<trackResults> trackRes);
 static void            updateWaypoints     (struct NedCoor_f *pos, vector<double> cPos, vector<double> totV);
 static vector<double>  calcLocalVelocity   (struct NedCoor_f *pos);
 static vector<double>  calcDiffVelocity    (void);
@@ -90,13 +89,11 @@ double 	AUTOSWARM_DEADZONE 			= 0.1;
 static struct FloatEulers * eulerAngles;
 static struct NedCoor_f *   groundSpeed;
 static struct NedCoor_f *   pos;
-static vector <memoryBlock> neighbourMem;
 
 static int runCount = 0;
-static int maxId = 0;
 static const char * flight_blocks[] = FP_BLOCKS;
 extern uint8_t nav_block;
-extern vector<trackResults> trackRes;
+extern vector<memoryBlock>  neighbourMem;
 
 #if AUTOSWARM_BENCHMARK
 vector<double> benchmark_time;
@@ -169,7 +166,6 @@ void autoswarm_opencv_run()
 #if AUTOSWARM_BENCHMARK
 	addBenchmark("Declared variables");
 #endif
-	identifyNeighbours(trackRes); 	// ID neighbours according to previous location
 #if AUTOSWARM_BENCHMARK
 	addBenchmark("Identified neighbours");
 #endif
@@ -237,60 +233,7 @@ void autoswarm_opencv_run()
 	return;
 }
 
-void identifyNeighbours(vector<trackResults> trackRes)
-{
-	// First lets clear the old elements which we will no longer be using
-	for(unsigned int i=0; i < neighbourMem.size();)
-	{
-		if(runCount - neighbourMem[i].lastSeen > AUTOSWARM_MEMORY * AUTOSWARM_FPS)
-		{
-			neighbourMem.erase(neighbourMem.begin() + i);
-		}else 	i++;
-	}
-	// We now only have memory samples from the past ~2 seconds so lets try to identify the neighbours we saw
-	bool identified;
-	for(unsigned int r=0; r < trackRes.size(); r++)
-	{
-		identified = false;
-		for(unsigned int i=0; i < neighbourMem.size(); i++)
-		{
-			double radius	= (runCount - neighbourMem[i].lastSeen) * AUTOSWARM_VMAX / ((double) AUTOSWARM_FPS);
-			double dx 		= trackRes[r].x_w - neighbourMem[i].x_w;
-			if(dx <= radius)
-			{
-				double dy 	= trackRes[r].y_w - neighbourMem[i].y_w;
-				if(dy <= radius)
-				{
-					if(sqrt(pow(dx, 2.0) + pow(dy, 2.0)) <= radius)
-					{
-						neighbourMem[i].lastSeen 	= runCount;
-						neighbourMem[i].x_w 		= trackRes[r].x_w;
-						neighbourMem[i].y_w 		= trackRes[r].y_w;
-						neighbourMem[i].z_w 		= trackRes[r].z_w;
-						neighbourMem[i].x_p 		= trackRes[r].x_p;
-						neighbourMem[i].y_p 		= trackRes[r].y_p;
-						identified = true;
-						break;
-					}
-				}
-			}
-		}
-		if(identified == false)
-		{
-			memoryBlock curN;
-			curN.lastSeen 	= runCount;
-			curN.id 		= maxId;
-			curN.x_w 		= trackRes[r].x_w;
-			curN.y_w 		= trackRes[r].y_w;
-			curN.z_w 		= trackRes[r].z_w;
-			curN.x_p 		= trackRes[r].x_p;
-			curN.y_p 		= trackRes[r].y_p;
-			neighbourMem.push_back(curN);
-			maxId++;
-		}
-	}
-	return;
-}
+
 
 vector<double> calcLocalVelocity(struct NedCoor_f *pos)
 {
