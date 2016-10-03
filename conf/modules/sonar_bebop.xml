@@ -9,6 +9,31 @@
     <define name="USE_SONAR" value="" description="activate use of sonar in INS extended filter (only rotorcraft)"/>
   </doc>
 
+  <settings>
+    <dl_settings NAME="Sonar Bebop">
+      <dl_settings name="sonar">
+        <dl_setting
+                var="sonar_bebop.obstacle_slope_threshold"
+                shortname="obstacle_slope_threshold"
+                min="0"
+                step="1"
+                max="20" />
+        <dl_setting
+                var="sonar_bebop.slope_threshold"
+                shortname="slope_threshold"
+                min="0"
+                step="1"
+                max="20" />
+        <dl_setting
+                var="sonar_bebop.obstacle_acceptance_threshold"
+                shortname="obstacle_acceptance_threshold"
+                min="0"
+                step="1"
+                max="20" />
+      </dl_settings>
+    </dl_settings>
+  </settings>
+
   <header>
     <file name="sonar_bebop.h"/>
   </header>

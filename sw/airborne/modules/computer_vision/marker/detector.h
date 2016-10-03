@@ -30,18 +30,22 @@
 
 struct Marker {
     volatile bool detected;
+    volatile bool processed;
     struct point_t pixel;
     struct NedCoor_f geo_location;
+    struct FloatVect3 geo_relative;
     float found_time;
-//    float mid;
+    float mid;
+    float mid_time;
 
 };
 
-extern struct Marker marker;
+extern struct Marker marker1;
+extern struct Marker marker2;
 
 void detector_init(void);
 
-void detector_locate_blob(void);
+void detector_locate_bucket(void);
 void detector_locate_helipad(void);
 
 #endif
