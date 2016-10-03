@@ -6,17 +6,17 @@
   <firmware name="rotorcraft">
     <target name="ap" board="bebop"/>
 
-    <define name="MT9F002_OUTPUT_HEIGHT" value="640" />  <!-- full height 4608 -->
-    <define name="MT9F002_OUTPUT_WIDTH" value="640" />  <!-- full width 2592 (3288) -->
-    <define name="MT9F002_INITIAL_OFFSET_Y" value="384" />
-    <define name="MT9F002_INITIAL_OFFSET_X" value="512" />
+    <define name="MT9F002_OUTPUT_HEIGHT" value="640"/>  <!-- full height 4608 -->
+    <define name="MT9F002_OUTPUT_WIDTH" value="640"/>  <!-- full width 2592 (3288) -->
+    <define name="MT9F002_INITIAL_OFFSET_Y" value="384"/>
+    <define name="MT9F002_INITIAL_OFFSET_X" value="512"/>
     <!--<define name="MT9F002_INITIAL_OFFSET_X" value="1280" />-->
-    <define name="MT9F002_X_ODD_INC_VAL" value="7" /> <!-- downsize x4 -->
-    <define name="MT9F002_Y_ODD_INC_VAL" value="7" />
+    <define name="MT9F002_X_ODD_INC_VAL" value="7"/> <!-- downsize x4 -->
+    <define name="MT9F002_Y_ODD_INC_VAL" value="7"/>
 
-    <define name="MT9F002_OUTPUT_SCALER" value="1" />
-    <define name="MT9F002_TARGET_FPS" value="30" />
-    <define name="MT9F002_TARGET_EXPOSURE" value="60" />
+    <define name="MT9F002_OUTPUT_SCALER" value="1"/>
+    <define name="MT9F002_TARGET_FPS" value="30"/>
+    <define name="MT9F002_TARGET_EXPOSURE" value="60"/>
 
 	<!-- Subsystem section -->
     <module name="telemetry" type="transparent_udp"/>
@@ -157,7 +157,7 @@
     <define name="SONAR_BARO_THRESHOLD" value="2.5"/>
     <define name="SONAR_UPDATE_ON_AGL" value="TRUE"/>
     <!--define name="USE_HFF"/-->
-    <define name ="INT_GPS_ID" value="ABI_DISABLE"/>
+    <define name="INT_GPS_ID" value="ABI_DISABLE"/>
   </section>
 
   <section name="RC_SETPOINT" prefix="STABILIZATION_ATTITUDE_">
@@ -197,10 +197,10 @@
     <!--<define name="G2_R" value="0.14"/>-->
 
     <!-- bebop TUBB05 (no legs, with bumpers) -->
-    <define name="G1_P" value="0.057"/>
-    <define name="G1_Q" value="0.042"/>
-    <define name="G1_R" value="0.0020"/>
-    <define name="G2_R" value="0.12"/>
+    <!--<define name="G1_P" value="0.057"/>-->
+    <!--<define name="G1_Q" value="0.042"/>-->
+    <!--<define name="G1_R" value="0.0020"/>-->
+    <!--<define name="G2_R" value="0.12"/>-->
 
     <!-- bebop TUBB04 (steel legs) -->
     <!--<define name="G1_P" value="0.01304"/>-->
@@ -209,10 +209,10 @@
     <!--<define name="G2_R" value="0.01448"/>-->
 
     <!-- bebop TUBB05 (plastic legs) -->
-    <!--<define name="G1_P" value="0.036052"/>-->
-    <!--<define name="G1_Q" value="0.021228"/>-->
-    <!--<define name="G1_R" value="0.002187"/>-->
-    <!--<define name="G2_R" value="0.127996"/>-->
+    <define name="G1_P" value="0.037038"/>
+    <define name="G1_Q" value="0.026524"/>
+    <define name="G1_R" value="0.002187"/>
+    <define name="G2_R" value="0.181954"/>
 
     <!-- reference acceleration for attitude control -->
     <define name="REF_ERR_P" value="600.0"/>
@@ -261,8 +261,8 @@
   </section>
 
   <section name="NAVIGATION" prefix="NAV_">
-    <define name="CLIMB_VSPEED" value="1.0" />
-    <define name="DESCEND_VSPEED" value="-1.0" />
+    <define name="CLIMB_VSPEED" value="1.0"/>
+    <define name="DESCEND_VSPEED" value="-1.0"/>
   </section>
 
   <section name="SIMULATOR" prefix="NPS_">
