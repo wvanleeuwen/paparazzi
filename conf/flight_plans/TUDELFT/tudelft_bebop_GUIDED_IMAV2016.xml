@@ -73,6 +73,16 @@
       <call_once fun="detector_locate_blob()"/>
       <while cond="1"/>
     </block>
+    
+    <block name="Close Gripper">
+      <call_once fun="close_gripper()"/>
+      <while cond="1"/>
+    </block>
+    
+    <block name="Open Gripper">
+      <call_once fun="open_gripper()"/>
+      <while cond="1"/>
+    </block>
 
 
     <!-- Start the bucket mission -->

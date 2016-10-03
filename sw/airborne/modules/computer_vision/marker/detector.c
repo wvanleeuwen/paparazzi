@@ -234,11 +234,11 @@ static struct image_t *draw_target_marker(struct image_t* img)
         image_draw_line(img, &l, &r);
     }
 
-    DOWNLINK_SEND_DETECTOR(DefaultChannel, DefaultDevice,
+    /*DOWNLINK_SEND_DETECTOR(DefaultChannel, DefaultDevice,
                            &marker.detected,
                            &marker.pixel.x,
                            &marker.pixel.y,
-                           &marker.found_time);
+                           &marker.found_time);*/
 
     return img;
 }
