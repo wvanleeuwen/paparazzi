@@ -35,6 +35,7 @@
 
     <!-- Wait 5 seconds and then set altitude reference -->
     <block name="Geo init">
+      <call_once fun="sonar_obstacle_detect_off()"/>
       <call fun="ResetAlt()"/>
       <while cond="1"/>
     </block>
