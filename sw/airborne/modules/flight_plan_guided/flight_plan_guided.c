@@ -126,9 +126,9 @@ bool Land(float end_altitude) {
     // return true if not completed
 
     //For bucket
-//    guidance_v_set_guided_vz(0.2);
+    guidance_v_set_guided_vz(0.2);
     //For landing pad
-    guidance_v_set_guided_vz(1.5);
+//    guidance_v_set_guided_vz(1.5);
     guidance_h_set_guided_body_vel(0, 0);
 
 
@@ -142,9 +142,9 @@ bool Land(float end_altitude) {
 static int BUCKET_HEADING_MARGIN = 60;  // px
 static float BUCKET_HEADING_RATE = 0.5; // rad/s
 
-bool bucket_heading_change(void) {
+bool bucket_heading_change(float altitude) {
   if (autopilot_mode != AP_MODE_GUIDED) { return true; }
-
+  guidance_v_set_guided_z(-altitude);
   guidance_h_set_guided_body_vel(0., 0.);
 
   if (marker2.detected) {
@@ -183,8 +183,9 @@ static float BUCKET_DRIFT_CORRECTION_RATE = 0.1;
 static float BUCKET_APPROACH_SPEED_HIGH = 0.1;
 static float BUCKET_APPROACH_SPEED_LOW = 0.05;
 
-bool bucket_approach(void) {
+bool bucket_approach(float altitude) {
   if (autopilot_mode != AP_MODE_GUIDED) { return true; }
+  guidance_v_set_guided_z(-altitude);
 
   if (marker1.detected) {
     // Hand over control to next stage
@@ -229,8 +230,9 @@ bool bucket_approach(void) {
   return true;
 }
 
-bool bucket_center(void) {
+bool bucket_center(float altitude) {
   if (autopilot_mode != AP_MODE_GUIDED) { return true; }
+  guidance_v_set_guided_z(-altitude);
 
   if (marker1.detected) {
     if (!marker1.processed) {

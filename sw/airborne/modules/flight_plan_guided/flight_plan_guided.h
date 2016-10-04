@@ -47,8 +47,8 @@ extern bool TakeOff(float climb_rate);
 extern bool WaitUntilAltitude(float altitude);
 extern bool Land(float end_altitude);
 
-bool bucket_heading_change(void);
-bool bucket_approach(void);
-bool bucket_center(void);
+bool bucket_heading_change(float altitude);
+bool bucket_approach(float altitude);
+bool bucket_center(float altitude);
 
 #endif
