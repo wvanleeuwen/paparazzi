@@ -117,17 +117,16 @@ static void marker_detected(struct Marker *marker, struct image_t* img, int pixe
     if (marker->found_time > MARKER_FOUND_TIME_MAX) { marker->found_time = MARKER_FOUND_TIME_MAX; }
     if (marker->mid_time > MARKER_MID_TIME_MAX) { marker->mid_time = MARKER_MID_TIME_MAX; }
 
-    // This is for bucket
+    // This is for landing pad
 //    if (marker->pixel.x < 120 + MARKER_WINDOW &&
 //        marker->pixel.x > 120 - MARKER_WINDOW &&
-//        marker->pixel.y < 100 + MARKER_WINDOW && //To account for gripper in the back
-//        marker->pixel.y > 100 - MARKER_WINDOW)
-
-    // This is for landing pad
+//        marker->pixel.y < 120 + MARKER_WINDOW && //To account for gripper in the back
+//        marker->pixel.y > 120 - MARKER_WINDOW)
+    // This is for bucket
     if (marker->pixel.x < 120 + MARKER_WINDOW &&
         marker->pixel.x > 120 - MARKER_WINDOW &&
-        marker->pixel.y < 120 + MARKER_WINDOW && //To account for gripper in the back
-        marker->pixel.y > 120 - MARKER_WINDOW)
+        marker->pixel.y < 100 + MARKER_WINDOW && //To account for gripper in the back
+        marker->pixel.y > 100 - MARKER_WINDOW)
     {
         marker->mid = true;
         marker->mid_time += img-> dt / 1000000.f;
@@ -198,6 +197,7 @@ static struct image_t *detect_bottom_bucket(struct image_t* img) {
     {
         int xloc   = labels[largest_id].x_sum / labels[largest_id].pixel_cnt * 2;
         int yloc   = labels[largest_id].y_sum / labels[largest_id].pixel_cnt - 20; //-20 is for the gripper position bias
+        if (yloc <= 0){yloc = 0;}
         marker_detected(&marker1, img, xloc, yloc);
     }
     else

@@ -27,6 +27,8 @@
       <message name="SURVEY"                 period="2.5"/>
       <message name="OPTIC_FLOW_EST"         period="0.05"/>
       <message name="VECTORNAV_INFO"      period="0.5"/>
+      <message name="HOVER_LOOP"            period="0.11"/>
+      <message name="GUIDANCE_H_REF_INT"    period="0.12"/>
     </mode>
 
     <mode name="ppm">
