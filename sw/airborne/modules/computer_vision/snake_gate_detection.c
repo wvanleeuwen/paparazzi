@@ -59,22 +59,37 @@
 
 struct video_listener *listener = NULL;
 
+#define RED 0
+#define BLUE 1
+
+#define WINDOW_COLOR RED
+
 // Filter Settings
-uint8_t color_lum_min = 60;//105;
-uint8_t color_lum_max = 228;//205;
-uint8_t color_cb_min  = 66;//52;
-uint8_t color_cb_max  = 194;//140;
-uint8_t color_cr_min  = 140;//was 180
-uint8_t color_cr_max  = 230;//255;
+#if WINDOW_COLOR == RED
+uint8_t color_lum_min = 60;// 60;//105;
+uint8_t color_lum_max = 255;//228;//205;
+uint8_t color_cb_min  = 20;//66;//52;
+uint8_t color_cb_max  = 180;//194;//140;
+uint8_t color_cr_min  = 150;//140;//180;
+uint8_t color_cr_max  = 255;//230;//255;
+#else
+// TODO find color scheme for blue
+uint8_t color_lum_min = 60;// 60;//105;
+uint8_t color_lum_max = 255;//228;//205;
+uint8_t color_cb_min  = 20;//66;//52;
+uint8_t color_cb_max  = 180;//194;//140;
+uint8_t color_cr_min  = 150;//140;//180;
+uint8_t color_cr_max  = 255;//230;//255;
+#endif
 
 // Gate detection settings:
 int n_samples = 1000;//1000;//500;
 int min_pixel_size = 40;//100;
-float min_gate_quality = 0.2;
+float min_gate_quality = 0.15;
 float gate_thickness = 0;//0.05;//0.10;//
 
 // TODO KIRK find correct
-float gate_size = 34;   // size in pixels at 2 meters
+const float gate_size_m = 1.;   // gate size in meters
 
 // Result
 #define MAX_GATES 50
@@ -225,15 +240,10 @@ static void calculate_gate_position(int x_pix, int y_pix, int sz_pix, struct ima
 
   current_quality = gate.gate_q;
 
-  if (gate_size == 0) {
-    gate_size = 1;
-  }
-
-  float gate_size_m = tan(((float)gate_size / 2.0) * radians_per_pix_w) * 3.0;
-  printf("gate size %f\n", gate_size_m);
+  printf("gate size %d %f\n", gate.sz, gate.sz * radians_per_pix_w / 2);
 
   // in body frame
-  x_dist = gate_size_m / tan((gate.sz / 2) * radians_per_pix_w);
+  x_dist = gate_size_m * 2 / (gate.sz * radians_per_pix_w);
   y_dist = x_dist * sin(hor_angle);
   z_dist = x_dist * sin(vert_angle);
 }

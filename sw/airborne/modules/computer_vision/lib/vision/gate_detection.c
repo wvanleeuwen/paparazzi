@@ -42,7 +42,8 @@ int WEIGHTED = 0; // color has no weight at the moment, since it is thresholded
 #define CIRCLE 0
 #define SQUARE 1
 #define POLYGON 2
-#define SHAPE SQUARE
+#define RECTANGLE 3
+#define SHAPE POLYGON
 float outlier_threshold = 20.0f;
 
 // Settings for the evolution:
@@ -91,6 +92,11 @@ void gate_detection(struct image_t *color_image, float *x_center, float *y_cente
     float mean_x = 0;
     float mean_y = 0;
 
+    float mean_above = 0, n_points_above = 0;
+    float mean_below = 0, n_points_below = 0;
+    float mean_left = 0, n_points_left = 0;
+    float mean_right = 0, n_points_right = 0;
+
     uint16_t i;
     for (i = 0; i < n_points; i++) {
       mean_x += points[i].x; // could still do a weighted average
@@ -100,9 +106,31 @@ void gate_detection(struct image_t *color_image, float *x_center, float *y_cente
     mean_y /= n_points;
     (*x0) = mean_x;
     (*y0) = mean_y;
+
+    for (i = 0; i < n_points; i++) {
+      if (points[i].y < mean_y){
+        mean_above += points[i].y;
+        n_points_above++;
+      } else {
+        mean_below += points[i].y;
+        n_points_below++;
+      }
+      if (points[i].x < mean_x){
+        mean_left += points[i].x;
+        n_points_left++;
+      } else {
+        mean_right += points[i].x;
+        n_points_right++;
+      }
+    }
+    mean_above /= n_points_above;
+    mean_below /= n_points_below;
+    mean_left /= n_points_left;
+    mean_right /= n_points_right;
+
     // TODO: make a better initial size estimation - this is actually ridiculous:
     // For instance, take min, max x, min, max y
-    (*size0) = 40.0f;// TODO: how good is 40 for the Bebop images?
+    (*size0) = (int)fabs(mean_below - mean_above);
 
     // run the fit procedure:
     float s_left, s_right;
@@ -185,9 +213,12 @@ void fit_window_to_points(int *x0, int *y0, int *size0, float *x_center, float *
     Population[i][0] = (*x0) + 5 * get_random_number() - 2.5f;
     Population[i][1] = (*y0) + 5 * get_random_number() - 2.5f;
     Population[i][2] = (*size0) + 5 * get_random_number() - 2.5f;
-    if (SHAPE == POLYGON) {
+    if (SHAPE == POLYGON || SHAPE == RECTANGLE) {
       // also the half-sizes of the right and left part of the gate are optimized:
       Population[i][3] = (*size0) + 5 * get_random_number() - 2.5f;
+    }
+    if (SHAPE == POLYGON) {
+      // also the half-sizes of the right and left part of the gate are optimized:
       Population[i][4] = (*size0) + 5 * get_random_number() - 2.5f;
     }
   }
