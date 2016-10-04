@@ -40,7 +40,7 @@
 
 static bool SHOW_MARKER = true;
 static float MARKER_FOUND_TIME_MAX = 5.0;
-static float MARKER_MID_TIME_MAX = 1.0;
+static float MARKER_MID_TIME_MAX = 3.0;
 
 //This is for bucket
 //static int MARKER_WINDOW = 25;
@@ -51,6 +51,7 @@ static int MARKER_WINDOW = 40;
 // General outputs
 struct Marker marker1;
 struct Marker marker2;
+struct PIXEL pixel_relative;
 
 // Helipad detection
 static struct video_listener* helipad_listener;
@@ -196,7 +197,7 @@ static struct image_t *detect_bottom_bucket(struct image_t* img) {
     if (largest_id >= 0)
     {
         int xloc   = labels[largest_id].x_sum / labels[largest_id].pixel_cnt * 2;
-        int yloc   = labels[largest_id].y_sum / labels[largest_id].pixel_cnt - 20; //-20 is for the gripper position bias
+        int yloc   = labels[largest_id].y_sum / labels[largest_id].pixel_cnt; //-20 is for the gripper position bias
         if (yloc <= 0){yloc = 0;}
         marker_detected(&marker1, img, xloc, yloc);
     }
@@ -303,8 +304,10 @@ static struct image_t *draw_target_marker1(struct image_t* img)
 
     DOWNLINK_SEND_DETECTOR(DefaultChannel, DefaultDevice,
                            &marker1.detected,
-                           &marker1.pixel.x,
-                           &marker1.pixel.y,
+//                           &marker1.pixel.x,
+//                           &marker1.pixel.y,
+                           &pixel_relative.x,
+                           &pixel_relative.y,
                            &marker1.found_time,
                            &marker1.mid_time);
 

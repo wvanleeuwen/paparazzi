@@ -40,6 +40,12 @@ struct Marker {
 
 };
 
+struct PIXEL {
+    float x;
+    float y;
+    float z;
+};
+
 extern struct Marker marker1;
 extern struct Marker marker2;
 

@@ -126,11 +126,10 @@ bool Land(float end_altitude) {
     // return true if not completed
 
     //For bucket
-    guidance_v_set_guided_vz(0.2);
+    guidance_v_set_guided_vz(0.4);
     //For landing pad
 //    guidance_v_set_guided_vz(1.5);
-    guidance_h_set_guided_body_vel(0, 0);
-
+    guidance_h_set_guided_pos(marker1.geo_location.x, marker1.geo_location.y);
 
     if (stateGetPositionEnu_f()->z > end_altitude) {
         return true;
@@ -179,7 +178,7 @@ bool bucket_heading_change(float altitude) {
 
 static int BUCKET_POSITION_MARGIN = 45;
 static int BUCKET_POSITION_MARGIN_LOST = 200;
-static float BUCKET_DRIFT_CORRECTION_RATE = 0.1;
+static float BUCKET_DRIFT_CORRECTION_RATE = 0.05;
 static float BUCKET_APPROACH_SPEED_HIGH = 0.1;
 static float BUCKET_APPROACH_SPEED_LOW = 0.05;
 
@@ -233,13 +232,19 @@ bool bucket_approach(float altitude) {
 bool bucket_center(float altitude) {
   if (autopilot_mode != AP_MODE_GUIDED) { return true; }
   guidance_v_set_guided_z(-altitude);
+  guidance_h_set_guided_heading_rate(0.);
 
   if (marker1.detected) {
     if (!marker1.processed) {
       marker1.processed = true;
 
       struct EnuCoor_f *speed = stateGetSpeedEnu_f();
-      guidance_h_set_guided_pos(marker1.geo_location.x, marker1.geo_location.y);
+
+      // add small lateral offset so marker is in centre of gripper
+      float x_offset = 0.05;
+      float psi = stateGetNedToBodyEulers_f()->psi;
+
+      guidance_h_set_guided_pos(marker1.geo_location.x + cos(-psi) * x_offset, marker1.geo_location.y - sinf(-psi) * x_offset);
     }
   } else {
     marker_lost = true;
