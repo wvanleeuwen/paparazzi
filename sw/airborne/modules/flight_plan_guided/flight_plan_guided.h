@@ -49,6 +49,6 @@ extern bool Land(float end_altitude);
 
 bool bucket_heading_change(float altitude);
 bool bucket_approach(float altitude);
-bool bucket_center(float altitude);
-
+bool bucket_center_alt(float altitude);
+bool bucket_center(void);
 #endif

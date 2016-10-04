@@ -229,9 +229,33 @@ bool bucket_approach(float altitude) {
   return true;
 }
 
-bool bucket_center(float altitude) {
+bool bucket_center_alt(float altitude) {
   if (autopilot_mode != AP_MODE_GUIDED) { return true; }
   guidance_v_set_guided_z(-altitude);
+  guidance_h_set_guided_heading_rate(0.);
+
+  if (marker1.detected) {
+    if (!marker1.processed) {
+      marker1.processed = true;
+
+      struct EnuCoor_f *speed = stateGetSpeedEnu_f();
+
+      // add small lateral offset so marker is in centre of gripper
+      float x_offset = 0.05;
+      float psi = stateGetNedToBodyEulers_f()->psi;
+
+      guidance_h_set_guided_pos(marker1.geo_location.x + cos(-psi) * x_offset, marker1.geo_location.y - sinf(-psi) * x_offset);
+    }
+  } else {
+    marker_lost = true;
+  }
+
+  // Loop this function
+  return true;
+}
+
+bool bucket_center(void) {
+  if (autopilot_mode != AP_MODE_GUIDED) { return true; }
   guidance_h_set_guided_heading_rate(0.);
 
   if (marker1.detected) {
