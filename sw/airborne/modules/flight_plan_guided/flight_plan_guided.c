@@ -237,11 +237,6 @@ bool bucket_center(void) {
       marker1.processed = true;
 
       struct EnuCoor_f *speed = stateGetSpeedEnu_f();
-
-      if (marker1.found_time > 5 && marker1.mid && abs(speed->x) < 0.1 && abs(speed->y) < 0.1) {
-        return false;
-      }
-
       guidance_h_set_guided_pos(marker1.geo_location.x, marker1.geo_location.y);
     }
   } else {

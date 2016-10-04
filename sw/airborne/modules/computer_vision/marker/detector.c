@@ -39,7 +39,7 @@
 #include "subsystems/datalink/telemetry.h"
 
 static bool SHOW_MARKER = true;
-static float MARKER_FOUND_TIME_MAX = 10.0;
+static float MARKER_FOUND_TIME_MAX = 5.0;
 static float MARKER_MID_TIME_MAX = 1.0;
 
 //This is for bucket
