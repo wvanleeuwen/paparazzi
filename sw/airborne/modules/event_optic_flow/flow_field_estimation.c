@@ -140,5 +140,5 @@ void derotateFlowField(struct flowField* field, struct FloatRates* rates) {
   float p = rates->p;
   float q = rates->q;
   field->wxDerotated = field->wx - p;
-  field->wyDerotated = field->wy - q;
+  field->wyDerotated = field->wy + q;
 }
