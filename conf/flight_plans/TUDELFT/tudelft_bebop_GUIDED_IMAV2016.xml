@@ -51,7 +51,8 @@
       <call_once fun="sonar_obstacle_detect_off()"/>
       <call fun="StartEngines()"/>
       <call fun="TakeOff(0.1)"/>
-      <call fun="WaitUntilAltitude(1)"/>
+      <exception cond="stateGetPositionEnu_f()->z > 1.5" deroute="Hover 2 sec"/>
+      <while cond="1"/>
     </block>
 
     <block name="Hover 2 sec">
