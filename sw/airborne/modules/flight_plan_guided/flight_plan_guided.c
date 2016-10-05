@@ -40,6 +40,7 @@
 #include "mcu_periph/uart.h"
 #include "modules/stereocam/stereocam.h"
 #include "modules/stereocam/stereoprotocol.h"
+#include "modules/stereocam/stereocam2state/stereocam2state.h"
 
 bool marker_lost;
 
@@ -266,4 +267,93 @@ bool close_gripper(void) {
   uint8_t msg[1]; msg[0] = 1;
   stereoprot_sendArray(&((UART_LINK).device), msg, 1, 1);
   return false;
+}
+
+bool fly_through_window(void) {
+  static int8_t win_state = 0;
+  static struct FloatVect3 window_loc;
+  static int16_t win_counter = 0;
+  static float window_dist = 0;
+
+  if (autopilot_mode != AP_MODE_GUIDED) { return true; }
+
+  // TODO window lost recovery
+  if (!win_processed) {
+    win_processed = 1;
+    switch (win_state){
+      // yaw to get parallel with wall
+      case 0:
+        if(disp_diff > 2){
+          guidance_h_set_guided_heading_rate(-1.);
+          win_counter--;
+        } else if ( disp_diff < -2 ) {
+          guidance_h_set_guided_heading_rate(1.);
+          win_counter--;
+        } else {
+          guidance_h_set_guided_heading(stateGetNedToBodyEulers_f()->psi);
+          win_counter++;
+        }
+        if (win_counter > 5){
+          win_state++;
+          printf("State advancing to window centering\n");
+          win_counter = 0;
+          guidance_v_set_guided_z(-1.7);  // TODO make variable
+
+          // reinitialise filter
+          window_loc.x = 3.;
+          window_loc.y = 0.;
+          window_loc.z = 0.;
+        }
+        if (win_counter < 0){
+          win_counter = 0;
+        }
+        break;
+      // centre drone in front of window at about 2m away
+      case 1:
+        if ( win_cert < 70 ){
+          // lowpass filter window geolocation
+          window_dist = (float)win_dist / 100.;
+          window_loc.x += 1 * (window_dist - window_loc.x);
+          window_loc.y += 1 * ((win_x - 64) * window_dist / 20 - window_loc.y); // assume focal length is 20px
+          window_loc.z += 1 * ((win_y - 48) * window_dist / 20 - window_loc.z); // down is positive
+          win_counter++;
+
+          printf("guided: %f %f %f\n", window_loc.x, window_loc.y, window_loc.z);
+
+          if(win_counter > 5){
+            guidance_h_set_guided_pos_relative(win_dist - 2.5, window_loc.y);
+          }
+        } else {
+          win_counter--;
+        }
+        // if position error is small
+        if (fabs(win_dist - 2.5) < 0.2 && fabs(window_loc.y) < 0.2 && win_counter > 20) {
+          win_state++;
+          printf("State advancing to window fly through\n");
+          win_counter = 0;
+        }
+        if (win_counter < 0){
+          win_counter = 0;
+        }
+        break;
+      // fly forward with active control till <2m in front of window
+      case 2:
+        guidance_h_set_guided_pos_relative(win_dist + 0.5, window_loc.y);
+        win_state++;
+        break;
+      case 3:
+        if (stateGetSpeedNed_f()->x < 0.1 && stateGetSpeedNed_f()->y < 0.1 && win_counter > 1000) {
+          win_counter = 0;
+          win_state = 0;
+          printf("Window fly through complete\n");
+          return false;
+        }
+        win_counter++;
+        break;
+      default:
+        break;
+    }
+  }
+
+  return true;
 }

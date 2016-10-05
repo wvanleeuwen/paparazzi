@@ -33,8 +33,9 @@ struct MedianFilter3Int pixelwise_filter;
 struct Egomotion stereo_motion;
 
 uint8_t tracked_x, tracked_y;
-uint8_t win_x, win_y, win_cert, win_size;
-uint16_t win_dist;
+uint8_t win_x, win_y, win_cert, disp_sum, win_processed;
+int8_t disp_diff;
+uint16_t win_dist, win_size;
 
 struct Int16Vect3 vel_pixel_i, vel_global_i;
 uint8_t agl; // in dm
@@ -69,12 +70,20 @@ void stereo_to_state_init(void)
 #endif
 
   memset(range_finder, 0, sizeof(range_finder));
+
+  win_x = 64;
+  win_y = 48;
+  disp_diff = 0;
+  win_cert = 100;
+  win_size = 0;
+  win_dist = 0;
+  win_processed = 1;
 }
 
 void stereo_to_state_periodic(void)
 {
-  if (stereocam_data.fresh && stereocam_data.len == 28) { // length of SEND_EDGEFLOW message
-	stereocam_to_state();
+  if (stereocam_data.fresh && stereocam_data.len == 30) { // length of SEND_EDGEFLOW message
+    stereocam_to_state();
     stereocam_data.fresh = 0;
   } else if (stereocam_data.fresh && stereocam_data.len == 2) {  // length of Lucas Kanade point tracker message
     tracked_x = stereocam_data.data[0];
@@ -87,13 +96,18 @@ void stereo_to_state_periodic(void)
     range_finder[2] = int16Arrray[2];
     range_finder[3] = int16Arrray[3];
     stereocam_data.fresh = 0;
-  } else if (stereocam_data.fresh && stereocam_data.len == 9) {  // length of WINDOW message
+  } else if (stereocam_data.fresh && stereocam_data.len == 12) {  // length of WINDOW message
     win_x = stereocam_data.data[0];
     win_y = stereocam_data.data[1];
     win_cert = stereocam_data.data[2];
-    win_size = stereocam_data.data[6];
-    win_dist = (uint16_t)stereocam_data.data[8] | ((uint16_t)stereocam_data.data[7] << 8);
+    disp_sum = stereocam_data.data[3];
+    disp_diff = stereocam_data.data[4];
+    win_size = stereocam_data.data[8]; win_size |= ((uint16_t)stereocam_data.data[9] << 8);
+    win_dist = stereocam_data.data[10]; win_dist |= ((uint16_t)stereocam_data.data[11] << 8);
+    win_processed = 0;
     stereocam_data.fresh = 0;
+
+    printf("%d %d %d %d %d %d %d\n", win_x, win_y, disp_sum, disp_diff, win_cert, win_size, win_dist);
   }
 }
 

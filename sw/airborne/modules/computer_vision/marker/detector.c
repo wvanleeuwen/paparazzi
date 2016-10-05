@@ -98,7 +98,6 @@ static void geo_locate_marker(struct Marker *marker, struct image_t* img) {
     marker->geo_location.z = 0;
 }
 
-
 static void marker_detected(struct Marker *marker, struct image_t* img, int pixelx, int pixely)
 {
     marker->detected = true;

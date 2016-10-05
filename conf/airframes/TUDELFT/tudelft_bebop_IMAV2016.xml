@@ -57,7 +57,6 @@
       <define name="OPTICFLOW_DEROTATION_CORRECTION_FACTOR_Y" value="0.85"/> <!--Obtained from a linefit-->
     </module>
 
-
     <module name="cv_marker_detection">
       <define name="DETECTOR_CAMERA1" value="bottom_camera"/>
       <define name="DETECTOR_CAMERA2" value="front_camera"/>

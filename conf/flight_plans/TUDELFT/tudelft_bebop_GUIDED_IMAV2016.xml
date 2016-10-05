@@ -105,6 +105,15 @@
       <call_once fun="open_gripper()"/>
       <while cond="1"/>
     </block>
+    
+    <block name="Fly Through Window">
+      <call fun="fly_through_window()"/>
+    </block>
+    
+    <block name="Hover">
+      <call fun="Hover(1.5)"/>
+      <while cond="1"/>
+    </block>
 
     <!--<block name="Detect Landing Pad">-->
       <!--<call_once fun="detector_locate_helipad()"/>-->

@@ -695,6 +695,20 @@ bool guidance_h_set_guided_pos(float x, float y)
   return false;
 }
 
+bool guidance_h_set_guided_pos_relative(float x, float y)
+{
+  if (guidance_h.mode == GUIDANCE_H_MODE_GUIDED) {
+    ClearBit(guidance_h.sp.mask, 5);
+    float psi = stateGetNedToBodyEulers_f()->psi;
+    guidance_h.sp.pos.x = POS_BFP_OF_REAL(stateGetPositionNed_f()->x + cosf(-psi) * x + sinf(-psi) * y);
+    guidance_h.sp.pos.y = POS_BFP_OF_REAL(stateGetPositionNed_f()->y - sinf(-psi) * x + cosf(-psi) * y);
+    return true;
+  }
+  return false;
+}
+
+
+
 bool guidance_h_set_guided_heading(float heading)
 {
   if (guidance_h.mode == GUIDANCE_H_MODE_GUIDED) {
