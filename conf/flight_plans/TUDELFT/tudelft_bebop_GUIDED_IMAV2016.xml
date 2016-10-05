@@ -43,7 +43,7 @@
     <!--Hover at the current location-->
     <block name="Hover and wait">
       <call_once fun="sonar_obstacle_detect_on()"/>
-      <call fun="Hover(1.5)"/>
+      <call fun="Hover(1)"/>
       <while cond="1"/>
     </block>
 
@@ -51,25 +51,27 @@
       <call_once fun="sonar_obstacle_detect_off()"/>
       <call fun="StartEngines()"/>
       <call fun="TakeOff(0.1)"/>
-      <exception cond="stateGetPositionEnu_f()->z > 1.5" deroute="Hover 0.5 sec"/>
+      <exception cond="stateGetPositionEnu_f()->z > 1" deroute="Hover 0.5 sec"/>
       <while cond="1"/>
     </block>
 
     <block name="Hover 0.5 sec">
       <call_once fun="sonar_obstacle_detect_on()"/>
-      <call fun="Hover(1.5)"/>
+      <call fun="Hover(1)"/>
       <while cond="0.5 > block_time"/>
     </block>
 
     <block name="Find bucket">
-      <call fun="bucket_heading_change(1.5)"/>
-      <exception cond="marker1.detected == true" deroute="Center bucket"/>
+      <call fun="Hover(1)"/>
+      <call fun="bucket_heading_change(1)"/>
+      <exception cond="marker1.found_time > 1" deroute="Center bucket"/>
     </block>
 
     <block name="Approach bucket">
-      <call fun="bucket_approach(1.5)"/>
+      <call fun="Hover(1)"/>
+      <call fun="bucket_approach(1)"/>
       <exception cond="marker_lost == true" deroute="Find bucket"/>
-      <exception cond="marker1.detected == true" deroute="Center bucket"/>
+      <exception cond="marker1.found_time > 1" deroute="Center bucket"/>
     </block>
 
     <!--<block name="Center bucket set alt">-->
@@ -81,7 +83,7 @@
 
     <block name="Center bucket">
       <call_once fun="sonar_obstacle_detect_off()"/>
-      <call fun="Hover(1.5)"/>
+      <call fun="Hover(1)"/>
       <call fun="marker_center_land(0.05, 0, 0)"/>
       <exception cond="marker1.found_time > 3" deroute="Land bucket"/>
     </block>

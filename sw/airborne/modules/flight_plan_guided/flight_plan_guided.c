@@ -147,8 +147,8 @@ static float BUCKET_HEADING_RATE = 0.5; // rad/s
 
 bool bucket_heading_change(float altitude) {
   if (autopilot_mode != AP_MODE_GUIDED) { return true; }
-  guidance_v_set_guided_z(-altitude);
-  guidance_h_set_guided_body_vel(0., 0.);
+//  guidance_v_set_guided_z(-altitude);
+//  guidance_h_set_guided_body_vel(0., 0.);
 
   if (marker2.detected) {
     marker_lost = false;
@@ -180,15 +180,15 @@ bool bucket_heading_change(float altitude) {
   return true;
 }
 
-static int BUCKET_POSITION_MARGIN = 45;
-static int BUCKET_POSITION_MARGIN_LOST = 200;
+static int BUCKET_POSITION_MARGIN = 100; // > 50 SO DISABLED
+static int BUCKET_POSITION_MARGIN_LOST = 50;
 static float BUCKET_DRIFT_CORRECTION_RATE = 0.05;
-static float BUCKET_APPROACH_SPEED_HIGH = 0.1;
+static float BUCKET_APPROACH_SPEED_HIGH = 0.2;
 static float BUCKET_APPROACH_SPEED_LOW = 0.05;
 
 bool bucket_approach(float altitude) {
   if (autopilot_mode != AP_MODE_GUIDED) { return true; }
-  guidance_v_set_guided_z(-altitude);
+//  guidance_v_set_guided_z(-altitude);
 
   if (marker1.detected) {
     // Hand over control to next stage
