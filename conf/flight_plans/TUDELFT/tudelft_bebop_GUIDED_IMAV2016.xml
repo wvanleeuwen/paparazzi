@@ -107,6 +107,16 @@
       <call_once fun="detector_locate_bucket()"/>
       <while cond="1"/>
     </block>
+    
+    <block name="Close Gripper">
+      <call_once fun="close_gripper()"/>
+      <while cond="1"/>
+    </block>
+    
+    <block name="Open Gripper">
+      <call_once fun="open_gripper()"/>
+      <while cond="1"/>
+    </block>
 
     <!--<block name="Detect Landing Pad">-->
       <!--<call_once fun="detector_locate_helipad()"/>-->

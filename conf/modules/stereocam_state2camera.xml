@@ -9,11 +9,33 @@
     </description>
     <configure name="STEREO_UART" value="UARTX" description="Sets the UART port number of the connected camera (required)"/>
     <configure name="STEREO_BAUD" value="BXXXXX" description="Sets the BAUD rate of the connected camera (required: must be same as camera)"/>
+    <section name="STEREOCAM">
+      <define name="STEREOCAM_EDGEFLOW_WINDOW_SIZE" value="8"/>
+      <define name="STEREOCAM_EDGEFLOW_SEARCH_DISTANCE" value="15"/>
+      <define name="STEREOCAM_EDGEFLOW_DEROTATION" value="0" />
+      <define name="STEREOCAM_EDGEFLOW_ADAPT_HORIZON" value="0"/>
+      <define name="STEREOCAM_EDGEFLOW_SNAPSHOT" value="0"/>
+      <define name="STEREOCAM_EDGEFLOW_KALMAN_FILTERING" value="0"/>
+    </section>
   </doc>
+   <settings>
+	<dl_settings NAME="stereocam_vision">
+      	<!-- Optical flow calculations parameters -->
+      <dl_settings name="stereocam_vision">
+        <dl_setting var="edgeflow.window_size" module="stereocam/state2camera/state2camera" min="0" step="1" max="20" shortname="window_size" param="STEREOCAM_EDGEFLOW_WINDOW_SIZE"/>
+        <dl_setting var="edgeflow.search_distance" module="stereocam/state2camera/state2camera" min="0" step="1" max="50" shortname="search_distance" param="STEREOCAM_EDGEFLOW_SEARCH_DISTANCE"/>
+        <dl_setting var="edgeflow.derotation" min="0" step="1" max="1" module="stereocam/state2camera/state2camera" values="OFF|ON" shortname="derotation" param="STEREOCAM_EDGEFLOW_DEROTATION"/>
+        <dl_setting var="edgeflow.adaptive_time_horizon" min="0" step="1" max="1" module="stereocam/state2camera/state2camera" values="OFF|ON" shortname="adaptive_horizon" param="STEREOCAM_EDGEFLOW_ADAPT_HORIZON"/>
+        <dl_setting var="edgeflow.snapshot" min="0" step="1" max="1" module="stereocam/state2camera/state2camera" values="OFF|ON" shortname="snapshot" param="STEREOCAM_EDGEFLOW_SNAPSHOT"/>
+        <dl_setting var="edgeflow.kalman" min="0" step="1" max="1" module="stereocam/state2camera/state2camera" values="OFF|ON" shortname="kalman" param="STEREOCAM_EDGEFLOW_KALMAN_FILTERING"/>
+      </dl_settings>
+    </dl_settings>
+  </settings>
   <header>
     <file name="state2camera/state2camera.h"/>
   </header>
-  <periodic fun="write_serial_rot()" freq="512."/>
+  <init fun="init_state2camera()"/>
+  <periodic fun="write_serial_rot()" freq="30"/>
   <makefile>
     <file name="state2camera/state2camera.c"/>
     <file name="stereoprotocol.c" dir="modules/stereocam"/>
