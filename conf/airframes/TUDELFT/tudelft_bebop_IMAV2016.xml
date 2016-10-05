@@ -43,7 +43,6 @@
     </module>
     <module name="pose_history"/>
     <module name="video_thread"/>
-    <module name="cv_georeference"/>
     <module name="flight_plan_guided"/>
 
     <module name="cv_opticflow">
@@ -95,7 +94,7 @@
       <define name="VIEWVIDEO_QUALITY_FACTOR" value="60"/>
 
       <configure name="VIEWVIDEO_BROADCAST" value="FALSE"/>
-      <configure name="VIEWVIDEO_HOST" value="192.168.42.30"/>
+      <configure name="VIEWVIDEO_HOST" value="192.168.42.68"/>
     </module>
     
     <module name="cv_ae_awb"/>
@@ -279,10 +278,8 @@
     <!-- Bad weather -->
     <!-- define name="MAX_BANK" value="32" unit="deg"/ -->
 
-    <!--<define name="PGAIN" value="120"/>-->
-    <define name="PGAIN" value="175"/>
-    <!--<define name="DGAIN" value="140"/>-->
-    <define name="DGAIN" value="200"/>
+    <define name="PGAIN" value="260"/>
+    <define name="DGAIN" value="240"/>
     <define name="IGAIN" value="20"/>
   </section>
 

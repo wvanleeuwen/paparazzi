@@ -52,7 +52,8 @@ extern bool open_gripper(void);
 
 bool bucket_heading_change(float altitude);
 bool bucket_approach(float altitude);
-bool bucket_center_alt(float altitude);
 bool bucket_center(void);
+
+bool marker_center_land(float x_offset, float z_speed, float end_altitude);
 
 #endif

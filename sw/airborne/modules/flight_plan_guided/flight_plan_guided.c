@@ -245,7 +245,7 @@ bool bucket_center(void) {
       float psi = stateGetNedToBodyEulers_f()->psi;
 
       // add small lateral offset so marker is in centre of gripper
-      float x_offset = 0.0;
+      float x_offset = 0.05;
 
       float pos_x = marker1.geo_location.x + cosf(-psi) * x_offset;
       float pos_y = marker1.geo_location.y - sinf(-psi) * x_offset;
@@ -254,6 +254,60 @@ bool bucket_center(void) {
     }
   } else {
     marker_lost = true;
+  }
+
+  // Loop this function
+  return true;
+}
+
+
+#define ERR_MIN 0.05
+#define ERR_MAX 0.30
+#define ERR_GAIN (1.0 / (ERR_MAX - ERR_MIN))
+
+bool marker_center_land(float x_offset, float z_speed, float end_altitude) {
+  if (autopilot_mode != AP_MODE_GUIDED) { return true; }
+
+  if (end_altitude != 0 && stateGetPositionEnu_f()->z < end_altitude) {
+      return false;
+  }
+
+  struct Marker *marker = &marker1;
+
+  guidance_h_set_guided_heading_rate(0.);
+
+  if (marker->detected) {
+    if (!marker->processed) {
+      marker->processed = true;
+
+      struct EnuCoor_f *speed = stateGetSpeedEnu_f();
+
+      float psi = stateGetNedToBodyEulers_f()->psi;
+
+      float offset_x = cosf(-psi) * x_offset;
+      float offset_y = sinf(-psi) * x_offset;
+
+      float rel_x = marker->geo_relative.x + offset_x;
+      float rel_y = marker->geo_relative.y + offset_y;
+
+      // err < 0.05 = acceptable when landed
+      // err < 0.10 = acceptable at low altitude
+      // err < 0.30 = caution when landing
+      // err > 0.30 = NOT GOOD
+      // err > 0.50 = probably lost marker
+      float err = fabsf(rel_x) + fabsf(rel_y);
+
+      if (z_speed != 0) {
+//      fprintf(stderr, "[landing] %.2f, %.2f, %.2f\n", rel_x, rel_y, err);
+        float bounded_err = Chop(err, ERR_MIN, ERR_MAX);
+        guidance_v_set_guided_vz(z_speed - z_speed * (bounded_err - ERR_MIN) * ERR_GAIN);
+      }
+
+      float pos_x = marker->geo_location.x + offset_x;
+      float pos_y = marker->geo_location.y - offset_y;
+
+      guidance_h_set_guided_pos(pos_x, pos_y);
+    }
   }
 
   // Loop this function
