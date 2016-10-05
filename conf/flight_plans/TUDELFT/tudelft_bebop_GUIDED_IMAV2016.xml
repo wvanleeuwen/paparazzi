@@ -76,14 +76,14 @@
       <call_once fun="sonar_obstacle_detect_off()"/>
       <call fun="bucket_center_alt(1.5)"/>
       <exception cond="marker1.detected == false && 3 > marker1.found_time" deroute="Find bucket"/>
-      <exception cond="marker1.mid == true && marker1.mid_time >= 3" deroute="Land bucket"/>
+      <exception cond="marker1.mid == true && marker1.mid_time >= 5" deroute="Land bucket"/>
     </block>
 
     <block name="Center bucket">
       <call_once fun="sonar_obstacle_detect_off()"/>
       <call fun="bucket_center()"/>
       <exception cond="marker1.detected == false && 3 > marker1.found_time" deroute="Find bucket"/>
-      <exception cond="marker1.mid == true && marker1.mid_time >= 3" deroute="Land bucket"/>
+      <exception cond="marker1.mid == true && marker1.mid_time >= 5" deroute="Land bucket"/>
     </block>
 
     <block name="Land bucket">
@@ -93,7 +93,7 @@
       <while cond="1"/>                   <!-- wait indefinitely -->
       <!--This is for red bucket-->
       <exception cond="marker1.detected == false" deroute="Center bucket set alt"/>
-      <exception cond="marker1.mid == false && 2.95 >= marker1.mid_time" deroute="Center bucket"/>
+      <exception cond="marker1.mid == false && 4.95 >= marker1.mid_time" deroute="Center bucket"/>
       <!--This is for landing pad-->
       <!--<exception cond="1.15 > marker1.mid_time" deroute="Hover"/>-->
     </block>
