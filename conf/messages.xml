@@ -2261,8 +2261,9 @@
     <field name="detected" type="uint8" unit="bool"/>
     <field name="pixel_x" type="uint32"/>
     <field name="pixel_y" type="uint32"/>
+    <field name="position_x" type="float"/>
+    <field name="position_y" type="float"/>
     <field name="found_time" type="float" unit="s" />
-    <field name="mid_time" type="float" unit="s" />
   </message>
 
    <message name="GPS_SMALL" id="252">

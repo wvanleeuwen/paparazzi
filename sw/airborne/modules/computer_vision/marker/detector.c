@@ -40,18 +40,10 @@
 
 static bool SHOW_MARKER = true;
 static float MARKER_FOUND_TIME_MAX = 5.0;
-static float MARKER_MID_TIME_MAX = 5.0;
-
-//This is for bucket
-//static int MARKER_WINDOW = 25;
-
-//This is for landing pad
-static int MARKER_WINDOW = 40;
 
 // General outputs
 struct Marker marker1;
 struct Marker marker2;
-struct PIXEL pixel_relative;
 
 // Helipad detection
 static struct video_listener* helipad_listener;
@@ -108,33 +100,11 @@ static void marker_detected(struct Marker *marker, struct image_t* img, int pixe
     marker->pixel.x = pixelx;
     marker->pixel.y = pixely;
 
-    // calculate geo location
-    geo_locate_marker(marker, img);
-
-    // Increase marker detected time and mid counter
-
+    // Increase marker detected time
     marker->found_time += img->dt / 1000000.f;
 
-    if (marker->found_time > MARKER_FOUND_TIME_MAX) { marker->found_time = MARKER_FOUND_TIME_MAX; }
-    if (marker->mid_time > MARKER_MID_TIME_MAX) { marker->mid_time = MARKER_MID_TIME_MAX; }
-
-    // This is for landing pad
-//    if (marker->pixel.x < 120 + MARKER_WINDOW &&
-//        marker->pixel.x > 120 - MARKER_WINDOW &&
-//        marker->pixel.y < 120 + MARKER_WINDOW && //To account for gripper in the back
-//        marker->pixel.y > 120 - MARKER_WINDOW)
-    // This is for bucket
-    if (marker->pixel.x < 120 + MARKER_WINDOW &&
-        marker->pixel.x > 120 - MARKER_WINDOW &&
-        marker->pixel.y < 100 + MARKER_WINDOW && //To account for gripper in the back
-        marker->pixel.y > 100 - MARKER_WINDOW)
-    {
-        marker->mid = true;
-        marker->mid_time += img-> dt / 1000000.f;
-    } else {
-        marker->mid = false;
-        marker->mid_time -= 0.1 * img-> dt / 1000000.f;
-        if (marker->mid_time < 0) { marker->mid_time = 0; }
+    if (marker->found_time > MARKER_FOUND_TIME_MAX) {
+        marker->found_time = MARKER_FOUND_TIME_MAX;
     }
 
     marker->processed = false;
@@ -143,17 +113,12 @@ static void marker_detected(struct Marker *marker, struct image_t* img, int pixe
 static void marker_not_detected(struct Marker *marker, struct image_t* img)
 {
     marker->detected = false;
-    marker->mid = false;
 
-    //This is for bucket
-//    marker->found_time -= 1.5 * img->dt / 1000000.f;
-//    marker->mid_time -= 1* img-> dt / 1000000.f;
-    //This is for landing pad
     marker->found_time -= 1 * img->dt / 1000000.f;
-    marker->mid_time -= 0.5* img-> dt / 1000000.f;
 
-    if (marker->found_time < 0) { marker->found_time = 0; }
-    if (marker->mid_time < 0) { marker->mid_time = 0; }
+    if (marker->found_time < 0) {
+        marker->found_time = 0;
+    }
 }
 
 static struct image_t *detect_bottom_bucket(struct image_t* img) {
@@ -197,9 +162,9 @@ static struct image_t *detect_bottom_bucket(struct image_t* img) {
     if (largest_id >= 0)
     {
         int xloc   = labels[largest_id].x_sum / labels[largest_id].pixel_cnt * 2;
-        int yloc   = labels[largest_id].y_sum / labels[largest_id].pixel_cnt; //-20 is for the gripper position bias
-        if (yloc <= 0){yloc = 0;}
+        int yloc   = labels[largest_id].y_sum / labels[largest_id].pixel_cnt;
         marker_detected(&marker1, img, xloc, yloc);
+        geo_locate_marker(&marker1, img);
     }
     else
     {
@@ -207,8 +172,6 @@ static struct image_t *detect_bottom_bucket(struct image_t* img) {
     }
 
     image_free(&dst);
-
-//    fprintf(stderr, "[blob] fps %.2f \n", (1000000.f / img->dt));
 
     return NULL;
 }
@@ -282,6 +245,7 @@ static struct image_t *detect_helipad_marker(struct image_t* img)
     if (helipad_marker.marker)
     {
         marker_detected(&marker1, img, helipad_marker.maxx, helipad_marker.maxy);
+        geo_locate_marker(&marker1, img);
     }
     else
     {
@@ -304,12 +268,11 @@ static struct image_t *draw_target_marker1(struct image_t* img)
 
     DOWNLINK_SEND_DETECTOR(DefaultChannel, DefaultDevice,
                            &marker1.detected,
-//                           &marker1.pixel.x,
-//                           &marker1.pixel.y,
-                           &pixel_relative.x,
-                           &pixel_relative.y,
-                           &marker1.found_time,
-                           &marker1.mid_time);
+                           &marker1.pixel.x,
+                           &marker1.pixel.y,
+                           &marker1.geo_relative.x,
+                           &marker1.geo_relative.y,
+                           &marker1.found_time);
 
     return img;
 }
@@ -344,14 +307,11 @@ void detector_locate_helipad(void)
 void detector_init(void)
 {
     // BOTTOM MARKER
-
     marker1.detected = false;
-    marker1.mid = false;
     marker1.processed = true;
     marker1.pixel.x = 0;
     marker1.pixel.y = 0;
     marker1.found_time = 0;
-    marker1.mid_time = 0;
 
     helipad_listener = cv_add_to_device_async(&DETECTOR_CAMERA1, detect_helipad_marker, 5);
     helipad_listener->maximum_fps = 20;

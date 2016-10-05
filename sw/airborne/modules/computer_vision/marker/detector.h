@@ -35,15 +35,6 @@ struct Marker {
     struct NedCoor_f geo_location;
     struct FloatVect3 geo_relative;
     float found_time;
-    float mid;
-    float mid_time;
-
-};
-
-struct PIXEL {
-    float x;
-    float y;
-    float z;
 };
 
 extern struct Marker marker1;
