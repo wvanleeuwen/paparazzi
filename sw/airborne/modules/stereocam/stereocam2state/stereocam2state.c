@@ -107,7 +107,7 @@ void stereo_to_state_periodic(void)
     win_processed = 0;
     stereocam_data.fresh = 0;
 
-    printf("%d %d %d %d %d %d %d\n", win_x, win_y, disp_sum, disp_diff, win_cert, win_size, win_dist);
+    //printf("%d %d %d %d %d %d %d\n", win_x, win_y, disp_sum, disp_diff, win_cert, win_size, win_dist);
   }
 }
 

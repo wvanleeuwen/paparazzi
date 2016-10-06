@@ -55,5 +55,6 @@ extern bool bucket_approach(void);
 extern bool bucket_center(void);
 
 extern bool fly_through_window(void);
+extern int8_t win_state;
 
 #endif
