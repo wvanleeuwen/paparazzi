@@ -181,10 +181,10 @@
   </section>
 
   <section name="INS" prefix="INS_">
-    <define name="SONAR_BARO_THRESHOLD" value="2.5"/>
+    <define name="SONAR_BARO_THRESHOLD" value="1.5"/>
     <define name="SONAR_UPDATE_ON_AGL" value="TRUE"/>
-    <!--define name="USE_HFF"/-->
-    <define name="INT_GPS_ID" value="ABI_DISABLE"/>
+    <define name="VFF_R_SONAR_OF_M" value="0."/>
+    <define name="INS_SONAR_OFFSET" value="0."/><!--0.4 when legs attached-->
   </section>
 
   <section name="RC_SETPOINT" prefix="STABILIZATION_ATTITUDE_">
@@ -236,8 +236,8 @@
     <!--<define name="G2_R" value="0.01448"/>-->
 
     <!-- bebop TUBB05 (plastic legs) -->
-    <define name="G1_P" value="0.037038"/>
-    <define name="G1_Q" value="0.026524"/>
+    <define name="G1_P" value="0.062038"/>
+    <define name="G1_Q" value="0.042524"/>
     <define name="G1_R" value="0.002187"/>
     <define name="G2_R" value="0.181954"/>
 
@@ -266,8 +266,8 @@
   </section>
 
   <section name="GUIDANCE_V" prefix="GUIDANCE_V_">
-    <define name="HOVER_KP" value="2000"/>
-    <define name="HOVER_KD" value="450"/>
+    <define name="HOVER_KP" value="1000"/>
+    <define name="HOVER_KD" value="250"/>
     <define name="HOVER_KI" value="0"/>
     <define name="NOMINAL_HOVER_THROTTLE" value="0.55"/>
     <!--<define name="ADAPT_THROTTLE_ENABLED" value="TRUE"/>-->

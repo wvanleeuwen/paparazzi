@@ -14,13 +14,13 @@
 
 // camera params: TODO: would be better to get from elsewhere!!!
 // TODO KIRK find correct
-#define FOV_W (120.0f/180.0f)*PI
-#define FOV_H (90.0f/180.0f)*PI
+#define FOV_W (150.0f/180.0f)*PI
+#define FOV_H (130.0f/180.0f)*PI
 
 // gate params: TODO: would also be better to put elsewhere, centrally:
 // TODO KIRK find correct
-#define GATE_SIZE 1.0f  // m
-#define HALF_GATE_SIZE 0.5f
+#define GATE_SIZE 1.1f  // m
+#define HALF_GATE_SIZE 0.55f
 
 // variables that have to be remembered in between function calls:
 
@@ -42,8 +42,7 @@ int WEIGHTED = 0; // color has no weight at the moment, since it is thresholded
 #define CIRCLE 0
 #define SQUARE 1
 #define POLYGON 2
-#define RECTANGLE 3
-#define SHAPE POLYGON
+#define SHAPE SQUARE//POLYGON
 float outlier_threshold = 20.0f;
 
 // Settings for the evolution:
@@ -64,7 +63,6 @@ int GRAPHICS = 0;
 
 // factor within which we search for clock arms:
 float clock_factor = 0.6;
-
 
 
 /**
@@ -213,12 +211,9 @@ void fit_window_to_points(int *x0, int *y0, int *size0, float *x_center, float *
     Population[i][0] = (*x0) + 5 * get_random_number() - 2.5f;
     Population[i][1] = (*y0) + 5 * get_random_number() - 2.5f;
     Population[i][2] = (*size0) + 5 * get_random_number() - 2.5f;
-    if (SHAPE == POLYGON || SHAPE == RECTANGLE) {
-      // also the half-sizes of the right and left part of the gate are optimized:
-      Population[i][3] = (*size0) + 5 * get_random_number() - 2.5f;
-    }
     if (SHAPE == POLYGON) {
       // also the half-sizes of the right and left part of the gate are optimized:
+      Population[i][3] = (*size0) + 5 * get_random_number() - 2.5f;
       Population[i][4] = (*size0) + 5 * get_random_number() - 2.5f;
     }
   }

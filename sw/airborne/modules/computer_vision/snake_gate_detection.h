@@ -67,10 +67,14 @@ extern struct video_listener *listener;
 
 extern float delta_z_gate;
 
+extern float gate_x_dist;
+extern float gate_y_dist;
+extern float gate_z_dist;
 extern float filtered_x_gate;
 extern float filtered_y_gate;
 extern float filtered_z_gate;
 extern int gate_detected;
+extern int gate_processed;
 extern int ready_pass_through;
 extern int init_pos_filter;
 

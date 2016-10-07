@@ -34,10 +34,6 @@
 #include "state.h"
 #include "mcu_periph/sys_time.h"
 
-//#include "modules/state_autonomous_race/state_autonomous_race.h"
-//#include "modules/flight_plan_in_guided_mode/flight_plan_clock.h"
-//#include "modules/state_autonomous_race/state_autonomous_race.h"
-
 #ifndef SGD_CAMERA
 #define SGD_CAMERA front_camera
 #endif
@@ -51,11 +47,11 @@
 #define INITIAL_Z 0
 
 //initial position and speed safety margins
-#define X_POS_MARGIN 0.15//m
-#define Y_POS_MARGIN 0.5//m
-#define Z_POS_MARGIN 0.15//m
-#define X_SPEED_MARGIN 0.15//m/s
-#define Y_SPEED_MARGIN 0.2//m/s
+#define X_POS_MARGIN 0.15 //m
+#define Y_POS_MARGIN 0.5 //m
+#define Z_POS_MARGIN 0.15 //m
+#define X_SPEED_MARGIN 0.15 //m/s
+#define Y_SPEED_MARGIN 0.2 //m/s
 
 struct video_listener *listener = NULL;
 
@@ -83,23 +79,23 @@ uint8_t color_cr_max  = 255;//230;//255;
 #endif
 
 // Gate detection settings:
-int n_samples = 1000;//1000;//500;
-int min_pixel_size = 40;//100;
+int n_samples = 1000; //1000;//500;
+int min_pixel_size = 40;  //100;
 float min_gate_quality = 0.15;
-float gate_thickness = 0;//0.05;//0.10;//
+float gate_thickness = 0; //0.05;//0.10;//
 
 // TODO KIRK find correct
-const float gate_size_m = 1.;   // gate size in meters
+const float gate_size_m = 1.1;   // gate size in meters
 
 // Result
 #define MAX_GATES 50
 struct gate_img gates[MAX_GATES];
-struct gate_img best_gate;
+struct gate_img best_gate = {0,0,0,0};
 struct image_t img_result;
 int n_gates = 0;
-float best_quality = 0;
-float current_quality = 0;
-float best_fitness = 100000;
+float best_quality = 0.;
+float current_quality = 0.;
+float best_fitness = 100000.;
 
 //color picker
 uint8_t y_center_picker  = 0;
@@ -111,19 +107,10 @@ uint8_t cr_center  = 0;
 #define radians_per_pix_w 0.006666667 //2.1 rad(60deg)/315
 #define radians_per_pix_h 0.0065625   //1.05rad / 160
 
-//original settings
-/*<define name="MT9F002_OUTPUT_WIDTH" value="160"/><!--128-->
-<define name="MT9F002_OUTPUT_HEIGHT" value="315"/>
-
-<define name="MT9F002_OUTPUT_SCALER" value="0.125"/>
-<define name="MT9F002_INITIAL_OFFSET_X" value="2050"/>      <!--2034--><!--2050-->
-
-<define name="MT9F002_INITIAL_OFFSET_Y" value="476"/><!--700-->*/
-
 // gate location relative to drone in body frame (assume forward camera)
-float x_dist = 0;
-float y_dist = 0;
-float z_dist = 0;
+float gate_x_dist = 0;
+float gate_y_dist = 0;
+float gate_z_dist = 0;
 
 //state filter
 float body_vx = 0;
@@ -145,6 +132,7 @@ float previous_z_gate = 0;
 //SAFETY AND RESET FLAGS
 int uncertainty_gate = 0;
 int gate_detected = 0;
+int gate_processed = 0;
 int counter_gate_detected = 0;
 int init_pos_filter = 0;
 int safe_pass_counter = 0;
@@ -173,7 +161,6 @@ int check_color(struct image_t *im, int x, int y)
   buf += 2 * (y * (im->w) + x); // each pixel has two bytes
   // odd ones are uy
   // even ones are vy
-
 
   if (
     (buf[1] >= color_lum_min)
@@ -230,51 +217,45 @@ static void image_yuv422_set_color(struct image_t *input, struct image_t *output
 
 static void calculate_gate_position(int x_pix, int y_pix, int sz_pix, struct image_t *img, struct gate_img gate)
 {
-  //pixel distance conversion
+  // pixel distance conversion
   static float hor_angle = 0, vert_angle = 0;
 
   // calculate angles here, rotate camera pixels 90 deg
-  vert_angle = (-(((float)x_pix * 1.0) - ((float)(img->w) / 2.0)) * radians_per_pix_w) -
-               (stateGetNedToBodyEulers_f()->theta);
-  hor_angle = (((float)y_pix * 1.0) - ((float)(img->h) / 2.0)) * radians_per_pix_h;
+  vert_angle = (-((float)x_pix - (float)(img->w) / 2.) * radians_per_pix_w)
+      - stateGetNedToBodyEulers_f()->theta;
+  hor_angle = ((float)y_pix - (float)(img->h) / 2.) * radians_per_pix_h;
 
   current_quality = gate.gate_q;
 
-  printf("gate size %d %f\n", gate.sz, gate.sz * radians_per_pix_w / 2);
-
   // in body frame
-  x_dist = gate_size_m * 2 / (gate.sz * radians_per_pix_w);
-  y_dist = x_dist * sin(hor_angle);
-  z_dist = x_dist * sin(vert_angle);
+  gate_x_dist = gate_size_m / (gate.sz * radians_per_pix_w);
+  gate_y_dist = gate_x_dist * sin(hor_angle);
+  gate_z_dist = gate_x_dist * sin(vert_angle);
 }
 
-//state filter in periodic loop
+// state filter in periodic loop
 void snake_gate_periodic(void)
 {
   if (time_gate_detected > last_processed) {
 
     //SAFETY gate_detected
-    if (x_dist > 0.6 && x_dist < 5) {
+    if (gate_x_dist > 0.6 && gate_x_dist < 5) {
       gate_detected = 1;
       counter_gate_detected = 0;
+      gate_processed = 0;
     } else {
       gate_detected = 0;
       counter_gate_detected = 0;
     }
 
-    if (gate_detected == 1){
-      printf("gate at %f %f %f\n", x_dist, y_dist, z_dist);
-    }
-
     //convert earth velocity to body x y velocity
     float psi = stateGetNedToBodyEulers_f()->psi;
-    //When using optitrack
     body_vx = cosf(psi)*stateGetSpeedNed_f()->x + sinf(psi)*stateGetSpeedNed_f()->y;
     body_vy = -sinf(psi)*stateGetSpeedNed_f()->x + cosf(psi)*stateGetSpeedNed_f()->y;
 
     //SAFETY ready_pass_trough
-    if (gate_detected == 1 && fabs(x_dist - INITIAL_X) < X_POS_MARGIN && fabs(y_dist - INITIAL_Y) < Y_POS_MARGIN
-        && fabs(z_dist - INITIAL_Z) < Z_POS_MARGIN && fabs(body_vx) < X_SPEED_MARGIN
+    if (gate_detected == 1 && fabs(gate_x_dist - INITIAL_X) < X_POS_MARGIN && fabs(gate_y_dist - INITIAL_Y) < Y_POS_MARGIN
+        && fabs(gate_z_dist - INITIAL_Z) < Z_POS_MARGIN && fabs(body_vx) < X_SPEED_MARGIN
         && fabs(body_vy) < Y_SPEED_MARGIN) {
       safe_pass_counter += 1;
     } else {
@@ -291,8 +272,9 @@ void snake_gate_periodic(void)
     if (init_pos_filter == 1) {
       init_pos_filter = 0;
       //assumed initial position at other end of the gate
-      predicted_x_gate = INITIAL_X;//0;
-      predicted_y_gate = INITIAL_Y;//1.5;
+      predicted_x_gate = INITIAL_X;
+      predicted_y_gate = INITIAL_Y;
+      predicted_z_gate = INITIAL_Z;
     }
 
     //State filter
@@ -320,9 +302,12 @@ void snake_gate_periodic(void)
         weight_measurement = 0.7;  //(GOOD_FIT-best_quality)/GOOD_FIT;//check constant weight
       }
 
-      filtered_x_gate = weight_measurement * x_dist + (1.0f - weight_measurement) * predicted_x_gate;
-      filtered_y_gate = weight_measurement * y_dist + (1.0f - weight_measurement) * predicted_y_gate;
-      filtered_z_gate = weight_measurement * (z_dist + sonar_alt) + (1.0f - weight_measurement) * predicted_z_gate;
+      filtered_x_gate = weight_measurement * gate_x_dist + (1.0f - weight_measurement) * predicted_x_gate;
+      filtered_y_gate = weight_measurement * gate_y_dist + (1.0f - weight_measurement) * predicted_y_gate;
+      filtered_z_gate = weight_measurement * (gate_z_dist + sonar_alt) + (1.0f - weight_measurement) * predicted_z_gate;
+
+      printf("gate at %f %f %f %f %f %f\n", gate_x_dist, gate_y_dist, gate_z_dist, filtered_x_gate, filtered_y_gate, filtered_z_gate);
+      printf("speed %f %f %f\n",body_vx, body_vy, dt);
 
       // reset uncertainty:
       uncertainty_gate = 0;
@@ -369,9 +354,15 @@ static struct image_t *snake_gate_detection_func(struct image_t *img)
   //check_color_center(img,&y_center_picker,&cb_center,&cr_center);
 
   for (i = 0; i < n_samples; i++) {
-    // get a random coordinate:
-    x = rand() % img->w;
-    y = rand() % img->h;
+    if (i == 0){
+      // use previous estimate
+      x = best_gate.x;
+      y = best_gate.y;
+    } else {
+      // get a random coordinate:
+      x = rand() % img->w;
+      y = rand() % img->h;
+    }
 
     //check_color(img, 1, 1);
     // check if it has the right color
@@ -448,55 +439,17 @@ static struct image_t *snake_gate_detection_func(struct image_t *img)
 
   // do an additional fit to improve the gate detection:
   if (best_quality > min_gate_quality && n_gates > 0) {
-    /*
-    // temporary variables:
-    float x_center, y_center, radius, fitness, angle_1, angle_2, psi;
-    int clock_arms = 1;
-
-    // prepare the Region of Interest (ROI), which is larger than the gate:
-    float size_factor = 1.5;//1.25;
-    int16_t ROI_size = (int16_t) (((float) gates[n_gates-1].sz) * size_factor);
-    int16_t min_x = gates[n_gates-1].x - ROI_size;
-    min_x = (min_x < 0) ? 0 : min_x;
-    int16_t max_x = gates[n_gates-1].x + ROI_size;
-    max_x = (max_x < img->w) ? max_x : img->w;
-    int16_t min_y = gates[n_gates-1].y - ROI_size;
-    min_y = (min_y < 0) ? 0 : min_y;
-    int16_t max_y = gates[n_gates-1].y + ROI_size;
-    max_y = (max_y < img->h) ? max_y : img->h;
-
-    draw_gate(img, gates[n_gates-1]);
-
-    // detect the gate:
-    gate_detection(img, &x_center, &y_center, &radius, &fitness, &(gates[n_gates-1].x), &(gates[n_gates-1].y), &(gates[n_gates-1].sz),
-                    (uint16_t) min_x, (uint16_t) min_y, (uint16_t) max_x, (uint16_t) max_y, clock_arms, &angle_1, &angle_2, &psi);
-
-    // store the information in the gate:
-    gates[n_gates-1].x = (int) x_center;
-    gates[n_gates-1].y = (int) y_center;
-    gates[n_gates-1].sz = (int) radius;
-    */
     // temporary variables:
     float x_center, y_center, radius, fitness, angle_1, angle_2, psi;
     int clock_arms = 1;
 
     // prepare the Region of Interest (ROI), which is larger than the gate:
     float size_factor = 1.5;//2;//1.25;
-    /*int16_t ROI_size = (int16_t) (((float) gates[n_gates-1].sz) * size_factor);
-    int16_t min_x = gates[n_gates-1].x - ROI_size;
-    min_x = (min_x < 0) ? 0 : min_x;
-    int16_t max_x = gates[n_gates-1].x + ROI_size;
-    max_x = (max_x < img->w) ? max_x : img->w;
-    int16_t min_y = gates[n_gates-1].y - ROI_size;
-    min_y = (min_y < 0) ? 0 : min_y;
-    int16_t max_y = gates[n_gates-1].y + ROI_size;
-    max_y = (max_y < img->h) ? max_y : img->h;*/
-
     if (gen_alg) {
       int max_candidate_gates = 5;
       best_fitness = 100;
       if (n_gates > 0 && n_gates < max_candidate_gates) {
-        for (int gate_nr = 0; gate_nr < n_gates; gate_nr += 1) {
+        for (int gate_nr = 0; gate_nr < n_gates; gate_nr++) {
           int16_t ROI_size = (int16_t)(((float) gates[gate_nr].sz) * size_factor);
           int16_t min_x = gates[gate_nr].x - ROI_size;
           min_x = (min_x < 0) ? 0 : min_x;
@@ -578,7 +531,7 @@ static struct image_t *snake_gate_detection_func(struct image_t *img)
 
     //calculate_gate_position(gates[n_gates-1].x,gates[n_gates-1].y,gates[n_gates-1].sz,img,gates[n_gates-1]);
     calculate_gate_position(best_gate.x, best_gate.y, best_gate.sz, img, best_gate);
-    time_gate_detected = sec_of_sys_time_ticks(img->pprz_ts);
+    time_gate_detected = get_sys_time_float();
   } else {
     gate_detected = 0;
     current_quality = 0;

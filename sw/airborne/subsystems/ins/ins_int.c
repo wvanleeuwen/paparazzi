@@ -441,7 +441,7 @@ static void sonar_cb(uint8_t __attribute__((unused)) sender_id, float distance)
 #endif
       && ins_int.update_on_agl
       && ins_int.baro_initialized) {
-    vff_update_z_conf(-(distance), VFF_R_SONAR_0 + VFF_R_SONAR_OF_M * fabsf(distance));
+    vff_update_z_conf(-(distance - INS_SONAR_OFFSET), VFF_R_SONAR_0 + VFF_R_SONAR_OF_M * fabsf(distance));
     last_offset = vff.offset;
   } else {
     /* update offset with last value to avoid divergence */

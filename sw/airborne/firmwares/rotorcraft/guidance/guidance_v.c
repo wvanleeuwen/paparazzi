@@ -326,8 +326,6 @@ void guidance_v_run(bool in_flight)
       if (guidance_v_guided_vel_enabled) {
         gv_update_ref_from_zd_sp(guidance_v_zd_sp, stateGetPositionNed_i()->z);
         run_hover_loop(in_flight);
-        /* update z sp for telemetry/debuging */
-        guidance_v_z_sp = guidance_v_z_ref;
       } else {
         guidance_v_zd_sp = 0;
         gv_update_ref_from_z_sp(guidance_v_z_sp);
@@ -492,7 +490,7 @@ bool guidance_v_set_guided_z(float z)
 
     /* reset guidance reference */
     guidance_v_z_sum_err = 0;
-    GuidanceVSetRef(guidance_v_z_sp, guidance_v_zd_sp, 0);
+    GuidanceVSetRef(stateGetPositionNed_i()->z, guidance_v_zd_sp, 0);
     return true;
   }
   return false;

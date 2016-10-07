@@ -66,8 +66,7 @@ uint8_t StartEngines(void) {
 
 
 /* Reset the altitude reference to the current GPS alt if GPS is used */
-uint8_t ResetAlt(void) {if (autopilot_mode == AP_MODE_GUIDED) { ins_reset_altitude_ref(); } return false;}
-
+uint8_t ResetAlt(void) {ins_reset_altitude_ref(); return false;}
 
 bool TakeOff(float climb_rate) {
     if (autopilot_mode != AP_MODE_GUIDED) { return true; }
@@ -273,45 +272,61 @@ int8_t win_state;
 
 bool fly_through_window(void) {
   static struct FloatVect3 window_loc;
-  static int16_t win_counter = 0;
   static float window_dist = 0;
+  static float mytime = 0;
 
   if (autopilot_mode != AP_MODE_GUIDED) { win_state = 0; return true; }
 
   // TODO window lost recovery
-  if (!win_processed) { // this will limit updates to the speed of the stereocam ~12Hz
-    win_processed = 1;
+  //if (!win_processed) { // this will limit updates to the speed of the stereocam ~12Hz
+  //  win_processed = 1;
     switch (win_state){
-      // yaw to get parallel with wall
       case 0:
-        guidance_v_set_guided_z(-1.7);
+        guidance_h_set_guided_pos_relative(stateGetPositionNed_f()->x, stateGetPositionNed_f()->y);
+        guidance_v_set_guided_z(-1.2);
+        mytime = get_sys_time_float();
+        init_pos_filter = 1;
+        win_state++;
+        break;
+      // yaw to get parallel with wall
+      case 1:
+        printf("disp_diff %d\n", disp_diff);
         if(disp_diff > 1){
           guidance_h_set_guided_heading_rate(-0.5);
-          win_counter--;
+          mytime = get_sys_time_float();
         } else if ( disp_diff < -1 ) {
           guidance_h_set_guided_heading_rate(0.5);
-          win_counter--;
+          mytime = get_sys_time_float();
         } else {
           guidance_h_set_guided_heading(stateGetNedToBodyEulers_f()->psi);
-          win_counter++;
         }
-        if (win_counter > 10){
+        if (get_sys_time_float() - mytime > 3.){
           win_state++;
           printf("State advancing to window centering\n");
-          win_counter = 0;
 
           // reinitialise filter
           window_loc.x = 3.;
           window_loc.y = 0.;
           window_loc.z = 0.;
         }
-        if (win_counter < 0){
-          win_counter = 0;
-        }
         break;
       // centre drone in front of window at about 2m away
-      case 1:
-        if ( win_cert < 70 ){
+      case 2:
+        if(gate_detected && gate_processed == 0) {
+          printf("going to %f %f\n\n", gate_x_dist - 2., gate_y_dist);
+
+          // position drone 2m in front of window
+          guidance_h_set_guided_pos_relative(gate_x_dist - 2., gate_y_dist);
+          //guidance_v_set_guided_z(stateGetPositionNed_f()->z - filtered_z_gate);
+          gate_processed = 1;
+
+          if (ready_pass_through){
+            printf("State advancing to window fly through\n");
+            win_state++;
+          }
+        }
+
+        /*if ( win_cert < 70 ){
           // lowpass filter window geolocation
           window_dist = (float)win_dist / 100.;
           window_loc.x += 0.7 * (window_dist - window_loc.x);
@@ -335,26 +350,32 @@ bool fly_through_window(void) {
         }
         if (win_counter < 0){
           win_counter = 0;
-        }
+        }*/
         break;
       // fly forward with active control till <2m in front of window
-      case 2:
-        guidance_h_set_guided_pos_relative(window_loc.x + 0.5, window_loc.y);
-        win_state++;
-        break;
       case 3:
-        if (stateGetSpeedNed_f()->x < 0.1 && stateGetSpeedNed_f()->y < 0.1 && win_counter > 60) {  // change to system time check 5s
-          win_counter = 0;
+        if(gate_detected){
+          guidance_h_set_guided_pos_relative(gate_x_dist + 0.5, gate_y_dist);
+        } else {
+          mytime = get_sys_time_float();
+          win_state++;
+        }
+        break;
+      case 4:
+        if (stateGetSpeedNed_f()->x < 0.1 && stateGetSpeedNed_f()->y < 0.1 &&
+            get_sys_time_float() - mytime > 5.) {
+          init_pos_filter = 1;
           win_state = 0;
           printf("Window fly through complete\n");
           return false;
         }
-        win_counter++;
         break;
       default:
+        mytime = get_sys_time_float();
+        win_state = 0;
         break;
     }
-  }
+  //}
 
   return true;
 }
