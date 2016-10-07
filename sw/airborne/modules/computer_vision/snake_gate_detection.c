@@ -726,5 +726,7 @@ void snake_left_and_right(struct image_t *im, int x, int y, int *x_low, int *x_h
 void snake_gate_detection_init(void)
 {
   listener = cv_add_to_device(&SGD_CAMERA, snake_gate_detection_func);
+  listener->active = false;
+
   time_gate_detected = last_processed = get_sys_time_float();
 }

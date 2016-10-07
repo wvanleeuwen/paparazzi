@@ -39,7 +39,7 @@
     <module name="air_data"/>
     <module name="send_imu_mag_current"/>
     <module name="sonar_bebop">
-      <!--define name="SENSOR_SYNC_SEND_SONAR" value="TRUE"/-->
+      <define name="SENSOR_SYNC_SEND_SONAR" value="TRUE"/>
     </module>
     <module name="pose_history"/>
     <module name="video_thread"/>
@@ -61,33 +61,9 @@
       <define name="DETECTOR_CAMERA2" value="front_camera"/>
     </module>
 
-    <!--<module name="cv_snake_gate_detection.xml">-->
-      <!--<define name="SGD_CAMERA" value="front_camera"/>-->
-    <!--</module>-->
-
-    <!-- /////////////////////////////////////////////////////////////////////////////////////////// -->
-    <!-- COLOR TRACKING -->
-
-    <!--<module name="color_tracking_bottom">-->
-      <!--<define name="COLOR_CAMERA_BOTTOM" value="bottom_camera"/>-->
-    <!--</module>-->
-
-    <!--<module name="color_tracking_front">-->
-    <!--<define name="COLOR_CAMERA_FRONT" value="front_camera"/>-->
-    <!--</module>-->
-
-    <!-- /////////////////////////////////////////////////////////////////////////////////////////// -->
-    <!-- LANDING -->
-
-    <!--<module name="cv_helipad">-->
-      <!--<define name="HELIPAD_CAMERA" value="bottom_camera"/>-->
-    <!--</module>-->
-
-    <!--<module name="autonomous_landing">-->
-      <!--<define name="MARKER_CAMERA" value="bottom_camera"/>-->
-    <!--</module>-->
-
-    <!-- /////////////////////////////////////////////////////////////////////////////////////////// -->
+    <module name="cv_snake_gate_detection.xml">
+      <define name="SGD_CAMERA" value="front_camera"/>
+    </module>
 
     <module name="video_rtp_stream">
       <define name="VIEWVIDEO_CAMERA" value="bottom_camera"/>
@@ -183,7 +159,7 @@
     <define name="SONAR_BARO_THRESHOLD" value="1.5"/>
     <define name="SONAR_UPDATE_ON_AGL" value="TRUE"/>
     <define name="VFF_R_SONAR_OF_M" value="0."/>
-    <define name="INS_SONAR_OFFSET" value="0."/><!--0.4 when legs attached-->
+    <define name="SONAR_OFFSET" value="0."/> <!--0.4 when legs attached-->
   </section>
 
   <section name="RC_SETPOINT" prefix="STABILIZATION_ATTITUDE_">
