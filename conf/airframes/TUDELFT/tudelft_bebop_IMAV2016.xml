@@ -9,7 +9,7 @@
     <define name="MT9F002_OUTPUT_HEIGHT" value="640"/>  <!-- full height 4608 -->
     <define name="MT9F002_OUTPUT_WIDTH" value="640"/>  <!-- full width 2592 (3288) -->
     <define name="MT9F002_INITIAL_OFFSET_Y" value="384"/>
-    <define name="MT9F002_INITIAL_OFFSET_X" value="512"/>
+    <define name="MT9F002_INITIAL_OFFSET_X" value="512"/> <!-- 896 for window testing
     <!--<define name="MT9F002_INITIAL_OFFSET_X" value="1280" />-->
     <define name="MT9F002_X_ODD_INC_VAL" value="7"/> <!-- downsize x4 -->
     <define name="MT9F002_Y_ODD_INC_VAL" value="7"/>
@@ -39,7 +39,7 @@
     <module name="air_data"/>
     <module name="send_imu_mag_current"/>
     <module name="sonar_bebop">
-      <define name="SENSOR_SYNC_SEND_SONAR" value="TRUE"/>
+      <!--define name="SENSOR_SYNC_SEND_SONAR" value="TRUE"/-->
     </module>
     <module name="pose_history"/>
     <module name="video_thread"/>
@@ -56,11 +56,14 @@
       <define name="OPTICFLOW_DEROTATION_CORRECTION_FACTOR_Y" value="0.85"/> <!--Obtained from a linefit-->
     </module>
 
-
     <module name="cv_marker_detection">
       <define name="DETECTOR_CAMERA1" value="bottom_camera"/>
       <define name="DETECTOR_CAMERA2" value="front_camera"/>
     </module>
+
+    <!--<module name="cv_snake_gate_detection.xml">-->
+      <!--<define name="SGD_CAMERA" value="front_camera"/>-->
+    <!--</module>-->
 
     <!-- /////////////////////////////////////////////////////////////////////////////////////////// -->
     <!-- COLOR TRACKING -->
@@ -177,10 +180,10 @@
   </section>
 
   <section name="INS" prefix="INS_">
-    <define name="SONAR_BARO_THRESHOLD" value="2.5"/>
+    <define name="SONAR_BARO_THRESHOLD" value="1.5"/>
     <define name="SONAR_UPDATE_ON_AGL" value="TRUE"/>
-    <!--define name="USE_HFF"/-->
-    <define name="INT_GPS_ID" value="ABI_DISABLE"/>
+    <define name="VFF_R_SONAR_OF_M" value="0."/>
+    <define name="INS_SONAR_OFFSET" value="0."/><!--0.4 when legs attached-->
   </section>
 
   <section name="RC_SETPOINT" prefix="STABILIZATION_ATTITUDE_">
@@ -262,8 +265,8 @@
   </section>
 
   <section name="GUIDANCE_V" prefix="GUIDANCE_V_">
-    <define name="HOVER_KP" value="2000"/>
-    <define name="HOVER_KD" value="450"/>
+    <define name="HOVER_KP" value="1000"/>
+    <define name="HOVER_KD" value="250"/>
     <define name="HOVER_KI" value="0"/>
     <define name="NOMINAL_HOVER_THROTTLE" value="0.55"/>
     <!--<define name="ADAPT_THROTTLE_ENABLED" value="TRUE"/>-->

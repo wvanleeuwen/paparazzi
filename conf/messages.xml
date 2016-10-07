@@ -2058,7 +2058,7 @@
     <field name="winX"       type="uint8"/>
     <field name="winY"       type="uint8"/>
     <field name="winCert"    type="uint8"/>
-    <field name="winSize"    type="uint8"/>
+    <field name="winSize"    type="uint16"/>
     <field name="winDist"    type="uint16" unit="cm" alt_unit="m"/>
     <field name="foe_x"    type="int8"/>
     <field name="foe_y"    type="int8"/>

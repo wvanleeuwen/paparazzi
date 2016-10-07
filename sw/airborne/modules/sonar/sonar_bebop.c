@@ -37,15 +37,13 @@
 #endif
 
 #ifndef SONAR_BEBOP_SLOPE_THRES_OBS
-#define SONAR_BEBOP_SLOPE_THRESH_OBS 6.        // gradient threshold for outlier detections when trying to hold altitude [m/s]
+#define SONAR_BEBOP_SLOPE_THRESH_OBS 6.     // gradient threshold for outlier detections when trying to hold altitude [m/s]
 #endif
-#define SONAR_BEBOP_SLOPE_THRESH 6.        // gradient threshold for outlier detections when changing altitude [m/s]
-#define SONAR_BEBOP_OBSTACLE_ACCEPTANCE 4   // number of outliers before it is accepted as an obstacle
+#define SONAR_BEBOP_SLOPE_THRESH 6.         // gradient threshold for outlier detections when changing altitude [m/s]
+#define SONAR_BEBOP_OBSTACLE_ACCEPTANCE 5   // number of outliers before it is accepted as an obstacle
 #define DT 0.01                 // sample period of sensor (100 Hz)
 
-
 static bool obstacle_mode = false;
-
 
 struct SonarBebop sonar_bebop;
 static uint8_t sonar_bebop_spi_d[16] = {0xF0, 0xF0, 0xF0, 0xF0, 0xF0, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
@@ -75,6 +73,16 @@ void sonar_bebop_init(void) {
   }
 }
 
+/*
+static void increment_circular_index(uint8_t *index, uint8_t limit){
+  *index = (*index + 1) % limit;
+}
+
+static uint8_t get_index_from_offset(uint8_t index, int8_t offset, uint8_t limit){
+  return (index - offset + limit) % limit;
+}
+*/
+
 void sonar_obstacle_detect_on(void)
 {
   obstacle_mode = true;
@@ -99,6 +107,7 @@ static void *sonar_bebop_read(void *data __attribute__((unused))) {
     static float current_obstacle_height = 0.;
     static float prev_sent_distance = 0.;
 //    static float prev_meas_distances[sonar_bebop.obstacle_acceptance_threshold] = {0.};
+//    static uint8_t curr_meas_index = 0;
     static bool outlier_detected = false;
     static int k_outliers = 0;
     static int sonar_diff_pos = 0;

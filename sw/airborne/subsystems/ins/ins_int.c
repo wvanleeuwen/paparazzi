@@ -438,7 +438,7 @@ static void sonar_cb(uint8_t __attribute__((unused)) sender_id, float distance)
 #endif
       && ins_int.update_on_agl
       && ins_int.baro_initialized) {
-    vff_update_z_conf(-(distance), VFF_R_SONAR_0 + VFF_R_SONAR_OF_M * fabsf(distance));
+    vff_update_z_conf(-(distance - INS_SONAR_OFFSET), VFF_R_SONAR_0 + VFF_R_SONAR_OF_M * fabsf(distance));
     last_offset = vff.offset;
   } else {
     /* update offset with last value to avoid divergence */
@@ -547,6 +547,8 @@ static void vel_est_cb(uint8_t sender_id __attribute__((unused)),
 #else
   ins_int.ltp_speed.x = SPEED_BFP_OF_REAL(vel_ned.x);
   ins_int.ltp_speed.y = SPEED_BFP_OF_REAL(vel_ned.y);
+
+  // we need to look a few seconds back to have enough resolution for velocity integration
   if (dt > 0.03) {
     ins_int.ltp_pos.x = ins_int.ltp_pos.x + POS_BFP_OF_REAL(dt * sum_vx / counter);
     ins_int.ltp_pos.y = ins_int.ltp_pos.y + POS_BFP_OF_REAL(dt * sum_vy / counter);

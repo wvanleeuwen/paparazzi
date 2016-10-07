@@ -35,15 +35,15 @@
 
     <!-- Wait 5 seconds and then set altitude reference -->
     <block name="Geo init">
-      <call_once fun="sonar_obstacle_detect_off()"/>
-      <call fun="ResetAlt()"/>
+      <!--<call_once fun="sonar_obstacle_detect_off()"/>-->
+      <call_once fun="ResetAlt()"/>
       <while cond="1"/>
     </block>
 
     <!--Hover at the current location-->
     <block name="Hover and wait">
       <call_once fun="sonar_obstacle_detect_on()"/>
-      <call fun="Hover(1)"/>
+      <call fun="Hover(1.5)"/>
       <while cond="1"/>
     </block>
 
@@ -51,13 +51,12 @@
       <call_once fun="sonar_obstacle_detect_off()"/>
       <call fun="StartEngines()"/>
       <call fun="TakeOff(0.1)"/>
-      <exception cond="stateGetPositionEnu_f()->z > 1" deroute="Hover 0.5 sec"/>
-      <while cond="1"/>
+      <call fun="WaitUntilAltitude(1.5)"/>
     </block>
 
     <block name="Hover 0.5 sec">
       <call_once fun="sonar_obstacle_detect_on()"/>
-      <call fun="Hover(1)"/>
+      <call fun="Hover(1.5)"/>
       <while cond="0.5 > block_time"/>
     </block>
 
@@ -74,16 +73,9 @@
       <exception cond="marker1.found_time > 1" deroute="Center bucket"/>
     </block>
 
-    <!--<block name="Center bucket set alt">-->
-      <!--<call_once fun="sonar_obstacle_detect_off()"/>-->
-      <!--<call fun="bucket_center_alt(1.5)"/>-->
-      <!--<exception cond="marker1.detected == false && 3 > marker1.found_time" deroute="Find bucket"/>-->
-      <!--<exception cond="marker1.mid == true && marker1.mid_time >= 5" deroute="Land bucket"/>-->
-    <!--</block>-->
-
     <block name="Center bucket">
       <call_once fun="sonar_obstacle_detect_off()"/>
-      <call fun="Hover(1)"/>
+      <call fun="Hover(1.5)"/>
       <call fun="marker_center_land(0.05, 0, 0)"/>
       <exception cond="marker1.found_time > 3" deroute="Land bucket"/>
     </block>
@@ -113,6 +105,16 @@
     
     <block name="Open Gripper">
       <call_once fun="open_gripper()"/>
+      <while cond="1"/>
+    </block>
+
+    <block name="Fly Through Window">
+      <call_once fun="win_state = 0"/>
+      <call fun="fly_through_window()"/>
+    </block>
+
+    <block name="Hover">
+      <call fun="Hover(1.5)"/>
       <while cond="1"/>
     </block>
 

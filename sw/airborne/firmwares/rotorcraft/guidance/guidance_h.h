@@ -121,6 +121,13 @@ extern void guidance_h_set_igain(uint32_t igain);
  */
 extern bool guidance_h_set_guided_pos(float x, float y);
 
+/** Set horizontal position setpoint relative to current position in GUIDED mode.
+ * @param x North position (local NED frame) in meters.
+ * @param y East position (local NED frame) in meters.
+ * @return TRUE if setpoints were set (currently in GUIDANCE_H_MODE_GUIDED)
+ */
+extern bool guidance_h_set_guided_pos_relative(float x, float y);
+
 /** Set heading setpoint in GUIDED mode.
  * @param heading Setpoint in radians.
  * @return TRUE if setpoint was set (currently in GUIDANCE_H_MODE_GUIDED)

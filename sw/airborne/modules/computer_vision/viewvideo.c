@@ -229,8 +229,10 @@ void viewvideo_init(void)
   struct video_listener *listener = cv_add_to_device_async(&VIEWVIDEO_CAMERA, viewvideo_function1, VIEWVIDEO_NICE_LEVEL);
   listener->maximum_fps = VIEWVIDEO_FPS;
 
+#ifdef VIEWVIDEO_CAMERA2
   struct video_listener *listener2 = cv_add_to_device_async(&VIEWVIDEO_CAMERA2, viewvideo_function2, VIEWVIDEO_NICE_LEVEL);
   listener2->maximum_fps = VIEWVIDEO_FPS;
+#endif
 
   viewvideo.is_streaming = true;
 
