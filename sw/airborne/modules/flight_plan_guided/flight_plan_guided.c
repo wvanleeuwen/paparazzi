@@ -254,8 +254,6 @@ bool marker_center_land(float x_offset, float z_speed, float end_altitude) {
     if (!marker->processed) {
       marker->processed = true;
 
-      struct EnuCoor_f *speed = stateGetSpeedEnu_f();
-
       float psi = stateGetNedToBodyEulers_f()->psi;
 
       float offset_x = cosf(-psi) * x_offset;

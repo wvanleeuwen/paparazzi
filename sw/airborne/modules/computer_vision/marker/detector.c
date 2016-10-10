@@ -45,240 +45,246 @@ static float MARKER_FOUND_TIME_MAX = 5.0;
 struct Marker marker1;
 struct Marker marker2;
 
-// Helipad detection
-static struct video_listener* helipad_listener;
-static struct video_listener* bucket_listener_front;
-static struct video_listener* bucket_listener_bottom;
+static struct video_listener *bucket_listener_front;
+static struct video_listener *item_listener_bottom;
+static struct video_listener *bucket_listener_bottom;
+static struct video_listener *helipad_listener_bottom;
 
 
-static void geo_locate_marker(struct Marker *marker, struct image_t* img) {
-    // Obtain the relative pixel location (measured from center in body frame) rotated to vehicle reference frame
-    struct FloatVect3 pixel_relative;
-    pixel_relative.x = (float) (img->h / 2) - (float) marker->pixel.y;
-    pixel_relative.y = (float) marker->pixel.x - (float) (img->w / 2);
-    pixel_relative.z = 400.; // estimated focal length in px
+static struct Marker single_blob_finder(struct image_t *img, struct image_filter_t *filter, int threshold) {
+  // Output image
+  struct image_t dst;
+  image_create(&dst, img->w, img->h, IMAGE_GRADIENT);
 
-    // Get the rotation measured at image capture
-    struct pose_t pose = get_rotation_at_timestamp(img->pprz_ts);
+  // Labels
+  uint16_t labels_count = 512;
+  struct image_label_t labels[512];
 
-    // Create a orientation representation
-    struct FloatRMat ned_to_body;
-    float_rmat_of_eulers(&ned_to_body, &pose.eulers);
+  // Blob finder
+  image_labeling(img, &dst, filter, 1, labels, &labels_count);
 
-    // Rotate the pixel vector from body frame to the north-east-down frame
-    float_rmat_transp_vmult(&marker->geo_relative, &ned_to_body, &pixel_relative);
+  int largest_id = -1;
+  int largest_size = 0;
 
-    // Divide by z-component to normalize the projection vector
-    float zi = marker->geo_relative.z;
+  // Find largest
+  for (int i = 0; i < labels_count; i++) {
+    // Only consider large blobs
+    if (labels[i].pixel_cnt > threshold) {
+      if (labels[i].pixel_cnt > largest_size) {
+        largest_size = labels[i].pixel_cnt;
+        largest_id = i;
+      }
+    }
+  }
 
-    // Pointing up or horizontal -> no ground projection
-    if (zi <= 0.) { return; }
+  struct Marker marker;
 
-    // Scale the parameters based on distance to ground and focal point
-    struct NedCoor_f *pos = stateGetPositionNed_f();
-    float agl = sonar_bebop.distance; // -pos->z
+  if (largest_id >= 0) {
+    marker.pixel.x = labels[largest_id].x_sum / labels[largest_id].pixel_cnt * 2;
+    marker.pixel.y = labels[largest_id].y_sum / labels[largest_id].pixel_cnt;
+    marker.detected = true;
+  } else {
+    marker.detected = false;
+  }
 
-    marker->geo_relative.x *= agl/zi;
-    marker->geo_relative.y *= agl/zi;
-    marker->geo_relative.z = agl;
+  image_free(&dst);
 
-    // TODO filter this location over time to reduce the jitter in output
-    // TODO use difference in position as a velocity estimate along side opticflow in hff...
-
-    // NED
-    marker->geo_location.x = pos->x + marker->geo_relative.x;
-    marker->geo_location.y = pos->y + marker->geo_relative.y;
-    marker->geo_location.z = 0;
+  return marker;
 }
 
 
-static void marker_detected(struct Marker *marker, struct image_t* img, int pixelx, int pixely)
-{
-    marker->detected = true;
+static void geo_locate_marker(struct Marker *marker, struct image_t *img) {
+  // Obtain the relative pixel location (measured from center in body frame) rotated to vehicle reference frame
+  struct FloatVect3 pixel_relative;
+  pixel_relative.x = (float) (img->h / 2) - (float) marker->pixel.y;
+  pixel_relative.y = (float) marker->pixel.x - (float) (img->w / 2);
+  pixel_relative.z = 400.; // estimated focal length in px
 
-    // store marker pixel location
-    marker->pixel.x = pixelx;
-    marker->pixel.y = pixely;
+  // Get the rotation measured at image capture
+  struct pose_t pose = get_rotation_at_timestamp(img->pprz_ts);
 
-    // Increase marker detected time
-    marker->found_time += img->dt / 1000000.f;
+  // Create a orientation representation
+  struct FloatRMat ned_to_body;
+  float_rmat_of_eulers(&ned_to_body, &pose.eulers);
 
-    if (marker->found_time > MARKER_FOUND_TIME_MAX) {
-        marker->found_time = MARKER_FOUND_TIME_MAX;
-    }
+  // Rotate the pixel vector from body frame to the north-east-down frame
+  float_rmat_transp_vmult(&marker->geo_relative, &ned_to_body, &pixel_relative);
 
-    marker->processed = false;
+  // Divide by z-component to normalize the projection vector
+  float zi = marker->geo_relative.z;
+
+  // Pointing up or horizontal -> no ground projection
+  if (zi <= 0.) { return; }
+
+  // Scale the parameters based on distance to ground and focal point
+  struct NedCoor_f *pos = stateGetPositionNed_f();
+  float agl = sonar_bebop.distance; // -pos->z
+
+  marker->geo_relative.x *= agl / zi;
+  marker->geo_relative.y *= agl / zi;
+  marker->geo_relative.z = agl;
+
+  // TODO filter this location over time to reduce the jitter in output
+  // TODO use difference in position as a velocity estimate along side opticflow in hff...
+
+  // NED
+  marker->geo_location.x = pos->x + marker->geo_relative.x;
+  marker->geo_location.y = pos->y + marker->geo_relative.y;
+  marker->geo_location.z = 0;
 }
 
-static void marker_not_detected(struct Marker *marker, struct image_t* img)
-{
-    marker->detected = false;
 
-    marker->found_time -= 1 * img->dt / 1000000.f;
+static void marker_detected(struct Marker *marker, struct image_t *img, int pixelx, int pixely) {
+  marker->detected = true;
 
-    if (marker->found_time < 0) {
-        marker->found_time = 0;
-    }
+  // store marker pixel location
+  marker->pixel.x = pixelx;
+  marker->pixel.y = pixely;
+
+  // Increase marker detected time
+  marker->found_time += img->dt / 1000000.f;
+
+  if (marker->found_time > MARKER_FOUND_TIME_MAX) {
+    marker->found_time = MARKER_FOUND_TIME_MAX;
+  }
+
+  marker->processed = false;
 }
 
-static struct image_t *detect_bottom_bucket(struct image_t* img) {
 
-    // Color Filter
-    struct image_filter_t filter;
-    filter.y_min = 87;    // red
-    filter.y_max = 255;
-    filter.u_min = 105;
-    filter.u_max = 255;
-    filter.v_min = 170;
-    filter.v_max = 255;
+static void marker_not_detected(struct Marker *marker, struct image_t *img) {
+  marker->detected = false;
 
-    int threshold = 50;
+  marker->found_time -= 1 * img->dt / 1000000.f;
 
-    // Output image
-    struct image_t dst;
-    image_create(&dst, img->w, img->h, IMAGE_GRADIENT);
-
-    // Labels
-    uint16_t labels_count = 512;
-    struct image_label_t labels[512];
-
-    // Blob finder
-    image_labeling(img, &dst, &filter, 1, labels, &labels_count);
-
-    int largest_id = -1;
-    int largest_size = 0;
-
-    // Find largest
-    for (int i=0; i<labels_count; i++) {
-        // Only consider large blobs
-        if (labels[i].pixel_cnt > threshold) {
-            if (labels[i].pixel_cnt > largest_size) {
-                largest_size = labels[i].pixel_cnt;
-                largest_id = i;
-            }
-        }
-    }
-
-    if (largest_id >= 0)
-    {
-        int xloc   = labels[largest_id].x_sum / labels[largest_id].pixel_cnt * 2;
-        int yloc   = labels[largest_id].y_sum / labels[largest_id].pixel_cnt;
-        marker_detected(&marker1, img, xloc, yloc);
-        geo_locate_marker(&marker1, img);
-    }
-    else
-    {
-        marker_not_detected(&marker1, img);
-    }
-
-    image_free(&dst);
-
-    return NULL;
+  if (marker->found_time < 0) {
+    marker->found_time = 0;
+  }
 }
 
-static struct image_t *detect_front_bucket(struct image_t* img) {
 
-    // Color Filter
-    struct image_filter_t filter;
-    filter.y_min = 87;    // red
-    filter.y_max = 162;
-    filter.u_min = 94;
-    filter.u_max = 255;
-    filter.v_min = 184;
-    filter.v_max = 255;
+static struct image_t *detect_front_bucket(struct image_t *img) {
 
-    int threshold = 50;
+  // Color Filter
+  struct image_filter_t filter;
+  filter.y_min = 87;    // red
+  filter.y_max = 162;
+  filter.u_min = 94;
+  filter.u_max = 255;
+  filter.v_min = 184;
+  filter.v_max = 255;
 
-    // Output image
-    struct image_t dst;
-    image_create(&dst, img->w, img->h, IMAGE_GRADIENT);
+  int threshold = 50;
 
-    // Labels
-    uint16_t labels_count = 512;
-    struct image_label_t labels[512];
+  struct Marker marker = single_blob_finder(img, &filter, threshold);
 
-    // Blob finder
-    image_labeling(img, &dst, &filter, 1, labels, &labels_count);
+  if (marker.detected) {
+    marker_detected(&marker2, img, marker.pixel.x, marker.pixel.y);
+  } else {
+    marker_not_detected(&marker2, img);
+  }
 
-    int largest_id = -1;
-    int largest_size = 0;
-
-    // Find largest
-    for (int i=0; i<labels_count; i++) {
-        // Only consider large blobs
-        if (labels[i].pixel_cnt > threshold) {
-            if (labels[i].pixel_cnt > largest_size) {
-                largest_size = labels[i].pixel_cnt;
-                largest_id = i;
-            }
-        }
-    }
-
-    if (largest_id >= 0)
-    {
-        int xloc   = labels[largest_id].x_sum / labels[largest_id].pixel_cnt * 2;
-        int yloc   = labels[largest_id].y_sum / labels[largest_id].pixel_cnt;
-        marker_detected(&marker2, img, xloc, yloc);
-    }
-    else
-    {
-        marker_not_detected(&marker2, img);
-    }
-
-    image_free(&dst);
-
-//    fprintf(stderr, "[blob] fps %.2f \n", (1000000.f / img->dt));
-
-    return NULL;
+  return NULL;
 }
 
-static struct image_t *detect_helipad_marker(struct image_t* img)
-{
-    struct results helipad_marker = opencv_imav_landing(
-            (char*) img->buf,
-            img->w,
-            img->h,
-            2, //squares
-            210, //binary threshold
-            0, img->dt); //modify image, time taken
 
-    if (helipad_marker.marker)
-    {
-        marker_detected(&marker1, img, helipad_marker.maxx, helipad_marker.maxy);
-        geo_locate_marker(&marker1, img);
-    }
-    else
-    {
-        marker_not_detected(&marker1, img);
-    }
-    return NULL;
+static struct image_t *detect_bottom_item(struct image_t *img) {
+
+  // Color Filter
+  struct image_filter_t filter;
+  filter.y_min = 87;    // pink
+  filter.y_max = 255;
+  filter.u_min = 105;
+  filter.u_max = 255;
+  filter.v_min = 170;
+  filter.v_max = 255;
+
+  int threshold = 50;
+
+  struct Marker marker = single_blob_finder(img, &filter, threshold);
+
+  if (marker.detected) {
+    marker_detected(&marker1, img, marker.pixel.x, marker.pixel.y);
+    geo_locate_marker(&marker1, img);
+  } else {
+    marker_not_detected(&marker1, img);
+  }
+
+  return NULL;
 }
 
-static struct image_t *draw_target_marker1(struct image_t* img)
-{
-    if (marker1.detected && SHOW_MARKER) {
-        struct point_t t = {marker1.pixel.x, marker1.pixel.y - 50},
-                b = {marker1.pixel.x, marker1.pixel.y + 50},
-                l = {marker1.pixel.x - 50, marker1.pixel.y},
-                r = {marker1.pixel.x + 50, marker1.pixel.y};
 
-        image_draw_line(img, &t, &b);
-        image_draw_line(img, &l, &r);
-    }
+static struct image_t *detect_bottom_bucket(struct image_t *img) {
 
-    DOWNLINK_SEND_DETECTOR(DefaultChannel, DefaultDevice,
-                           &marker1.detected,
-                           &marker1.pixel.x,
-                           &marker1.pixel.y,
-                           &marker1.geo_relative.x,
-                           &marker1.geo_relative.y,
-                           &marker1.found_time);
+  // Color Filter
+  struct image_filter_t filter;
+  filter.y_min = 0;    // red
+  filter.y_max = 122;
+  filter.u_min = 89;
+  filter.u_max = 122;
+  filter.v_min = 167;
+  filter.v_max = 198;
 
-    return img;
+  int threshold = 50;
+
+  img->h = 140;
+  struct Marker marker = single_blob_finder(img, &filter, threshold);
+  img->h = 240;
+
+  if (marker.detected) {
+    marker_detected(&marker1, img, marker.pixel.x, marker.pixel.y);
+    geo_locate_marker(&marker1, img);
+  } else {
+    marker_not_detected(&marker1, img);
+  }
+
+  return NULL;
 }
 
-static struct image_t *draw_target_marker2(struct image_t* img)
-{
+
+static struct image_t *detect_helipad_marker(struct image_t *img) {
+  struct results helipad_marker = opencv_imav_landing(
+          (char *) img->buf,
+          img->w,
+          img->h,
+          2, //squares
+          210, //binary threshold
+          0, img->dt); //modify image, time taken
+
+  if (helipad_marker.marker) {
+    marker_detected(&marker1, img, helipad_marker.maxx, helipad_marker.maxy);
+    geo_locate_marker(&marker1, img);
+  } else {
+    marker_not_detected(&marker1, img);
+  }
+  return NULL;
+}
+
+
+static struct image_t *draw_target_marker1(struct image_t *img) {
+  if (marker1.detected && SHOW_MARKER) {
+    struct point_t t = {marker1.pixel.x, marker1.pixel.y - 50},
+            b = {marker1.pixel.x, marker1.pixel.y + 50},
+            l = {marker1.pixel.x - 50, marker1.pixel.y},
+            r = {marker1.pixel.x + 50, marker1.pixel.y};
+
+    image_draw_line(img, &t, &b);
+    image_draw_line(img, &l, &r);
+  }
+
+  DOWNLINK_SEND_DETECTOR(DefaultChannel, DefaultDevice,
+                         &marker1.detected,
+                         &marker1.pixel.x,
+                         &marker1.pixel.y,
+                         &marker1.geo_relative.x,
+                         &marker1.geo_relative.y,
+                         &marker1.found_time);
+
+  return img;
+}
+
+
+static struct image_t *draw_target_marker2(struct image_t *img) {
   if (marker2.detected && SHOW_MARKER) {
     struct point_t t = {marker2.pixel.x, marker2.pixel.y - 50},
             b = {marker2.pixel.x, marker2.pixel.y + 50},
@@ -292,46 +298,42 @@ static struct image_t *draw_target_marker2(struct image_t* img)
   return img;
 }
 
-void detector_locate_bucket(void)
-{
-    bucket_listener_bottom->active = true;
-    helipad_listener->active = false;
+
+void detector_locate(bool item, bool bucket, bool helipad) {
+  item_listener_bottom->active = item;
+  bucket_listener_bottom->active = bucket;
+  helipad_listener_bottom->active = helipad;
 }
 
-void detector_locate_helipad(void)
-{
-    bucket_listener_bottom->active = false;
-    helipad_listener->active = true;
-}
 
-void detector_init(void)
-{
-    // BOTTOM MARKER
-    marker1.detected = false;
-    marker1.processed = true;
-    marker1.pixel.x = 0;
-    marker1.pixel.y = 0;
-    marker1.found_time = 0;
+void detector_init(void) {
+  // BOTTOM MARKER
+  marker1.detected = false;
+  marker1.processed = true;
+  marker1.pixel.x = 0;
+  marker1.pixel.y = 0;
+  marker1.found_time = 0;
 
-    helipad_listener = cv_add_to_device_async(&DETECTOR_CAMERA1, detect_helipad_marker, 5);
-    helipad_listener->maximum_fps = 20;
+  helipad_listener_bottom = cv_add_to_device_async(&DETECTOR_CAMERA1, detect_helipad_marker, 5);
+  helipad_listener_bottom->maximum_fps = 20;
 
-    bucket_listener_bottom = cv_add_to_device(&DETECTOR_CAMERA1, detect_bottom_bucket);
+  item_listener_bottom = cv_add_to_device(&DETECTOR_CAMERA1, detect_bottom_item);
+  bucket_listener_bottom = cv_add_to_device(&DETECTOR_CAMERA1, detect_bottom_bucket);
 
-    cv_add_to_device(&DETECTOR_CAMERA1, draw_target_marker1);
+  cv_add_to_device(&DETECTOR_CAMERA1, draw_target_marker1);
 
-    // FRONT MARKER
-    marker2.detected = false;
-    marker2.processed = true;
-    marker2.pixel.x = 0;
-    marker2.pixel.y = 0;
-    marker2.found_time = 0;
+  // FRONT MARKER
+  marker2.detected = false;
+  marker2.processed = true;
+  marker2.pixel.x = 0;
+  marker2.pixel.y = 0;
+  marker2.found_time = 0;
 
-    bucket_listener_front = cv_add_to_device_async(&DETECTOR_CAMERA2, detect_front_bucket, 5);
-    bucket_listener_front->maximum_fps = 20;
+  bucket_listener_front = cv_add_to_device_async(&DETECTOR_CAMERA2, detect_front_bucket, 5);
+  bucket_listener_front->maximum_fps = 20;
 
-    cv_add_to_device(&DETECTOR_CAMERA2, draw_target_marker2);
+  cv_add_to_device(&DETECTOR_CAMERA2, draw_target_marker2);
 
-    // INITIAL STATE
-    detector_locate_bucket();
+  // INITIAL STATE
+  detector_locate(true, false, false);
 }
