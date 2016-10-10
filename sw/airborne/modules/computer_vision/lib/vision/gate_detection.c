@@ -42,7 +42,7 @@ int WEIGHTED = 0; // color has no weight at the moment, since it is thresholded
 #define CIRCLE 0
 #define SQUARE 1
 #define POLYGON 2
-#define SHAPE SQUARE//POLYGON
+#define SHAPE POLYGON
 float outlier_threshold = 20.0f;
 
 // Settings for the evolution:
@@ -55,7 +55,7 @@ float outlier_threshold = 20.0f;
 #define N_GENES 5
 #endif
 #define N_GENES_CLOCK 2
-uint16_t n_generations = 10; // could be reduced for instance when there are many points
+uint16_t n_generations = 15; // could be reduced for instance when there are many points
 float Population[N_INDIVIDUALS][N_GENES];
 
 // whether to draw on the image:
@@ -129,6 +129,9 @@ void gate_detection(struct image_t *color_image, float *x_center, float *y_cente
     // TODO: make a better initial size estimation - this is actually ridiculous:
     // For instance, take min, max x, min, max y
     (*size0) = (int)fabs(mean_below - mean_above);
+    // bound the size
+    if (*size0 > 100) {*size0 = 100;}
+    if (*size0 < 30) {*size0 = 30;}
 
     // run the fit procedure:
     float s_left, s_right;

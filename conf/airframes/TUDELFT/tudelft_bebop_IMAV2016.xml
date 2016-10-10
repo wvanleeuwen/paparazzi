@@ -184,7 +184,7 @@
     <define name="SONAR_BARO_THRESHOLD" value="1.5"/>
     <define name="SONAR_UPDATE_ON_AGL" value="TRUE"/>
     <define name="VFF_R_SONAR_OF_M" value="0."/>
-    <define name="INS_SONAR_OFFSET" value="0."/><!--0.4 when legs attached-->
+    <define name="SONAR_OFFSET" value="0."/><!--0.4 when legs attached-->
   </section>
 
   <section name="RC_SETPOINT" prefix="STABILIZATION_ATTITUDE_">
@@ -266,24 +266,24 @@
   </section>
 
   <section name="GUIDANCE_V" prefix="GUIDANCE_V_">
-    <define name="HOVER_KP" value="1000"/>
-    <define name="HOVER_KD" value="250"/>
+    <define name="HOVER_KP" value="200"/>
+    <define name="HOVER_KD" value="200"/>
     <define name="HOVER_KI" value="0"/>
     <define name="NOMINAL_HOVER_THROTTLE" value="0.55"/>
     <!--<define name="ADAPT_THROTTLE_ENABLED" value="TRUE"/>-->
   </section>
 
   <section name="GUIDANCE_H" prefix="GUIDANCE_H_">
-    <!--<define name="USE_SPEED_REF" value="TRUE"/>-->
-    <define name="REF_MAX_SPEED" value="0.5" unit="m/s"/>
+    <define name="USE_SPEED_REF" value="TRUE"/>
+    <define name="REF_MAX_SPEED" value="0.2" unit="m/s"/>
 
     <!-- Good weather -->
     <define name="MAX_BANK" value="20" unit="deg"/>
     <!-- Bad weather -->
     <!-- define name="MAX_BANK" value="32" unit="deg"/ -->
 
-    <define name="PGAIN" value="120"/>
-    <define name="DGAIN" value="140"/>
+    <define name="PGAIN" value="260"/>
+    <define name="DGAIN" value="240"/>
     <define name="IGAIN" value="20"/>
   </section>
 

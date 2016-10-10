@@ -80,7 +80,7 @@ static void sonar_cb(uint8_t sender_id, float distance);
 #ifndef INS_SONAR_MAX_RANGE
 #define INS_SONAR_MAX_RANGE 4.0
 #endif
-#define VFF_R_SONAR_0 0.1
+#define VFF_R_SONAR_0 0.5
 #ifndef VFF_R_SONAR_OF_M
 #define VFF_R_SONAR_OF_M 0.2
 #endif
@@ -517,11 +517,9 @@ static void vel_est_cb(uint8_t sender_id __attribute__((unused)),
 {
 
   struct FloatVect3 vel_body = {x, y, z};
-  static uint32_t last_stamp = 0;
-  static float dt = 0.;
-  static float sum_vx = 0., sum_vy = 0.;
-  static float counter = 0;
-
+  static uint32_t last_stamp = 0, last_pos_stamp = 0;
+  static float sum_x = 0., sum_y = 0.;
+  struct FloatVect3 prev_vel;
 
   /* rotate velocity estimate to nav/ltp frame */
   struct FloatQuat q_b2n = *stateGetNedToBodyQuat_f();
@@ -531,13 +529,14 @@ static void vel_est_cb(uint8_t sender_id __attribute__((unused)),
 
   // du to time tep resolution on bebop need to average velocity over longer time window for int position resolution
   if (last_stamp > 0) {
-    dt += (float)(stamp - last_stamp) * 1e-6;
-    sum_vx += vel_ned.x;
-    sum_vy += vel_ned.y;
-    counter++;
+    // integrate area under speed curve assuming constant gradient between speed measurements (ie trapezoid)
+    sum_x += (prev_vel.x + vel_ned.x) * (stamp - last_stamp) / 2.;
+    sum_y += (prev_vel.y + vel_ned.y) * (stamp - last_stamp) / 2.;
   }
 
   last_stamp = stamp;
+  prev_vel.x = vel_ned.x;
+  prev_vel.y = vel_ned.y;
 
 #if USE_HFF
   (void)dt; //dt is unused variable in this define
@@ -552,13 +551,11 @@ static void vel_est_cb(uint8_t sender_id __attribute__((unused)),
   ins_int.ltp_speed.y = SPEED_BFP_OF_REAL(vel_ned.y);
 
   // we need to look a few seconds back to have enough resolution for velocity integration
-  if (dt > 0.03) {
-    ins_int.ltp_pos.x = ins_int.ltp_pos.x + POS_BFP_OF_REAL(dt * sum_vx / counter);
-    ins_int.ltp_pos.y = ins_int.ltp_pos.y + POS_BFP_OF_REAL(dt * sum_vy / counter);
-    dt = 0;
-    sum_vx = 0;
-    sum_vy = 0;
-    counter = 0;
+  if (stamp - last_pos_stamp >= 0.05) {
+    ins_int.ltp_pos.x += POS_BFP_OF_REAL(sum_x * 1e-6);
+    ins_int.ltp_pos.y += POS_BFP_OF_REAL(sum_y * 1e-6);
+    sum_x = 0.; sum_y = 0.;
+    last_pos_stamp = stamp;
   }
 #endif
 

@@ -127,6 +127,9 @@ uint8_t MoveRight(float vy) {
 bool Land(float end_altitude) {
   if (autopilot_mode != AP_MODE_GUIDED) { return true; }
 
+  //gh_set_max_speed(float max_speed)
+  //gh_set_max_speed(GUIDANCE_H_REF_MAX_SPEED);
+
     // return true if not completed
 
     //For bucket
@@ -282,7 +285,7 @@ bool fly_through_window(void) {
   //  win_processed = 1;
     switch (win_state){
       case 0:
-        guidance_h_set_guided_pos_relative(stateGetPositionNed_f()->x, stateGetPositionNed_f()->y);
+        guidance_h_set_guided_pos(stateGetPositionNed_f()->x, stateGetPositionNed_f()->y);
         guidance_v_set_guided_z(-1.2);
         mytime = get_sys_time_float();
         init_pos_filter = 1;
@@ -300,7 +303,7 @@ bool fly_through_window(void) {
         } else {
           guidance_h_set_guided_heading(stateGetNedToBodyEulers_f()->psi);
         }
-        if (get_sys_time_float() - mytime > 3.){
+        if (get_sys_time_float() - mytime > 1.){
           win_state++;
           printf("State advancing to window centering\n");
 
@@ -313,17 +316,17 @@ bool fly_through_window(void) {
       // centre drone in front of window at about 2m away
       case 2:
         if(gate_detected && gate_processed == 0) {
-          printf("going to %f %f\n\n", gate_x_dist - 2., gate_y_dist);
+          if (ready_pass_through){
+            printf("State advancing to window fly through\n\n\n\n\n\n");
+            win_state++;
+            break;
+          }
+          printf("going to %f %f\n\n", 0.5*(filtered_x_gate - 1.5), 0.5*filtered_y_gate);
 
-          // position drone 2m in front of window
-          guidance_h_set_guided_pos_relative(gate_x_dist - 2., gate_y_dist);
+          // position drone 1.5m in front of window, add small low pass filter on position command
+          guidance_h_set_guided_pos_relative(0.5*(filtered_x_gate - 1.5), 0.5*filtered_y_gate);
           //guidance_v_set_guided_z(stateGetPositionNed_f()->z - filtered_z_gate);
           gate_processed = 1;
-
-          if (ready_pass_through){
-            printf("State advancing to window fly through\n");
-            win_state++;
-          }
         }
 
         /*if ( win_cert < 70 ){
@@ -355,7 +358,7 @@ bool fly_through_window(void) {
       // fly forward with active control till <2m in front of window
       case 3:
         if(gate_detected){
-          guidance_h_set_guided_pos_relative(gate_x_dist + 0.5, gate_y_dist);
+          guidance_h_set_guided_pos_relative(filtered_x_gate + 0.5, filtered_y_gate);
         } else {
           mytime = get_sys_time_float();
           win_state++;

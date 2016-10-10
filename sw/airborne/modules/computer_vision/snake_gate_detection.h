@@ -70,6 +70,7 @@ extern float delta_z_gate;
 extern float gate_x_dist;
 extern float gate_y_dist;
 extern float gate_z_dist;
+extern float angle_to_gate;
 extern float filtered_x_gate;
 extern float filtered_y_gate;
 extern float filtered_z_gate;
