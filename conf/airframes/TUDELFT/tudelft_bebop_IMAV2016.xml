@@ -159,7 +159,7 @@
     <define name="SONAR_BARO_THRESHOLD" value="1.5"/>
     <define name="SONAR_UPDATE_ON_AGL" value="TRUE"/>
     <define name="VFF_R_SONAR_OF_M" value="0."/>
-    <define name="SONAR_OFFSET" value="0."/> <!--0.4 when legs attached-->
+    <define name="BARO_AGL_OFFSET" value="0.48"/>
   </section>
 
   <section name="RC_SETPOINT" prefix="STABILIZATION_ATTITUDE_">
@@ -211,10 +211,22 @@
     <!--<define name="G2_R" value="0.01448"/>-->
 
     <!-- bebop TUBB05 (plastic legs) -->
-    <define name="G1_P" value="0.037543"/>
-    <define name="G1_Q" value="0.023722"/>
-    <define name="G1_R" value="0.002219"/>
-    <define name="G2_R" value="0.124241"/>
+    <!--<define name="G1_P" value="0.037543"/>-->
+    <!--<define name="G1_Q" value="0.023722"/>-->
+    <!--<define name="G1_R" value="0.002219"/>-->
+    <!--<define name="G2_R" value="0.124241"/>-->
+
+    <!-- bebop TUBB05 (plastic legs and gripper) -->
+    <define name="G1_P" value="0.025"/>
+    <define name="G1_Q" value="0.016"/>
+    <define name="G1_R" value="0.0018"/>
+    <define name="G2_R" value="0.11"/>
+
+    <!-- bebop TUBB05 (plastic legs, gripper and bucket) -->
+    <!--<define name="G1_P" value="0.0"/>-->
+    <!--<define name="G1_Q" value="0.0"/>-->
+    <!--<define name="G1_R" value="0.0"/>-->
+    <!--<define name="G2_R" value="0.1"/>-->
 
     <!-- reference acceleration for attitude control -->
     <define name="REF_ERR_P" value="600.0"/>

@@ -42,6 +42,7 @@
 #include "modules/stereocam/stereoprotocol.h"
 #include "modules/stereocam/stereocam2state/stereocam2state.h"
 
+
 bool marker_lost;
 
 void flight_plan_guided_init(void) {
@@ -227,33 +228,6 @@ bool bucket_approach(float altitude) {
 
   if (marker_lost) {
     guidance_h_set_guided_body_vel(0., 0.);
-  }
-
-  // Loop this function
-  return true;
-}
-
-bool bucket_center(void) {
-  if (autopilot_mode != AP_MODE_GUIDED) { return true; }
-  guidance_h_set_guided_heading_rate(0.);
-
-  if (marker1.detected) {
-    if (!marker1.processed) {
-      marker1.processed = true;
-
-      struct EnuCoor_f *speed = stateGetSpeedEnu_f();
-      float psi = stateGetNedToBodyEulers_f()->psi;
-
-      // add small lateral offset so marker is in centre of gripper
-      float x_offset = 0.05;
-
-      float pos_x = marker1.geo_location.x + cosf(-psi) * x_offset;
-      float pos_y = marker1.geo_location.y - sinf(-psi) * x_offset;
-
-      guidance_h_set_guided_pos(pos_x, pos_y);
-    }
-  } else {
-    marker_lost = true;
   }
 
   // Loop this function

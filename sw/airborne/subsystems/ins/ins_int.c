@@ -71,8 +71,8 @@ static void sonar_cb(uint8_t sender_id, float distance);
 #include "firmwares/rotorcraft/stabilization.h"
 #endif
 
-#ifndef INS_SONAR_OFFSET
-#define INS_SONAR_OFFSET 0.
+#ifndef INS_BARO_AGL_OFFSET
+#define INS_BARO_AGL_OFFSET 0.
 #endif
 #ifndef INS_SONAR_MIN_RANGE
 #define INS_SONAR_MIN_RANGE 0.001
@@ -318,6 +318,11 @@ void ins_int_propagate(struct Int32Vect3 *accel, float dt)
 
 static void baro_cb(uint8_t __attribute__((unused)) sender_id, float pressure)
 {
+  static uint16_t num_pressure_points = 10;
+  static float running_mean_pressure = 0.;
+
+  running_mean_pressure = (running_mean_pressure * (num_pressure_points - 1) + pressure) / num_pressure_points;
+
   if (!ins_int.baro_initialized && pressure > 1e-7) {
     // wait for a first positive value
     ins_int.qfe = pressure;
@@ -327,11 +332,11 @@ static void baro_cb(uint8_t __attribute__((unused)) sender_id, float pressure)
   if (ins_int.baro_initialized) {
     if (ins_int.vf_reset) {
       ins_int.vf_reset = false;
-      ins_int.qfe = pressure;
+      ins_int.qfe = running_mean_pressure;
       vff_realign(0.);
       ins_update_from_vff();
     } else {
-      ins_int.baro_z = -pprz_isa_height_of_pressure(pressure, ins_int.qfe);
+      ins_int.baro_z = -pprz_isa_height_of_pressure(pressure, ins_int.qfe) - INS_BARO_AGL_OFFSET;
 #if USE_VFF_EXTENDED
       vff_update_baro(ins_int.baro_z);
 #else
@@ -441,7 +446,7 @@ static void sonar_cb(uint8_t __attribute__((unused)) sender_id, float distance)
 #endif
       && ins_int.update_on_agl
       && ins_int.baro_initialized) {
-    vff_update_z_conf(-(distance - INS_SONAR_OFFSET), VFF_R_SONAR_0 + VFF_R_SONAR_OF_M * fabsf(distance));
+    vff_update_z_conf(-distance, VFF_R_SONAR_0 + VFF_R_SONAR_OF_M * fabsf(distance));
     last_offset = vff.offset;
   } else {
     /* update offset with last value to avoid divergence */
