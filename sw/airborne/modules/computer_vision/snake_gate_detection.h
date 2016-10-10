@@ -28,44 +28,16 @@
 
 #include <stdint.h>
 #include "modules/computer_vision/cv.h"
-
-/* Gate structure */
-struct gate_img {
-  int x;             ///< The image x coordinate of the gate centre
-  int y;             ///< The image y coordinate of the gate centre
-  int sz;            ///< Half the image size of the gate
-  float gate_q; //gate quality
-};
+#include "lib/vision/gate_detection.h"
 
 // Module functions
 extern void snake_gate_detection_init(void);
-extern int check_color(struct image_t *im, int x, int y);
-extern void snake_up_and_down(struct image_t *im, int x, int y, int *y_low, int *y_high);
-extern void snake_left_and_right(struct image_t *im, int x, int y, int *x_low, int *x_high);
-extern void draw_gate(struct image_t *im, struct gate_img gate);
-extern void check_gate(struct image_t *im, struct gate_img gate, float *quality);
-void check_line(struct image_t *im, struct point_t Q1, struct point_t Q2, int *n_points, int *n_colored_points);
-
-extern void snake_gate_periodic(void);
-
-extern uint8_t color_lum_min;
-extern uint8_t color_lum_max;
-
-extern uint8_t color_cb_min;
-extern uint8_t color_cb_max;
-
-extern uint8_t color_cr_min;
-extern uint8_t color_cr_max;
-
-//static void snake_gate_send(struct transport_tx *trans, struct link_device *dev);
+extern void snake_gate_detection_start(void);
+extern void snake_gate_detection_stop(void);
+extern void snake_gate_detection_periodic(void);
 
 //uint16_t image_yuv422_set_color(struct image_t *input, struct image_t *output, int x, int y);
-//void calculate_gate_position(int x_pix,int y_pix, int sz_pix, struct image_t *img,struct gate_img gate);
-//void snake_gate_periodic(void);
-
-extern struct video_listener *listener;
-
-extern float delta_z_gate;
+//void check_color_center(struct image_t *im, uint8_t *y_c, uint8_t *cb_c, uint8_t *cr_c)
 
 extern float gate_x_dist;
 extern float gate_y_dist;

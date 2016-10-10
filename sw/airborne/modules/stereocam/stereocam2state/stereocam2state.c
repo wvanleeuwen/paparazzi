@@ -38,7 +38,7 @@ int8_t disp_diff;
 uint16_t win_dist, win_size;
 
 struct Int16Vect3 vel_pixel_i, vel_global_i;
-uint8_t agl; // in dm
+uint8_t stereo_agl; // in dm
 uint8_t fps;
 
 uint16_t range_finder[4]; // distance from range finder in mm clockwise starting with front
@@ -50,7 +50,7 @@ static void stereocam_telem_send(struct transport_tx *trans, struct link_device 
   int8_t foe_x = stereo_motion.foe.x;
   int8_t foe_y =  stereo_motion.foe.y;
   pprz_msg_send_STEREOCAM_OPTIC_FLOW(trans, dev, AC_ID,
-      &fps, &agl, &vel_pixel_i.x, &vel_pixel_i.z,
+      &fps, &stereo_agl, &vel_pixel_i.x, &vel_pixel_i.z,
       &vel_global_i.x, &vel_global_i.y, &vel_global_i.z,
       &tracked_x, &tracked_y, &win_x, &win_y, &win_cert, &win_size, &win_dist,
       &foe_x, &foe_y);
@@ -120,7 +120,7 @@ void stereocam_to_state(void)
   int16_t div_y = buffer[2];
   int16_t flow_y = buffer[3];
 
-  agl = stereocam_data.data[8]; // in dm
+  stereo_agl = stereocam_data.data[8]; // in dm
   fps = stereocam_data.data[9];
 
   int16_t vel_x_global_int = buffer[5];

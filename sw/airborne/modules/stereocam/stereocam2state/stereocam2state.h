@@ -28,6 +28,8 @@ extern int8_t disp_diff;
 extern uint16_t win_dist, win_size;
 extern uint16_t range_finder[]; // distance from range finder in mm clockwise starting with front
 
+extern uint8_t stereo_agl; // in dm
+
 extern struct Egomotion stereo_motion;
 
 extern void stereo_to_state_init(void);

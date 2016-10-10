@@ -10,7 +10,6 @@
 
 #include "modules/computer_vision/cv.h"
 #include "modules/computer_vision/lib/vision/image.h"
-#include "modules/computer_vision/snake_gate_detection.h"
 
 #define GOOD_FIT 0.04
 #define BAD_FIT 0.12
@@ -21,6 +20,15 @@ struct point_f {
   float x;
   float y;
 };
+
+extern uint8_t color_lum_min;
+extern uint8_t color_lum_max;
+
+extern uint8_t color_cb_min;
+extern uint8_t color_cb_max;
+
+extern uint8_t color_cr_min;
+extern uint8_t color_cr_max;
 
 // main gate detection function:
 extern void gate_detection(struct image_t *color_image, float *x_center, float *y_center, float *radius, float *fitness,
@@ -54,6 +62,8 @@ float get_sum(float *nums, int n_elements);
 void draw_circle(struct image_t *Im, float x_center, float y_center, float radius, uint8_t *color);
 void draw_stick(struct image_t *Im, float x_center, float y_center, float radius, uint8_t *color);
 void draw_line_segment(struct image_t *Im, struct point_f Q1, struct point_f Q2, uint8_t *color);
+
+extern int check_color(struct image_t *im, int x, int y);
 
 // calculating the color fit cannot be done with the current stereo output:
 // float check_color_fit();

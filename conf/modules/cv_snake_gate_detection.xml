@@ -9,7 +9,6 @@
   <settings>
     <dl_settings>
       <dl_settings NAME="snake_gate_detection">
-         <dl_setting var="listener->active" min="0" step="1" max="1" shortname="active" />
          <dl_setting var="color_lum_min" min="0" step="1" max="255" shortname="y_min" />
          <dl_setting var="color_lum_max" min="0" step="1" max="255" shortname="y_max" />
          <dl_setting var="color_cb_min"  min="0" step="1" max="255" shortname="u_min" />
@@ -27,7 +26,7 @@
   </header>
 
   <init fun="snake_gate_detection_init()"/>
-  <periodic fun="snake_gate_periodic()" freq="20" autorun="TRUE"/>
+  <periodic fun="snake_gate_detection_periodic()" freq="10" autorun="FALSE" start="snake_gate_detection_start()" stop="snake_gate_detection_stop()"/>
   <makefile target="ap">
     <file name="snake_gate_detection.c"/>
     <file name="lib/vision/gate_detection.c"/>

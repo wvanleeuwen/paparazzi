@@ -7,15 +7,15 @@
 
 #include "gate_detection.h"
 #include <math.h>
-// one would expect this to be part of math.h, but...
-#define PI 3.14159265359
+
 //#include "main_parameters.h"
 #include <stdlib.h>
+#include "std.h"
 
 // camera params: TODO: would be better to get from elsewhere!!!
 // TODO KIRK find correct
-#define FOV_W (150.0f/180.0f)*PI
-#define FOV_H (130.0f/180.0f)*PI
+#define FOV_W (150.0f/180.0f)*M_PI
+#define FOV_H (130.0f/180.0f)*M_PI
 
 // gate params: TODO: would also be better to put elsewhere, centrally:
 // TODO KIRK find correct
@@ -64,6 +64,36 @@ int GRAPHICS = 0;
 // factor within which we search for clock arms:
 float clock_factor = 0.6;
 
+// Checks for a single pixel if it is the right color
+// 1 means that it passes the filter
+int check_color(struct image_t *im, int x, int y)
+{
+  if (x % 2 == 1) { x--; }
+
+  if (x < 0 || x >= im->w || y < 0 || y >= im->h) {
+    return 0;
+  }
+
+  uint8_t *buf = im->buf;
+  buf += 2 * (y * (im->w) + x); // each pixel has two bytes
+  // odd ones are uy
+  // even ones are vy
+
+  if (
+    (buf[1] >= color_lum_min)
+    && (buf[1] <= color_lum_max)
+    && (buf[0] >= color_cb_min)
+    && (buf[0] <= color_cb_max)
+    && (buf[2] >= color_cr_min)
+    && (buf[2] <= color_cr_max)
+  ) {
+    // the pixel passes:
+    return 1;
+  } else {
+    // the pixel does not:
+    return 0;
+  }
+}
 
 /**
  * Function takes a disparity image and fits a circular gate to the close-by points.
@@ -73,7 +103,6 @@ float clock_factor = 0.6;
  * - min_x, min_y, ... The region of interest in which to sample the points.
  * @author Guido
  */
-
 void gate_detection(struct image_t *color_image, float *x_center, float *y_center, float *radius, float *fitness,
                     int *x0, int *y0, int *size0, uint16_t min_x, uint16_t min_y, uint16_t max_x, uint16_t max_y, int clock_arms,
                     float *angle_1, float *angle_2, float *psi)
@@ -738,7 +767,7 @@ void draw_circle(struct image_t *Im, float x_center, float y_center, float radiu
   float t_step = 0.05; // should depend on radius, but hey...
   int x, y;
   float t;
-  for (t = 0.0f; t < (float)(2 * PI); t += t_step) {
+  for (t = 0.0f; t < (float)(2 * M_PI); t += t_step) {
     x = (int)x_center + (int)(cosf(t) * radius);
     y = (int)y_center + (int)(sinf(t) * radius);
     if (x >= 0 && x < Im->w - 1 && y >= 0 && y < Im->h) {
@@ -813,8 +842,8 @@ float fit_clock_arms(float x_center, float y_center, float radius, float *angle_
   // 2) optimize two angles to best fit the pattern
   uint16_t i, g, ge;
   for (i = 0; i < N_INDIVIDUALS; i++) {
-    Population[i][0] = 2 * PI * get_random_number() - PI;
-    Population[i][1] = 2 * PI * get_random_number() - PI;
+    Population[i][0] = 2 * M_PI * get_random_number() - M_PI;
+    Population[i][1] = 2 * M_PI * get_random_number() - M_PI;
   }
 
   // large number, since we will minimize it:
@@ -849,8 +878,8 @@ float fit_clock_arms(float x_center, float y_center, float radius, float *angle_
     if (g < n_generations - 1) {
       // super elitist evolution:
       for (i = 0; i < N_INDIVIDUALS; i++) {
-        Population[i][0] = min_genome[0] + 2 * PI * get_random_number() - PI;
-        Population[i][1] = min_genome[1] + 2 * PI * get_random_number() - PI;
+        Population[i][0] = min_genome[0] + 2 * M_PI * get_random_number() - M_PI;
+        Population[i][1] = min_genome[1] + 2 * M_PI * get_random_number() - M_PI;
       }
     }
 

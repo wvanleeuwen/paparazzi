@@ -31,16 +31,24 @@
 #include "modules/computer_vision/lib/vision/image.h"
 #include "modules/computer_vision/lib/vision/gate_detection.h"
 
+#include "std.h"
 #include "state.h"
 #include "mcu_periph/sys_time.h"
+
+
+/* Gate structure */
+struct gate_img {
+  int x;             ///< The image x coordinate of the gate centre
+  int y;             ///< The image y coordinate of the gate centre
+  int sz;            ///< Half the image size of the gate
+  float gate_q; //gate quality
+};
 
 #ifndef SGD_CAMERA
 #define SGD_CAMERA front_camera
 #endif
 
 #define DRAW_GATE
-
-#define PI 3.1415926
 
 //initial position after gate pass
 // this initialises the filter location before positive identification
@@ -125,7 +133,6 @@ float predicted_z_gate = 0;
 float filtered_x_gate = 0;
 float filtered_y_gate = 0;
 float filtered_z_gate = 0;
-float delta_z_gate   = 0;
 
 float previous_x_gate = 0;
 float previous_y_gate = 0;
@@ -143,39 +150,6 @@ float gate_quality = 0;
 
 // timers
 float last_processed, time_gate_detected, time_tracked;
-
-//Debug messages
-
-// Checks for a single pixel if it is the right color
-// 1 means that it passes the filter
-int check_color(struct image_t *im, int x, int y)
-{
-  if (x % 2 == 1) { x--; }
-
-  if (x < 0 || x >= im->w || y < 0 || y >= im->h) {
-    return 0;
-  }
-
-  uint8_t *buf = im->buf;
-  buf += 2 * (y * (im->w) + x); // each pixel has two bytes
-  // odd ones are uy
-  // even ones are vy
-
-  if (
-    (buf[1] >= color_lum_min)
-    && (buf[1] <= color_lum_max)
-    && (buf[0] >= color_cb_min)
-    && (buf[0] <= color_cb_max)
-    && (buf[2] >= color_cr_min)
-    && (buf[2] <= color_cr_max)
-  ) {
-    // the pixel passes:
-    return 1;
-  } else {
-    // the pixel does not:
-    return 0;
-  }
-}
 
 /*
 static void check_color_center(struct image_t *im, uint8_t *y_c, uint8_t *cb_c, uint8_t *cr_c)
@@ -217,12 +191,11 @@ static void image_yuv422_set_color(struct image_t *input, struct image_t *output
 static void calculate_gate_position(int x_pix, int y_pix, int sz_pix, struct image_t *img, struct gate_img gate)
 {
   // pixel distance conversion
-  static float hor_angle = 0, vert_angle = 0;
+  static float hor_angle = 0., vert_angle = 0.;
 
   // calculate angles here, rotate camera pixels 90 deg
-  vert_angle = (-((float)x_pix - (float)(img->w) / 2.) * radians_per_pix_w)
-      - stateGetNedToBodyEulers_f()->theta;
-  hor_angle = ((float)y_pix - (float)(img->h) / 2.) * radians_per_pix_h;
+  vert_angle = -(x_pix - img->w / 2) * radians_per_pix_w - stateGetNedToBodyEulers_f()->theta;
+  hor_angle = (y_pix - img->h / 2) * radians_per_pix_h;
 
   // in body frame
   gate_x_dist = gate_size_m / (gate.sz * radians_per_pix_w);
@@ -230,91 +203,208 @@ static void calculate_gate_position(int x_pix, int y_pix, int sz_pix, struct ima
   gate_z_dist = gate_x_dist * sin(vert_angle);
 }
 
-// state filter in periodic loop
-void snake_gate_periodic(void)
+static void draw_gate(struct image_t *im, struct gate_img gate)
 {
-  // Reinitialization after gate is cleared and turn is made(called from velocity guidance module)
-  if (init_pos_filter == 1) {
-    init_pos_filter = 0;
-    //assumed initial position at other end of the gate
-    predicted_x_gate = INITIAL_X;
-    predicted_y_gate = INITIAL_Y;
-    predicted_z_gate = INITIAL_Z;
+  // draw four lines on the image:
+  struct point_t from, to;
+  from.x = (gate.x - gate.sz);
+  from.y = gate.y - gate.sz;
+  to.x = (gate.x - gate.sz);
+  to.y = gate.y + gate.sz;
+  image_draw_line(im, &from, &to);
+  from.x = (gate.x - gate.sz);
+  from.y = gate.y + gate.sz;
+  to.x = (gate.x + gate.sz);
+  to.y = gate.y + gate.sz;
+  image_draw_line(im, &from, &to);
+  from.x = (gate.x + gate.sz);
+  from.y = gate.y + gate.sz;
+  to.x = (gate.x + gate.sz);
+  to.y = gate.y - gate.sz;
+  image_draw_line(im, &from, &to);
+  from.x = (gate.x + gate.sz);
+  from.y = gate.y - gate.sz;
+  to.x = (gate.x - gate.sz);
+  to.y = gate.y - gate.sz;
+  image_draw_line(im, &from, &to);
+}
+
+static void check_line(struct image_t *im, struct point_t Q1, struct point_t Q2, int *n_points, int *n_colored_points)
+{
+  (*n_points) = 0;
+  (*n_colored_points) = 0;
+
+  float t_step = 0.05;
+  int x, y;
+  float t;
+  // go from Q1 to Q2 in 1/t_step steps:
+  for (t = 0.0f; t < 1.0f; t += t_step) {
+    // determine integer coordinate on the line:
+    x = (int)(t * Q1.x + (1.0f - t) * Q2.x);
+    y = (int)(t * Q1.y + (1.0f - t) * Q2.y);
+
+    if (x >= 0 && x < im->w && y >= 0 && y < im->h) {
+      // augment number of checked points:
+      (*n_points)++;
+
+      if (check_color(im, x, y)) {
+        // the point is of the right color:
+        (*n_colored_points)++;
+      }
+    }
+  }
+}
+
+static void check_gate(struct image_t *im, struct gate_img gate, float *quality)
+{
+  int n_points, n_colored_points;
+  n_points = 0;
+  n_colored_points = 0;
+  int np, nc;
+
+  // check the four lines of which the gate consists:
+  struct point_t from, to;
+  from.x = gate.x - gate.sz;
+  from.y = gate.y - gate.sz;
+  to.x = gate.x - gate.sz;
+  to.y = gate.y + gate.sz;
+  check_line(im, from, to, &np, &nc);
+  n_points += np;
+  n_colored_points += nc;
+
+  from.x = gate.x - gate.sz;
+  from.y = gate.y + gate.sz;
+  to.x = gate.x + gate.sz;
+  to.y = gate.y + gate.sz;
+  check_line(im, from, to, &np, &nc);
+  n_points += np;
+  n_colored_points += nc;
+
+  from.x = gate.x + gate.sz;
+  from.y = gate.y + gate.sz;
+  to.x = gate.x + gate.sz;
+  to.y = gate.y - gate.sz;
+  check_line(im, from, to, &np, &nc);
+  n_points += np;
+  n_colored_points += nc;
+
+  from.x = gate.x + gate.sz;
+  from.y = gate.y - gate.sz;
+  to.x = gate.x - gate.sz;
+  to.y = gate.y - gate.sz;
+  check_line(im, from, to, &np, &nc);
+  n_points += np;
+  n_colored_points += nc;
+
+  // the quality is the ratio of colored points / number of points:
+  if (n_points == 0) {
+    (*quality) = 0;
+  } else {
+    (*quality) = ((float) n_colored_points) / ((float) n_points);
+  }
+}
+
+static void snake_up_and_down(struct image_t *im, int x, int y, int *y_low, int *y_high)
+{
+  int done = 0;
+  int x_initial = x;
+  (*y_low) = y;
+
+  // snake towards negative y (down?)
+  while ((*y_low) > 0 && !done) {
+    if (check_color(im, x, (*y_low) - 1)) {
+      (*y_low)--;
+    } else if (x < im->w - 1 && check_color(im, x + 1, (*y_low) - 1)) {
+      x++;
+      (*y_low)--;
+    } else if (x > 0 && check_color(im, x - 1, (*y_low) - 1)) {
+      x--;
+      (*y_low)--;
+    } else if (x < im->w - 2 && check_color(im, x + 2, (*y_low) - 1)) {
+      x+=2;
+      (*y_low)--;
+    } else if (x > 1 && check_color(im, x - 2, (*y_low) - 1)) {
+      x-=2;
+      (*y_low)--;
+    } else {
+      done = 1;
+    }
   }
 
-  if (time_gate_detected > last_processed) {
-
-    // SAFETY gate_detected
-    if (gate_x_dist > 0.6 && gate_x_dist < 5) {
-      gate_detected = 1;
-      counter_gate_detected = 0;
-      gate_processed = 0;
+  x = x_initial;
+  (*y_high) = y;
+  done = 0;
+  // snake towards positive y (up?)
+  while ((*y_high) < im->h - 1 && !done) {
+    if (check_color(im, x, (*y_high) + 1)) {
+      (*y_high)++;
+    } else if (x < im->w - 1 && check_color(im, x + 1, (*y_high) + 1)) {
+      x++;
+      (*y_high)++;
+    } else if (x > 0 && check_color(im, x - 1, (*y_high) + 1)) {
+      x--;
+      (*y_high)++;
+    } else if (x < im->w - 2 && check_color(im, x + 2, (*y_high) + 1)) {
+      x+=2;
+      (*y_high)++;
+    } else if (x > 1 && check_color(im, x - 2, (*y_high) + 1)) {
+      x-=2;
+      (*y_high)++;
     } else {
-      gate_detected = 0;
-      counter_gate_detected = 0;
+      done = 1;
     }
+  }
+}
 
-    //convert earth velocity to body x y velocity
-    float psi = stateGetNedToBodyEulers_f()->psi;
-    body_vx = cosf(psi)*stateGetSpeedNed_f()->x + sinf(psi)*stateGetSpeedNed_f()->y;
-    body_vy = -sinf(psi)*stateGetSpeedNed_f()->x + cosf(psi)*stateGetSpeedNed_f()->y;
+static void snake_left_and_right(struct image_t *im, int x, int y, int *x_low, int *x_high)
+{
+  int done = 0;
+  int y_initial = y;
+  (*x_low) = x;
 
-    //State filter
-    float dt = time_gate_detected - last_processed;
-
-    // predict the new location:
-    float dx_gate = dt * body_vx; //(cos(current_angle_gate) * gate_turn_rate * current_distance);
-    float dy_gate = dt * body_vy; //(velocity_gate - sin(current_angle_gate) * gate_turn_rate * current_distance);
-    predicted_x_gate = previous_x_gate + dx_gate;
-    predicted_y_gate = previous_y_gate + dy_gate;
-    predicted_z_gate = previous_z_gate;
-
-    float sonar_alt = stateGetPositionNed_f()->z;
-
-    if (gate_detected == 1) {
-      // Mix the measurement with the prediction:
-      float weight_measurement;
-      if (uncertainty_gate > 150) {
-        weight_measurement = 1.0f;
-        uncertainty_gate = 151;//max
-      } else {
-        weight_measurement = 0.7;  //(GOOD_FIT-best_quality)/GOOD_FIT;//check constant weight
-      }
-
-      filtered_x_gate = weight_measurement * gate_x_dist + (1.0f - weight_measurement) * predicted_x_gate;
-      filtered_y_gate = weight_measurement * gate_y_dist + (1.0f - weight_measurement) * predicted_y_gate;
-      filtered_z_gate = weight_measurement * (gate_z_dist + sonar_alt) + (1.0f - weight_measurement) * predicted_z_gate;
-
-      // reset uncertainty:
-      uncertainty_gate = 0;
-    } else {
-      // just the prediction
-      filtered_x_gate = predicted_x_gate;
-      filtered_y_gate = predicted_y_gate;
-      filtered_z_gate = predicted_z_gate;
-
-      // increase uncertainty
-      uncertainty_gate++;
+  // snake towards negative x (left)
+  while ((*x_low) > 0 && !done) {
+    if (check_color(im, (*x_low) - 1, y)) {
+      (*x_low)--;
+    } else if (y < im->h - 1 && check_color(im, (*x_low) - 1, y + 1)) {
+      y++;
+      (*x_low)--;
+    } else if (y > 0 && check_color(im, (*x_low) - 1, y - 1)) {
+      y--;
+      (*x_low)--;
+    } else if (y < im->h - 2 && check_color(im, (*x_low) - 1, y + 2)) {
+      y+=2;
+      (*x_low)--;
+    } else if (y > 1 && check_color(im, (*x_low) - 1, y - 2)) {
+      y-=2;
+      (*x_low)--;
+    }else {
+      done = 1;
     }
-    // set the previous state for the next time:
-    previous_x_gate = filtered_x_gate;
-    previous_y_gate = filtered_y_gate;
-    previous_z_gate = filtered_z_gate;
-    delta_z_gate = filtered_z_gate - sonar_alt;
+  }
 
-    last_processed = time_gate_detected;
+  y = y_initial;
+  (*x_high) = x;
+  done = 0;
+  // snake towards positive x (right)
+  while ((*x_high) < im->w - 1 && !done) {
 
-    //SAFETY ready_pass_trough
-    printf("gate at %f %d %f %f %f %f\n", time_gate_detected - time_tracked, gate_detected, filtered_x_gate, filtered_y_gate, body_vx, body_vy);
-    if (gate_detected && fabs(filtered_x_gate - INITIAL_X) < X_POS_MARGIN && fabs(filtered_y_gate - INITIAL_Y) < Y_POS_MARGIN
-        && fabs(body_vx) < X_SPEED_MARGIN && fabs(body_vy) < Y_SPEED_MARGIN) {
-      if (time_gate_detected - time_tracked > 1.5) {
-        ready_pass_through = 1;
-        printf("I'm ready\n\n\n");
-      }
+    if (check_color(im, (*x_high) + 1, y)) {
+      (*x_high)++;
+    } else if (y < im->h - 1 && check_color(im, (*x_high) + 1, y + 1)) {
+      y++;
+      (*x_high)++;
+    } else if (y > 0 && check_color(im, (*x_high) + 1, y - 1)) {
+      y--;
+      (*x_high)++;
+    } else if (y < im->h - 2 && check_color(im, (*x_high) + 1, y + 2)) {
+      y+=2;
+      (*x_high)++;
+    } else if (y > 1 && check_color(im, (*x_high) + 1, y - 2)) {
+      y-=2;
+      (*x_high)++;
     } else {
-      time_tracked = time_gate_detected;
-      ready_pass_through = 0;
+      done = 1;
     }
   }
 }
@@ -497,215 +587,105 @@ static struct image_t *snake_gate_detection_func(struct image_t *img)
   return img; // snake_gate_detection did not make a new image
 }
 
-
-void draw_gate(struct image_t *im, struct gate_img gate)
-{
-  // draw four lines on the image:
-  struct point_t from, to;
-  from.x = (gate.x - gate.sz);
-  from.y = gate.y - gate.sz;
-  to.x = (gate.x - gate.sz);
-  to.y = gate.y + gate.sz;
-  image_draw_line(im, &from, &to);
-  from.x = (gate.x - gate.sz);
-  from.y = gate.y + gate.sz;
-  to.x = (gate.x + gate.sz);
-  to.y = gate.y + gate.sz;
-  image_draw_line(im, &from, &to);
-  from.x = (gate.x + gate.sz);
-  from.y = gate.y + gate.sz;
-  to.x = (gate.x + gate.sz);
-  to.y = gate.y - gate.sz;
-  image_draw_line(im, &from, &to);
-  from.x = (gate.x + gate.sz);
-  from.y = gate.y - gate.sz;
-  to.x = (gate.x - gate.sz);
-  to.y = gate.y - gate.sz;
-  image_draw_line(im, &from, &to);
+void snake_gate_detection_start(void){
+  time_gate_detected = last_processed = get_sys_time_float();
+  gate_detected = 0;
+  ready_pass_through = 0;
+  listener->active = 1;
 }
 
-extern void check_gate(struct image_t *im, struct gate_img gate, float *quality)
-{
-  int n_points, n_colored_points;
-  n_points = 0;
-  n_colored_points = 0;
-  int np, nc;
-
-  // check the four lines of which the gate consists:
-  struct point_t from, to;
-  from.x = gate.x - gate.sz;
-  from.y = gate.y - gate.sz;
-  to.x = gate.x - gate.sz;
-  to.y = gate.y + gate.sz;
-  check_line(im, from, to, &np, &nc);
-  n_points += np;
-  n_colored_points += nc;
-
-  from.x = gate.x - gate.sz;
-  from.y = gate.y + gate.sz;
-  to.x = gate.x + gate.sz;
-  to.y = gate.y + gate.sz;
-  check_line(im, from, to, &np, &nc);
-  n_points += np;
-  n_colored_points += nc;
-
-  from.x = gate.x + gate.sz;
-  from.y = gate.y + gate.sz;
-  to.x = gate.x + gate.sz;
-  to.y = gate.y - gate.sz;
-  check_line(im, from, to, &np, &nc);
-  n_points += np;
-  n_colored_points += nc;
-
-  from.x = gate.x + gate.sz;
-  from.y = gate.y - gate.sz;
-  to.x = gate.x - gate.sz;
-  to.y = gate.y - gate.sz;
-  check_line(im, from, to, &np, &nc);
-  n_points += np;
-  n_colored_points += nc;
-
-  // the quality is the ratio of colored points / number of points:
-  if (n_points == 0) {
-    (*quality) = 0;
-  } else {
-    (*quality) = ((float) n_colored_points) / ((float) n_points);
-  }
-}
-
-void check_line(struct image_t *im, struct point_t Q1, struct point_t Q2, int *n_points, int *n_colored_points)
-{
-  (*n_points) = 0;
-  (*n_colored_points) = 0;
-
-  float t_step = 0.05;
-  int x, y;
-  float t;
-  // go from Q1 to Q2 in 1/t_step steps:
-  for (t = 0.0f; t < 1.0f; t += t_step) {
-    // determine integer coordinate on the line:
-    x = (int)(t * Q1.x + (1.0f - t) * Q2.x);
-    y = (int)(t * Q1.y + (1.0f - t) * Q2.y);
-
-    if (x >= 0 && x < im->w && y >= 0 && y < im->h) {
-      // augment number of checked points:
-      (*n_points)++;
-
-      if (check_color(im, x, y)) {
-        // the point is of the right color:
-        (*n_colored_points)++;
-      }
-    }
-  }
-}
-
-void snake_up_and_down(struct image_t *im, int x, int y, int *y_low, int *y_high)
-{
-  int done = 0;
-  int x_initial = x;
-  (*y_low) = y;
-
-  // snake towards negative y (down?)
-  while ((*y_low) > 0 && !done) {
-    if (check_color(im, x, (*y_low) - 1)) {
-      (*y_low)--;
-    } else if (x < im->w - 1 && check_color(im, x + 1, (*y_low) - 1)) {
-      x++;
-      (*y_low)--;
-    } else if (x > 0 && check_color(im, x - 1, (*y_low) - 1)) {
-      x--;
-      (*y_low)--;
-    } else if (x < im->w - 2 && check_color(im, x + 2, (*y_low) - 1)) {
-      x+=2;
-      (*y_low)--;
-    } else if (x > 1 && check_color(im, x - 2, (*y_low) - 1)) {
-      x-=2;
-      (*y_low)--;
-    } else {
-      done = 1;
-    }
-  }
-
-  x = x_initial;
-  (*y_high) = y;
-  done = 0;
-  // snake towards positive y (up?)
-  while ((*y_high) < im->h - 1 && !done) {
-    if (check_color(im, x, (*y_high) + 1)) {
-      (*y_high)++;
-    } else if (x < im->w - 1 && check_color(im, x + 1, (*y_high) + 1)) {
-      x++;
-      (*y_high)++;
-    } else if (x > 0 && check_color(im, x - 1, (*y_high) + 1)) {
-      x--;
-      (*y_high)++;
-    } else if (x < im->w - 2 && check_color(im, x + 2, (*y_high) + 1)) {
-      x+=2;
-      (*y_high)++;
-    } else if (x > 1 && check_color(im, x - 2, (*y_high) + 1)) {
-      x-=2;
-      (*y_high)++;
-    } else {
-      done = 1;
-    }
-  }
-}
-
-void snake_left_and_right(struct image_t *im, int x, int y, int *x_low, int *x_high)
-{
-  int done = 0;
-  int y_initial = y;
-  (*x_low) = x;
-
-  // snake towards negative x (left)
-  while ((*x_low) > 0 && !done) {
-    if (check_color(im, (*x_low) - 1, y)) {
-      (*x_low)--;
-    } else if (y < im->h - 1 && check_color(im, (*x_low) - 1, y + 1)) {
-      y++;
-      (*x_low)--;
-    } else if (y > 0 && check_color(im, (*x_low) - 1, y - 1)) {
-      y--;
-      (*x_low)--;
-    } else if (y < im->h - 2 && check_color(im, (*x_low) - 1, y + 2)) {
-      y+=2;
-      (*x_low)--;
-    } else if (y > 1 && check_color(im, (*x_low) - 1, y - 2)) {
-      y-=2;
-      (*x_low)--;
-    }else {
-      done = 1;
-    }
-  }
-
-  y = y_initial;
-  (*x_high) = x;
-  done = 0;
-  // snake towards positive x (right)
-  while ((*x_high) < im->w - 1 && !done) {
-
-    if (check_color(im, (*x_high) + 1, y)) {
-      (*x_high)++;
-    } else if (y < im->h - 1 && check_color(im, (*x_high) + 1, y + 1)) {
-      y++;
-      (*x_high)++;
-    } else if (y > 0 && check_color(im, (*x_high) + 1, y - 1)) {
-      y--;
-      (*x_high)++;
-    } else if (y < im->h - 2 && check_color(im, (*x_high) + 1, y + 2)) {
-      y+=2;
-      (*x_high)++;
-    } else if (y > 1 && check_color(im, (*x_high) + 1, y - 2)) {
-      y-=2;
-      (*x_high)++;
-    } else {
-      done = 1;
-    }
-  }
+void snake_gate_detection_stop(void){
+  gate_detected = 0;
+  ready_pass_through = 0;
+  listener->active = 0;
 }
 
 void snake_gate_detection_init(void)
 {
   listener = cv_add_to_device(&SGD_CAMERA, snake_gate_detection_func);
-  time_gate_detected = last_processed = get_sys_time_float();
+  listener->active = 0;
+}
+
+// state filter in periodic loop
+void snake_gate_detection_periodic(void)
+{
+  // Reinitialization after gate is cleared and turn is made(called from velocity guidance module)
+  if (init_pos_filter == 1) {
+    init_pos_filter = 0;
+    //assumed initial position at other end of the gate
+    predicted_x_gate = INITIAL_X;
+    predicted_y_gate = INITIAL_Y;
+    predicted_z_gate = INITIAL_Z;
+  }
+
+  if (time_gate_detected > last_processed) {
+    // SAFETY gate_detected
+    if (gate_x_dist > 0.6 && gate_x_dist < 5) {
+      gate_detected = 1;
+      counter_gate_detected = 0;
+      gate_processed = 0;
+    } else {
+      gate_detected = 0;
+      counter_gate_detected = 0;
+    }
+
+    //convert earth velocity to body x y velocity
+    float psi = stateGetNedToBodyEulers_f()->psi;
+    body_vx = cosf(psi)*stateGetSpeedNed_f()->x + sinf(psi)*stateGetSpeedNed_f()->y;
+    body_vy = -sinf(psi)*stateGetSpeedNed_f()->x + cosf(psi)*stateGetSpeedNed_f()->y;
+
+    //State filter
+    float dt = time_gate_detected - last_processed;
+
+    // predict the new location:
+    float dx_gate = dt * body_vx; //(cos(current_angle_gate) * gate_turn_rate * current_distance);
+    float dy_gate = dt * body_vy; //(velocity_gate - sin(current_angle_gate) * gate_turn_rate * current_distance);
+    predicted_x_gate = previous_x_gate + dx_gate;
+    predicted_y_gate = previous_y_gate + dy_gate;
+    predicted_z_gate = previous_z_gate;
+
+    if (gate_detected == 1) {
+      // Mix the measurement with the prediction:
+      float weight_measurement;
+      if (uncertainty_gate > 150) {
+        weight_measurement = 1.0f;
+        uncertainty_gate = 151;//max
+      } else {
+        weight_measurement = 0.7;  //(GOOD_FIT-best_quality)/GOOD_FIT;//check constant weight
+      }
+
+      filtered_x_gate = weight_measurement * gate_x_dist + (1.0f - weight_measurement) * predicted_x_gate;
+      filtered_y_gate = weight_measurement * gate_y_dist + (1.0f - weight_measurement) * predicted_y_gate;
+      filtered_z_gate = weight_measurement * gate_z_dist + (1.0f - weight_measurement) * predicted_z_gate;
+
+      // reset uncertainty:
+      uncertainty_gate = 0;
+    } else {
+      // just the prediction
+      filtered_x_gate = predicted_x_gate;
+      filtered_y_gate = predicted_y_gate;
+      filtered_z_gate = predicted_z_gate;
+
+      // increase uncertainty
+      uncertainty_gate++;
+    }
+    // set the previous state for the next time:
+    previous_x_gate = filtered_x_gate;
+    previous_y_gate = filtered_y_gate;
+    previous_z_gate = filtered_z_gate;
+
+    last_processed = time_gate_detected;
+
+    //SAFETY ready_pass_trough
+    printf("gate at %f %d %f %f %f %f\n", time_gate_detected - time_tracked, gate_detected, filtered_x_gate, filtered_y_gate, body_vx, body_vy);
+    if (gate_detected && fabs(filtered_x_gate - INITIAL_X) < X_POS_MARGIN && fabs(filtered_y_gate - INITIAL_Y) < Y_POS_MARGIN
+        && fabs(body_vx) < X_SPEED_MARGIN && fabs(body_vy) < Y_SPEED_MARGIN) {
+      if (time_gate_detected - time_tracked > 1.5) {
+        ready_pass_through = 1;
+      }
+    } else {
+      time_tracked = time_gate_detected;
+      ready_pass_through = 0;
+    }
+  }
 }

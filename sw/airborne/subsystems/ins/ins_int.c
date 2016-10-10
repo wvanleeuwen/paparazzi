@@ -519,7 +519,7 @@ static void vel_est_cb(uint8_t sender_id __attribute__((unused)),
   struct FloatVect3 vel_body = {x, y, z};
   static uint32_t last_stamp = 0, last_pos_stamp = 0;
   static float sum_x = 0., sum_y = 0.;
-  struct FloatVect3 prev_vel;
+  struct FloatVect3 prev_vel = {0};
 
   /* rotate velocity estimate to nav/ltp frame */
   struct FloatQuat q_b2n = *stateGetNedToBodyQuat_f();
