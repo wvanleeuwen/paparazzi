@@ -14,32 +14,25 @@ void flowStatsInit(struct flowStats *s) {
   s->eventRate = 0;
   int32_t i;
   for (i = 0; i < N_FIELD_DIRECTIONS; i++) {
-    s->ms[i] = 0;
-    s->mss[i] = 0;
-    s->mV[i] = 0;
-    s->mVV[i] = 0;
-    s->msV[i] = 0;
+    s->sumS[i] = 0;
+    s->sumSS[i] = 0;
+    s->sumV[i] = 0;
+    s->sumVV[i] = 0;
+    s->sumSV[i] = 0;
     s->N[i] = 0;
-    s->tLast[i] = 0;
     s->angles[i] = ((float) i)/N_FIELD_DIRECTIONS*M_PI;
     s->cos_angles[i] = cosf(s->angles[i]);
     s->sin_angles[i] = sinf(s->angles[i]);
   }
 }
 
-void flowStatsUpdate(struct flowStats* s, struct flowEvent e, struct flowField lastField,
-    float filterTimeConstant, float movingAverageWindow, float maxSpeedDifference,
+void flowStatsUpdate(struct flowStats* s, struct flowEvent e,
     struct cameraIntrinsicParameters intrinsics) {
   // X,Y are defined around the camera's principal point
     float x = e.x - intrinsics.principalPointX;
     float y = e.y - intrinsics.principalPointY;
     float u = e.u;
     float v = e.v;
-
-    // Dot product of position/flow
-//    float w = x * u + y * v;
-    // Squared flow magnitude
-//    float m = u * u + v * v;
 
     // Find direction/index of flow
     float alpha = atan2f(v,u);
@@ -52,41 +45,18 @@ void flowStatsUpdate(struct flowStats* s, struct flowEvent e, struct flowField l
     }
     int32_t a = (int32_t) (N_FIELD_DIRECTIONS*alpha/M_PI);
 
-    // Update stats through hybrid moving averaging/low-pass filtering
-//    float dt = ((float)(e.t - s->tLast[a]))/1e6;
-//    if (dt <= 0) {
-//      dt = 1e-8;
-//    }
-//    float tFactor =  dt / filterTimeConstant;
-//    // To prevent very large updates after a large dt, the update reduces to a moving average
-//    if (tFactor > 1/movingAverageWindow)
-//      tFactor = 1/movingAverageWindow;
-
-    // Limit outlier influence based on predicted flow magnitude
-//    float p[3] = {
-//        lastField.wx * intrinsics.focalLengthX,
-//        lastField.wy * intrinsics.focalLengthY,
-//        lastField.D
-//    };
-//    float mPred = p[0]*u + p[1]*v + p[2]*w;
-//    float dm = m - mPred;
-//    float dmMax = powf(maxSpeedDifference,2);
-//    if (fabsf(dm) > dmMax) {
-//      tFactor *= fabsf(dmMax/dm);
-//    }
-
     // Transform flow to direction reference frame
     float S = x * s->cos_angles[a] + y * s->sin_angles[a];
     float V = u * s->cos_angles[a] + v * s->sin_angles[a];
 
-    // Update statistics only in the direction of the flow
-    s->ms [a] += S;//(S   - s->ms [a]) * tFactor;
-    s->mss[a] += S*S;//(S*S - s->mss[a]) * tFactor;
-    s->mV [a] += V;//(V   - s->mV [a]) * tFactor;
-    s->mVV[a] += V*V;//(V*V - s->mVV[a]) * tFactor;
-    s->msV[a] += S*V;//(S*V - s->msV[a]) * tFactor;
+    // Update flow field statistics
+    s->sumS [a] += S;
+    s->sumSS[a] += S*S;
+    s->sumV [a] += V;
+    s->sumVV[a] += V*V;
+    s->sumSV[a] += S*V;
     s->N[a] += 1;
-    s->tLast[a] = e.t;
+
 }
 
 enum updateStatus recomputeFlowField(struct flowField* field, struct flowStats* s,
@@ -110,27 +80,45 @@ enum updateStatus recomputeFlowField(struct flowField* field, struct flowStats* 
 
     // Loop over all directions and collect total flow field information
     for (i = 0; i < N_FIELD_DIRECTIONS; i++) {
+      // Skip if too few new events were added along this direction
+      // Minimum is 2 in order to obtain a nonzero variance
+      if (s->N[i] < 2) {
+        varS[i] = 0;
+        c_var[i] = 0;
+        continue;
+      }
+
+      // Obtain mean statistics
+      float meanS  = s->sumS [i] / s->N[i];
+      float meanSS = s->sumSS[i] / s->N[i];
+      float meanV  = s->sumV [i] / s->N[i];
+      float meanVV = s->sumVV[i] / s->N[i];
+      float meanSV = s->sumSV[i] / s->N[i];
+
+
       // Compute position variances and confidence values from mean statistics
-      varS[i] = s->mss[i] - s->ms[i] * s->ms[i];
+      varS[i] = meanSS - meanS * meanS;
       c_var[i] = 1;
       if (varS[i] < minPosVariance) {
         c_var[i] *= powf(varS[i] / minPosVariance, power);
       }
-      if (s->N[i] == 0) continue;
-      s->N[i] *= c_var[i];
+
+      // Weight per entry: number of elements divided by variance
+      float W = s->N[i] * c_var[i];
+
       // Fill in matrix entries (A is used as upper triangular matrix)
-      A[0][0] += s->N[i] * s->cos_angles[i] * s->cos_angles[i];
-      A[1][1] += s->N[i] * s->sin_angles[i] * s->sin_angles[i];
-      A[2][2] += s->N[i] * s->mss[i];
-      A[0][1] += s->N[i] * s->cos_angles[i] * s->sin_angles[i];
-      A[0][2] += s->N[i] * s->cos_angles[i] * s->ms[i];
-      A[1][2] += s->N[i] * s->sin_angles[i] * s->ms[i];
-      Y[0] += s->N[i] * s->cos_angles[i] * s->mV[i];
-      Y[1] += s->N[i] * s->sin_angles[i] * s->mV[i];
-      Y[2] += s->N[i] * s->msV[i];
-      sumV += s->N[i] * s->mV[i];
-      sumVV += s->N[i] * s->mVV[i];
-      sumW += s->N[i];
+      A[0][0] += W * cos(s->angles[i]) * cos(s->angles[i]);
+      A[1][1] += W * sin(s->angles[i]) * sin(s->angles[i]);
+      A[2][2] += W * meanSS;
+      A[0][1] += W * cos(s->angles[i]) * sin(s->angles[i]);
+      A[0][2] += W * cos(s->angles[i]) * meanS;
+      A[1][2] += W * sin(s->angles[i]) * meanS;
+      Y[0] += W * cos(s->angles[i]) * meanV;
+      Y[1] += W * sin(s->angles[i]) * meanV;
+      Y[2] += W * meanSV;
+      sumV += W * meanV;
+      sumVV += W * meanVV;
+      sumW += W;
     }
 
     // Compute determinant
@@ -186,8 +174,6 @@ enum updateStatus recomputeFlowField(struct flowField* field, struct flowStats* 
 
 
 void derotateFlowField(struct flowField* field, struct FloatRates* rates) {
-  float p = rates->p;
-  float q = rates->q;
-  field->wxDerotated = field->wx - p;
-  field->wyDerotated = field->wy + q;
+  field->wxDerotated = field->wx - rates->p;
+  field->wyDerotated = field->wy + rates->q;
 }

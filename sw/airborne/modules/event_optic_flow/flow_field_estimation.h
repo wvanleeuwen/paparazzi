@@ -64,12 +64,11 @@ struct flowField {
  */
 struct flowStats {
   float N[N_FIELD_DIRECTIONS];
-  float ms[N_FIELD_DIRECTIONS];
-  float mss[N_FIELD_DIRECTIONS];
-  float mV[N_FIELD_DIRECTIONS];
-  float mVV[N_FIELD_DIRECTIONS];
-  float msV[N_FIELD_DIRECTIONS];
-  int32_t tLast[N_FIELD_DIRECTIONS];
+  float sumS[N_FIELD_DIRECTIONS];
+  float sumSS[N_FIELD_DIRECTIONS];
+  float sumV[N_FIELD_DIRECTIONS];
+  float sumVV[N_FIELD_DIRECTIONS];
+  float sumSV[N_FIELD_DIRECTIONS];
   float angles[N_FIELD_DIRECTIONS];
   float cos_angles[N_FIELD_DIRECTIONS];
   float sin_angles[N_FIELD_DIRECTIONS];
@@ -108,8 +107,7 @@ void flowStatsInit(struct flowStats *s);
 /**
  * Performs an update of all flow field statistics with a new event.
  */
-void flowStatsUpdate(struct flowStats* s, struct flowEvent e, struct flowField lastField,
-    float filterTimeConstant, float movingAverageWindow, float maxSpeedDifference,
+void flowStatsUpdate(struct flowStats* s, struct flowEvent e,
     struct cameraIntrinsicParameters intrinsics);
 
 /**

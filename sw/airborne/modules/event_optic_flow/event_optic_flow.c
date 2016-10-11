@@ -140,7 +140,7 @@ const struct cameraIntrinsicParameters dvs128Intrinsics = {
 };
 
 // Internal function declarations (definitions below)
-enum updateStatus processUARTInput(struct flowStats* s, double filterTimeConstant, int32_t* N);
+enum updateStatus processUARTInput(struct flowStats* s, int32_t* N);
 static void sendFlowFieldState(struct transport_tx *trans, struct link_device *dev);
 uint16_t bufferGetFreeSpace(void);
 void incrementBufferPos(uint16_t* pos);
@@ -180,7 +180,7 @@ void event_optic_flow_periodic(void) {
 
 	// Obtain UART data if available
   int32_t NNew;
-	enum updateStatus status = processUARTInput(&eofState.stats, statsFilterTimeConstant, &NNew);
+	enum updateStatus status = processUARTInput(&eofState.stats, &NNew);
 
   // Timing bookkeeping, do this after the most uncertain computations,
   // but before operations where timing info is necessary
@@ -208,14 +208,15 @@ void event_optic_flow_periodic(void) {
 	}
   // Set confidence level globally
   eofState.status = status;
-  //test
+
+  // Reset sums for next iteration
   int32_t i;
   for (i = 0; i < N_FIELD_DIRECTIONS; i++) {
-    eofState.stats.ms [i] = 0;
-    eofState.stats.mss[i] = 0;
-    eofState.stats.mV [i] = 0;
-    eofState.stats.mVV[i] = 0;
-    eofState.stats.msV[i] = 0;
+    eofState.stats.sumS [i] = 0;
+    eofState.stats.sumSS[i] = 0;
+    eofState.stats.sumV [i] = 0;
+    eofState.stats.sumVV[i] = 0;
+    eofState.stats.sumSV[i] = 0;
     eofState.stats.N[i] = 0;
   }
 
@@ -311,7 +312,7 @@ int32_t ringBufferGetInt32(void) {
   return out;
 }
 
-enum updateStatus processUARTInput(struct flowStats* s, double filterTimeConstant, int32_t *N) {
+enum updateStatus processUARTInput(struct flowStats* s, int32_t *N) {
   enum updateStatus returnStatus = UPDATE_NONE;
 	// Copy UART data to buffer if not full
 	while( bufferGetFreeSpace() > 0 && uart_char_available(&DVS_PORT)) {
@@ -348,8 +349,7 @@ enum updateStatus processUARTInput(struct flowStats* s, double filterTimeConstan
 	    separator = ringBufferGetByte();
 	    if (separator == EVENT_SEPARATOR) {
 	      // Full event received - we can process this further
-	      flowStatsUpdate(s, e, eofState.field, filterTimeConstant, MOVING_AVERAGE_MIN_WINDOW,
-	          flowMaxSpeedDiff, dvs128Intrinsics);
+	      flowStatsUpdate(s, e, dvs128Intrinsics);
 	      returnStatus = UPDATE_STATS;
 	      if (!eofState.caerInputReceived) {
 	        eofState.caerInputReceived = TRUE;
