@@ -12,6 +12,8 @@
 #include <inttypes.h>
 #include "math/pprz_algebra_float.h"
 
+#define N_FIELD_DIRECTIONS 4
+
 /**
  * Flow event struct, simplified version of the cAER implementation.
  * It contains all fields passed from the DVS through UART.
@@ -19,7 +21,7 @@
  * all received events are assumed to be valid.
  */
 struct flowEvent {
-  uint8_t x,y;
+  float x,y;
   int32_t t;
   float u,v;
 };
@@ -34,7 +36,7 @@ struct flowField {
   float wxDerotated;
   float wyDerotated;
   float D;
-  float p[3];
+  float confidence;
   int32_t t;
 };
 
@@ -45,40 +47,33 @@ struct flowField {
  * N previous vector coordinates or the mean of cross-products of two
  * vector coordinates.
  *
- * E.g. 's<x><x>' refers to \f$\sum_i^N {<x_i>*<x_i>} / N \f$.
+ * E.g. 'm<x><x>' refers to \f$\sum_i^N {<x_i>*<x_i>} / N \f$.
  *
  * These mean values can be used to compute, among others, variance:
  * \f[
- * Var{x} = (\sum_i^N {x_i^2} - \left(\sum_i^N {x_i}\right)^2) / N
+ * {\rm Var}{x} = (\sum_i^N {x_i^2} - \left(\sum_i^N {x_i}\right)^2) / N
  *      = mxx - mx^2
  * \f]
  * And similarly, covariance:
  * \f[
- * Cov{x,y} = mxy - mx * my
+ * {\rm Cov}{x,y} = mxy - mx * my
  * \f]
  *
  * And ultimately they are used for computing the flow field as a
  * least-squares solution.
  */
 struct flowStats {
-  float mx, my, mu, mv;
-  float mxx, myy, mxu, myv;
-  float mwx, mwy;
-  float sx, sy, sxy, sxx, syy;
+  float N[N_FIELD_DIRECTIONS];
+  float ms[N_FIELD_DIRECTIONS];
+  float mss[N_FIELD_DIRECTIONS];
+  float mV[N_FIELD_DIRECTIONS];
+  float mVV[N_FIELD_DIRECTIONS];
+  float msV[N_FIELD_DIRECTIONS];
+  int32_t tLast[N_FIELD_DIRECTIONS];
+  float angles[N_FIELD_DIRECTIONS];
+  float cos_angles[N_FIELD_DIRECTIONS];
+  float sin_angles[N_FIELD_DIRECTIONS];
   float eventRate;
-};
-
-/**
- * Camera intrinsic parameters struct.
- *
- * Contains the principal point coordinates (x,y) and the focal lengths for x and y.
- * Note that these are scaled by
- */
-struct cameraIntrinsicParameters {
-  float principalPointX;
-  float principalPointY;
-  float focalLengthX;
-  float focalLengthY;
 };
 
 /**
@@ -90,24 +85,45 @@ enum updateStatus {
   UPDATE_STATS,             // Stats were updated - the flow field still needs to be recomputed
   UPDATE_WARNING_SINGULAR,  // No update, flow field system is singular
   UPDATE_WARNING_RATE,      // No update, event rate is too low
-  UPDATE_WARNING_SPREAD     // No update, there is too little spread in flow vector position
+  UPDATE_WARNING_SPREAD,    // No update, there is too little spread in flow vector position
+  UPDATE_WARNING_RESIDUAL   // No update, the flow field residuals are too large
 };
+
+/**
+ * Camera intrinsic parameters.
+ */
+struct cameraIntrinsicParameters {
+  float principalPointX;
+  float principalPointY;
+  float focalLengthX;
+  float focalLengthY;
+};
+
+/**
+ * Initializes/resets flow stats values to zero.
+ * @param s The flow stats container
+ */
+void flowStatsInit(struct flowStats *s);
 
 /**
  * Performs an update of all flow field statistics with a new event.
  */
-void updateFlowStats(struct flowStats* s, struct flowEvent e, struct flowField lastField,
-    float filterTimeConstant, float movingAverageWindow, float maxSpeedDifference);
+void flowStatsUpdate(struct flowStats* s, struct flowEvent e, struct flowField lastField,
+    float filterTimeConstant, float movingAverageWindow, float maxSpeedDifference,
+    struct cameraIntrinsicParameters intrinsics);
 
 /**
  * Recomputation of the flow field using the latest statistics.
  */
 enum updateStatus recomputeFlowField(struct flowField* field, struct flowStats* s,
-    float minEventRate, float minPosVariance,
+    float minEventRate, float minPosVariance, float minR2, float power,
     struct cameraIntrinsicParameters intrinsics);
 
 /**
- * Derotation of the flow field parameters using rotational rate measurements.
+ * Simple derotation of the optic flow field parameters.
+ *
+ * @param field The flow field to be derotated.
+ * @param rates The input body rates.
  */
 void derotateFlowField(struct flowField* field, struct FloatRates* rates);
 

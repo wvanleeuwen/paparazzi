@@ -12,9 +12,9 @@
         <dl_setting var="statsFilterTimeConstant" min="0.01" step="0.01" max="0.2" shortname="filter_constant" param="EOF_FILTER_TIME_CONSTANT"/>
         <dl_setting var="flowMaxSpeedDiff" min="10.0" step="2.0" max="200.0" shortname="flow_speed_threshold" param="EOF_FLOW_MAX_SPEED_DIFF"/>
 		<dl_setting var="derotationMovingAverageFactor" min="0.05" step="0.05" max="0.9" shortname="derotation_MA_factor" param="EOF_DEROTATION_MOVING_AVERAGE_FACTOR"/>
-        <dl_setting var="minEventRate" min="50" step="50" max="1000" shortname="event_rate" param="EOF_MIN_EVENT_RATE"/>
+        <dl_setting var="minEventRate" min="100" step="100" max="5000" shortname="event_rate" param="EOF_MIN_EVENT_RATE"/>
         <dl_setting var="minPosVariance" min="10" step="50" max="1000" shortname="position_variance" param="EOF_MIN_POSITION_VARIANCE"/>
-        <dl_setting var="maxFlowResidual" min="0.1" step="0.05" max="0.8" shortname="max_flow_residual" param="EOF_MAX_FLOW_RESIDUAL"/>
+        <dl_setting var="minR2" min="0.1" step="0.05" max="1" shortname="min_R2" param="EOF_MIN_R2"/>
         <dl_setting var="irLedSwitch" min="0" step="1" max="1" shortname="led setting" values="OFF|ON" param="IR_LEDS_SWITCH"/>
       </dl_settings>
     </dl_settings>

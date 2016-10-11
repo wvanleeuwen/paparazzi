@@ -20,7 +20,15 @@
 /**
  * @file "modules/event_optic_flow/event_optic_flow.c"
  * @author Bas Pijnacker Hordijk
- * Event based opticflow using DVS camera
+ * Event based optic flow detection and control using the Dynamic Vision Sensor (DVS).
+ * Implementation is based on the following:
+ * - The MAV used in this application is a customized MavTec drone on which the
+ *    DVS is mounted, facing downwards.
+ * - The DVS is connected through USB to an Odroid XU4 board which reads
+ *    the raw event input.
+ * - The Odroid processes and filters the input into 'optic flow events'.
+ * - These new events are sent through UART to the Paparazzi autopilot.
+ * - Real-time data is logged in Paparazzi to an SD card by the 'high speed logger' module.
  */
 
 #include "event_optic_flow.h"
@@ -35,7 +43,7 @@
 
 
 #ifndef DVS_PORT
-#error Please define uart port connected to the dvs event based camera. e.g <define name="DVS_PORT" value="uart0"/>
+#error Please define UART port connected to the DVS128 event-based camera. e.g <define name="DVS_PORT" value="uart0"/>
 #endif
 
 // Module settings
@@ -50,7 +58,7 @@ PRINT_CONFIG_VAR(EOF_ENABLE_DEROTATION)
 PRINT_CONFIG_VAR(EOF_FILTER_TIME_CONSTANT)
 
 #ifndef EOF_FLOW_MAX_SPEED_DIFF
-#define EOF_FLOW_MAX_SPEED_DIFF 50.0f
+#define EOF_FLOW_MAX_SPEED_DIFF 1000.0f
 #endif
 PRINT_CONFIG_VAR(EOF_FLOW_MAX_SPEED_DIFF)
 
@@ -60,7 +68,7 @@ PRINT_CONFIG_VAR(EOF_FLOW_MAX_SPEED_DIFF)
 PRINT_CONFIG_VAR(EOF_DEROTATION_MOVING_AVERAGE_FACTOR)
 
 #ifndef EOF_MIN_EVENT_RATE
-#define EOF_MIN_EVENT_RATE 300.0f
+#define EOF_MIN_EVENT_RATE 2000.0f
 #endif
 PRINT_CONFIG_VAR(EOF_MIN_EVENT_RATE)
 
@@ -69,10 +77,10 @@ PRINT_CONFIG_VAR(EOF_MIN_EVENT_RATE)
 #endif
 PRINT_CONFIG_VAR(EOF_MIN_POSITION_VARIANCE)
 
-#ifndef EOF_MAX_FLOW_RESIDUAL
-#define EOF_MAX_FLOW_RESIDUAL 0.7f
+#ifndef EOF_MIN_R2
+#define EOF_MIN_R2 1.0f
 #endif
-PRINT_CONFIG_VAR(EOF_MAX_FLOW_RESIDUAL)
+PRINT_CONFIG_VAR(EOF_MIN_R2)
 
 #ifndef EOF_DIVERGENCE_CONTROL_PGAIN
 #define EOF_DIVERGENCE_CONTROL_PGAIN 1.0f
@@ -108,22 +116,23 @@ float derotationMovingAverageFactor = EOF_DEROTATION_MOVING_AVERAGE_FACTOR;
 // Confidence thresholds
 float minPosVariance = EOF_MIN_POSITION_VARIANCE;
 float minEventRate = EOF_MIN_EVENT_RATE;
-float maxFlowResidual = EOF_MAX_FLOW_RESIDUAL;
+float minR2 = EOF_MIN_R2;
 
-// logging controls
+// Logging controls
 bool irLedSwitch = IR_LEDS_SWITCH;
 
 // Constants
 const int32_t MAX_NUMBER_OF_UART_EVENTS = 100;
 const float MOVING_AVERAGE_MIN_WINDOW = 5.0f;
 const uint8_t EVENT_SEPARATOR = 255;
-const float FLOW_INT16_TO_FLOAT = 100.0f;
+const float UART_INT16_TO_FLOAT = 10.0f;
 const float LENS_DISTANCE_TO_CENTER = 0.13f; // approximate distance of lens focal length to OptiTrack center
 const uint32_t EVENT_BYTE_SIZE = sizeof(struct flowEvent) + 1; // +1 for separator
 const float inactivityDecayFactor = 0.8f;
+const float power = 1;
 
-// Camera intrinsics definition
-struct cameraIntrinsicParameters dvs128Intrinsics = {
+// Camera intrinsic parameters
+const struct cameraIntrinsicParameters dvs128Intrinsics = {
     .principalPointX = 76.70f,
     .principalPointY = 56.93f,
     .focalLengthX = 115.0f,
@@ -141,12 +150,6 @@ int32_t ringBufferGetInt32(void);
 
 // ----- Implementations start here -----
 void event_optic_flow_init(void) {
-  struct flowField field = {0., 0., 0., 0., 0., 0.};
-  struct flowStats stats = {0., 0., 0., 0., 0., 0., 0., 0., 0.,
-        0., 0., 0.};
-	eofState.field = field;
-	eofState.stats = stats;
-
 	register_periodic_telemetry(DefaultPeriodic,
 	    PPRZ_MSG_ID_EVENT_OPTIC_FLOW_EST, sendFlowFieldState);
 }
@@ -163,12 +166,9 @@ void event_optic_flow_start(void) {
 	eofState.wxTruth = 0.0f;
 	eofState.wyTruth = 0.0f;
 	eofState.DTruth = 0.0f;
-
-	struct flowField field = {0., 0., 0., 0., 0., 0.};
-	struct flowStats stats = {0., 0., 0., 0., 0., 0., 0., 0., 0.,
-      0., 0., 0.};
-	eofState.field = field;
-  eofState.stats = stats;
+  struct flowField field = {0., 0., 0., 0., 0., 0.,0};
+  eofState.field = field;
+  flowStatsInit(&eofState.stats);
   eofState.caerInputReceived = false;
 }
 
@@ -181,24 +181,26 @@ void event_optic_flow_periodic(void) {
 	// Obtain UART data if available
   int32_t NNew;
 	enum updateStatus status = processUARTInput(&eofState.stats, statsFilterTimeConstant, &NNew);
+
+  // Timing bookkeeping, do this after the most uncertain computations,
+  // but before operations where timing info is necessary
+  float currentTime = get_sys_time_float();
+  float dt = currentTime - eofState.lastTime;
+  eofState.moduleFrequency = 1/dt;
+  eofState.lastTime = currentTime;
+  eofState.stats.eventRate = (float) NNew / dt;
+
 	if (status == UPDATE_STATS) {
 		// If new events are received, recompute flow field
 		// In case the flow field is ill-posed, do not update
 		status = recomputeFlowField(&eofState.field, &eofState.stats,
-		    minEventRate, minPosVariance, maxFlowResidual, dvs128Intrinsics);
+		    minEventRate, minPosVariance, minR2, power, dvs128Intrinsics);
 	}
-	// Timing bookkeeping, do this after the most uncertain computations,
-	// but before operations where timing info is necessary
-	float currentTime = get_sys_time_float();
-	float dt = currentTime - eofState.lastTime;
-	eofState.moduleFrequency = 1/dt;
-	eofState.lastTime = currentTime;
+
 
 	// If no update has been performed, decay flow field parameters towards zero
 	if (status != UPDATE_SUCCESS) {
-	  eofState.field.wx *= inactivityDecayFactor;
-	  eofState.field.wy *= inactivityDecayFactor;
-	  eofState.field.D *= inactivityDecayFactor;
+	  eofState.field.confidence = 0;
 	}
 	else {
 	  // Assign timestamp to last update
@@ -206,6 +208,16 @@ void event_optic_flow_periodic(void) {
 	}
   // Set confidence level globally
   eofState.status = status;
+  //test
+  int32_t i;
+  for (i = 0; i < N_FIELD_DIRECTIONS; i++) {
+    eofState.stats.ms [i] = 0;
+    eofState.stats.mss[i] = 0;
+    eofState.stats.mV [i] = 0;
+    eofState.stats.mVV[i] = 0;
+    eofState.stats.msV[i] = 0;
+    eofState.stats.N[i] = 0;
+  }
 
 	// Derotate flow field if enabled
 	if (enableDerotation) {
@@ -237,7 +249,7 @@ void event_optic_flow_periodic(void) {
   velB.z = rot->m[2][0] * vel->x + rot->m[2][1] * vel->y + rot->m[2][2] * vel->z;
   float R = -pos->z/(cosf(ang->theta)*cosf(ang->phi));*/
 
-  //TODO verify signs in calculation below
+  //FIXME verify signs in calculation below
   eofState.wxTruth = -(vel->y*cosf(ang->psi) -vel->x*sinf(ang->psi)) / (pos->z + LENS_DISTANCE_TO_CENTER);
   eofState.wyTruth = -(vel->x*cosf(ang->psi) +vel->y*sinf(ang->psi)) / (pos->z + LENS_DISTANCE_TO_CENTER);
   eofState.DTruth = 2*vel->z / (pos->z + LENS_DISTANCE_TO_CENTER);
@@ -261,7 +273,7 @@ void event_optic_flow_periodic(void) {
 }
 
 void event_optic_flow_stop(void) {
-	//TODO is now present as dummy, may be removed if not required
+  //TODO is now present as dummy, may be removed if not required
 }
 
 // Simple ring buffer definition
@@ -316,16 +328,19 @@ enum updateStatus processUARTInput(struct flowStats* s, double filterTimeConstan
 	    // Next set of bytes contains a new event
 	    struct flowEvent e;
 	    uint8_t separator;
-	    int16_t u,v;
-	    e.x = ringBufferGetByte();
-	    e.y = ringBufferGetByte();
+	    int16_t x,y,u,v;
+	    x = ringBufferGetInt16();
+	    y = ringBufferGetInt16();
 	    e.t = ringBufferGetInt32();
 	    u = ringBufferGetInt16();
 	    v = ringBufferGetInt16();
-	    e.u = (float) u / FLOW_INT16_TO_FLOAT;
-	    e.v = (float) v / FLOW_INT16_TO_FLOAT;
+	    e.x = (float) x / UART_INT16_TO_FLOAT;
+	    e.y = (float) y / UART_INT16_TO_FLOAT;
+	    e.u = (float) u / UART_INT16_TO_FLOAT;
+	    e.v = (float) v / UART_INT16_TO_FLOAT;
 
 	    if (enableDerotation) {
+	        //FIXME account for normal flow
 	        e.u -= eofState.ratesMA.p*dvs128Intrinsics.focalLengthX;
 	        e.v += eofState.ratesMA.q*dvs128Intrinsics.focalLengthY;
 	    }
@@ -333,7 +348,7 @@ enum updateStatus processUARTInput(struct flowStats* s, double filterTimeConstan
 	    separator = ringBufferGetByte();
 	    if (separator == EVENT_SEPARATOR) {
 	      // Full event received - we can process this further
-	      updateFlowStats(s, e, eofState.field, filterTimeConstant, MOVING_AVERAGE_MIN_WINDOW,
+	      flowStatsUpdate(s, e, eofState.field, filterTimeConstant, MOVING_AVERAGE_MIN_WINDOW,
 	          flowMaxSpeedDiff, dvs128Intrinsics);
 	      returnStatus = UPDATE_STATS;
 	      if (!eofState.caerInputReceived) {
@@ -365,7 +380,7 @@ static void sendFlowFieldState(struct transport_tx *trans, struct link_device *d
   float D  = eofState.field.D;
   float wxDerotated = eofState.ratesMA.p;
   float wyDerotated = eofState.ratesMA.q;
-  float wxTruth = eofState.wxTruth;
+  float wxTruth = eofState.field.confidence;
   float wyTruth = eofState.wyTruth;
   float DTruth = eofState.DTruth;
 

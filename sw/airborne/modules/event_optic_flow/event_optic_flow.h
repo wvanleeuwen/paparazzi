@@ -20,7 +20,15 @@
 /**
  * @file "modules/event_opticflow/event_opticflow.h"
  * @author Bas Pijnacker Hordijk
- * Event based opticflow using DVS camera
+ * Event based optic flow detection and control using the Dynamic Vision Sensor (DVS).
+ * Implementation is based on the following:
+ * - The MAV used in this application is a customized MavTec drone on which the
+ *    DVS is mounted, facing downwards.
+ * - The DVS is connected through USB to an Odroid XU4 board which reads
+ *    the raw event input.
+ * - The Odroid processes and filters the input into 'optic flow events'.
+ * - These new events are sent through UART to the Paparazzi autopilot.
+ * - Real-time data is logged in Paparazzi to an SD card by the 'high speed logger' module.
  */
 
 #ifndef EVENT_OPTICFLOW_H
@@ -52,8 +60,10 @@ extern struct module_state eofState;
 extern uint8_t enableDerotation;
 extern float statsFilterTimeConstant;
 extern float flowMaxSpeedDiff;
+extern float derotationMovingAverageFactor;
 extern float minPosVariance;
 extern float minEventRate;
+extern float minR2;
 extern bool irLedSwitch;
 
 // Module main functions
