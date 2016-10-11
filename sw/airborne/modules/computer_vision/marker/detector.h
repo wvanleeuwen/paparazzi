@@ -35,9 +35,6 @@ struct Marker {
     struct NedCoor_f geo_location;
     struct FloatVect3 geo_relative;
     float found_time;
-    float mid;
-    float mid_time;
-
 };
 
 extern struct Marker marker1;
@@ -45,7 +42,6 @@ extern struct Marker marker2;
 
 void detector_init(void);
 
-void detector_locate_bucket(void);
-void detector_locate_helipad(void);
+extern void detector_locate(bool item, bool bucket, bool helipad);
 
 #endif

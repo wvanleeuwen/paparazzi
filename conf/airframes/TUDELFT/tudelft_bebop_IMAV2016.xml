@@ -9,7 +9,7 @@
     <define name="MT9F002_OUTPUT_HEIGHT" value="640"/>  <!-- full height 4608 -->
     <define name="MT9F002_OUTPUT_WIDTH" value="640"/>  <!-- full width 2592 (3288) -->
     <define name="MT9F002_INITIAL_OFFSET_Y" value="384"/>
-    <define name="MT9F002_INITIAL_OFFSET_X" value="896"/> <!--512-->
+    <define name="MT9F002_INITIAL_OFFSET_X" value="512"/> <!-- 896 for window testing
     <!--<define name="MT9F002_INITIAL_OFFSET_X" value="1280" />-->
     <define name="MT9F002_X_ODD_INC_VAL" value="7"/> <!-- downsize x4 -->
     <define name="MT9F002_Y_ODD_INC_VAL" value="7"/>
@@ -39,7 +39,7 @@
     <module name="air_data"/>
     <module name="send_imu_mag_current"/>
     <module name="sonar_bebop">
-      <!--define name="SENSOR_SYNC_SEND_SONAR" value="TRUE"/-->
+      <define name="SENSOR_SYNC_SEND_SONAR" value="TRUE"/>
     </module>
     <module name="pose_history"/>
     <module name="video_thread"/>
@@ -65,30 +65,6 @@
     <module name="cv_snake_gate_detection.xml">
       <define name="SGD_CAMERA" value="front_camera"/>
     </module>
-
-    <!-- /////////////////////////////////////////////////////////////////////////////////////////// -->
-    <!-- COLOR TRACKING -->
-
-    <!--<module name="color_tracking_bottom">-->
-      <!--<define name="COLOR_CAMERA_BOTTOM" value="bottom_camera"/>-->
-    <!--</module>-->
-
-    <!--<module name="color_tracking_front">-->
-    <!--<define name="COLOR_CAMERA_FRONT" value="front_camera"/>-->
-    <!--</module>-->
-
-    <!-- /////////////////////////////////////////////////////////////////////////////////////////// -->
-    <!-- LANDING -->
-
-    <!--<module name="cv_helipad">-->
-      <!--<define name="HELIPAD_CAMERA" value="bottom_camera"/>-->
-    <!--</module>-->
-
-    <!--<module name="autonomous_landing">-->
-      <!--<define name="MARKER_CAMERA" value="bottom_camera"/>-->
-    <!--</module>-->
-
-    <!-- /////////////////////////////////////////////////////////////////////////////////////////// -->
 
     <module name="video_rtp_stream">
       <!--define name="VIEWVIDEO_CAMERA" value="bottom_camera"/-->
@@ -184,7 +160,7 @@
     <define name="SONAR_BARO_THRESHOLD" value="1.5"/>
     <define name="SONAR_UPDATE_ON_AGL" value="TRUE"/>
     <define name="VFF_R_SONAR_OF_M" value="0."/>
-    <define name="SONAR_OFFSET" value="0."/><!--0.4 when legs attached-->
+    <define name="BARO_AGL_OFFSET" value="0.48"/>
   </section>
 
   <section name="RC_SETPOINT" prefix="STABILIZATION_ATTITUDE_">
@@ -236,10 +212,22 @@
     <!--<define name="G2_R" value="0.01448"/>-->
 
     <!-- bebop TUBB05 (plastic legs) -->
-    <define name="G1_P" value="0.062038"/>
-    <define name="G1_Q" value="0.042524"/>
-    <define name="G1_R" value="0.002187"/>
-    <define name="G2_R" value="0.181954"/>
+    <!--<define name="G1_P" value="0.037543"/>-->
+    <!--<define name="G1_Q" value="0.023722"/>-->
+    <!--<define name="G1_R" value="0.002219"/>-->
+    <!--<define name="G2_R" value="0.124241"/>-->
+
+    <!-- bebop TUBB05 (plastic legs and gripper) -->
+    <define name="G1_P" value="0.025"/>
+    <define name="G1_Q" value="0.016"/>
+    <define name="G1_R" value="0.0018"/>
+    <define name="G2_R" value="0.11"/>
+
+    <!-- bebop TUBB05 (plastic legs, gripper and bucket) -->
+    <!--<define name="G1_P" value="0.0"/>-->
+    <!--<define name="G1_Q" value="0.0"/>-->
+    <!--<define name="G1_R" value="0.0"/>-->
+    <!--<define name="G2_R" value="0.1"/>-->
 
     <!-- reference acceleration for attitude control -->
     <define name="REF_ERR_P" value="600.0"/>
@@ -267,7 +255,7 @@
 
   <section name="GUIDANCE_V" prefix="GUIDANCE_V_">
     <define name="HOVER_KP" value="200"/>
-    <define name="HOVER_KD" value="200"/>
+    <define name="HOVER_KD" value="150"/>
     <define name="HOVER_KI" value="0"/>
     <define name="NOMINAL_HOVER_THROTTLE" value="0.55"/>
     <!--<define name="ADAPT_THROTTLE_ENABLED" value="TRUE"/>-->

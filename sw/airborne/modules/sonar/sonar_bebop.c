@@ -36,7 +36,7 @@
 #include "state.h"
 #endif
 
-#ifndef SONAR_BEBOP_SLOPE_THRES_OBS
+#ifndef SONAR_BEBOP_SLOPE_THRESH_OBS
 #define SONAR_BEBOP_SLOPE_THRESH_OBS 6.     // gradient threshold for outlier detections when trying to hold altitude [m/s]
 #endif
 #define SONAR_BEBOP_SLOPE_THRESH 6.         // gradient threshold for outlier detections when changing altitude [m/s]

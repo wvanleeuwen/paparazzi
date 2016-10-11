@@ -2107,9 +2107,12 @@
     <field name="y" type="uint16"></field>
   </message>
 
- <message name="SONAR" id="236">
-    <field name="sonar_meas" type="uint16"/>
+  <message name="SONAR" id="236">
     <field name="sonar_distance" type="float" unit="m"/>
+    <field name="obstacle_height" type="float" unit="m"/>
+    <field name="altitude_from_ground" type="float" unit="m"/>
+    <field name="Outlier_Count" type="uint8" unit="-"/>
+    <field name="Obstacle_On" type="uint8" unit="bool"/>
   </message>
 
   <message name="PAYLOAD_FLOAT" id="237">
@@ -2254,7 +2257,14 @@
       <field name="yaw_c"  type="float"/>
   </message>
 
-   <!--251 is free -->
+  <message name="DETECTOR" id="251">
+    <field name="detected" type="uint8" unit="bool"/>
+    <field name="pixel_x" type="uint32"/>
+    <field name="pixel_y" type="uint32"/>
+    <field name="position_x" type="float"/>
+    <field name="position_y" type="float"/>
+    <field name="found_time" type="float" unit="s" />
+  </message>
 
    <message name="GPS_SMALL" id="252">
     <field name="multiplex_speed"  type="uint32">bits 31-21 course in decideg : bits 20-10 ground speed in cm/s : bits 9-0 climb speed in cm/s</field>

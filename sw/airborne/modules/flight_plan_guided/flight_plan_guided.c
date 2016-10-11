@@ -141,11 +141,10 @@ bool Land(float end_altitude) {
     // return true if not completed
 
     //For bucket
-//    guidance_v_set_guided_vz(0.2);
+    guidance_v_set_guided_vz(0.4);
     //For landing pad
-    guidance_v_set_guided_vz(1.5);
-    guidance_h_set_guided_body_vel(0, 0);
-
+//    guidance_v_set_guided_vz(1.5);
+    guidance_h_set_guided_pos(marker1.geo_location.x, marker1.geo_location.y);
 
     if (stateGetPositionEnu_f()->z > end_altitude) {
         return true;
@@ -157,10 +156,10 @@ bool Land(float end_altitude) {
 static int BUCKET_HEADING_MARGIN = 60;  // px
 static float BUCKET_HEADING_RATE = 0.5; // rad/s
 
-bool bucket_heading_change(void) {
+bool bucket_heading_change(float altitude) {
   if (autopilot_mode != AP_MODE_GUIDED) { return true; }
-
-  guidance_h_set_guided_body_vel(0., 0.);
+//  guidance_v_set_guided_z(-altitude);
+//  guidance_h_set_guided_body_vel(0., 0.);
 
   if (marker2.detected) {
     marker_lost = false;
@@ -192,14 +191,15 @@ bool bucket_heading_change(void) {
   return true;
 }
 
-static int BUCKET_POSITION_MARGIN = 45;
-static int BUCKET_POSITION_MARGIN_LOST = 200;
-static float BUCKET_DRIFT_CORRECTION_RATE = 0.1;
-static float BUCKET_APPROACH_SPEED_HIGH = 0.1;
+static int BUCKET_POSITION_MARGIN = 100; // > 50 SO DISABLED
+static int BUCKET_POSITION_MARGIN_LOST = 50;
+static float BUCKET_DRIFT_CORRECTION_RATE = 0.05;
+static float BUCKET_APPROACH_SPEED_HIGH = 0.2;
 static float BUCKET_APPROACH_SPEED_LOW = 0.05;
 
-bool bucket_approach(void) {
+bool bucket_approach(float altitude) {
   if (autopilot_mode != AP_MODE_GUIDED) { return true; }
+//  guidance_v_set_guided_z(-altitude);
 
   if (marker1.detected) {
     // Hand over control to next stage
@@ -244,23 +244,52 @@ bool bucket_approach(void) {
   return true;
 }
 
-bool bucket_center(void) {
+
+#define ERR_MIN 0.05
+#define ERR_MAX 0.30
+#define ERR_GAIN (1.0 / (ERR_MAX - ERR_MIN))
+
+bool marker_center_land(float x_offset, float z_speed, float end_altitude) {
   if (autopilot_mode != AP_MODE_GUIDED) { return true; }
 
-  if (marker1.detected) {
-    if (!marker1.processed) {
-      marker1.processed = true;
+  if (end_altitude != 0 && stateGetPositionEnu_f()->z < end_altitude) {
+      return false;
+  }
 
-      struct EnuCoor_f *speed = stateGetSpeedEnu_f();
+  struct Marker *marker = &marker1;
 
-      if (marker1.found_time > 5 && marker1.mid && abs(speed->x) < 0.1 && abs(speed->y) < 0.1) {
-        return false;
+  guidance_h_set_guided_heading_rate(0.);
+
+  if (marker->detected) {
+    if (!marker->processed) {
+      marker->processed = true;
+
+      float psi = stateGetNedToBodyEulers_f()->psi;
+
+      float offset_x = cosf(-psi) * x_offset;
+      float offset_y = sinf(-psi) * x_offset;
+
+      float rel_x = marker->geo_relative.x + offset_x;
+      float rel_y = marker->geo_relative.y + offset_y;
+
+      // err < 0.05 = acceptable when landed
+      // err < 0.10 = acceptable at low altitude
+      // err < 0.30 = caution when landing
+      // err > 0.30 = NOT GOOD
+      // err > 0.50 = probably lost marker
+      float err = fabsf(rel_x) + fabsf(rel_y);
+
+      if (z_speed != 0) {
+//      fprintf(stderr, "[landing] %.2f, %.2f, %.2f\n", rel_x, rel_y, err);
+        float bounded_err = Chop(err, ERR_MIN, ERR_MAX);
+        guidance_v_set_guided_vz(z_speed - z_speed * (bounded_err - ERR_MIN) * ERR_GAIN);
       }
 
-      guidance_h_set_guided_pos(marker1.geo_location.x, marker1.geo_location.y);
+      float pos_x = marker->geo_location.x + offset_x;
+      float pos_y = marker->geo_location.y - offset_y;
+
+      guidance_h_set_guided_pos(pos_x, pos_y);
     }
-  } else {
-    marker_lost = true;
   }
 
   // Loop this function
