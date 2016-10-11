@@ -76,11 +76,11 @@ struct video_listener *listener = NULL;
 // Filter Settings
 #if WINDOW_COLOR == RED
 uint8_t color_lum_min = 60;// 60;//105;
-uint8_t color_lum_max = 255;//228;//205;
-uint8_t color_cb_min  = 20;//66;//52;
-uint8_t color_cb_max  = 180;//194;//140;
-uint8_t color_cr_min  = 150;//140;//180;
-uint8_t color_cr_max  = 255;//230;//255;
+uint8_t color_lum_max = 100;//228;//205;
+uint8_t color_cb_min  = 90;//66;//52;
+uint8_t color_cb_max  = 130;//194;//140;
+uint8_t color_cr_min  = 145;//140;//180;
+uint8_t color_cr_max  = 200;//230;//255;
 #else
 // TODO find color scheme for blue
 uint8_t color_lum_min = 60;// 60;//105;
@@ -93,8 +93,8 @@ uint8_t color_cr_max  = 100;//194;//140;
 
 // Gate detection settings:
 int n_samples = 2500; //1000;//500;
-int min_pixel_size = 50;  //100;
-float min_gate_quality = 0.2;
+int min_pixel_size = 40;  //100;
+float min_gate_quality = 0.15;
 float gate_thickness = 0; //0.05;//0.10;//
 float angle_to_gate = 0;
 
@@ -268,95 +268,50 @@ static void check_gate(struct image_t *im, struct gate_img gate, float *quality,
 
   // check the four lines of which the gate consists:
   struct point_t from, to;
-  if (gate.sz_left == gate.sz_right) {
-    from.x = gate.x - gate.sz;
-    from.y = gate.y - gate.sz;
-    to.x = gate.x - gate.sz;
-    to.y = gate.y + gate.sz;
-    check_line(im, from, to, &np, &nc);
-    if ((float) nc / (float) np >= min_ratio_side) {
-      (*n_sides)++;
-    }
-    n_points += np;
-    n_colored_points += nc;
 
-    from.x = gate.x - gate.sz;
-    from.y = gate.y + gate.sz;
-    to.x = gate.x + gate.sz;
-    to.y = gate.y + gate.sz;
-    check_line(im, from, to, &np, &nc);
-    if ((float) nc / (float) np >= min_ratio_side) {
-      (*n_sides)++;
-    }
-    n_points += np;
-    n_colored_points += nc;
-
-    from.x = gate.x + gate.sz;
-    from.y = gate.y + gate.sz;
-    to.x = gate.x + gate.sz;
-    to.y = gate.y - gate.sz;
-    check_line(im, from, to, &np, &nc);
-    if ((float) nc / (float) np >= min_ratio_side) {
-      (*n_sides)++;
-    }
-    n_points += np;
-    n_colored_points += nc;
-
-    from.x = gate.x + gate.sz;
-    from.y = gate.y - gate.sz;
-    to.x = gate.x - gate.sz;
-    to.y = gate.y - gate.sz;
-    check_line(im, from, to, &np, &nc);
-    if ((float) nc / (float) np >= min_ratio_side) {
-      (*n_sides)++;
-    }
-    n_points += np;
-    n_colored_points += nc;
-  } else {
-    from.x = gate.x - gate.sz;
-    from.y = gate.y - gate.sz_left;
-    to.x = gate.x - gate.sz;
-    to.y = gate.y + gate.sz_left;
-    check_line(im, from, to, &np, &nc);
-    if ((float) nc / (float) np >= min_ratio_side) {
-      (*n_sides)++;
-    }
-    n_points += np;
-    n_colored_points += nc;
-
-    from.x = gate.x - gate.sz;
-    from.y = gate.y + gate.sz_left;
-    to.x = gate.x + gate.sz;
-    to.y = gate.y + gate.sz_right;
-    check_line(im, from, to, &np, &nc);
-    if ((float) nc / (float) np >= min_ratio_side) {
-      (*n_sides)++;
-    }
-    n_points += np;
-    n_colored_points += nc;
-
-    from.x = gate.x + gate.sz;
-    from.y = gate.y + gate.sz_right;
-    to.x = gate.x + gate.sz;
-    to.y = gate.y - gate.sz_right;
-    check_line(im, from, to, &np, &nc);
-    if ((float) nc / (float) np >= min_ratio_side) {
-      (*n_sides)++;
-    }
-    n_points += np;
-    n_colored_points += nc;
-
-    from.x = gate.x + gate.sz;
-    from.y = gate.y - gate.sz_right;
-    to.x = gate.x - gate.sz;
-    to.y = gate.y - gate.sz_left;
-    check_line(im, from, to, &np, &nc);
-    if ((float) nc / (float) np >= min_ratio_side) {
-      (*n_sides)++;
-    }
-    n_points += np;
-    n_colored_points += nc;
+  from.x = gate.x - gate.sz;
+  from.y = gate.y - gate.sz_left;
+  to.x = gate.x - gate.sz;
+  to.y = gate.y + gate.sz_left;
+  check_line(im, from, to, &np, &nc);
+  if ((float) nc / (float) np >= min_ratio_side) {
+    (*n_sides)++;
   }
+  n_points += np;
+  n_colored_points += nc;
+
+  from.x = gate.x - gate.sz;
+  from.y = gate.y + gate.sz_left;
+  to.x = gate.x + gate.sz;
+  to.y = gate.y + gate.sz_right;
+  check_line(im, from, to, &np, &nc);
+  if ((float) nc / (float) np >= min_ratio_side) {
+    (*n_sides)++;
+  }
+  n_points += np;
+  n_colored_points += nc;
+
+  from.x = gate.x + gate.sz;
+  from.y = gate.y + gate.sz_right;
+  to.x = gate.x + gate.sz;
+  to.y = gate.y - gate.sz_right;
+  check_line(im, from, to, &np, &nc);
+  if ((float) nc / (float) np >= min_ratio_side) {
+    (*n_sides)++;
+  }
+  n_points += np;
+  n_colored_points += nc;
+
+  from.x = gate.x + gate.sz;
+  from.y = gate.y - gate.sz_right;
+  to.x = gate.x - gate.sz;
+  to.y = gate.y - gate.sz_left;
+  check_line(im, from, to, &np, &nc);
+  if ((float) nc / (float) np >= min_ratio_side) {
+    (*n_sides)++;
+  }
+  n_points += np;
+  n_colored_points += nc;
 
   // the quality is the ratio of colored points / number of points:
   if (n_points == 0) {
@@ -366,6 +321,7 @@ static void check_gate(struct image_t *im, struct gate_img gate, float *quality,
   }
 }
 
+/* y direction is left right */
 static void snake_left_right(struct image_t *im, int x, int y, int *y_low, int *y_high)
 {
   int done = 0;
@@ -376,13 +332,13 @@ static void snake_left_right(struct image_t *im, int x, int y, int *y_low, int *
   while ((*y_low) > 0 && !done) {
     if (check_color(im, x, (*y_low) - 1)) {
       (*y_low)--;
-    } else if (x < im->w - 1 && check_color(im, x + 1, (*y_low) - 1)) {
+    } else if (x < im->h - 1 && check_color(im, x + 1, (*y_low) - 1)) {
       x++;
       (*y_low)--;
     } else if (x > 0 && check_color(im, x - 1, (*y_low) - 1)) {
       x--;
       (*y_low)--;
-    } else if (x < im->w - 2 && check_color(im, x + 2, (*y_low) - 1)) {
+    } else if (x < im->h - 2 && check_color(im, x + 2, (*y_low) - 1)) {
       x+=2;
       (*y_low)--;
     } else if (x > 1 && check_color(im, x - 2, (*y_low) - 1)) {
@@ -397,16 +353,16 @@ static void snake_left_right(struct image_t *im, int x, int y, int *y_low, int *
   (*y_high) = y;
   done = 0;
   // snake towards positive y (up?)
-  while ((*y_high) < im->h - 1 && !done) {
+  while ((*y_high) < im->w - 1 && !done) {
     if (check_color(im, x, (*y_high) + 1)) {
       (*y_high)++;
-    } else if (x < im->w - 1 && check_color(im, x + 1, (*y_high) + 1)) {
+    } else if (x < im->h - 1 && check_color(im, x + 1, (*y_high) + 1)) {
       x++;
       (*y_high)++;
     } else if (x > 0 && check_color(im, x - 1, (*y_high) + 1)) {
       x--;
       (*y_high)++;
-    } else if (x < im->w - 2 && check_color(im, x + 2, (*y_high) + 1)) {
+    } else if (x < im->h - 2 && check_color(im, x + 2, (*y_high) + 1)) {
       x+=2;
       (*y_high)++;
     } else if (x > 1 && check_color(im, x - 2, (*y_high) + 1)) {
@@ -418,6 +374,7 @@ static void snake_left_right(struct image_t *im, int x, int y, int *y_low, int *
   }
 }
 
+/* x direction is up down */
 static void snake_up_down(struct image_t *im, int x, int y, int *x_low, int *x_high)
 {
   int done = 0;
@@ -428,13 +385,13 @@ static void snake_up_down(struct image_t *im, int x, int y, int *x_low, int *x_h
   while ((*x_low) > 0 && !done) {
     if (check_color(im, (*x_low) - 1, y)) {
       (*x_low)--;
-    } else if (y < im->h - 1 && check_color(im, (*x_low) - 1, y + 1)) {
+    } else if (y < im->w - 1 && check_color(im, (*x_low) - 1, y + 1)) {
       y++;
       (*x_low)--;
     } else if (y > 0 && check_color(im, (*x_low) - 1, y - 1)) {
       y--;
       (*x_low)--;
-    } else if (y < im->h - 2 && check_color(im, (*x_low) - 1, y + 2)) {
+    } else if (y < im->w - 2 && check_color(im, (*x_low) - 1, y + 2)) {
       y+=2;
       (*x_low)--;
     } else if (y > 1 && check_color(im, (*x_low) - 1, y - 2)) {
@@ -449,17 +406,16 @@ static void snake_up_down(struct image_t *im, int x, int y, int *x_low, int *x_h
   (*x_high) = x;
   done = 0;
   // snake towards positive x (right)
-  while ((*x_high) < im->w - 1 && !done) {
-
+  while ((*x_high) < im->h - 1 && !done) {
     if (check_color(im, (*x_high) + 1, y)) {
       (*x_high)++;
-    } else if (y < im->h - 1 && check_color(im, (*x_high) + 1, y + 1)) {
+    } else if (y < im->w - 1 && check_color(im, (*x_high) + 1, y + 1)) {
       y++;
       (*x_high)++;
     } else if (y > 0 && check_color(im, (*x_high) + 1, y - 1)) {
       y--;
       (*x_high)++;
-    } else if (y < im->h - 2 && check_color(im, (*x_high) + 1, y + 2)) {
+    } else if (y < im->w - 2 && check_color(im, (*x_high) + 1, y + 2)) {
       y+=2;
       (*x_high)++;
     } else if (y > 1 && check_color(im, (*x_high) + 1, y - 2)) {
@@ -496,7 +452,7 @@ static struct image_t *snake_gate_detection_func(struct image_t *img)
   for (i = 0; i < n_samples; i++) {
     if (i == 0){
       // use previous estimate
-      x = best_gate.x;
+      x = best_gate.x - best_gate.sz;
       y = best_gate.y;
     } else {
       // get a random coordinate:
@@ -617,10 +573,8 @@ static struct image_t *snake_gate_detection_func(struct image_t *img)
         }
       }
     }
-    //if (best_gate.n_sides > 2){
-      calculate_gate_position(best_gate.x, best_gate.y, best_gate.sz, img, best_gate);
-      time_gate_detected = get_sys_time_float();
-    //}
+    calculate_gate_position(best_gate.x, best_gate.y, best_gate.sz, img, best_gate);
+    time_gate_detected = get_sys_time_float();
 
 #ifdef DRAW_GATE
     draw_gate(img, best_gate);

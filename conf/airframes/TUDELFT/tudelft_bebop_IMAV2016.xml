@@ -9,7 +9,7 @@
     <define name="MT9F002_OUTPUT_HEIGHT" value="640"/>  <!-- full height 4608 -->
     <define name="MT9F002_OUTPUT_WIDTH" value="640"/>  <!-- full width 2592 (3288) -->
     <define name="MT9F002_INITIAL_OFFSET_Y" value="384"/>
-    <define name="MT9F002_INITIAL_OFFSET_X" value="512"/> <!-- 896 for window testing
+    <define name="MT9F002_INITIAL_OFFSET_X" value="896"/> <!-- 896 for window testing
     <!--<define name="MT9F002_INITIAL_OFFSET_X" value="1280" />-->
     <define name="MT9F002_X_ODD_INC_VAL" value="7"/> <!-- downsize x4 -->
     <define name="MT9F002_Y_ODD_INC_VAL" value="7"/>
@@ -27,10 +27,12 @@
     <module name="gps" type="optitrack"/>
     <module name="stabilization" type="indi"/>
     <module name="ahrs" type="int_cmpl_quat">
-      <configure name="USE_MAGNETOMETER" value="TRUE"/>
+      <configure name="USE_MAGNETOMETER" value="FALSE"/>
       <define name="AHRS_USE_GPS_HEADING" value="FALSE"/>
     </module>
-    <module name="ins" type="extended"/>
+    <module name="ins" type="extended">
+      <define name="VFF_EXTENDED_R_BARO" value="15."/>
+    </module>
   </firmware>
 
 <!-- Modules -->
@@ -157,10 +159,10 @@
   </section>
 
   <section name="INS" prefix="INS_">
-    <define name="SONAR_BARO_THRESHOLD" value="1.5"/>
+    <define name="SONAR_BARO_THRESHOLD" value="2"/>
     <define name="SONAR_UPDATE_ON_AGL" value="TRUE"/>
     <define name="VFF_R_SONAR_OF_M" value="0."/>
-    <define name="BARO_AGL_OFFSET" value="0.48"/>
+    <define name="BARO_AGL_OFFSET" value="0."/>
   </section>
 
   <section name="RC_SETPOINT" prefix="STABILIZATION_ATTITUDE_">
@@ -212,22 +214,10 @@
     <!--<define name="G2_R" value="0.01448"/>-->
 
     <!-- bebop TUBB05 (plastic legs) -->
-    <!--<define name="G1_P" value="0.037543"/>-->
-    <!--<define name="G1_Q" value="0.023722"/>-->
-    <!--<define name="G1_R" value="0.002219"/>-->
-    <!--<define name="G2_R" value="0.124241"/>-->
-
-    <!-- bebop TUBB05 (plastic legs and gripper) -->
-    <define name="G1_P" value="0.025"/>
-    <define name="G1_Q" value="0.016"/>
-    <define name="G1_R" value="0.0018"/>
-    <define name="G2_R" value="0.11"/>
-
-    <!-- bebop TUBB05 (plastic legs, gripper and bucket) -->
-    <!--<define name="G1_P" value="0.0"/>-->
-    <!--<define name="G1_Q" value="0.0"/>-->
-    <!--<define name="G1_R" value="0.0"/>-->
-    <!--<define name="G2_R" value="0.1"/>-->
+    <define name="G1_P" value="0.062038"/>
+    <define name="G1_Q" value="0.042524"/>
+    <define name="G1_R" value="0.002187"/>
+    <define name="G2_R" value="0.181954"/>
 
     <!-- reference acceleration for attitude control -->
     <define name="REF_ERR_P" value="600.0"/>

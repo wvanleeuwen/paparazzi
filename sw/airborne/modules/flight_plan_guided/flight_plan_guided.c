@@ -326,7 +326,6 @@ bool fly_through_window(void) {
         guidance_v_set_guided_z(-1.4);
         mytime = get_sys_time_float();
         init_pos_filter = 1;
-
         snake_gate_detection_snake_gate_detection_periodic_status = MODULES_START;
 
         win_state++;
@@ -350,18 +349,13 @@ bool fly_through_window(void) {
         break;
       // fly forward with active control till <2m in front of window
       case 2:
-        if(gate_detected){
-          guidance_h_set_guided_pos_relative(filtered_x_gate + 0.5, filtered_y_gate);
-        } else {
-          mytime = get_sys_time_float();
-          win_state++;
-        }
+        guidance_h_set_guided_pos_relative(filtered_x_gate + 0.5, filtered_y_gate);
+        snake_gate_detection_snake_gate_detection_periodic_status = MODULES_STOP;
+        mytime = get_sys_time_float();
+        win_state++;
         break;
       case 3:
-        if (stateGetSpeedNed_f()->x < 0.1 && stateGetSpeedNed_f()->y < 0.1 &&
-            get_sys_time_float() - mytime > 5.) {
-          init_pos_filter = 1;
-          snake_gate_detection_snake_gate_detection_periodic_status = MODULES_STOP;
+        if (get_sys_time_float() - mytime > 5.) {
           win_state = 0;
           return false;
         }

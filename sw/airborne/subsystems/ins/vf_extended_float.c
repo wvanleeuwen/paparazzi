@@ -57,9 +57,13 @@ PRINT_CONFIG_VAR(DEBUG_VFF_EXTENDED)
 #define VFF_EXTENDED_ACCEL_NOISE 0.5
 #endif
 
+/** Barometer confidence **/
+#ifndef VFF_EXTENDED_R_BARO
+#define VFF_EXTENDED_R_BARO 1.
+#endif
+
 #define Qbiasbias 1e-7
 #define Qoffoff 1e-4
-#define R_BARO 10.
 #define R_ALT 0.1
 #define R_OFFSET 1.
 
@@ -216,7 +220,7 @@ static void update_baro_conf(float z_meas, float conf)
 
 void vff_update_baro(float z_meas)
 {
-  update_baro_conf(z_meas, R_BARO);
+  update_baro_conf(z_meas, VFF_EXTENDED_R_BARO);
 }
 
 void vff_update_baro_conf(float z_meas, float conf)
