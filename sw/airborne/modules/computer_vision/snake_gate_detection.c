@@ -41,7 +41,10 @@ struct gate_img {
   int x;             ///< The image x coordinate of the gate centre
   int y;             ///< The image y coordinate of the gate centre
   int sz;            ///< Half the image size of the gate
-  float gate_q; //gate quality
+  float q;           //gate quality
+  int n_sides;       ///< How many sides are orange (to prevent detecting a small gate in the corner of a big one partially out of view).
+  int sz_left;     ///< Half the image size of the left side
+  int sz_right;    ///< Half the image size of the right side
 };
 
 #ifndef SGD_CAMERA
@@ -101,11 +104,11 @@ const float gate_size_m = 1.1;   // gate size in meters
 // Result
 #define MAX_GATES 50
 struct gate_img gates[MAX_GATES];
-struct gate_img best_gate = {0,0,0,0};
+struct gate_img best_gate = {0};
+struct gate_img previous_gate = {0};
+struct gate_img gen_gate = {0};
 struct image_t img_result;
 int n_gates = 0;
-float best_quality = 0.;
-float best_fitness = 100000.;
 
 //color picker
 uint8_t y_center_picker  = 0;
@@ -114,8 +117,8 @@ uint8_t cr_center  = 0;
 
 //camera parameters
 // TODO KIRK find correct
-#define radians_per_pix_w 0.006666667 //2.1 rad(60deg)/315
-#define radians_per_pix_h 0.0065625   //1.05rad / 160
+#define radians_per_pix_w 0.003333334 //2.1 rad(60deg)/315
+#define radians_per_pix_h 0.00328125   //1.05rad / 160
 
 // gate location relative to drone in body frame (assume forward camera)
 float gate_x_dist = 0;
@@ -145,8 +148,6 @@ int gate_processed = 0;
 int counter_gate_detected = 0;
 int init_pos_filter = 0;
 int ready_pass_through;
-
-float gate_quality = 0;
 
 // timers
 float last_processed, time_gate_detected, time_tracked;
@@ -194,11 +195,11 @@ static void calculate_gate_position(int x_pix, int y_pix, int sz_pix, struct ima
   static float hor_angle = 0., vert_angle = 0.;
 
   // calculate angles here, rotate camera pixels 90 deg
-  vert_angle = -(x_pix - img->w / 2) * radians_per_pix_w - stateGetNedToBodyEulers_f()->theta;
-  hor_angle = (y_pix - img->h / 2) * radians_per_pix_h;
+  vert_angle = -(x_pix - img->h / 2) * radians_per_pix_h - stateGetNedToBodyEulers_f()->theta;
+  hor_angle = (y_pix - img->w / 2) * radians_per_pix_w;
 
   // in body frame
-  gate_x_dist = gate_size_m / (gate.sz * radians_per_pix_w);
+  gate_x_dist = gate_size_m / (gate.sz * 2 * radians_per_pix_w);
   gate_y_dist = gate_x_dist * sin(hor_angle);
   gate_z_dist = gate_x_dist * sin(vert_angle);
 }
@@ -255,46 +256,107 @@ static void check_line(struct image_t *im, struct point_t Q1, struct point_t Q2,
   }
 }
 
-static void check_gate(struct image_t *im, struct gate_img gate, float *quality)
+static void check_gate(struct image_t *im, struct gate_img gate, float *quality, int *n_sides)
 {
   int n_points, n_colored_points;
   n_points = 0;
   n_colored_points = 0;
   int np, nc;
+  // how much of the side should be visible to count as a detected side?
+  float min_ratio_side = 0.30;
+  (*n_sides) = 0;
 
   // check the four lines of which the gate consists:
   struct point_t from, to;
-  from.x = gate.x - gate.sz;
-  from.y = gate.y - gate.sz;
-  to.x = gate.x - gate.sz;
-  to.y = gate.y + gate.sz;
-  check_line(im, from, to, &np, &nc);
-  n_points += np;
-  n_colored_points += nc;
+  if (gate.sz_left == gate.sz_right) {
+    from.x = gate.x - gate.sz;
+    from.y = gate.y - gate.sz;
+    to.x = gate.x - gate.sz;
+    to.y = gate.y + gate.sz;
+    check_line(im, from, to, &np, &nc);
+    if ((float) nc / (float) np >= min_ratio_side) {
+      (*n_sides)++;
+    }
+    n_points += np;
+    n_colored_points += nc;
 
-  from.x = gate.x - gate.sz;
-  from.y = gate.y + gate.sz;
-  to.x = gate.x + gate.sz;
-  to.y = gate.y + gate.sz;
-  check_line(im, from, to, &np, &nc);
-  n_points += np;
-  n_colored_points += nc;
+    from.x = gate.x - gate.sz;
+    from.y = gate.y + gate.sz;
+    to.x = gate.x + gate.sz;
+    to.y = gate.y + gate.sz;
+    check_line(im, from, to, &np, &nc);
+    if ((float) nc / (float) np >= min_ratio_side) {
+      (*n_sides)++;
+    }
+    n_points += np;
+    n_colored_points += nc;
 
-  from.x = gate.x + gate.sz;
-  from.y = gate.y + gate.sz;
-  to.x = gate.x + gate.sz;
-  to.y = gate.y - gate.sz;
-  check_line(im, from, to, &np, &nc);
-  n_points += np;
-  n_colored_points += nc;
+    from.x = gate.x + gate.sz;
+    from.y = gate.y + gate.sz;
+    to.x = gate.x + gate.sz;
+    to.y = gate.y - gate.sz;
+    check_line(im, from, to, &np, &nc);
+    if ((float) nc / (float) np >= min_ratio_side) {
+      (*n_sides)++;
+    }
+    n_points += np;
+    n_colored_points += nc;
 
-  from.x = gate.x + gate.sz;
-  from.y = gate.y - gate.sz;
-  to.x = gate.x - gate.sz;
-  to.y = gate.y - gate.sz;
-  check_line(im, from, to, &np, &nc);
-  n_points += np;
-  n_colored_points += nc;
+    from.x = gate.x + gate.sz;
+    from.y = gate.y - gate.sz;
+    to.x = gate.x - gate.sz;
+    to.y = gate.y - gate.sz;
+    check_line(im, from, to, &np, &nc);
+    if ((float) nc / (float) np >= min_ratio_side) {
+      (*n_sides)++;
+    }
+    n_points += np;
+    n_colored_points += nc;
+  } else {
+    from.x = gate.x - gate.sz;
+    from.y = gate.y - gate.sz_left;
+    to.x = gate.x - gate.sz;
+    to.y = gate.y + gate.sz_left;
+    check_line(im, from, to, &np, &nc);
+    if ((float) nc / (float) np >= min_ratio_side) {
+      (*n_sides)++;
+    }
+    n_points += np;
+    n_colored_points += nc;
+
+    from.x = gate.x - gate.sz;
+    from.y = gate.y + gate.sz_left;
+    to.x = gate.x + gate.sz;
+    to.y = gate.y + gate.sz_right;
+    check_line(im, from, to, &np, &nc);
+    if ((float) nc / (float) np >= min_ratio_side) {
+      (*n_sides)++;
+    }
+    n_points += np;
+    n_colored_points += nc;
+
+    from.x = gate.x + gate.sz;
+    from.y = gate.y + gate.sz_right;
+    to.x = gate.x + gate.sz;
+    to.y = gate.y - gate.sz_right;
+    check_line(im, from, to, &np, &nc);
+    if ((float) nc / (float) np >= min_ratio_side) {
+      (*n_sides)++;
+    }
+    n_points += np;
+    n_colored_points += nc;
+
+    from.x = gate.x + gate.sz;
+    from.y = gate.y - gate.sz_right;
+    to.x = gate.x - gate.sz;
+    to.y = gate.y - gate.sz_left;
+    check_line(im, from, to, &np, &nc);
+    if ((float) nc / (float) np >= min_ratio_side) {
+      (*n_sides)++;
+    }
+    n_points += np;
+    n_colored_points += nc;
+  }
 
   // the quality is the ratio of colored points / number of points:
   if (n_points == 0) {
@@ -304,7 +366,7 @@ static void check_gate(struct image_t *im, struct gate_img gate, float *quality)
   }
 }
 
-static void snake_up_and_down(struct image_t *im, int x, int y, int *y_low, int *y_high)
+static void snake_left_right(struct image_t *im, int x, int y, int *y_low, int *y_high)
 {
   int done = 0;
   int x_initial = x;
@@ -356,7 +418,7 @@ static void snake_up_and_down(struct image_t *im, int x, int y, int *y_low, int 
   }
 }
 
-static void snake_left_and_right(struct image_t *im, int x, int y, int *x_low, int *x_high)
+static void snake_up_down(struct image_t *im, int x, int y, int *x_low, int *x_high)
 {
   int done = 0;
   int y_initial = y;
@@ -417,15 +479,14 @@ static void snake_left_and_right(struct image_t *im, int x, int y, int *x_low, i
 // candidate square, optionally drawing it on the image.
 static struct image_t *snake_gate_detection_func(struct image_t *img)
 {
-  int gen_alg = 0;
+  int gen_alg = 1;
   uint16_t i;
   int x, y;
   int x_low = 0, x_high = 0;
   int y_low1 = 0, y_high1 = 0, y_low2 = 0, y_high2 = 0;
   int sz = 0, szy1 = 0, szy2 = 0;
 
-  float quality;
-  best_quality = 0;
+  float best_quality = 0.;
   n_gates = 0;
 
   //color picker
@@ -439,15 +500,16 @@ static struct image_t *snake_gate_detection_func(struct image_t *img)
       y = best_gate.y;
     } else {
       // get a random coordinate:
-      x = rand() % img->w;
-      y = rand() % img->h;
+      x = rand() % img->h;
+      y = rand() % img->w;
     }
 
+	// NOTE: image is rotated
     //check_color(img, 1, 1);
     // check if it has the right color
     if (check_color(img, x, y)) {
       // snake up and down:
-      snake_left_and_right(img, x, y, &x_low, &x_high);
+      snake_up_down(img, x, y, &x_low, &x_high);
       sz = x_high - x_low;
 
       x_low = x_low + (sz * gate_thickness);
@@ -458,8 +520,8 @@ static struct image_t *snake_gate_detection_func(struct image_t *img)
       // if the stretch is long enough
       if (sz > min_pixel_size) {
         // snake left and right:
-        snake_up_and_down(img, x_low, y, &y_low1, &y_high1);
-        snake_up_and_down(img, x_high, y, &y_low2, &y_high2);
+        snake_left_right(img, x_low, y, &y_low1, &y_high1);
+        snake_left_right(img, x_high, y, &y_low2, &y_high2);
 
         y_low1 = y_low1 + (sz * gate_thickness);
         y_high1 = y_high1 - (sz * gate_thickness);
@@ -473,7 +535,7 @@ static struct image_t *snake_gate_detection_func(struct image_t *img)
         // if the size is big enough:
         if (szy1 > min_pixel_size) {
           // draw four lines on the image:
-          y = (y_high1 + y_low1) / 2;//was+
+          y = (y_high1 + y_low1) / 2;
           // set the size to the largest line found:
           //sz = (sz > szy1) ? sz : szy1;
           // create the gate:
@@ -481,16 +543,15 @@ static struct image_t *snake_gate_detection_func(struct image_t *img)
           gates[n_gates].y = y;
           gates[n_gates].sz = sz / 2;
           // check the gate quality:
-          check_gate(img, gates[n_gates], &quality);
-          gates[n_gates].gate_q = quality;
+          check_gate(img, gates[n_gates], &gates[n_gates].q, &gates[n_gates].n_sides);
           // only increment the number of gates if the quality is sufficient
           // else it will be overwritten by the next one
-          if (quality > min_gate_quality && quality > best_quality) {
-            best_quality = quality;
+          if (gates[n_gates].q > min_gate_quality && gates[n_gates].q > best_quality) {
+            best_quality = gates[n_gates].q;
             n_gates++;
           }
         } else if (szy2 > min_pixel_size) {
-          y = (y_high2 + y_low2) / 2;//was +
+          y = (y_high2 + y_low2) / 2;
           // set the size to the largest line found:
           //sz = (sz > szy2) ? sz : szy2;
           // create the gate:
@@ -498,12 +559,11 @@ static struct image_t *snake_gate_detection_func(struct image_t *img)
           gates[n_gates].y = y;
           gates[n_gates].sz = sz / 2;
           // check the gate quality:
-          check_gate(img, gates[n_gates], &quality);
-          gates[n_gates].gate_q = quality;
+          check_gate(img, gates[n_gates], &gates[n_gates].q, &gates[n_gates].n_sides);
           // only increment the number of gates if the quality is sufficient
           // else it will be overwritten by the next one
-          if (quality > min_gate_quality && quality > best_quality) {
-            best_quality = quality;
+          if (gates[n_gates].q > min_gate_quality && gates[n_gates].q > best_quality) {
+            best_quality = gates[n_gates].q;
             n_gates++;
           }
         }
@@ -516,57 +576,51 @@ static struct image_t *snake_gate_detection_func(struct image_t *img)
   }
 
   if (n_gates > 0) {
+    best_gate = gates[n_gates - 1];
+
     // do an additional fit to improve the gate detection:
     if (gen_alg) {
       // temporary variables:
-      float x_center, y_center, radius, fitness, angle_1, angle_2;
+      float fitness, angle_1, angle_2;
       int clock_arms = 0;
 
       // prepare the Region of Interest (ROI), which is larger than the gate:
       float size_factor = 1.25;//2;//1.25;
 
-      int max_candidate_gates = 5;
-      best_fitness = 100000.;
+      int max_candidate_gates = 10;
       int start = 0;
       if (n_gates > max_candidate_gates) {
         // only check max_candidate_gate gates, last gates are best quality
         start = n_gates - max_candidate_gates;
       }
+
       for (int gate_nr = start; gate_nr < n_gates; gate_nr++) {
         int16_t ROI_size = (int16_t)(((float) gates[gate_nr].sz) * size_factor);
         int16_t min_x = gates[gate_nr].x - ROI_size;
         min_x = (min_x < 0) ? 0 : min_x;
         int16_t max_x = gates[gate_nr].x + ROI_size;
-        max_x = (max_x < img->w) ? max_x : img->w;
+        max_x = (max_x < img->h) ? max_x : img->h;
         int16_t min_y = gates[gate_nr].y - ROI_size;
         min_y = (min_y < 0) ? 0 : min_y;
         int16_t max_y = gates[gate_nr].y + ROI_size;
-        max_y = (max_y < img->h) ? max_y : img->h;
+        max_y = (max_y < img->w) ? max_y : img->w;
 
+        // use best gate a seed for elite population
+        gen_gate = gates[gate_nr];
         // detect the gate:
-        gate_detection(img, &x_center, &y_center, &radius, &fitness, &gates[gate_nr].x, &gates[gate_nr].y, &gates[gate_nr].sz,
-                       min_x, min_y, max_x, max_y, clock_arms, &angle_1, &angle_2, &angle_to_gate);
-        if (fitness < best_fitness) {
-          best_fitness = fitness;
-          gate_quality = gates[gate_nr].gate_q;
+        gate_detection(img, &gen_gate.x, &gen_gate.y, &gen_gate.sz, &fitness, min_x, min_y, max_x, max_y, clock_arms, &angle_1, &angle_2, &angle_to_gate, &gates[gate_nr].sz_left, &gates[gate_nr].sz_right);
+        check_gate(img, gen_gate, &gen_gate.q, &gen_gate.n_sides);
+
+        if(gen_gate.n_sides > 2 && gen_gate.q > best_gate.q) {
           // store the information in the gate:
-          best_gate.x = (int) x_center;
-          best_gate.y = (int) y_center;
-          best_gate.sz = (int) radius;
+          best_gate = gen_gate;
         }
       }
-    } else {
-      // set best gate from quality
-      gate_quality = gates[n_gates - 1].gate_q;
-      // store the information in the gate:
-      best_gate.x = gates[n_gates - 1].x;
-      best_gate.y = gates[n_gates - 1].y;
-      best_gate.sz = gates[n_gates - 1].sz;
-      // angle_1 angle_2 angle_to_gate
-      angle_to_gate = 0;
     }
-    calculate_gate_position(best_gate.x, best_gate.y, best_gate.sz, img, best_gate);
-    time_gate_detected = get_sys_time_float();
+    //if (best_gate.n_sides > 2){
+      calculate_gate_position(best_gate.x, best_gate.y, best_gate.sz, img, best_gate);
+      time_gate_detected = get_sys_time_float();
+    //}
 
 #ifdef DRAW_GATE
     draw_gate(img, best_gate);
@@ -591,19 +645,19 @@ void snake_gate_detection_start(void){
   time_gate_detected = last_processed = get_sys_time_float();
   gate_detected = 0;
   ready_pass_through = 0;
-  listener->active = 1;
+  listener->active = true;
 }
 
 void snake_gate_detection_stop(void){
   gate_detected = 0;
   ready_pass_through = 0;
-  listener->active = 0;
+  listener->active = false;
 }
 
 void snake_gate_detection_init(void)
 {
   listener = cv_add_to_device(&SGD_CAMERA, snake_gate_detection_func);
-  listener->active = 0;
+  listener->active = false;
 }
 
 // state filter in periodic loop

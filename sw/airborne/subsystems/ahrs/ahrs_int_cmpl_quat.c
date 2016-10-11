@@ -363,7 +363,7 @@ void ahrs_icq_update_accel(struct Int32Vect3 *accel, float dt)
 
   int32_t inv_bias_gain = (int32_t)(ahrs_icq.accel_inv_ki /
                                     (dt * ahrs_icq.weight * ahrs_icq.weight));
-  Bound(inv_bias_gain, 8, 65536)
+  Bound(inv_bias_gain, 8, 65536);
   ahrs_icq.high_rez_bias.p += (residual.x / inv_bias_gain) << 5;
   ahrs_icq.high_rez_bias.q += (residual.y / inv_bias_gain) << 5;
   ahrs_icq.high_rez_bias.r += (residual.z / inv_bias_gain) << 5;
@@ -469,11 +469,10 @@ static inline void ahrs_icq_update_mag_2d(struct Int32Vect3 *mag, float dt)
   struct Int32Vect2 measured_ltp_2d = {measured_ltp.x, measured_ltp.y};
   int32_vect2_normalize(&measured_ltp_2d, INT32_MAG_FRAC);
 
-  /* residual_ltp FRAC: 2 * MAG_FRAC - 5 = 17 */
   struct Int32Vect3 residual_ltp = {
     0,
     0,
-    (measured_ltp_2d.x * expected_ltp.y - measured_ltp_2d.y * expected_ltp.x) / (1 << 5)
+    (measured_ltp_2d.x * expected_ltp.y - measured_ltp_2d.y * expected_ltp.x) / (1 << (2 * INT32_MAG_FRAC - INT32_LTP_RESIDUAL_FRAC))
   };
 
 
@@ -508,13 +507,13 @@ static inline void ahrs_icq_update_mag_2d(struct Int32Vect3 *mag, float dt)
    *
    * bias_gain = Ki * FRAC_conversion = Ki * 2^23
    */
-  int32_t bias_gain = (int32_t)(ahrs_icq.mag_ki * dt * (1 << 23));
+  int32_t bias_gain = (int32_t)(ahrs_icq.mag_ki * dt * (1 << (INT32_HIGH_RES_BIAS_FRAC - INT32_LTP_RESIDUAL_FRAC)));
 
   ahrs_icq.high_rez_bias.p -= (residual_imu.x * bias_gain);
   ahrs_icq.high_rez_bias.q -= (residual_imu.y * bias_gain);
   ahrs_icq.high_rez_bias.r -= (residual_imu.z * bias_gain);
 
-  INT_RATES_RSHIFT(ahrs_icq.gyro_bias, ahrs_icq.high_rez_bias, 28);
+  INT_RATES_RSHIFT(ahrs_icq.gyro_bias, ahrs_icq.high_rez_bias, INT32_HIGH_RES_BIAS_FRAC - INT32_RATE_FRAC);
 
 }
 

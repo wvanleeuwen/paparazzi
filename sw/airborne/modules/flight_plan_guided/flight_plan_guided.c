@@ -42,10 +42,13 @@
 #include "modules/stereocam/stereoprotocol.h"
 #include "modules/stereocam/stereocam2state/stereocam2state.h"
 
-#define ANGLE_BUILDING_ENTRY  0.  // angle of drone to enter building
-#define ANGLE_ROOM_1_ENTRY    0.  // angle to enter room 1
-#define ANGLE_ROOM_2_ENTRY    0.  // angle to enter room 2
-#define ANGLE_ROOM_3_ENTRY    0.  // angle to enter room 3
+// start and stop modules
+#include "generated/modules.h"
+
+#define ANGLE_BUILDING_ENTRY  -0.594  // angle of drone to enter building
+#define ANGLE_ROOM_1_ENTRY     0.  // angle to enter room 1
+#define ANGLE_ROOM_2_ENTRY     0.  // angle to enter room 2
+#define ANGLE_ROOM_3_ENTRY     0.  // angle to enter room 3
 
 bool marker_lost;
 
@@ -288,17 +291,22 @@ bool fly_through_window(void) {
   //  win_processed = 1;
     switch (win_state){
       case 0:
-        guidance_h_set_guided_heading(ANGLE_BUILDING_ENTRY);
+        //guidance_h_set_guided_heading(ANGLE_BUILDING_ENTRY);
+        //guidance_h_set_guided_heading();
         guidance_h_set_guided_pos(stateGetPositionNed_f()->x, stateGetPositionNed_f()->y);
-        guidance_v_set_guided_z(-1.5);
+        guidance_v_set_guided_z(-1.4);
         mytime = get_sys_time_float();
         init_pos_filter = 1;
+
+        snake_gate_detection_snake_gate_detection_periodic_status = MODULES_START;
+
         win_state++;
         break;
       // centre drone in front of window at about 2m away
       case 1:
-        if(stereo_agl < 3) {  // if I get closer than 40cm, move away and retry
-          guidance_h_set_guided_pos_relative(0.5*(-1.5), 0.);
+        if(stereo_agl != 0 && stereo_agl < 3) {  // if I get closer than 40cm, move away and retry
+          win_state = 4;
+          break;
         }
         if(gate_detected && gate_processed == 0) {
           if (ready_pass_through){
@@ -307,14 +315,14 @@ bool fly_through_window(void) {
           }
 
           // position drone 1.5m in front of window, add small low pass filter on position command
-          guidance_h_set_guided_pos_relative(0.5*(filtered_x_gate - 1.5), 0.5*filtered_y_gate);
+          guidance_h_set_guided_pos_relative(0.9*(filtered_x_gate - 1.5), 0.9*filtered_y_gate);
           gate_processed = 1;
         }
         break;
       // fly forward with active control till <2m in front of window
       case 2:
         if(gate_detected){
-          guidance_h_set_guided_pos_relative(0.5*(filtered_x_gate + 0.5), 0.5*(filtered_y_gate));
+          guidance_h_set_guided_pos_relative(filtered_x_gate + 0.5, filtered_y_gate);
         } else {
           mytime = get_sys_time_float();
           win_state++;
@@ -324,13 +332,19 @@ bool fly_through_window(void) {
         if (stateGetSpeedNed_f()->x < 0.1 && stateGetSpeedNed_f()->y < 0.1 &&
             get_sys_time_float() - mytime > 5.) {
           init_pos_filter = 1;
+          snake_gate_detection_snake_gate_detection_periodic_status = MODULES_STOP;
           win_state = 0;
           return false;
         }
         break;
+      case 4: // missed approach, recycle and try again
+        guidance_h_set_guided_pos_relative(-1.5, 0.);
+        win_state = 1;
+        break;
       default:
         mytime = get_sys_time_float();
         win_state = 0;
+        snake_gate_detection_snake_gate_detection_periodic_status = MODULES_STOP;
         break;
     }
 

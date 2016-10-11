@@ -31,16 +31,14 @@ extern uint8_t color_cr_min;
 extern uint8_t color_cr_max;
 
 // main gate detection function:
-extern void gate_detection(struct image_t *color_image, float *x_center, float *y_center, float *radius, float *fitness,
-                           int *x0, int *y0, int *size0,
-                           uint16_t min_x, uint16_t min_y, uint16_t max_x, uint16_t max_y, int clock_arms, float *angle_1, float *angle_2,
-                           float *psi);
+extern void gate_detection(struct image_t* color_image, int *x_center, int *y_center, int *radius, float* fitness, uint16_t min_x, uint16_t min_y, uint16_t max_x, uint16_t max_y, int clock_arms, float* angle_1, float* angle_2, float* psi, int* s_left, int* s_right);
 
 // "private" functions:
+/*
 void convert_image_to_points(struct image_t *color_image, uint16_t min_x, uint16_t min_y, uint16_t max_x,
                              uint16_t max_y);
-void fit_window_to_points(int *x0, int *y0, int *size0, float *x_center, float *y_center, float *radius,
-                          float *fitness, float *s_left, float *s_right);
+extern void fit_window_to_points(int x0, int y0, int size0, int *x_center, int *y_center, int *radius,
+                          float *fitness, int *s_left, int *s_right);
 float fit_clock_arms(float x_center, float y_center, float radius, float *angle_1, float *angle_2);
 float mean_distance_to_circle(float *genome);
 float mean_distance_to_square(float *genome);
@@ -63,6 +61,7 @@ void draw_circle(struct image_t *Im, float x_center, float y_center, float radiu
 void draw_stick(struct image_t *Im, float x_center, float y_center, float radius, uint8_t *color);
 void draw_line_segment(struct image_t *Im, struct point_f Q1, struct point_f Q2, uint8_t *color);
 
+*/
 extern int check_color(struct image_t *im, int x, int y);
 
 // calculating the color fit cannot be done with the current stereo output:

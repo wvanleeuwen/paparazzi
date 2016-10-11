@@ -3,18 +3,17 @@
 <airframe>
   <section name="IMU" prefix="IMU_">
     <!-- Magneto calibration -->
-<define name="MAG_X_NEUTRAL" value="-120"/>
-<define name="MAG_Y_NEUTRAL" value="54"/>
-<define name="MAG_Z_NEUTRAL" value="49"/>
-<define name="MAG_X_SENS" value="6.3026110969" integer="16"/>
-<define name="MAG_Y_SENS" value="6.75366277396" integer="16"/>
-<define name="MAG_Z_SENS" value="5.77699238143" integer="16"/>
-
+<define name="MAG_X_NEUTRAL" value="-22"/>
+<define name="MAG_Y_NEUTRAL" value="95"/>
+<define name="MAG_Z_NEUTRAL" value="-50"/>
+<define name="MAG_X_SENS" value="7.27404586886" integer="16"/>
+<define name="MAG_Y_SENS" value="7.91291115225" integer="16"/>
+<define name="MAG_Z_SENS" value="3.95456443096" integer="16"/>
 
     <!-- Magneto current calibration -->
-<define name= "MAG_X_CURRENT_COEF" value="-0.00363854777985"/>
-<define name= "MAG_Y_CURRENT_COEF" value="-0.000238563933841"/>
-<define name= "MAG_Z_CURRENT_COEF" value="-0.00142141412685"/>
+<define name= "MAG_X_CURRENT_COEF" value="-0.00241441907521"/>
+<define name= "MAG_Y_CURRENT_COEF" value="-0.00111216015747"/>
+<define name= "MAG_Z_CURRENT_COEF" value="-0.00292234568252"/>
 
   </section>
 </airframe>
