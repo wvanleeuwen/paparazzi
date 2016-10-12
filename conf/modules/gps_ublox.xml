@@ -23,6 +23,7 @@
     <configure name="UBX_GPS_BAUD" default="$(GPS_BAUD)"/>
 
     <file name="gps_ubx.c" dir="subsystems/gps"/>
+    <include name="$(PAPARAZZI_SRC)/sw/ext"/>
 
     <define name="USE_$(UBX_GPS_PORT_UPPER)"/>
     <define name="UBX_GPS_LINK" value="$(UBX_GPS_PORT_LOWER)"/>

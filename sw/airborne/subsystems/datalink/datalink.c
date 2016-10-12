@@ -126,8 +126,18 @@ void dl_parse_msg(void)
         );
       }
       break;
-#endif  // USE_GPS
-
+#if USE_GPS_UBX_RTCM
+      case DL_RTCM_INJECT : {
+              // GPS parse data
+              gpss_inject_data(
+                DL_RTCM_INJECT_packet_id(buf),
+		DL_RTCM_INJECT_data_length(buf),
+		DL_RTCM_INJECT_data(buf)
+              );
+            }
+            break;
+#endif // USE_GPS_UBX_RTCM
+#endif // USE_GPS
       default:
         break;
     }

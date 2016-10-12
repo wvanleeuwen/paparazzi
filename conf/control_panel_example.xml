@@ -65,6 +65,8 @@
       <arg flag="--ac" constant="@AC_ID"/>
     </program>
     <program name="SVInfo" command="sw/ground_segment/python/svinfo/svinfo.py"/>
+    <program name="IridiumDialer" command="sw/tools/iridium/iridium_link.py"/>
+    <program name="rtcm2ivy" command="sw/ground_segment/misc/rtcm2ivy"/>
  </section>
 
   <section name="sessions">
