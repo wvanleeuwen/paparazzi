@@ -168,8 +168,8 @@
     <define name="SONAR_MAX_RANGE" value="3"/>
     <define name="SONAR_UPDATE_ON_AGL" value="TRUE"/>
     <define name="VFF_R_SONAR_OF_M" value="0."/>
-    <define name="VFF_R_SONAR_0" value="0.5"/>
-    <define name="BARO_AGL_OFFSET" value="0."/>
+    <define name="VFF_R_SONAR_0" value="0.1"/>
+    <define name="BARO_AGL_OFFSET" value="0.31"/><!--This should be set the the length of the legs, positive-->
   </section>
 
   <section name="RC_SETPOINT" prefix="STABILIZATION_ATTITUDE_">
@@ -209,10 +209,10 @@
     <!--<define name="G2_R" value="0.14"/>-->
 
     <!-- bebop TUBB05 (no legs, with bumpers) -->
-    <define name="G1_P" value="0.057"/>
+    <!--define name="G1_P" value="0.057"/>
     <define name="G1_Q" value="0.042"/>
     <define name="G1_R" value="0.0020"/>
-    <define name="G2_R" value="0.12"/>
+    <define name="G2_R" value="0.12"/-->
 
     <!-- bebop TUBB04 (steel legs) -->
     <!--<define name="G1_P" value="0.01304"/>-->
@@ -221,10 +221,10 @@
     <!--<define name="G2_R" value="0.01448"/>-->
 
     <!-- bebop TUBB05 (plastic legs) -->
-    <!--<define name="G1_P" value="0.037543"/>-->
-    <!--<define name="G1_Q" value="0.023722"/>-->
-    <!--<define name="G1_R" value="0.002219"/>-->
-    <!--<define name="G2_R" value="0.124241"/>-->
+    <define name="G1_P" value="0.037543"/>
+    <define name="G1_Q" value="0.023722"/>
+    <define name="G1_R" value="0.002219"/>
+    <define name="G2_R" value="0.124241"/>
 
     <!-- bebop TUBB05 (plastic legs and gripper) -->
     <!--<define name="G1_P" value="0.025"/>-->
@@ -266,7 +266,7 @@
     <define name="HOVER_KP" value="200"/>
     <define name="HOVER_KD" value="800"/>
     <define name="HOVER_KI" value="0"/>
-    <define name="NOMINAL_HOVER_THROTTLE" value="0.55"/>
+    <define name="NOMINAL_HOVER_THROTTLE" value="0.6"/>
     <!--<define name="ADAPT_THROTTLE_ENABLED" value="TRUE"/>-->
   </section>
 
