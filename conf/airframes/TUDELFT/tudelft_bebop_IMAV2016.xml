@@ -27,7 +27,7 @@
     <module name="gps" type="optitrack"/>
     <module name="stabilization" type="indi"/>
     <module name="ahrs" type="int_cmpl_quat">
-      <configure name="USE_MAGNETOMETER" value="TRUE"/>
+      <configure name="USE_MAGNETOMETER" value="FALSE"/>
       <define name="AHRS_USE_GPS_HEADING" value="FALSE"/>
     </module>
     <module name="ins" type="extended"/>
@@ -56,13 +56,13 @@
       <define name="OPTICFLOW_DEROTATION_CORRECTION_FACTOR_Y" value="0.85"/> <!--Obtained from a linefit-->
     </module>
 
+    <!--<module name="cv_active_random_filter">-->
+      <!--<define name="AR_FILTER_CAMERA" value="front_camera" />-->
+    <!--</module>-->
+
     <module name="cv_marker_detection">
       <define name="DETECTOR_CAMERA1" value="bottom_camera"/>
       <define name="DETECTOR_CAMERA2" value="front_camera"/>
-    </module>
-
-    <module name="cv_active_random_filter">
-      <define name="AR_FILTER_CAMERA" value="front_camera" />
     </module>
 
     <module name="cv_snake_gate_detection.xml">
@@ -203,10 +203,10 @@
     <!--<define name="G2_R" value="0.14"/>-->
 
     <!-- bebop TUBB05 (no legs, with bumpers) -->
-    <!--<define name="G1_P" value="0.057"/>-->
-    <!--<define name="G1_Q" value="0.042"/>-->
-    <!--<define name="G1_R" value="0.0020"/>-->
-    <!--<define name="G2_R" value="0.12"/>-->
+    <define name="G1_P" value="0.057"/>
+    <define name="G1_Q" value="0.042"/>
+    <define name="G1_R" value="0.0020"/>
+    <define name="G2_R" value="0.12"/>
 
     <!-- bebop TUBB04 (steel legs) -->
     <!--<define name="G1_P" value="0.01304"/>-->
@@ -221,10 +221,10 @@
     <!--<define name="G2_R" value="0.124241"/>-->
 
     <!-- bebop TUBB05 (plastic legs and gripper) -->
-    <define name="G1_P" value="0.025"/>
-    <define name="G1_Q" value="0.016"/>
-    <define name="G1_R" value="0.0018"/>
-    <define name="G2_R" value="0.11"/>
+    <!--<define name="G1_P" value="0.025"/>-->
+    <!--<define name="G1_Q" value="0.016"/>-->
+    <!--<define name="G1_R" value="0.0018"/>-->
+    <!--<define name="G2_R" value="0.11"/>-->
 
     <!-- bebop TUBB05 (plastic legs, gripper and bucket) -->
     <!--<define name="G1_P" value="0.0"/>-->

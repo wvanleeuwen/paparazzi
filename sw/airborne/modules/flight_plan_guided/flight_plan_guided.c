@@ -98,7 +98,8 @@ uint8_t Hover(float altitude) {
     if (autopilot_mode != AP_MODE_GUIDED) { return true; }
     // Horizontal velocities are set to zero
     guidance_h_set_guided_body_vel(0, 0);
-    guidance_v_set_guided_z(-altitude);
+//    guidance_v_set_guided_z(-altitude);
+    guidance_v_set_guided_vz(0);
 
     return false;
 }

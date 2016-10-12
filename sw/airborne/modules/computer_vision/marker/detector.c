@@ -42,14 +42,9 @@ static bool SHOW_MARKER = true;
 static float MARKER_FOUND_TIME_MAX = 5.0;
 
 // General outputs
+struct Detector detector;
 struct Marker marker1;
 struct Marker marker2;
-
-static struct video_listener *bucket_listener_front;
-static struct video_listener *item_listener_bottom;
-static struct video_listener *bucket_listener_bottom;
-static struct video_listener *helipad_listener_bottom;
-
 
 static struct Marker single_blob_finder(struct image_t *img, struct image_filter_t *filter, int threshold) {
   // Output image
@@ -163,16 +158,40 @@ static void marker_not_detected(struct Marker *marker, struct image_t *img) {
 }
 
 
+static struct image_t *detect_front_item(struct image_t *img) {
+
+  // Color Filter
+  struct image_filter_t filter;
+  filter.y_min = 92;
+  filter.y_max = 129;
+  filter.u_min = 109;
+  filter.u_max = 123;
+  filter.v_min = 191;
+  filter.v_max = 242;
+
+  int threshold = 50;
+
+  struct Marker marker = single_blob_finder(img, &filter, threshold);
+
+  if (marker.detected) {
+    marker_detected(&marker2, img, marker.pixel.x, marker.pixel.y);
+  } else {
+    marker_not_detected(&marker2, img);
+  }
+
+  return NULL;
+}
+
 static struct image_t *detect_front_bucket(struct image_t *img) {
 
   // Color Filter
   struct image_filter_t filter;
-  filter.y_min = 87;    // red
-  filter.y_max = 162;
-  filter.u_min = 94;
-  filter.u_max = 255;
-  filter.v_min = 184;
-  filter.v_max = 255;
+  filter.y_min = 66;
+  filter.y_max = 102;
+  filter.u_min = 120;
+  filter.u_max = 130;
+  filter.v_min = 161;
+  filter.v_max = 184;
 
   int threshold = 50;
 
@@ -192,11 +211,11 @@ static struct image_t *detect_bottom_item(struct image_t *img) {
 
   // Color Filter
   struct image_filter_t filter;
-  filter.y_min = 87;    // pink
+  filter.y_min = 183; //87;    // pink
   filter.y_max = 255;
   filter.u_min = 105;
   filter.u_max = 255;
-  filter.v_min = 170;
+  filter.v_min = 120; //170;
   filter.v_max = 255;
 
   int threshold = 50;
@@ -299,10 +318,12 @@ static struct image_t *draw_target_marker2(struct image_t *img) {
 }
 
 
-void detector_locate(bool item, bool bucket, bool helipad) {
-  item_listener_bottom->active = item;
-  bucket_listener_bottom->active = bucket;
-  helipad_listener_bottom->active = helipad;
+void detector_disable_all() {
+  detector.item_front->active = false;
+  detector.bucket_front->active = false;
+  detector.item_bottom->active = false;
+  detector.bucket_bottom->active = false;
+  detector.helipad_bottom->active = false;
 }
 
 
@@ -314,11 +335,11 @@ void detector_init(void) {
   marker1.pixel.y = 0;
   marker1.found_time = 0;
 
-  helipad_listener_bottom = cv_add_to_device_async(&DETECTOR_CAMERA1, detect_helipad_marker, 5);
-  helipad_listener_bottom->maximum_fps = 20;
+  detector.helipad_bottom = cv_add_to_device_async(&DETECTOR_CAMERA1, detect_helipad_marker, 5);
+  detector.helipad_bottom->maximum_fps = 20;
 
-  item_listener_bottom = cv_add_to_device(&DETECTOR_CAMERA1, detect_bottom_item);
-  bucket_listener_bottom = cv_add_to_device(&DETECTOR_CAMERA1, detect_bottom_bucket);
+  detector.item_bottom = cv_add_to_device(&DETECTOR_CAMERA1, detect_bottom_item);
+  detector.bucket_bottom = cv_add_to_device(&DETECTOR_CAMERA1, detect_bottom_bucket);
 
   cv_add_to_device(&DETECTOR_CAMERA1, draw_target_marker1);
 
@@ -329,11 +350,13 @@ void detector_init(void) {
   marker2.pixel.y = 0;
   marker2.found_time = 0;
 
-  bucket_listener_front = cv_add_to_device_async(&DETECTOR_CAMERA2, detect_front_bucket, 5);
-  bucket_listener_front->maximum_fps = 20;
+  detector.item_front = cv_add_to_device_async(&DETECTOR_CAMERA2, detect_front_item, 5);
+  detector.item_front->maximum_fps = 20;
+  detector.bucket_front = cv_add_to_device_async(&DETECTOR_CAMERA2, detect_front_bucket, 5);
+  detector.bucket_front->maximum_fps = 20;
 
   cv_add_to_device(&DETECTOR_CAMERA2, draw_target_marker2);
 
   // INITIAL STATE
-  detector_locate(true, false, false);
+  detector_disable_all();
 }

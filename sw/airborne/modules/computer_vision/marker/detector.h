@@ -28,6 +28,16 @@
 #include "math/pprz_geodetic_float.h"
 #include "lib/vision/image.h"
 
+struct Detector {
+    struct video_listener *item_front;
+    struct video_listener *bucket_front;
+    struct video_listener *item_bottom;
+    struct video_listener *bucket_bottom;
+    struct video_listener *helipad_bottom;
+};
+
+extern struct Detector detector;
+
 struct Marker {
     volatile bool detected;
     volatile bool processed;
@@ -42,6 +52,7 @@ extern struct Marker marker2;
 
 void detector_init(void);
 
-extern void detector_locate(bool item, bool bucket, bool helipad);
+void detector_disable_all(void);
+
 
 #endif
