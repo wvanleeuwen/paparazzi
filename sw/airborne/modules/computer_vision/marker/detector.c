@@ -162,12 +162,12 @@ static struct image_t *detect_front_item(struct image_t *img) {
 
   // Color Filter
   struct image_filter_t filter;
-  filter.y_min = 92;
-  filter.y_max = 129;
-  filter.u_min = 109;
-  filter.u_max = 123;
-  filter.v_min = 191;
-  filter.v_max = 242;
+  filter.y_min = 87;
+  filter.y_max = 130;
+  filter.u_min = 108;
+  filter.u_max = 128;
+  filter.v_min = 173;
+  filter.v_max = 231;
 
   int threshold = 50;
 
@@ -186,12 +186,12 @@ static struct image_t *detect_front_bucket(struct image_t *img) {
 
   // Color Filter
   struct image_filter_t filter;
-  filter.y_min = 66;
-  filter.y_max = 102;
-  filter.u_min = 120;
-  filter.u_max = 130;
-  filter.v_min = 161;
-  filter.v_max = 184;
+  filter.y_min = 63;
+  filter.y_max = 103;
+  filter.u_min = 115;
+  filter.u_max = 138;
+  filter.v_min = 160;
+  filter.v_max = 190;
 
   int threshold = 50;
 
@@ -211,12 +211,12 @@ static struct image_t *detect_bottom_item(struct image_t *img) {
 
   // Color Filter
   struct image_filter_t filter;
-  filter.y_min = 183; //87;    // pink
-  filter.y_max = 255;
-  filter.u_min = 105;
-  filter.u_max = 255;
-  filter.v_min = 120; //170;
-  filter.v_max = 255;
+  filter.y_min = 79;
+  filter.y_max = 165;
+  filter.u_min = 115;
+  filter.u_max = 125;
+  filter.v_min = 177;
+  filter.v_max = 227;
 
   int threshold = 50;
 

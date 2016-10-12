@@ -46,10 +46,10 @@
     </block>
 
     <block name="Find item">
-      <call fun="Hover(NOM_FLIGHT_ALT)"/>
       <call_once fun="detector_disable_all()"/>
       <call_once fun="detector.item_bottom->active = true"/>
       <call_once fun="detector.item_front->active = true"/>
+      <call fun="Hover(NOM_FLIGHT_ALT)"/>
       <call fun="bucket_heading_change(1)"/>
       <exception cond="marker1.found_time > 1" deroute="Center item"/>
     </block>
@@ -69,19 +69,50 @@
     </block>
 
     <block name="Land item">
-      <call fun="marker_center_land(0.05, 0.4, 0.3)"/>
-      <call_once fun="KillEngines()"/>
+      <call fun="marker_center_land(0.05, 0.4, 0.5)"/>
+      <!--<call_once fun="KillEngines()"/>-->
       <while cond="1"/> <!-- wait indefinitely -->
     </block>
-    
+
+    <block name="Go up">
+      <call fun="TakeOff(0.2)"/>
+      <call fun="WaitUntilAltitude(NOM_FLIGHT_ALT - 0.2)"/>
+    </block>
+
+    <block name="Hover before finding bucket">
+      <call fun="Hover(NOM_FLIGHT_ALT)"/>
+      <while cond="2 > block_time"/>
+    </block>
+
+    <block name="Find bucket">
+      <call_once fun="detector_disable_all()"/>
+      <call_once fun="detector.bucket_bottom->active = true"/>
+      <call_once fun="detector.bucket_front->active = true"/>
+      <call fun="Hover(NOM_FLIGHT_ALT)"/>
+      <call fun="bucket_heading_change(1)"/>
+    </block>
+
+    <block name="Approach bucket">
+      <call fun="Hover(NOM_FLIGHT_ALT)"/>
+      <call fun="bucket_approach(1)"/>
+      <exception cond="marker_lost == true" deroute="Find bucket"/>
+    </block>
+
+    <block name="Center bucket">
+      <call fun="Hover(NOM_FLIGHT_ALT)"/>
+      <call fun="marker_center_land(0.05, 0, 0)"/>
+      <exception cond="0.1 > marker1.found_time" deroute="Find bucket"/>
+    </block>
+
+
+    <!--<block name="Center big bucket">-->
+      <!--<call fun="Hover(NOM_FLIGHT_ALT)"/>-->
+      <!--<call fun="marker_center_land(-0.1, 0, 0)"/>-->
+    <!--</block>-->
+
     <block name="Close Gripper">
       <call_once fun="close_gripper()"/>
       <while cond="1"/>
-    </block>
-
-    <block name="Center big bucket">
-      <call fun="Hover(NOM_FLIGHT_ALT)"/>
-      <call fun="marker_center_land(-0.1, 0, 0)"/>
     </block>
     
     <block name="Open Gripper">
