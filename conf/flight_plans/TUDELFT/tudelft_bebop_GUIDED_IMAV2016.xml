@@ -9,7 +9,8 @@
         alt="2.0">
 
   <header>
-    # define NOM_FLIGHT_ALT 1.0  // nominal flight altitude
+    #define NOM_FLIGHT_ALT 1.0  // nominal flight altitude
+    #include "guidance/guidance_h.h"
   </header>
 
   <waypoints>

@@ -39,7 +39,7 @@
 #ifndef SONAR_BEBOP_SLOPE_THRESH_OBS
 #define SONAR_BEBOP_SLOPE_THRESH_OBS 6.     // gradient threshold for outlier detections when trying to hold altitude [m/s]
 #endif
-#define SONAR_BEBOP_SLOPE_THRESH 5.         // gradient threshold for outlier detections when changing altitude [m/s]
+#define SONAR_BEBOP_SLOPE_THRESH 8.         // gradient threshold for outlier detections when changing altitude [m/s]
 #define SONAR_BEBOP_OBSTACLE_ACCEPTANCE 5   // number of outliers before it is accepted as an obstacle
 #define DT 0.01                 // sample period of sensor (100 Hz)
 
