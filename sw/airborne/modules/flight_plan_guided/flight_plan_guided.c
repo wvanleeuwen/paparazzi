@@ -143,6 +143,13 @@ bool Land(float end_altitude) {
     return false;
 }
 
+bool front_cam_set_x_offset(int offset) {
+  mt9f002.offset_x = offset;
+  mt9f002_set_resolution(&mt9f002);
+
+  return false;
+}
+
 static int BUCKET_HEADING_MARGIN = 60;  // px
 static float BUCKET_HEADING_RATE = 0.5; // rad/s
 

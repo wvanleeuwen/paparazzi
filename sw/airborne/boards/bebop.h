@@ -27,6 +27,7 @@
 
 #include "std.h"
 #include "peripherals/video_device.h"
+#include "boards/bebop/mt9f002.h"
 
 #ifndef MT9F002_OUTPUT_HEIGHT
 #define MT9F002_OUTPUT_HEIGHT 1408
@@ -119,6 +120,9 @@
 /* Cameras */
 extern struct video_config_t bottom_camera;
 extern struct video_config_t front_camera;
+
+/* ISP */
+struct mt9f002_t mt9f002;
 
 /* by default activate onboard baro */
 #ifndef USE_BARO_BOARD

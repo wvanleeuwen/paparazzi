@@ -58,4 +58,6 @@ extern bool marker_center_land(float x_offset, float z_speed, float end_altitude
 extern bool fly_through_window(void);
 extern int8_t win_state;
 
+extern bool front_cam_set_x_offset(int offset);
+
 #endif

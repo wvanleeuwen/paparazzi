@@ -61,6 +61,10 @@
       <define name="DETECTOR_CAMERA2" value="front_camera"/>
     </module>
 
+    <module name="cv_active_random_filter">
+      <define name="AR_FILTER_CAMERA" value="front_camera" />
+    </module>
+
     <module name="cv_snake_gate_detection.xml">
       <define name="SGD_CAMERA" value="front_camera"/>
     </module>
