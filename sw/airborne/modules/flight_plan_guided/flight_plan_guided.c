@@ -332,7 +332,7 @@ bool fly_through_window(void) {
         break;
       // centre drone in front of window at about 2m away
       case 1:
-        if(stereo_agl != 0 && stereo_agl < 3) {  // if I get closer than 40cm, move away and retry
+        if(stereo_agl != 0 && stereo_agl < 3) {  // if I get closer than 30cm, move away and retry
           win_state = 4;
           break;
         }
@@ -347,7 +347,7 @@ bool fly_through_window(void) {
           gate_processed = 1;
         }
         break;
-      // fly forward with active control till <2m in front of window
+      // fly forward with active control till >0.5m in front of window
       case 2:
         guidance_h_set_guided_pos_relative(filtered_x_gate + 0.5, filtered_y_gate);
         snake_gate_detection_snake_gate_detection_periodic_status = MODULES_STOP;
@@ -362,7 +362,8 @@ bool fly_through_window(void) {
         break;
       case 4: // missed approach, recycle and try again
         guidance_h_set_guided_pos_relative(-1.5, 0.);
-        win_state = 1;
+        gate_processed = 1;
+        win_state = 1;  // try again
         break;
       default:
         mytime = get_sys_time_float();
