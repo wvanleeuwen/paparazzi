@@ -31,7 +31,8 @@
       <define name="AHRS_USE_GPS_HEADING" value="FALSE"/>
     </module>
     <module name="ins" type="extended">
-      <define name="VFF_EXTENDED_R_BARO" value="15."/>
+      <define name="VFF_EXTENDED_R_BARO" value=".1"/>
+      <define name="VFF_EXTENDED_ACCEL_NOISE" value=".5"/>
     </module>
   </firmware>
 
@@ -163,6 +164,8 @@
 
   <section name="INS" prefix="INS_">
     <define name="SONAR_BARO_THRESHOLD" value="2"/>
+    <define name="SONAR_MIN_RANGE" value="0.45"/>
+    <define name="SONAR_MAX_RANGE" value="3"/>
     <define name="SONAR_UPDATE_ON_AGL" value="TRUE"/>
     <define name="VFF_R_SONAR_OF_M" value="0."/>
     <define name="BARO_AGL_OFFSET" value="0."/>

@@ -55,6 +55,10 @@
 #include "math/pprz_isa.h"
 
 
+#ifndef INS_BARO_AGL_OFFSET
+#define INS_BARO_AGL_OFFSET 0.
+#endif
+
 #if USE_SONAR
 #if !USE_VFF_EXTENDED
 #error USE_SONAR needs USE_VFF_EXTENDED
@@ -71,9 +75,6 @@ static void sonar_cb(uint8_t sender_id, float distance);
 #include "firmwares/rotorcraft/stabilization.h"
 #endif
 
-#ifndef INS_BARO_AGL_OFFSET
-#define INS_BARO_AGL_OFFSET 0.
-#endif
 #ifndef INS_SONAR_MIN_RANGE
 #define INS_SONAR_MIN_RANGE 0.001
 #endif
@@ -318,33 +319,36 @@ void ins_int_propagate(struct Int32Vect3 *accel, float dt)
 
 static void baro_cb(uint8_t __attribute__((unused)) sender_id, float pressure)
 {
-  static uint8_t num_calls = 0;
-  static const float num_pressure_points = 20.;
-  static float running_mean_pressure = 0.;
+  static uint8_t num_points = 0;
+  static const float min_pressure_points = 20.;
+  static float low_pass_pressure = 0.;
+  static float alpha = 0.85;
 
   if (pressure > 1e-7){
-    if (running_mean_pressure < 1e-7){
-      running_mean_pressure = pressure;
+    if (low_pass_pressure < 1e-7){
+      low_pass_pressure = pressure;
     } else {
-      running_mean_pressure = (running_mean_pressure * (num_pressure_points - 1) + pressure) / num_pressure_points;
+      low_pass_pressure = low_pass_pressure * alpha + pressure * (1-alpha);
     }
 
-    if (!ins_int.baro_initialized && num_calls >= 2*num_pressure_points) {
+    if (!ins_int.baro_initialized && num_points >= min_pressure_points) {
       // wait for a first positive value
-      ins_int.qfe = running_mean_pressure;
-      ins_int.baro_initialized = true;
-      vff_realign(0.);
+      ins_int.qfe = low_pass_pressure;
+      vff_realign(INS_BARO_AGL_OFFSET);
       ins_update_from_vff();
-    } else { num_calls++; }
+      ins_int.baro_initialized = true;
+    } else { num_points++; }
 
     if (ins_int.baro_initialized) {
       if (ins_int.vf_reset) {
         ins_int.vf_reset = false;
-        ins_int.qfe = running_mean_pressure;
-        vff_realign(0.);
+        ins_int.qfe = low_pass_pressure;
+        ins_int.baro_z = -pprz_isa_height_of_pressure(low_pass_pressure, ins_int.qfe) - INS_BARO_AGL_OFFSET;
+        vff_realign(ins_int.baro_z);
         ins_update_from_vff();
       } else {
-        ins_int.baro_z = -pprz_isa_height_of_pressure(pressure, ins_int.qfe) - INS_BARO_AGL_OFFSET;
+        ins_int.baro_z = -pprz_isa_height_of_pressure(low_pass_pressure, ins_int.qfe) - INS_BARO_AGL_OFFSET;
+        printf("pressure: %f, mean_pressure: %f, %f %f\n", pressure, low_pass_pressure, ins_int.qfe, ins_int.baro_z);
   #if USE_VFF_EXTENDED
         vff_update_baro(ins_int.baro_z);
   #else

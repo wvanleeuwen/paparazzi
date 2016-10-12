@@ -36,6 +36,7 @@
 
     <block name="Take off">
       <call fun="StartEngines()"/>
+      <call_once fun="ResetAlt()"/>
       <call fun="TakeOff(0.2)"/>
       <call fun="WaitUntilAltitude(NOM_FLIGHT_ALT - 0.2)"/>
     </block>

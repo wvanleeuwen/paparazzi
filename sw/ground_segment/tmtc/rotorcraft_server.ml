@@ -110,7 +110,7 @@ let get_rc_status = fun rc_status ->
   else if rc_status = 2 then status := "NONE"; (* REALLY_LOST *)
   !status
 
-let pos_frac = 2. ** 8.
+let pos_frac = 2. ** 12.
 let speed_frac = 2. ** 19.
 let angle_frac = 2. ** 12.
 let gps_frac = 1e7
