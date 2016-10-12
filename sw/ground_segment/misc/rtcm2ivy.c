@@ -37,8 +37,8 @@
 #include <ctype.h>
 #include <Ivy/ivy.h>
 #include <Ivy/ivyglibloop.h>
-#include <rtcm3.h>
-#include <CRC24Q.h>
+#include <rtcm3.h>							// Used to decode RTCM3 messages
+#include <CRC24Q.h> 						// Used to verify CRC checks
 #include <math/pprz_geodetic_float.h>
 
 #include "std.h"
@@ -56,14 +56,15 @@ rtcm3_msg_callbacks_node_t rtcm3_1087_node;
 rtcm3_msg_callbacks_node_t ubx_nav_svin_node;
 
 /** Default values **/
-uint8_t ac_id = 0;
-uint32_t msg_cnt = 0;
+uint8_t ac_id         = 0;
+uint32_t msg_cnt      = 0;
 char *serial_device   = "/dev/ttyACM0";
 uint32_t serial_baud  = B9600;
 
 /** Debugging options */
-bool verbose = FALSE;
-bool logger = FALSE;
+bool verbose          = FALSE;
+bool logger           = FALSE;
+
 #define printf_debug    if(verbose == TRUE) printf
 
 FILE * 	pFile;
@@ -76,7 +77,7 @@ char *ivy_bus                   = "127.255.255.255"; // 192.168.1.255   127.255.
 #endif
 
 /*
- * Read bytes from the Piksi UART connection
+ * Read bytes from the uBlox UART connection
  * This is a wrapper functions used in the librtcm3 library
  */
 static uint32_t uart_read(unsigned char (*buff)[], uint32_t n) //, void *context __attribute__((unused))
@@ -89,19 +90,19 @@ static uint32_t uart_read(unsigned char (*buff)[], uint32_t n) //, void *context
 }
 
 static void ivy_send_message(uint8_t packet_id, uint8_t len, uint8_t msg[]) {
-	char gps_packet[4146], number[10]; // 1024 + 6 = max msg_len --> *4 for int representation in string (255,) + 25 ivy_msg description + 1 null character = 4146
+	char gps_packet[4146], number[10];    // 1024 + 6 = max msg_len --> *4 for int representation in string (255,) + 25 ivy_msg description + 1 null character = 4146
 	uint8_t i;
 	snprintf(gps_packet, 4146, "rtcm2ivy RTCM_INJECT %d %d", packet_id, msg[0]);
 	for(i = 1; i < len; i++) {
 		if(i==124)
 		{
-			snprintf(number, 10, ",5,5,%d", msg[i]);
+			snprintf(number, 10, ",5,5,%d", msg[i]); 	// Temporary fix for IVYBUS message size of 128 bytes
 		}else{
 			snprintf(number, 10, ",%d", msg[i]);
 		}
 		strcat(gps_packet, number);
 	}
-	//printf("%s\n\n", gps_packet);
+	printf_debug("%s\n\n", gps_packet);
 	IvySendMsg("%s", gps_packet);
 	if(logger == TRUE)
 	{
@@ -113,10 +114,10 @@ static void ivy_send_message(uint8_t packet_id, uint8_t len, uint8_t msg[]) {
 }
 
 /*
- * Callback for the OBS observation message to send it trough GPS_INJECT
+ * Callback for the 1005 message to send it trough RTCM_INJECT
  */
 struct EcefCoor_f posEcef;
-struct LlaCoor_f posLla;
+struct LlaCoor_f  posLla;
 
 static void rtcm3_1005_callback(uint8_t len, uint8_t msg[])
 {
@@ -134,7 +135,7 @@ static void rtcm3_1005_callback(uint8_t len, uint8_t msg[])
 			posEcef.y      = RTCMgetbits_38(msg, 24 + 74) * 0.0001;
 			posEcef.z      = RTCMgetbits_38(msg, 24 + 114) * 0.0001;
 			lla_of_ecef_f(&posLla, &posEcef);
-			//printf("Lat: %f, Lon: %f, Alt: %f\n", posLla.lat / (2 * M_PI) * 360, posLla.lon / (2 * M_PI) * 360, posLla.alt);
+			printf_debug("Lat: %f, Lon: %f, Alt: %f\n", posLla.lat / (2 * M_PI) * 360, posLla.lon / (2 * M_PI) * 360, posLla.alt);
 			// Send spoof gpsd message to GCS to plot groundstation position
 			IvySendMsg("%s %s %s %f %f %f %f %f %f %f %f %f %f %f %d %f", "ground", "FLIGHT_PARAM", "GCS", 0.0, 0.0, 0.0, posLla.lat / (2 * M_PI) * 360, posLla.lon / (2 * M_PI) * 360, 0.0, 0.0, posLla.alt, 0.0, 0.0, 0.0, 0,  0.0);
 			// Send UBX_RTK_GROUNDSTATION message to GCS for RTK info
@@ -147,7 +148,7 @@ static void rtcm3_1005_callback(uint8_t len, uint8_t msg[])
 }
 
 /*
- * Callback for the OBS observation message to send it trough GPS_INJECT
+ * Callback for the 1077 message to send it trough RTCM_INJECT
  */
 static void rtcm3_1077_callback(uint8_t len, uint8_t msg[])
 {
@@ -164,7 +165,7 @@ static void rtcm3_1077_callback(uint8_t len, uint8_t msg[])
 }
 
 /*
- * Callback for the OBS observation message to send it trough GPS_INJECT
+ * Callback for the 1087 message to send it trough RTCM_INJECT
  */
 static void rtcm3_1087_callback(uint8_t len, uint8_t msg[])
 {
@@ -181,20 +182,17 @@ static void rtcm3_1087_callback(uint8_t len, uint8_t msg[])
 
 
 /*
- * Callback for UBX message
+ * Callback for UBX survey-in message
  */
-
 static void ubx_navsvin_callback(uint8_t len, uint8_t msg[])
-
 {
    if (len>0) {
-
 		u32 iTow      = UBX_NAV_SVIN_ITOW(msg);
 		u32 dur       = UBX_NAV_SVIN_dur (msg);
 		float meanAcc = (float) 0.1 * UBX_NAV_SVIN_meanACC(msg);
 		u8 valid      = UBX_NAV_SVIN_Valid(msg);
 		u8 active     = UBX_NAV_SVIN_Active(msg);
-  printf ("iTow: %u \t dur: %u \t meaAcc: %f \t valid: %u \t active: %u \n", iTow, dur, meanAcc,valid,active);
+		printf ("iTow: %u \t dur: %u \t meaAcc: %f \t valid: %u \t active: %u \n", iTow, dur, meanAcc,valid,active);
    }
 }
 /**
@@ -205,20 +203,20 @@ static gboolean parse_device_data(GIOChannel *chan, GIOCondition cond, gpointer 
 	unsigned char buff[1000];
 	int c;
 	c = uart_read(&buff, 1);
-	if(c > 0)
+	if(c > 0) 									// Have we read anything?
 	{
-		if(msg_state.msg_class == RTCM_CLASS)
+		if(msg_state.msg_class == RTCM_CLASS) 		// Are we already reading a RTCM message?
 		{
-			rtcm3_process(&msg_state, buff[0]);
-		}else if(msg_state.msg_class == UBX_CLASS)
+			rtcm3_process(&msg_state, buff[0]); 		// If so continue reading RTCM
+		}else if(msg_state.msg_class == UBX_CLASS) 	// Are we already reading a UBX message?
 		{
-			ubx_process(&msg_state, buff[0]);
+			ubx_process(&msg_state, buff[0]); 			// If so continue reading UBX
 		}else{
-			msg_state.state = UNINIT;
-			rtcm3_process(&msg_state, buff[0]);
-			if(msg_state.msg_class != RTCM_CLASS)
+			msg_state.state = UNINIT; 					// Not reading anything yet
+			rtcm3_process(&msg_state, buff[0]); 		// Try to process preamble as RTCM
+			if(msg_state.msg_class != RTCM_CLASS)		// If it wasn't a RTCM preamble
 			{
-				ubx_process(&msg_state, buff[0]);
+				ubx_process(&msg_state, buff[0]);			// Check for UBX preamble
 			}
 		}
 	}
@@ -231,9 +229,11 @@ void print_usage(int argc __attribute__((unused)), char ** argv) {
 			"Usage: %s [options]\n"
 			" Options :\n"
 			"   -h, --help                Display this help\n"
-			"   -v, --verbose             Verbosity enabled\n\n"
+			"   -v, --verbose             Verbosity enabled\n"
+			"   -l, --logger              Save RTCM3 messages to log\n\n"
 
-			"   -d <device>               The GPS device(default: /dev/ttyUSB0)\n\n";
+			"   -d <device>               The GPS device(default: /dev/ttyACM0)\n"
+			"   -b <baud_rate>            The device baud rate(default: B9600)\n\n";
 	fprintf(stderr, usage, argv[0]);
 }
 
