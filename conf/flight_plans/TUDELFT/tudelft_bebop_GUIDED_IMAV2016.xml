@@ -9,7 +9,7 @@
         alt="2.0">
 
   <header>
-    #define NOM_FLIGHT_ALT 1.0  // nominal flight altitude
+    #define NOM_FLIGHT_ALT 1.8  // nominal flight altitude
     #include "guidance/guidance_h.h"
   </header>
 
@@ -47,6 +47,13 @@
       <while cond="2 > block_time"/>
     </block>
 
+    <block name="Fly Through Window">
+      <call_once fun="front_cam_set_x_offset(896)"/>
+      <call_once fun="win_state = 0"/>
+      <call fun="fly_through_window()"/>
+      <call_once fun="front_cam_set_x_offset(512)"/>
+    </block>
+    
     <block name="Find item">
       <call_once fun="detector_disable_all()"/>
       <call_once fun="detector.item_bottom->active = true"/>
@@ -120,13 +127,6 @@
     <block name="Open Gripper">
       <call_once fun="open_gripper()"/>
       <while cond="1"/>
-    </block>
-
-    <block name="Fly Through Window">
-      <call_once fun="front_cam_set_x_offset(896)"/>
-      <call_once fun="win_state = 0"/>
-      <call fun="fly_through_window()"/>
-      <call_once fun="front_cam_set_x_offset(512)"/>
     </block>
 
     <block name="Hover">

@@ -105,8 +105,7 @@ uint8_t Hover(float altitude) {
     if (autopilot_mode != AP_MODE_GUIDED) { return true; }
     // Horizontal velocities are set to zero
     guidance_h_set_guided_body_vel(0, 0);
-//    guidance_v_set_guided_z(-altitude);
-    guidance_v_set_guided_vz(0);
+    guidance_v_set_guided_z(-altitude);
 
     return false;
 }
@@ -331,7 +330,7 @@ bool fly_through_window(void) {
         //guidance_h_set_guided_heading(ANGLE_BUILDING_ENTRY);
         //guidance_h_set_guided_heading();
         guidance_h_set_guided_pos(stateGetPositionNed_f()->x, stateGetPositionNed_f()->y);
-        guidance_v_set_guided_z(-1.4);
+        guidance_v_set_guided_z(-1.8);
         mytime = get_sys_time_float();
         init_pos_filter = 1;
         snake_gate_detection_snake_gate_detection_periodic_status = MODULES_START;
