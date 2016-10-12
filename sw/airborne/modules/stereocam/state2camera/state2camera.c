@@ -31,10 +31,6 @@
 #include "mcu_periph/uart.h"
 #include "autopilot.h"
 
-static int frame_number_sending = 0;
-float lastKnownHeight = 0.0;
-int pleaseResetOdroid = 0;
-
 #ifndef STEREOCAM_EDGEFLOW_WINDOW_SIZE
 #define STEREOCAM_EDGEFLOW_WINDOW_SIZE 0
 #endif
@@ -64,6 +60,13 @@ int pleaseResetOdroid = 0;
 #endif
 
 struct stereocam_edgeflow_t edgeflow;
+
+
+#if STATE2CAMERA_SEND_DATA_TYPE == 0
+static int frame_number_sending = 0;
+#endif
+float lastKnownHeight = 0.0;
+int pleaseResetOdroid = 0;
 
 void init_state2camera(void)
 {

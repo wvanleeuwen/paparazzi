@@ -57,9 +57,13 @@ PRINT_CONFIG_VAR(DEBUG_VFF_EXTENDED)
 #define VFF_EXTENDED_ACCEL_NOISE 0.5
 #endif
 
+/** Barometer confidence **/
+#ifndef VFF_EXTENDED_R_BARO
+#define VFF_EXTENDED_R_BARO 1.
+#endif
+
 #define Qbiasbias 1e-7
 #define Qoffoff 1e-4
-#define R_BARO 1.
 #define R_ALT 0.1
 #define R_OFFSET 1.
 
@@ -128,8 +132,9 @@ void vff_propagate(float accel, float dt)
 {
   /* update state */
   vff.zdotdot = accel + 9.81 - vff.bias;
-  vff.z = vff.z + dt * vff.zdot;
-  vff.zdot = vff.zdot + dt * vff.zdotdot;
+  vff.z += vff.zdot * dt;
+  vff.zdot += vff.zdotdot * dt;
+
   /* update covariance */
   const float FPF00 = vff.P[0][0] + dt * (vff.P[1][0] + vff.P[0][1] + dt * vff.P[1][1]);
   const float FPF01 = vff.P[0][1] + dt * (vff.P[1][1] - vff.P[0][2] - dt * vff.P[1][2]);
@@ -215,7 +220,7 @@ static void update_baro_conf(float z_meas, float conf)
 
 void vff_update_baro(float z_meas)
 {
-  update_baro_conf(z_meas, R_BARO);
+  update_baro_conf(z_meas, VFF_EXTENDED_R_BARO);
 }
 
 void vff_update_baro_conf(float z_meas, float conf)

@@ -42,6 +42,13 @@
 #include "modules/stereocam/stereoprotocol.h"
 #include "modules/stereocam/stereocam2state/stereocam2state.h"
 
+// start and stop modules
+#include "generated/modules.h"
+
+#define ANGLE_BUILDING_ENTRY  -0.594  // angle of drone to enter building
+#define ANGLE_ROOM_1_ENTRY     0.  // angle to enter room 1
+#define ANGLE_ROOM_2_ENTRY     0.  // angle to enter room 2
+#define ANGLE_ROOM_3_ENTRY     0.  // angle to enter room 3
 
 bool marker_lost;
 
@@ -128,6 +135,9 @@ uint8_t MoveRight(float vy) {
 
 bool Land(float end_altitude) {
   if (autopilot_mode != AP_MODE_GUIDED) { return true; }
+
+  //gh_set_max_speed(float max_speed)
+  //gh_set_max_speed(GUIDANCE_H_REF_MAX_SPEED);
 
     // return true if not completed
 
@@ -309,8 +319,6 @@ bool close_gripper(void) {
 int8_t win_state;
 
 bool fly_through_window(void) {
-  static struct FloatVect3 window_loc;
-  static float window_dist = 0;
   static float mytime = 0;
 
   if (autopilot_mode != AP_MODE_GUIDED) { win_state = 0; return true; }
@@ -320,100 +328,57 @@ bool fly_through_window(void) {
   //  win_processed = 1;
     switch (win_state){
       case 0:
-        guidance_h_set_guided_pos_relative(stateGetPositionNed_f()->x, stateGetPositionNed_f()->y);
-        guidance_v_set_guided_z(-1.2);
+        //guidance_h_set_guided_heading(ANGLE_BUILDING_ENTRY);
+        //guidance_h_set_guided_heading();
+        guidance_h_set_guided_pos(stateGetPositionNed_f()->x, stateGetPositionNed_f()->y);
+        guidance_v_set_guided_z(-1.4);
         mytime = get_sys_time_float();
         init_pos_filter = 1;
+        snake_gate_detection_snake_gate_detection_periodic_status = MODULES_START;
+
         win_state++;
         break;
-      // yaw to get parallel with wall
-      case 1:
-        printf("disp_diff %d\n", disp_diff);
-        if(disp_diff > 1){
-          guidance_h_set_guided_heading_rate(-0.5);
-          mytime = get_sys_time_float();
-        } else if ( disp_diff < -1 ) {
-          guidance_h_set_guided_heading_rate(0.5);
-          mytime = get_sys_time_float();
-        } else {
-          guidance_h_set_guided_heading(stateGetNedToBodyEulers_f()->psi);
-        }
-        if (get_sys_time_float() - mytime > 3.){
-          win_state++;
-          printf("State advancing to window centering\n");
-
-          // reinitialise filter
-          window_loc.x = 3.;
-          window_loc.y = 0.;
-          window_loc.z = 0.;
-        }
-        break;
       // centre drone in front of window at about 2m away
-      case 2:
+      case 1:
+        if(stereo_agl != 0 && stereo_agl < 3) {  // if I get closer than 30cm, move away and retry
+          win_state = 4;
+          break;
+        }
         if(gate_detected && gate_processed == 0) {
-          printf("going to %f %f\n\n", gate_x_dist - 2., gate_y_dist);
-
-          // position drone 2m in front of window
-          guidance_h_set_guided_pos_relative(gate_x_dist - 2., gate_y_dist);
-          //guidance_v_set_guided_z(stateGetPositionNed_f()->z - filtered_z_gate);
-          gate_processed = 1;
-
           if (ready_pass_through){
-            printf("State advancing to window fly through\n");
             win_state++;
+            break;
           }
-        }
 
-        /*if ( win_cert < 70 ){
-          // lowpass filter window geolocation
-          window_dist = (float)win_dist / 100.;
-          window_loc.x += 0.7 * (window_dist - window_loc.x);
-          window_loc.y += 0.7 * ((win_x - 64) * window_dist / 50 - window_loc.y); // assume focal length is 20px
-          window_loc.z += 0.7 * ((win_y - 48) * window_dist / 50 - window_loc.z); // down is positive
-
-          printf("guided: %f %f %f %d\n", window_loc.x, window_loc.y, window_loc.z, win_counter);
-
-          if(win_counter++ > 12){ // replace 1s
-            guidance_h_set_guided_pos_relative(window_loc.x - 2., window_loc.y);
-          }
-        } else {
-          win_counter -= 2;
+          // position drone 1.5m in front of window, add small low pass filter on position command
+          guidance_h_set_guided_pos_relative(0.9*(filtered_x_gate - 1.5), 0.9*filtered_y_gate);
+          gate_processed = 1;
         }
-        // if position error is small
-        if (fabs(window_loc.x - 2) < 0.2 && fabs(window_loc.y) < 0.2 && win_counter > 36 &&
-            stateGetSpeedNed_f()->x < 0.1 && stateGetSpeedNed_f()->y < 0.1) {
-          win_state++;
-          printf("State advancing to window fly through\n");
-          win_counter = 0;
-        }
-        if (win_counter < 0){
-          win_counter = 0;
-        }*/
         break;
-      // fly forward with active control till <2m in front of window
+      // fly forward with active control till >0.5m in front of window
+      case 2:
+        guidance_h_set_guided_pos_relative(filtered_x_gate + 0.5, filtered_y_gate);
+        snake_gate_detection_snake_gate_detection_periodic_status = MODULES_STOP;
+        mytime = get_sys_time_float();
+        win_state++;
+        break;
       case 3:
-        if(gate_detected){
-          guidance_h_set_guided_pos_relative(gate_x_dist + 0.5, gate_y_dist);
-        } else {
-          mytime = get_sys_time_float();
-          win_state++;
-        }
-        break;
-      case 4:
-        if (stateGetSpeedNed_f()->x < 0.1 && stateGetSpeedNed_f()->y < 0.1 &&
-            get_sys_time_float() - mytime > 5.) {
-          init_pos_filter = 1;
+        if (get_sys_time_float() - mytime > 5.) {
           win_state = 0;
-          printf("Window fly through complete\n");
           return false;
         }
+        break;
+      case 4: // missed approach, recycle and try again
+        guidance_h_set_guided_pos_relative(-1.5, 0.);
+        gate_processed = 1;
+        win_state = 1;  // try again
         break;
       default:
         mytime = get_sys_time_float();
         win_state = 0;
+        snake_gate_detection_snake_gate_detection_periodic_status = MODULES_STOP;
         break;
     }
-  //}
 
   return true;
 }
