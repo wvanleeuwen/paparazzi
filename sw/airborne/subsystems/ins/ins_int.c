@@ -459,11 +459,11 @@ static void sonar_cb(uint8_t __attribute__((unused)) sender_id, float distance)
 #endif
       && ins_int.update_on_agl
       && ins_int.baro_initialized) {
-    vff_update_z_conf(-distance, VFF_R_SONAR_0 + VFF_R_SONAR_OF_M * fabsf(distance));
+    vff_update_sonar(-distance, VFF_R_SONAR_0 + VFF_R_SONAR_OF_M * fabsf(distance));
     last_offset = vff.offset;
   } else {
     /* update offset with last value to avoid divergence */
-    vff_update_offset(last_offset);
+    //vff_update_offset(last_offset);
   }
 
   /* reset the counter to indicate we just had a measurement update */

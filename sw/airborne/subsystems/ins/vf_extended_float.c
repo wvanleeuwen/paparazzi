@@ -62,8 +62,14 @@ PRINT_CONFIG_VAR(DEBUG_VFF_EXTENDED)
 #define VFF_EXTENDED_R_BARO 1.
 #endif
 
+#define VFF_EXTENDED_NON_FLAT_FLOOR
+
 #define Qbiasbias 1e-6
-#define Qoffoff 1e-6
+#ifdef VFF_EXTENDED_NON_FLAT_FLOOR
+#define Qoffoff 0.0008
+#else
+#define Qoffoff 1e-4
+#endif
 #define R_ALT 0.1
 #define R_OFFSET 1.
 
@@ -86,12 +92,12 @@ void vff_init_zero(void)
   vff_init(0., 0., 0., 0.);
 }
 
-void vff_init(float init_z, float init_zdot, float init_accel_bias, float init_baro_offset)
+void vff_init(float init_z, float init_zdot, float init_accel_bias, float init_offset)
 {
   vff.z = init_z;
   vff.zdot = init_zdot;
   vff.bias = init_accel_bias;
-  vff.offset = init_baro_offset;
+  vff.offset = init_offset;
   int i, j;
   for (i = 0; i < VFF_STATE_SIZE; i++) {
     for (j = 0; j < VFF_STATE_SIZE; j++) {
@@ -162,7 +168,7 @@ void vff_propagate(float accel, float dt)
 }
 
 /**
- * Update sensor "with" offset (baro).
+ * Update sensor "with" offset (baro, sonar).
  *
  * H = [1 0 0 -1];
  * // state residual
@@ -176,10 +182,8 @@ void vff_propagate(float accel, float dt)
  * // update covariance
  * Pp = Pm - K*H*Pm;
  */
-static void update_baro_conf(float z_meas, float conf)
+static void update_biased_z_conf(float z_meas, float conf)
 {
-  vff.z_meas_baro = z_meas;
-
   const float y = z_meas - vff.z + vff.offset;
   const float S = vff.P[0][0] - vff.P[0][3] - vff.P[3][0] + vff.P[3][3] + conf;
   const float K0 = (vff.P[0][0] - vff.P[0][3]) * 1 / S;
@@ -215,16 +219,6 @@ static void update_baro_conf(float z_meas, float conf)
   vff.P[3][3] -= K3 * P3;
 }
 
-void vff_update_baro(float z_meas)
-{
-  update_baro_conf(z_meas, VFF_EXTENDED_R_BARO);
-}
-
-void vff_update_baro_conf(float z_meas, float conf)
-{
-  update_baro_conf(z_meas, conf);
-}
-
 /**
  * Update sensor "without" offset (gps, sonar)
  * H = [1 0 0 0];
@@ -241,8 +235,6 @@ void vff_update_baro_conf(float z_meas, float conf)
  */
 static void update_alt_conf(float z_meas, float conf)
 {
-  vff.z_meas = z_meas;
-
   const float y = z_meas - vff.z;
   const float S = vff.P[0][0] + conf;
   const float K0 = vff.P[0][0] * 1 / S;
@@ -278,14 +270,40 @@ static void update_alt_conf(float z_meas, float conf)
   vff.P[3][3] -= K3 * P3;
 }
 
-void vff_update_z(float z_meas)
-{
-  update_alt_conf(z_meas, R_ALT);
-}
-
 void vff_update_z_conf(float z_meas, float conf)
 {
+  vff.z_meas = z_meas;
   update_alt_conf(z_meas, conf);
+}
+
+void vff_update_z(float z_meas)
+{
+  vff_update_z_conf(z_meas, R_ALT);
+}
+
+void vff_update_sonar(float z_meas, float conf)
+{
+#ifdef VFF_EXTENDED_NON_FLAT_FLOOR
+  vff.z_meas = z_meas;
+  update_biased_z_conf(z_meas, conf);
+#else
+  vff_update_z_conf(z_meas, conf);
+#endif
+}
+
+void vff_update_baro_conf(float z_meas, float conf)
+{
+  vff.z_meas_baro = z_meas;
+#ifdef VFF_EXTENDED_NON_FLAT_FLOOR
+  update_alt_conf(z_meas, conf);
+#else
+  update_biased_z_conf(z_meas, conf);
+#endif
+}
+
+void vff_update_baro(float z_meas)
+{
+  vff_update_baro_conf(z_meas, VFF_EXTENDED_R_BARO);
 }
 
 /**
