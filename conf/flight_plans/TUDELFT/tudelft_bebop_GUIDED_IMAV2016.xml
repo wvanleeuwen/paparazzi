@@ -122,8 +122,15 @@
     </block>
 
     <block name="Fly Through Window">
+      <call_once fun="front_cam_set_x_offset(896)"/>
       <call_once fun="win_state = 0"/>
       <call fun="fly_through_window()"/>
+      <call_once fun="front_cam_set_x_offset(512)"/>
+    </block>
+
+    <block name="Hover">
+      <call fun="Hover(NOM_FLIGHT_ALT)"/>
+      <while cond="1"/>
     </block>
 
     <block name="Front cam down">
@@ -133,11 +140,6 @@
 
     <block name="Front cam forward">
       <call_once fun="front_cam_set_x_offset(896)"/>
-      <while cond="1"/>
-    </block>
-
-    <block name="Hover">
-      <call fun="Hover(NOM_FLIGHT_ALT)"/>
       <while cond="1"/>
     </block>
 
