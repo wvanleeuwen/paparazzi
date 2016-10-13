@@ -31,6 +31,7 @@
       <define name="AHRS_USE_GPS_HEADING" value="FALSE"/>
     </module>
     <module name="ins" type="extended">
+      <define name="VFF_EXTENDED_NON_FLAT_FLOOR"/>
       <define name="VFF_EXTENDED_R_BARO" value="3"/>
       <define name="VFF_EXTENDED_ACCEL_NOISE" value=".2"/>
     </module>
@@ -73,14 +74,14 @@
     </module>
 
     <module name="video_rtp_stream">
-      <define name="VIEWVIDEO_CAMERA" value="bottom_camera"/>
-      <define name="VIEWVIDEO_CAMERA2" value="front_camera"/>
+      <!--define name="VIEWVIDEO_CAMERA" value="bottom_camera"/-->
+      <define name="VIEWVIDEO_CAMERA" value="front_camera"/>
 
       <define name="VIEWVIDEO_DOWNSIZE_FACTOR" value="1"/>
       <define name="VIEWVIDEO_QUALITY_FACTOR" value="60"/>
 
-      <configure name="VIEWVIDEO_BROADCAST" value="FALSE"/>
-      <configure name="VIEWVIDEO_HOST" value="192.168.42.68"/>
+      <!--configure name="VIEWVIDEO_BROADCAST" value="FALSE"/>
+      <configure name="VIEWVIDEO_HOST" value="192.168.42.97"/-->
     </module>
     
     <module name="cv_ae_awb"/>
@@ -263,11 +264,11 @@
   </section>
 
   <section name="GUIDANCE_V" prefix="GUIDANCE_V_">
-    <define name="HOVER_KP" value="200"/>
-    <define name="HOVER_KD" value="800"/>
+    <define name="HOVER_KP" value="700"/>
+    <define name="HOVER_KD" value="1000"/>
     <define name="HOVER_KI" value="0"/>
-    <define name="NOMINAL_HOVER_THROTTLE" value="0.6"/>
-    <!--<define name="ADAPT_THROTTLE_ENABLED" value="TRUE"/>-->
+    <define name="NOMINAL_HOVER_THROTTLE" value="0.55"/>
+    <define name="ADAPT_THROTTLE_ENABLED" value="TRUE"/>
   </section>
 
   <section name="GUIDANCE_H" prefix="GUIDANCE_H_">
