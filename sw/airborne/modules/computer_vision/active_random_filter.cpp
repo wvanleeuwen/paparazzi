@@ -58,16 +58,21 @@ static vector<double> 	estimatePosition	(int xp, int yp, double area, double k =
 static void 			addObject			(void);
 static Rect 			enlargeRectangle	(Mat& sourceFrame, Rect rectangle, double scale);
 static bool 			inRectangle			(Point pt, Rect rectangle);
+static void 			getNextDirection	(int prevDir, int* nextDir, int* nextDirCnt);
+static void 			getNewPosition		(int nextDir, int* newRow, int* newCol);
 // Optional function declarations
 #if AR_FILTER_CALIBRATE_CAM
 static void 			calibrateEstimation (vector<trackResults> trackRes);
 #endif
-/* #if AR_FILTER_MOD_VIDEO
-static void 			mat2Buffer			(Mat& source, char* buf, bool greyscale = false);
-#endif */
+#if AR_FILTER_MOD_VIDEO
+static void 			mod_video			(Mat& sourceFrame, Mat& frameGrey);
+#endif
 #if AR_FILTER_SAVE_FRAME
 static void 			saveBuffer			(Mat sourceFrame, const char *filename);
 #endif
+/* #if AR_FILTER_MOD_VIDEO
+static void 			mat2Buffer			(Mat& source, char* buf, bool greyscale = false);
+#endif */
 
 #if AR_FILTER_MEASURE_FPS
 static time_t 	startTime;
@@ -76,20 +81,20 @@ static int 		curT;
 #endif
 
 // Set up tracking parameters
-int 	AR_FILTER_MIN_CROP_AREA 	= 170;
-int 	AR_FILTER_RND_PIX_SAMPLE 	= 5000;
-int 	AR_FILTER_MAX_LAYERS  		= 2500;
+int 	AR_FILTER_MIN_CROP_AREA 	= 500;
+int 	AR_FILTER_RND_PIX_SAMPLE 	= 2500;
+int 	AR_FILTER_MAX_LAYERS  		= 1500;
 int 	AR_FILTER_MIN_LAYERS 		= 100;
-double 	AR_FILTER_MIN_CIRCLE_SIZE 	= 200;
-double 	AR_FILTER_MAX_CIRCLE_DEF 	= 0.25;
+double 	AR_FILTER_MIN_CIRCLE_SIZE 	= 500;
+double 	AR_FILTER_MAX_CIRCLE_DEF 	= 0.2;
 
 int 	AR_FILTER_SAMPLE_STYLE 		= AR_FILTER_STYLE_RANDOM;
 int 	AR_FILTER_FLOOD_STYLE 	    = AR_FILTER_FLOOD_OMNI;
-int 	AR_FILTER_Y_MIN 			= 90;                      // 0  [0,65 84,135 170,255]zoo 45
-int 	AR_FILTER_Y_MAX 			= 170;                     // 255
+int 	AR_FILTER_Y_MIN 			= 50;                      // 0  [0,65 84,135 170,255]zoo 45
+int 	AR_FILTER_Y_MAX 			= 200;                     // 255
 int 	AR_FILTER_CB_MIN 			= 70;                      // 84
-int 	AR_FILTER_CB_MAX 			= 130;                     // 113
-int 	AR_FILTER_CR_MIN 			= 200;                     // 218 -> 150?
+int 	AR_FILTER_CB_MAX 			= 120;                     // 113
+int 	AR_FILTER_CR_MIN 			= 190;                     // 218 -> 150?
 int 	AR_FILTER_CR_MAX 			= 255;                     // 240 -> 255?
 int 	AR_FILTER_IMAGE_CROP_FOVY 	= 90; 		               // Degrees
 int 	AR_FILTER_SAVE_RESULTS 		= 0;
@@ -113,43 +118,18 @@ static int 	layerDepth  = 0;
 static int 	sample      = 0;
 static int 	runCount    = 0;
 static int 	maxId 		= 0;
-Rect 	objCrop;
-vector<Rect> cropAreas;
-vector<Point> objCont;
+Rect 					objCrop;
+vector<Rect> 			cropAreas;
+vector<Point> 			objCont;
 vector<vector<Point> > allContours;
 vector<memoryBlock>    neighbourMem;
 vector<trackResults>   trackRes;                               // Create empty struct _trackResults to store our neighbours in
 
 void active_random_filter(char* buff, int width, int height)
 {
-	if(!AR_FILTER_CV_CONTOURS && AR_FILTER_FLOOD_STYLE != AR_FILTER_FLOOD_CW)
-	{
-		printf("[AR-FILTER-ERR] No openCV contours is only possible with clockwise flooding.\n");
-	}
-	trackRes.clear();
-	eulerAngles 			= stateGetNedToBodyEulers_f(); 	   // Get Euler angles
-	Mat sourceFrame(height, width, CV_8UC2, buff); 	           // Initialize current frame in openCV (UYVY) 2 channel
 #if AR_FILTER_SAVE_FRAME
 	if(runCount == 25) saveBuffer(sourceFrame, "testBuffer.txt");
-#endif
-	Rect crop 	= setISPvars(width, height, true); 	           // Calculate ISP related parameters
-#if !AR_FILTER_ISP_CROP
-	sourceFrame = sourceFrame(crop); 				           // Crop the frame
-#endif
-	//Mat frameGrey; 									           // Initialize frameGrey (to hold the thresholded image)
-	//if(AR_FILTER_FLOOD_STYLE != AR_FILTER_FLOOD_CW || AR_FILTER_CV_CONTOURS)
-	//{
-	Mat frameGrey(sourceFrame.rows, sourceFrame.cols, CV_8UC1, cvScalar(0.0)); 	// Only when using opencv contours the frame is filled with zeros
-	//}
-	trackGreyObjects(sourceFrame, frameGrey, &trackRes);    // Track objects in sourceFrame
-	for(unsigned int r=0; r < trackRes.size(); r++)         // Convert angles & Write/Print output
-	{
-		cam2body(&trackRes[r]);						       // Convert from camera angles to body angles (correct for roll)
-		body2world(&trackRes[r], eulerAngles); 		       // Convert from body angles to world coordinates (correct yaw and pitch)
-	}
-	identifyObjects(trackRes);
-#if AR_FILTER_MOD_VIDEO
-	char text[15];
+#endif // AR_FILTER_SAVE_FRAME
 #if AR_FILTER_MEASURE_FPS
 	if(runCount == 0)
 	{
@@ -159,59 +139,41 @@ void active_random_filter(char* buff, int width, int height)
 		curT 			= difftime(currentTime,startTime); 						// Calculate time-difference between startTime and currentTime
 		printf("Measured FPS: %0.2f\n", runCount / ((double) curT));
 	}
-	sprintf(text,"FPS: %0.2f", runCount / ((double) curT));
-#else
-	sprintf(text,"frame %i", runCount);
 #endif
-	if(AR_FILTER_FLOOD_STYLE != AR_FILTER_FLOOD_CW || AR_FILTER_CV_CONTOURS)
-		{
-			for(unsigned int r=0; r < cropAreas.size(); r++)
-			{
-				if(cropAreas[r].x != 0 && cropAreas[r].width != 0)
-				{
-					vector<Mat> channels;
-					Mat thr_frame(cropAreas[r].height, cropAreas[r].width, CV_8UC2);
-					Mat emptyCH(cropAreas[r].height, cropAreas[r].width, CV_8UC1, cvScalar(127.0));
-					channels.push_back(emptyCH);
-					channels.push_back(frameGrey(cropAreas[r]));
-					merge(channels, thr_frame);
-					thr_frame.copyTo(sourceFrame(cropAreas[r])); 			               // Copy threshold result to black frame
-					emptyCH.release();
-					thr_frame.release();
-					rectangle(sourceFrame, cropAreas[r], Scalar(0,255), 5);
-				}
-			}
-		}else{
-	#if AR_FILTER_DRAW_CONTOURS
-			drawContours(sourceFrame, allContours, -1, cvScalar(0,255), 3);
-	#endif
-			for(unsigned int r=0; r < trackRes.size(); r++)         // Convert angles & Write/Print output
-			{
-	#if !AR_FILTER_DRAW_CONTOURS
-				circle(sourceFrame,cvPoint(trackRes[r].x_p - cropCol, trackRes[r].y_p), sqrt(trackRes[r].area_p / M_PI), cvScalar(0,255), 5);
-	#endif
-			}
-		}
-	#endif
-	putText(sourceFrame, text, Point(10,sourceFrame.rows-100), FONT_HERSHEY_SIMPLEX, 2, Scalar(0,255,255), 5);
-	line(sourceFrame, Point(0,0), Point(0, sourceFrame.rows-1), Scalar(0,255), 5);
-	line(sourceFrame, Point(sourceFrame.cols - 1,0), Point(sourceFrame.cols - 1, sourceFrame.rows-1), Scalar(0,255), 5);
-
+	if(!AR_FILTER_CV_CONTOURS && AR_FILTER_FLOOD_STYLE != AR_FILTER_FLOOD_CW)
+	{
+		printf("[AR-FILTER-ERR] No openCV contours is only possible with clockwise flooding.\n");
+	}
+	trackRes.clear();
+	eulerAngles 			= stateGetNedToBodyEulers_f(); 	   // Get Euler angles
+	Mat sourceFrame	(height, width, CV_8UC2, buff); 	           // Initialize current frame in openCV (UYVY) 2 channel
+	Mat frameGrey	(sourceFrame.rows, sourceFrame.cols, CV_8UC1, cvScalar(0.0));
+	Rect crop 	= setISPvars(width, height, true); 	           // Calculate ISP related parameters
+#if !AR_FILTER_ISP_CROP
+	sourceFrame = sourceFrame(crop); 				           // Crop the frame
+#endif // AR_FILTER_ISP_CROP
+	trackGreyObjects(sourceFrame, frameGrey, &trackRes);    // Track objects in sourceFrame
+	for(unsigned int r=0; r < trackRes.size(); r++)         // Convert angles & Write/Print output
+	{
+		cam2body(&trackRes[r]);						       // Convert from camera angles to body angles (correct for roll)
+		body2world(&trackRes[r], eulerAngles); 		       // Convert from body angles to world coordinates (correct yaw and pitch)
+	}
+	identifyObjects(trackRes);
+#if AR_FILTER_MOD_VIDEO
+	mod_video(sourceFrame, frameGrey);
+#endif // AR_FILTER_MOD_VIDEO
 #if AR_FILTER_SHOW_MEM
-		for(unsigned int r=0; r < neighbourMem.size(); r++)        // Print to file & terminal
+	for(unsigned int r=0; r < neighbourMem.size(); r++)        // Print to file & terminal
 		{
 			printf("%i - Object at (%0.2f m, %0.2f m, %0.2f m)\n", runCount, neighbourMem[r].x_w, neighbourMem[r].y_w, neighbourMem[r].z_w); 														// Print to terminal
 		}
-#endif
+#endif // AR_FILTER_SHOW_MEM
+#if AR_FILTER_CALIBRATE_CAM
+	if(runCount==10) 	calibrateEstimation(trackRes);
+#endif // AR_FILTER_CALIBRATE_CAM
 	frameGrey.release(); 			                           // Release Mat
 	sourceFrame.release();
 	runCount++;
-#if AR_FILTER_CALIBRATE_CAM
-	if(runCount==10)                                           // First and second frame are often not yet detected properly so let's calibrate the tenth frame
-	{
-		calibrateEstimation(trackRes);
-	}
-#endif
 	return;
 }
 
@@ -617,11 +579,22 @@ int pixFindContour(Mat& sourceFrame, Mat& destFrame, int row, int col, int prevD
 			{
 			case AR_FILTER_FLOOD_OMNI :
 			{
-				int res1 = pixFindContour(sourceFrame, destFrame, row - 1, col, ARF_UP, true);
-				int res2 = pixFindContour(sourceFrame, destFrame, row, col + 1, ARF_RIGHT, true);
-				int res3 = pixFindContour(sourceFrame, destFrame, row + 1, col, ARF_DOWN, true);
-				int res4 = pixFindContour(sourceFrame, destFrame, row, col - 1, ARF_LEFT, true);
-				if(res1 <= ARF_NO_FOUND && res2 <= ARF_NO_FOUND && res3 <= ARF_NO_FOUND && res4 <= ARF_NO_FOUND)
+				int nextDir[3];
+				int nextDirCnt = 3;
+				getNextDirection(prevDir, nextDir, &nextDirCnt);
+				bool success = false;
+				int d        = 0;
+				int newRow, newCol;
+				int res[4];
+				while(d < nextDirCnt && success == false)
+				{
+					newRow = row;
+					newCol = col;
+					getNewPosition(nextDir[d], &newRow, &newCol);
+					res[d] = pixFindContour(sourceFrame, destFrame, newRow, newCol, nextDir[d], true);
+					d++;
+				}
+				if(res[0] <= ARF_NO_FOUND && res[1] <= ARF_NO_FOUND && res[2] <= ARF_NO_FOUND && res[3] <= ARF_NO_FOUND)
 				{
 					return ARF_FINISHED;
 				}
@@ -631,81 +604,7 @@ int pixFindContour(Mat& sourceFrame, Mat& destFrame, int row, int col, int prevD
 			{
 				int nextDir[6];
 				int nextDirCnt = 6;
-				switch(prevDir) // Find out which directions to try next
-				{
-				default:
-				case ARF_SEARCH :
-					nextDir[0] = ARF_SEARCH;
-					nextDir[1] = ARF_UP_RIGHT;
-					nextDir[2] = ARF_RIGHT;
-					nextDir[3] = ARF_RIGHT_DOWN;
-					nextDirCnt = 4;
-					break;
-				case ARF_UP :
-					nextDir[0] = ARF_LEFT;
-					nextDir[1] = ARF_LEFT_UP;
-					nextDir[2] = ARF_UP;
-					nextDir[3] = ARF_UP_RIGHT;
-					nextDir[4] = ARF_RIGHT;
-					nextDir[5] = ARF_RIGHT_DOWN;
-					break;
-				case ARF_UP_RIGHT :
-					nextDir[0] = ARF_LEFT_UP;
-					nextDir[1] = ARF_UP;
-					nextDir[2] = ARF_UP_RIGHT;
-					nextDir[3] = ARF_RIGHT;
-					nextDir[4] = ARF_RIGHT_DOWN;
-					nextDir[5] = ARF_DOWN;
-					break;
-				case ARF_RIGHT :
-					nextDir[0] = ARF_UP;
-					nextDir[1] = ARF_UP_RIGHT;
-					nextDir[2] = ARF_RIGHT;
-					nextDir[3] = ARF_RIGHT_DOWN;
-					nextDir[4] = ARF_DOWN;
-					nextDir[5] = ARF_DOWN_LEFT;
-					break;
-				case ARF_RIGHT_DOWN :
-					nextDir[0] = ARF_UP_RIGHT;
-					nextDir[1] = ARF_RIGHT;
-					nextDir[2] = ARF_RIGHT_DOWN;
-					nextDir[3] = ARF_DOWN;
-					nextDir[4] = ARF_DOWN_LEFT;
-					nextDir[5] = ARF_LEFT;
-					break;
-				case ARF_DOWN :
-					nextDir[0] = ARF_RIGHT;
-					nextDir[1] = ARF_RIGHT_DOWN;
-					nextDir[2] = ARF_DOWN;
-					nextDir[3] = ARF_DOWN_LEFT;
-					nextDir[4] = ARF_LEFT;
-					nextDir[5] = ARF_LEFT_UP;
-					break;
-				case ARF_DOWN_LEFT :
-					nextDir[0] = ARF_RIGHT_DOWN;
-					nextDir[1] = ARF_DOWN;
-					nextDir[2] = ARF_DOWN_LEFT;
-					nextDir[3] = ARF_LEFT;
-					nextDir[4] = ARF_LEFT_UP;
-					nextDir[5] = ARF_UP;
-					break;
-				case ARF_LEFT :
-					nextDir[0] = ARF_DOWN;
-					nextDir[1] = ARF_DOWN_LEFT;
-					nextDir[2] = ARF_LEFT;
-					nextDir[3] = ARF_LEFT_UP;
-					nextDir[4] = ARF_UP;
-					nextDir[5] = ARF_UP_RIGHT;
-					break;
-				case ARF_LEFT_UP :
-					nextDir[0] = ARF_DOWN_LEFT;
-					nextDir[1] = ARF_LEFT;
-					nextDir[2] = ARF_LEFT_UP;
-					nextDir[3] = ARF_UP;
-					nextDir[4] = ARF_UP_RIGHT;
-					nextDir[5] = ARF_RIGHT;
-					break;
-				}
+				getNextDirection(prevDir, nextDir, &nextDirCnt);
 				int d        = 0;
 				int edge     = 0;
 				bool success = false;
@@ -714,31 +613,7 @@ int pixFindContour(Mat& sourceFrame, Mat& destFrame, int row, int col, int prevD
 				{
 					newRow = row;
 					newCol = col;
-					switch(nextDir[d]) // Set the location of the next pixel to test
-					{
-					case ARF_SEARCH :
-						newRow += -1; 	break;
-					case ARF_UP :
-						newRow += -1; 	break;
-					case ARF_UP_RIGHT :
-						newRow += -1; 	newCol += 1; 	break;
-					case ARF_RIGHT :
-						newCol += 1; 	break;
-					case ARF_RIGHT_DOWN :
-						newRow += 1; 	newCol += 1; 	break;
-					case ARF_DOWN :
-						newRow += 1; 	break;
-					case ARF_DOWN_LEFT :
-						newRow += 1; 	newCol += -1; 	break;
-					case ARF_LEFT :
-						newCol += -1; 	break;
-					case ARF_LEFT_UP :
-						newRow += -1; 	newCol += -1; 	break;
-					default:
-						printf("[AR_FILTER-ERR] Invalid next-dir (d %i): %i\n", d, nextDir[d]);
-						nextDir[d] = ARF_SEARCH;
-						newRow += -1; 	break;
-					}
+					getNewPosition(nextDir[d], &newRow, &newCol);
 					switch(pixFindContour(sourceFrame, destFrame, newRow, newCol, nextDir[d], true)) // Catch the proper response for the tested pixel
 					{
 					case ARF_FINISHED :
@@ -747,7 +622,6 @@ int pixFindContour(Mat& sourceFrame, Mat& destFrame, int row, int col, int prevD
 						edge 	= 0;
 						break;
 					case ARF_SUCCESS :
-						//printf("%i Looking from (%i %i) at pixel: %i %i - succes\n", d, col, row, newCol, newRow);
 						success = true;
 						result 	= ARF_SUCCESS;
 						break;
@@ -756,7 +630,6 @@ int pixFindContour(Mat& sourceFrame, Mat& destFrame, int row, int col, int prevD
 						result 	= ARF_NO_FOUND;
 						break;
 					case ARF_DUPLICATE :
-						//printf("%i Looking from (%i %i) at pixel: %i %i - duplicate\n", d, col, row, newCol, newRow);
 						if(prevDir == ARF_SEARCH){
 							return ARF_DUPLICATE;
 						}else{
@@ -765,7 +638,6 @@ int pixFindContour(Mat& sourceFrame, Mat& destFrame, int row, int col, int prevD
 						}
 						break;
 					case ARF_ERROR :
-						//printf("%i Looking from (%i %i) at pixel: %i %i - no_found\n", d, col, row, newCol, newRow);
 						edge++;
 						result 	= ARF_ERROR;
 						break;
@@ -774,7 +646,7 @@ int pixFindContour(Mat& sourceFrame, Mat& destFrame, int row, int col, int prevD
 				}
 				if(!AR_FILTER_CV_CONTOURS)
 				{
-					if(edge==3)
+					if(edge==nextDirCnt)
 					{
 						return ARF_NO_FOUND; // Dead end
 					}else if (result == ARF_FINISHED)
@@ -808,6 +680,154 @@ int pixFindContour(Mat& sourceFrame, Mat& destFrame, int row, int col, int prevD
 			destFrame.at<uint8_t>(row, col) = 80;
 		}
 		return ARF_NO_FOUND;
+	}
+}
+
+void getNextDirection(int prevDir, int* nextDir, int* nextDirCnt)
+{
+	switch(AR_FILTER_FLOOD_STYLE)
+	{
+	case AR_FILTER_FLOOD_OMNI :
+	{
+		switch(prevDir)
+		{
+		case ARF_UP :
+			nextDir[0] = ARF_LEFT;
+			nextDir[1] = ARF_UP;
+			nextDir[2] = ARF_RIGHT;
+			*nextDirCnt = 3;
+			break;
+		case ARF_RIGHT :
+			nextDir[0] = ARF_UP;
+			nextDir[1] = ARF_RIGHT;
+			nextDir[2] = ARF_DOWN;
+			*nextDirCnt = 3;
+			break;
+		case ARF_DOWN :
+			nextDir[0] = ARF_RIGHT;
+			nextDir[1] = ARF_DOWN;
+			nextDir[2] = ARF_LEFT;
+			*nextDirCnt = 3;
+			break;
+		case ARF_LEFT :
+			nextDir[0] = ARF_DOWN;
+			nextDir[1] = ARF_LEFT;
+			nextDir[2] = ARF_UP;
+			*nextDirCnt = 3;
+			break;
+		}
+		break;
+	}
+	case AR_FILTER_FLOOD_CW :
+	{
+		*nextDirCnt = 6;
+		switch(prevDir) // Find out which directions to try next
+		{
+		default:
+		case ARF_SEARCH :
+			nextDir[0] = ARF_SEARCH;
+			nextDir[1] = ARF_UP_RIGHT;
+			nextDir[2] = ARF_RIGHT;
+			nextDir[3] = ARF_RIGHT_DOWN;
+			*nextDirCnt = 4;
+			break;
+		case ARF_UP :
+			nextDir[0] = ARF_LEFT;
+			nextDir[1] = ARF_LEFT_UP;
+			nextDir[2] = ARF_UP;
+			nextDir[3] = ARF_UP_RIGHT;
+			nextDir[4] = ARF_RIGHT;
+			nextDir[5] = ARF_RIGHT_DOWN;
+			break;
+		case ARF_UP_RIGHT :
+			nextDir[0] = ARF_LEFT_UP;
+			nextDir[1] = ARF_UP;
+			nextDir[2] = ARF_UP_RIGHT;
+			nextDir[3] = ARF_RIGHT;
+			nextDir[4] = ARF_RIGHT_DOWN;
+			nextDir[5] = ARF_DOWN;
+			break;
+		case ARF_RIGHT :
+			nextDir[0] = ARF_UP;
+			nextDir[1] = ARF_UP_RIGHT;
+			nextDir[2] = ARF_RIGHT;
+			nextDir[3] = ARF_RIGHT_DOWN;
+			nextDir[4] = ARF_DOWN;
+			nextDir[5] = ARF_DOWN_LEFT;
+			break;
+		case ARF_RIGHT_DOWN :
+			nextDir[0] = ARF_UP_RIGHT;
+			nextDir[1] = ARF_RIGHT;
+			nextDir[2] = ARF_RIGHT_DOWN;
+			nextDir[3] = ARF_DOWN;
+			nextDir[4] = ARF_DOWN_LEFT;
+			nextDir[5] = ARF_LEFT;
+			break;
+		case ARF_DOWN :
+			nextDir[0] = ARF_RIGHT;
+			nextDir[1] = ARF_RIGHT_DOWN;
+			nextDir[2] = ARF_DOWN;
+			nextDir[3] = ARF_DOWN_LEFT;
+			nextDir[4] = ARF_LEFT;
+			nextDir[5] = ARF_LEFT_UP;
+			break;
+		case ARF_DOWN_LEFT :
+			nextDir[0] = ARF_RIGHT_DOWN;
+			nextDir[1] = ARF_DOWN;
+			nextDir[2] = ARF_DOWN_LEFT;
+			nextDir[3] = ARF_LEFT;
+			nextDir[4] = ARF_LEFT_UP;
+			nextDir[5] = ARF_UP;
+			break;
+		case ARF_LEFT :
+			nextDir[0] = ARF_DOWN;
+			nextDir[1] = ARF_DOWN_LEFT;
+			nextDir[2] = ARF_LEFT;
+			nextDir[3] = ARF_LEFT_UP;
+			nextDir[4] = ARF_UP;
+			nextDir[5] = ARF_UP_RIGHT;
+			break;
+		case ARF_LEFT_UP :
+			nextDir[0] = ARF_DOWN_LEFT;
+			nextDir[1] = ARF_LEFT;
+			nextDir[2] = ARF_LEFT_UP;
+			nextDir[3] = ARF_UP;
+			nextDir[4] = ARF_UP_RIGHT;
+			nextDir[5] = ARF_RIGHT;
+			break;
+		}
+		break;
+	}
+	}
+	return;
+}
+
+void getNewPosition(int nextDir, int* newRow, int* newCol)
+{
+	switch(nextDir) // Set the location of the next pixel to test
+	{
+	case ARF_SEARCH :
+		*newRow += -1; 	break;
+	case ARF_UP :
+		*newRow += -1; 	break;
+	case ARF_UP_RIGHT :
+		*newRow += -1; 	*newCol += 1; 	break;
+	case ARF_RIGHT :
+		*newCol += 1; 	break;
+	case ARF_RIGHT_DOWN :
+		*newRow += 1; 	*newCol += 1; 	break;
+	case ARF_DOWN :
+		*newRow += 1; 	break;
+	case ARF_DOWN_LEFT :
+		*newRow += 1; 	*newCol += -1; 	break;
+	case ARF_LEFT :
+		*newCol += -1; 	break;
+	case ARF_LEFT_UP :
+		*newRow += -1; 	*newCol += -1; 	break;
+	default:
+		printf("[AR_FILTER-ERR] Invalid next-dir: %i\n", nextDir);
+		nextDir = ARF_SEARCH;
+		*newRow += -1; 	break;
 	}
 }
 
@@ -910,6 +930,49 @@ void body2world(trackResults* trackRes, struct 	FloatEulers * eulerAngles)
 	trackRes->z_w = worldPos(2,0) + pos.z;
 	return;
 }
+
+#if AR_FILTER_MOD_VIDEO
+void mod_video(Mat& sourceFrame, Mat& frameGrey)
+{
+	char text[15];
+#if AR_FILTER_MEASURE_FPS
+	sprintf(text,"FPS: %0.2f", runCount / ((double) curT));
+#else
+	sprintf(text,"frame %i", runCount);
+#endif // AR_FILTER_MEASURE_FPS
+	if(AR_FILTER_FLOOD_STYLE != AR_FILTER_FLOOD_CW || AR_FILTER_CV_CONTOURS)
+	{
+		for(unsigned int r=0; r < cropAreas.size(); r++)
+		{
+			if(cropAreas[r].x != 0 && cropAreas[r].width != 0)
+			{
+				vector<Mat> channels;
+				Mat thr_frame(cropAreas[r].height, cropAreas[r].width, CV_8UC2);
+				Mat emptyCH(cropAreas[r].height, cropAreas[r].width, CV_8UC1, cvScalar(127.0));
+				channels.push_back(emptyCH);
+				channels.push_back(frameGrey(cropAreas[r]));
+				merge(channels, thr_frame);
+				thr_frame.copyTo(sourceFrame(cropAreas[r])); 			               // Copy threshold result to black frame
+				emptyCH.release();
+				thr_frame.release();
+				rectangle(sourceFrame, cropAreas[r], Scalar(0,255), 5);
+			}
+		}
+	}else{
+#if AR_FILTER_DRAW_CONTOURS
+		drawContours(sourceFrame, allContours, -1, cvScalar(0,255), 3);
+#else
+		for(unsigned int r=0; r < trackRes.size(); r++)         // Convert angles & Write/Print output
+		{
+			circle(sourceFrame,cvPoint(trackRes[r].x_p - cropCol, trackRes[r].y_p), sqrt(trackRes[r].area_p / M_PI), cvScalar(0,255), 5);
+		}
+#endif // AR_FILTER_DRAW_CONTOURS
+	}
+	putText(sourceFrame, text, Point(10,sourceFrame.rows-100), FONT_HERSHEY_SIMPLEX, 2, Scalar(0,255,255), 5);
+	line(sourceFrame, Point(0,0), Point(0, sourceFrame.rows-1), Scalar(0,255), 5);
+	line(sourceFrame, Point(sourceFrame.cols - 1,0), Point(sourceFrame.cols - 1, sourceFrame.rows-1), Scalar(0,255), 5);
+}
+#endif // AR_FILTER_MOD_VIDEO
 
 
 #if AR_FILTER_CALIBRATE_CAM

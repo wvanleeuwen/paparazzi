@@ -10,17 +10,17 @@
     </target>
     <configure name="HOST" value="192.168.40.30" />
     <configure name="MODEM_HOST" value="192.168.40.255" />
-    <define name="MT9F002_OUTPUT_HEIGHT" value="1664" /> <!-- 1648 / 1688-->
-	<define name="MT9F002_OUTPUT_WIDTH" value="2048" /> <!-- 1672 -->
-	<define name="MT9F002_INITIAL_OFFSET_X" value="288" /> <!-- 672 -->
-	<define name="MT9F002_INITIAL_OFFSET_Y" value="12" />
+    <define name="MT9F002_OUTPUT_HEIGHT" value="822" /> <!-- 1644-->
+	<define name="MT9F002_OUTPUT_WIDTH" value="1024" /> <!-- 2048 -->
+	<define name="MT9F002_INITIAL_OFFSET_X" value="256" /> <!-- 672 -->
+	<define name="MT9F002_INITIAL_OFFSET_Y" value="288" />
 	<define name="MT9F002_OUTPUT_SCALER" value="1" /> <!-- 16/26 -->
-	<define name="MT9F002_TARGET_FPS" value="30" />
-	<define name="MT9F002_TARGET_EXPOSURE" value="0.348262" /> <!-- Daylight: 0.348262 -->
+	<define name="MT9F002_TARGET_FPS" value="60" />
+	<define name="MT9F002_TARGET_EXPOSURE" value="20" /> <!-- Daylight: 0.348262 -->
 	<define name="MT9F002_GAIN_GREEN1" value="2.0" />
 	<define name="MT9F002_GAIN_GREEN2" value="2.0" />
-	<define name="MT9F002_X_ODD_INC_VAL" value="3" />
-	<define name="MT9F002_Y_ODD_INC_VAL" value="3" />
+	<define name="MT9F002_X_ODD_INC_VAL" value="7" />
+	<define name="MT9F002_Y_ODD_INC_VAL" value="7" />
 	<!--<define name="USE_GPS_UBX_RTCM" value="TRUE"/> -->
     <module name="telemetry" type="transparent_udp"/>
     <module name="radio_control" type="datalink"/>
