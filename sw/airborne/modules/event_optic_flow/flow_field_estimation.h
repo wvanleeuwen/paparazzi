@@ -12,7 +12,7 @@
 #include <inttypes.h>
 #include "math/pprz_algebra_float.h"
 
-#define N_FIELD_DIRECTIONS 4
+#define N_FIELD_DIRECTIONS 5
 
 /**
  * Flow event struct, simplified version of the cAER implementation.
@@ -114,7 +114,7 @@ void flowStatsUpdate(struct flowStats* s, struct flowEvent e,
  * Recomputation of the flow field using the latest statistics.
  */
 enum updateStatus recomputeFlowField(struct flowField* field, struct flowStats* s,
-    float minEventRate, float minPosVariance, float minR2, float power,
+    float inlierMaxDiff, float minEventRate, float minPosVariance, float minR2, float power,
     struct cameraIntrinsicParameters intrinsics);
 
 /**

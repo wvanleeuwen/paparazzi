@@ -10,6 +10,8 @@
 
 float DET_MIN_RESOLUTION = 1;
 
+void lowPassFilterWithThreshold(float *val, float new, float factor, float limit);
+
 void flowStatsInit(struct flowStats *s) {
   s->eventRate = 0;
   int32_t i;
@@ -60,7 +62,7 @@ void flowStatsUpdate(struct flowStats* s, struct flowEvent e,
 }
 
 enum updateStatus recomputeFlowField(struct flowField* field, struct flowStats* s,
-    float minEventRate, float minPosVariance, float minR2, float power,
+    float inlierMaxDiff, float minEventRate, float minPosVariance, float minR2, float power,
     struct cameraIntrinsicParameters intrinsics) {
 
   // Compute rate confidence value
@@ -77,6 +79,7 @@ enum updateStatus recomputeFlowField(struct flowField* field, struct flowStats* 
     float sumV = 0;
     float sumVV = 0;
     float sumW = 0;
+    uint32_t nValidDirections = 0;
 
     // Loop over all directions and collect total flow field information
     for (i = 0; i < N_FIELD_DIRECTIONS; i++) {
@@ -95,9 +98,12 @@ enum updateStatus recomputeFlowField(struct flowField* field, struct flowStats* 
       float meanVV = s->sumVV[i] / s->N[i];
       float meanSV = s->sumSV[i] / s->N[i];
 
-
       // Compute position variances and confidence values from mean statistics
       varS[i] = meanSS - meanS * meanS;
+      if (varS[i] < 100) {
+        c_var[i] = 0;
+        continue;
+      }
       c_var[i] = 1;
       if (varS[i] < minPosVariance) {
         c_var[i] *= powf(varS[i] / minPosVariance, power);
@@ -119,6 +125,7 @@ enum updateStatus recomputeFlowField(struct flowField* field, struct flowStats* 
       sumV += W * meanV;
       sumVV += W * meanVV;
       sumW += W;
+      nValidDirections++;
     }
 
     // Compute determinant
@@ -126,8 +133,9 @@ enum updateStatus recomputeFlowField(struct flowField* field, struct flowStats* 
         + 2*A[0][1] * A[0][2] * A[1][2]
         - A[0][0] * A[1][2] * A[1][2]
         - A[1][1] * A[0][2] * A[0][2]
-          - A[2][2] * A[0][1] * A[0][1];
-    if (fabs(det) < DET_MIN_RESOLUTION) {
+        - A[2][2] * A[0][1] * A[0][1];
+
+    if (nValidDirections < 2 || fabs(det) < DET_MIN_RESOLUTION) {
       return UPDATE_WARNING_SINGULAR;
     }
 
@@ -163,9 +171,9 @@ enum updateStatus recomputeFlowField(struct flowField* field, struct flowStats* 
     }
 
     float c_total = c_rate * c_var_max * c_R2;
-    field->wx += (wx - field->wx) * c_total;
-    field->wy += (wy - field->wy) * c_total;
-    field->D  += (D  - field->D ) * c_total;
+    lowPassFilterWithThreshold(&field->wx,wx,c_total,inlierMaxDiff);
+    lowPassFilterWithThreshold(&field->wy,wy,c_total,inlierMaxDiff);
+    lowPassFilterWithThreshold(&field->D,D,c_total,inlierMaxDiff);
     field->confidence = c_total;
 
     // If no problem was found, update is successful
@@ -176,4 +184,15 @@ enum updateStatus recomputeFlowField(struct flowField* field, struct flowStats* 
 void derotateFlowField(struct flowField* field, struct FloatRates* rates) {
   field->wxDerotated = field->wx - rates->p;
   field->wyDerotated = field->wy + rates->q;
+}
+
+void lowPassFilterWithThreshold(float *val, float new, float factor, float limit) {
+  float delta = new - *val;
+  if (delta > limit) {
+    delta = limit;
+  }
+  if (delta < -limit) {
+      delta = -limit;
+    }
+  *val += delta * factor;
 }
