@@ -203,10 +203,10 @@
   <section name="STABILIZATION_ATTITUDE_INDI" prefix="STABILIZATION_INDI_">
 
     <!-- bebop TUBB05 (no legs, no bumpers) -->
-    <define name="G1_P" value="0.063"/>
-    <define name="G1_Q" value="0.044"/>
-    <define name="G1_R" value="0.0022"/>
-    <define name="G2_R" value="0.14"/>
+    <!--<define name="G1_P" value="0.063"/>-->
+    <!--<define name="G1_Q" value="0.044"/>-->
+    <!--<define name="G1_R" value="0.0022"/>-->
+    <!--<define name="G2_R" value="0.14"/>-->
 
     <!-- bebop TUBB05 (no legs, with bumpers) -->
     <!--define name="G1_P" value="0.057"/>
@@ -227,10 +227,10 @@
     <!--<define name="G2_R" value="0.124241"/>-->
 
     <!-- bebop TUBB05 (plastic legs and gripper) -->
-    <!--<define name="G1_P" value="0.032"/>-->
-    <!--<define name="G1_Q" value="0.016"/>-->
-    <!--<define name="G1_R" value="0.002"/>-->
-    <!--<define name="G2_R" value="0.12"/>-->
+    <define name="G1_P" value="0.032"/>
+    <define name="G1_Q" value="0.016"/>
+    <define name="G1_R" value="0.002"/>
+    <define name="G2_R" value="0.12"/>
 
     <!-- bebop TUBB05 (plastic legs, gripper and bucket) -->
     <!--<define name="G1_P" value="0.0"/>-->
