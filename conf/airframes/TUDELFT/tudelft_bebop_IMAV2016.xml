@@ -9,8 +9,7 @@
     <define name="MT9F002_OUTPUT_HEIGHT" value="640"/>  <!-- full height 4608 -->
     <define name="MT9F002_OUTPUT_WIDTH" value="640"/>  <!-- full width 2592 (3288) -->
     <define name="MT9F002_INITIAL_OFFSET_Y" value="384"/>
-    <define name="MT9F002_INITIAL_OFFSET_X" value="512"/> <!-- 896 for window testing
-    <!--<define name="MT9F002_INITIAL_OFFSET_X" value="1280" />-->
+    <define name="MT9F002_INITIAL_OFFSET_X" value="512"/> <!-- 896 for window testing -->
     <define name="MT9F002_X_ODD_INC_VAL" value="7"/> <!-- downsize x4 -->
     <define name="MT9F002_Y_ODD_INC_VAL" value="7"/>
 
@@ -74,14 +73,14 @@
     </module>
 
     <module name="video_rtp_stream">
-      <!--define name="VIEWVIDEO_CAMERA" value="bottom_camera"/-->
-      <define name="VIEWVIDEO_CAMERA" value="front_camera"/>
+      <define name="VIEWVIDEO_CAMERA" value="bottom_camera"/>
+      <define name="VIEWVIDEO_CAMERA2" value="front_camera"/>
 
       <define name="VIEWVIDEO_DOWNSIZE_FACTOR" value="1"/>
       <define name="VIEWVIDEO_QUALITY_FACTOR" value="60"/>
 
-      <!--configure name="VIEWVIDEO_BROADCAST" value="FALSE"/>
-      <configure name="VIEWVIDEO_HOST" value="192.168.42.97"/-->
+      <configure name="VIEWVIDEO_BROADCAST" value="FALSE"/>
+      <configure name="VIEWVIDEO_HOST" value="192.168.42.68"/>
     </module>
     
     <module name="cv_ae_awb"/>
@@ -170,7 +169,7 @@
     <define name="SONAR_UPDATE_ON_AGL" value="TRUE"/>
     <define name="VFF_R_SONAR_OF_M" value="0."/>
     <define name="VFF_R_SONAR_0" value="0.1"/>
-    <define name="BARO_AGL_OFFSET" value="0.31"/><!--This should be set the the length of the legs, positive-->
+    <define name="BARO_AGL_OFFSET" value="0.0"/><!--This should be set the the length of the legs, positive-->
   </section>
 
   <section name="RC_SETPOINT" prefix="STABILIZATION_ATTITUDE_">
@@ -204,10 +203,10 @@
   <section name="STABILIZATION_ATTITUDE_INDI" prefix="STABILIZATION_INDI_">
 
     <!-- bebop TUBB05 (no legs, no bumpers) -->
-    <!--<define name="G1_P" value="0.063"/>-->
-    <!--<define name="G1_Q" value="0.044"/>-->
-    <!--<define name="G1_R" value="0.0022"/>-->
-    <!--<define name="G2_R" value="0.14"/>-->
+    <define name="G1_P" value="0.063"/>
+    <define name="G1_Q" value="0.044"/>
+    <define name="G1_R" value="0.0022"/>
+    <define name="G2_R" value="0.14"/>
 
     <!-- bebop TUBB05 (no legs, with bumpers) -->
     <!--define name="G1_P" value="0.057"/>
@@ -222,16 +221,16 @@
     <!--<define name="G2_R" value="0.01448"/>-->
 
     <!-- bebop TUBB05 (plastic legs) -->
-    <define name="G1_P" value="0.037543"/>
-    <define name="G1_Q" value="0.023722"/>
-    <define name="G1_R" value="0.002219"/>
-    <define name="G2_R" value="0.124241"/>
+    <!--<define name="G1_P" value="0.037543"/>-->
+    <!--<define name="G1_Q" value="0.023722"/>-->
+    <!--<define name="G1_R" value="0.002219"/>-->
+    <!--<define name="G2_R" value="0.124241"/>-->
 
     <!-- bebop TUBB05 (plastic legs and gripper) -->
-    <!--<define name="G1_P" value="0.025"/>-->
+    <!--<define name="G1_P" value="0.032"/>-->
     <!--<define name="G1_Q" value="0.016"/>-->
-    <!--<define name="G1_R" value="0.0018"/>-->
-    <!--<define name="G2_R" value="0.11"/>-->
+    <!--<define name="G1_R" value="0.002"/>-->
+    <!--<define name="G2_R" value="0.12"/>-->
 
     <!-- bebop TUBB05 (plastic legs, gripper and bucket) -->
     <!--<define name="G1_P" value="0.0"/>-->

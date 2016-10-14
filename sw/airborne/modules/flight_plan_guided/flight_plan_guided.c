@@ -160,13 +160,11 @@ bool front_cam_set_x_offset(int offset) {
   return false;
 }
 
-static int BUCKET_HEADING_MARGIN = 60;  // px
-static float BUCKET_HEADING_RATE = 0.5; // rad/s
+static int FRONT_MARKER_HEADING_MARGIN = 60;  // px
+static float FRONT_MARKER_HEADING_RATE = 0.5; // rad/s
 
-bool bucket_heading_change(float altitude) {
+bool front_marker_heading_change(void) {
   if (autopilot_mode != AP_MODE_GUIDED) { return true; }
-//  guidance_v_set_guided_z(-altitude);
-//  guidance_h_set_guided_body_vel(0., 0.);
 
   if (marker2.detected) {
     marker_lost = false;
@@ -175,12 +173,12 @@ bool bucket_heading_change(float altitude) {
       marker2.processed = true;
       int relative_heading = marker2.pixel.y - 320;
 
-      if (relative_heading > BUCKET_HEADING_MARGIN) {
+      if (relative_heading > FRONT_MARKER_HEADING_MARGIN) {
         // Marker is to the right
-        guidance_h_set_guided_heading_rate(BUCKET_HEADING_RATE);
-      } else if (relative_heading < -BUCKET_HEADING_MARGIN) {
+        guidance_h_set_guided_heading_rate(FRONT_MARKER_HEADING_RATE);
+      } else if (relative_heading < -FRONT_MARKER_HEADING_MARGIN) {
         // Marker is to the left
-        guidance_h_set_guided_heading_rate(-BUCKET_HEADING_RATE);
+        guidance_h_set_guided_heading_rate(-FRONT_MARKER_HEADING_RATE);
       } else {
         // Marker is more or less centered
         guidance_h_set_guided_heading_rate(0.);
@@ -192,21 +190,20 @@ bool bucket_heading_change(float altitude) {
     }
   } else {
     // Marker not detected
-    guidance_h_set_guided_heading_rate(BUCKET_HEADING_RATE);
+    guidance_h_set_guided_heading_rate(FRONT_MARKER_HEADING_RATE);
   }
 
   return true;
 }
 
-static int BUCKET_POSITION_MARGIN = 100; // > 50 SO DISABLED
-static int BUCKET_POSITION_MARGIN_LOST = 50;
-static float BUCKET_DRIFT_CORRECTION_RATE = 0.05;
-static float BUCKET_APPROACH_SPEED_HIGH = 0.2;
-static float BUCKET_APPROACH_SPEED_LOW = 0.05;
+static int FRONT_MARKER_POSITION_MARGIN = 100; // > 50, SO DISABLED
+static int FRONT_MARKER_POSITION_MARGIN_LOST = 50;
+static float FRONT_MARKER_DRIFT_CORRECTION_RATE = 0.05;
+static float FRONT_MARKER_APPROACH_SPEED_HIGH = 0.2;
+static float FRONT_MARKER_APPROACH_SPEED_LOW = 0.05;
 
-bool bucket_approach(float altitude) {
+bool front_marker_approach(void) {
   if (autopilot_mode != AP_MODE_GUIDED) { return true; }
-//  guidance_v_set_guided_z(-altitude);
 
   if (marker1.detected) {
     // Hand over control to next stage
@@ -219,26 +216,26 @@ bool bucket_approach(float altitude) {
       marker2.processed = true;
       int relative_pos = marker2.pixel.y - 320;
 
-      if (abs(relative_pos) > BUCKET_POSITION_MARGIN_LOST) {
-        fprintf(stderr, "[bucket] OUT OF FRAME.\n");
+      if (abs(relative_pos) > FRONT_MARKER_POSITION_MARGIN_LOST) {
+        fprintf(stderr, "[FRONT_MARKER] OUT OF FRAME.\n");
         marker_lost = true;
-      } else if (relative_pos > BUCKET_POSITION_MARGIN) {
-        fprintf(stderr, "[bucket] RIGHT.\n");
-        guidance_h_set_guided_body_vel(BUCKET_APPROACH_SPEED_LOW, BUCKET_DRIFT_CORRECTION_RATE);
-      } else if (relative_pos < -BUCKET_POSITION_MARGIN) {
-        fprintf(stderr, "[bucket] LEFT.\n");
-        guidance_h_set_guided_body_vel(BUCKET_APPROACH_SPEED_LOW, -BUCKET_DRIFT_CORRECTION_RATE);
+      } else if (relative_pos > FRONT_MARKER_POSITION_MARGIN) {
+        fprintf(stderr, "[FRONT_MARKER] RIGHT.\n");
+        guidance_h_set_guided_body_vel(FRONT_MARKER_APPROACH_SPEED_LOW, FRONT_MARKER_DRIFT_CORRECTION_RATE);
+      } else if (relative_pos < -FRONT_MARKER_POSITION_MARGIN) {
+        fprintf(stderr, "[FRONT_MARKER] LEFT.\n");
+        guidance_h_set_guided_body_vel(FRONT_MARKER_APPROACH_SPEED_LOW, -FRONT_MARKER_DRIFT_CORRECTION_RATE);
       } else {
-        fprintf(stderr, "[bucket] CENTER.\n");
-        guidance_h_set_guided_body_vel(BUCKET_APPROACH_SPEED_HIGH, 0.0);
+        fprintf(stderr, "[FRONT_MARKER] CENTER.\n");
+        guidance_h_set_guided_body_vel(FRONT_MARKER_APPROACH_SPEED_HIGH, 0.0);
       }
     } else {
-      fprintf(stderr, "[bucket] ALREADY PROCESSED.\n");
+      fprintf(stderr, "[FRONT_MARKER] ALREADY PROCESSED.\n");
       // Marker detected but already processed
       // ** just wait **
     }
   } else {
-    fprintf(stderr, "[bucket] NOT DETECTED.\n");
+    fprintf(stderr, "[FRONT_MARKER] NOT DETECTED.\n");
     // Marker not detected
     marker_lost = true;
   }

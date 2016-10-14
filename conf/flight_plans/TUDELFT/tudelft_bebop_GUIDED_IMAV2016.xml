@@ -44,6 +44,7 @@
 
     <block name="Hover 2 sec">
       <call fun="Hover(NOM_FLIGHT_ALT)"/>
+      <while cond="1"/>
       <while cond="2 > block_time"/>
     </block>
 
@@ -59,13 +60,13 @@
       <call_once fun="detector.item_bottom->active = true"/>
       <call_once fun="detector.item_front->active = true"/>
       <call fun="Hover(NOM_FLIGHT_ALT)"/>
-      <call fun="bucket_heading_change(1)"/>
+      <call fun="front_marker_heading_change()"/>
       <exception cond="marker1.found_time > 1" deroute="Center item"/>
     </block>
 
     <block name="Approach item">
       <call fun="Hover(NOM_FLIGHT_ALT)"/>
-      <call fun="bucket_approach(1)"/>
+      <call fun="front_marker_approach()"/>
       <exception cond="marker_lost == true" deroute="Find item"/>
       <exception cond="marker1.found_time > 1" deroute="Center item"/>
     </block>
@@ -74,7 +75,7 @@
       <call fun="Hover(NOM_FLIGHT_ALT)"/>
       <call fun="marker_center_land(0.05, 0, 0)"/>
       <exception cond="0.1 > marker1.found_time" deroute="Find item"/>
-      <exception cond="marker1.found_time > 4" deroute="Land item"/>
+      <!--<exception cond="marker1.found_time > 4" deroute="Land item"/>-->
     </block>
 
     <block name="Land item">
@@ -98,12 +99,12 @@
       <call_once fun="detector.bucket_bottom->active = true"/>
       <call_once fun="detector.bucket_front->active = true"/>
       <call fun="Hover(NOM_FLIGHT_ALT)"/>
-      <call fun="bucket_heading_change(1)"/>
+      <call fun="front_marker_heading_change()"/>
     </block>
 
     <block name="Approach bucket">
       <call fun="Hover(NOM_FLIGHT_ALT)"/>
-      <call fun="bucket_approach(1)"/>
+      <call fun="front_marker_approach()"/>
       <exception cond="marker_lost == true" deroute="Find bucket"/>
     </block>
 
