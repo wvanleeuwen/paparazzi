@@ -76,7 +76,7 @@ struct video_listener *listener = NULL;
 // Filter Settings
 #if WINDOW_COLOR == RED
 uint8_t color_lum_min = 60;// 60;//105;
-uint8_t color_lum_max = 100;//228;//205;
+uint8_t color_lum_max = 255;//228;//205;
 uint8_t color_cb_min  = 90;//66;//52;
 uint8_t color_cb_max  = 130;//194;//140;
 uint8_t color_cr_min  = 145;//140;//180;

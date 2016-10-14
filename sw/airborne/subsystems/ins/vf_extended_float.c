@@ -62,11 +62,9 @@ PRINT_CONFIG_VAR(DEBUG_VFF_EXTENDED)
 #define VFF_EXTENDED_R_BARO 1.
 #endif
 
-#define VFF_EXTENDED_NON_FLAT_FLOOR
-
 #define Qbiasbias 1e-6
 #ifdef VFF_EXTENDED_NON_FLAT_FLOOR
-#define Qoffoff 0.0008
+#define Qoffoff 0.0006
 #else
 #define Qoffoff 1e-4
 #endif
