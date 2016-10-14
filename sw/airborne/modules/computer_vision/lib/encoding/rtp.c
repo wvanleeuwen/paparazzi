@@ -31,6 +31,11 @@
 
 #include "rtp.h"
 
+#ifndef RTP_VERBOSE
+#define RTP_VERBOSE 0
+#endif
+#define printf_debug    if(RTP_VERBOSE > 0) printf
+
 enum {
   FU_NONE,
   FU_START,
@@ -268,14 +273,14 @@ void rtp_frame_send_h264(struct UdpSocket *udp, uint8_t *buf, uint32_t len)
 
   int32_t secondNalu = rtp_find_nalu(rawBuf, rawLength);
   if(secondNalu > 0) {
-    printf("Got a second NALU at %d\n", secondNalu);
+	printf_debug("Got a second NALU at %d\n", secondNalu);
     rawLength = secondNalu - 1; // Also remove the first byte
   }
 
   if((rawBuf[0] & 0x1f) == 5)
   {
-      printf("Key(IDR) frame is found \n"); //debug
-      printf("Key(IDR) frame's length is %d \n",rawLength); //debug
+	  printf_debug("Key(IDR) frame is found \n"); //debug
+	  printf_debug("Key(IDR) frame's length is %d \n",rawLength); //debug
   }
 
   if(rawLength < MAX_PACKET_SIZE)
@@ -292,7 +297,7 @@ void rtp_frame_send_h264(struct UdpSocket *udp, uint8_t *buf, uint32_t len)
   }
 
   if(secondNalu > 0) {
-    printf("Got a second NALU at %d %d\n", secondNalu, (len - 4 - secondNalu));
+	printf_debug("Got a second NALU at %d %d\n", secondNalu, (len - 4 - secondNalu));
     rtp_frame_send_h264(udp, &rawBuf[secondNalu], len - 4 - secondNalu);
   }
 }
@@ -362,8 +367,8 @@ static void rtp_packet_send_h264(struct UdpSocket *udp, uint8_t byte0, uint8_t *
       return;
   }
 
-  printf("Sending %d: %d %d\n", m_SequenceNumber, fu_type, RtpPacketSize);
+  printf_debug("Sending %d: %d %d\n", m_SequenceNumber, fu_type, RtpPacketSize);
   int32_t udpSend = udp_socket_send(udp, RtpBuf, RtpPacketSize);
   if(udpSend != RtpPacketSize)
-    printf("\n\n\nCould not send all... %d of %d\n\n\n", udpSend, RtpPacketSize);
+	printf_debug("\n\n\nCould not send all... %d of %d\n\n\n", udpSend, RtpPacketSize);
 }

@@ -52,7 +52,7 @@
 
 // Downsize factor for video stream
 #ifndef VIEWVIDEO_DOWNSIZE_FACTOR
-#define VIEWVIDEO_DOWNSIZE_FACTOR 4
+#define VIEWVIDEO_DOWNSIZE_FACTOR 1
 #endif
 PRINT_CONFIG_VAR(VIEWVIDEO_DOWNSIZE_FACTOR)
 
@@ -99,6 +99,12 @@ PRINT_CONFIG_VAR(VIEWVIDEO_FPS)
 #define VIEWVIDEO_USE_RTP TRUE
 #endif
 
+#ifndef VIEWVIDEO_VERBOSE
+#define VIEWVIDEO_VERBOSE 0
+#endif
+
+#define printf_debug    if(VIEWVIDEO_VERBOSE > 0) printf
+
 #if VIEWVIDEO_USE_NETCAT
 #include <sys/wait.h>
 PRINT_CONFIG_MSG("[viewvideo] Using netcat.")
@@ -136,8 +142,15 @@ struct image_t *viewvideo_function(struct image_t *img)
   uint8_t* h264Buffer;
   struct image_t releaseImg;
 
-  if (viewvideo.is_streaming) {
+  // Resize image if needed
+    struct image_t img_small;
+    image_create(&img_small,
+                 img->w / VIEWVIDEO_DOWNSIZE_FACTOR,
+                 img->h / VIEWVIDEO_DOWNSIZE_FACTOR,
+                 IMAGE_YUV422);
 
+
+  if (viewvideo.is_streaming) {
     //jpeg_encode_image(img, &img_jpeg, VIEWVIDEO_QUALITY_FACTOR, VIEWVIDEO_USE_NETCAT);
 
     /*if (viewvideo.use_rtp) {
@@ -179,8 +192,8 @@ struct image_t *viewvideo_function(struct image_t *img)
       if (size == 0)
         fprintf(stderr, "%s:%d warning, no data to write\n",__FILE__,__LINE__);
       else {
-        printf("Got frame of size: %d\r\n", size);
-        printf("Byte: %2X %2X %2X %2X %2X\n", h264Buffer[0],h264Buffer[1], h264Buffer[2], h264Buffer[3], h264Buffer[4]);
+    	printf_debug("Got frame of size: %d\r\n", size);
+    	printf_debug("Byte: %2X %2X %2X %2X %2X\n", h264Buffer[0],h264Buffer[1], h264Buffer[2], h264Buffer[3], h264Buffer[4]);
         rtp_frame_send_h264(&video_sock, h264Buffer, size);
         fwrite(h264Buffer, size, 1, video_file);
       }
@@ -209,8 +222,8 @@ void viewvideo_init(void)
   viewvideo.is_streaming = true;
   videoEncoder.inputType = H264ENC_YUV422_INTERLEAVED_UYVY;
   videoEncoder.bitRate = 1000*1000; // 1000 kbps
-  videoEncoder.frameRate = 15;
-  videoEncoder.intraRate = 15;
+  videoEncoder.frameRate = VIEWVIDEO_FPS;
+  videoEncoder.intraRate = VIEWVIDEO_FPS;
   P7_H264_open(&videoEncoder, VIEWVIDEO_CAMERA.thread.dev);
 
   // Open udp socket
@@ -226,7 +239,7 @@ void viewvideo_init(void)
     fprintf(fp, "c=IN IP4 0.0.0.0\n");
     fclose(fp);
   } else {
-    printf("[viewvideo] Failed to create SDP file.\n");
+    printf_debug("[viewvideo] Failed to create SDP file.\n");
   }
 }
 

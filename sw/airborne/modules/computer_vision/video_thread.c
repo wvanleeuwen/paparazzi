@@ -62,6 +62,12 @@ PRINT_CONFIG_VAR(VIDEO_THREAD_NICE_LEVEL)
 #endif
 PRINT_CONFIG_VAR(VIDEO_THREAD_MAX_CAMERAS)
 
+#ifndef VIDEO_THREAD_VERBOSE
+#define VIDEO_THREAD_VERBOSE 0
+#endif
+
+#define printf_debug    if(VIDEO_THREAD_VERBOSE > 0) printf
+
 struct video_config_t *cameras[VIDEO_THREAD_MAX_CAMERAS];
 
 // Main thread
@@ -168,7 +174,7 @@ static bool initialize_camera(struct video_config_t *camera)
   if (camera->subdev_name != NULL) {
     // FIXME! add subdev format to config, only needed on bebop front camera so far
     if (!v4l2_init_subdev(camera->subdev_name, 0, camera->subdev_format, camera->sensor_size)) {
-      printf("[video_thread] Could not initialize the %s subdevice.\n", camera->subdev_name);
+      printf_debug("[video_thread] Could not initialize the %s subdevice.\n", camera->subdev_name);
       return false;
     }
   }
@@ -176,7 +182,7 @@ static bool initialize_camera(struct video_config_t *camera)
   // Initialize the V4L2 device
   camera->thread.dev = v4l2_init(camera->dev_name, camera->output_size, camera->crop, camera->buf_cnt, camera->format);
   if (camera->thread.dev == NULL) {
-    printf("[video_thread] Could not initialize the %s V4L2 device.\n", camera->dev_name);
+	printf_debug("[video_thread] Could not initialize the %s V4L2 device.\n", camera->dev_name);
     return false;
   }
 
@@ -210,7 +216,7 @@ bool add_video_device(struct video_config_t *device)
     cameras[i] = device;
 
     // Debug statement
-    printf("[video_thread] Added %s to camera array.\n", device->dev_name);
+    printf_debug("[video_thread] Added %s to camera array.\n", device->dev_name);
 
     // Successfully initialized
     return true;
@@ -229,7 +235,7 @@ static void start_video_thread(struct video_config_t *camera)
     // Start the streaming thread for a camera
     pthread_t tid;
     if (pthread_create(&tid, NULL, video_thread_function, (void *)(camera)) != 0) {
-      printf("[viewvideo] Could not create streaming thread for camera %s: Reason: %d.\n", camera->dev_name, errno);
+      printf_debug("[viewvideo] Could not create streaming thread for camera %s: Reason: %d.\n", camera->dev_name, errno);
       return;
     }
   }
@@ -246,7 +252,7 @@ static void stop_video_thread(struct video_config_t *device)
 
     // Stop the capturing
     if (!v4l2_stop_capture(device->thread.dev)) {
-      printf("[video_thread] Could not stop capture of %s.\n", device->thread.dev->name);
+      printf_debug("[video_thread] Could not stop capture of %s.\n", device->thread.dev->name);
       return;
     }
   }

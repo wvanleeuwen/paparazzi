@@ -44,6 +44,9 @@ using namespace cv;
 #define AR_FILTER_SHOW_MEM      1 // Print object locations to terminal
 #define AR_FILTER_SAVE_FRAME    0 // Save a frame for post-processing
 #define AR_FILTER_MEASURE_FPS   1
+#define AR_FILTER_CALIBRATE_CAM 0 // Calibrate camera
+#define AR_FILTER_WORLDPOS 		0 // Use world coordinates
+#define AR_FILTER_NOYAW 		1 // Output in body horizontal XY
 
 static void 			trackGreyObjects	(Mat& sourceFrame, Mat& greyFrame, vector<trackResults>* trackRes);
 static void             identifyObjects     (vector<trackResults> trackRes);
@@ -81,20 +84,20 @@ static int 		curT;
 #endif
 
 // Set up tracking parameters
-int 	AR_FILTER_MIN_CROP_AREA 	= 500;
+int 	AR_FILTER_MIN_CROP_AREA 	= 600;
 int 	AR_FILTER_RND_PIX_SAMPLE 	= 2500;
 int 	AR_FILTER_MAX_LAYERS  		= 1500;
 int 	AR_FILTER_MIN_LAYERS 		= 100;
-double 	AR_FILTER_MIN_CIRCLE_SIZE 	= 500;
-double 	AR_FILTER_MAX_CIRCLE_DEF 	= 0.2;
+double 	AR_FILTER_MIN_CIRCLE_SIZE 	= 600;
+double 	AR_FILTER_MAX_CIRCLE_DEF 	= 0.3;
 
 int 	AR_FILTER_SAMPLE_STYLE 		= AR_FILTER_STYLE_RANDOM;
 int 	AR_FILTER_FLOOD_STYLE 	    = AR_FILTER_FLOOD_OMNI;
-int 	AR_FILTER_Y_MIN 			= 50;                      // 0  [0,65 84,135 170,255]zoo 45
-int 	AR_FILTER_Y_MAX 			= 200;                     // 255
-int 	AR_FILTER_CB_MIN 			= 70;                      // 84
-int 	AR_FILTER_CB_MAX 			= 120;                     // 113
-int 	AR_FILTER_CR_MIN 			= 190;                     // 218 -> 150?
+int 	AR_FILTER_Y_MIN 			= 31;                      // 0  [0,65 84,135 170,255]zoo 45
+int 	AR_FILTER_Y_MAX 			= 179;                     // 255
+int 	AR_FILTER_CB_MIN 			= 101;                      // 84
+int 	AR_FILTER_CB_MAX 			= 129;                     // 113
+int 	AR_FILTER_CR_MIN 			= 167;                     // 218 -> 150?
 int 	AR_FILTER_CR_MAX 			= 255;                     // 240 -> 255?
 int 	AR_FILTER_IMAGE_CROP_FOVY 	= 90; 		               // Degrees
 int 	AR_FILTER_SAVE_RESULTS 		= 0;
@@ -157,6 +160,7 @@ void active_random_filter(char* buff, int width, int height)
 	{
 		cam2body(&trackRes[r]);						       // Convert from camera angles to body angles (correct for roll)
 		body2world(&trackRes[r], eulerAngles); 		       // Convert from body angles to world coordinates (correct yaw and pitch)
+		printf("Area: %0.2f\n", trackRes[r].area_p);
 	}
 	identifyObjects(trackRes);
 #if AR_FILTER_MOD_VIDEO
@@ -169,7 +173,7 @@ void active_random_filter(char* buff, int width, int height)
 		}
 #endif // AR_FILTER_SHOW_MEM
 #if AR_FILTER_CALIBRATE_CAM
-	if(runCount==10) 	calibrateEstimation(trackRes);
+	if(runCount==50) 	calibrateEstimation(trackRes);
 #endif // AR_FILTER_CALIBRATE_CAM
 	frameGrey.release(); 			                           // Release Mat
 	sourceFrame.release();
@@ -835,9 +839,9 @@ vector<double> estimatePosition(int xp, int yp, double area, double k, int calAr
 {
 	// This function estimates the 3D position (in camera  coordinate system) according to pixel position
 	// (Default) calibration parameters
-	if(k==0) 		k 		= 1.0; // Fisheye correction factor (1.085)
-	if(calArea==0) 	calArea = 3390; // Calibrate at full resolution (5330)
-	if(orbDiag==0) 	orbDiag = 2500; // Measured circular image diagonal using resolution of 2024x2048 org: 2400 (2200)
+	if(k==0) 		k 		= 1.085; // Fisheye correction factor (1.085)
+	if(calArea==0) 	calArea = 5530; // Calibrate at full resolution (5330)
+	if(orbDiag==0) 	orbDiag = 2400; // Measured circular image diagonal using resolution of 2024x2048 org: 2400 (2200)
 	// Calculate corrected calibration parameters
 	calArea 				= (int) round(calArea * (ispWidth / 2048.0) * (ispWidth / 2048.0));
 	orbDiag 				= (int) round(orbDiag * (ispWidth / 2048.0));
@@ -911,7 +915,11 @@ void body2world(trackResults* trackRes, struct 	FloatEulers * eulerAngles)
 	pos.y = 0.0;
 	pos.z = 0.0;
 #endif
+#if AR_FILTER_NOYAW
+	double phi 		= 0.0;
+#else
 	double phi 		= eulerAngles->phi;
+#endif
 	double theta 	= eulerAngles->theta;
 	double psi 		= eulerAngles->psi;
 	Matx33f rotX(	 1,  		 0, 	 	 0,
@@ -979,10 +987,6 @@ void mod_video(Mat& sourceFrame, Mat& frameGrey)
 void calibrateEstimation(vector<trackResults> trackRes)
 {
 	printf("Starting calibration!\n");
-	struct NedCoor_f fakePos;
-	fakePos.x = 0.0;
-	fakePos.y = 0.0;
-	fakePos.z = 0.0;
 	struct 	FloatEulers	fakeEulerAngles;
 	fakeEulerAngles.phi 	= 0.0;
 	fakeEulerAngles.psi 	= 0.0;
@@ -991,8 +995,8 @@ void calibrateEstimation(vector<trackResults> trackRes)
 	vector< vector<double> > calPositions(6, vector<double>(3));
 	calPositions[0][0] 	=  1.00;
 	calPositions[0][1] 	=  0.00;
-	calPositions[0][2] 	=  0.25;
-
+	calPositions[0][2] 	=  0.50;
+/*
 	calPositions[1][0] 	=  1.00;
 	calPositions[1][1] 	=  -1.00;
 	calPositions[1][2] 	=  0.25;
@@ -1008,15 +1012,15 @@ void calibrateEstimation(vector<trackResults> trackRes)
 	calPositions[4][0] 	=  2.00;
 	calPositions[4][1] 	=  0.50;
 	calPositions[4][2] 	=  0.25;
-
+*/
 	double k_opt;
 	double k_min 		= 1.0;
-	double k_max 		= 1.15;
+	double k_max 		= 1.05;
 	double k_step 		= 0.0025;
 
 	int calArea_opt;
-	int calArea_min 	= 1100;
-	int calArea_max 	= 5100;
+	int calArea_min 	= 9000;
+	int calArea_max 	= 12000;
 	int calArea_step 	=   10;
 
 	int orbDiag_opt;
@@ -1041,11 +1045,11 @@ void calibrateEstimation(vector<trackResults> trackRes)
 					trackRes[r].y_c = position[1];
 					trackRes[r].r_c = position[2];
 					cam2body(&trackRes[r]);							// Convert from camera angles to body angles (correct for roll)
-					body2world(&trackRes[r], &fakePos , &fakeEulerAngles); 	// Convert from body angles to world coordinates (correct yaw and pitch)
+					body2world(&trackRes[r], &fakeEulerAngles); 	// Convert from body angles to world coordinates (correct yaw and pitch)
 					double ball_err = 1000;
 					for(unsigned int i=0; i < calPositions.size(); i++)
 					{
-						double cur_ball_err = pow(trackRes[r].x_w - calPositions[i][0], 2.0) + pow(trackRes[r].y_w - calPositions[i][1], 2.0);// + pow(trackRes[r].z_w - calPositions[i][2], 2.0);
+						double cur_ball_err = pow(trackRes[r].x_w - calPositions[i][0], 2.0) + pow(trackRes[r].y_w - calPositions[i][1], 2.0) + pow(trackRes[r].z_w - calPositions[i][2], 2.0);
 						if(cur_ball_err < ball_err)
 						{
 							ball_err = cur_ball_err;

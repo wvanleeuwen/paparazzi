@@ -791,23 +791,21 @@ void mt9f002_set_resolution(struct mt9f002_t *mt)
 	  mt->output_scaler = (float)MT9F002_SCALER_N / scaleFactor;
 	  int x_skip_factor = (mt->x_odd_inc + 1) / 2;
 	  int y_skip_factor = (mt->y_odd_inc + 1) / 2;
-	  mt->scaled_width 	= ceil((float)mt->output_width / mt->output_scaler) * x_skip_factor - mt->x_odd_inc;
-	  mt->scaled_height = ceil((float)mt->output_height / mt->output_scaler) * y_skip_factor - mt->y_odd_inc;
+	  mt->scaled_width 	= ceil((float)mt->output_width / mt->output_scaler) * x_skip_factor - mt->x_odd_inc + 1;
+	  mt->scaled_height = ceil((float)mt->output_height / mt->output_scaler) * y_skip_factor - mt->y_odd_inc + 1;
 	  if (mt->output_scaler != 1.0)
 	  {
 	    write_reg(mt, MT9F002_SCALING_MODE, 2, 2); // Vertical and horizontal scaling
 	    write_reg(mt, MT9F002_SCALE_M, scaleFactor, 2);
 	  }
 	  printf("OUTPUT_SIZE: (%i, %i)\tSCALED_SIZE: (%i, %i)\n", mt->output_width, mt->output_height, mt->scaled_width, mt->scaled_height);
-	  printf("Stage 0\n");
 	  /* Set position (based on offset and subsample increment) */
-	  if(mt->offset_x % (x_skip_factor * 8) != 0)
+	  if(mt->x_odd_inc > 1 && mt->offset_x % (x_skip_factor * 8) != 0)
 	  {
 		  mt->offset_x = round(mt->offset_x / (x_skip_factor * 8)) * (x_skip_factor * 8);
 		  printf("[MT9F002] Warning, offset_x not a multiple of %i, changing to %i\n", 8 * x_skip_factor, mt->offset_x);
 	  }
-	  printf("Stage 1\n");
-	  if(mt->offset_y % (y_skip_factor * 8) != 0)
+	  if(mt->y_odd_inc > 1 && mt->offset_y % (y_skip_factor * 8) != 0)
 	  {
 		  mt->offset_y = round(mt->offset_y / (y_skip_factor * 8)) * (y_skip_factor * 8);
 		  printf("[MT9F002] Warning, offset_y not a multiple of %i, changing to %i\n", 8 * y_skip_factor, mt->offset_y);
@@ -816,12 +814,12 @@ void mt9f002_set_resolution(struct mt9f002_t *mt)
 	  write_reg(mt, MT9F002_Y_ADDR_START, mt->offset_y , 2);
 	  int end_addr_x = mt->offset_x + mt->scaled_width;
 	  int end_addr_y = mt->offset_y + mt->scaled_height;
-	  if((end_addr_x - mt->offset_x + mt->x_odd_inc) % (x_skip_factor * 8) != 0)
+	  if(mt->x_odd_inc > 1 && (end_addr_x - mt->offset_x + mt->x_odd_inc) % (x_skip_factor * 8) != 0)
 	  {
 		end_addr_x = ceil((end_addr_x - mt->offset_x + mt->x_odd_inc) / ((double) (x_skip_factor * 8))) * (x_skip_factor * 8) + mt->offset_x - mt->x_odd_inc;
 		printf("[MT9F002] End address warning, %i not a multiple of %i, changing to %i\n", mt->offset_x - 1 + mt->scaled_width, x_skip_factor * 8, end_addr_x);
 	  }
-	  if((end_addr_y - mt->offset_y + mt->y_odd_inc) % (y_skip_factor * 8) != 0)
+	  if(mt->y_odd_inc > 1 && (end_addr_y - mt->offset_y + mt->y_odd_inc) % (y_skip_factor * 8) != 0)
 	  {
 	    end_addr_y = ceil((end_addr_y - mt->offset_y + mt->y_odd_inc) / ((double) (y_skip_factor * 8))) * (y_skip_factor * 8) + mt->offset_y - mt->y_odd_inc;
 	    printf("[MT9F002] End address warning, %i not a multiple of %i, changing to %i\n", mt->offset_y - 1 + mt->scaled_height, y_skip_factor * 8, end_addr_y);

@@ -102,8 +102,8 @@ void cv_ae_awb_periodic(void) {
 #if CV_AE_AWB_VERBOSE
       printf("Too red... %f\r\n", avgU - avgV);
 #endif
-      mt9f002.gain_blue += 0.1;
-      mt9f002.gain_red  -= 0.1;
+      mt9f002.gain_blue += 0.05;
+      mt9f002.gain_red  -= 0.05;
       Bound(mt9f002.gain_blue, 2, 50);
       Bound(mt9f002.gain_red, 2, 50);
       mt9f002_set_gains(&mt9f002);
@@ -113,8 +113,8 @@ void cv_ae_awb_periodic(void) {
 #if CV_AE_AWB_VERBOSE
       printf("Too blue... %f\r\n", avgU - avgV);
 #endif
-      mt9f002.gain_blue -= 0.1;
-      mt9f002.gain_red  += 0.1;
+      mt9f002.gain_blue -= 0.05;
+      mt9f002.gain_red  += 0.05;
       Bound(mt9f002.gain_blue, 2, 50);
       Bound(mt9f002.gain_red, 2, 50);
       mt9f002_set_gains(&mt9f002);
