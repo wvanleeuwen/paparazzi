@@ -40,17 +40,19 @@ using namespace cv;
 #define AR_FILTER_ISP_CROP      0 // Use the ISP to crop the frame according to FOV-Y
 #define AR_FILTER_SHOW_REJECT   0 // Print why shapes are rejected
 #define AR_FILTER_MOD_VIDEO     1 // Modify the frame to show relevant info
-#define AR_FILTER_DRAW_CONTOURS 0 // Use drawContours function iso circle
-#define AR_FILTER_SHOW_MEM      1 // Print object locations to terminal
+#define AR_FILTER_DRAW_CONTOURS 1 // Use drawContours function iso circle
+#define AR_FILTER_DRAW_CIRCLES  1 // Draw circles
+#define AR_FILTER_DRAW_BOXES 	0 // Draw boxes
+#define AR_FILTER_SHOW_MEM      0 // Print object locations to terminal
 #define AR_FILTER_SAVE_FRAME    0 // Save a frame for post-processing
-#define AR_FILTER_MEASURE_FPS   1
+#define AR_FILTER_MEASURE_FPS   0
 #define AR_FILTER_CALIBRATE_CAM 0 // Calibrate camera
 #define AR_FILTER_WORLDPOS 		0 // Use world coordinates
 #define AR_FILTER_NOYAW 		1 // Output in body horizontal XY
 
 static void 			trackGreyObjects	(Mat& sourceFrame, Mat& greyFrame, vector<trackResults>* trackRes);
 static void             identifyObjects     (vector<trackResults> trackRes);
-static void 			addContour			(vector<Point> contour, vector<trackResults>* trackRes);
+static void 			addContour			(vector<Point> contour, vector<trackResults>* trackRes, int offsetX, int offsetY);
 static void 			cam2body 			(trackResults* trackRes);
 static void 			body2world 			(trackResults* trackRes, struct 	FloatEulers * eulerAngles);
 static bool 			rndRedGrayscale		(Mat& sourceFrame, Mat& destFrame, int sampleSize);
@@ -160,7 +162,6 @@ void active_random_filter(char* buff, int width, int height)
 	{
 		cam2body(&trackRes[r]);						       // Convert from camera angles to body angles (correct for roll)
 		body2world(&trackRes[r], eulerAngles); 		       // Convert from body angles to world coordinates (correct yaw and pitch)
-		printf("Area: %0.2f\n", trackRes[r].area_p);
 	}
 	identifyObjects(trackRes);
 #if AR_FILTER_MOD_VIDEO
@@ -300,7 +301,7 @@ void trackGreyObjects(Mat& sourceFrame, Mat& frameGrey, vector<trackResults>* tr
 		{
 			if(allContours[tc].size() > 0)
 			{
-				addContour(allContours[tc], trackRes);
+				addContour(allContours[tc], trackRes, 0, 0);
 			}
 		}
 	}else{
@@ -310,14 +311,14 @@ void trackGreyObjects(Mat& sourceFrame, Mat& frameGrey, vector<trackResults>* tr
 			if(cropAreas[r].x != 0 && cropAreas[r].width != 0)
 			{
 				contours.clear();
-#if AR_FILTER_MOD_VIDEO
+#if AR_FILTER_MOD_VIDEO && AR_FILTER_DRAW_BOXES
 				findContours(frameGrey(cropAreas[r]).clone(), contours, CV_RETR_EXTERNAL, CV_CHAIN_APPROX_SIMPLE);
 #else
 				findContours(frameGrey(cropAreas[r]), contours, CV_RETR_EXTERNAL, CV_CHAIN_APPROX_SIMPLE);
 #endif
 				for(unsigned int tc=0; tc < contours.size(); tc++)
 				{
-					addContour(contours[tc], trackRes);
+					addContour(contours[tc], trackRes, cropAreas[r].x, cropAreas[r].y);
 				}
 			}
 		}
@@ -328,7 +329,7 @@ void trackGreyObjects(Mat& sourceFrame, Mat& frameGrey, vector<trackResults>* tr
 	return;
 }
 
-void addContour(vector<Point> contour, vector<trackResults>* trackRes)
+void addContour(vector<Point> contour, vector<trackResults>* trackRes, int offsetX, int offsetY)
 {
 	double contArea = contourArea(contour);
 	if (contArea > (AR_FILTER_MIN_CROP_AREA * ispScalar * ispScalar))
@@ -341,8 +342,8 @@ void addContour(vector<Point> contour, vector<trackResults>* trackRes)
 		{
 			trackResults curRes;
 			vector<double> position(3);
-			curRes.x_p 		= objCentre.x + cropCol;
-			curRes.y_p 		= objCentre.y;
+			curRes.x_p 		= objCentre.x + cropCol + offsetX;
+			curRes.y_p 		= objCentre.y + offsetY;
 			//printf("Object at pixel location: %0.2f px %0.2f px\n",objCentre.x, objCentre.y);
 			curRes.area_p 	= objArea;
 			position 		= estimatePosition(curRes.x_p, curRes.y_p, curRes.area_p); // Estimate position in camera reference frame based on pixel location and area
@@ -950,6 +951,7 @@ void mod_video(Mat& sourceFrame, Mat& frameGrey)
 #endif // AR_FILTER_MEASURE_FPS
 	if(AR_FILTER_FLOOD_STYLE != AR_FILTER_FLOOD_CW || AR_FILTER_CV_CONTOURS)
 	{
+#if AR_FILTER_DRAW_BOXES
 		for(unsigned int r=0; r < cropAreas.size(); r++)
 		{
 			if(cropAreas[r].x != 0 && cropAreas[r].width != 0)
@@ -966,16 +968,18 @@ void mod_video(Mat& sourceFrame, Mat& frameGrey)
 				rectangle(sourceFrame, cropAreas[r], Scalar(0,255), 5);
 			}
 		}
+#endif
 	}else{
 #if AR_FILTER_DRAW_CONTOURS
 		drawContours(sourceFrame, allContours, -1, cvScalar(0,255), 3);
-#else
-		for(unsigned int r=0; r < trackRes.size(); r++)         // Convert angles & Write/Print output
-		{
-			circle(sourceFrame,cvPoint(trackRes[r].x_p - cropCol, trackRes[r].y_p), sqrt(trackRes[r].area_p / M_PI), cvScalar(0,255), 5);
-		}
-#endif // AR_FILTER_DRAW_CONTOURS
+#endif
 	}
+#if AR_FILTER_DRAW_CIRCLES
+	for(unsigned int r=0; r < trackRes.size(); r++)         // Convert angles & Write/Print output
+	{
+		circle(sourceFrame,cvPoint(trackRes[r].x_p - cropCol, trackRes[r].y_p), sqrt(trackRes[r].area_p / M_PI), cvScalar(0,255), 5);
+	}
+#endif // AR_FILTER_DRAW_CONTOURS
 	putText(sourceFrame, text, Point(10,sourceFrame.rows-100), FONT_HERSHEY_SIMPLEX, 2, Scalar(0,255,255), 5);
 	line(sourceFrame, Point(0,0), Point(0, sourceFrame.rows-1), Scalar(0,255), 5);
 	line(sourceFrame, Point(sourceFrame.cols - 1,0), Point(sourceFrame.cols - 1, sourceFrame.rows-1), Scalar(0,255), 5);

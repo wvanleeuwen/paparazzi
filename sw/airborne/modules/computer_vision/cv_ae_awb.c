@@ -92,18 +92,15 @@ void cv_ae_awb_periodic(void) {
     // Calculate AWB
     float avgU = (float) yuv_stats.awb_sum_U / (float) yuv_stats.nb_valid_Y;
     float avgV = (float) yuv_stats.awb_sum_V / (float) yuv_stats.nb_valid_Y;
-    float fTolerance = 0.2f;
+    float fTolerance = 0.05f;
     float targetAWB = 0.0f;
-#if CV_AE_AWB_VERBOSE
-    printf("U-V: %f\r\n", avgU - avgV);
-#endif
     if (avgU - avgV + targetAWB < -fTolerance) {
       // Want more red
 #if CV_AE_AWB_VERBOSE
-      printf("Too red... %f\r\n", avgU - avgV);
+      printf("Too red (%0.4f, %0.4f) %f\r\n", mt9f002.gain_blue, mt9f002.gain_red, avgU - avgV);
 #endif
-      mt9f002.gain_blue += 0.05;
-      mt9f002.gain_red  -= 0.05;
+      mt9f002.gain_blue -= 0.0075 * (avgU - avgV);
+      mt9f002.gain_red  += 0.0075 * (avgU - avgV);
       Bound(mt9f002.gain_blue, 2, 50);
       Bound(mt9f002.gain_red, 2, 50);
       mt9f002_set_gains(&mt9f002);
@@ -111,10 +108,10 @@ void cv_ae_awb_periodic(void) {
     else if(avgU - avgV + targetAWB > fTolerance) {
       // Want more blue
 #if CV_AE_AWB_VERBOSE
-      printf("Too blue... %f\r\n", avgU - avgV);
+      printf("Too blue (%0.4f, %0.4f) %f\r\n", mt9f002.gain_blue, mt9f002.gain_red, avgU - avgV);
 #endif
-      mt9f002.gain_blue -= 0.05;
-      mt9f002.gain_red  += 0.05;
+      mt9f002.gain_blue -= 0.0075 * (avgU - avgV);
+      mt9f002.gain_red  += 0.0075 * (avgU - avgV);
       Bound(mt9f002.gain_blue, 2, 50);
       Bound(mt9f002.gain_red, 2, 50);
       mt9f002_set_gains(&mt9f002);

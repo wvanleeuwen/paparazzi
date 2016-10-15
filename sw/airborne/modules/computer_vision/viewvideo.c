@@ -103,6 +103,18 @@ PRINT_CONFIG_VAR(VIEWVIDEO_FPS)
 #define VIEWVIDEO_VERBOSE 0
 #endif
 
+#ifndef VIEWVIDEO_WRITE_VIDEO
+#define VIEWVIDEO_WRITE_VIDEO 0
+#else
+#ifndef VIEWVIDEO_VIDEO_FILE
+#define VIEWVIDEO_VIDEO_FILE test
+#endif
+#endif
+
+#ifndef VIEWVIDEO_STREAM_VIDEO
+#define VIEWVIDEO_STREAM_VIDEO 1
+#endif
+
 #define printf_debug    if(VIEWVIDEO_VERBOSE > 0) printf
 
 #if VIEWVIDEO_USE_NETCAT
@@ -129,7 +141,9 @@ struct viewvideo_t viewvideo = {
 };
 
 static P7_H264_context_t videoEncoder;
+#if VIEWVIDEO_WRITE_VIDEO
 static FILE *video_file;
+#endif
 
 /**
  * Handles all the video streaming and saving of the image shots
@@ -194,8 +208,12 @@ struct image_t *viewvideo_function(struct image_t *img)
       else {
     	printf_debug("Got frame of size: %d\r\n", size);
     	printf_debug("Byte: %2X %2X %2X %2X %2X\n", h264Buffer[0],h264Buffer[1], h264Buffer[2], h264Buffer[3], h264Buffer[4]);
-        rtp_frame_send_h264(&video_sock, h264Buffer, size);
+#if VIEWVIDEO_STREAM_VIDEO
+    	rtp_frame_send_h264(&video_sock, h264Buffer, size);
+#endif
+#if VIEWVIDEO_WRITE_VIDEO
         fwrite(h264Buffer, size, 1, video_file);
+#endif
       }
       P7_H264_releaseOutputBuffer(&videoEncoder, h264BufferIndex);
     }
@@ -213,9 +231,20 @@ struct image_t *viewvideo_function(struct image_t *img)
 void viewvideo_init(void)
 {
   char save_name[512];
-  video_file = fopen("test.h264", "wb");
-
-
+#if VIEWVIDEO_WRITE_VIDEO
+  char video_name[512];
+  sprintf(video_name, "%s/%s.h264", STRINGIFY(VIEWVIDEO_SHOT_PATH), STRINGIFY(VIEWVIDEO_VIDEO_FILE));
+  int tries = 0;
+  int maxtries = 5;
+  do {
+	  video_file = fopen(video_name, "w");
+	  tries++;
+  } while(video_file == NULL && tries < maxtries);
+  if(video_file == NULL)
+  {
+	  printf("[viewvideo] Failed to create .h264 file.\n");
+  }
+#endif
   struct video_listener *listener = cv_add_to_device(&VIEWVIDEO_CAMERA, viewvideo_function);
   listener->maximum_fps = 0;
 
@@ -227,19 +256,22 @@ void viewvideo_init(void)
   P7_H264_open(&videoEncoder, VIEWVIDEO_CAMERA.thread.dev);
 
   // Open udp socket
+#if VIEWVIDEO_STREAM_VIDEO
   udp_socket_create(&video_sock, STRINGIFY(VIEWVIDEO_HOST), VIEWVIDEO_PORT_OUT, -1, VIEWVIDEO_BROADCAST);
   udp_socket_set_sendbuf(&video_sock, 1500*10);
-
   // Create an SDP file for the streaming
   sprintf(save_name, "%s/stream.sdp", STRINGIFY(VIEWVIDEO_SHOT_PATH));
   FILE *fp = fopen(save_name, "w");
   if (fp != NULL) {
-    fprintf(fp, "v=0\n");
-    fprintf(fp, "m=video %d RTP/AVP 26\n", (int)(VIEWVIDEO_PORT_OUT));
-    fprintf(fp, "c=IN IP4 0.0.0.0\n");
-    fclose(fp);
+	  fprintf(fp, "v=0\n");
+	  fprintf(fp, "m=video %d RTP/AVP 96\n", (int)(VIEWVIDEO_PORT_OUT));
+	  fprintf(fp, "a=rtpmap:96 H264\n");
+	  fprintf(fp, "a=framerate:%d\n", (int)(VIEWVIDEO_FPS));
+	  fprintf(fp, "c=IN IP4 0.0.0.0\n");
+	  fclose(fp);
   } else {
-    printf_debug("[viewvideo] Failed to create SDP file.\n");
+	  printf_debug("[viewvideo] Failed to create SDP file.\n");
   }
+#endif
 }
 
