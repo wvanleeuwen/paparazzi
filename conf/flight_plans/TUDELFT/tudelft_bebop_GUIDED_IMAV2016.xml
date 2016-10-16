@@ -108,13 +108,13 @@
     <block name="Approach bucket A">
       <call fun="Hover(NOM_FLIGHT_ALT)"/>
       <call fun="front_marker_approach()"/>
-      <exception cond="marker_lost == true" deroute="Find bucket"/>
+      <exception cond="marker_lost == true" deroute="Search bucket A"/>
     </block>
 
     <block name="Center bucket A">
       <call fun="Hover(NOM_FLIGHT_ALT)"/>
       <call fun="marker_center_land(0.05, 0, 0)"/>
-      <exception cond="0.1 > marker1.found_time" deroute="Find bucket"/>
+      <exception cond="0.1 > marker1.found_time" deroute="Search bucket A"/>
     </block>
 
     <block name="Release item A">
