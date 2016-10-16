@@ -9,7 +9,7 @@
         alt="2.0">
 
   <header>
-    #define NOM_FLIGHT_ALT 1.5  // nominal flight altitude
+    #define NOM_FLIGHT_ALT 1.7  // nominal flight altitude
     #include "guidance/guidance_h.h"
   </header>
 
@@ -57,34 +57,43 @@
       <call fun="fly_through_window()"/>
     </block>
 
-    <block name="Search item A">
+    <block name="Find and land at item A">
       <call_once fun="front_cam_set_x_offset(512)"/>
       <call_once fun="detector_disable_all()"/>
       <call_once fun="detector.item_bottom->active = true"/>
       <call_once fun="detector.item_front->active = true"/>
-      <call fun="Hover(NOM_FLIGHT_ALT)"/>
-      <call fun="front_marker_heading_change()"/>
+      <call_once fun="object_state = 0"/>
+      <call fun="go_to_object(false)"/>
     </block>
 
-    <block name="Approach item A">
-      <call fun="Hover(NOM_FLIGHT_ALT)"/>
-      <call fun="front_marker_approach()"/>
-      <exception cond="marker_lost == true" deroute="Search item A"/>
-      <exception cond="marker1.found_time > 1" deroute="Center item A"/>
-    </block>
+    <!--<block name="Search item A">-->
+      <!--<call_once fun="front_cam_set_x_offset(512)"/>-->
+      <!--<call_once fun="detector_disable_all()"/>-->
+      <!--<call_once fun="detector.item_bottom->active = true"/>-->
+      <!--<call_once fun="detector.item_front->active = true"/>-->
+      <!--<call fun="Hover(NOM_FLIGHT_ALT)"/>-->
+      <!--<call fun="front_marker_heading_change()"/>-->
+    <!--</block>-->
 
-    <block name="Center item A">
-      <call fun="Hover(NOM_FLIGHT_ALT)"/>
-      <call fun="marker_center_land(0.1, 0, 0)"/>
-      <exception cond="1 > marker1.found_time" deroute="Search item A"/>
-      <exception cond="marker1.found_time > 4" deroute="Land item A"/>
-    </block>
+    <!--<block name="Approach item A">-->
+      <!--<call fun="Hover(NOM_FLIGHT_ALT)"/>-->
+      <!--<call fun="front_marker_approach()"/>-->
+      <!--<exception cond="marker_lost == true" deroute="Search item A"/>-->
+      <!--<exception cond="marker1.found_time > 1" deroute="Center item A"/>-->
+    <!--</block>-->
 
-    <block name="Land item A">
-      <call fun="marker_center_land(0.05, 0.4, 0.5)"/>
-      <call_once fun="KillEngines()"/>
-      <!-- TODO: exception conditions -->
-    </block>
+    <!--<block name="Center item A">-->
+      <!--<call fun="Hover(NOM_FLIGHT_ALT)"/>-->
+      <!--<call fun="marker_center_land(0.1, 0, 0)"/>-->
+      <!--<exception cond="1 > marker1.found_time" deroute="Search item A"/>-->
+      <!--<exception cond="marker1.found_time > 4" deroute="Land item A"/>-->
+    <!--</block>-->
+
+    <!--<block name="Land item A">-->
+      <!--<call fun="marker_center_land(0.05, 0.4, 0.5)"/>-->
+      <!--<call_once fun="KillEngines()"/>-->
+      <!--&lt;!&ndash; TODO: exception conditions &ndash;&gt;-->
+    <!--</block>-->
 
     <block name="Grab item A">
       <call_once fun="close_gripper()"/>
@@ -96,26 +105,34 @@
       <!-- TODO: exception conditions (check if item is grabbed) -->
     </block>
 
-    <block name="Search bucket A">
+    <block name="Find and hover above bucket A">
       <call_once fun="front_cam_set_x_offset(512)"/>
       <call_once fun="detector_disable_all()"/>
       <call_once fun="detector.bucket_bottom->active = true"/>
       <call_once fun="detector.bucket_front->active = true"/>
-      <call fun="Hover(NOM_FLIGHT_ALT)"/>
-      <call fun="front_marker_heading_change()"/>
+      <call fun="go_to_object(false)"/>
     </block>
 
-    <block name="Approach bucket A">
-      <call fun="Hover(NOM_FLIGHT_ALT)"/>
-      <call fun="front_marker_approach()"/>
-      <exception cond="marker_lost == true" deroute="Search bucket A"/>
-    </block>
+    <!--<block name="Search bucket A">-->
+      <!--<call_once fun="front_cam_set_x_offset(512)"/>-->
+      <!--<call_once fun="detector_disable_all()"/>-->
+      <!--<call_once fun="detector.bucket_bottom->active = true"/>-->
+      <!--<call_once fun="detector.bucket_front->active = true"/>-->
+      <!--<call fun="Hover(NOM_FLIGHT_ALT)"/>-->
+      <!--<call fun="front_marker_heading_change()"/>-->
+    <!--</block>-->
 
-    <block name="Center bucket A">
-      <call fun="Hover(NOM_FLIGHT_ALT)"/>
-      <call fun="marker_center_land(0.05, 0, 0)"/>
-      <exception cond="0.1 > marker1.found_time" deroute="Search bucket A"/>
-    </block>
+    <!--<block name="Approach bucket A">-->
+      <!--<call fun="Hover(NOM_FLIGHT_ALT)"/>-->
+      <!--<call fun="front_marker_approach()"/>-->
+      <!--<exception cond="marker_lost == true" deroute="Search bucket A"/>-->
+    <!--</block>-->
+
+    <!--<block name="Center bucket A">-->
+      <!--<call fun="Hover(NOM_FLIGHT_ALT)"/>-->
+      <!--<call fun="marker_center_land(0.05, 0, 0)"/>-->
+      <!--<exception cond="0.1 > marker1.found_time" deroute="Search bucket A"/>-->
+    <!--</block>-->
 
     <block name="Release item A">
       <call_once fun="open_gripper()"/>
@@ -173,6 +190,7 @@
 
     <block name="Locate landing platform">
       <call_once fun="front_cam_set_x_offset(512)"/>
+      <!-- TODO -->
     </block>
 
     <block name="Approach landing platform">
