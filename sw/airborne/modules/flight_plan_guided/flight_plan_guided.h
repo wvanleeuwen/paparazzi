@@ -61,6 +61,7 @@ extern int8_t win_state;
 
 extern bool go_to_object(bool descent);
 extern int8_t object_state;
+extern int8_t object_retries;
 
 
 extern bool front_cam_set_x_offset(int offset);

@@ -289,6 +289,8 @@ bool marker_center_descent(float x_offset, float z_speed, float end_altitude) {
 
       guidance_h_set_guided_pos(pos_x, pos_y);
     }
+  } else {
+    guidance_v_set_guided_vz(0);
   }
 
   // Loop this function
@@ -309,6 +311,7 @@ bool close_gripper(void) {
 
 
 int8_t object_state;
+int8_t object_retries = 0;
 
 bool go_to_object(bool descent) {
   // If we are not in guided mode
@@ -325,6 +328,7 @@ bool go_to_object(bool descent) {
       // Initialize
 
       guidance_v_set_guided_z(-NOM_FLIGHT_ALT);
+      object_retries--;
 
       object_state++; // Go to next state + switch fallthrough
     case 1:
@@ -375,7 +379,18 @@ bool go_to_object(bool descent) {
 
       object_state++; // Go to next state + switch fallthrough
     case 4:
-      // TODO: land
+
+      if (marker.found_time < 4) {
+        object_state = 3;
+        break;
+      }
+
+      marker_center_descent(0.05, 0.4, 0);
+
+      if (marker.found_time < 1) {
+        object_state = 0;
+        break;
+      }
 
       return false;
   }
