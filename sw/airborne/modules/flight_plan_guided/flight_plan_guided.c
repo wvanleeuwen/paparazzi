@@ -312,6 +312,50 @@ bool close_gripper(void) {
   return false;
 }
 
+
+int8_t object_state;
+
+bool go_to_object(bool land) {
+  // If we are not in guided mode
+  if (autopilot_mode != AP_MODE_GUIDED) {
+    // Reset the approach strategy and loop
+    object_state = 0;
+    return true;
+  }
+
+  switch (object_state) {
+    case 0: // Initialize
+      // TODO: set guided altitude?
+      object_state++; // Go to next state + switch fallthrough
+    case 1: // Search for the marker with the front camera
+      // TODO: more advanced strategy than just simply rotating to right
+      if (front_marker_heading_change()) { break; }
+
+      object_state++; // Go to next state + switch fallthrough
+    case 2:
+      if (front_marker_approach()) { break; }
+
+      // TODO: front marker lost, go to state 1
+
+      object_state++; // Go to next state + switch fallthrough
+    case 3:
+      if (marker_center_land(0.05, 0, 0)) { break; }
+
+      // TODO: marker lost go back, etc..
+
+      // If we don't want to land, job is done and we can continue
+      if (!land) { return false; }
+
+      object_state++; // Go to next state + switch fallthrough
+    case 4:
+      // TODO: land
+
+      return false;
+  }
+
+  return true;
+}
+
 int8_t win_state;
 
 bool fly_through_window(void) {
