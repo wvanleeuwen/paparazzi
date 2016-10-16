@@ -28,6 +28,13 @@
 
 #include <std.h>
 
+struct range_finders_ {
+  int16_t front;
+  int16_t right;
+  int16_t left;
+  int16_t back;
+};
+
 extern bool marker_lost;
 
 // Module functions
@@ -59,5 +66,8 @@ extern bool fly_through_window(void);
 extern int8_t win_state;
 
 extern bool front_cam_set_x_offset(int offset);
+
+extern void range_sensor_force_field(float *vel_body_x, float *vel_body_y, struct range_finders_ range_finders,
+                                     int16_t avoid_inner_border, int16_t avoid_outer_border, float min_vel_command, float max_vel_command);
 
 #endif

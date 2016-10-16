@@ -52,8 +52,18 @@
 
 bool marker_lost;
 
-void flight_plan_guided_init(void) {
+#include "subsystems/abi.h"
+#ifndef RANGE_SENSORS_ABI_ID
+#define RANGE_SENSORS_ABI_ID ABI_BROADCAST
+#endif
+static abi_event range_sensors_ev;
+static void range_sensors_cb(uint8_t sender_id __attribute__((unused)),
+                             int16_t range_front, int16_t range_right, int16_t range_back, int16_t range_left);
+
+void flight_plan_guided_init(void)
+{
   marker_lost = true;
+  AbiBindMsgRANGE_SENSORS(RANGE_SENSORS_ABI_ID, &range_sensors_ev, &range_sensors_cb);
 } // Dummy
 
 
@@ -380,4 +390,85 @@ bool fly_through_window(void) {
     }
 
   return true;
+}
+
+void range_sensor_force_field(float *vel_body_x, float *vel_body_y, struct range_finders_ range_finders,
+                              int16_t avoid_inner_border, int16_t avoid_outer_border, float min_vel_command, float max_vel_command)
+{
+
+  int16_t difference_inner_outer = avoid_outer_border - avoid_inner_border;
+
+
+  // Velocity commands
+  float avoid_x_command = *vel_body_x;
+  float avoid_y_command = *vel_body_y;
+
+  // Balance avoidance command for y direction (sideways)
+
+  if (range_finders.right < avoid_outer_border) {
+    if (range_finders.right > avoid_inner_border) {
+      avoid_y_command -= (max_vel_command - min_vel_command) *
+                         ((float)avoid_outer_border - (float)range_finders.right)
+                         / (float)difference_inner_outer;
+    } else {
+      avoid_y_command -= max_vel_command;
+    }
+  }
+  if (range_finders.left < avoid_outer_border) {
+    if (range_finders.left > avoid_inner_border) {
+      avoid_y_command += (max_vel_command - min_vel_command) *
+                         ((float)avoid_outer_border - (float)range_finders.left)
+                         / (float)difference_inner_outer;
+    } else {
+      avoid_y_command += max_vel_command;
+    }
+  }
+
+  // balance avoidance command for x direction (forward/backward)
+  if (range_finders.front < avoid_outer_border) {
+    //from stereo camera TODO: add this once the stereocamera is attached
+    if (range_finders.front > avoid_inner_border)
+      avoid_y_command += (max_vel_command - min_vel_command) *
+                         ((float)avoid_outer_border - (float)range_finders.front)
+                         / (float)difference_inner_outer;
+  } else {
+    avoid_y_command += max_vel_command;
+  }
+
+
+  if (range_finders.back < avoid_outer_border) {
+    if (range_finders.back > avoid_inner_border) {
+      avoid_x_command += (max_vel_command - min_vel_command) *
+                         ((float)avoid_outer_border - (float)range_finders.back)
+                         / (float)difference_inner_outer;
+    } else {
+      avoid_x_command += max_vel_command;
+    }
+  }
+
+  *vel_body_x = avoid_x_command;
+  *vel_body_y = avoid_y_command;
+}
+
+static void range_sensors_cb(uint8_t sender_id __attribute__((unused)),
+                             int16_t range_front, int16_t range_right, int16_t range_back, int16_t range_left)
+{
+
+  struct range_finders_ range_finders;
+// save range finders values
+  range_finders.front = range_front;
+  range_finders.right = range_right;
+  range_finders.left = range_left;
+  range_finders.back = range_back;
+
+
+//add extra velocity command to avoid walls based on range sensors
+  float vel_offset_body_x = 0.0f;
+  float vel_offset_body_y = 0.0f;
+
+  range_sensor_force_field(&vel_offset_body_x, &vel_offset_body_y, range_finders, 800, 1200, 0.0f, 0.3f);
+
+// calculate velocity offset for guidance
+  guidance_h_set_speed_offset(vel_offset_body_x, vel_offset_body_y);
+
 }
