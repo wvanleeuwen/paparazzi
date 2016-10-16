@@ -36,6 +36,7 @@ struct range_finders_ {
 };
 
 extern bool marker_lost;
+extern struct range_finders_ range_finders;
 
 // Module functions
 void flight_plan_guided_init(void);
@@ -67,7 +68,10 @@ extern int8_t win_state;
 
 extern bool front_cam_set_x_offset(int offset);
 
-extern void range_sensor_force_field(float *vel_body_x, float *vel_body_y, struct range_finders_ range_finders,
+extern void range_sensor_force_field(float *vel_body_x, float *vel_body_y,
                                      int16_t avoid_inner_border, int16_t avoid_outer_border, float min_vel_command, float max_vel_command);
+
+extern bool range_sensor_wall_following(float forward_velocity, float wanted_distance_from_wall, bool right);
+
 
 #endif

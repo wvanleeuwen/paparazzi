@@ -53,6 +53,8 @@
 bool marker_lost;
 
 #include "subsystems/abi.h"
+ struct range_finders_ range_finders;
+
 #ifndef RANGE_SENSORS_ABI_ID
 #define RANGE_SENSORS_ABI_ID ABI_BROADCAST
 #endif
@@ -392,8 +394,53 @@ bool fly_through_window(void) {
   return true;
 }
 
-void range_sensor_force_field(float *vel_body_x, float *vel_body_y, struct range_finders_ range_finders,
-                              int16_t avoid_inner_border, int16_t avoid_outer_border, float min_vel_command, float max_vel_command)
+bool range_sensor_wall_following(float forward_velocity, float wanted_distance_from_wall, bool right)
+{
+	int16_t actual_distance_from_wall = 0;
+	float vel_body_x_command = forward_velocity;
+	float vel_body_y_command = 0.0f;
+    float unsigned_difference = 0.0f;
+    float signed_difference = 0.0f;
+
+    float sign = 0.0f;
+
+	float wall_following_bandwidth = 0.2f;
+	float max_velocity_command = 0.3f;
+
+	if(right)
+	{
+		actual_distance_from_wall = (float)range_finders.right/1000;
+		unsigned_difference = fabs(wanted_distance_from_wall -actual_distance_from_wall);
+		signed_difference = fabs(wanted_distance_from_wall -actual_distance_from_wall);
+		sign = signed_difference/unsigned_difference;
+
+		if(unsigned_difference > wall_following_bandwidth){
+			vel_body_y_command = -1* sign * max_velocity_command;
+		}else
+		{
+			vel_body_y_command = max_velocity_command * -1 * signed_difference / wall_following_bandwidth;
+		}
+
+	}else
+	{
+		actual_distance_from_wall = (float)range_finders.left/1000;
+		unsigned_difference = fabs(wanted_distance_from_wall -actual_distance_from_wall);
+		signed_difference = fabs(wanted_distance_from_wall -actual_distance_from_wall);
+		sign = signed_difference/unsigned_difference;
+
+		if(unsigned_difference > wall_following_bandwidth){
+			vel_body_y_command =  sign * max_velocity_command;
+		}else
+		{
+			vel_body_y_command = max_velocity_command  * signed_difference / wall_following_bandwidth;
+		}
+
+	}
+	guidance_h_set_guided_body_vel(vel_body_x_command, vel_body_y_command);
+return true;
+}
+
+void range_sensor_force_field(float *vel_body_x, float *vel_body_y, int16_t avoid_inner_border, int16_t avoid_outer_border, float min_vel_command, float max_vel_command)
 {
 
   int16_t difference_inner_outer = avoid_outer_border - avoid_inner_border;
@@ -448,13 +495,13 @@ void range_sensor_force_field(float *vel_body_x, float *vel_body_y, struct range
 
   *vel_body_x = avoid_x_command;
   *vel_body_y = avoid_y_command;
+
 }
 
 static void range_sensors_cb(uint8_t sender_id __attribute__((unused)),
                              int16_t range_front, int16_t range_right, int16_t range_back, int16_t range_left)
 {
 
-  struct range_finders_ range_finders;
 // save range finders values
   range_finders.front = range_front;
   range_finders.right = range_right;
@@ -466,7 +513,7 @@ static void range_sensors_cb(uint8_t sender_id __attribute__((unused)),
   float vel_offset_body_x = 0.0f;
   float vel_offset_body_y = 0.0f;
 
-  range_sensor_force_field(&vel_offset_body_x, &vel_offset_body_y, range_finders, 800, 1200, 0.0f, 0.3f);
+  range_sensor_force_field(&vel_offset_body_x, &vel_offset_body_y, 800, 1200, 0.0f, 0.3f);
 
 // calculate velocity offset for guidance
   guidance_h_set_speed_offset(vel_offset_body_x, vel_offset_body_y);

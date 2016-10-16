@@ -768,11 +768,9 @@ void guidance_h_set_speed_offset(float vx, float vy)
   if (guidance_h.mode == GUIDANCE_H_MODE_GUIDED) {
 
     // update offset velocity based on range sensors
-    float vel_offset_body_x = 0.0f;
-    float vel_offset_body_y =  0.0f;
     float psi = stateGetNedToBodyEulers_f()->psi;
-    float vel_offset_NED_x_f =  cosf(-psi) * vel_offset_body_x + sinf(-psi) * vel_offset_body_y;
-    float vel_offset_NED_y_f = - sinf(-psi) * vel_offset_body_x + cosf(-psi) * vel_offset_body_y;
+    float vel_offset_NED_x_f =  cosf(-psi) * vx + sinf(-psi) * vy;
+    float vel_offset_NED_y_f = - sinf(-psi) * vx + cosf(-psi) * vy;
     // add speed offset (by range sensors)
     guidance_h_speed_offset.x = SPEED_BFP_OF_REAL(vel_offset_NED_x_f);
     guidance_h_speed_offset.y = SPEED_BFP_OF_REAL(vel_offset_NED_y_f);
