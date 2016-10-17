@@ -146,7 +146,7 @@
       <call_once fun="front_cam_set_x_offset(512)"/>
       <call_once fun="detector_disable_all()"/>
       <call_once fun="detector.front_blue_item->active = true"/>
-      <!--<call_once fun="detector.bottom_blue_item->active = true"/>-->
+      <call_once fun="detector.bottom_blue_item->active = true"/>
       <call_once fun="object_state = 0"/>
       <call fun="go_to_object(false)"/>
     </block>
@@ -163,7 +163,7 @@
       <call_once fun="front_cam_set_x_offset(512)"/>
       <call_once fun="detector_disable_all()"/>
       <call_once fun="detector.front_blue_bucket->active = true"/>
-      <!--<call_once fun="detector.bottom_blue_bucket->active = true"/>-->
+      <call_once fun="detector.bottom_blue_bucket->active = true"/>
       <call fun="go_to_object(false)"/>
     </block>
 

@@ -183,6 +183,32 @@ static struct image_t *detect_front_blue_item(struct image_t *img) {
 }
 
 
+static struct image_t *detect_bottom_blue_item(struct image_t *img) {
+
+  // Color Filter
+  struct image_filter_t filter;
+  filter.y_min = 52;
+  filter.y_max = 205;
+  filter.u_min = 171;
+  filter.u_max = 255;
+  filter.v_min = 69;
+  filter.v_max = 175;
+
+  int threshold = 50;
+
+  struct Marker marker = single_blob_finder(img, &filter, threshold);
+
+  if (marker.detected) {
+    marker_detected(&marker1, img, marker.pixel.x, marker.pixel.y);
+    geo_locate_marker(&marker1, img);
+  } else {
+    marker_not_detected(&marker1, img);
+  }
+
+  return NULL;
+}
+
+
 static struct image_t *detect_front_blue_bucket(struct image_t *img) {
 
   // Color Filter
@@ -202,6 +228,32 @@ static struct image_t *detect_front_blue_bucket(struct image_t *img) {
     marker_detected(&marker2, img, marker.pixel.x, marker.pixel.y);
   } else {
     marker_not_detected(&marker2, img);
+  }
+
+  return NULL;
+}
+
+
+static struct image_t *detect_bottom_blue_bucket(struct image_t *img) {
+
+  // Color Filter
+  struct image_filter_t filter;
+  filter.y_min = 12;
+  filter.y_max = 126;
+  filter.u_min = 138;
+  filter.u_max = 252;
+  filter.v_min = 89;
+  filter.v_max = 139;
+
+  int threshold = 50;
+
+  struct Marker marker = single_blob_finder(img, &filter, threshold);
+
+  if (marker.detected) {
+    marker_detected(&marker1, img, marker.pixel.x, marker.pixel.y);
+    geo_locate_marker(&marker1, img);
+  } else {
+    marker_not_detected(&marker1, img);
   }
 
   return NULL;
@@ -233,6 +285,32 @@ static struct image_t *detect_front_red_item(struct image_t *img) {
 }
 
 
+static struct image_t *detect_bottom_red_item(struct image_t *img) {
+
+  // Color Filter
+  struct image_filter_t filter;
+  filter.y_min = 52;
+  filter.y_max = 205;
+  filter.u_min = 171;
+  filter.u_max = 255;
+  filter.v_min = 69;
+  filter.v_max = 175;
+
+  int threshold = 50;
+
+  struct Marker marker = single_blob_finder(img, &filter, threshold);
+
+  if (marker.detected) {
+    marker_detected(&marker1, img, marker.pixel.x, marker.pixel.y);
+    geo_locate_marker(&marker1, img);
+  } else {
+    marker_not_detected(&marker1, img);
+  }
+
+  return NULL;
+}
+
+
 static struct image_t *detect_front_red_bucket(struct image_t *img) {
 
   // Color Filter
@@ -252,6 +330,32 @@ static struct image_t *detect_front_red_bucket(struct image_t *img) {
     marker_detected(&marker2, img, marker.pixel.x, marker.pixel.y);
   } else {
     marker_not_detected(&marker2, img);
+  }
+
+  return NULL;
+}
+
+
+static struct image_t *detect_bottom_red_bucket(struct image_t *img) {
+
+  // Color Filter
+  struct image_filter_t filter;
+  filter.y_min = 12;
+  filter.y_max = 233;
+  filter.u_min = 61;
+  filter.u_max = 255;
+  filter.v_min = 144;
+  filter.v_max = 255;
+
+  int threshold = 50;
+
+  struct Marker marker = single_blob_finder(img, &filter, threshold);
+
+  if (marker.detected) {
+    marker_detected(&marker1, img, marker.pixel.x, marker.pixel.y);
+    geo_locate_marker(&marker1, img);
+  } else {
+    marker_not_detected(&marker1, img);
   }
 
   return NULL;
@@ -396,9 +500,9 @@ static struct image_t *draw_target_marker2(struct image_t *img) {
 
 void detector_disable_all() {
   detector.front_blue_item->active = false;
-//  detector.bottom_blue_item->active = false;
+  detector.bottom_blue_item->active = false;
   detector.front_blue_bucket->active = false;
-//  detector.bottom_blue_bucket->active = false;
+  detector.bottom_blue_bucket->active = false;
   detector.front_red_item->active = false;
   detector.bottom_red_item->active = false;
   detector.front_red_bucket->active = false;
@@ -419,8 +523,10 @@ void detector_init(void) {
   detector.helipad_bottom = cv_add_to_device_async(&DETECTOR_CAMERA1, detect_helipad_marker, 5);
   detector.helipad_bottom->maximum_fps = 20;
 
-  detector.bottom_red_item = cv_add_to_device(&DETECTOR_CAMERA1, detect_bottom_item);
-  detector.bottom_red_bucket = cv_add_to_device(&DETECTOR_CAMERA1, detect_bottom_bucket);
+  detector.bottom_red_item = cv_add_to_device(&DETECTOR_CAMERA1, detect_bottom_red_item);
+  detector.bottom_red_bucket = cv_add_to_device(&DETECTOR_CAMERA1, detect_bottom_red_bucket);
+  detector.bottom_blue_item = cv_add_to_device(&DETECTOR_CAMERA1, detect_bottom_blue_item);
+  detector.bottom_blue_bucket = cv_add_to_device(&DETECTOR_CAMERA1, detect_bottom_blue_bucket);
 
   cv_add_to_device(&DETECTOR_CAMERA1, draw_target_marker1);
 
