@@ -633,6 +633,7 @@ static struct image_t *snake_gate_detection_func(struct image_t *img)
           check_door(img, gen_gate, &gen_gate.q, &gen_gate.n_sides);
         }
 
+        // TODO: perhaps for door, n_sides >= 2:
         if(gen_gate.n_sides > 2 && gen_gate.q > best_gate.q) {
           // store the information in the gate:
           best_gate = gen_gate;
