@@ -174,12 +174,15 @@ void opticflow_module_run(void)
  */
 struct image_t *opticflow_module_calc(struct image_t *img)
 {
+
   // Copy the state
   // TODO : put accelerometer values at pose of img timestamp
   struct opticflow_state_t temp_state;
   struct pose_t pose = get_rotation_at_timestamp(img->pprz_ts);
   temp_state = opticflow_state;
   temp_state.rates = pose.rates;
+
+  opticflow_state.agl = -stateGetPositionNed_f()->z;
 
   // Do the optical flow calculation
   struct opticflow_result_t temp_result = {}; // new initialization

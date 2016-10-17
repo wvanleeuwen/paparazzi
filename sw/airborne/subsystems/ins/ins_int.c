@@ -348,7 +348,7 @@ static void baro_cb(uint8_t __attribute__((unused)) sender_id, float pressure)
         ins_update_from_vff();
       } else {
         ins_int.baro_z = -pprz_isa_height_of_pressure(low_pass_pressure, ins_int.qfe) - INS_BARO_AGL_OFFSET;
-        printf("pressure: %f, mean_pressure: %f, %f %f\n", pressure, low_pass_pressure, ins_int.qfe, ins_int.baro_z);
+//        printf("pressure: %f, mean_pressure: %f, %f %f\n", pressure, low_pass_pressure, ins_int.qfe, ins_int.baro_z);
   #if USE_VFF_EXTENDED
         vff_update_baro(ins_int.baro_z);
   #else

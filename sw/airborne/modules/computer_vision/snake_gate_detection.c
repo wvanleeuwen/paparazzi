@@ -71,24 +71,24 @@ struct video_listener *listener = NULL;
 #define RED 0
 #define BLUE 1
 
-#define WINDOW_COLOR RED
+#define WINDOW_COLOR BLUE
 
 // Filter Settings
 #if WINDOW_COLOR == RED
-uint8_t color_lum_min = 60;// 60;//105;
-uint8_t color_lum_max = 255;//228;//205;
-uint8_t color_cb_min  = 90;//66;//52;
-uint8_t color_cb_max  = 130;//194;//140;
-uint8_t color_cr_min  = 145;//140;//180;
-uint8_t color_cr_max  = 200;//230;//255;
+uint8_t color_lum_min = 75;// 60;//105;
+uint8_t color_lum_max = 197;//228;//205;
+uint8_t color_cb_min  = 0;//66;//52;
+uint8_t color_cb_max  = 156;//194;//140;
+uint8_t color_cr_min  = 127;//140;//180;
+uint8_t color_cr_max  = 255;//230;//255;
 #else
 // TODO find color scheme for blue
-uint8_t color_lum_min = 60;// 60;//105;
-uint8_t color_lum_max = 255;//228;//205;
-uint8_t color_cb_min  = 100;//140;//180;
+uint8_t color_lum_min = 70;// 60;//105;
+uint8_t color_lum_max = 128;//228;//205;
+uint8_t color_cb_min  = 150;//140;//180;
 uint8_t color_cb_max  = 255;//230;//255;
-uint8_t color_cr_min  = 20;//66;//52;
-uint8_t color_cr_max  = 100;//194;//140;
+uint8_t color_cr_min  = 0;//66;//52;
+uint8_t color_cr_max  = 123;//194;//140;
 #endif
 
 // Gate detection settings:
