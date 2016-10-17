@@ -280,8 +280,8 @@
     <!-- Bad weather -->
     <!-- define name="MAX_BANK" value="32" unit="deg"/ -->
 
-    <define name="PGAIN" value="260"/>
-    <define name="DGAIN" value="240"/>
+    <define name="PGAIN" value="130"/>
+    <define name="DGAIN" value="130"/>
     <define name="IGAIN" value="20"/>
   </section>
 

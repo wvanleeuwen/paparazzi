@@ -349,10 +349,12 @@ static struct image_t *detect_bottom_red_bucket(struct image_t *img) {
 
   int threshold = 50;
 
+  img->h = 120;
   struct Marker marker = single_blob_finder(img, &filter, threshold);
+  img->h = 240;
 
   if (marker.detected) {
-    marker_detected(&marker1, img, marker.pixel.x, marker.pixel.y);
+    marker_detected(&marker1, img, marker.pixel.x, marker.pixel.y*2);
     geo_locate_marker(&marker1, img);
   } else {
     marker_not_detected(&marker1, img);

@@ -225,6 +225,10 @@
       <while cond="1"/>
     </block>
 
+    <block name="TESTING - Open gripper and return to hover">
+      <call_once fun="open_gripper()"/>
+      <deroute block="TESTING - Hover over red bucket"/>
+    </block>
 
   </blocks>
 </flight_plan>
