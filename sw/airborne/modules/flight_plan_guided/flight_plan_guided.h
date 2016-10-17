@@ -35,6 +35,7 @@ struct range_finders_ {
   int16_t back;
 };
 
+extern float marker_err;
 extern bool marker_lost;
 extern struct range_finders_ range_finders;
 
@@ -58,13 +59,18 @@ extern bool Land(float end_altitude);
 extern bool close_gripper(void);
 extern bool open_gripper(void);
 
-extern bool bucket_heading_change(float altitude);
-extern bool bucket_approach(float altitude);
+extern bool front_marker_heading_change(void);
+extern bool front_marker_approach(void);
 
-extern bool marker_center_land(float x_offset, float z_speed, float end_altitude);
+extern bool marker_center_descent(float x_offset, float z_speed, float end_altitude);
 
 extern bool fly_through_window(void);
 extern int8_t win_state;
+
+extern bool go_to_object(bool descent);
+extern int8_t object_state;
+extern int8_t object_retries;
+
 
 extern bool front_cam_set_x_offset(int offset);
 

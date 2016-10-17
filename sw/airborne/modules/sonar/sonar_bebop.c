@@ -156,7 +156,7 @@ static void *sonar_bebop_read(void *data __attribute__((unused))) {
       peek_distance = 0;
     }
 
-    sonar_bebop.distance = peek_distance / 1000.0;
+    sonar_bebop.distance = peek_distance * 0.0010625;
 
     if (obstacle_mode == true) {
       float sonar_diff = (sonar_bebop.distance - prev_sent_distance);
