@@ -97,6 +97,7 @@ int min_pixel_size = 40;  //100;
 float min_gate_quality = 0.15;
 float gate_thickness = 0; //0.05;//0.10;//
 float angle_to_gate = 0;
+int door = 0;
 
 // TODO KIRK find correct
 const float gate_size_m = 1.1;   // gate size in meters
@@ -171,26 +172,48 @@ static void draw_gate(struct image_t *im, struct gate_img gate)
 {
   // draw four lines on the image:
   struct point_t from, to;
-  from.x = (gate.x - gate.sz);
-  from.y = gate.y - gate.sz;
-  to.x = (gate.x - gate.sz);
-  to.y = gate.y + gate.sz;
-  image_draw_line(im, &from, &to);
-  from.x = (gate.x - gate.sz);
-  from.y = gate.y + gate.sz;
-  to.x = (gate.x + gate.sz);
-  to.y = gate.y + gate.sz;
-  image_draw_line(im, &from, &to);
-  from.x = (gate.x + gate.sz);
-  from.y = gate.y + gate.sz;
-  to.x = (gate.x + gate.sz);
-  to.y = gate.y - gate.sz;
-  image_draw_line(im, &from, &to);
-  from.x = (gate.x + gate.sz);
-  from.y = gate.y - gate.sz;
-  to.x = (gate.x - gate.sz);
-  to.y = gate.y - gate.sz;
-  image_draw_line(im, &from, &to);
+  if(!door)
+  {
+    from.x = (gate.x - gate.sz);
+    from.y = gate.y - gate.sz;
+    to.x = (gate.x - gate.sz);
+    to.y = gate.y + gate.sz;
+    image_draw_line(im, &from, &to);
+    from.x = (gate.x - gate.sz);
+    from.y = gate.y + gate.sz;
+    to.x = (gate.x + gate.sz);
+    to.y = gate.y + gate.sz;
+    image_draw_line(im, &from, &to);
+    from.x = (gate.x + gate.sz);
+    from.y = gate.y + gate.sz;
+    to.x = (gate.x + gate.sz);
+    to.y = gate.y - gate.sz;
+    image_draw_line(im, &from, &to);
+    from.x = (gate.x + gate.sz);
+    from.y = gate.y - gate.sz;
+    to.x = (gate.x - gate.sz);
+    to.y = gate.y - gate.sz;
+    image_draw_line(im, &from, &to);
+  }
+  else
+  {
+    // only draw three lines for door:
+    from.x = (gate.x - gate.sz);
+    from.y = gate.y - gate.sz_left;
+    to.x = (gate.x - gate.sz);
+    to.y = gate.y + gate.sz_left;
+    image_draw_line(im, &from, &to);
+    from.x = (gate.x - gate.sz);
+    from.y = gate.y + gate.sz_left;
+    to.x = (gate.x + gate.sz);
+    to.y = gate.y + gate.sz_left;
+    image_draw_line(im, &from, &to);
+    from.x = (gate.x + gate.sz);
+    from.y = gate.y + gate.sz_left;
+    to.x = (gate.x + gate.sz);
+    to.y = gate.y - gate.sz_left;
+    image_draw_line(im, &from, &to);
+  }
 }
 
 static void check_line(struct image_t *im, struct point_t Q1, struct point_t Q2, int *n_points, int *n_colored_points)
@@ -207,7 +230,7 @@ static void check_line(struct image_t *im, struct point_t Q1, struct point_t Q2,
     x = (int)(t * Q1.x + (1.0f - t) * Q2.x);
     y = (int)(t * Q1.y + (1.0f - t) * Q2.y);
 
-    if (x >= 0 && x < im->w && y >= 0 && y < im->h) {
+    if (x >= 0 && x < im->h && y >= 0 && y < im->w) {
       // augment number of checked points:
       (*n_points)++;
 
@@ -218,8 +241,6 @@ static void check_line(struct image_t *im, struct point_t Q1, struct point_t Q2,
     }
   }
 }
-
-// TODO: make check_door
 
 static void check_gate(struct image_t *im, struct gate_img gate, float *quality, int *n_sides)
 {
@@ -285,6 +306,63 @@ static void check_gate(struct image_t *im, struct gate_img gate, float *quality,
     (*quality) = ((float) n_colored_points) / ((float) n_points);
   }
 }
+
+static void check_door(struct image_t *im, struct gate_img gate, float *quality, int *n_sides)
+{
+  int n_points, n_colored_points;
+  n_points = 0;
+  n_colored_points = 0;
+  int np, nc;
+  // how much of the side should be visible to count as a detected side?
+  float min_ratio_side = 0.30;
+  (*n_sides) = 0;
+
+  // check the three lines of which the door consists:
+  struct point_t from, to;
+
+  // Snake should find longer up/down elements for a door (x-direction):
+  // Only check 3 sides:
+  from.x = gate.x - gate.sz;
+  from.y = gate.y - gate.sz_left;
+  to.x = gate.x - gate.sz;
+  to.y = gate.y + gate.sz_left;
+  check_line(im, from, to, &np, &nc);
+  if ((float) nc / (float) np >= min_ratio_side) {
+    (*n_sides)++;
+  }
+  n_points += np;
+  n_colored_points += nc;
+
+  from.x = gate.x - gate.sz;
+  from.y = gate.y + gate.sz_left;
+  to.x = gate.x + gate.sz;
+  to.y = gate.y + gate.sz_left;
+  check_line(im, from, to, &np, &nc);
+  if ((float) nc / (float) np >= min_ratio_side) {
+    (*n_sides)++;
+  }
+  n_points += np;
+  n_colored_points += nc;
+
+  from.x = gate.x + gate.sz;
+  from.y = gate.y + gate.sz_left;
+  to.x = gate.x + gate.sz;
+  to.y = gate.y - gate.sz_left;
+  check_line(im, from, to, &np, &nc);
+  if ((float) nc / (float) np >= min_ratio_side) {
+    (*n_sides)++;
+  }
+  n_points += np;
+  n_colored_points += nc;
+
+  // The quality is the ratio of colored points / number of points:
+  if (n_points == 0) {
+    (*quality) = 0;
+  } else {
+    (*quality) = ((float) n_colored_points) / ((float) n_points);
+  }
+}
+
 
 /* y direction is left right */
 static void snake_left_right(struct image_t *im, int x, int y, int *y_low, int *y_high)
@@ -463,8 +541,16 @@ static struct image_t *snake_gate_detection_func(struct image_t *img)
           gates[n_gates].x = x;
           gates[n_gates].y = y;
           gates[n_gates].sz = sz / 2;
-          // check the gate quality:
-          check_gate(img, gates[n_gates], &gates[n_gates].q, &gates[n_gates].n_sides);
+          if(!door)
+          {
+            // check the gate quality:
+            check_gate(img, gates[n_gates], &gates[n_gates].q, &gates[n_gates].n_sides);
+          }
+          else
+          {
+            // check the door quality:
+            check_door(img, gates[n_gates], &gates[n_gates].q, &gates[n_gates].n_sides);
+          }
           // only increment the number of gates if the quality is sufficient
           // else it will be overwritten by the next one
           if (gates[n_gates].q > min_gate_quality && gates[n_gates].q > best_quality) {
@@ -479,8 +565,15 @@ static struct image_t *snake_gate_detection_func(struct image_t *img)
           gates[n_gates].x = x;
           gates[n_gates].y = y;
           gates[n_gates].sz = sz / 2;
-          // check the gate quality:
-          check_gate(img, gates[n_gates], &gates[n_gates].q, &gates[n_gates].n_sides);
+          if(!door)
+          {
+            // check the gate quality:
+            check_gate(img, gates[n_gates], &gates[n_gates].q, &gates[n_gates].n_sides);
+          }
+          else
+          {
+            check_door(img, gates[n_gates], &gates[n_gates].q, &gates[n_gates].n_sides);            
+          }
           // only increment the number of gates if the quality is sufficient
           // else it will be overwritten by the next one
           if (gates[n_gates].q > min_gate_quality && gates[n_gates].q > best_quality) {
@@ -529,8 +622,16 @@ static struct image_t *snake_gate_detection_func(struct image_t *img)
         // use best gate a seed for elite population
         gen_gate = gates[gate_nr];
         // detect the gate:
-        gate_detection(img, &gen_gate.x, &gen_gate.y, &gen_gate.sz, &fitness, min_x, min_y, max_x, max_y, clock_arms, &angle_1, &angle_2, &angle_to_gate, &gates[gate_nr].sz_left, &gates[gate_nr].sz_right);
-        check_gate(img, gen_gate, &gen_gate.q, &gen_gate.n_sides);
+        // TODO: instead of define, use a parameter to decide on SHAPE:
+        gate_detection(img, &gen_gate.x, &gen_gate.y, &gen_gate.sz, &fitness, min_x, min_y, max_x, max_y, clock_arms, &angle_1, &angle_2, &angle_to_gate, &gen_gate.sz_left, &gen_gate.sz_right);
+        if(!door)
+        {
+          check_gate(img, gen_gate, &gen_gate.q, &gen_gate.n_sides);
+        }
+        else
+        {
+          check_door(img, gen_gate, &gen_gate.q, &gen_gate.n_sides);
+        }
 
         if(gen_gate.n_sides > 2 && gen_gate.q > best_gate.q) {
           // store the information in the gate:
