@@ -40,6 +40,9 @@
     </block>
 
     <block name="Approach building">
+      <call_once fun="front_cam_set_x_offset(896)"/>
+      <call_once fun="detector_disable_all()"/>
+      <call_once fun="detector.front_white_building->active = true"/>
       <!-- TODO -->
     </block>
 
@@ -57,11 +60,11 @@
       <call fun="fly_through_window()"/>
     </block>
 
-    <block name="Find and land at item A">
+    <block name="Find and land at red item">
       <call_once fun="front_cam_set_x_offset(512)"/>
       <call_once fun="detector_disable_all()"/>
-      <call_once fun="detector.item_bottom->active = true"/>
-      <call_once fun="detector.item_front->active = true"/>
+      <call_once fun="detector.front_red_item->active = true"/>
+      <call_once fun="detector.bottom_red_item->active = true"/>
       <call_once fun="object_state = 0"/>
       <call fun="go_to_object(false)"/>
     </block>
@@ -95,21 +98,21 @@
       <!--&lt;!&ndash; TODO: exception conditions &ndash;&gt;-->
     <!--</block>-->
 
-    <block name="Grab item A">
+    <block name="Grab red item">
       <call_once fun="close_gripper()"/>
       <while cond="2 > block_time"/>
     </block>
 
-    <block name="Take-off from item A">
+    <block name="Take-off from red item">
       <!-- TODO: start engines, geo init, take-off, hover a bit -->
       <!-- TODO: exception conditions (check if item is grabbed) -->
     </block>
 
-    <block name="Find and hover above bucket A">
+    <block name="Find and hover above red bucket">
       <call_once fun="front_cam_set_x_offset(512)"/>
       <call_once fun="detector_disable_all()"/>
-      <call_once fun="detector.bucket_bottom->active = true"/>
-      <call_once fun="detector.bucket_front->active = true"/>
+      <call_once fun="detector.front_red_bucket->active = true"/>
+      <call_once fun="detector.bottom_red_bucket->active = true"/>
       <call fun="go_to_object(false)"/>
     </block>
 
@@ -134,43 +137,36 @@
       <!--<exception cond="0.1 > marker1.found_time" deroute="Search bucket A"/>-->
     <!--</block>-->
 
-    <block name="Release item A">
+    <block name="Release red item">
       <call_once fun="open_gripper()"/>
     </block>
 
-    <block name="Search item B">
+    <block name="Find and land at blue item">
+      <call_once fun="front_cam_set_x_offset(512)"/>
+      <call_once fun="detector_disable_all()"/>
+      <call_once fun="detector.front_blue_item->active = true"/>
+      <!--<call_once fun="detector.bottom_blue_item->active = true"/>-->
+      <call_once fun="object_state = 0"/>
+      <call fun="go_to_object(false)"/>
+    </block>
+
+    <block name="Grab blue item">
       <!-- TODO -->
     </block>
 
-    <block name="Approach item B">
+    <block name="Take-off from blue item">
       <!-- TODO -->
     </block>
 
-    <block name="Land item B">
-      <!-- TODO -->
+    <block name="Find and hover above blue bucket">
+      <call_once fun="front_cam_set_x_offset(512)"/>
+      <call_once fun="detector_disable_all()"/>
+      <call_once fun="detector.front_blue_bucket->active = true"/>
+      <!--<call_once fun="detector.bottom_blue_bucket->active = true"/>-->
+      <call fun="go_to_object(false)"/>
     </block>
 
-    <block name="Grab item B">
-      <!-- TODO -->
-    </block>
-
-    <block name="Take-off from item B">
-      <!-- TODO -->
-    </block>
-
-    <block name="Search bucket B">
-      <!-- TODO -->
-    </block>
-
-    <block name="Approach bucket B">
-      <!-- TODO -->
-    </block>
-
-    <block name="Center bucket B">
-      <!-- TODO -->
-    </block>
-
-    <block name="Release item B">
+    <block name="Release blue item">
       <!-- TODO -->
     </block>
 
@@ -189,7 +185,9 @@
     </block>
 
     <block name="Locate landing platform">
-      <call_once fun="front_cam_set_x_offset(512)"/>
+      <call_once fun="front_cam_set_x_offset(896)"/>
+      <call_once fun="detector_disable_all()"/>
+      <call_once fun="detector.helipad_bottom->active = true"/>
       <!-- TODO -->
     </block>
 
