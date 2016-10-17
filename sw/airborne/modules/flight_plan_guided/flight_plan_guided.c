@@ -333,6 +333,7 @@ bool go_to_object(bool descent) {
       object_state++; // Go to next state + switch fallthrough
     case 1:
       // Search for the marker with the front camera
+      guidance_h_set_guided_body_vel(0., 0.);
 
       if (marker1.found_time > 0.5) {
         object_state = 3;
@@ -350,7 +351,6 @@ bool go_to_object(bool descent) {
 
       if (marker_lost) {
         object_state = 1;
-        guidance_h_set_guided_body_vel(0., 0.);
         break;
       }
 
