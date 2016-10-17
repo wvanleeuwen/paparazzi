@@ -113,7 +113,7 @@ static void geo_locate_marker(struct Marker *marker, struct image_t *img) {
 
   // Scale the parameters based on distance to ground and focal point
   struct NedCoor_f *pos = stateGetPositionNed_f();
-  float agl = sonar_bebop.distance; // -pos->z
+  float agl = -pos->z; // sonar_bebop.distance
 
   marker->geo_relative.x *= agl / zi;
   marker->geo_relative.y *= agl / zi;
