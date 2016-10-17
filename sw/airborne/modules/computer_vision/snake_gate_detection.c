@@ -174,26 +174,51 @@ static void draw_gate(struct image_t *im, struct gate_img gate)
   struct point_t from, to;
   if(!door)
   {
-    from.x = (gate.x - gate.sz);
-    from.y = gate.y - gate.sz;
-    to.x = (gate.x - gate.sz);
-    to.y = gate.y + gate.sz;
-    image_draw_line(im, &from, &to);
-    from.x = (gate.x - gate.sz);
-    from.y = gate.y + gate.sz;
-    to.x = (gate.x + gate.sz);
-    to.y = gate.y + gate.sz;
-    image_draw_line(im, &from, &to);
-    from.x = (gate.x + gate.sz);
-    from.y = gate.y + gate.sz;
-    to.x = (gate.x + gate.sz);
-    to.y = gate.y - gate.sz;
-    image_draw_line(im, &from, &to);
-    from.x = (gate.x + gate.sz);
-    from.y = gate.y - gate.sz;
-    to.x = (gate.x - gate.sz);
-    to.y = gate.y - gate.sz;
-    image_draw_line(im, &from, &to);
+     if (gate.sz_left == gate.sz_right) {
+        // square
+        from.x = (gate.x - gate.sz);
+        from.y = gate.y - gate.sz;
+        to.x = (gate.x - gate.sz);
+        to.y = gate.y + gate.sz;
+        image_draw_line(im, &from, &to);
+        from.x = (gate.x - gate.sz);
+        from.y = gate.y + gate.sz;
+        to.x = (gate.x + gate.sz);
+        to.y = gate.y + gate.sz;
+        image_draw_line(im, &from, &to);
+        from.x = (gate.x + gate.sz);
+        from.y = gate.y + gate.sz;
+        to.x = (gate.x + gate.sz);
+        to.y = gate.y - gate.sz;
+        image_draw_line(im, &from, &to);
+        from.x = (gate.x + gate.sz);
+        from.y = gate.y - gate.sz;
+        to.x = (gate.x - gate.sz);
+        to.y = gate.y - gate.sz;
+        image_draw_line(im, &from, &to);
+      } else {
+        // polygon
+        from.x = (gate.x - gate.sz);
+        from.y = gate.y - gate.sz_left;
+        to.x = (gate.x - gate.sz);
+        to.y = gate.y + gate.sz_left;
+        image_draw_line(im, &from, &to);
+        from.x = (gate.x - gate.sz);
+        from.y = gate.y + gate.sz_left;
+        to.x = (gate.x + gate.sz);
+        to.y = gate.y + gate.sz_right;
+        image_draw_line(im, &from, &to);
+        from.x = (gate.x + gate.sz);
+        from.y = gate.y + gate.sz_right;
+        to.x = (gate.x + gate.sz);
+        to.y = gate.y - gate.sz_right;
+        image_draw_line(im, &from, &to);
+        from.x = (gate.x + gate.sz);
+        from.y = gate.y - gate.sz_right;
+        to.x = (gate.x - gate.sz);
+        to.y = gate.y - gate.sz_left;
+        image_draw_line(im, &from, &to);
+      }
   }
   else
   {
