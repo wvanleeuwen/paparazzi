@@ -211,7 +211,7 @@ static void check_line(struct image_t *im, struct point_t Q1, struct point_t Q2,
       // augment number of checked points:
       (*n_points)++;
 
-      if (check_color(im, x, y)) {
+      if (check_color(im, y, x)) {
         // the point is of the right color:
         (*n_colored_points)++;
       }
@@ -295,18 +295,18 @@ static void snake_left_right(struct image_t *im, int x, int y, int *y_low, int *
 
   // snake towards negative y (down?)
   while ((*y_low) > 0 && !done) {
-    if (check_color(im, x, (*y_low) - 1)) {
+    if (check_color(im, (*y_low) - 1, x)) {
       (*y_low)--;
-    } else if (x < im->h - 1 && check_color(im, x + 1, (*y_low) - 1)) {
+    } else if (x < im->h - 1 && check_color(im, (*y_low) - 1, x + 1)) {
       x++;
       (*y_low)--;
-    } else if (x > 0 && check_color(im, x - 1, (*y_low) - 1)) {
+    } else if (x > 0 && check_color(im, (*y_low) - 1, x - 1)) {
       x--;
       (*y_low)--;
-    } else if (x < im->h - 2 && check_color(im, x + 2, (*y_low) - 1)) {
+    } else if (x < im->h - 2 && check_color(im, (*y_low) - 1, x + 2)) {
       x+=2;
       (*y_low)--;
-    } else if (x > 1 && check_color(im, x - 2, (*y_low) - 1)) {
+    } else if (x > 1 && check_color(im, (*y_low) - 1, x - 2)) {
       x-=2;
       (*y_low)--;
     } else {
@@ -319,18 +319,18 @@ static void snake_left_right(struct image_t *im, int x, int y, int *y_low, int *
   done = 0;
   // snake towards positive y (up?)
   while ((*y_high) < im->w - 1 && !done) {
-    if (check_color(im, x, (*y_high) + 1)) {
+    if (check_color(im, (*y_high) + 1, x)) {
       (*y_high)++;
-    } else if (x < im->h - 1 && check_color(im, x + 1, (*y_high) + 1)) {
+    } else if (x < im->h - 1 && check_color(im, (*y_high) + 1, x + 1)) {
       x++;
       (*y_high)++;
-    } else if (x > 0 && check_color(im, x - 1, (*y_high) + 1)) {
+    } else if (x > 0 && check_color(im, (*y_high) + 1, x - 1)) {
       x--;
       (*y_high)++;
-    } else if (x < im->h - 2 && check_color(im, x + 2, (*y_high) + 1)) {
+    } else if (x < im->h - 2 && check_color(im, (*y_high) + 1, x + 2)) {
       x+=2;
       (*y_high)++;
-    } else if (x > 1 && check_color(im, x - 2, (*y_high) + 1)) {
+    } else if (x > 1 && check_color(im, (*y_high) + 1, x - 2)) {
       x-=2;
       (*y_high)++;
     } else {
@@ -348,18 +348,18 @@ static void snake_up_down(struct image_t *im, int x, int y, int *x_low, int *x_h
 
   // snake towards negative x (left)
   while ((*x_low) > 0 && !done) {
-    if (check_color(im, (*x_low) - 1, y)) {
+    if (check_color(im, y, (*x_low) - 1)) {
       (*x_low)--;
-    } else if (y < im->w - 1 && check_color(im, (*x_low) - 1, y + 1)) {
+    } else if (y < im->w - 1 && check_color(im, y + 1, (*x_low) - 1)) {
       y++;
       (*x_low)--;
-    } else if (y > 0 && check_color(im, (*x_low) - 1, y - 1)) {
+    } else if (y > 0 && check_color(im, y - 1, (*x_low) - 1)) {
       y--;
       (*x_low)--;
-    } else if (y < im->w - 2 && check_color(im, (*x_low) - 1, y + 2)) {
+    } else if (y < im->w - 2 && check_color(im, y + 2, (*x_low) - 1)) {
       y+=2;
       (*x_low)--;
-    } else if (y > 1 && check_color(im, (*x_low) - 1, y - 2)) {
+    } else if (y > 1 && check_color(im, y - 2, (*x_low) - 1)) {
       y-=2;
       (*x_low)--;
     }else {
@@ -372,18 +372,18 @@ static void snake_up_down(struct image_t *im, int x, int y, int *x_low, int *x_h
   done = 0;
   // snake towards positive x (right)
   while ((*x_high) < im->h - 1 && !done) {
-    if (check_color(im, (*x_high) + 1, y)) {
+    if (check_color(im, y, (*x_high) + 1)) {
       (*x_high)++;
-    } else if (y < im->w - 1 && check_color(im, (*x_high) + 1, y + 1)) {
+    } else if (y < im->w - 1 && check_color(im, y + 1, (*x_high) + 1)) {
       y++;
       (*x_high)++;
-    } else if (y > 0 && check_color(im, (*x_high) + 1, y - 1)) {
+    } else if (y > 0 && check_color(im, y - 1, (*x_high) + 1)) {
       y--;
       (*x_high)++;
-    } else if (y < im->w - 2 && check_color(im, (*x_high) + 1, y + 2)) {
+    } else if (y < im->w - 2 && check_color(im, y + 2, (*x_high) + 1)) {
       y+=2;
       (*x_high)++;
-    } else if (y > 1 && check_color(im, (*x_high) + 1, y - 2)) {
+    } else if (y > 1 && check_color(im, y - 2, (*x_high) + 1)) {
       y-=2;
       (*x_high)++;
     } else {
@@ -428,7 +428,7 @@ static struct image_t *snake_gate_detection_func(struct image_t *img)
 	// NOTE: image is rotated
     //check_color(img, x, y);
     // check if the pixel has the right color
-    if (check_color(img, x, y)) {
+    if (check_color(img, y, x)) {
       // snake up and down:
       snake_up_down(img, x, y, &x_low, &x_high);
       sz = x_high - x_low;
