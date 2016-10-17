@@ -71,7 +71,7 @@ struct video_listener *listener = NULL;
 #define RED 0
 #define BLUE 1
 
-#define WINDOW_COLOR RED
+#define WINDOW_COLOR BLUE
 
 // Filter Settings
 #if WINDOW_COLOR == RED

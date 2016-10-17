@@ -169,7 +169,7 @@
     <define name="SONAR_UPDATE_ON_AGL" value="TRUE"/>
     <define name="VFF_R_SONAR_OF_M" value="0."/>
     <define name="VFF_R_SONAR_0" value="0.1"/>
-    <define name="BARO_AGL_OFFSET" value="0.0"/><!--This should be set the the length of the legs, positive-->
+    <define name="BARO_AGL_OFFSET" value="0.23"/><!--This should be set the the length of the legs, positive-->
   </section>
 
   <section name="RC_SETPOINT" prefix="STABILIZATION_ATTITUDE_">

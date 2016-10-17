@@ -43,6 +43,8 @@
       <call_once fun="front_cam_set_x_offset(896)"/>
       <call_once fun="detector_disable_all()"/>
       <call_once fun="detector.front_white_building->active = true"/>
+      <call_once fun="object_state = 0"/>
+      <call fun="go_to_object(false)"/>
       <!-- TODO -->
     </block>
 
@@ -200,6 +202,12 @@
     <block name="Land">
       <!-- TODO -->
     </block>
+
+    <block name="Hover forever">
+      <call fun="Hover(NOM_FLIGHT_ALT)"/>
+      <while cond="1"/>
+    </block>
+
 
   </blocks>
 </flight_plan>
