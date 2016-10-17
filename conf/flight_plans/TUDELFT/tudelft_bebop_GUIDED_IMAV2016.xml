@@ -203,8 +203,25 @@
       <!-- TODO -->
     </block>
 
-    <block name="Hover forever">
+    <block name="TESTING - Hover forever">
       <call fun="Hover(NOM_FLIGHT_ALT)"/>
+      <while cond="1"/>
+    </block>
+
+    <block name="TESTING - Hover over red bucket">
+      <call_once fun="detector_disable_all()"/>
+      <call_once fun="detector.bottom_red_bucket->active = true"/>
+      <call fun="Hover(NOM_FLIGHT_ALT)"/>
+      <call fun="marker_center_descent(0, 0, 0)"/>
+    </block>
+
+    <block name="TESTING - Open gripper">
+      <call_once fun="open_gripper()"/>
+      <while cond="1"/>
+    </block>
+
+    <block name="TESTING - Close gripper">
+      <call_once fun="close_gripper()"/>
       <while cond="1"/>
     </block>
 
