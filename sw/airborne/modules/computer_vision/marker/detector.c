@@ -64,17 +64,15 @@ static struct Marker single_blob_finder(struct image_t *img, struct image_filter
   // Find largest
   for (int i = 0; i < labels_count; i++) {
     // Only consider large blobs
-    if (labels[i].pixel_cnt > threshold) {
-      if (labels[i].pixel_cnt > largest_size) {
-        largest_size = labels[i].pixel_cnt;
-        largest_id = i;
-      }
+    if (labels[i].pixel_cnt > largest_size) {
+      largest_size = labels[i].pixel_cnt;
+      largest_id = i;
     }
   }
 
   struct Marker marker;
 
-  if (largest_id >= 0) {
+  if (largest_id >= 0 && largest_size > threshold) {
     marker.pixel.x = labels[largest_id].x_sum / labels[largest_id].pixel_cnt * 2;
     marker.pixel.y = labels[largest_id].y_sum / labels[largest_id].pixel_cnt;
     marker.detected = true;
@@ -395,16 +393,16 @@ static struct image_t *draw_target_marker2(struct image_t *img) {
 
 
 void detector_disable_all() {
-  detector.front_blue_item = false;
-  detector.bottom_blue_item = false;
-  detector.front_blue_bucket = false;
-  detector.bottom_blue_bucket = false;
-  detector.front_red_item = false;
-  detector.bottom_red_item = false;
-  detector.front_red_bucket = false;
-  detector.bottom_red_bucket = false;
-  detector.front_white_building = false;
-  detector.helipad_bottom = false;
+  detector.front_blue_item->active = false;
+//  detector.bottom_blue_item->active = false;
+  detector.front_blue_bucket->active = false;
+//  detector.bottom_blue_bucket->active = false;
+  detector.front_red_item->active = false;
+  detector.bottom_red_item->active = false;
+  detector.front_red_bucket->active = false;
+  detector.bottom_red_bucket->active = false;
+  detector.front_white_building->active = false;
+  detector.helipad_bottom->active = false;
 }
 
 
@@ -441,6 +439,7 @@ void detector_init(void) {
   detector.front_red_bucket->maximum_fps = 5;
   detector.front_white_building = cv_add_to_device_async(&DETECTOR_CAMERA2, detect_front_white_building, 5);
   detector.front_white_building->maximum_fps = 5;
+
   cv_add_to_device(&DETECTOR_CAMERA2, draw_target_marker2);
 
   // INITIAL STATE
