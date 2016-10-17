@@ -362,6 +362,7 @@ bool go_to_object(bool descent) {
 
       object_state++; // Go to next state + switch fallthrough
     case 3:
+      // Hover over marker
 
       if (marker1.found_time < 1) {
         object_state = 1;
@@ -379,6 +380,7 @@ bool go_to_object(bool descent) {
 
       object_state++; // Go to next state + switch fallthrough
     case 4:
+      // Land on top of marker
 
       if (marker1.found_time < 4) {
         object_state = 3;
