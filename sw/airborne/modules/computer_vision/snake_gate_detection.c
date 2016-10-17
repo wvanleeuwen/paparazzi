@@ -43,8 +43,8 @@ struct gate_img {
   int sz;            ///< Half the image size of the gate
   float q;           //gate quality
   int n_sides;       ///< How many sides are orange (to prevent detecting a small gate in the corner of a big one partially out of view).
-  int sz_left;     ///< Half the image size of the left side
-  int sz_right;    ///< Half the image size of the right side
+  int sz_left;       ///< Half the image size of the left side
+  int sz_right;      ///< Half the image size of the right side
 };
 
 #ifndef SGD_CAMERA
@@ -152,43 +152,6 @@ int ready_pass_through;
 // timers
 float last_processed, time_gate_detected, time_tracked;
 
-/*
-static void check_color_center(struct image_t *im, uint8_t *y_c, uint8_t *cb_c, uint8_t *cr_c)
-{
-  uint8_t *buf = im->buf;
-  int x = (im->w) / 2;
-  int y = (im->h) / 2;
-  buf += y * (im->w) * 2 + x * 2;
-
-  *y_c = buf[1];
-  *cb_c = buf[0];
-  *cr_c = buf[2];
-}
-
-
-//set color pixel
-static void image_yuv422_set_color(struct image_t *input, struct image_t *output, int x, int y)
-{
-  uint8_t *source = input->buf;
-  uint8_t *dest = output->buf;
-
-  // Copy the creation timestamp (stays the same)
-  output->ts = input->ts;
-  if (x % 2 == 1) { x--; }
-  if (x < 0 || x >= input->w || y < 0 || y >= input->h) {
-    return;
-  }
-
-  source += y * (input->w) * 2 + x * 2;
-  dest += y * (output->w) * 2 + x * 2;
-  // UYVY
-  dest[0] = 65;//211;        // U//was 65
-  dest[1] = source[1];  // Y
-  dest[2] = 255;//60;        // V//was 255
-  dest[3] = source[3];  // Y
-}
-*/
-
 static void calculate_gate_position(int x_pix, int y_pix, int sz_pix, struct image_t *img, struct gate_img gate)
 {
   // pixel distance conversion
@@ -255,6 +218,8 @@ static void check_line(struct image_t *im, struct point_t Q1, struct point_t Q2,
     }
   }
 }
+
+// TODO: make check_door
 
 static void check_gate(struct image_t *im, struct gate_img gate, float *quality, int *n_sides)
 {
@@ -461,8 +426,8 @@ static struct image_t *snake_gate_detection_func(struct image_t *img)
     }
 
 	// NOTE: image is rotated
-    //check_color(img, 1, 1);
-    // check if it has the right color
+    //check_color(img, x, y);
+    // check if the pixel has the right color
     if (check_color(img, x, y)) {
       // snake up and down:
       snake_up_down(img, x, y, &x_low, &x_high);

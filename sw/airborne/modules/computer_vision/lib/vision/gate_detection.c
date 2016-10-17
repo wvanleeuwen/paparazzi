@@ -68,6 +68,7 @@ float clock_factor = 0.6;
 // 1 means that it passes the filter
 int check_color(struct image_t *im, int x, int y)
 {
+  // TODO: to be adapted to switch?
   if (x % 2 == 1) { x--; }
 
   if (x < 0 || x >= im->w || y < 0 || y >= im->h) {
