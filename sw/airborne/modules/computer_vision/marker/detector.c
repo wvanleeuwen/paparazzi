@@ -70,6 +70,8 @@ static struct Marker single_blob_finder(struct image_t *img, struct image_filter
     }
   }
 
+  fprintf(stderr, "[detector %i] largest blob size %i.\n", img->w, largest_size);
+
   struct Marker marker;
 
   if (largest_id >= 0 && largest_size > threshold) {
