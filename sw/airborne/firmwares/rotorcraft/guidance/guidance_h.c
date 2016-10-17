@@ -546,10 +546,8 @@ static void guidance_h_traj_run(bool in_flight)
 
   /* compute speed error    */
   struct HorizontalGuidance imav_guidance_h ={0};
-  printf("check %f %f \n",  SPEED_FLOAT_OF_BFP(guidance_h_speed_offset.x),SPEED_FLOAT_OF_BFP(guidance_h_speed_offset.y));
   imav_guidance_h.ref.speed.x += guidance_h_speed_offset.x;
   imav_guidance_h.ref.speed.y += guidance_h_speed_offset.y;
- // printf(" setpoint %f ref %f\n",SPEED_FLOAT_OF_BFP(guidance_h_speed_offset.y), SPEED_FLOAT_OF_BFP(imav_guidance_h.ref.speed.y));
   VECT2_DIFF(guidance_h_speed_err, imav_guidance_h.ref.speed, *stateGetSpeedNed_i());
   /* saturate it               */
   VECT2_STRIM(guidance_h_speed_err, -MAX_SPEED_ERR, MAX_SPEED_ERR);
