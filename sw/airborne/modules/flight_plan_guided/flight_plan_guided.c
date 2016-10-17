@@ -380,14 +380,14 @@ bool go_to_object(bool descent) {
       object_state++; // Go to next state + switch fallthrough
     case 4:
 
-      if (marker.found_time < 4) {
+      if (marker1.found_time < 4) {
         object_state = 3;
         break;
       }
 
       marker_center_descent(0.05, 0.4, 0);
 
-      if (marker.found_time < 1) {
+      if (marker1.found_time < 1) {
         object_state = 0;
         break;
       }
