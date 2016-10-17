@@ -91,8 +91,8 @@ struct Int32Vect2 guidance_h_pos_err;
 struct Int32Vect2 guidance_h_speed_err;
 struct Int32Vect2 guidance_h_trim_att_integrator;
 
-
-struct Int32Vect2 guidance_h_speed_offset;
+#include "state.h"
+struct Int32Vect2 guidance_h_speed_offset ={0};
 
 /** horizontal guidance command.
  * In north/east with #INT32_ANGLE_FRAC
@@ -488,11 +488,6 @@ static void guidance_h_update_reference(void)
 {
   /* compute reference even if usage temporarily disabled via guidance_h_use_ref */
 #if GUIDANCE_H_USE_REF
-
-// add offset to speed (Range sensors)
-  guidance_h.sp.speed.x += guidance_h_speed_offset.x;
-  guidance_h.sp.speed.y += guidance_h_speed_offset.y;
-
   if (bit_is_set(guidance_h.sp.mask, 5)) {
     gh_update_ref_from_speed_sp(guidance_h.sp.speed);
   } else {
@@ -550,7 +545,12 @@ static void guidance_h_traj_run(bool in_flight)
   VECT2_STRIM(guidance_h_pos_err, -MAX_POS_ERR, MAX_POS_ERR);
 
   /* compute speed error    */
-  VECT2_DIFF(guidance_h_speed_err, guidance_h.ref.speed, *stateGetSpeedNed_i());
+  struct HorizontalGuidance imav_guidance_h ={0};
+  printf("check %f %f \n",  SPEED_FLOAT_OF_BFP(guidance_h_speed_offset.x),SPEED_FLOAT_OF_BFP(guidance_h_speed_offset.y));
+  imav_guidance_h.ref.speed.x += guidance_h_speed_offset.x;
+  imav_guidance_h.ref.speed.y += guidance_h_speed_offset.y;
+ // printf(" setpoint %f ref %f\n",SPEED_FLOAT_OF_BFP(guidance_h_speed_offset.y), SPEED_FLOAT_OF_BFP(imav_guidance_h.ref.speed.y));
+  VECT2_DIFF(guidance_h_speed_err, imav_guidance_h.ref.speed, *stateGetSpeedNed_i());
   /* saturate it               */
   VECT2_STRIM(guidance_h_speed_err, -MAX_SPEED_ERR, MAX_SPEED_ERR);
 
@@ -762,11 +762,8 @@ const struct Int32Vect2 *guidance_h_get_pos_err(void)
   return &guidance_h_pos_err;
 }
 
-
 void guidance_h_set_speed_offset(float vx, float vy)
 {
-  if (guidance_h.mode == GUIDANCE_H_MODE_GUIDED) {
-
     // update offset velocity based on range sensors
     float psi = stateGetNedToBodyEulers_f()->psi;
     float vel_offset_NED_x_f =  cosf(-psi) * vx + sinf(-psi) * vy;
@@ -774,8 +771,4 @@ void guidance_h_set_speed_offset(float vx, float vy)
     // add speed offset (by range sensors)
     guidance_h_speed_offset.x = SPEED_BFP_OF_REAL(vel_offset_NED_x_f);
     guidance_h_speed_offset.y = SPEED_BFP_OF_REAL(vel_offset_NED_y_f);
-  } else {
-    guidance_h_speed_offset.x = SPEED_BFP_OF_REAL(0.0f);
-    guidance_h_speed_offset.y = SPEED_BFP_OF_REAL(0.0f);
-  }
 }

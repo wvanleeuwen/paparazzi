@@ -158,9 +158,6 @@ extern bool guidance_h_set_guided_heading_rate(float rate);
  * @param none.
  * @return Pointer to a structure containing x and y position errors
  */
-
-extern void guidance_h_set_speed_offset(float vx, float vy);
-
 extern const struct Int32Vect2 *guidance_h_get_pos_err(void);
 
 /* Make sure that ref can only be temporarily disabled for testing,
@@ -189,5 +186,6 @@ static inline void guidance_h_SetTau(float tau)
 {
   gh_set_tau(tau);
 }
+extern void guidance_h_set_speed_offset(float vx, float vy);
 
 #endif /* GUIDANCE_H_H */

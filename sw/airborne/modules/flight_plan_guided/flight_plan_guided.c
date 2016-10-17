@@ -59,13 +59,13 @@ bool marker_lost;
 #define RANGE_SENSORS_ABI_ID ABI_BROADCAST
 #endif
 static abi_event range_sensors_ev;
-static void range_sensors_cb(uint8_t sender_id __attribute__((unused)),
-                             int16_t range_front, int16_t range_right, int16_t range_back, int16_t range_left);
+static void range_sensors_cb(uint8_t sender_id,
+                             uint16_t range_front, uint16_t range_right, uint16_t range_back, uint16_t range_left);
 
 void flight_plan_guided_init(void)
 {
   marker_lost = true;
-  AbiBindMsgRANGE_SENSORS(RANGE_SENSORS_ABI_ID, &range_sensors_ev, &range_sensors_cb);
+  AbiBindMsgRANGE_SENSORS(RANGE_SENSORS_ABI_ID, &range_sensors_ev, range_sensors_cb);
 } // Dummy
 
 
@@ -396,7 +396,8 @@ bool fly_through_window(void) {
 
 bool range_sensor_wall_following(float forward_velocity, float wanted_distance_from_wall, bool right)
 {
-	int16_t actual_distance_from_wall = 0;
+//STIL TO TEST OUT!!!
+	float actual_distance_from_wall = 0;
 	float vel_body_x_command = forward_velocity;
 	float vel_body_y_command = 0.0f;
     float unsigned_difference = 0.0f;
@@ -475,11 +476,11 @@ void range_sensor_force_field(float *vel_body_x, float *vel_body_y, int16_t avoi
   if (range_finders.front < avoid_outer_border) {
     //from stereo camera TODO: add this once the stereocamera is attached
     if (range_finders.front > avoid_inner_border)
-      avoid_y_command += (max_vel_command - min_vel_command) *
+      avoid_y_command -= (max_vel_command - min_vel_command) *
                          ((float)avoid_outer_border - (float)range_finders.front)
                          / (float)difference_inner_outer;
   } else {
-    avoid_y_command += max_vel_command;
+    avoid_y_command -= max_vel_command;
   }
 
 
@@ -498,8 +499,8 @@ void range_sensor_force_field(float *vel_body_x, float *vel_body_y, int16_t avoi
 
 }
 
-static void range_sensors_cb(uint8_t sender_id __attribute__((unused)),
-                             int16_t range_front, int16_t range_right, int16_t range_back, int16_t range_left)
+static void range_sensors_cb(uint8_t sender_id,
+                             uint16_t range_front, uint16_t range_right, uint16_t range_back, uint16_t range_left)
 {
 
 // save range finders values
