@@ -186,5 +186,6 @@ static inline void guidance_h_SetTau(float tau)
 {
   gh_set_tau(tau);
 }
+extern void guidance_h_set_speed_offset(float vx, float vy);
 
 #endif /* GUIDANCE_H_H */

@@ -29,10 +29,20 @@
 #include "lib/vision/image.h"
 
 struct Detector {
-    struct video_listener *item_front;
-    struct video_listener *bucket_front;
-    struct video_listener *item_bottom;
-    struct video_listener *bucket_bottom;
+    struct video_listener *front_blue_item;
+    struct video_listener *bottom_blue_item;
+
+    struct video_listener *front_blue_bucket;
+    struct video_listener *bottom_blue_bucket;
+
+    struct video_listener *front_red_item;
+    struct video_listener *bottom_red_item;
+
+    struct video_listener *front_red_bucket;
+    struct video_listener *bottom_red_bucket;
+
+    struct video_listener *front_white_building;
+
     struct video_listener *helipad_bottom;
 };
 

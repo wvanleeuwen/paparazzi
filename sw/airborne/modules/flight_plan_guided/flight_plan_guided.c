@@ -50,10 +50,23 @@
 #define ANGLE_ROOM_2_ENTRY     0.  // angle to enter room 2
 #define ANGLE_ROOM_3_ENTRY     0.  // angle to enter room 3
 
+float marker_err = 0;
 bool marker_lost;
 
-void flight_plan_guided_init(void) {
+#include "subsystems/abi.h"
+ struct range_finders_ range_finders;
+
+#ifndef RANGE_SENSORS_ABI_ID
+#define RANGE_SENSORS_ABI_ID ABI_BROADCAST
+#endif
+static abi_event range_sensors_ev;
+static void range_sensors_cb(uint8_t sender_id,
+                             uint16_t range_front, uint16_t range_right, uint16_t range_back, uint16_t range_left);
+
+void flight_plan_guided_init(void)
+{
   marker_lost = true;
+  AbiBindMsgRANGE_SENSORS(RANGE_SENSORS_ABI_ID, &range_sensors_ev, range_sensors_cb);
 } // Dummy
 
 
@@ -160,13 +173,11 @@ bool front_cam_set_x_offset(int offset) {
   return false;
 }
 
-static int BUCKET_HEADING_MARGIN = 60;  // px
-static float BUCKET_HEADING_RATE = 0.5; // rad/s
+static int FRONT_MARKER_HEADING_MARGIN = 60;  // px
+static float FRONT_MARKER_HEADING_RATE = 0.5; // rad/s
 
-bool bucket_heading_change(float altitude) {
+bool front_marker_heading_change(void) {
   if (autopilot_mode != AP_MODE_GUIDED) { return true; }
-//  guidance_v_set_guided_z(-altitude);
-//  guidance_h_set_guided_body_vel(0., 0.);
 
   if (marker2.detected) {
     marker_lost = false;
@@ -175,12 +186,12 @@ bool bucket_heading_change(float altitude) {
       marker2.processed = true;
       int relative_heading = marker2.pixel.y - 320;
 
-      if (relative_heading > BUCKET_HEADING_MARGIN) {
+      if (relative_heading > FRONT_MARKER_HEADING_MARGIN) {
         // Marker is to the right
-        guidance_h_set_guided_heading_rate(BUCKET_HEADING_RATE);
-      } else if (relative_heading < -BUCKET_HEADING_MARGIN) {
+        guidance_h_set_guided_heading_rate(FRONT_MARKER_HEADING_RATE);
+      } else if (relative_heading < -FRONT_MARKER_HEADING_MARGIN) {
         // Marker is to the left
-        guidance_h_set_guided_heading_rate(-BUCKET_HEADING_RATE);
+        guidance_h_set_guided_heading_rate(-FRONT_MARKER_HEADING_RATE);
       } else {
         // Marker is more or less centered
         guidance_h_set_guided_heading_rate(0.);
@@ -192,26 +203,21 @@ bool bucket_heading_change(float altitude) {
     }
   } else {
     // Marker not detected
-    guidance_h_set_guided_heading_rate(BUCKET_HEADING_RATE);
+    marker_lost = true;
+    guidance_h_set_guided_heading_rate(FRONT_MARKER_HEADING_RATE);
   }
 
   return true;
 }
 
-static int BUCKET_POSITION_MARGIN = 100; // > 50 SO DISABLED
-static int BUCKET_POSITION_MARGIN_LOST = 50;
-static float BUCKET_DRIFT_CORRECTION_RATE = 0.05;
-static float BUCKET_APPROACH_SPEED_HIGH = 0.2;
-static float BUCKET_APPROACH_SPEED_LOW = 0.05;
+static int FRONT_MARKER_POSITION_MARGIN = 100; // > 50, SO DISABLED
+static int FRONT_MARKER_POSITION_MARGIN_LOST = 50;
+static float FRONT_MARKER_DRIFT_CORRECTION_RATE = 0.05;
+static float FRONT_MARKER_APPROACH_SPEED_HIGH = 0.2;
+static float FRONT_MARKER_APPROACH_SPEED_LOW = 0.05;
 
-bool bucket_approach(float altitude) {
+bool front_marker_approach(void) {
   if (autopilot_mode != AP_MODE_GUIDED) { return true; }
-//  guidance_v_set_guided_z(-altitude);
-
-  if (marker1.detected) {
-    // Hand over control to next stage
-    return false;
-  }
 
   if (marker2.detected) {
     marker_lost = false;
@@ -219,32 +225,30 @@ bool bucket_approach(float altitude) {
       marker2.processed = true;
       int relative_pos = marker2.pixel.y - 320;
 
-      if (abs(relative_pos) > BUCKET_POSITION_MARGIN_LOST) {
-        fprintf(stderr, "[bucket] OUT OF FRAME.\n");
+      if (abs(relative_pos) > FRONT_MARKER_POSITION_MARGIN_LOST) {
+        fprintf(stderr, "[FRONT_MARKER] OUT OF FRAME.\n");
         marker_lost = true;
-      } else if (relative_pos > BUCKET_POSITION_MARGIN) {
-        fprintf(stderr, "[bucket] RIGHT.\n");
-        guidance_h_set_guided_body_vel(BUCKET_APPROACH_SPEED_LOW, BUCKET_DRIFT_CORRECTION_RATE);
-      } else if (relative_pos < -BUCKET_POSITION_MARGIN) {
-        fprintf(stderr, "[bucket] LEFT.\n");
-        guidance_h_set_guided_body_vel(BUCKET_APPROACH_SPEED_LOW, -BUCKET_DRIFT_CORRECTION_RATE);
+      } else if (relative_pos > FRONT_MARKER_POSITION_MARGIN) {
+        fprintf(stderr, "[FRONT_MARKER] RIGHT.\n");
+        guidance_h_set_guided_body_vel(FRONT_MARKER_APPROACH_SPEED_LOW, FRONT_MARKER_DRIFT_CORRECTION_RATE);
+      } else if (relative_pos < -FRONT_MARKER_POSITION_MARGIN) {
+        fprintf(stderr, "[FRONT_MARKER] LEFT.\n");
+        guidance_h_set_guided_body_vel(FRONT_MARKER_APPROACH_SPEED_LOW, -FRONT_MARKER_DRIFT_CORRECTION_RATE);
       } else {
-        fprintf(stderr, "[bucket] CENTER.\n");
-        guidance_h_set_guided_body_vel(BUCKET_APPROACH_SPEED_HIGH, 0.0);
+        fprintf(stderr, "[FRONT_MARKER] CENTER.\n");
+        guidance_h_set_guided_body_vel(FRONT_MARKER_APPROACH_SPEED_HIGH, 0.0);
+
+        return false;
       }
     } else {
-      fprintf(stderr, "[bucket] ALREADY PROCESSED.\n");
+      fprintf(stderr, "[FRONT_MARKER] ALREADY PROCESSED.\n");
       // Marker detected but already processed
       // ** just wait **
     }
   } else {
-    fprintf(stderr, "[bucket] NOT DETECTED.\n");
+    fprintf(stderr, "[FRONT_MARKER] NOT DETECTED.\n");
     // Marker not detected
     marker_lost = true;
-  }
-
-  if (marker_lost) {
-    guidance_h_set_guided_body_vel(0., 0.);
   }
 
   // Loop this function
@@ -256,7 +260,7 @@ bool bucket_approach(float altitude) {
 #define ERR_MAX 0.30
 #define ERR_GAIN (1.0 / (ERR_MAX - ERR_MIN))
 
-bool marker_center_land(float x_offset, float z_speed, float end_altitude) {
+bool marker_center_descent(float x_offset, float z_speed, float end_altitude) {
   if (autopilot_mode != AP_MODE_GUIDED) { return true; }
 
   if (end_altitude != 0 && stateGetPositionEnu_f()->z < end_altitude) {
@@ -284,11 +288,11 @@ bool marker_center_land(float x_offset, float z_speed, float end_altitude) {
       // err < 0.30 = caution when landing
       // err > 0.30 = NOT GOOD
       // err > 0.50 = probably lost marker
-      float err = fabsf(rel_x) + fabsf(rel_y);
+      marker_err = fabsf(rel_x) + fabsf(rel_y);
 
       if (z_speed != 0) {
 //      fprintf(stderr, "[landing] %.2f, %.2f, %.2f\n", rel_x, rel_y, err);
-        float bounded_err = Chop(err, ERR_MIN, ERR_MAX);
+        float bounded_err = Chop(marker_err, ERR_MIN, ERR_MAX);
         guidance_v_set_guided_vz(z_speed - z_speed * (bounded_err - ERR_MIN) * ERR_GAIN);
       }
 
@@ -297,6 +301,8 @@ bool marker_center_land(float x_offset, float z_speed, float end_altitude) {
 
       guidance_h_set_guided_pos(pos_x, pos_y);
     }
+  } else {
+    guidance_v_set_guided_vz(0);
   }
 
   // Loop this function
@@ -313,6 +319,97 @@ bool close_gripper(void) {
   uint8_t msg[1]; msg[0] = 1;
   stereoprot_sendArray(&((UART_LINK).device), msg, 1, 1);
   return false;
+}
+
+
+int8_t object_state;
+int8_t object_retries = 0;
+
+bool go_to_object(bool descent) {
+  // If we are not in guided mode
+  if (autopilot_mode != AP_MODE_GUIDED) {
+    // Reset the approach strategy and loop
+    object_state = 0;
+    return true;
+  }
+
+  fprintf(stderr, "[go_to_object] State %i.\n", object_state);
+
+  switch (object_state) {
+    case 0:
+      // Initialize
+
+      guidance_v_set_guided_z(-NOM_FLIGHT_ALT);
+      object_retries--;
+
+      object_state++; // Go to next state + switch fallthrough
+    case 1:
+      // Search for the marker with the front camera
+      guidance_h_set_guided_body_vel(0., 0.);
+
+      if (marker1.found_time > 0.5) {
+        object_state = 3;
+        break;
+      }
+
+      if (front_marker_heading_change()) {
+        // TODO: after 360 degrees of mindless turning move a bit first
+        break;
+      }
+
+      object_state++; // Go to next state + switch fallthrough
+    case 2:
+      // Approach marker straight on
+
+      if (marker_lost) {
+        object_state = 1;
+        break;
+      }
+
+      front_marker_approach();
+
+      if (marker1.found_time < 1) {
+        break;
+      }
+
+      object_state++; // Go to next state + switch fallthrough
+    case 3:
+      // Hover over marker
+
+      if (marker1.found_time < 1) {
+        object_state = 1;
+        break;
+      }
+
+      marker_center_descent(0.05, 0, 0);
+
+      if (marker1.found_time < 4) {
+        break;
+      }
+
+      // If we don't want to land, job is done and we can continue
+      if (!descent && marker_err < ERR_MAX) { return false; }
+
+      object_state++; // Go to next state + switch fallthrough
+    case 4:
+      // Land on top of marker
+
+      if (marker1.found_time < 4) {
+        object_state = 3;
+        break;
+      }
+
+      marker_center_descent(0.05, 0.4, 0);
+
+      if (marker1.found_time < 1) {
+        object_state = 0;
+        break;
+      }
+
+      return false;
+  }
+
+  return true;
 }
 
 int8_t win_state;
@@ -380,4 +477,141 @@ bool fly_through_window(void) {
     }
 
   return true;
+}
+
+bool range_sensor_wall_following(float forward_velocity, float wanted_distance_from_wall, bool right)
+{
+//STIL TO TEST OUT!!!
+	float actual_distance_from_wall = 0;
+	float vel_body_x_command = forward_velocity;
+	float vel_body_y_command = 0.0f;
+    float unsigned_difference = 0.0f;
+    float signed_difference = 0.0f;
+
+    float sign = 0.0f;
+
+	float wall_following_bandwidth = 0.2f;
+	float max_velocity_command = 0.3f;
+
+	if(right)
+	{
+		actual_distance_from_wall = (float)range_finders.right/1000;
+		unsigned_difference = fabs(wanted_distance_from_wall -actual_distance_from_wall);
+		signed_difference = fabs(wanted_distance_from_wall -actual_distance_from_wall);
+		sign = signed_difference/unsigned_difference;
+
+		if(unsigned_difference > wall_following_bandwidth){
+			vel_body_y_command = -1* sign * max_velocity_command;
+		}else
+		{
+			vel_body_y_command = max_velocity_command * -1 * signed_difference / wall_following_bandwidth;
+		}
+
+	}else
+	{
+		actual_distance_from_wall = (float)range_finders.left/1000;
+		unsigned_difference = fabs(wanted_distance_from_wall -actual_distance_from_wall);
+		signed_difference = fabs(wanted_distance_from_wall -actual_distance_from_wall);
+		sign = signed_difference/unsigned_difference;
+
+		if(unsigned_difference > wall_following_bandwidth){
+			vel_body_y_command =  sign * max_velocity_command;
+		}else
+		{
+			vel_body_y_command = max_velocity_command  * signed_difference / wall_following_bandwidth;
+		}
+
+	}
+	guidance_h_set_guided_body_vel(vel_body_x_command, vel_body_y_command);
+return true;
+}
+
+void range_sensor_force_field(float *vel_body_x, float *vel_body_y, int16_t avoid_inner_border, int16_t avoid_outer_border, float min_vel_command, float max_vel_command)
+{
+
+  int16_t difference_inner_outer = avoid_outer_border - avoid_inner_border;
+
+
+  // Velocity commands
+  float avoid_x_command = *vel_body_x;
+  float avoid_y_command = *vel_body_y;
+
+  // Balance avoidance command for y direction (sideways)
+
+  if (range_finders.right < avoid_outer_border) {
+    if (range_finders.right > avoid_inner_border) {
+      avoid_y_command -= (max_vel_command - min_vel_command) *
+          ((float)avoid_outer_border - (float)range_finders.right)
+          / (float)difference_inner_outer;
+    } else {
+      if(range_finders.right > 1)
+        avoid_y_command -= max_vel_command;
+    }
+  }
+
+  if (range_finders.left < avoid_outer_border) {
+    if (range_finders.left > avoid_inner_border) {
+      avoid_y_command += (max_vel_command - min_vel_command) *
+          ((float)avoid_outer_border - (float)range_finders.left)
+          / (float)difference_inner_outer;
+    } else {
+      if(range_finders.left > 1)
+        avoid_y_command += max_vel_command;
+    }
+  }
+
+
+  // balance avoidance command for x direction (forward/backward)
+  if(range_finders.front < avoid_outer_border) {
+    //from stereo camera TODO: add this once the stereocamera is attached
+    if (range_finders.front > avoid_inner_border)
+    {
+      avoid_y_command -= (max_vel_command - min_vel_command) *
+          ((float)avoid_outer_border - (float)range_finders.front)
+          / (float)difference_inner_outer;
+    } else {
+      if(range_finders.front > 1)
+        avoid_y_command -= max_vel_command;
+    }
+  }
+
+
+  if (range_finders.back < avoid_outer_border) {
+    if (range_finders.back > avoid_inner_border) {
+      avoid_x_command += (max_vel_command - min_vel_command) *
+          ((float)avoid_outer_border - (float)range_finders.back)
+          / (float)difference_inner_outer;
+    } else {
+      if(range_finders.back > 1)
+        avoid_x_command += max_vel_command;
+    }
+  }
+
+
+  *vel_body_x = avoid_x_command;
+  *vel_body_y = avoid_y_command;
+
+}
+
+static void range_sensors_cb(uint8_t sender_id,
+                             uint16_t range_front, uint16_t range_right, uint16_t range_back, uint16_t range_left)
+{
+
+// save range finders values
+  range_finders.front = range_front;
+  range_finders.right = range_right;
+  range_finders.left = range_left;
+  range_finders.back = range_back;
+
+
+//add extra velocity command to avoid walls based on range sensors
+  float vel_offset_body_x = 0.0f;
+  float vel_offset_body_y = 0.0f;
+
+  range_sensor_force_field(&vel_offset_body_x, &vel_offset_body_y, 800, 1200, 0.0f, 0.3f);
+
+ // printf("offset x %f, y %f\n, distance right%d, left%d ",vel_offset_body_x,vel_offset_body_y,range_finders.right,range_finders.left);
+// calculate velocity offset for guidance
+  guidance_h_set_speed_offset(vel_offset_body_x, vel_offset_body_y);
+
 }

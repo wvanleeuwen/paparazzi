@@ -28,7 +28,16 @@
 
 #include <std.h>
 
+struct range_finders_ {
+  int16_t front;
+  int16_t right;
+  int16_t left;
+  int16_t back;
+};
+
+extern float marker_err;
 extern bool marker_lost;
+extern struct range_finders_ range_finders;
 
 // Module functions
 void flight_plan_guided_init(void);
@@ -50,14 +59,25 @@ extern bool Land(float end_altitude);
 extern bool close_gripper(void);
 extern bool open_gripper(void);
 
-extern bool bucket_heading_change(float altitude);
-extern bool bucket_approach(float altitude);
+extern bool front_marker_heading_change(void);
+extern bool front_marker_approach(void);
 
-extern bool marker_center_land(float x_offset, float z_speed, float end_altitude);
+extern bool marker_center_descent(float x_offset, float z_speed, float end_altitude);
 
 extern bool fly_through_window(void);
 extern int8_t win_state;
 
+extern bool go_to_object(bool descent);
+extern int8_t object_state;
+extern int8_t object_retries;
+
+
 extern bool front_cam_set_x_offset(int offset);
+
+extern void range_sensor_force_field(float *vel_body_x, float *vel_body_y,
+                                     int16_t avoid_inner_border, int16_t avoid_outer_border, float min_vel_command, float max_vel_command);
+
+extern bool range_sensor_wall_following(float forward_velocity, float wanted_distance_from_wall, bool right);
+
 
 #endif
