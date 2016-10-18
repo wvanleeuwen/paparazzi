@@ -11,6 +11,39 @@
       <module name="udp"/>
     </target>
 
+    <!--
+      IMPORTANT: MT9F002 INFO
+      - bebop camera is rotated 90 degrees: x and y, as well as width and height, are reversed
+      - width and height should be multiples of 8 at least, preferably 32 for the video stream to work properly
+      - subsampling is defined with ODD_INC_VAL
+              1 = no subsampling,
+              3 = skip each odd pixel (downsize x2)
+              7 = for each pixel skip 3 (downsize x4)
+    -->
+
+    <define name="MT9F002_OUTPUT_HEIGHT" value="1280"/>  <!-- full height 4608 -->
+    <define name="MT9F002_OUTPUT_WIDTH" value="768"/>  <!-- full width 2592 (3288) -->
+    <define name="MT9F002_INITIAL_OFFSET_Y" value="384"/>
+    <define name="MT9F002_INITIAL_OFFSET_X" value="768"/> <!-- 896 for window testing -->
+    <define name="MT9F002_X_ODD_INC_VAL" value="3"/> <!-- downsize x4 -->
+    <define name="MT9F002_Y_ODD_INC_VAL" value="3"/>
+
+    <!--<define name="MT9F002_OUTPUT_HEIGHT" value="640"/>  &lt;!&ndash; full height 4608 &ndash;&gt;-->
+    <!--<define name="MT9F002_OUTPUT_WIDTH" value="640"/>  &lt;!&ndash; full width 2592 (3288) &ndash;&gt;-->
+    <!--<define name="MT9F002_INITIAL_OFFSET_Y" value="384"/>-->
+    <!--<define name="MT9F002_INITIAL_OFFSET_X" value="512"/> &lt;!&ndash; 896 for window testing &ndash;&gt;-->
+    <!--<define name="MT9F002_X_ODD_INC_VAL" value="7"/> &lt;!&ndash; downsize x4 &ndash;&gt;-->
+    <!--<define name="MT9F002_Y_ODD_INC_VAL" value="7"/>-->
+
+    <define name="MT9F002_GAIN_RED" value="6"/>
+    <define name="MT9F002_GAIN_BLUE" value="5"/>
+    <define name="MT9F002_GAIN_GREEN1" value="4"/>
+    <define name="MT9F002_GAIN_GREEN2" value="4"/>
+
+    <define name="MT9F002_OUTPUT_SCALER" value="1"/>
+    <define name="MT9F002_TARGET_FPS" value="30"/>
+    <define name="MT9F002_TARGET_EXPOSURE" value="60"/>
+
 	  <!-- Subsystem section -->
     <module name="telemetry" type="transparent_udp"/>
     <module name="radio_control" type="datalink"/>
@@ -36,6 +69,8 @@
       <define name="FILE_LOGGER_PATH" value="/data/ftp/internal_000"/>
     </module-->
     <module name="video_thread"/>
+    <module name="video_exif"/>
+    <module name="cv_ae_awb"/>
 
     <module name="cv_blob_locator">
       <define name="BLOB_LOCATOR_CAMERA" value="bottom_camera"/>
@@ -43,11 +78,18 @@
 
     <module name="video_rtp_stream">
       <define name="VIEWVIDEO_CAMERA" value="bottom_camera"/>
-      <define name="VIEWVIDEO_QUALITY_FACTOR" value="80"/>
-      <define name="VIEWVIDEO_DOWNSIZE_FACTOR" value="8"/>
-      <configure name="VIEWVIDEO_HOST" value="192.168.42.255" />
-      <configure name="VIEWVIDEO_PORT_OUT" value="5000" />
-      <configure name="VIEWVIDEO_BROADCAST" value="TRUE" />
+      <define name="VIEWVIDEO_DOWNSIZE_FACTOR1" value="1"/>
+      <define name="VIEWVIDEO_PORT_OUT1" value="5000" />
+
+      <define name="VIEWVIDEO_CAMERA2" value="front_camera"/>
+      <define name="VIEWVIDEO_DOWNSIZE_FACTOR2" value="2"/>
+      <define name="VIEWVIDEO_PORT_OUT2" value="6000" />
+
+      <define name="VIEWVIDEO_QUALITY_FACTOR" value="60"/>
+      <define name="VIEWVIDEO_FPS" value="5"/>
+
+      <configure name="VIEWVIDEO_HOST" value="192.168.42.68" />
+      <configure name="VIEWVIDEO_BROADCAST" value="FALSE" />
     </module>
 
     <module name="nav" type="survey_rectangle_rotorcraft">
@@ -57,13 +99,12 @@
       <define name="POLYSURVEY_DEFAULT_DISTANCE" value="10"/>
     </module>
     <module name="video_capture">
-      <define name="VIDEO_CAPTURE_CAMERA" value="bottom_camera"/>
+      <define name="VIDEO_CAPTURE_CAMERA" value="front_camera"/>
       <define name="VIDEO_CAPTURE_PATH" value="/data/ftp/internal_000/images"/>
     </module>
     <module name="digital_cam_video">
       <define name="DC_AUTOSHOOT_DISTANCE_INTERVAL" value="5"/>
     </module>
-    <module name="video_exif"/>
 
     <module name="switch" type="uart">
       <configure name="SWITCH_UART_PORT" value="uart2" />
