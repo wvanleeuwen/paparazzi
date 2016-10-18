@@ -537,45 +537,55 @@ void range_sensor_force_field(float *vel_body_x, float *vel_body_y, int16_t avoi
   float avoid_y_command = *vel_body_y;
 
   // Balance avoidance command for y direction (sideways)
-
-  if (range_finders.right < avoid_outer_border) {
-    if (range_finders.right > avoid_inner_border) {
-      avoid_y_command -= (max_vel_command - min_vel_command) *
-                         ((float)avoid_outer_border - (float)range_finders.right)
-                         / (float)difference_inner_outer;
-    } else {
-      avoid_y_command -= max_vel_command;
+  if(range_finders.right != 0 && range_finders.right != -1)//check if value is above zero (0 or -1 means the range finder is missing/not well connected)
+  {
+    if (range_finders.right < avoid_outer_border) {
+      if (range_finders.right > avoid_inner_border) {
+        avoid_y_command -= (max_vel_command - min_vel_command) *
+            ((float)avoid_outer_border - (float)range_finders.right)
+            / (float)difference_inner_outer;
+      } else {
+        avoid_y_command -= max_vel_command;
+      }
     }
   }
-  if (range_finders.left < avoid_outer_border) {
-    if (range_finders.left > avoid_inner_border) {
-      avoid_y_command += (max_vel_command - min_vel_command) *
-                         ((float)avoid_outer_border - (float)range_finders.left)
-                         / (float)difference_inner_outer;
-    } else {
-      avoid_y_command += max_vel_command;
+  if(range_finders.left != 0 && range_finders.left != 1)
+  {
+    if (range_finders.left < avoid_outer_border) {
+      if (range_finders.left > avoid_inner_border) {
+        avoid_y_command += (max_vel_command - min_vel_command) *
+            ((float)avoid_outer_border - (float)range_finders.left)
+            / (float)difference_inner_outer;
+      } else {
+        avoid_y_command += max_vel_command;
+      }
     }
   }
 
   // balance avoidance command for x direction (forward/backward)
-  if (range_finders.front < avoid_outer_border) {
-    //from stereo camera TODO: add this once the stereocamera is attached
-    if (range_finders.front > avoid_inner_border)
-      avoid_y_command -= (max_vel_command - min_vel_command) *
-                         ((float)avoid_outer_border - (float)range_finders.front)
-                         / (float)difference_inner_outer;
-  } else {
-    avoid_y_command -= max_vel_command;
+  if(range_finders.front != 0 && range_finders.front != 1)
+  {
+    if (range_finders.front < avoid_outer_border) {
+      //from stereo camera TODO: add this once the stereocamera is attached
+      if (range_finders.front > avoid_inner_border)
+        avoid_y_command -= (max_vel_command - min_vel_command) *
+        ((float)avoid_outer_border - (float)range_finders.front)
+        / (float)difference_inner_outer;
+    } else {
+      avoid_y_command -= max_vel_command;
+    }
   }
 
-
-  if (range_finders.back < avoid_outer_border) {
-    if (range_finders.back > avoid_inner_border) {
-      avoid_x_command += (max_vel_command - min_vel_command) *
-                         ((float)avoid_outer_border - (float)range_finders.back)
-                         / (float)difference_inner_outer;
-    } else {
-      avoid_x_command += max_vel_command;
+  if(range_finders.back != 0 && range_finders.back != 1)
+  {
+    if (range_finders.back < avoid_outer_border) {
+      if (range_finders.back > avoid_inner_border) {
+        avoid_x_command += (max_vel_command - min_vel_command) *
+            ((float)avoid_outer_border - (float)range_finders.back)
+            / (float)difference_inner_outer;
+      } else {
+        avoid_x_command += max_vel_command;
+      }
     }
   }
 
@@ -601,6 +611,7 @@ static void range_sensors_cb(uint8_t sender_id,
 
   range_sensor_force_field(&vel_offset_body_x, &vel_offset_body_y, 800, 1200, 0.0f, 0.3f);
 
+ // printf("offset x %f, y %f\n, distance right%d, left%d ",vel_offset_body_x,vel_offset_body_y,range_finders.right,range_finders.left);
 // calculate velocity offset for guidance
   guidance_h_set_speed_offset(vel_offset_body_x, vel_offset_body_y);
 
