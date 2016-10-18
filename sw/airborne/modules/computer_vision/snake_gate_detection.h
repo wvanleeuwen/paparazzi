@@ -36,8 +36,8 @@ extern void snake_gate_detection_start(void);
 extern void snake_gate_detection_stop(void);
 extern void snake_gate_detection_periodic(void);
 
-#define SNAKE_RED 0
-#define SNAKE_BLUE 1
+#define SNAKE_DOOR 0
+#define SNAKE_WINDOW 1
 //uint16_t image_yuv422_set_color(struct image_t *input, struct image_t *output, int x, int y);
 //void check_color_center(struct image_t *im, uint8_t *y_c, uint8_t *cb_c, uint8_t *cr_c)
 
