@@ -42,6 +42,7 @@ int WEIGHTED = 0; // color has no weight at the moment, since it is thresholded
 #define CIRCLE 0
 #define SQUARE 1
 #define POLYGON 2
+#define RECTANGLE 3
 #define SHAPE POLYGON
 float outlier_threshold = 20.0f;
 
@@ -51,6 +52,8 @@ float outlier_threshold = 20.0f;
 // The number of genes depends on the shape:
 #if SHAPE == CIRCLE || SHAPE == SQUARE
 #define N_GENES 3
+#elif SHAPE == RECTANGLE
+#define N_GENES 4
 #else
 #define N_GENES 5
 #endif
@@ -142,7 +145,7 @@ static void convert_image_to_points(struct image_t *color_image, uint16_t min_x,
     for (y = min_y + Y0[sp]; y < max_y; y += GRID_STEP) {
       for (x = min_x + X0[sp]; x < max_x; x += GRID_STEP) {
         // check if the pixel has the right color:
-        check = check_color(color_image, x, y);
+        check = check_color(color_image, y, x);
 
         if (check) {
           // add the points to the array:
@@ -397,6 +400,59 @@ static float mean_distance_to_square(float *genome)
   mean_distance /= n_points;
   return mean_distance;
 }
+
+static float mean_distance_to_rectangle(float *genome)
+{
+  float x = genome[0];
+  float y = genome[1];
+  float rx = genome[2];
+  float ry = genome[3];
+
+  float mean_distance = 0.0f;
+  struct point_f point;
+  float error;
+  uint16_t p;
+  int index;
+  int n_sides = 4;
+
+  // determine corner points:
+  struct point_f rectangle_top_left;
+  struct point_f rectangle_top_right;
+  struct point_f rectangle_bottom_right;
+  struct point_f rectangle_bottom_left;
+  rectangle_top_left.x = x - rx;
+  rectangle_top_left.y = y + ry;
+  rectangle_top_right.x = x + rx;
+  rectangle_top_right.y = y + ry;
+  rectangle_bottom_left.x = x - rx;
+  rectangle_bottom_left.y = y - ry;
+  rectangle_bottom_right.x = x + rx;
+  rectangle_bottom_right.y = y - ry;
+  float side_distances[n_sides];
+
+  for (p = 0; p < n_points; p++) {
+    // get the current point:
+    point = points[p];
+    // determine the distance to the four sides of the square and select the smallest one:
+    side_distances[0] = distance_to_vertical_segment(rectangle_bottom_left, rectangle_top_left, point);
+    side_distances[1] = distance_to_vertical_segment(rectangle_bottom_right, rectangle_top_right, point);
+    side_distances[2] = distance_to_horizontal_segment(rectangle_top_left, rectangle_top_right, point);
+    side_distances[3] = distance_to_horizontal_segment(rectangle_bottom_left, rectangle_bottom_right, point);
+    error = get_minimum(side_distances, n_sides, &index);
+
+    // apply outlier threshold before applying weights:
+    if (error > outlier_threshold) { error = outlier_threshold; }
+
+    if (WEIGHTED) {
+      mean_distance += error * weights[p];
+    } else {
+      mean_distance += error;
+    }
+  }
+  mean_distance /= n_points;
+  return mean_distance;
+}
+
 
 static float mean_distance_to_polygon(float *genome)
 {
@@ -666,10 +722,15 @@ static void fit_window_to_points(int x0, int y0, int size0, int *x_center, int *
   // The idea behind this is that evolution can extend over multiple images, while a wrong tracking will not
   // influence the tracking excessively long.
   uint16_t i, g, ge, j;
+  // TODO: when having more parameters, we do not fully use the previous hypothesis (e.g., left and right size equal to *radius)
   for (i = 0; i < N_INDIVIDUALS / 2; i++) {
     Population[i][0] = x0 + 5 * get_random_number() - 2.5f;
     Population[i][1] = y0 + 5 * get_random_number() - 2.5f;
     Population[i][2] = size0 + 5 * get_random_number() - 2.5f;
+    if (SHAPE == RECTANGLE)
+    {
+      Population[i][3] = size0 + 5 * get_random_number() - 2.5f;
+    }
     if (SHAPE == POLYGON) {
       // also the half-sizes of the right and left part of the gate are optimized:
       Population[i][3] = size0 + 5 * get_random_number() - 2.5f;
@@ -680,6 +741,10 @@ static void fit_window_to_points(int x0, int y0, int size0, int *x_center, int *
     Population[i][0] = *x_center + 5 * get_random_number() - 2.5f;
     Population[i][1] = *y_center + 5 * get_random_number() - 2.5f;
     Population[i][2] = *radius + 5 * get_random_number() - 2.5f;
+    if (SHAPE == RECTANGLE)
+    {
+      Population[i][3] = *radius + 5 * get_random_number() - 2.5f;
+    }
     if (SHAPE == POLYGON) {
       // also the half-sizes of the right and left part of the gate are optimized:
       Population[i][3] = *radius + 5 * get_random_number() - 2.5f;
@@ -696,6 +761,9 @@ static void fit_window_to_points(int x0, int y0, int size0, int *x_center, int *
   best_genome[0] = x0;
   best_genome[1] = y0;
   best_genome[2] = size0;
+  if (SHAPE == RECTANGLE) {
+    best_genome[3] = size0;
+  }
   if (SHAPE == POLYGON) {
     best_genome[3] = size0;
     best_genome[4] = size0;
@@ -708,7 +776,10 @@ static void fit_window_to_points(int x0, int y0, int size0, int *x_center, int *
       } else if (SHAPE == SQUARE) {
         // optimize mean distance to square (and possibly stick)
         fits[i] = mean_distance_to_square(Population[i]);
-      } else {
+      } else if (SHAPE == RECTANGLE) {
+        fits[i] = mean_distance_to_rectangle(Population[i]);
+      }
+      else {
         // optimize mean distance to a polygon (and possibly stick)
         fits[i] = mean_distance_to_polygon(Population[i]);
       }
@@ -751,6 +822,10 @@ static void fit_window_to_points(int x0, int y0, int size0, int *x_center, int *
   if (SHAPE == POLYGON) {
     (*s_left) = (int) best_genome[3];
     (*s_right) = (int) best_genome[4];
+  }
+  if (SHAPE == RECTANGLE) {
+    // radius has x-direction size, s_left has y-direction size
+    (*s_left) = (int) best_genome[3];
   }
 
   return;
@@ -831,7 +906,10 @@ void gate_detection(struct image_t* color_image, int *x_center, int *y_center, i
       // tells us the angle to the center of the gate.
       (*psi) = get_angle_from_polygon(*s_left, *s_right, color_image);
     } else {
-        *s_left = *radius;
+        if(SHAPE != RECTANGLE)
+        {
+          *s_left = *radius;
+        }
         *s_right = *radius;
         *psi = 0.;
     }

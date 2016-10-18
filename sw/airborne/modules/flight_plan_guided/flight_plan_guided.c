@@ -54,7 +54,9 @@ float marker_err = 0;
 bool marker_lost;
 
 #include "subsystems/abi.h"
- struct range_finders_ range_finders;
+struct range_finders_ range_finders;
+bool do_wall_following = false;
+bool front_wall_detected = false;
 
 #ifndef RANGE_SENSORS_ABI_ID
 #define RANGE_SENSORS_ABI_ID ABI_BROADCAST
@@ -413,8 +415,8 @@ bool go_to_object(bool descent) {
 }
 
 int8_t win_state;
-
-bool fly_through_window(void) {
+// color 0 = red, 1 = blue
+bool fly_through_window(uint8_t color) {
   static float mytime = 0;
 
   if (autopilot_mode != AP_MODE_GUIDED) { win_state = 0; return true; }
@@ -430,6 +432,7 @@ bool fly_through_window(void) {
         guidance_v_set_guided_z(-1.7);
         mytime = get_sys_time_float();
         init_pos_filter = 1;
+        set_snake_gate_color_filter(color);
         snake_gate_detection_snake_gate_detection_periodic_status = MODULES_START;
 
         win_state++;
@@ -448,6 +451,8 @@ bool fly_through_window(void) {
 
           // position drone 1.5m in front of window, add small low pass filter on position command
           guidance_h_set_guided_pos_relative(0.9*(filtered_x_gate - 1.5), 0.9*filtered_y_gate);
+          // align drone perpendicular to gate
+          guidance_h_set_guided_heading_relative(angle_to_gate);
           gate_processed = 1;
         }
         break;
@@ -479,139 +484,102 @@ bool fly_through_window(void) {
   return true;
 }
 
-bool range_sensor_wall_following(float forward_velocity, float wanted_distance_from_wall, bool right)
+static void range_sensor_force_field(float *vel_body_x, float *vel_body_y, int16_t avoid_inner_border, int16_t avoid_outer_border,
+    int16_t tinder_range, float min_vel_command, float max_vel_command)
 {
-//STIL TO TEST OUT!!!
-	float actual_distance_from_wall = 0;
-	float vel_body_x_command = forward_velocity;
-	float vel_body_y_command = 0.0f;
-    float unsigned_difference = 0.0f;
-    float signed_difference = 0.0f;
-
-    float sign = 0.0f;
-
-	float wall_following_bandwidth = 0.2f;
-	float max_velocity_command = 0.3f;
-
-	if(right)
-	{
-		actual_distance_from_wall = (float)range_finders.right/1000;
-		unsigned_difference = fabs(wanted_distance_from_wall -actual_distance_from_wall);
-		signed_difference = fabs(wanted_distance_from_wall -actual_distance_from_wall);
-		sign = signed_difference/unsigned_difference;
-
-		if(unsigned_difference > wall_following_bandwidth){
-			vel_body_y_command = -1* sign * max_velocity_command;
-		}else
-		{
-			vel_body_y_command = max_velocity_command * -1 * signed_difference / wall_following_bandwidth;
-		}
-
-	}else
-	{
-		actual_distance_from_wall = (float)range_finders.left/1000;
-		unsigned_difference = fabs(wanted_distance_from_wall -actual_distance_from_wall);
-		signed_difference = fabs(wanted_distance_from_wall -actual_distance_from_wall);
-		sign = signed_difference/unsigned_difference;
-
-		if(unsigned_difference > wall_following_bandwidth){
-			vel_body_y_command =  sign * max_velocity_command;
-		}else
-		{
-			vel_body_y_command = max_velocity_command  * signed_difference / wall_following_bandwidth;
-		}
-
-	}
-	guidance_h_set_guided_body_vel(vel_body_x_command, vel_body_y_command);
-return true;
-}
-
-void range_sensor_force_field(float *vel_body_x, float *vel_body_y, int16_t avoid_inner_border, int16_t avoid_outer_border, float min_vel_command, float max_vel_command)
-{
+  static const int16_t max_sensor_range = 2000;
 
   int16_t difference_inner_outer = avoid_outer_border - avoid_inner_border;
-
 
   // Velocity commands
   float avoid_x_command = *vel_body_x;
   float avoid_y_command = *vel_body_y;
 
   // Balance avoidance command for y direction (sideways)
+  if (range_finders.right < 1 || range_finders.right > max_sensor_range)
+  {
+    //do nothing
+  } else if(range_finders.right < avoid_inner_border){
+    avoid_y_command -= max_vel_command;
+  } else if (range_finders.right < avoid_outer_border) {
+    // Linear
+    avoid_y_command -= (max_vel_command - min_vel_command) *
+        ((float)avoid_outer_border - (float)range_finders.right)
+        / (float)difference_inner_outer;
+  } else {}
 
-  if (range_finders.right < avoid_outer_border) {
-    if (range_finders.right > avoid_inner_border) {
-      avoid_y_command -= (max_vel_command - min_vel_command) *
-          ((float)avoid_outer_border - (float)range_finders.right)
-          / (float)difference_inner_outer;
-    } else {
-      if(range_finders.right > 1)
-        avoid_y_command -= max_vel_command;
-    }
-  }
-
-  if (range_finders.left < avoid_outer_border) {
-    if (range_finders.left > avoid_inner_border) {
-      avoid_y_command += (max_vel_command - min_vel_command) *
-          ((float)avoid_outer_border - (float)range_finders.left)
-          / (float)difference_inner_outer;
-    } else {
-      if(range_finders.left > 1)
-        avoid_y_command += max_vel_command;
-    }
-  }
-
+  if (range_finders.left < 1 || range_finders.left > max_sensor_range)
+  {
+    //do nothing
+  } else if(range_finders.left < avoid_inner_border){
+    avoid_y_command -= max_vel_command;
+  } else if (range_finders.left < avoid_outer_border) {
+    // Linear
+    avoid_y_command -= (max_vel_command - min_vel_command) *
+        ((float)avoid_outer_border - (float)range_finders.left)
+        / (float)difference_inner_outer;
+  } else {}
 
   // balance avoidance command for x direction (forward/backward)
-  if(range_finders.front < avoid_outer_border) {
-    //from stereo camera TODO: add this once the stereocamera is attached
-    if (range_finders.front > avoid_inner_border)
-    {
-      avoid_y_command -= (max_vel_command - min_vel_command) *
-          ((float)avoid_outer_border - (float)range_finders.front)
-          / (float)difference_inner_outer;
-    } else {
-      if(range_finders.front > 1)
-        avoid_y_command -= max_vel_command;
+  if (range_finders.front < 1 || range_finders.front > max_sensor_range)
+  {
+    //do nothing
+  } else if(range_finders.front < avoid_inner_border){
+    avoid_y_command -= max_vel_command;
+  } else if (range_finders.front < avoid_outer_border) {
+    // Linear
+    avoid_y_command -= (max_vel_command - min_vel_command) *
+        ((float)avoid_outer_border - (float)range_finders.front)
+        / (float)difference_inner_outer;
+  } else if(range_finders.front > tinder_range){
+    if(do_wall_following){
+      avoid_y_command += max_vel_command;
     }
-  }
+  } else {}
 
 
-  if (range_finders.back < avoid_outer_border) {
-    if (range_finders.back > avoid_inner_border) {
-      avoid_x_command += (max_vel_command - min_vel_command) *
-          ((float)avoid_outer_border - (float)range_finders.back)
-          / (float)difference_inner_outer;
-    } else {
-      if(range_finders.back > 1)
-        avoid_x_command += max_vel_command;
-    }
-  }
-
+  if (range_finders.back < 1 || range_finders.back > max_sensor_range)
+  {
+    //do nothing
+  } else if(range_finders.back < avoid_inner_border){
+    avoid_y_command += max_vel_command;
+  } else if (range_finders.back < avoid_outer_border) {
+    // Linear
+    avoid_y_command += (max_vel_command - min_vel_command) *
+        ((float)avoid_outer_border - (float)range_finders.back)
+        / (float)difference_inner_outer;
+  } else {}
 
   *vel_body_x = avoid_x_command;
   *vel_body_y = avoid_y_command;
-
 }
 
 static void range_sensors_cb(uint8_t sender_id,
                              uint16_t range_front, uint16_t range_right, uint16_t range_back, uint16_t range_left)
 {
+  static uint32_t front_wall_detect_counter = 0;
+  static const int32_t max_sensor_range = 2000;
 
-// save range finders values
+  // save range finders values
   range_finders.front = range_front;
   range_finders.right = range_right;
   range_finders.left = range_left;
   range_finders.back = range_back;
 
+  if (range_finders.front < max_sensor_range) {
+    if(++front_wall_detect_counter > 5) {
+      front_wall_detected = true;
+    }
+  } else {
+    front_wall_detect_counter = 0;
+  }
 
-//add extra velocity command to avoid walls based on range sensors
+  // add extra velocity command to avoid walls based on range sensors
   float vel_offset_body_x = 0.0f;
   float vel_offset_body_y = 0.0f;
 
-  range_sensor_force_field(&vel_offset_body_x, &vel_offset_body_y, 800, 1200, 0.0f, 0.3f);
+  range_sensor_force_field(&vel_offset_body_x, &vel_offset_body_y, 500, 1000, 1600, 0.0f, 0.3f);
 
- // printf("offset x %f, y %f\n, distance right%d, left%d ",vel_offset_body_x,vel_offset_body_y,range_finders.right,range_finders.left);
-// calculate velocity offset for guidance
+  // calculate velocity offset for guidance
   guidance_h_set_speed_offset(vel_offset_body_x, vel_offset_body_y);
-
 }

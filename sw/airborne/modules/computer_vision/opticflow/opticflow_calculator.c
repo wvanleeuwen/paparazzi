@@ -276,6 +276,9 @@ void calc_fast9_lukas_kanade(struct opticflow_t *opticflow, struct opticflow_sta
   // Corner detection
   // *************************************************************************************
 
+  // TODO: Only do FAST detection when there are too few corners / OR / do corner detection and only add corners when not too close to existing ones  
+  // The opticflow struct is remembered between calls to this function (see opticflow_module.c)
+
   // FAST corner detection
   // TODO: There is something wrong with fast9_detect destabilizing FPS. This problem is reduced with putting min_distance
   // to 0 (see defines), however a more permanent solution should be considered
@@ -316,11 +319,16 @@ void calc_fast9_lukas_kanade(struct opticflow_t *opticflow, struct opticflow_sta
                                        opticflow->window_size / 2, opticflow->subpixel_factor, opticflow->max_iterations,
                                        opticflow->threshold_vec, opticflow->max_track_corners, opticflow->pyramid_level);
 
+  // TODO: how are the vectors matched to the points sent in?
+  // TODO: Update the flow of the existing points with the new flow.  
+  
 #if OPTICFLOW_SHOW_FLOW
   printf("show: n tracked = %d\n", result->tracked_cnt);
   image_show_flow(img, vectors, result->tracked_cnt, opticflow->subpixel_factor);
 #endif
 
+
+  // TODO: use the filtered flow with weights instead of vectors coming 
   // Estimate size divergence:
   if (SIZE_DIV) {
     n_samples = 100;
