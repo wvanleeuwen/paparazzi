@@ -826,6 +826,13 @@ void mt9f002_set_resolution(struct mt9f002_t *mt)
 	  }
 	  write_reg(mt, MT9F002_X_ADDR_END  , end_addr_x, 2);
 	  write_reg(mt, MT9F002_Y_ADDR_END  , end_addr_y, 2);
+
+	  printf("[MT9F002] X_ADDR_START: %i\n", mt->offset_x);
+	  	  printf("[MT9F002] Y_ADDR_START: %i\n", mt->offset_y);
+	  	  printf("[MT9F002] X_ADDR_END: %i\n", end_addr_x);
+	  	  printf("[MT9F002] Y_ADDR_END: %i\n", end_addr_y);
+	  	  printf("[MT9F002] X_OUTPUT_SIZE: %i\n", mt->output_width);
+	  	  printf("[MT9F002] Y_OUTPUT_SIZE: %i\n", mt->output_height);
 }
 /**
  * Initialisation of the Aptina MT9F002 CMOS sensor
