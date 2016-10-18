@@ -64,7 +64,7 @@ extern bool front_marker_approach(void);
 
 extern bool marker_center_descent(float x_offset, float z_speed, float end_altitude);
 
-extern bool fly_through_window(void);
+extern bool fly_through_window(uint8_t color);
 extern int8_t win_state;
 
 extern bool go_to_object(bool descent);

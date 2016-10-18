@@ -152,7 +152,27 @@ int ready_pass_through;
 
 // timers
 float last_processed, time_gate_detected, time_tracked;
-
+// color 0 = red, 1 = blue
+void set_snake_gate_color_filter(uint8_t color){
+  // Filter Settings
+  if (color == SNAKE_RED){
+    // red door
+    uint8_t color_lum_min = 75;// 60;//105;
+    uint8_t color_lum_max = 197;//228;//205;
+    uint8_t color_cb_min  = 0;//66;//52;
+    uint8_t color_cb_max  = 156;//194;//140;
+    uint8_t color_cr_min  = 127;//140;//180;
+    uint8_t color_cr_max  = 255;//230;//255;
+  } else if(color == SNAKE_BLUE) {
+    // blue window
+    uint8_t color_lum_min = 70;// 60;//105;
+    uint8_t color_lum_max = 128;//228;//205;
+    uint8_t color_cb_min  = 141;//140;//180;
+    uint8_t color_cb_max  = 200;//230;//255;
+    uint8_t color_cr_min  = 104;//66;//52;
+    uint8_t color_cr_max  = 177;//194;//140;
+  }
+}
 static void calculate_gate_position(int x_pix, int y_pix, int sz_pix, struct image_t *img, struct gate_img gate)
 {
   // pixel distance conversion

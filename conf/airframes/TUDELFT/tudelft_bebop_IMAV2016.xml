@@ -79,15 +79,15 @@
     </module>
 
     <module name="video_rtp_stream">
-      <define name="VIEWVIDEO_CAMERA" value="bottom_camera"/>
-      <define name="VIEWVIDEO_CAMERA2" value="front_camera"/>
+      <define name="VIEWVIDEO_CAMERA" value="front_camera"/>
+      <!--define name="VIEWVIDEO_CAMERA2" value="front_camera"/-->
 
       <define name="VIEWVIDEO_DOWNSIZE_FACTOR" value="1"/>
       <define name="VIEWVIDEO_QUALITY_FACTOR" value="60"/>
       <define name="VIEWVIDEO_FPS" value="5"/>
 
-      <configure name="VIEWVIDEO_BROADCAST" value="FALSE"/>
-      <configure name="VIEWVIDEO_HOST" value="192.168.42.68"/>
+      <!--configure name="VIEWVIDEO_BROADCAST" value="FALSE"/>
+      <configure name="VIEWVIDEO_HOST" value="192.168.42.68"/-->
     </module>
     
     <module name="cv_ae_awb"/>

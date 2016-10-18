@@ -52,7 +52,7 @@ float outlier_threshold = 20.0f;
 // The number of genes depends on the shape:
 #if SHAPE == CIRCLE || SHAPE == SQUARE
 #define N_GENES 3
-#else if SHAPE == RECTANGLE
+#elif SHAPE == RECTANGLE
 #define N_GENES 4
 #else
 #define N_GENES 5

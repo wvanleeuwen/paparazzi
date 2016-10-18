@@ -413,8 +413,8 @@ bool go_to_object(bool descent) {
 }
 
 int8_t win_state;
-
-bool fly_through_window(void) {
+// color 0 = red, 1 = blue
+bool fly_through_window(uint8_t color) {
   static float mytime = 0;
 
   if (autopilot_mode != AP_MODE_GUIDED) { win_state = 0; return true; }
@@ -430,6 +430,7 @@ bool fly_through_window(void) {
         guidance_v_set_guided_z(-1.7);
         mytime = get_sys_time_float();
         init_pos_filter = 1;
+        set_snake_gate_color_filter(color);
         snake_gate_detection_snake_gate_detection_periodic_status = MODULES_START;
 
         win_state++;

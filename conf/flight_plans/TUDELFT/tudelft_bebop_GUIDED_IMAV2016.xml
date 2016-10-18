@@ -63,10 +63,10 @@
     </block>
 
     <block name="Fly through entrance">
-      <call_once fun="front_cam_set_x_offset(896)"/>
       <call_once fun="detector_disable_all()"/>
+      <call_once fun="front_cam_set_x_offset(896)"/>
       <call_once fun="win_state = 0"/>
-      <call fun="fly_through_window()"/>
+      <call fun="fly_through_window(SNAKE_BLUE)"/>
     </block>
 
     <block name="Find and land at red item">
@@ -191,10 +191,10 @@
     </block>
 
     <block name="Fly through exit">
-      <call_once fun="front_cam_set_x_offset(896)"/>
       <call_once fun="detector_disable_all()"/>
+      <call_once fun="front_cam_set_x_offset(896)"/>
       <call_once fun="win_state = 0"/>
-      <call fun="fly_through_window()"/>
+      <call fun="fly_through_window(SNAKE_RED)"/>
     </block>
 
     <block name="Locate landing platform">
