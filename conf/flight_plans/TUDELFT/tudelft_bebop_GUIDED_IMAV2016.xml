@@ -239,8 +239,8 @@
       <deroute block="TESTING - Hover over red bucket"/>
     </block>
     <block name = "TESTING - Wall Following Right Side">
-      <call fun="range_sensor_wall_following(0.3, 1.0, TRUE)"/>
-      <exception cond="range_finders.right > 1500" deroute="TESTING - Turn To Door Right Side"/>
+      <call fun="range_sensor_wall_following(0.3, 1.5, TRUE)"/>
+      <exception cond="range_finders.right > 3000" deroute="TESTING - Turn To Door Right Side"/>
     </block>
 
     <block name = "TESTING - Turn To Door Right Side">

@@ -481,34 +481,28 @@ bool fly_through_window(void) {
 
 bool range_sensor_wall_following(float forward_velocity, float wanted_distance_from_wall, bool right)
 {
-//STILL HAVE TO TEST OUT!!!
-	float actual_distance_from_wall = 0;
-	float vel_body_x_command = forward_velocity;
-	float vel_body_y_command = 0.0f;
-    float unsigned_difference = 0.0f;
-    float signed_difference = 0.0f;
-
-    float sign = 0.0f;
-
-	float wall_following_bandwidth = 0.2f;
-	float max_velocity_command = 0.3f;
+  //STILL HAVE TO TEST OUT!!!
+  float actual_distance_from_wall = 0;
+  float vel_body_x_command = forward_velocity;
+  float vel_body_y_command = 0.0f;
+  float signed_difference = 0.0f;
 
 
-	if(right)
-	{
-		actual_distance_from_wall = (float)range_finders.right/1000;
-		signed_difference = wanted_distance_from_wall - actual_distance_from_wall;
-		vel_body_y_command = -1*signed_difference;
 
-	}else
-	{
-		actual_distance_from_wall = (float)range_finders.left/1000;
-		signed_difference = fabs(wanted_distance_from_wall -actual_distance_from_wall);
+  if(right)
+  {
+    actual_distance_from_wall = (float)range_finders.right/1000;
+    signed_difference = wanted_distance_from_wall - actual_distance_from_wall;
+    vel_body_y_command = -1*signed_difference;
+  }else
+  {
+    actual_distance_from_wall = (float)range_finders.left/1000;
+    signed_difference = wanted_distance_from_wall - actual_distance_from_wall;
     vel_body_y_command = signed_difference;
-	}
-  guidance_h_set_guided_pos_relative(-1*signed_difference);
+  }
+  guidance_h_set_guided_pos_relative(vel_body_x_command,vel_body_y_command);
 
-return true;
+  return true;
 }
 
 void range_sensor_force_field(float *vel_body_x, float *vel_body_y, int16_t avoid_inner_border, int16_t avoid_outer_border, float min_vel_command, float max_vel_command)
@@ -593,7 +587,7 @@ static void range_sensors_cb(uint8_t sender_id,
   float vel_offset_body_x = 0.0f;
   float vel_offset_body_y = 0.0f;
 
-  range_sensor_force_field(&vel_offset_body_x, &vel_offset_body_y, 800, 1200, 0.0f, 0.3f);
+  range_sensor_force_field(&vel_offset_body_x, &vel_offset_body_y, 500, 1000, 0.0f, 0.3f);
 
  // printf("offset x %f, y %f\n, distance right%d, left%d ",vel_offset_body_x,vel_offset_body_y,range_finders.right,range_finders.left);
 // calculate velocity offset for guidance
