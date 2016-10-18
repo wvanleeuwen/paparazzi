@@ -55,6 +55,7 @@ bool marker_lost;
 
 #include "subsystems/abi.h"
 struct range_finders_ range_finders;
+bool do_lr_avoidance = true;
 bool do_wall_following = false;
 bool front_wall_detected = false;
 
@@ -439,10 +440,11 @@ bool fly_through_window(uint8_t color) {
         break;
       // centre drone in front of window at about 2m away
       case 1:
-        if(stereo_agl != 0 && stereo_agl < 3) {  // if I get closer than 30cm, move away and retry
+        // todo, filter... do I need this?
+        /*if(range_finders.front > 0 && range_finders.front < 30) {  // if I get closer than 30cm, move away and retry
           win_state = 4;
           break;
-        }
+        }*/
         if(gate_detected && gate_processed == 0) {
           if (ready_pass_through){
             win_state++;
@@ -557,7 +559,7 @@ static void range_sensor_force_field(float *vel_body_x, float *vel_body_y, int16
 static void range_sensors_cb(uint8_t sender_id,
                              int16_t range_front, int16_t range_right, int16_t range_back, int16_t range_left)
 {
-  static uint32_t front_wall_detect_counter = 0;
+  static int32_t front_wall_detect_counter = 0;
   static const int32_t max_sensor_range = 2000;
 
   // save range finders values
@@ -566,12 +568,17 @@ static void range_sensors_cb(uint8_t sender_id,
   range_finders.left = range_left;
   range_finders.back = range_back;
 
-  if (range_finders.front < max_sensor_range) {
-    if(++front_wall_detect_counter > 5) {
-      front_wall_detected = true;
+  if (range_finders.front > 1) {  // good sensor reading
+    if(range_finders.front < max_sensor_range) {  // wall in view
+      if(front_wall_detect_counter > 5) { // outlier detection for positive wall detection
+        front_wall_detected = true;
+      } else {
+        front_wall_detect_counter++;
+      }
+    } else if(--front_wall_detect_counter < 0){  // outlier detection for negative wall detection
+      front_wall_detected = false;
+      front_wall_detect_counter = 0;
     }
-  } else {
-    front_wall_detect_counter = 0;
   }
 
   // add extra velocity command to avoid walls based on range sensors

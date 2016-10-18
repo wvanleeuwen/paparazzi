@@ -67,7 +67,9 @@
       <call_once fun="detector_disable_all()"/>
       <call_once fun="front_cam_set_x_offset(896)"/>
       <call_once fun="win_state = 0"/>
+      <call_once fun="do_lr_avoidance = false"/>
       <call fun="fly_through_window(SNAKE_WINDOW)"/>
+      <call_once fun="do_lr_avoidance = true"/>
     </block>
 
     <block name="Find and land at red item">
@@ -143,7 +145,9 @@
       <call_once fun="detector_disable_all()"/>
       <call_once fun="front_cam_set_x_offset(896)"/>
       <call_once fun="win_state = 0"/>
+      <call_once fun="do_lr_avoidance = false"/>
       <call fun="fly_through_window(SNAKE_DOOR)"/>
+      <call_once fun="do_lr_avoidance = true"/>
     </block>
 
     <block name="Find and hover above red bucket">
@@ -196,7 +200,9 @@
       <call_once fun="detector_disable_all()"/>
       <call_once fun="front_cam_set_x_offset(896)"/>
       <call_once fun="win_state = 0"/>
+      <call_once fun="do_lr_avoidance = false"/>
       <call fun="fly_through_window(SNAKE_DOOR)"/>
+      <call_once fun="do_lr_avoidance = true"/>
     </block>
 
     <block name="Find and land at blue item">
@@ -240,7 +246,9 @@
       <call_once fun="detector_disable_all()"/>
       <call_once fun="front_cam_set_x_offset(896)"/>
       <call_once fun="win_state = 0"/>
+      <call_once fun="do_lr_avoidance = false"/>
       <call fun="fly_through_window(SNAKE_DOOR)"/>
+      <call_once fun="do_lr_avoidance = true"/>
     </block>
 
     <block name="Locate landing platform">
@@ -258,6 +266,11 @@
       <!-- TODO -->
     </block>
 
+    <block name = "Disable Snake Gate">
+       <call_once fun="snake_gate_detection_snake_gate_detection_periodic_status = MODULES_STOP"/>
+       <while cond="1"/>
+    </block>
+    
     <block name="TESTING - Hover forever">
       <call fun="Hover(NOM_FLIGHT_ALT)"/>
       <while cond="1"/>
@@ -293,7 +306,7 @@
        <call fun="RotateToHeading(stateGetNedToBodyEulers_f()->psi+DegOfRad(90))"/>
       <!--deroute block="Hover"/-->
     </block>
-
+    
   </blocks>
 
 
