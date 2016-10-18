@@ -140,9 +140,11 @@
     </block>
 
     <block name="Move through door 2">
-    <!-- TODO: get gate dector working on drone FOR DOORS-->
+      <call_once fun="detector_disable_all()"/>
+      <call_once fun="front_cam_set_x_offset(896)"/>
+      <call_once fun="win_state = 0"/>
+      <call fun="fly_through_window(SNAKE_DOOR)"/>
     </block>
-
 
     <block name="Find and hover above red bucket">
       <call_once fun="detector_disable_all()"/>
@@ -188,9 +190,14 @@
     <!-- TODO: turn 180 degrees (face towards wall) and move LEFT for a meter-->
     <!-- TODO: wall following for 2 meters untill door is found with gate detection-->
     <!--       or wall following for constant velocity untill door is met-->
-    <!-- TODO: move through the door-->
     </block>
 
+    <block name="Move through door 3">
+      <call_once fun="detector_disable_all()"/>
+      <call_once fun="front_cam_set_x_offset(896)"/>
+      <call_once fun="win_state = 0"/>
+      <call fun="fly_through_window(SNAKE_DOOR)"/>
+    </block>
 
     <block name="Find and land at blue item">
       <call_once fun="detector_disable_all()"/>

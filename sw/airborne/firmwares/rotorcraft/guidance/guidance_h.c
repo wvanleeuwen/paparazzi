@@ -715,13 +715,6 @@ bool guidance_h_set_guided_pos_relative(float x, float y)
   return false;
 }
 
-bool guidance_h_set_guided_heading_relative(float heading)
-{
-  float psi = stateGetNedToBodyEulers_f()->psi;
-  return guidance_h_set_guided_heading(psi + heading);
-}
-
-
 bool guidance_h_set_guided_heading(float heading)
 {
   if (guidance_h.mode == GUIDANCE_H_MODE_GUIDED) {
@@ -731,6 +724,11 @@ bool guidance_h_set_guided_heading(float heading)
     return true;
   }
   return false;
+}
+
+bool guidance_h_set_guided_heading_relative(float heading)
+{
+  return guidance_h_set_guided_heading(stateGetNedToBodyEulers_f()->psi + heading);
 }
 
 bool guidance_h_set_guided_body_vel(float vx, float vy)
