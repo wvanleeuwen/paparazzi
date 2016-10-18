@@ -151,7 +151,7 @@ struct image_t *viewvideo_function(struct UdpSocket *socket, struct image_t *img
   struct image_t img_jpeg;
   image_create(&img_jpeg, img_small.w, img_small.h, IMAGE_JPEG);
 
-  fprintf(stderr, "[viewvideo%i] create \n", img->w);
+//  fprintf(stderr, "[viewvideo%i] create \n", img->w);
 
 #if VIEWVIDEO_USE_NETCAT
   char nc_cmd[64];
@@ -193,7 +193,7 @@ struct image_t *viewvideo_function(struct UdpSocket *socket, struct image_t *img
 #else
     if (viewvideo.use_rtp) {
 
-      fprintf(stderr, "[viewvideo%i] send \n", img->w);
+//      fprintf(stderr, "[viewvideo%i] send \n", img->w);
 
       // Send image with RTP
       rtp_frame_send(

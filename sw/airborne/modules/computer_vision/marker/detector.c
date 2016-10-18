@@ -545,16 +545,11 @@ void detector_init(void) {
   marker2.pixel.y = 0;
   marker2.found_time = 0;
 
-  detector.front_blue_item = cv_add_to_device_async(&DETECTOR_CAMERA2, detect_front_blue_item, 5);
-  detector.front_blue_item->maximum_fps = 5;
-  detector.front_blue_bucket = cv_add_to_device_async(&DETECTOR_CAMERA2, detect_front_blue_bucket, 5);
-  detector.front_blue_bucket->maximum_fps = 5;
-  detector.front_red_item = cv_add_to_device_async(&DETECTOR_CAMERA2, detect_front_red_item, 5);
-  detector.front_red_item->maximum_fps = 5;
-  detector.front_red_bucket = cv_add_to_device_async(&DETECTOR_CAMERA2, detect_front_red_bucket, 5);
-  detector.front_red_bucket->maximum_fps = 5;
-  detector.front_white_building = cv_add_to_device_async(&DETECTOR_CAMERA2, detect_front_white_building, 5);
-  detector.front_white_building->maximum_fps = 5;
+  detector.front_blue_item = cv_add_to_device(&DETECTOR_CAMERA2, detect_front_blue_item);
+  detector.front_blue_bucket = cv_add_to_device(&DETECTOR_CAMERA2, detect_front_blue_bucket);
+  detector.front_red_item = cv_add_to_device(&DETECTOR_CAMERA2, detect_front_red_item);
+  detector.front_red_bucket = cv_add_to_device(&DETECTOR_CAMERA2, detect_front_red_bucket);
+  detector.front_white_building = cv_add_to_device(&DETECTOR_CAMERA2, detect_front_white_building);
 
   cv_add_to_device(&DETECTOR_CAMERA2, draw_target_marker2);
 
