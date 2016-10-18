@@ -76,7 +76,6 @@ extern bool front_cam_set_x_offset(int offset);
 
 extern bool front_wall_detected;
 extern bool do_wall_following;
-extern bool do_lr_avoidance;
 extern bool range_sensor_wall_following_between_doors(float travel_time);
 
 #endif

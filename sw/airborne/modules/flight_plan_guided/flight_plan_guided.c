@@ -435,6 +435,7 @@ bool fly_through_window(uint8_t color) {
         init_pos_filter = 1;
         set_snake_gate_color_filter(color);
         snake_gate_detection_snake_gate_detection_periodic_status = MODULES_START;
+        do_lr_avoidance = false;
 
         win_state++;
         break;
@@ -468,6 +469,7 @@ bool fly_through_window(uint8_t color) {
       case 3:
         if (get_sys_time_float() - mytime > 6.) {
           win_state = 0;
+          do_lr_avoidance = true;
           return false;
         }
         break;
