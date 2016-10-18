@@ -239,6 +239,12 @@
     <!--<define name="G1_R" value="0.0"/>-->
     <!--<define name="G2_R" value="0.1"/>-->
 
+    <!--bebop 026447 (with range_sensors)>
+    <define name="G1_P" value="0.066554"/>
+    <define name="G1_Q" value="0.034597"/>
+    <define name="G1_R" value="0.002595"/>
+    <define name="G2_R" value="0.136735"/-->
+
     <!-- reference acceleration for attitude control -->
     <define name="REF_ERR_P" value="600.0"/>
     <define name="REF_ERR_Q" value="600.0"/>

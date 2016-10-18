@@ -53,8 +53,20 @@
 float marker_err = 0;
 bool marker_lost;
 
-void flight_plan_guided_init(void) {
+#include "subsystems/abi.h"
+ struct range_finders_ range_finders;
+
+#ifndef RANGE_SENSORS_ABI_ID
+#define RANGE_SENSORS_ABI_ID ABI_BROADCAST
+#endif
+static abi_event range_sensors_ev;
+static void range_sensors_cb(uint8_t sender_id,
+                             uint16_t range_front, uint16_t range_right, uint16_t range_back, uint16_t range_left);
+
+void flight_plan_guided_init(void)
+{
   marker_lost = true;
+  AbiBindMsgRANGE_SENSORS(RANGE_SENSORS_ABI_ID, &range_sensors_ev, range_sensors_cb);
 } // Dummy
 
 
@@ -465,4 +477,141 @@ bool fly_through_window(void) {
     }
 
   return true;
+}
+
+bool range_sensor_wall_following(float forward_velocity, float wanted_distance_from_wall, bool right)
+{
+//STIL TO TEST OUT!!!
+	float actual_distance_from_wall = 0;
+	float vel_body_x_command = forward_velocity;
+	float vel_body_y_command = 0.0f;
+    float unsigned_difference = 0.0f;
+    float signed_difference = 0.0f;
+
+    float sign = 0.0f;
+
+	float wall_following_bandwidth = 0.2f;
+	float max_velocity_command = 0.3f;
+
+	if(right)
+	{
+		actual_distance_from_wall = (float)range_finders.right/1000;
+		unsigned_difference = fabs(wanted_distance_from_wall -actual_distance_from_wall);
+		signed_difference = fabs(wanted_distance_from_wall -actual_distance_from_wall);
+		sign = signed_difference/unsigned_difference;
+
+		if(unsigned_difference > wall_following_bandwidth){
+			vel_body_y_command = -1* sign * max_velocity_command;
+		}else
+		{
+			vel_body_y_command = max_velocity_command * -1 * signed_difference / wall_following_bandwidth;
+		}
+
+	}else
+	{
+		actual_distance_from_wall = (float)range_finders.left/1000;
+		unsigned_difference = fabs(wanted_distance_from_wall -actual_distance_from_wall);
+		signed_difference = fabs(wanted_distance_from_wall -actual_distance_from_wall);
+		sign = signed_difference/unsigned_difference;
+
+		if(unsigned_difference > wall_following_bandwidth){
+			vel_body_y_command =  sign * max_velocity_command;
+		}else
+		{
+			vel_body_y_command = max_velocity_command  * signed_difference / wall_following_bandwidth;
+		}
+
+	}
+	guidance_h_set_guided_body_vel(vel_body_x_command, vel_body_y_command);
+return true;
+}
+
+void range_sensor_force_field(float *vel_body_x, float *vel_body_y, int16_t avoid_inner_border, int16_t avoid_outer_border, float min_vel_command, float max_vel_command)
+{
+
+  int16_t difference_inner_outer = avoid_outer_border - avoid_inner_border;
+
+
+  // Velocity commands
+  float avoid_x_command = *vel_body_x;
+  float avoid_y_command = *vel_body_y;
+
+  // Balance avoidance command for y direction (sideways)
+
+  if (range_finders.right < avoid_outer_border) {
+    if (range_finders.right > avoid_inner_border) {
+      avoid_y_command -= (max_vel_command - min_vel_command) *
+          ((float)avoid_outer_border - (float)range_finders.right)
+          / (float)difference_inner_outer;
+    } else {
+      if(range_finders.right > 1)
+        avoid_y_command -= max_vel_command;
+    }
+  }
+
+  if (range_finders.left < avoid_outer_border) {
+    if (range_finders.left > avoid_inner_border) {
+      avoid_y_command += (max_vel_command - min_vel_command) *
+          ((float)avoid_outer_border - (float)range_finders.left)
+          / (float)difference_inner_outer;
+    } else {
+      if(range_finders.left > 1)
+        avoid_y_command += max_vel_command;
+    }
+  }
+
+
+  // balance avoidance command for x direction (forward/backward)
+  if(range_finders.front < avoid_outer_border) {
+    //from stereo camera TODO: add this once the stereocamera is attached
+    if (range_finders.front > avoid_inner_border)
+    {
+      avoid_y_command -= (max_vel_command - min_vel_command) *
+          ((float)avoid_outer_border - (float)range_finders.front)
+          / (float)difference_inner_outer;
+    } else {
+      if(range_finders.front > 1)
+        avoid_y_command -= max_vel_command;
+    }
+  }
+
+
+  if (range_finders.back < avoid_outer_border) {
+    if (range_finders.back > avoid_inner_border) {
+      avoid_x_command += (max_vel_command - min_vel_command) *
+          ((float)avoid_outer_border - (float)range_finders.back)
+          / (float)difference_inner_outer;
+    } else {
+      if(range_finders.back > 1)
+        avoid_x_command += max_vel_command;
+    }
+  }
+
+
+  *vel_body_x = avoid_x_command;
+  *vel_body_y = avoid_y_command;
+
+}
+
+static void range_sensors_cb(uint8_t sender_id,
+                             uint16_t range_front, uint16_t range_right, uint16_t range_back, uint16_t range_left)
+{
+
+// save range finders values
+  range_finders.front = range_front;
+  range_finders.right = range_right;
+  range_finders.left = range_left;
+  range_finders.back = range_back;
+
+
+//add extra velocity command to avoid walls based on range sensors
+  float vel_offset_body_x = 0.0f;
+  float vel_offset_body_y = 0.0f;
+
+  range_sensor_force_field(&vel_offset_body_x, &vel_offset_body_y, 800, 1200, 0.0f, 0.3f);
+
+ // printf("offset x %f, y %f\n, distance right%d, left%d ",vel_offset_body_x,vel_offset_body_y,range_finders.right,range_finders.left);
+// calculate velocity offset for guidance
+  guidance_h_set_speed_offset(vel_offset_body_x, vel_offset_body_y);
+
 }

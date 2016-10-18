@@ -14,14 +14,20 @@
   </header>
 
   <waypoints>
+    <!-- Mission waypoints -->
     <waypoint name="HOME" x="0.0" y="0.0"/>
   </waypoints>
+
+  <!--<exceptions>-->
+    <!--<exception cond="datalink_time > 2 && nav_is_in_flight()" deroute="Hover"/>-->
+  <!--</exceptions>-->
 
   <blocks>
     <block name="Wait">
       <while cond="1"/>
     </block>
 
+    <!-- Wait 5 seconds and then set altitude reference -->
     <block name="Geo init">
       <call_once fun="ResetAlt()"/>
       <while cond="1"/>
@@ -65,6 +71,9 @@
 
     <block name="Find and land at red item">
       <call_once fun="front_cam_set_x_offset(512)"/>
+    </block>
+    
+    <block name="Find item">
       <call_once fun="detector_disable_all()"/>
       <call_once fun="detector.front_red_item->active = true"/>
       <call_once fun="detector.bottom_red_item->active = true"/>
@@ -229,6 +238,19 @@
       <call_once fun="open_gripper()"/>
       <deroute block="TESTING - Hover over red bucket"/>
     </block>
+    <block name = "TESTING - Wall Following Right Side">
+      <call fun="range_sensor_wall_following(0.3, 1.0, TRUE)"/>
+      <exception cond="range_finders.right > 1500" deroute="TESTING - Turn To Door Right Side"/>
+    </block>
+
+    <block name = "TESTING - Turn To Door Right Side">
+       <call fun="guidance_h_set_guided_pos_relative(0.5,0.0)"/>
+       <call fun="RotateToHeading(stateGetNedToBodyEulers_f()->psi+DegOfRad(90))"/>
+      <!--deroute block="Hover"/-->
+    </block>
 
   </blocks>
+
+
+
 </flight_plan>
