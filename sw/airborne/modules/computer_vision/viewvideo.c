@@ -47,6 +47,8 @@
 #include "lib/encoding/rtp.h"
 #include "udp_socket.h"
 
+#include "modules/computer_vision/lib/opengl/opengl.h"
+
 #include BOARD_CONFIG
 
 
@@ -165,7 +167,47 @@ struct image_t *viewvideo_function(struct image_t *img)
 
 
   if (viewvideo.is_streaming) {
-    //jpeg_encode_image(img, &img_jpeg, VIEWVIDEO_QUALITY_FACTOR, VIEWVIDEO_USE_NETCAT);
+
+
+	  /////////////////////////////////////////////////////
+
+	  static const GLfloat vVertices[] = {
+			  -1.0f, -1.0f,
+			  1.0f, -1.0f,
+			  -1.0f,  1.0f,
+			  1.0f,  1.0f,
+	  };
+	  static const GLfloat textureVertices[] = {
+			  0.0f, 0.0f,
+			  1.0f, 0.0f,
+			  0.0f, 1.0f,
+			  1.0f, 1.0f,
+	  };
+
+	  glUseProgram(opengl.programObject);
+	  glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, 320 / 2, 240, 0, GL_RGBA, GL_UNSIGNED_BYTE, img->buf);
+
+	  GLint texel_width = glGetUniformLocation(opengl.programObject, "texel_width");
+	  GLint texel_height = glGetUniformLocation(opengl.programObject, "texel_height");
+	  glUniform1f(texel_width, 1.0 / 160);
+	  glUniform1f(texel_height, 1.0 / 240);
+
+	  // Set the vertices
+	  glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 0, vVertices);
+	  glEnableVertexAttribArray(0);
+	  glVertexAttribPointer(1, 2, GL_FLOAT, 0, 0, textureVertices);
+	  glEnableVertexAttribArray(1);
+
+	  // Draw the square
+	  glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+
+	  // Read the image back
+	  glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+	  glReadPixels(0, 0, 320 / 2, 240, GL_RGBA, GL_UNSIGNED_BYTE, img->buf);
+
+	  /////////////////////////////////////////////////////
+
+	//jpeg_encode_image(img, &img_jpeg, VIEWVIDEO_QUALITY_FACTOR, VIEWVIDEO_USE_NETCAT);
 
     /*if (viewvideo.use_rtp) {
 

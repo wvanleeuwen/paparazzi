@@ -42,7 +42,7 @@
     <include name="modules/computer_vision/lib/encoding"/>
     <file name="rtp.c" dir="modules/computer_vision/lib/encoding"/>
     <file name="P7_H264.c" dir="modules/computer_vision/lib/encoding"/>
-
+       
     <!-- Define the network connection to send images over -->
     <raw>
       include $(CFG_SHARED)/udp.makefile
@@ -62,6 +62,5 @@
 
       $(TARGET).LDFLAGS += -Wl,-Bdynamic -Lmodules/computer_vision/lib/encoding -l:libh1enc.so -Wl,-Bstatic
     </raw>
-
   </makefile>
 </module>
