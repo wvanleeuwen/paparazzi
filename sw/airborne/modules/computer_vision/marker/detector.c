@@ -315,12 +315,18 @@ static struct image_t *detect_front_red_bucket(struct image_t *img) {
 
   // Color Filter
   struct image_filter_t filter;
-  filter.y_min = 36;
-  filter.y_max = 181;
-  filter.u_min = 100;
-  filter.u_max = 140;
-  filter.v_min = 155;
-  filter.v_max = 201;
+  filter.y_min = 30;
+  filter.y_max = 223;
+  filter.u_min = 118;
+  filter.u_max = 255;
+  filter.v_min = 160;
+  filter.v_max = 255;
+//  filter.y_min = 36;
+//  filter.y_max = 181;
+//  filter.u_min = 100;
+//  filter.u_max = 140;
+//  filter.v_min = 155;
+//  filter.v_max = 201;
 
   int threshold = 50;
 

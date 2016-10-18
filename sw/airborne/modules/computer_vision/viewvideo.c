@@ -151,6 +151,8 @@ struct image_t *viewvideo_function(struct UdpSocket *socket, struct image_t *img
   struct image_t img_jpeg;
   image_create(&img_jpeg, img_small.w, img_small.h, IMAGE_JPEG);
 
+  fprintf(stderr, "[viewvideo%i] create \n", img->w);
+
 #if VIEWVIDEO_USE_NETCAT
   char nc_cmd[64];
   sprintf(nc_cmd, "nc %s %d 2>/dev/null", STRINGIFY(VIEWVIDEO_HOST), VIEWVIDEO_PORT_OUT);
@@ -191,6 +193,8 @@ struct image_t *viewvideo_function(struct UdpSocket *socket, struct image_t *img
 #else
     if (viewvideo.use_rtp) {
 
+      fprintf(stderr, "[viewvideo%i] send \n", img->w);
+
       // Send image with RTP
       rtp_frame_send(
         socket,              // UDP socket
@@ -226,8 +230,10 @@ void viewvideo_init(void)
 {
   char save_name[512];
 
+#ifdef VIEWVIDEO_CAMERA
   struct video_listener *listener = cv_add_to_device_async(&VIEWVIDEO_CAMERA, viewvideo_function1, VIEWVIDEO_NICE_LEVEL);
   listener->maximum_fps = VIEWVIDEO_FPS;
+#endif
 
 #ifdef VIEWVIDEO_CAMERA2
   struct video_listener *listener2 = cv_add_to_device_async(&VIEWVIDEO_CAMERA2, viewvideo_function2, VIEWVIDEO_NICE_LEVEL);
