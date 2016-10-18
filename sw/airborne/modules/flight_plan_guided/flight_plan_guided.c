@@ -537,57 +537,56 @@ void range_sensor_force_field(float *vel_body_x, float *vel_body_y, int16_t avoi
   float avoid_y_command = *vel_body_y;
 
   // Balance avoidance command for y direction (sideways)
-  if(range_finders.right != 0 && range_finders.right != -1)//check if value is above zero (0 or -1 means the range finder is missing/not well connected)
-  {
-    if (range_finders.right < avoid_outer_border) {
-      if (range_finders.right > avoid_inner_border) {
-        avoid_y_command -= (max_vel_command - min_vel_command) *
-            ((float)avoid_outer_border - (float)range_finders.right)
-            / (float)difference_inner_outer;
-      } else {
+
+  if (range_finders.right < avoid_outer_border) {
+    if (range_finders.right > avoid_inner_border) {
+      avoid_y_command -= (max_vel_command - min_vel_command) *
+          ((float)avoid_outer_border - (float)range_finders.right)
+          / (float)difference_inner_outer;
+    } else {
+      if(range_finders.right > 1)
         avoid_y_command -= max_vel_command;
-      }
     }
   }
-  if(range_finders.left != 0 && range_finders.left != 1)
-  {
-    if (range_finders.left < avoid_outer_border) {
-      if (range_finders.left > avoid_inner_border) {
-        avoid_y_command += (max_vel_command - min_vel_command) *
-            ((float)avoid_outer_border - (float)range_finders.left)
-            / (float)difference_inner_outer;
-      } else {
+
+  if (range_finders.left < avoid_outer_border) {
+    if (range_finders.left > avoid_inner_border) {
+      avoid_y_command += (max_vel_command - min_vel_command) *
+          ((float)avoid_outer_border - (float)range_finders.left)
+          / (float)difference_inner_outer;
+    } else {
+      if(range_finders.left > 1)
         avoid_y_command += max_vel_command;
-      }
     }
   }
+
 
   // balance avoidance command for x direction (forward/backward)
-  if(range_finders.front != 0 && range_finders.front != 1)
-  {
-    if (range_finders.front < avoid_outer_border) {
-      //from stereo camera TODO: add this once the stereocamera is attached
-      if (range_finders.front > avoid_inner_border)
-        avoid_y_command -= (max_vel_command - min_vel_command) *
-        ((float)avoid_outer_border - (float)range_finders.front)
-        / (float)difference_inner_outer;
+  if(range_finders.front < avoid_outer_border) {
+    //from stereo camera TODO: add this once the stereocamera is attached
+    if (range_finders.front > avoid_inner_border)
+    {
+      avoid_y_command -= (max_vel_command - min_vel_command) *
+          ((float)avoid_outer_border - (float)range_finders.front)
+          / (float)difference_inner_outer;
     } else {
-      avoid_y_command -= max_vel_command;
+      if(range_finders.front > 1)
+        avoid_y_command -= max_vel_command;
     }
   }
 
-  if(range_finders.back != 0 && range_finders.back != 1)
-  {
-    if (range_finders.back < avoid_outer_border) {
-      if (range_finders.back > avoid_inner_border) {
-        avoid_x_command += (max_vel_command - min_vel_command) *
-            ((float)avoid_outer_border - (float)range_finders.back)
-            / (float)difference_inner_outer;
-      } else {
+
+  if (range_finders.back < avoid_outer_border) {
+    if (range_finders.back > avoid_inner_border) {
+      avoid_x_command += (max_vel_command - min_vel_command) *
+          ((float)avoid_outer_border - (float)range_finders.back)
+          / (float)difference_inner_outer;
+    } else {
+      if(range_finders.back > 1)
         avoid_x_command += max_vel_command;
-      }
     }
   }
+
 
   *vel_body_x = avoid_x_command;
   *vel_body_y = avoid_y_command;
