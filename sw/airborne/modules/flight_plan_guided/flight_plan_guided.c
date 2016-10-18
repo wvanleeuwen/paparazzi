@@ -481,7 +481,7 @@ bool fly_through_window(void) {
 
 bool range_sensor_wall_following(float forward_velocity, float wanted_distance_from_wall, bool right)
 {
-//STIL TO TEST OUT!!!
+//STILL HAVE TO TEST OUT!!!
 	float actual_distance_from_wall = 0;
 	float vel_body_x_command = forward_velocity;
 	float vel_body_y_command = 0.0f;
@@ -493,36 +493,21 @@ bool range_sensor_wall_following(float forward_velocity, float wanted_distance_f
 	float wall_following_bandwidth = 0.2f;
 	float max_velocity_command = 0.3f;
 
+
 	if(right)
 	{
 		actual_distance_from_wall = (float)range_finders.right/1000;
-		unsigned_difference = fabs(wanted_distance_from_wall -actual_distance_from_wall);
-		signed_difference = fabs(wanted_distance_from_wall -actual_distance_from_wall);
-		sign = signed_difference/unsigned_difference;
-
-		if(unsigned_difference > wall_following_bandwidth){
-			vel_body_y_command = -1* sign * max_velocity_command;
-		}else
-		{
-			vel_body_y_command = max_velocity_command * -1 * signed_difference / wall_following_bandwidth;
-		}
+		signed_difference = wanted_distance_from_wall - actual_distance_from_wall;
+		vel_body_y_command = -1*signed_difference;
 
 	}else
 	{
 		actual_distance_from_wall = (float)range_finders.left/1000;
-		unsigned_difference = fabs(wanted_distance_from_wall -actual_distance_from_wall);
 		signed_difference = fabs(wanted_distance_from_wall -actual_distance_from_wall);
-		sign = signed_difference/unsigned_difference;
-
-		if(unsigned_difference > wall_following_bandwidth){
-			vel_body_y_command =  sign * max_velocity_command;
-		}else
-		{
-			vel_body_y_command = max_velocity_command  * signed_difference / wall_following_bandwidth;
-		}
-
+    vel_body_y_command = signed_difference;
 	}
-	guidance_h_set_guided_body_vel(vel_body_x_command, vel_body_y_command);
+  guidance_h_set_guided_pos_relative(-1*signed_difference);
+
 return true;
 }
 
