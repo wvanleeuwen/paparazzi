@@ -315,18 +315,12 @@ static struct image_t *detect_front_red_bucket(struct image_t *img) {
 
   // Color Filter
   struct image_filter_t filter;
-  filter.y_min = 30;
-  filter.y_max = 223;
-  filter.u_min = 118;
-  filter.u_max = 255;
-  filter.v_min = 160;
-  filter.v_max = 255;
-//  filter.y_min = 36;
-//  filter.y_max = 181;
-//  filter.u_min = 100;
-//  filter.u_max = 140;
-//  filter.v_min = 155;
-//  filter.v_max = 201;
+  filter.y_min = 36;
+  filter.y_max = 181;
+  filter.u_min = 100;
+  filter.u_max = 140;
+  filter.v_min = 155;
+  filter.v_max = 201;
 
   int threshold = 50;
 
@@ -346,11 +340,11 @@ static struct image_t *detect_bottom_red_bucket(struct image_t *img) {
 
   // Color Filter
   struct image_filter_t filter;
-  filter.y_min = 12;
-  filter.y_max = 233;
-  filter.u_min = 61;
-  filter.u_max = 255;
-  filter.v_min = 144;
+  filter.y_min = 21;
+  filter.y_max = 235;
+  filter.u_min = 94;
+  filter.u_max = 203;
+  filter.v_min = 131;
   filter.v_max = 255;
 
   int threshold = 50;
@@ -360,7 +354,7 @@ static struct image_t *detect_bottom_red_bucket(struct image_t *img) {
   img->h = 240;
 
   if (marker.detected) {
-    marker_detected(&marker1, img, marker.pixel.x, marker.pixel.y*2);
+    marker_detected(&marker1, img, marker.pixel.x, marker.pixel.y);
     geo_locate_marker(&marker1, img);
   } else {
     marker_not_detected(&marker1, img);
