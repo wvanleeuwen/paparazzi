@@ -158,21 +158,21 @@ void set_snake_gate_color_filter(uint8_t color){
   if (color == SNAKE_DOOR){
     // red door
     door = 1;
-    uint8_t color_lum_min = 75;// 60;//105;
-    uint8_t color_lum_max = 197;//228;//205;
-    uint8_t color_cb_min  = 0;//66;//52;
-    uint8_t color_cb_max  = 156;//194;//140;
-    uint8_t color_cr_min  = 127;//140;//180;
-    uint8_t color_cr_max  = 255;//230;//255;
+    color_lum_min = 75;// 60;//105;
+    color_lum_max = 197;//228;//205;
+    color_cb_min  = 0;//66;//52;
+    color_cb_max  = 156;//194;//140;
+    color_cr_min  = 127;//140;//180;
+    color_cr_max  = 255;//230;//255;
   } else if(color == SNAKE_WINDOW) {
     // blue window
     door = 0;
-    uint8_t color_lum_min = 70;// 60;//105;
-    uint8_t color_lum_max = 128;//228;//205;
-    uint8_t color_cb_min  = 141;//140;//180;
-    uint8_t color_cb_max  = 200;//230;//255;
-    uint8_t color_cr_min  = 104;//66;//52;
-    uint8_t color_cr_max  = 177;//194;//140;
+    color_lum_min = 70;// 60;//105;
+    color_lum_max = 128;//228;//205;
+    color_cb_min  = 141;//140;//180;
+    color_cb_max  = 200;//230;//255;
+    color_cr_min  = 104;//66;//52;
+    color_cr_max  = 177;//194;//140;
   }
 }
 static void calculate_gate_position(int x_pix, int y_pix, int sz_pix, struct image_t *img, struct gate_img gate)

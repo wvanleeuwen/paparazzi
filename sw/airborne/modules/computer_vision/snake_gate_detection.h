@@ -53,4 +53,6 @@ extern int gate_processed;
 extern int ready_pass_through;
 extern int init_pos_filter;
 
+extern void set_snake_gate_color_filter(uint8_t color);
+
 #endif /* SNAKE_GATE_DETECTION_CV_PLUGIN_H */

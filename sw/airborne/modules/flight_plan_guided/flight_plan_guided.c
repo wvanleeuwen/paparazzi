@@ -63,7 +63,7 @@ bool front_wall_detected = false;
 #endif
 static abi_event range_sensors_ev;
 static void range_sensors_cb(uint8_t sender_id,
-                             uint16_t range_front, uint16_t range_right, uint16_t range_back, uint16_t range_left);
+                             int16_t range_front, int16_t range_right, int16_t range_back, int16_t range_left);
 
 void flight_plan_guided_init(void)
 {
@@ -555,7 +555,7 @@ static void range_sensor_force_field(float *vel_body_x, float *vel_body_y, int16
 }
 
 static void range_sensors_cb(uint8_t sender_id,
-                             uint16_t range_front, uint16_t range_right, uint16_t range_back, uint16_t range_left)
+                             int16_t range_front, int16_t range_right, int16_t range_back, int16_t range_left)
 {
   static uint32_t front_wall_detect_counter = 0;
   static const int32_t max_sensor_range = 2000;
