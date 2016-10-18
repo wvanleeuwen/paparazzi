@@ -133,6 +133,7 @@ extern bool guidance_h_set_guided_pos_relative(float x, float y);
  * @return TRUE if setpoint was set (currently in GUIDANCE_H_MODE_GUIDED)
  */
 extern bool guidance_h_set_guided_heading(float heading);
+extern bool guidance_h_set_guided_heading_relative(float heading);
 
 /** Set body relative horizontal velocity setpoint in GUIDED mode.
  * @param vx forward velocity (body frame) in meters/sec.

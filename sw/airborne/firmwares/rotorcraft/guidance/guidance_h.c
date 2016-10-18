@@ -715,6 +715,11 @@ bool guidance_h_set_guided_pos_relative(float x, float y)
   return false;
 }
 
+bool guidance_h_set_guided_heading_relative(float heading)
+{
+  float psi = stateGetNedToBodyEulers_f()->psi;
+  return guidance_h_set_guided_heading(psi + heading);
+}
 
 
 bool guidance_h_set_guided_heading(float heading)
