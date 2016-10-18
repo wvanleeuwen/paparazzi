@@ -623,25 +623,12 @@ static inline void mt9f002_set_pll(struct mt9f002_t *mt)
  *Set the blanking configuration
  * Blanking of the MT9F002 depends on the target FPS
  */
-/* write a register */
 static void mt9f002_blanking_init(struct mt9f002_t *mt)
 {
 	/*
 	#define NO_BINNING_NO_SKIPPING 						0x1
 	#define BINNING_ONLY 								0x3
 	#define BINNING_AND_SKIPPING 						0x7 */
-	/* normal mode
-	#define FINE_INTEGRATION_TIME_MIN					1316
-	#define FINE_INTEGRATION_TIME_MAX_MARGIN			1032 */
-	/* scaler mode
-	#define SCALER_FINE_INTEGRATION_TIME_MIN			1316
-	#define SCALER_FINE_INTEGRATION_TIME_MAX_MARGIN		1032 */
-	/* binning mode
-	#define BINNING_XY_FINE_INTEGRATION_TIME_MIN		2000
-	#define BINNING_XY_FINE_INTEGRATION_TIME_MAX_MARGIN	2200
-	#define BINNING_X_FINE_INTEGRATION_TIME_MIN			1500
-	#define BINNING_X_FINE_INTEGRATION_TIME_MAX_MARGIN	1900 */
-
 	if (mt->x_odd_inc > 1) {
 		if (mt->y_odd_inc > 1)
 		{
@@ -1001,25 +988,17 @@ void mt9f002_calc_resolution(struct mt9f002_t *mt)
 
 void mt9f002_set_resolution(struct mt9f002_t *mt)
 {
-		//Set window pos
+		/* Set window pos */
 		write_reg(mt, MT9F002_X_ADDR_START, mt->offset_x, 2);
 		write_reg(mt, MT9F002_Y_ADDR_START, mt->offset_y, 2);
 		write_reg(mt, MT9F002_X_ADDR_END, mt->offset_x + mt->sensor_width - 1, 2);
 		write_reg(mt, MT9F002_Y_ADDR_END, mt->offset_y + mt->sensor_height - 1, 2);
-
-		//Set output resolution
+		/* Set output resolution */
 		write_reg(mt, MT9F002_X_OUTPUT_SIZE, mt->output_width, 2);
 		write_reg(mt, MT9F002_Y_OUTPUT_SIZE, mt->output_height, 2);
-
-		printf("[MT9F002] X_ADDR_START: %i\n", mt->offset_x);
-		printf("[MT9F002] Y_ADDR_START: %i\n", mt->offset_y);
-		printf("[MT9F002] X_ADDR_END: %i\n", mt->offset_x + mt->sensor_width - 1);
-		printf("[MT9F002] Y_ADDR_END: %i\n", mt->offset_y + mt->sensor_height - 1);
-		printf("[MT9F002] X_OUTPUT_SIZE: %i\n", mt->output_width);
-		printf("[MT9F002] Y_OUTPUT_SIZE: %i\n", mt->output_height);
 		/* scaler */
 		if (mt->output_scaler != 1) {
-			// enable scaling mode
+			/* enable scaling mode */
 			write_reg(mt, MT9F002_SCALING_MODE, 2, 2);
 			write_reg(mt, MT9F002_SCALE_M, (int) ceil((float)MT9F002_SCALER_N / mt->output_scaler), 2);
 			printf("[MT9F002] SCALE_M: %i\n", (int) ceil((float)MT9F002_SCALER_N / mt->output_scaler));
@@ -1054,9 +1033,10 @@ void mt9f002_init(struct mt9f002_t *mt)
   /* Set the PLL based on Input clock and wanted clock frequency */
   mt9f002_set_pll(mt);
 
+  /* Calculate binning/skipping/scaling for requested sensor domain and output resolution */
   mt9f002_calc_resolution(mt);
+  /* Update blanking timings based on chosen binning/skipping/scaling */
   mt9f002_blanking_init(mt);
-
   /* Based on the interface configure stage 2 */
   if(mt->interface == MT9F002_MIPI || mt->interface == MT9F002_HiSPi) {
     mt9f002_mipi_stage2(mt);
