@@ -25,6 +25,7 @@
 
 #include "modules/computer_vision/cv_ae_awb.h"
 #include "lib/isp/libisp.h"
+#include <stdio.h>
 
 #ifndef CV_AE_AWB_AV
 #define CV_AE_AWB_AV 1

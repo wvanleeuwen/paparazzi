@@ -1,6 +1,8 @@
 #ifndef _LIBISP_CONFIG_H
 #define _LIBISP_CONFIG_H
 
+#define ISP_CFA 2
+
 #include "boards/bebop.h"
 
 #define COMPLEMENT_2(i, r) (((i) >= 0) ? (r) : (~(r) + 1) & 0x3fff)
@@ -36,11 +38,11 @@ struct libisp_config isp_config = {
 
   /* Don't bypass a bayer function */
   .bayer_inter = {{
-      .pedestal_bypass     = 1,
+      .pedestal_bypass     = 0,
       .grim_bypass         = 1,
       .rip_bypass          = 1,
       .denoise_bypass      = 0,
-      .lsc_bypass          = 1,
+      .lsc_bypass          = 0,
       .chroma_aber_bypass  = 1,
       .bayer_bypass        = 0,
       .color_matrix_bypass = 0,
@@ -48,7 +50,7 @@ struct libisp_config isp_config = {
 
   /* Pedestal */
   .pedestal = {
-      .cfa    = {{  3 }},
+      .cfa    = {{  ISP_CFA }},
       .sub_r  = {{ 42 }},
       .sub_gb = {{ 42 }},
       .sub_gr = {{ 42 }},
@@ -57,7 +59,7 @@ struct libisp_config isp_config = {
 
   /* Green imbalance (grim) */
   .green_imbalance = {
-      .bayer_cfa   = {{3}},
+      .bayer_cfa   = {{ ISP_CFA }},
       .offset_x_y  = {._register = 4718720},
       .cell_id_x_y = {._register = 131076},
       .cell_w      = {{288}},
@@ -106,7 +108,7 @@ struct libisp_config isp_config = {
 
   /* Dead pixel correction (for now bypass) */
   .dead_pixel_correction = {
-      .cfa = {{ 3 }},
+      .cfa = {{ ISP_CFA }},
       .bypass = { ._register = 1 },
       .threshold = {{ 0xdc }},
       .rgrim_conf = { ._register = 0x40264006 },
@@ -115,7 +117,7 @@ struct libisp_config isp_config = {
 
   /* Denoising */
   .denoising = {
-    .cfa = {{ 3 }},
+    .cfa = {{ ISP_CFA }},
     .lumocoeff_r_03_00 = {{ 0,   0,   1,   2 }},
     .lumocoeff_r_07_04 = {{ 4,   6,   9,  13 }},
     .lumocoeff_r_11_08 = {{ 16,  18,  21,  23 }},
@@ -142,13 +144,13 @@ struct libisp_config isp_config = {
     .circle_radius_squared = {{ 3841600 }},
     .increments_log2       = {{ 0, 0 }},
     .sat_threshold         = {{ 980 }}, //1022 - pedestal
-    .cfa                   = {{ 3 }},
+    .cfa                   = {{ ISP_CFA }},
     .max_nb_windows        = {{ .x_window_count=BAYERSTATS_STATX, .y_window_count=BAYERSTATS_STATY }},
   },
 
   /* Lens shading correction + AWB */
   .lens_shading_correction = {
-    .bayer_cfa   = {{ 3 }},
+    .bayer_cfa   = {{ ISP_CFA }},
     .offset_x_y  = { ._register = 4718720 },
     .cell_id_x_y = { ._register = 131076 },
     .cell_w      = {{ 288 }},
@@ -221,7 +223,7 @@ struct libisp_config isp_config = {
     .circle_pos_x_squared = {{ 5550736 }},
     .circle_pos_y_center = {{ 1585 }},
     .circle_pos_y_squared = {{ 2512225 }},
-    .cfa = {{ 3 }},
+    .cfa = {{ ISP_CFA }},
     .green_variation = {{ 1 }},
     .increments_log2 = {{ .x_log2_inc=0, .y_log2_inc=0 }},
   },
@@ -229,7 +231,7 @@ struct libisp_config isp_config = {
 
   /* Demosaicking */
   .bayer = {
-    .cfa         = {{    3 }}, /* GRGB (top left to bottom right order) */
+    .cfa         = {{ ISP_CFA }}, /* GRGB (top left to bottom right order) */
     .threshold_1 = {{   25 }}, /* Lower threshold */
     .threshold_2 = {{  200 }}, /* Upper threshold */
   },
@@ -436,18 +438,18 @@ struct libisp_config isp_config = {
 
   /* Color space conversion */
   .chroma = {
-    .coeff_01_00 = {{    436, 1464   }},
-    .coeff_10_02 = {{    147, 16179  }},
-    .coeff_12_11 = {{  15696, 893    }},
-    .coeff_21_20 = {{   1260, 15392  }},
-    .coeff_22    = {{  16179         }},
-    .offset_ry   = {{  0, 16  }},
-    .clip_ry     = {{ 16, 235 }},
-    .offset_gu   = {{  0, 128 }},
-    .clip_gu     = {{ 16, 240 }},
-    .offset_bv   = {{  0, 128 }},
-    .clip_bv     = {{ 16, 240 }},
-  },
+      .coeff_01_00 = {{    526, 1032 }},
+      .coeff_10_02 = {{    201, 900  }},
+      .coeff_12_11 = {{   -753,-146  }},
+      .coeff_21_20 = {{   -304,-596  }},
+      .coeff_22    = {{    900       }},
+      .offset_ry   = {{  0, 16  }},
+      .clip_ry     = {{ 16, 235 }},
+      .offset_gu   = {{  0, 128 }},
+      .clip_gu     = {{ 16, 240 }},
+      .offset_bv   = {{  0, 128 }},
+      .clip_bv     = {{ 16, 240 }},
+    },
 
   /* YUV statistics */
   .statistics_yuv = {
