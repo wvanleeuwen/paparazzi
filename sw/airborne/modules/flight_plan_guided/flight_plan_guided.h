@@ -77,7 +77,6 @@ extern bool front_cam_set_x_offset(int offset);
 extern void range_sensor_force_field(float *vel_body_x, float *vel_body_y,
                                      int16_t avoid_inner_border, int16_t avoid_outer_border, float min_vel_command, float max_vel_command);
 
-extern bool range_sensor_wall_following(float forward_velocity, float wanted_distance_from_wall, bool right);
-
+extern bool range_sensor_wall_following(float forward_velocity, float wanted_distance_from_wall, uint8_t direction);
 
 #endif
