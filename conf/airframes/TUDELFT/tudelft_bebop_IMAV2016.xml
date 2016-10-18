@@ -38,9 +38,9 @@
 
 <!-- Modules -->
   <modules main_freq="512">
-    <module name="geo_mag"/>
+    <!--<module name="geo_mag"/>-->
     <module name="air_data"/>
-    <module name="send_imu_mag_current"/>
+    <!--<module name="send_imu_mag_current"/>-->
     <!--<module name="sonar_bebop">-->
       <!--<define name="SENSOR_SYNC_SEND_SONAR" value="TRUE"/>-->
     <!--</module>-->
@@ -156,11 +156,10 @@
   <!-- local magnetic field -->
   <!-- http://wiki.paparazziuav.org/wiki/Subsystem/ahrs#Local_Magnetic_Field -->
   <section name="AHRS" prefix="AHRS_">
-    <!-- values used if no GPS fix, on 3D fix is update by geo_mag module -->
-    <!-- Delft, The Netherlands 2014 -->
-    <define name="H_X" value="0.3892503"/>
-    <define name="H_Y" value="0.0017972"/>
-    <define name="H_Z" value="0.9211303"/>
+    <!-- Beijing, China, 2016-10-18 from WMM2015 -->
+    <define name="H_X" value="0.51118171"/>
+    <define name="H_Y" value="-0.06081404"/>
+    <define name="H_Z" value="0.85731844"/>
   </section>
 
   <section name="INS" prefix="INS_">
@@ -265,7 +264,7 @@
 
   <section name="GUIDANCE_V" prefix="GUIDANCE_V_">
     <define name="HOVER_KP" value="700"/>
-    <define name="HOVER_KD" value="1000"/>
+    <define name="HOVER_KD" value="1800"/>
     <define name="HOVER_KI" value="0"/>
     <define name="NOMINAL_HOVER_THROTTLE" value="0.55"/>
     <define name="ADAPT_THROTTLE_ENABLED" value="TRUE"/>
@@ -281,7 +280,7 @@
     <!-- define name="MAX_BANK" value="32" unit="deg"/ -->
 
     <define name="PGAIN" value="180"/>
-    <define name="DGAIN" value="130"/>
+    <define name="DGAIN" value="160"/>
     <define name="IGAIN" value="20"/>
   </section>
 
