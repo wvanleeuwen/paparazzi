@@ -73,6 +73,9 @@ struct mt9f002_t {
   uint16_t offset_x;                  ///< Offset from left in pixels
   uint16_t offset_y;                  ///< Offset from top in pixels
 
+  uint16_t sensor_width;
+  uint16_t sensor_height;
+
   uint8_t x_odd_inc;                  ///< X increment for subsampling (1,3,7,15,31 accepted)
   uint8_t y_odd_inc;                  ///< Y increment for subsampling (1,3,7,15,31 accepted)
 

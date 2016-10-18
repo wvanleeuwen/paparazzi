@@ -30,19 +30,26 @@
 #include "boards/bebop/mt9f002.h"
 
 #ifndef MT9F002_OUTPUT_HEIGHT
-#define MT9F002_OUTPUT_HEIGHT 720
+#define MT9F002_OUTPUT_HEIGHT 848
 #endif
 
 #ifndef MT9F002_OUTPUT_WIDTH
-#define MT9F002_OUTPUT_WIDTH 480
+#define MT9F002_OUTPUT_WIDTH 960
+#endif
+
+#ifndef MT9F002_SENSOR_WIDTH
+#define MT9F002_SENSOR_WIDTH 3866
+#endif
+#ifndef MT9F002_SENSOR_HEIGHT
+#define MT9F002_SENSOR_HEIGHT 3418
 #endif
 
 #ifndef MT9F002_INITIAL_OFFSET_X
-#define MT9F002_INITIAL_OFFSET_X 2512 // pixels in the raw sensor(please make steps of 2 for ISP)!!
+#define MT9F002_INITIAL_OFFSET_X 416 // pixels in the raw sensor(please make steps of 2 for ISP)!!
 #endif
 
 #ifndef MT9F002_INITIAL_OFFSET_Y
-#define MT9F002_INITIAL_OFFSET_Y 849 // pixels in the raw sensor(please make steps of 2 for ISP)!!
+#define MT9F002_INITIAL_OFFSET_Y 0 // pixels in the raw sensor(please make steps of 2 for ISP)!!
 #endif
 
 /** Our output is only OUTPUT_SCALER of the pixels we take of the sensor

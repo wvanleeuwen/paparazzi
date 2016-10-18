@@ -66,6 +66,47 @@ struct video_config_t front_camera = {
   .fps = MT9F002_TARGET_FPS
 };
 
+#define max(a,b) \
+   ({ __typeof__ (a) _a = (a); \
+       __typeof__ (b) _b = (b); \
+     _a > _b ? _a : _b; })
+
+#define min(a,b) \
+   ({ __typeof__ (a) _a = (a); \
+       __typeof__ (b) _b = (b); \
+     _a < _b ? _a : _b; })
+
+#define clamp(a,b,c) \
+   ({ __typeof__ (a) _a = (a); \
+       __typeof__ (b) _b = (b); \
+       __typeof__ (c) _c = (c); \
+     _a < _b ? _b : (_a > _c ? _c : _a); })
+
+#define clamp_t(t, a, l, u) \
+   ({ __typeof__ (t) _a = (a); \
+       __typeof__ (t) _l = (l); \
+       __typeof__ (t) _u = (u); \
+     _a < _l ? _l : (_a > _u ? _u : _a); })
+
+#define ALIGN(x,a) \
+	({ __typeof__ (x) _x = (x); \
+       __typeof__ (a) _a = (a); \
+       __typeof__ (a) _r = _x%_a; \
+       _r ? _x + (_a - _r) : _x; })
+
+#define CFG_SCALER_M_MIN 						16
+#define CFG_SCALER_M_MAX 						128
+#define CFG_MT9F002_PIXEL_ARRAY_HEIGHT			3418
+#define CFG_MT9F002_PIXEL_ARRAY_WIDTH			4647
+#define	CFG_MT9F002_X_ADDR_MIN			        24
+#define	CFG_MT9F002_X_ADDR_MAX			        4608
+#define	CFG_MT9F002_Y_ADDR_MIN			        0
+#define	CFG_MT9F002_Y_ADDR_MAX			        3418
+#define	CFG_MT9F002_WINDOW_HEIGHT_MIN           1
+#define	CFG_MT9F002_WINDOW_HEIGHT_MAX			3418
+#define	CFG_MT9F002_WINDOW_WIDTH_MIN        	1
+#define	CFG_MT9F002_WINDOW_WIDTH_MAX			4608
+
 /**
  * Write multiple bytes to a single register
  */
@@ -781,59 +822,129 @@ void mt9f002_set_gains(struct mt9f002_t *mt)
   write_reg(mt, MT9F002_GREEN2_GAIN, mt9f002_calc_gain(mt->gain_green2), 2);
 }
 
+void mt9f002_calc_resolution(struct mt9f002_t *mt)
+{
+		struct v4l2_rect rect;
+		struct v4l2_rect crop;
+		unsigned int x_odd_inc;
+		unsigned int y_odd_inc;
+		unsigned int hratio;
+		unsigned int vratio;
+		unsigned int width;
+		unsigned int height;
+		unsigned int ratio;
+		unsigned int xMultiple;
+		unsigned int dividor;
+		static const uint8_t xy_odd_inc_tab[] = {1, 1, 3, 3, 7};
+
+		crop.left   = mt->offset_x;
+		crop.top    = mt->offset_y;
+		crop.width  = mt->sensor_width;
+		crop.height = mt->sensor_height;
+
+		printf("[MT9F002] Requested output    - width: %i, height: %i\n", mt->output_width, mt->output_height);
+		printf("[MT9F002] Requested crop      - top: %i, left: %i, width: %i, height: %i\n", crop.top, crop.left, crop.width, crop.height);
+
+		/* Clamp the crop rectangle boundaries and align them to a multiple of 2
+		 * pixels to ensure a GRBG Bayer pattern.
+		 */
+		rect.left = clamp(ALIGN(crop.left, 2),
+				CFG_MT9F002_X_ADDR_MIN,
+				CFG_MT9F002_X_ADDR_MAX);
+		rect.top = clamp(ALIGN(crop.top, 2),
+				CFG_MT9F002_Y_ADDR_MIN,
+				CFG_MT9F002_Y_ADDR_MAX);
+		rect.width = clamp(ALIGN(crop.width, 2), 1,
+				CFG_MT9F002_PIXEL_ARRAY_WIDTH);
+		rect.height = clamp(ALIGN(crop.height, 2), 1,
+				CFG_MT9F002_PIXEL_ARRAY_HEIGHT);
+		rect.width = min(rect.width, CFG_MT9F002_PIXEL_ARRAY_WIDTH - rect.left);
+		rect.height = min(rect.height, CFG_MT9F002_PIXEL_ARRAY_HEIGHT - rect.top);
+
+		/* Clamp the width and height to avoid dividing by zero. */
+		width = clamp_t(unsigned int, ALIGN(mt->output_width, 2),
+				max(rect.width / 8, (__s32) CFG_MT9F002_WINDOW_WIDTH_MIN),
+				rect.width);
+		height = clamp_t(unsigned int, ALIGN(mt->output_height, 2),
+				max((rect.height / 8), (__s32) CFG_MT9F002_WINDOW_HEIGHT_MIN),
+				rect.height);
+		/* Calculate binning / skipping for X */
+		dividor = rect.width / width;
+		dividor = clamp_t(unsigned int,dividor, 1U, 4U);
+		x_odd_inc = xy_odd_inc_tab[dividor];
+		/* Calculate binning / skipping for Y */
+		dividor = rect.height / height;
+		dividor = clamp_t(unsigned int,dividor, 1U, 4U);
+		y_odd_inc = xy_odd_inc_tab[dividor];
+		/* Align left offset to 8 */
+		xMultiple = 8 * ((x_odd_inc + 1) / 2);
+		if (rect.left % xMultiple)
+			rect.left -= (rect.left % xMultiple);
+		/* Calculate remaining scaling not handled by binning / skipping */
+		hratio = ((rect.width / ((x_odd_inc + 1) / 2) * MT9F002_SCALER_N) + width - 1) /
+			 width;
+		vratio = ((rect.height / ((y_odd_inc + 1) / 2) * MT9F002_SCALER_N) + height -
+			  1) / height;
+		ratio = min(hratio, vratio);
+		/* Check ratio */
+		if (ratio > CFG_SCALER_M_MAX)
+		{
+			/* Fix ratio to maximum and adjust the crop window */
+			ratio = CFG_SCALER_M_MAX;
+			rect.width = mt->output_width * ratio * ((x_odd_inc + 1) / 2) /
+					MT9F002_SCALER_N;
+			rect.height = mt->output_height * ratio * ((y_odd_inc + 1) / 2) /
+					MT9F002_SCALER_N;
+		}
+		printf("[MT9F002] Calculated skipping - x: %i, y: %i\n", x_odd_inc, y_odd_inc);
+		printf("[MT9F002] Calculated scaler   - %i/%i = %0.3f\n", MT9F002_SCALER_N, ratio, ceil(((float) MT9F002_SCALER_N) / ((float) ratio)));
+		/* Update crop */
+		crop = rect;
+		printf("[MT9F002] Granted crop        - top: %i, left: %i, width: %i, height: %i\n", crop.top, crop.left, crop.width, crop.height);
+		printf("[MT9F002] Granted output      - width: %i, height: %i\n", width, height);
+
+		/* Check if scaling configuration has changed */
+		if (mt->x_odd_inc != x_odd_inc ||
+		    mt->y_odd_inc != y_odd_inc || mt->output_scaler != ceil((float)MT9F002_SCALER_N / ((float) ratio))) {
+			/* Update values */
+				mt->output_scaler = ceil((float)MT9F002_SCALER_N / ((float) ratio));
+				mt->x_odd_inc = x_odd_inc;
+				mt->y_odd_inc = y_odd_inc;
+		}
+		mt->offset_x = crop.left;
+		mt->offset_y = crop.top;
+		mt->sensor_width = crop.width;
+		mt->sensor_height = crop.height;
+}
+
 void mt9f002_set_resolution(struct mt9f002_t *mt)
 {
-	/* Set output resolution */
-	  write_reg(mt, MT9F002_X_OUTPUT_SIZE, mt->output_width, 2);
-	  write_reg(mt, MT9F002_Y_OUTPUT_SIZE, mt->output_height, 2);
-	  /* Set scaling */
-	  uint16_t scaleFactor = ceil((float)MT9F002_SCALER_N / mt->output_scaler);
-	  mt->output_scaler = (float)MT9F002_SCALER_N / scaleFactor;
-	  int x_skip_factor = (mt->x_odd_inc + 1) / 2;
-	  int y_skip_factor = (mt->y_odd_inc + 1) / 2;
-	  mt->scaled_width 	= ceil((float)mt->output_width / mt->output_scaler) * x_skip_factor - mt->x_odd_inc + 1;
-	  mt->scaled_height = ceil((float)mt->output_height / mt->output_scaler) * y_skip_factor - mt->y_odd_inc + 1;
-	  if (mt->output_scaler != 1.0)
-	  {
-	    write_reg(mt, MT9F002_SCALING_MODE, 2, 2); // Vertical and horizontal scaling
-	    write_reg(mt, MT9F002_SCALE_M, scaleFactor, 2);
-	  }
-	  printf("OUTPUT_SIZE: (%i, %i)\tSCALED_SIZE: (%i, %i)\n", mt->output_width, mt->output_height, mt->scaled_width, mt->scaled_height);
-	  /* Set position (based on offset and subsample increment) */
-	  if(mt->x_odd_inc > 1 && mt->offset_x % (x_skip_factor * 8) != 0)
-	  {
-		  mt->offset_x = round(mt->offset_x / (x_skip_factor * 8)) * (x_skip_factor * 8);
-		  printf("[MT9F002] Warning, offset_x not a multiple of %i, changing to %i\n", 8 * x_skip_factor, mt->offset_x);
-	  }
-	  if(mt->y_odd_inc > 1 && mt->offset_y % (y_skip_factor * 8) != 0)
-	  {
-		  mt->offset_y = round(mt->offset_y / (y_skip_factor * 8)) * (y_skip_factor * 8);
-		  printf("[MT9F002] Warning, offset_y not a multiple of %i, changing to %i\n", 8 * y_skip_factor, mt->offset_y);
-	  }
-	  write_reg(mt, MT9F002_X_ADDR_START, mt->offset_x , 2);
-	  write_reg(mt, MT9F002_Y_ADDR_START, mt->offset_y , 2);
-	  int end_addr_x = mt->offset_x + mt->scaled_width;
-	  int end_addr_y = mt->offset_y + mt->scaled_height;
-	  if(mt->x_odd_inc > 1 && (end_addr_x - mt->offset_x + mt->x_odd_inc) % (x_skip_factor * 8) != 0)
-	  {
-		end_addr_x = ceil((end_addr_x - mt->offset_x + mt->x_odd_inc) / ((double) (x_skip_factor * 8))) * (x_skip_factor * 8) + mt->offset_x - mt->x_odd_inc;
-		printf("[MT9F002] End address warning, %i not a multiple of %i, changing to %i\n", mt->offset_x - 1 + mt->scaled_width, x_skip_factor * 8, end_addr_x);
-	  }
-	  if(mt->y_odd_inc > 1 && (end_addr_y - mt->offset_y + mt->y_odd_inc) % (y_skip_factor * 8) != 0)
-	  {
-	    end_addr_y = ceil((end_addr_y - mt->offset_y + mt->y_odd_inc) / ((double) (y_skip_factor * 8))) * (y_skip_factor * 8) + mt->offset_y - mt->y_odd_inc;
-	    printf("[MT9F002] End address warning, %i not a multiple of %i, changing to %i\n", mt->offset_y - 1 + mt->scaled_height, y_skip_factor * 8, end_addr_y);
-	  }
-	  write_reg(mt, MT9F002_X_ADDR_END  , end_addr_x, 2);
-	  write_reg(mt, MT9F002_Y_ADDR_END  , end_addr_y, 2);
+		//Set window pos
+		write_reg(mt, MT9F002_X_ADDR_START, mt->offset_x, 2);
+		write_reg(mt, MT9F002_Y_ADDR_START, mt->offset_y, 2);
+		write_reg(mt, MT9F002_X_ADDR_END, mt->offset_x + mt->sensor_width - 1, 2);
+		write_reg(mt, MT9F002_Y_ADDR_END, mt->offset_y + mt->sensor_height - 1, 2);
 
-	  printf("[MT9F002] X_ADDR_START: %i\n", mt->offset_x);
-	  	  printf("[MT9F002] Y_ADDR_START: %i\n", mt->offset_y);
-	  	  printf("[MT9F002] X_ADDR_END: %i\n", end_addr_x);
-	  	  printf("[MT9F002] Y_ADDR_END: %i\n", end_addr_y);
-	  	  printf("[MT9F002] X_OUTPUT_SIZE: %i\n", mt->output_width);
-	  	  printf("[MT9F002] Y_OUTPUT_SIZE: %i\n", mt->output_height);
+		//Set output resolution
+		write_reg(mt, MT9F002_X_OUTPUT_SIZE, mt->output_width, 2);
+		write_reg(mt, MT9F002_Y_OUTPUT_SIZE, mt->output_height, 2);
+
+		printf("[MT9F002] X_ADDR_START: %i\n", mt->offset_x);
+		printf("[MT9F002] Y_ADDR_START: %i\n", mt->offset_y);
+		printf("[MT9F002] X_ADDR_END: %i\n", mt->offset_x + mt->sensor_width - 1);
+		printf("[MT9F002] Y_ADDR_END: %i\n", mt->offset_y + mt->sensor_height - 1);
+		printf("[MT9F002] X_OUTPUT_SIZE: %i\n", mt->output_width);
+		printf("[MT9F002] Y_OUTPUT_SIZE: %i\n", mt->output_height);
+		/* scaler */
+		if (mt->output_scaler != 1) {
+			// enable scaling mode
+			write_reg(mt, MT9F002_SCALING_MODE, 2, 2);
+			write_reg(mt, MT9F002_SCALE_M, (int) ceil((float)MT9F002_SCALER_N / mt->output_scaler), 2);
+			printf("[MT9F002] SCALE_M: %i\n", (int) ceil((float)MT9F002_SCALER_N / mt->output_scaler));
+		}
+		return;
 }
+
 /**
  * Initialisation of the Aptina MT9F002 CMOS sensor
  * (front camera)
@@ -860,6 +971,8 @@ void mt9f002_init(struct mt9f002_t *mt)
 
   /* Set the PLL based on Input clock and wanted clock frequency */
   mt9f002_set_pll(mt);
+
+  mt9f002_calc_resolution(mt);
 
   /* Based on the interface configure stage 2 */
   if(mt->interface == MT9F002_MIPI || mt->interface == MT9F002_HiSPi) {
