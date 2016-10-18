@@ -182,7 +182,7 @@ struct image_t *opticflow_module_calc(struct image_t *img)
   temp_state = opticflow_state;
   temp_state.rates = pose.rates;
 
-  opticflow_state.agl = -stateGetPositionNed_f()->z;
+  opticflow_state.agl = *stateGetAltAgl_f();
 
   // Do the optical flow calculation
   struct opticflow_result_t temp_result = {}; // new initialization
@@ -208,7 +208,7 @@ static void opticflow_agl_cb(uint8_t sender_id __attribute__((unused)), float di
 {
   // Update the distance if we got a valid measurement
   if (distance > 0) {
-    opticflow_state.agl = distance;
+    //opticflow_state.agl = distance; // TODO Remove this completely and use state to get filtered agl
   }
 }
 

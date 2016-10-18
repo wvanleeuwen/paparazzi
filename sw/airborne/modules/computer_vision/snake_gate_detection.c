@@ -85,10 +85,10 @@ uint8_t color_cr_max  = 255;//230;//255;
 // TODO find color scheme for blue
 uint8_t color_lum_min = 70;// 60;//105;
 uint8_t color_lum_max = 128;//228;//205;
-uint8_t color_cb_min  = 150;//140;//180;
-uint8_t color_cb_max  = 255;//230;//255;
-uint8_t color_cr_min  = 0;//66;//52;
-uint8_t color_cr_max  = 123;//194;//140;
+uint8_t color_cb_min  = 141;//140;//180;
+uint8_t color_cb_max  = 200;//230;//255;
+uint8_t color_cr_min  = 104;//66;//52;
+uint8_t color_cr_max  = 177;//194;//140;
 #endif
 
 // Gate detection settings:

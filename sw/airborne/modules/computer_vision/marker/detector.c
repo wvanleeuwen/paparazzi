@@ -162,12 +162,12 @@ static struct image_t *detect_front_blue_item(struct image_t *img) {
 
   // Color Filter
   struct image_filter_t filter;
-  filter.y_min = 45;
-  filter.y_max = 234;
-  filter.u_min = 141;
-  filter.u_max = 170;
-  filter.v_min = 113;
-  filter.v_max = 255;
+  filter.y_min = 15;
+  filter.y_max = 231;
+  filter.u_min = 150;
+  filter.u_max = 255;
+  filter.v_min = 0;
+  filter.v_max = 154;
 
   int threshold = 50;
 
@@ -187,12 +187,12 @@ static struct image_t *detect_bottom_blue_item(struct image_t *img) {
 
   // Color Filter
   struct image_filter_t filter;
-  filter.y_min = 52;
-  filter.y_max = 205;
-  filter.u_min = 171;
+  filter.y_min = 26;
+  filter.y_max = 224;
+  filter.u_min = 157;
   filter.u_max = 255;
-  filter.v_min = 69;
-  filter.v_max = 175;
+  filter.v_min = 0;
+  filter.v_max = 168;
 
   int threshold = 50;
 
@@ -213,12 +213,12 @@ static struct image_t *detect_front_blue_bucket(struct image_t *img) {
 
   // Color Filter
   struct image_filter_t filter;
-  filter.y_min = 40;
-  filter.y_max = 146;
-  filter.u_min = 135;
-  filter.u_max = 230;
-  filter.v_min = 104;
-  filter.v_max = 122;
+  filter.y_min = 38;
+  filter.y_max = 236;
+  filter.u_min = 145;
+  filter.u_max = 172;
+  filter.v_min = 0;
+  filter.v_max = 150;
 
   int threshold = 50;
 
@@ -238,12 +238,12 @@ static struct image_t *detect_bottom_blue_bucket(struct image_t *img) {
 
   // Color Filter
   struct image_filter_t filter;
-  filter.y_min = 12;
-  filter.y_max = 126;
-  filter.u_min = 138;
-  filter.u_max = 252;
-  filter.v_min = 89;
-  filter.v_max = 139;
+  filter.y_min = 53;
+  filter.y_max = 134;
+  filter.u_min = 111;
+  filter.u_max = 255;
+  filter.v_min = 0;
+  filter.v_max = 150;
 
   int threshold = 50;
 
@@ -264,12 +264,12 @@ static struct image_t *detect_front_red_item(struct image_t *img) {
 
   // Color Filter
   struct image_filter_t filter;
-  filter.y_min = 26;
-  filter.y_max = 228;
-  filter.u_min = 73;
-  filter.u_max = 103;
-  filter.v_min = 195;
-  filter.v_max = 253;
+  filter.y_min = 23;
+  filter.y_max = 230;
+  filter.u_min = 79;
+  filter.u_max = 134;
+  filter.v_min = 202;
+  filter.v_max = 255;
 
   int threshold = 50;
 
@@ -315,12 +315,12 @@ static struct image_t *detect_front_red_bucket(struct image_t *img) {
 
   // Color Filter
   struct image_filter_t filter;
-  filter.y_min = 36;
-  filter.y_max = 181;
-  filter.u_min = 100;
-  filter.u_max = 140;
-  filter.v_min = 155;
-  filter.v_max = 201;
+  filter.y_min = 23;
+  filter.y_max = 186;
+  filter.u_min = 69;
+  filter.u_max = 174;
+  filter.v_min = 159;
+  filter.v_max = 255;
 
   int threshold = 50;
 
@@ -340,21 +340,21 @@ static struct image_t *detect_bottom_red_bucket(struct image_t *img) {
 
   // Color Filter
   struct image_filter_t filter;
-  filter.y_min = 12;
-  filter.y_max = 233;
-  filter.u_min = 61;
-  filter.u_max = 255;
-  filter.v_min = 144;
+  filter.y_min = 21;
+  filter.y_max = 235;
+  filter.u_min = 94;
+  filter.u_max = 203;
+  filter.v_min = 131;
   filter.v_max = 255;
 
   int threshold = 50;
 
-  img->h = 120;
+//  img->h = 120;
   struct Marker marker = single_blob_finder(img, &filter, threshold);
   img->h = 240;
 
   if (marker.detected) {
-    marker_detected(&marker1, img, marker.pixel.x, marker.pixel.y*2);
+    marker_detected(&marker1, img, marker.pixel.x, marker.pixel.y);
     geo_locate_marker(&marker1, img);
   } else {
     marker_not_detected(&marker1, img);
@@ -539,16 +539,11 @@ void detector_init(void) {
   marker2.pixel.y = 0;
   marker2.found_time = 0;
 
-  detector.front_blue_item = cv_add_to_device_async(&DETECTOR_CAMERA2, detect_front_blue_item, 5);
-  detector.front_blue_item->maximum_fps = 5;
-  detector.front_blue_bucket = cv_add_to_device_async(&DETECTOR_CAMERA2, detect_front_blue_bucket, 5);
-  detector.front_blue_bucket->maximum_fps = 5;
-  detector.front_red_item = cv_add_to_device_async(&DETECTOR_CAMERA2, detect_front_red_item, 5);
-  detector.front_red_item->maximum_fps = 5;
-  detector.front_red_bucket = cv_add_to_device_async(&DETECTOR_CAMERA2, detect_front_red_bucket, 5);
-  detector.front_red_bucket->maximum_fps = 5;
-  detector.front_white_building = cv_add_to_device_async(&DETECTOR_CAMERA2, detect_front_white_building, 5);
-  detector.front_white_building->maximum_fps = 5;
+  detector.front_blue_item = cv_add_to_device(&DETECTOR_CAMERA2, detect_front_blue_item);
+  detector.front_blue_bucket = cv_add_to_device(&DETECTOR_CAMERA2, detect_front_blue_bucket);
+  detector.front_red_item = cv_add_to_device(&DETECTOR_CAMERA2, detect_front_red_item);
+  detector.front_red_bucket = cv_add_to_device(&DETECTOR_CAMERA2, detect_front_red_bucket);
+  detector.front_white_building = cv_add_to_device(&DETECTOR_CAMERA2, detect_front_white_building);
 
   cv_add_to_device(&DETECTOR_CAMERA2, draw_target_marker2);
 
