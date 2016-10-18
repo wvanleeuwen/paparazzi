@@ -18,8 +18,8 @@
 	<define name="MT9F002_TARGET_EXPOSURE" value="20" /> 
 	<define name="MT9F002_GAIN_GREEN1" value="3.0" />
 	<define name="MT9F002_GAIN_GREEN2" value="3.0" />
-	<define name="MT9F002_GAIN_RED" value="4.38" />
-	<define name="MT9F002_GAIN_BLUE" value="4.12" />
+	<define name="MT9F002_GAIN_RED" value="2.5" />
+	<define name="MT9F002_GAIN_BLUE" value="5.5" />
 
 	<!--<define name="USE_GPS_UBX_RTCM" value="TRUE"/> -->
     <module name="telemetry" type="transparent_udp"/>
@@ -66,7 +66,7 @@
 	</module>
 	<module name="cv_ae_awb">
 	  <define name="CV_AE_AWB_AV" value="1" />
-	  <define name="CV_AE_AWB_VERBOSE" value="0"/>
+	  <define name="CV_AE_AWB_VERBOSE" value="1"/>
 	</module>
 	<module name="logger_file">
       <define name="FILE_LOGGER_PATH" value="/data/ftp/internal_000"/>

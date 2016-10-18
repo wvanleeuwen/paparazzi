@@ -60,13 +60,14 @@ void cv_ae_awb_periodic(void) {
     // Calculate bright and saturated pixels
     uint32_t bright_pixels = cdf[MAX_HIST_Y-1] - cdf[MAX_HIST_Y-21]; // Top 20 bins
     uint32_t saturated_pixels = cdf[MAX_HIST_Y-1] - cdf[MAX_HIST_Y-6]; // top 5 bins
-    uint32_t target_bright_pixels = yuv_stats.nb_valid_Y / 100;
-    uint32_t max_saturated_pixels = yuv_stats.nb_valid_Y / 400;
+    uint32_t target_bright_pixels = yuv_stats.nb_valid_Y / 50;
+    uint32_t max_saturated_pixels = yuv_stats.nb_valid_Y / 250;
     float adjustment = 1.0f;
 
     // Fix saturated pixels
     if(saturated_pixels > max_saturated_pixels) {
-      adjustment = 1.0f - ((float)(saturated_pixels - max_saturated_pixels))/yuv_stats.nb_valid_Y;
+      adjustment = 1.0f - 4 * ((float)(saturated_pixels - max_saturated_pixels))/yuv_stats.nb_valid_Y;
+      adjustment = pow(adjustment, 4.0);
     }
     // Fix bright pixels
     else if (bright_pixels < target_bright_pixels) {
@@ -80,6 +81,7 @@ void cv_ae_awb_periodic(void) {
 
       // that level is supposed to be at MAX_HIST_Y-11;
       adjustment = (float)(MAX_HIST_Y-11+1)/(l+1);
+      adjustment = pow(adjustment, 2.0);
     }
 
     // Calculate exposure
@@ -93,7 +95,7 @@ void cv_ae_awb_periodic(void) {
     // Calculate AWB
     float avgU = (float) yuv_stats.awb_sum_U / (float) yuv_stats.nb_valid_Y;
     float avgV = (float) yuv_stats.awb_sum_V / (float) yuv_stats.nb_valid_Y;
-    float fTolerance = 0.05f;
+    float fTolerance = 0.025f;
     float targetAWB = 0.0f;
     if (avgU - avgV + targetAWB < -fTolerance) {
       // Want more red
@@ -102,8 +104,8 @@ void cv_ae_awb_periodic(void) {
 #endif
       mt9f002.gain_blue -= 0.0075 * (avgU - avgV);
       mt9f002.gain_red  += 0.0075 * (avgU - avgV);
-      Bound(mt9f002.gain_blue, 2, 50);
-      Bound(mt9f002.gain_red, 2, 50);
+      Bound(mt9f002.gain_blue, 2, 7.5);
+      Bound(mt9f002.gain_red, 2, 7.5);
       mt9f002_set_gains(&mt9f002);
     }
     else if(avgU - avgV + targetAWB > fTolerance) {
@@ -113,8 +115,8 @@ void cv_ae_awb_periodic(void) {
 #endif
       mt9f002.gain_blue -= 0.0075 * (avgU - avgV);
       mt9f002.gain_red  += 0.0075 * (avgU - avgV);
-      Bound(mt9f002.gain_blue, 2, 50);
-      Bound(mt9f002.gain_red, 2, 50);
+      Bound(mt9f002.gain_blue, 2, 7.5);
+      Bound(mt9f002.gain_red, 2, 7.5);
       mt9f002_set_gains(&mt9f002);
     }
   }

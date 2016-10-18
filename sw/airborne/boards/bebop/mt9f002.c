@@ -107,6 +107,14 @@ struct video_config_t front_camera = {
 #define	CFG_MT9F002_WINDOW_WIDTH_MIN        	1
 #define	CFG_MT9F002_WINDOW_WIDTH_MAX			4608
 
+struct blanking_ {
+	uint16_t min_line_blanking_pck;
+	uint16_t min_line_length_pck;
+	uint16_t min_line_fifo_pck;
+	uint16_t fine_integration_time_min;
+	uint16_t fine_integration_time_max_margin;
+} mt9f002_blanking;
+
 /**
  * Write multiple bytes to a single register
  */
@@ -564,9 +572,21 @@ static inline void mt9f002_parallel_stage2(struct mt9f002_t *mt)
   write_reg(mt, MT9F002_DIGITAL_TEST           , 0x0000, 2);
   //write_reg(mt, MT9F002_DATAPATH_SELECT        , 0xd881, 2); // permanent line valid
   write_reg(mt, MT9F002_DATAPATH_SELECT        , 0xd880, 2);
-  write_reg(mt, MT9F002_READ_MODE              , 0x0041, 2);
-  write_reg(mt, MT9F002_X_ODD_INC              , mt->x_odd_inc, 2);
-  write_reg(mt, MT9F002_Y_ODD_INC              , mt->y_odd_inc, 2);
+
+  if(mt->x_odd_inc > 1 && mt->y_odd_inc > 1)
+  {
+	  write_reg(mt, MT9F002_READ_MODE			, 0x0441, 2);
+	  //write_reg(mt, MT9F002_READ_MODE			, 0x0041, 2);
+	  write_reg(mt, MT9F002_X_ODD_INC			, mt->x_odd_inc, 2);
+	  write_reg(mt, MT9F002_Y_ODD_INC			, mt->y_odd_inc, 2);
+	  // bayer resampling
+	  write_reg(mt, MT9F002_SCALING_MODE		, 2, 2);
+	  write_reg(mt,	MT9F002_DATAPATH_SELECT		, 0xd8b0, 2);
+  }else{
+	  write_reg(mt, MT9F002_READ_MODE              , 0x0041, 2);
+	  write_reg(mt, MT9F002_X_ODD_INC              , mt->x_odd_inc, 2);
+	  write_reg(mt, MT9F002_Y_ODD_INC              , mt->y_odd_inc, 2);
+  }
   write_reg(mt, MT9F002_MASK_CORRUPTED_FRAMES  , 0x0001, 1); // 0 output corrupted frame, 1 mask them
 }
 
@@ -603,13 +623,74 @@ static inline void mt9f002_set_pll(struct mt9f002_t *mt)
  *Set the blanking configuration
  * Blanking of the MT9F002 depends on the target FPS
  */
+/* write a register */
+static void mt9f002_blanking_init(struct mt9f002_t *mt)
+{
+	/*
+	#define NO_BINNING_NO_SKIPPING 						0x1
+	#define BINNING_ONLY 								0x3
+	#define BINNING_AND_SKIPPING 						0x7 */
+	/* normal mode
+	#define FINE_INTEGRATION_TIME_MIN					1316
+	#define FINE_INTEGRATION_TIME_MAX_MARGIN			1032 */
+	/* scaler mode
+	#define SCALER_FINE_INTEGRATION_TIME_MIN			1316
+	#define SCALER_FINE_INTEGRATION_TIME_MAX_MARGIN		1032 */
+	/* binning mode
+	#define BINNING_XY_FINE_INTEGRATION_TIME_MIN		2000
+	#define BINNING_XY_FINE_INTEGRATION_TIME_MAX_MARGIN	2200
+	#define BINNING_X_FINE_INTEGRATION_TIME_MIN			1500
+	#define BINNING_X_FINE_INTEGRATION_TIME_MAX_MARGIN	1900 */
+
+	if (mt->x_odd_inc > 1) {
+		if (mt->y_odd_inc > 1)
+		{
+			/* Binning XY */
+			mt9f002_blanking.min_line_blanking_pck 	= 2950;
+			mt9f002_blanking.min_line_length_pck 	= 4650;
+			mt9f002_blanking.min_line_fifo_pck 		= 120;
+			mt9f002_blanking.fine_integration_time_max_margin = 2000;
+			mt9f002_blanking.fine_integration_time_min = 2200;
+		} else {
+			/* Binning X */
+			mt9f002_blanking.min_line_blanking_pck 	= 0;
+			mt9f002_blanking.min_line_length_pck 	= 3495;
+			mt9f002_blanking.min_line_fifo_pck 		= 60;
+			mt9f002_blanking.fine_integration_time_max_margin = 1500;
+			mt9f002_blanking.fine_integration_time_min = 1900;
+		}
+	} else {
+		if (mt->output_scaler != 1) {
+			/* Scaler mode */
+			mt9f002_blanking.min_line_blanking_pck 	= 2400;
+			mt9f002_blanking.min_line_length_pck 	= 1750;
+			mt9f002_blanking.min_line_fifo_pck 		= 60;
+			mt9f002_blanking.fine_integration_time_max_margin = 1316;
+			mt9f002_blanking.fine_integration_time_min = 1032;
+		} else {
+			/* Normal mode */
+			mt9f002_blanking.min_line_blanking_pck 	= 1316;
+			mt9f002_blanking.min_line_length_pck 	= 1032;
+			mt9f002_blanking.min_line_fifo_pck 		= 60;
+			mt9f002_blanking.fine_integration_time_max_margin = 1316;
+			mt9f002_blanking.fine_integration_time_min = 1032;
+		}
+	}
+
+	return;
+}
+
 static void mt9f002_set_blanking(struct mt9f002_t *mt)
 {
   /* Read some config values in order to calculate blanking configuration */
-  uint16_t min_line_blanking_pck = read_reg(mt, MT9F002_MIN_LINE_BLANKING_PCK, 2);
+  uint16_t min_line_blanking_pck 	= mt9f002_blanking.min_line_blanking_pck;
+  uint16_t min_line_length_pck 		= mt9f002_blanking.min_line_length_pck;
+  uint16_t min_line_fifo_pck 		= mt9f002_blanking.min_line_fifo_pck;
+
+  //uint16_t min_line_blanking_pck = read_reg(mt, MT9F002_MIN_LINE_BLANKING_PCK, 2);
   uint16_t x_odd_inc = read_reg(mt, MT9F002_X_ODD_INC, 2);
   uint16_t min_frame_blanking_lines = read_reg(mt, MT9F002_MIN_FRAME_BLANKING_LINES, 2);
-  uint16_t min_line_length_pck = read_reg(mt, MT9F002_MIN_LINE_LENGTH_PCK, 2);
+  //uint16_t min_line_length_pck = read_reg(mt, MT9F002_MIN_LINE_LENGTH_PCK, 2);
 
   /* Calculate minimum line length */
   float subsampling_factor = (float)(1 + x_odd_inc) / 2.0f; // See page 52
@@ -617,10 +698,10 @@ static void mt9f002_set_blanking(struct mt9f002_t *mt)
   min_line_length = MAX(min_line_length, (mt->scaled_width-1 + x_odd_inc) / subsampling_factor/2 + min_line_blanking_pck);
   if (mt->interface == MT9F002_MIPI ||
       mt->interface == MT9F002_HiSPi) {
-    min_line_length = MAX(min_line_length, ((uint16_t)((float)mt->scaled_width * mt->vt_pix_clk / mt->op_pix_clk)/2) + 0x005E); // 2 lanes, pll clocks
+    min_line_length = MAX(min_line_length, ((uint16_t)((float)mt->scaled_width * mt->vt_pix_clk / mt->op_pix_clk)/2) + min_line_fifo_pck); // 2 lanes, pll clocks
   }
   else {
-    min_line_length = MAX(min_line_length, ((uint16_t)((float)mt->scaled_width * mt->vt_pix_clk / mt->op_pix_clk)) + 0x005E); // pll clocks
+    min_line_length = MAX(min_line_length, ((uint16_t)((float)mt->scaled_width * mt->vt_pix_clk / mt->op_pix_clk)) + min_line_fifo_pck); // pll clocks
   }
 
   /* Do some magic to get it to work with P7 ISP (with horizontal blanking) */
@@ -701,8 +782,9 @@ void mt9f002_set_exposure(struct mt9f002_t *mt)
   /* Fetch minimum and maximum integration times */
   uint16_t coarse_integration_min = read_reg(mt, MT9F002_COARSE_INTEGRATION_TIME_MIN, 2);
   uint16_t coarse_integration_max = mt->frame_length - read_reg(mt, MT9F002_COARSE_INTEGRATION_TIME_MAX_MARGIN, 2);
-  uint16_t fine_integration_min = read_reg(mt, MT9F002_FINE_INTEGRATION_TIME_MIN, 2);
-  uint16_t fine_integration_max = mt->line_length - read_reg(mt, MT9F002_FINE_INTEGRATION_TIME_MAX_MARGIN, 2);
+  uint16_t fine_integration_min = mt9f002_blanking.fine_integration_time_min;
+  uint16_t fine_integration_max_margin = mt9f002_blanking.fine_integration_time_max_margin;
+  uint16_t fine_integration_max = mt->line_length - fine_integration_max_margin;
 
   /* Compute fine and coarse integration time */
   uint32_t integration = mt->target_exposure * mt->vt_pix_clk * 1000;
@@ -973,6 +1055,7 @@ void mt9f002_init(struct mt9f002_t *mt)
   mt9f002_set_pll(mt);
 
   mt9f002_calc_resolution(mt);
+  mt9f002_blanking_init(mt);
 
   /* Based on the interface configure stage 2 */
   if(mt->interface == MT9F002_MIPI || mt->interface == MT9F002_HiSPi) {
@@ -983,7 +1066,6 @@ void mt9f002_init(struct mt9f002_t *mt)
   }
 
   mt9f002_set_resolution(mt);
-
   /* Update blanking (based on FPS) */
   mt9f002_set_blanking(mt);
 
