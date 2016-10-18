@@ -32,6 +32,7 @@
 extern struct mt9f002_t mt9f002;
 
 void cv_ae_awb_init(void) {}
+
 void cv_ae_awb_periodic(void) {
   struct isp_yuv_stats_t yuv_stats;
 
@@ -82,30 +83,30 @@ void cv_ae_awb_periodic(void) {
 
 
     // Calculate AWB
-    float avgU = (float) yuv_stats.awb_sum_U / (float) yuv_stats.nb_valid_Y;
-    float avgV = (float) yuv_stats.awb_sum_V / (float) yuv_stats.nb_valid_Y;
-    float fTolerance = 2.0f;
-    float targetAWB = 0.0f;
+//    float avgU = (float) yuv_stats.awb_sum_U / (float) yuv_stats.nb_valid_Y;
+//    float avgV = (float) yuv_stats.awb_sum_V / (float) yuv_stats.nb_valid_Y;
+//    float fTolerance = 2.0f;
+//    float targetAWB = 0.0f;
 
 //    printf("U-V: %f\r\n", avgU - avgV);
-    if (avgU - avgV + targetAWB < -fTolerance) {
-      // Want more red
-//      printf("Too red...\r\n");
-      mt9f002.gain_blue += 0.1;
-      mt9f002.gain_red  -= 0.1;
-      Bound(mt9f002.gain_blue, 2, 50);
-      Bound(mt9f002.gain_red, 2, 50);
-      mt9f002_set_gains(&mt9f002);
-    }
-    else if(avgU - avgV + targetAWB > fTolerance) {
-      // Want more blue
-//      printf("Too blue...\r\n");
-      mt9f002.gain_blue -= 0.1;
-      mt9f002.gain_red  += 0.1;
-      Bound(mt9f002.gain_blue, 2, 50);
-      Bound(mt9f002.gain_red, 2, 50);
-      mt9f002_set_gains(&mt9f002);
-    }
+//    if (avgU - avgV + targetAWB < -fTolerance) {
+//      // Want more red
+////      printf("Too red...\r\n");
+//      mt9f002.gain_blue += 0.1;
+//      mt9f002.gain_red  -= 0.1;
+//      Bound(mt9f002.gain_blue, 2, 50);
+//      Bound(mt9f002.gain_red, 2, 50);
+//      mt9f002_set_gains(&mt9f002);
+//    }
+//    else if(avgU - avgV + targetAWB > fTolerance) {
+//      // Want more blue
+////      printf("Too blue...\r\n");
+//      mt9f002.gain_blue -= 0.1;
+//      mt9f002.gain_red  += 0.1;
+//      Bound(mt9f002.gain_blue, 2, 50);
+//      Bound(mt9f002.gain_red, 2, 50);
+//      mt9f002_set_gains(&mt9f002);
+//    }
   }
 }
 

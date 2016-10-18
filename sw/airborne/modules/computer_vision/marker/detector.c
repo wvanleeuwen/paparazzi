@@ -349,7 +349,7 @@ static struct image_t *detect_bottom_red_bucket(struct image_t *img) {
 
   int threshold = 50;
 
-  img->h = 120;
+//  img->h = 120;
   struct Marker marker = single_blob_finder(img, &filter, threshold);
   img->h = 240;
 
