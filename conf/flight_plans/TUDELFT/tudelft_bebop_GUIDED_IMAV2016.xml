@@ -67,7 +67,9 @@
       <call_once fun="detector_disable_all()"/>
       <call_once fun="front_cam_set_x_offset(896)"/>
       <call_once fun="win_state = 0"/>
+      <set var="disable_sideways_forcefield" value="true"/>
       <call fun="fly_through_window(SNAKE_WINDOW)"/>
+      <set var="disable_sideways_forcefield" value="false"/>
     </block>
 
     <block name="Find and land at red item">
@@ -122,11 +124,14 @@
     </block>
 
 
-    <block name="Turn to exit room 1">
+    <block name="Find exit room 1">
     <!-- TODO: determine in what heading the door is and turn to it-->
-    <!-- TODO: center to middle of door and go through it-->
-    <!--       use either range sensors for this or gate detection-->
-    <!-- TODO: Move for an aditional 1 meter/-->
+      <call_once fun="detector_disable_all()"/>
+      <call_once fun="front_cam_set_x_offset(896)"/>
+      <call_once fun="win_state = 0"/>
+      <set var="disable_sideways_forcefield" value="true"/>
+      <call fun="fly_through_window(SNAKE_DOOR)"/>
+      <set var="disable_sideways_forcefield" value="false"/>
     </block>
 
     <block name="Navigate to room 2">
@@ -143,7 +148,9 @@
       <call_once fun="detector_disable_all()"/>
       <call_once fun="front_cam_set_x_offset(896)"/>
       <call_once fun="win_state = 0"/>
+      <set var="disable_sideways_forcefield" value="true"/>
       <call fun="fly_through_window(SNAKE_DOOR)"/>
+      <set var="disable_sideways_forcefield" value="false"/>
     </block>
 
     <block name="Find and hover above red bucket">
@@ -179,24 +186,33 @@
       <call_once fun="open_gripper()"/>
     </block>
 
-    <block name="Turn to exit room 2">
+    <block name="Find exit room 2">
     <!-- TODO: determine in what heading the door is and turn to it-->
-    <!-- TODO: center to middle of door and go through it-->
-    <!--       use either range sensors for this or gate detection-->
-    <!-- TODO: Move for an aditional 1 meter/-->
+      <call_once fun="detector_disable_all()"/>
+      <call_once fun="front_cam_set_x_offset(896)"/>
+      <call_once fun="win_state = 0"/>
+      <set var="disable_sideways_forcefield" value="true"/>
+      <call fun="fly_through_window(SNAKE_DOOR)"/>
+      <set var="disable_sideways_forcefield" value="false"/>
     </block>
 
     <block name="Navigate to room 3">
-    <!-- TODO: turn 180 degrees (face towards wall) and move LEFT for a meter-->
-    <!-- TODO: wall following for 2 meters untill door is found with gate detection-->
-    <!--       or wall following for constant velocity untill door is met-->
+      <call_once fun="guidance_h_set_guided_heading_relative(DegOfRad(180.0))"/>
+      <call_once fun="MoveRight(-0.2)"/>
+      <while cond = "!front_wall_detected"/>	<!--wait till we see the wall-->
+      <set var="do_wall_following" value= "true"/>	<!--follow wall at fixed distance-->
+      <while cond = "front_wall_detected"/> <!--wait till we see the next door-->
+      <set var="do_wall_following" value= "false"/>
+      <call_once fun="MoveRight(0.0)"/>
     </block>
 
     <block name="Move through door 3">
       <call_once fun="detector_disable_all()"/>
       <call_once fun="front_cam_set_x_offset(896)"/>
       <call_once fun="win_state = 0"/>
+      <set var="disable_sideways_forcefield" value="true"/>
       <call fun="fly_through_window(SNAKE_DOOR)"/>
+      <set var="disable_sideways_forcefield" value="false"/>
     </block>
 
     <block name="Find and land at blue item">
@@ -216,6 +232,36 @@
       <!-- TODO -->
     </block>
 
+    <block name="Find exit room second time">
+    <!-- TODO: determine in what heading the door is and turn to it-->
+      <call_once fun="detector_disable_all()"/>
+      <call_once fun="front_cam_set_x_offset(896)"/>
+      <call_once fun="win_state = 0"/>
+      <set var="disable_sideways_forcefield" value="true"/>
+      <call fun="fly_through_window(SNAKE_DOOR)"/>
+      <set var="disable_sideways_forcefield" value="false"/>
+    </block>
+
+    <block name="Navigate to room 2 second time">
+      <call_once fun="guidance_h_set_guided_heading_relative(DegOfRad(180.0))"/>
+      <call_once fun="MoveRight(0.2)"/>
+      <while cond = "!front_wall_detected"/>	<!--wait till we see the wall-->
+      <set var="do_wall_following" value= "true"/>	<!--follow wall at fixed distance-->
+      <while cond = "front_wall_detected"/> <!--wait till we see the next door-->
+      <set var="do_wall_following" value= "false"/>
+      <call_once fun="MoveRight(0.0)"/>
+    </block>
+
+    <block name="Move through door 2 second time">
+      <call_once fun="detector_disable_all()"/>
+      <call_once fun="front_cam_set_x_offset(896)"/>
+      <call_once fun="win_state = 0"/>
+      <set var="disable_sideways_forcefield" value="true"/>
+      <call fun="fly_through_window(SNAKE_DOOR)"/>
+      <set var="disable_sideways_forcefield" value="false"/>
+    </block>
+
+
     <block name="Find and hover above blue bucket">
       <call_once fun="detector_disable_all()"/>
       <call_once fun="front_cam_set_x_offset(512)"/>
@@ -228,12 +274,18 @@
       <!-- TODO -->
     </block>
 
-    <block name="Search exit">
-      <!-- TODO -->
+    <block name="Find exit room 3">
+    <!-- TODO: determine in what heading the door is and turn to it-->
+      <call_once fun="detector_disable_all()"/>
+      <call_once fun="front_cam_set_x_offset(896)"/>
+      <call_once fun="win_state = 0"/>
+      <set var="disable_sideways_forcefield" value="true"/>
+      <call fun="fly_through_window(SNAKE_DOOR)"/>
+      <set var="disable_sideways_forcefield" value="false"/>
     </block>
 
     <block name="Approach exit">
-      <!-- TODO -->
+      <call_once fun="guidance_h_set_guided_heading_relative(DegOfRad(-45.0))"/> <!-- change heading to face the door approximatly -->
     </block>
 
     <block name="Fly through exit">
