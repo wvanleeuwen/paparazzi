@@ -1,6 +1,6 @@
 <!DOCTYPE flight_plan SYSTEM "../flight_plan.dtd">
 
-<flight_plan alt="74" ground_alt="44" lat0="39.735078" lon0="116.164560" max_dist_from_home="500" name="IMAV2016_outdoor" security_height="2">
+<flight_plan alt="59" ground_alt="44" lat0="39.735078" lon0="116.164560" max_dist_from_home="500" name="IMAV2016_outdoor" security_height="2">
   <header>
 
 #include "autopilot.h"
@@ -39,7 +39,7 @@
 #define StopVision() FALSE
 #endif
 
-#define ALT_WATER 		40			// TODO!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+#define ALT_WATER 		41.0			// TODO!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 #define ALT_LANDING_PLATFORM	45.36			// Verified
 #define ALT_BOTTOM_WATER_BOX	44.36			// Verified
 
@@ -50,6 +50,8 @@
 #define ALT_DROPWATER		(ALT_BOTTOM_WATER_BOX+2.2)
 #define ALT_MOVETOLAND		(ALT_DROPWATER+1.0)
 #define ALT_LANDING		(ALT_LANDING_PLATFORM+0.4)
+
+#define GetGpsAlt()    		(((float)gps.hmsl)/1000.0f)
 
   </header>
   <waypoints>
@@ -123,7 +125,7 @@
 
   <exceptions>
     <exception cond="(!InsideOZ(GetPosX(), GetPosY()) && !(nav_block == IndexOfBlock('flare_emergency')) && !(nav_block == IndexOfBlock('landed')) && !(nav_block == IndexOfBlock('WaitGPS')))" deroute="land_emergency"/>
-    <exception cond="gps.hmsl > 104360" deroute="land_emergency"/>
+    <exception cond="GetGpsAlt() > 104.36" deroute="land_emergency"/>
     <exception cond="datalink_time > 40" deroute="land_emergency"/>
   </exceptions>
 
@@ -147,22 +149,22 @@
 
     <!-- GO -->
     <block name="Takeoff-Standby" strip_button="Takeoff-Standby" strip_icon="takeoff.png" group="takeoff">
-      <exception cond="stateGetPositionEnu_f()->z > ALT_CLIMBOUT" deroute="Standby"/>
+      <exception cond="GetPosAlt() > ALT_CLIMBOUT" deroute="Standby"/>
       <call fun="NavSetWaypointHere(WP_CLIMB)"/>
       <stay climb="nav_climb_vspeed" vmode="climb" wp="CLIMB"/>
     </block>
     <block name="Takeoff-Map" strip_button="Takeoff-Map" strip_icon="survey.png" group="takeoff">
-      <exception cond="stateGetPositionEnu_f()->z > ALT_CLIMBOUT" deroute="SurveyPoly"/>
+      <exception cond="GetPosAlt() > ALT_CLIMBOUT" deroute="SurveyPoly"/>
       <call fun="NavSetWaypointHere(WP_CLIMB)"/>
       <stay climb="nav_climb_vspeed" vmode="climb" wp="CLIMB"/>
     </block>
     <block name="Takeoff-Drop" strip_button="Takeoff-Drop" strip_icon="parachute.png" group="takeoff">
-      <exception cond="stateGetPositionEnu_f()->z > ALT_CLIMBOUT" deroute="drop"/>
+      <exception cond="GetPosAlt() > ALT_CLIMBOUT" deroute="drop"/>
       <call fun="NavSetWaypointHere(WP_CLIMB)"/>
       <stay climb="nav_climb_vspeed" vmode="climb" wp="CLIMB"/>
     </block>
     <block name="Takeoff-Water" strip_button="Takeoff-Water" group="takeoff">
-      <exception cond="stateGetPositionEnu_f()->z > ALT_CLIMBOUT" deroute="pickup_water"/>
+      <exception cond="GetPosAlt() > ALT_CLIMBOUT" deroute="pickup_water"/>
       <call fun="NavSetWaypointHere(WP_CLIMB)"/>
       <stay climb="nav_climb_vspeed" vmode="climb" wp="CLIMB"/>
     </block>
@@ -193,7 +195,7 @@
     <block name="ComeBackAndLand" strip_button="ComeBackAndLand" strip_icon="land-right.png" group="hover">
       <call fun="StopVision()"/>
       <call fun="NavSetWaypointHere(WP_CLIMB)"/>
-      <stay climb="nav_climb_vspeed" vmode="climb" wp="CLIMB" until="stateGetPositionEnu_f()->z > ALT_CLIMBOUT"/>
+      <stay climb="nav_climb_vspeed" vmode="climb" wp="CLIMB" until="GetPosAlt() > ALT_CLIMBOUT"/>
       <call fun="NavCopyWaypointPositionOnly(WP_CAM,WP_TD)"/>
       <call fun="NavCopyWaypointPositionOnly(WP_CRUISE,WP_TD)"/>
       <go wp="CRUISE"/>
@@ -209,31 +211,31 @@
     <!-- DROPPINGS -->
     <block name="drop" group="drop">
        <go wp="DROP"/>
-       <stay climb="nav_descend_vspeed" vmode="climb" wp="DROP" until="LessThan(stateGetPositionEnu_f()->z, ALT_DROPLIFEVEST)"/>
+       <stay climb="nav_descend_vspeed" vmode="climb" wp="DROP" until="LessThan(GetPosAlt(), ALT_DROPLIFEVEST)"/>
        <call fun="DropLifeVest()"/>
-       <stay climb="nav_climb_vspeed" vmode="climb" wp="DROP" until="stateGetPositionEnu_f()->z > ALT_MOVETOPICKUP"/>
+       <stay climb="nav_climb_vspeed" vmode="climb" wp="DROP" until="GetPosAlt() > ALT_MOVETOPICKUP"/>
        <deroute block="pickup_water"/>
     </block>
 
     <block name="pickup_water" group="drop">
       <exception cond="DetectWater()" deroute="climb_with_water"/>
        <go wp="WG"/>
-       <stay climb="nav_descend_vspeed" vmode="climb" wp="WG" until="LessThan(stateGetPositionEnu_f()->z, ALT_WATERPICKUP)"/>
+       <stay climb="nav_descend_vspeed" vmode="climb" wp="WG" until="LessThan(GetPosAlt(), ALT_WATERPICKUP)"/>
     </block>
     <block name="climb_with_water" group="drop">
-       <stay climb="nav_climb_vspeed" vmode="climb" wp="WG" until="stateGetPositionEnu_f()->z > ALT_CLIMBOUT"/>
+       <stay climb="nav_climb_vspeed" vmode="climb" wp="WG" until="GetPosAlt() > ALT_CLIMBOUT"/>
        <deroute block="drop_water"/>
     </block>
 
     <block name="drop_water" group="drop">
        <go wp="WD"/>
-       <stay climb="nav_descend_vspeed" vmode="climb" wp="WD" until="LessThan(stateGetPositionEnu_f()->z, ALT_DROPWATER)"/>
+       <stay climb="nav_descend_vspeed" vmode="climb" wp="WD" until="LessThan(GetPosAlt(), ALT_DROPWATER)"/>
        <call fun="DropWater()"/>
     </block>
     <block name="drop_container" group="drop">
        <stay climb="nav_climb_vspeed" wp="WD" until="NavBlockTime() > 2"/>
        <call fun="DropContainer()"/>
-       <stay climb="nav_climb_vspeed" vmode="climb" wp="WD" until="stateGetPositionEnu_f()->z > ALT_MOVETOLAND"/>
+       <stay climb="nav_climb_vspeed" vmode="climb" wp="WD" until="GetPosAlt() > ALT_MOVETOLAND"/>
        <deroute block="land"/>
     </block>
 
@@ -283,7 +285,7 @@
 -->
 
     <block name="flare">
-      <exception cond="LessThan(sonar_bebop.distance,0.8)" deroute="touch_down"/>
+      <!--exception cond="LessThan(sonar_bebop.distance,0.8)" deroute="touch_down"/-->
       <stay wp="TD"/>
     </block>
 

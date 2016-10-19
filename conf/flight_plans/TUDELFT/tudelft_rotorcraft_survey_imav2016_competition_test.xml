@@ -29,10 +29,10 @@
 #ifndef StopVision
 #define StopVision() FALSE
 #endif
-#define ALT_WATER 		40			// TODO!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+#define ALT_WATER 		0			// TODO!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 #define ALT_LANDING_PLATFORM	45.36			// Verified
 #define ALT_BOTTOM_WATER_BOX	44.36			// Verified
-#define ALT_CLIMBOUT 		(ALT_LANDING_PLATFORM+12.0)
+#define ALT_CLIMBOUT 		(ALT_LANDING_PLATFORM+1.5)
 #define ALT_DROPLIFEVEST	(ALT_WATER+3.0)
 #define ALT_MOVETOPICKUP	(ALT_WATER+5.0)
 #define ALT_WATERPICKUP 	(ALT_WATER+0.5)
