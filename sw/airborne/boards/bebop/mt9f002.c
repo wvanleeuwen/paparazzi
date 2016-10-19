@@ -66,33 +66,33 @@ struct video_config_t front_camera = {
   .fps = MT9F002_TARGET_FPS
 };
 
-#define max(a,b) \
-   ({ __typeof__ (a) _a = (a); \
-       __typeof__ (b) _b = (b); \
-     _a > _b ? _a : _b; })
+#define max(m1,m2) \
+   ({ __typeof__ (m1) _m1 = (m1); \
+       __typeof__ (m2) _m2 = (m2); \
+     _m1 > _m2 ? _m1 : _m2; })
 
-#define min(a,b) \
-   ({ __typeof__ (a) _a = (a); \
-       __typeof__ (b) _b = (b); \
-     _a < _b ? _a : _b; })
+#define min(m1,m2) \
+		({ __typeof__ (m1) _m1 = (m1); \
+		__typeof__ (m2) _m2 = (m2); \
+		_m1 < _m2 ? _m1 : _m2; })
 
-#define clamp(a,b,c) \
-   ({ __typeof__ (a) _a = (a); \
-       __typeof__ (b) _b = (b); \
-       __typeof__ (c) _c = (c); \
-     _a < _b ? _b : (_a > _c ? _c : _a); })
+#define clamp(c1,l,u) \
+   ({ __typeof__ (c1) _c1 = (c1); \
+       __typeof__ (l) _l = (l); \
+       __typeof__ (u) _u = (u); \
+     _c1 < _l ? _l : (_c1 > _u ? _u : _c1); })
 
-#define clamp_t(t, a, l, u) \
-   ({ __typeof__ (t) _a = (a); \
+#define clamp_t(t, c1, l, u) \
+   ({ __typeof__ (t) _c1 = (c1); \
        __typeof__ (t) _l = (l); \
        __typeof__ (t) _u = (u); \
-     _a < _l ? _l : (_a > _u ? _u : _a); })
+     _c1 < _l ? _l : (_c1 > _u ? _u : _c1); })
 
-#define ALIGN(x,a) \
+#define ALIGN(x,a1) \
 	({ __typeof__ (x) _x = (x); \
-       __typeof__ (a) _a = (a); \
-       __typeof__ (a) _r = _x%_a; \
-       _r ? _x + (_a - _r) : _x; })
+       __typeof__ (a1) _a1 = (a1); \
+       __typeof__ (a1) _r = _x%_a1; \
+       _r ? _x + (_a1 - _r) : _x; })
 
 #define CFG_SCALER_M_MIN 						16
 #define CFG_SCALER_M_MAX 						128
@@ -903,7 +903,7 @@ void mt9f002_calc_resolution(struct mt9f002_t *mt)
 		unsigned int height;
 		unsigned int ratio;
 		unsigned int xMultiple;
-		unsigned int dividor;
+		unsigned int div_res;
 		static const uint8_t xy_odd_inc_tab[] = {1, 1, 3, 3, 7, 7, 7, 7, 15};
 
 		crop.left   = mt->offset_x;
@@ -938,14 +938,14 @@ void mt9f002_calc_resolution(struct mt9f002_t *mt)
 				max((rect.height / 8), (__s32) CFG_MT9F002_WINDOW_HEIGHT_MIN),
 				rect.height);
 		/* Calculate binning / skipping for X */
-		dividor = rect.width / width;
-		printf("I wanted dividor: %i\n", dividor);
-		dividor = clamp_t(unsigned int,dividor, 1U, 4U);
-		x_odd_inc = xy_odd_inc_tab[dividor];
+		div_res = rect.width / width;
+		printf("I wanted div: %i\n", div_res);
+		div_res = clamp_t(unsigned int,div_res, 1U, 4U);
+		x_odd_inc = xy_odd_inc_tab[div_res];
 		/* Calculate binning / skipping for Y */
-		dividor = rect.height / height;
-		dividor = clamp_t(unsigned int,dividor, 1U, 4U);
-		y_odd_inc = xy_odd_inc_tab[dividor];
+		div_res = rect.height / height;
+		div_res = clamp_t(unsigned int,div_res, 1U, 4U);
+		y_odd_inc = xy_odd_inc_tab[div_res];
 		/* Align left offset to 8 */
 		xMultiple = 8 * ((x_odd_inc + 1) / 2);
 		if (rect.left % xMultiple)

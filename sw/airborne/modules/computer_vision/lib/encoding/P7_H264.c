@@ -779,7 +779,7 @@ int P7_H264_open(P7_H264_context_t* context, struct v4l2_device *v4l2_dev)
 
     if (!pthreadRes)
     {
-      pthread_create(&context->thread,&context->attr,P7_H264_encoderThread, context);
+      pthread_create((pthread_t *) &context->thread,&context->attr,P7_H264_encoderThread, context);
     }
 
     if (!pthreadRes)

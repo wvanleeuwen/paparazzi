@@ -31,7 +31,7 @@ extern "C"
     1. Type definition for encoder instance
 ------------------------------------------------------------------------------*/
 
-    typedef const void *H264EncInst;
+    typedef void *H264EncInst;
 
 /*------------------------------------------------------------------------------
     2. Enumerations for API parameters

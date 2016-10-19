@@ -124,7 +124,9 @@ typedef struct
 } stream_s;
 
 /* General tools */
+#ifndef ABS
 #define ABS(x)          ((x) < (0) ? -(x) : (x))
+#endif
 #define MAX(a, b)       ((a) > (b) ?  (a) : (b))
 #define MIN(a, b)       ((a) < (b) ?  (a) : (b))
 #define SIGN(a)         ((a) < (0) ? (-1) : (1))
