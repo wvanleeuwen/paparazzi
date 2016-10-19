@@ -262,7 +262,7 @@
       <deroute block="Survey Poly RUN"/>
     </block>
     <block name="Survey Poly RUN">
-      <exception cond="PolySurveySweepNum >= 5" deroute="drop"/>
+      <exception cond="PolySurveySweepNum >= 4" deroute="drop"/>
       <call fun="nav_survey_poly_run()"/>
     </block>
 

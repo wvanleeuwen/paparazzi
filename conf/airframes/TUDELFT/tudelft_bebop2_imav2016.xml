@@ -94,10 +94,10 @@
     </module>
 
     <module name="nav" type="survey_rectangle_rotorcraft">
-      <define name="RECTANGLE_SURVEY_DEFAULT_SWEEP" value="10"/>
+      <define name="RECTANGLE_SURVEY_DEFAULT_SWEEP" value="33"/>
     </module>
     <module name="nav" type="survey_poly_rotorcraft">
-      <define name="POLYSURVEY_DEFAULT_DISTANCE" value="10"/>
+      <define name="POLYSURVEY_DEFAULT_DISTANCE" value="33"/>
     </module>
     <module name="video_capture">
       <define name="VIDEO_CAPTURE_CAMERA" value="front_camera"/>
