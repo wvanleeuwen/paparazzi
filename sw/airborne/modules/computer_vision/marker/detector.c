@@ -349,7 +349,7 @@ static struct image_t *detect_bottom_red_bucket(struct image_t *img) {
 
   int threshold = 50;
 
-//  img->h = 120;
+//  img->h = 120; // set image to half so blob finder only scans top part
   struct Marker marker = single_blob_finder(img, &filter, threshold);
   img->h = 240;
 
@@ -389,60 +389,6 @@ static struct image_t *detect_front_white_building(struct image_t *img) {
 }
 
 
-static struct image_t *detect_bottom_item(struct image_t *img) {
-
-  // Color Filter
-  struct image_filter_t filter;
-  filter.y_min = 50;
-  filter.y_max = 232;
-  filter.u_min = 108;
-  filter.u_max = 131;
-  filter.v_min = 152;
-  filter.v_max = 255;
-
-  int threshold = 50;
-
-  struct Marker marker = single_blob_finder(img, &filter, threshold);
-
-  if (marker.detected) {
-    marker_detected(&marker1, img, marker.pixel.x, marker.pixel.y);
-    geo_locate_marker(&marker1, img);
-  } else {
-    marker_not_detected(&marker1, img);
-  }
-
-  return NULL;
-}
-
-
-static struct image_t *detect_bottom_bucket(struct image_t *img) {
-
-  // Color Filter
-  struct image_filter_t filter;
-  filter.y_min = 0;    // red
-  filter.y_max = 122;
-  filter.u_min = 89;
-  filter.u_max = 122;
-  filter.v_min = 167;
-  filter.v_max = 198;
-
-  int threshold = 50;
-
-  img->h = 140;
-  struct Marker marker = single_blob_finder(img, &filter, threshold);
-  img->h = 240;
-
-  if (marker.detected) {
-    marker_detected(&marker1, img, marker.pixel.x, marker.pixel.y);
-    geo_locate_marker(&marker1, img);
-  } else {
-    marker_not_detected(&marker1, img);
-  }
-
-  return NULL;
-}
-
-
 static struct image_t *detect_helipad_marker(struct image_t *img) {
   struct results helipad_marker = opencv_imav_landing(
           (char *) img->buf,
@@ -473,8 +419,9 @@ static struct image_t *draw_target_marker1(struct image_t *img) {
     image_draw_line(img, &l, &r);
   }
 
+  uint8_t detected = marker1.detected;
   DOWNLINK_SEND_DETECTOR(DefaultChannel, DefaultDevice,
-                         &marker1.detected,
+                         &detected,
                          &marker1.pixel.x,
                          &marker1.pixel.y,
                          &marker1.geo_relative.x,

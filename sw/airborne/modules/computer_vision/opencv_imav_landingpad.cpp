@@ -347,7 +347,7 @@ struct results opencv_imav_landing(char *img, int width, int height, int v_squar
         sprintf(text, "FPS: %0.2f", detector2_fps);
         putText(imcopy, text, Point(10, image.rows - 10), FONT_HERSHEY_SIMPLEX, 0.5, Scalar(255), 2);
 
-        grayscale_opencv_to_yuv422(imcopy, img, width, height);
+        grayscale_opencv_to_yuv422(imcopy, img);
     }
 
     return landing;
