@@ -82,7 +82,8 @@
     </block>
 
     <block name="Take-off from red item">
-      <!-- TODO: start engines, geo init, take-off, hover a bit -->
+      <call fun="Hover(NOM_FLIGHT_ALT)"/>
+      <while cond="2 > block_time"/>
       <!-- TODO: exception conditions (check if item is grabbed) -->
     </block>
 
