@@ -47,6 +47,9 @@ struct gate_img {
   int sz_right;      ///< Half the image size of the right side
 };
 
+uint8_t bad_color[4] = {127, 255, 127, 255};
+uint8_t good_color[4] = {0, 127, 0, 127};
+
 #ifndef SGD_CAMERA
 #define SGD_CAMERA front_camera
 #endif
@@ -192,74 +195,85 @@ static void calculate_gate_position(int x_pix, int y_pix, int sz_pix, struct ima
 
 static void draw_gate(struct image_t *im, struct gate_img gate)
 {
+  
+  uint8_t* color;
+  if(gate.n_sides > 2)
+  {
+    color = good_color;
+  }
+  else
+  {
+    color = bad_color;
+  }
+  
   // draw four lines on the image:
   struct point_t from, to;
   if(!door)
   {
      if (gate.sz_left == gate.sz_right) {
         // square
-        from.x = (gate.x - gate.sz);
-        from.y = gate.y - gate.sz;
-        to.x = (gate.x - gate.sz);
-        to.y = gate.y + gate.sz;
-        image_draw_line(im, &from, &to);
-        from.x = (gate.x - gate.sz);
-        from.y = gate.y + gate.sz;
-        to.x = (gate.x + gate.sz);
-        to.y = gate.y + gate.sz;
-        image_draw_line(im, &from, &to);
-        from.x = (gate.x + gate.sz);
-        from.y = gate.y + gate.sz;
-        to.x = (gate.x + gate.sz);
-        to.y = gate.y - gate.sz;
-        image_draw_line(im, &from, &to);
-        from.x = (gate.x + gate.sz);
-        from.y = gate.y - gate.sz;
-        to.x = (gate.x - gate.sz);
-        to.y = gate.y - gate.sz;
-        image_draw_line(im, &from, &to);
+        from.y = (gate.x - gate.sz);
+        from.x = gate.y - gate.sz;
+        to.y = (gate.x - gate.sz);
+        to.x = gate.y + gate.sz;
+        image_draw_line_color(im, &from, &to, color);
+        from.y = (gate.x - gate.sz);
+        from.x = gate.y + gate.sz;
+        to.y = (gate.x + gate.sz);
+        to.x = gate.y + gate.sz;
+        image_draw_line_color(im, &from, &to, color);
+        from.y = (gate.x + gate.sz);
+        from.x = gate.y + gate.sz;
+        to.y = (gate.x + gate.sz);
+        to.x = gate.y - gate.sz;
+        image_draw_line_color(im, &from, &to, color);
+        from.y = (gate.x + gate.sz);
+        from.x = gate.y - gate.sz;
+        to.y = (gate.x - gate.sz);
+        to.x = gate.y - gate.sz;
+        image_draw_line_color(im, &from, &to, color);
       } else {
         // polygon
-        from.x = (gate.x - gate.sz);
-        from.y = gate.y - gate.sz_left;
-        to.x = (gate.x - gate.sz);
-        to.y = gate.y + gate.sz_left;
-        image_draw_line(im, &from, &to);
-        from.x = (gate.x - gate.sz);
-        from.y = gate.y + gate.sz_left;
-        to.x = (gate.x + gate.sz);
-        to.y = gate.y + gate.sz_right;
-        image_draw_line(im, &from, &to);
-        from.x = (gate.x + gate.sz);
-        from.y = gate.y + gate.sz_right;
-        to.x = (gate.x + gate.sz);
-        to.y = gate.y - gate.sz_right;
-        image_draw_line(im, &from, &to);
-        from.x = (gate.x + gate.sz);
-        from.y = gate.y - gate.sz_right;
-        to.x = (gate.x - gate.sz);
-        to.y = gate.y - gate.sz_left;
-        image_draw_line(im, &from, &to);
+        from.y = (gate.x - gate.sz);
+        from.x = gate.y - gate.sz_left;
+        to.y = (gate.x - gate.sz);
+        to.x = gate.y + gate.sz_left;
+        image_draw_line_color(im, &from, &to, color);
+        from.y = (gate.x - gate.sz);
+        from.x = gate.y + gate.sz_left;
+        to.y = (gate.x + gate.sz);
+        to.x = gate.y + gate.sz_right;
+        image_draw_line_color(im, &from, &to, color);
+        from.y = (gate.x + gate.sz);
+        from.x = gate.y + gate.sz_right;
+        to.y = (gate.x + gate.sz);
+        to.x = gate.y - gate.sz_right;
+        image_draw_line_color(im, &from, &to, color);
+        from.y = (gate.x + gate.sz);
+        from.x = gate.y - gate.sz_right;
+        to.y = (gate.x - gate.sz);
+        to.x = gate.y - gate.sz_left;
+        image_draw_line_color(im, &from, &to, color);
       }
   }
   else
   {
     // only draw three lines for door:
-    from.x = (gate.x - gate.sz);
-    from.y = gate.y - gate.sz_left;
-    to.x = (gate.x - gate.sz);
-    to.y = gate.y + gate.sz_left;
-    image_draw_line(im, &from, &to);
-    from.x = (gate.x - gate.sz);
-    from.y = gate.y + gate.sz_left;
-    to.x = (gate.x + gate.sz);
-    to.y = gate.y + gate.sz_left;
-    image_draw_line(im, &from, &to);
-    from.x = (gate.x + gate.sz);
-    from.y = gate.y + gate.sz_left;
-    to.x = (gate.x + gate.sz);
-    to.y = gate.y - gate.sz_left;
-    image_draw_line(im, &from, &to);
+    from.y = (gate.x - gate.sz);
+    from.x = gate.y - gate.sz_left;
+    to.y = (gate.x - gate.sz);
+    to.x = gate.y + gate.sz_left;
+    image_draw_line_color(im, &from, &to, color);
+    from.y = (gate.x - gate.sz);
+    from.x = gate.y + gate.sz_left;
+    to.y = (gate.x + gate.sz);
+    to.x = gate.y + gate.sz_left;
+    image_draw_line_color(im, &from, &to, color);
+    from.y = (gate.x + gate.sz);
+    from.x = gate.y + gate.sz_left;
+    to.y = (gate.x + gate.sz);
+    to.x = gate.y - gate.sz_left;
+    image_draw_line_color(im, &from, &to, color);
   }
 }
 
@@ -675,13 +689,11 @@ static struct image_t *snake_gate_detection_func(struct image_t *img)
         {
           check_gate(img, gen_gate, &gen_gate.q, &gen_gate.n_sides);
         }
-        else
-        {
+        else {
           check_door(img, gen_gate, &gen_gate.q, &gen_gate.n_sides);
         }
 
-        // TODO: perhaps for door, n_sides >= 2:
-        if(gen_gate.n_sides > 2 && gen_gate.q > best_gate.q) {
+        if(gen_gate.q > best_gate.q) {
           // store the information in the gate:
           best_gate = gen_gate;
         }
@@ -690,9 +702,6 @@ static struct image_t *snake_gate_detection_func(struct image_t *img)
     calculate_gate_position(best_gate.x, best_gate.y, best_gate.sz, img, best_gate);
     time_gate_detected = get_sys_time_float();
 
-#ifdef DRAW_GATE
-    draw_gate(img, best_gate);
-#endif
   } else {
     printf("NO GATES!!\n\n");
     gate_detected = 0;
@@ -704,6 +713,10 @@ static struct image_t *snake_gate_detection_func(struct image_t *img)
                     color_lum_min, color_lum_max,
                     color_cb_min, color_cb_max,
                     color_cr_min, color_cr_max);
+
+  if (n_gates > 0) {
+    draw_gate(img, best_gate);
+  }
 #endif
 
   return img; // snake_gate_detection did not make a new image
