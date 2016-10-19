@@ -455,7 +455,9 @@ bool fly_through_window(uint8_t color) {
           // position drone 1.5m in front of window, add small low pass filter on position command
           guidance_h_set_guided_pos_relative(0.9*(filtered_x_gate - 1.5), 0.9*filtered_y_gate);
           // align drone perpendicular to gate
-          guidance_h_set_guided_heading_relative(angle_to_gate);
+
+           // Way too agressive behavior, need a stable measurement??
+           // guidance_h_set_guided_heading_relative(angle_to_gate);
           gate_processed = 1;
         }
         break;
