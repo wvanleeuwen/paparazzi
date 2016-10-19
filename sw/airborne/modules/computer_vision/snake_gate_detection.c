@@ -184,8 +184,8 @@ static void calculate_gate_position(int x_pix, int y_pix, int sz_pix, struct ima
   static float hor_angle = 0., vert_angle = 0.;
 
   // calculate angles here, rotate camera pixels 90 deg
-  vert_angle = -(x_pix - img->h / 2) * radians_per_pix_h - stateGetNedToBodyEulers_f()->theta;
-  hor_angle = (y_pix - img->w / 2) * radians_per_pix_w;
+  vert_angle = -(y_pix - img->w / 2) * radians_per_pix_w - stateGetNedToBodyEulers_f()->theta;
+  hor_angle = (x_pix - img->h / 2) * radians_per_pix_h;
 
   // in body frame
   gate_x_dist = gate_size_m / (gate.sz * 2 * radians_per_pix_w);
@@ -775,6 +775,8 @@ void snake_gate_detection_periodic(void)
     // predict the new location:
     float dx_gate = dt * body_vx; //(cos(current_angle_gate) * gate_turn_rate * current_distance);
     float dy_gate = dt * body_vy; //(velocity_gate - sin(current_angle_gate) * gate_turn_rate * current_distance);
+
+    // If the drone keeps incrementing the setpoint, than remove dx and dy gate
     predicted_x_gate = previous_x_gate + dx_gate;
     predicted_y_gate = previous_y_gate + dy_gate;
     predicted_z_gate = previous_z_gate;
