@@ -904,7 +904,7 @@ void mt9f002_calc_resolution(struct mt9f002_t *mt)
 		unsigned int ratio;
 		unsigned int xMultiple;
 		unsigned int dividor;
-		static const uint8_t xy_odd_inc_tab[] = {1, 1, 3, 3, 7};
+		static const uint8_t xy_odd_inc_tab[] = {1, 1, 3, 3, 7, 7, 7, 7, 15};
 
 		crop.left   = mt->offset_x;
 		crop.top    = mt->offset_y;
@@ -939,6 +939,7 @@ void mt9f002_calc_resolution(struct mt9f002_t *mt)
 				rect.height);
 		/* Calculate binning / skipping for X */
 		dividor = rect.width / width;
+		printf("I wanted dividor: %i\n", dividor);
 		dividor = clamp_t(unsigned int,dividor, 1U, 4U);
 		x_odd_inc = xy_odd_inc_tab[dividor];
 		/* Calculate binning / skipping for Y */
@@ -966,7 +967,7 @@ void mt9f002_calc_resolution(struct mt9f002_t *mt)
 					MT9F002_SCALER_N;
 		}
 		printf("[MT9F002] Calculated skipping - x: %i, y: %i\n", x_odd_inc, y_odd_inc);
-		printf("[MT9F002] Calculated scaler   - %i/%i = %0.3f\n", MT9F002_SCALER_N, ratio, ceil(((float) MT9F002_SCALER_N) / ((float) ratio)));
+		printf("[MT9F002] Calculated scaler   - %i/%i = %0.3f\n", MT9F002_SCALER_N, ratio, ((float) MT9F002_SCALER_N) / ((float) ratio));
 		/* Update crop */
 		crop = rect;
 		printf("[MT9F002] Granted crop        - top: %i, left: %i, width: %i, height: %i\n", crop.top, crop.left, crop.width, crop.height);
@@ -974,9 +975,9 @@ void mt9f002_calc_resolution(struct mt9f002_t *mt)
 
 		/* Check if scaling configuration has changed */
 		if (mt->x_odd_inc != x_odd_inc ||
-		    mt->y_odd_inc != y_odd_inc || mt->output_scaler != ceil((float)MT9F002_SCALER_N / ((float) ratio))) {
+		    mt->y_odd_inc != y_odd_inc || mt->output_scaler != (float)MT9F002_SCALER_N / ((float) ratio)) {
 			/* Update values */
-				mt->output_scaler = ceil((float)MT9F002_SCALER_N / ((float) ratio));
+				mt->output_scaler = (float)MT9F002_SCALER_N / ((float) ratio);
 				mt->x_odd_inc = x_odd_inc;
 				mt->y_odd_inc = y_odd_inc;
 		}
