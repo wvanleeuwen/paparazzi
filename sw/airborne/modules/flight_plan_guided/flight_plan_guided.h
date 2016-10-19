@@ -37,6 +37,9 @@ struct range_finders_ {
 
 extern float marker_err;
 extern bool marker_lost;
+extern bool approach_white_building;
+extern uint32_t max_pixel_building;
+
 extern struct range_finders_ range_finders;
 
 // Module functions

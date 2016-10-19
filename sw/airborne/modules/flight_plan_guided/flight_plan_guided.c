@@ -52,6 +52,8 @@
 
 float marker_err = 0;
 bool marker_lost;
+bool approach_white_building = false;
+uint32_t max_pixel_building = 1000; //TODO: CALIBRATE THIS!
 
 #include "subsystems/abi.h"
 struct range_finders_ range_finders;
@@ -374,6 +376,15 @@ bool go_to_object(bool descent) {
 
       if (marker1.found_time < 1) {
         break;
+      }
+
+      if(approach_white_building)
+      {
+        if(marker1.pixel_cnt > max_pixel_building) //TODO: calibrate this
+        {
+          return false; // if returned false it will stop the approach
+
+        }
       }
 
       object_state++; // Go to next state + switch fallthrough
