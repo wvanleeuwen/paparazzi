@@ -409,7 +409,6 @@ bool go_to_object(bool descent) {
         break;
       }
 
-      return false;
   }
 
   return true;

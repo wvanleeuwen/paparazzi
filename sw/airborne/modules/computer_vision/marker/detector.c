@@ -289,12 +289,12 @@ static struct image_t *detect_bottom_red_item(struct image_t *img) {
 
   // Color Filter
   struct image_filter_t filter;
-  filter.y_min = 52;
-  filter.y_max = 205;
-  filter.u_min = 171;
-  filter.u_max = 255;
-  filter.v_min = 69;
-  filter.v_max = 175;
+  filter.y_min = 56;
+  filter.y_max = 208;
+  filter.u_min = 12;
+  filter.u_max = 175;
+  filter.v_min = 158;
+  filter.v_max = 255;
 
   int threshold = 50;
 
@@ -340,11 +340,11 @@ static struct image_t *detect_bottom_red_bucket(struct image_t *img) {
 
   // Color Filter
   struct image_filter_t filter;
-  filter.y_min = 21;
-  filter.y_max = 235;
-  filter.u_min = 94;
-  filter.u_max = 203;
-  filter.v_min = 131;
+  filter.y_min = 36;
+  filter.y_max = 149;
+  filter.u_min = 98;
+  filter.u_max = 214;
+  filter.v_min = 154;
   filter.v_max = 255;
 
   int threshold = 50;

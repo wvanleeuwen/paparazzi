@@ -72,14 +72,11 @@
 
     <block name="Find and land at red item">
       <call_once fun="front_cam_set_x_offset(512)"/>
-    </block>
-    
-    <block name="Find item">
       <call_once fun="detector_disable_all()"/>
       <call_once fun="detector.front_red_item->active = true"/>
       <call_once fun="detector.bottom_red_item->active = true"/>
       <call_once fun="object_state = 0"/>
-      <call fun="go_to_object(false)"/>
+      <call fun="go_to_object(true)"/>
     </block>
 
     <!--<block name="Search item A">-->
