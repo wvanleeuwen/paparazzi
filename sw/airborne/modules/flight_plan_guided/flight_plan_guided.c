@@ -52,12 +52,15 @@
 
 float marker_err = 0;
 bool marker_lost;
+bool approach_white_building = false;
+uint32_t max_pixel_building = 1000; //TODO: CALIBRATE THIS!
 
 #include "subsystems/abi.h"
 struct range_finders_ range_finders;
 bool do_lr_avoidance = true;
 bool do_wall_following = false;
 bool front_wall_detected = false;
+bool disable_sideways_forcefield = false;
 
 #ifndef RANGE_SENSORS_ABI_ID
 #define RANGE_SENSORS_ABI_ID ABI_BROADCAST
@@ -375,6 +378,15 @@ bool go_to_object(bool descent) {
         break;
       }
 
+      if(approach_white_building)
+      {
+        if(marker1.pixel_cnt > max_pixel_building) //TODO: calibrate this
+        {
+          return false; // if returned false it will stop the approach
+
+        }
+      }
+
       object_state++; // Go to next state + switch fallthrough
     case 3:
       // Hover over marker
@@ -591,6 +603,10 @@ static void range_sensors_cb(uint8_t sender_id,
 
   range_sensor_force_field(&vel_offset_body_x, &vel_offset_body_y, 500, 1000, 1600, 0.0f, 0.3f);
 
+  if(disable_sideways_forcefield) // disable forcefield for the side if the drone is going through a door for instance
+  {
+    vel_offset_body_y = 0.0f;
+  }
   // calculate velocity offset for guidance
   guidance_h_set_speed_offset(vel_offset_body_x, vel_offset_body_y);
 }

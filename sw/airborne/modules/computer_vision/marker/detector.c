@@ -73,6 +73,7 @@ static struct Marker single_blob_finder(struct image_t *img, struct image_filter
   fprintf(stderr, "[detector %i] largest blob size %i.\n", img->w, largest_size);
 
   struct Marker marker;
+  marker.pixel_cnt = labels[largest_id].pixel_cnt;
 
   if (largest_id >= 0 && largest_size > threshold) {
     marker.pixel.x = labels[largest_id].x_sum / labels[largest_id].pixel_cnt * 2;

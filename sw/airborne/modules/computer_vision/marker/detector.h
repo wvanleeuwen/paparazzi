@@ -54,6 +54,7 @@ struct Marker {
     struct point_t pixel;
     struct NedCoor_f geo_location;
     struct FloatVect3 geo_relative;
+    uint32_t pixel_cnt;
     float found_time;
 };
 

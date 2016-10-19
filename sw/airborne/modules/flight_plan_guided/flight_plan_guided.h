@@ -37,6 +37,9 @@ struct range_finders_ {
 
 extern float marker_err;
 extern bool marker_lost;
+extern bool approach_white_building;
+extern uint32_t max_pixel_building;
+
 extern struct range_finders_ range_finders;
 
 // Module functions
@@ -76,6 +79,7 @@ extern bool front_cam_set_x_offset(int offset);
 
 extern bool front_wall_detected;
 extern bool do_wall_following;
+extern bool disable_sideways_forcefield;
 extern bool range_sensor_wall_following_between_doors(float travel_time);
 
 #endif
