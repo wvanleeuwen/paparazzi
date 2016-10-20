@@ -25,6 +25,7 @@
 
 #include "modules/computer_vision/cv_ae_awb.h"
 #include "lib/isp/libisp.h"
+#include <stdio.h>
 
 #define MAX_HIST_Y 256-10
 

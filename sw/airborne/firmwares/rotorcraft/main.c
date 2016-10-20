@@ -309,8 +309,8 @@ STATIC_INLINE void failsafe_check(void)
   if (radio_control.status == RC_REALLY_LOST &&
       autopilot_mode != AP_MODE_KILL &&
       autopilot_mode != AP_MODE_HOME &&
-      autopilot_mode != AP_MODE_FAILSAFE // &&
-//      autopilot_mode != AP_MODE_NAV &&
+      autopilot_mode != AP_MODE_FAILSAFE &&
+      autopilot_mode != AP_MODE_NAV &&
 //      autopilot_mode != AP_MODE_MODULE &&
 //      autopilot_mode != AP_MODE_FLIP &&
 //      autopilot_mode != AP_MODE_GUIDED
