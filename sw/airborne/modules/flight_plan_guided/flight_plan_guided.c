@@ -590,7 +590,12 @@ static void range_sensor_force_field(float *vel_body_x, float *vel_body_y, int16
 static void agl_cb(uint8_t sender_id, float agl) {
   filtered_agl = filtered_agl * 0.9 + agl * 0.1;
 
-//  fprintf(stderr, "[filtered_agl] %.3f.\n", filtered_agl);
+//  int height = (filtered_agl < LEGS_HEIGHT + 0.02);
+//
+//  int marker =  (marker1.detected && marker1.pixel.y > 120 &&
+//        marker1.pixel.x > 40  && marker1.pixel.x < 200);
+//
+//  fprintf(stderr, "[gripping] %i, %i, %.3f.\n", height, marker, filtered_agl);
 }
 
 static void range_sensors_cb(uint8_t sender_id,
