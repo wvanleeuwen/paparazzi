@@ -542,15 +542,15 @@ static void range_sensor_force_field(float *vel_body_x, float *vel_body_y, int16
   {
     //do nothing
   } else if(range_finders.front < avoid_inner_border){
-    avoid_y_command -= max_vel_command;
+    avoid_x_command -= max_vel_command;
   } else if (range_finders.front < avoid_outer_border) {
     // Linear
-    avoid_y_command -= (max_vel_command - min_vel_command) *
+    avoid_x_command -= (max_vel_command - min_vel_command) *
         ((float)avoid_outer_border - (float)range_finders.front)
         / (float)difference_inner_outer;
   } else if(range_finders.front > tinder_range){
     if(do_wall_following){
-      avoid_y_command += max_vel_command;
+      avoid_x_command += max_vel_command;
     }
   } else {}
 
@@ -559,10 +559,10 @@ static void range_sensor_force_field(float *vel_body_x, float *vel_body_y, int16
   {
     //do nothing
   } else if(range_finders.back < avoid_inner_border){
-    avoid_y_command += max_vel_command;
+    avoid_x_command += max_vel_command;
   } else if (range_finders.back < avoid_outer_border) {
     // Linear
-    avoid_y_command += (max_vel_command - min_vel_command) *
+    avoid_x_command += (max_vel_command - min_vel_command) *
         ((float)avoid_outer_border - (float)range_finders.back)
         / (float)difference_inner_outer;
   } else {}
@@ -601,6 +601,7 @@ static void range_sensors_cb(uint8_t sender_id,
   float vel_offset_body_y = 0.0f;
 
   range_sensor_force_field(&vel_offset_body_x, &vel_offset_body_y, 500, 1000, 1600, 0.0f, 0.3f);
+  // printf("front %d, back %d, right %d, left %d\n, vel x %f, vel_y %f",range_finders.front,range_finders.back,range_finders.right,range_finders.left, vel_offset_body_x,vel_offset_body_y);
 
   if(disable_sideways_forcefield) // disable forcefield for the side if the drone is going through a door for instance
   {
