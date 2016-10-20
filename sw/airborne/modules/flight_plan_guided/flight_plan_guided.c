@@ -429,8 +429,7 @@ bool go_to_object(bool descent) {
       if (filtered_agl < LEGS_HEIGHT + 0.02) {
         // We are almost touching the table
 
-        if (marker1.detected &&
-            marker1.pixel.y > 120 && marker1.pixel.y < 230 &&
+        if (marker1.detected && marker1.pixel.y > 120 &&
             marker1.pixel.x > 40  && marker1.pixel.x < 200) {
           return false;
           // Go to next block
