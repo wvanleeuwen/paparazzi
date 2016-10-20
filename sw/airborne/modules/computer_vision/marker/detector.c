@@ -391,20 +391,22 @@ static struct image_t *detect_front_white_building(struct image_t *img) {
 
 
 static struct image_t *detect_helipad_marker(struct image_t *img) {
-  struct results helipad_marker = opencv_imav_landing(
-          (char *) img->buf,
-          img->w,
-          img->h,
-          2, //squares
-          210, //binary threshold
-          0, img->dt); //modify image, time taken
-
-  if (helipad_marker.marker) {
-    marker_detected(&marker1, img, helipad_marker.maxx, helipad_marker.maxy);
-    geo_locate_marker(&marker1, img);
-  } else {
+//  struct results helipad_marker = opencv_imav_landing(
+//          (char *) img->buf,
+//          img->w,
+//          img->h,
+//          2, //squares
+//          210, //binary threshold
+//          0, img->dt); //modify image, time taken
+//
+//  if (helipad_marker.marker) {
+//    marker_detected(&marker1, img, helipad_marker.maxx, helipad_marker.maxy);
+//    geo_locate_marker(&marker1, img);
+//  } else {
     marker_not_detected(&marker1, img);
-  }
+//  }
+
+
   return NULL;
 }
 
