@@ -47,7 +47,7 @@
     <!--<module name="geo_mag"/>-->
     <module name="air_data"/>
     <!--<module name="send_imu_mag_current"/>-->
-    <!--<module name="sonar_bebop">-->
+    <!--<module name="sonar_bebop">--><!--todo use for kim drone-->
       <!--<define name="SENSOR_SYNC_SEND_SONAR" value="TRUE"/>-->
     <!--</module>-->
     <module name="pose_history"/>
@@ -277,7 +277,7 @@
 
   <section name="GUIDANCE_H" prefix="GUIDANCE_H_">
     <define name="USE_SPEED_REF" value="TRUE"/>
-    <define name="REF_MAX_SPEED" value="0.2" unit="m/s"/>
+    <define name="REF_MAX_SPEED" value="0.3" unit="m/s"/>
 
     <!-- Good weather -->
     <define name="MAX_BANK" value="20" unit="deg"/>

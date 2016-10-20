@@ -803,9 +803,6 @@ static struct image_t *snake_gate_detection_func(struct image_t *img)
       float fitness, angle_1, angle_2;
       int clock_arms = 0;
 
-      // prepare the Region of Interest (ROI), which is larger than the gate:
-      float size_factor = 1.25;//2;//1.25;
-
       int16_t min_x = 0;
       min_x = (min_x < 0) ? 0 : min_x;
       int16_t max_x = img->h-1;
@@ -916,11 +913,11 @@ void snake_gate_detection_periodic(void)
     body_vy = -sinf(psi)*stateGetSpeedNed_f()->x + cosf(psi)*stateGetSpeedNed_f()->y;
 
     //State filter
-    float dt = time_gate_detected - last_processed;
+    //float dt = time_gate_detected - last_processed;
 
     // predict the new location:
-    float dx_gate = dt * body_vx; //(cos(current_angle_gate) * gate_turn_rate * current_distance);
-    float dy_gate = dt * body_vy; //(velocity_gate - sin(current_angle_gate) * gate_turn_rate * current_distance);
+    //float dx_gate = dt * body_vx; //(cos(current_angle_gate) * gate_turn_rate * current_distance);
+    //float dy_gate = dt * body_vy; //(velocity_gate - sin(current_angle_gate) * gate_turn_rate * current_distance);
 
     // If the drone keeps incrementing the setpoint, than remove dx and dy gate
     predicted_x_gate = previous_x_gate; // + dx_gate;

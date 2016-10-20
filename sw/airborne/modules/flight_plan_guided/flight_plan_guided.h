@@ -39,6 +39,7 @@ extern float marker_err;
 extern bool marker_lost;
 extern bool approach_white_building;
 extern uint32_t max_pixel_building;
+extern float nom_flight_alt; // nominal flight altitude
 
 extern struct range_finders_ range_finders;
 
@@ -49,7 +50,7 @@ void flight_plan_guided_init(void);
 extern uint8_t KillEngines(void);
 extern uint8_t StartEngines(void);
 extern uint8_t ResetAlt(void);
-extern uint8_t Hover(float altitude);
+extern uint8_t Hover(float alt);
 extern uint8_t MoveForward(float vx);
 extern uint8_t MoveRight(float vy);
 
@@ -86,5 +87,11 @@ extern bool front_wall_detected;
 extern bool do_wall_following;
 extern bool disable_sideways_forcefield;
 extern bool range_sensor_wall_following_between_doors(float travel_time);
+
+extern bool Decend_on_landing_pad(float alt);
+extern uint8_t landing_state;
+extern float initial_heading;
+
+extern bool WaitUntilMarker(void);
 
 #endif
