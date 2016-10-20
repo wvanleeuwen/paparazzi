@@ -62,17 +62,27 @@ bool do_wall_following = false;
 bool front_wall_detected = false;
 bool disable_sideways_forcefield = false;
 
+#ifdef INS_BARO_AGL_OFFSET
+#define LEGS_HEIGHT INS_BARO_AGL_OFFSET
+#else
+#define LEGS_HEIGHT 20.0
+#endif
+
 #ifndef RANGE_SENSORS_ABI_ID
 #define RANGE_SENSORS_ABI_ID ABI_BROADCAST
 #endif
 static abi_event range_sensors_ev;
 static void range_sensors_cb(uint8_t sender_id,
                              int16_t range_front, int16_t range_right, int16_t range_back, int16_t range_left);
+static abi_event agl_ev;
+static float filtered_agl = LEGS_HEIGHT;
+static void agl_cb(uint8_t sender_id, float agl);
 
 void flight_plan_guided_init(void)
 {
   marker_lost = true;
   AbiBindMsgRANGE_SENSORS(RANGE_SENSORS_ABI_ID, &range_sensors_ev, range_sensors_cb);
+  AbiBindMsgAGL(RANGE_SENSORS_ABI_ID, &agl_ev, agl_cb); // ABI to the altitude above ground level
 } // Dummy
 
 
@@ -409,16 +419,22 @@ bool go_to_object(bool descent) {
     case 4:
       // Land on top of marker
 
-      if (marker1.found_time < 4) {
-        object_state = 3;
+      if (marker1.found_time < 2) {
+        object_state = 0;
         break;
       }
 
       marker_center_descent(0.1, 0.4, 0);
 
-      if (marker1.found_time < 1) {
-        object_state = 0;
-        break;
+      if (filtered_agl < LEGS_HEIGHT + 0.02) {
+        // We are almost touching the table
+
+        if (marker1.detected &&
+            marker1.pixel.y > 120 && marker1.pixel.y < 230 &&
+            marker1.pixel.x > 40  && marker1.pixel.x < 200) {
+          return false;
+          // Go to next block
+        }
       }
 
   }
@@ -569,6 +585,10 @@ static void range_sensor_force_field(float *vel_body_x, float *vel_body_y, int16
 
   *vel_body_x = avoid_x_command;
   *vel_body_y = avoid_y_command;
+}
+
+static void agl_cb(uint8_t sender_id, float agl) {
+  filtered_agl = filtered_agl * 0.9 + agl * 0.1;
 }
 
 static void range_sensors_cb(uint8_t sender_id,
