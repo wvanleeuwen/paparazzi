@@ -62,6 +62,12 @@ bool do_wall_following = false;
 bool front_wall_detected = false;
 bool disable_sideways_forcefield = false;
 
+#ifdef INS_BARO_AGL_OFFSET
+#define LEGS_HEIGHT INS_BARO_AGL_OFFSET
+#else
+#define LEGS_HEIGHT 20.0
+#endif
+
 #ifndef RANGE_SENSORS_ABI_ID
 #define RANGE_SENSORS_ABI_ID ABI_BROADCAST
 #endif
@@ -69,7 +75,7 @@ static abi_event range_sensors_ev;
 static void range_sensors_cb(uint8_t sender_id,
                              int16_t range_front, int16_t range_right, int16_t range_back, int16_t range_left);
 static abi_event agl_ev;
-static float filtered_agl = INS_BARO_AGL_OFFSET;
+static float filtered_agl = LEGS_HEIGHT;
 static void agl_cb(uint8_t sender_id, float agl);
 
 void flight_plan_guided_init(void)
@@ -420,7 +426,7 @@ bool go_to_object(bool descent) {
 
       marker_center_descent(0.1, 0.4, 0);
 
-      if (filtered_agl < INS_BARO_AGL_OFFSET + 0.02) {
+      if (filtered_agl < LEGS_HEIGHT + 0.02) {
         // We are almost touching the table
 
         if (marker1.detected &&
