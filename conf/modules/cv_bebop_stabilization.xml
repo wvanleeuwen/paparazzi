@@ -1,0 +1,15 @@
+<!DOCTYPE module SYSTEM "module.dtd">
+
+<module name="cv_bebop_stabilization" dir="computer_vision">
+  <doc>
+    <description>Image stabilization for bebop front camera</description>
+  </doc>
+  <header>
+    <file name="cv_bebop_stabilization.h"/>
+  </header>
+  <init fun="cv_bebop_stabilization_init()"/>
+  <makefile>
+    <file name="cv_bebop_stabilization.c"/>
+  </makefile>
+</module>
+

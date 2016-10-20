@@ -106,11 +106,11 @@
 
 /* Set subsampling */
 #ifndef MT9F002_X_ODD_INC_VAL
-#define MT9F002_X_ODD_INC_VAL 1
+#define MT9F002_X_ODD_INC_VAL 7
 #endif
 
 #ifndef MT9F002_Y_ODD_INC_VAL
-#define MT9F002_Y_ODD_INC_VAL 1
+#define MT9F002_Y_ODD_INC_VAL 7
 #endif
 
 /** uart connected to GPS internally */

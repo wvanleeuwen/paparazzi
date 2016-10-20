@@ -5,6 +5,10 @@
 
 #include "boards/bebop.h"
 
+#define CAMERA_H_FISHEYE_RADIUS 1911
+#define CAMERA_H_FISHEYE_CENTER_X (MT9F002_SENSOR_WIDTH/2)
+#define CAMERA_H_FISHEYE_CENTER_Y (MT9F002_SENSOR_HEIGHT/2)
+
 #define COMPLEMENT_2(i, r) (((i) >= 0) ? (r) : (~(r) + 1) & 0x3fff)
 #define Q311(i) (COMPLEMENT_2(i, (unsigned)(((ABS(i)) * (1 << 11)) + 0.5)))
 #define AVI_CONV_MATRIX(_c00, _c01, _c02,                                    \
@@ -132,17 +136,16 @@ struct libisp_config isp_config = {
     .lumocoeff_b_13_12 = {{ 25,  27 }},
   },
 
-  /* Bayer statistics */
   .statistics_bayer = {
     .measure_req           = {{ 0 }},
-    .window_x              = {{ .x_offset = (MT9F002_OUTPUT_WIDTH - (MT9F002_OUTPUT_WIDTH / BAYERSTATS_STATX)/2),    .x_width = (MT9F002_OUTPUT_WIDTH / BAYERSTATS_STATX) }},
-    .window_y              = {{ .y_offset = (MT9F002_OUTPUT_HEIGHT - (MT9F002_OUTPUT_HEIGHT / BAYERSTATS_STATY)/2) , .y_width = (MT9F002_OUTPUT_HEIGHT / BAYERSTATS_STATY) }},
-    .circle_pos_x_center   = {{ 1088 }},
-    .circle_pos_x_squared  = {{ 1183744 }},
-    .circle_pos_y_center   = {{ 1078 }},
-    .circle_pos_y_squared  = {{ 1162084 }},
-    .circle_radius_squared = {{ 3841600 }},
-    .increments_log2       = {{ 0, 0 }},
+    .window_x              = {{ .x_offset = ((MT9F002_SENSOR_WIDTH  - ((MT9F002_SENSOR_WIDTH  / BAYERSTATS_STATX) & 0xFFFFFFFE)*BAYERSTATS_STATX) / 2) & 0xFFFFFFFE, .x_width = (MT9F002_SENSOR_WIDTH  / BAYERSTATS_STATX) & 0xFFFFFFFE }},
+    .window_y              = {{ .y_offset = ((MT9F002_SENSOR_HEIGHT - ((MT9F002_SENSOR_HEIGHT / BAYERSTATS_STATY) & 0xFFFFFFFE)*BAYERSTATS_STATY) / 2) & 0xFFFFFFFE, .y_width = (MT9F002_SENSOR_HEIGHT / BAYERSTATS_STATY) & 0xFFFFFFFE }},
+    .circle_pos_x_center   = {{ CAMERA_H_FISHEYE_CENTER_X }},
+    .circle_pos_x_squared  = {{ CAMERA_H_FISHEYE_CENTER_X * CAMERA_H_FISHEYE_CENTER_X }},
+    .circle_pos_y_center   = {{ CAMERA_H_FISHEYE_CENTER_Y }},
+    .circle_pos_y_squared  = {{ CAMERA_H_FISHEYE_CENTER_Y * CAMERA_H_FISHEYE_CENTER_Y }},
+    .circle_radius_squared = {{ CAMERA_H_FISHEYE_RADIUS * CAMERA_H_FISHEYE_RADIUS}},
+    .increments_log2       = {{ MT9F002_X_ODD_INC_VAL, MT9F002_Y_ODD_INC_VAL}},
     .sat_threshold         = {{ 980 }}, //1022 - pedestal
     .cfa                   = {{ ISP_CFA }},
     .max_nb_windows        = {{ .x_window_count=BAYERSTATS_STATX, .y_window_count=BAYERSTATS_STATY }},
@@ -455,13 +458,13 @@ struct libisp_config isp_config = {
   .statistics_yuv = {
     .measure_req           = {{1,1}},
     .measure_status        = {{0,0}},
-    .window_pos_x          = {{ .window_x_start = 0, .window_x_end = MT9F002_OUTPUT_WIDTH }},
-    .window_pos_y          = {{ .window_y_start = 0, .window_y_end = MT9F002_OUTPUT_HEIGHT }},
-    .circle_pos_x_center   = {{ 1088 }},
-    .circle_pos_x_squared  = {{ 1183744 }},
-    .circle_pos_y_center   = {{ 1078 }},
-    .circle_pos_y_squared  = {{ 1162084 }},
-    .circle_radius_squared = {{ 3841600 }},
+    .window_pos_x          = {{ .window_x_start = MT9F002_INITIAL_OFFSET_X, .window_x_end = MT9F002_INITIAL_OFFSET_X + MT9F002_SENSOR_WIDTH }},
+    .window_pos_y          = {{ .window_y_start = MT9F002_INITIAL_OFFSET_Y, .window_y_end = MT9F002_INITIAL_OFFSET_Y + MT9F002_SENSOR_HEIGHT }},
+    .circle_pos_x_center   = {{ CAMERA_H_FISHEYE_CENTER_X }},
+    .circle_pos_x_squared  = {{ CAMERA_H_FISHEYE_CENTER_X * CAMERA_H_FISHEYE_CENTER_X }},
+    .circle_pos_y_center   = {{ CAMERA_H_FISHEYE_CENTER_Y }},
+    .circle_pos_y_squared  = {{ CAMERA_H_FISHEYE_CENTER_Y * CAMERA_H_FISHEYE_CENTER_Y }},
+    .circle_radius_squared = {{ CAMERA_H_FISHEYE_RADIUS * CAMERA_H_FISHEYE_RADIUS }},
     .increments_log2       = {{ 0, 0 }},
     .awb_threshold         = { ._register = 0x00000021 },
   },
@@ -508,6 +511,7 @@ struct libisp_config isp_config = {
   /* Bypass 3D for now */
 
   /* Bypass Drop for now */
+
 
   /* Bypass for YUV chain */
   .chain_yuv_inter = {{

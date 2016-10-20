@@ -167,7 +167,7 @@ struct image_t *viewvideo_function(struct image_t *img)
 
 
   if (viewvideo.is_streaming) {
-
+/*
 
 	  /////////////////////////////////////////////////////
 
@@ -185,12 +185,12 @@ struct image_t *viewvideo_function(struct image_t *img)
 	  };
 
 	  glUseProgram(opengl.programObject);
-	  glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, 320 / 2, 240, 0, GL_RGBA, GL_UNSIGNED_BYTE, img->buf);
+	  glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, mt9f002.output_width, mt9f002.output_height, 0, GL_RGBA, GL_UNSIGNED_BYTE, img->buf);
 
 	  GLint texel_width = glGetUniformLocation(opengl.programObject, "texel_width");
 	  GLint texel_height = glGetUniformLocation(opengl.programObject, "texel_height");
-	  glUniform1f(texel_width, 1.0 / 160);
-	  glUniform1f(texel_height, 1.0 / 240);
+	  glUniform1f(texel_width, 1.0 / mt9f002.output_width);
+	  glUniform1f(texel_height, 1.0 / mt9f002.output_height);
 
 	  // Set the vertices
 	  glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 0, vVertices);
@@ -203,10 +203,10 @@ struct image_t *viewvideo_function(struct image_t *img)
 
 	  // Read the image back
 	  glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
-	  glReadPixels(0, 0, 320 / 2, 240, GL_RGBA, GL_UNSIGNED_BYTE, img->buf);
+	  glReadPixels(0, 0, mt9f002.output_width, mt9f002.output_height, GL_RGBA, GL_UNSIGNED_BYTE, img->buf);
 
 	  /////////////////////////////////////////////////////
-
+*/
 	//jpeg_encode_image(img, &img_jpeg, VIEWVIDEO_QUALITY_FACTOR, VIEWVIDEO_USE_NETCAT);
 
     /*if (viewvideo.use_rtp) {
@@ -292,7 +292,11 @@ void viewvideo_init(void)
 
   viewvideo.is_streaming = true;
   videoEncoder.inputType = H264ENC_YUV422_INTERLEAVED_UYVY;
-  videoEncoder.bitRate = 1.5*1000*1000; // 1000 kbps
+#if VIEWVIDEO_WRITE_VIDEO
+  videoEncoder.bitRate   = 3*8*1000*1000; // 3 MBps
+#else
+  videoEncoder.bitRate   = 10*1000*1000; // 10 Mbps
+#endif
   videoEncoder.frameRate = VIEWVIDEO_FPS;
   videoEncoder.intraRate = VIEWVIDEO_FPS;
   P7_H264_open(&videoEncoder, VIEWVIDEO_CAMERA.thread.dev);
