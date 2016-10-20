@@ -65,7 +65,7 @@ bool disable_sideways_forcefield = false;
 #ifdef INS_BARO_AGL_OFFSET
 #define LEGS_HEIGHT INS_BARO_AGL_OFFSET
 #else
-#define LEGS_HEIGHT 20.0
+#define LEGS_HEIGHT 0.2
 #endif
 
 #ifndef RANGE_SENSORS_ABI_ID
@@ -589,6 +589,8 @@ static void range_sensor_force_field(float *vel_body_x, float *vel_body_y, int16
 
 static void agl_cb(uint8_t sender_id, float agl) {
   filtered_agl = filtered_agl * 0.9 + agl * 0.1;
+
+//  fprintf(stderr, "[filtered_agl] %.3f.\n", filtered_agl);
 }
 
 static void range_sensors_cb(uint8_t sender_id,
