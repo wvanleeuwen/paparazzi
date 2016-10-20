@@ -146,6 +146,12 @@
       <while cond="1"/>
     </block>
 
+    <block name = "Land here">
+      <call fun="guidance_h_set_guided_pos_relative(0.,0.)"/>
+      <call fun="guidance_v_set_guided_th(0.4)"/>
+      <!--deroute block="Hover"/-->
+    </block>
+
     <block name="TESTING - Open gripper">
       <call_once fun="open_gripper()"/>
       <while cond="1"/>
