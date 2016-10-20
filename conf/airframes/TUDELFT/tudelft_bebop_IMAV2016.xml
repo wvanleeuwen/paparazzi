@@ -47,7 +47,7 @@
     <!--<module name="geo_mag"/>-->
     <module name="air_data"/>
     <!--<module name="send_imu_mag_current"/>-->
-    <!--<module name="sonar_bebop">--><!--todo use for kim drone-->
+    <!--module name="sonar_bebop"/--><!--todo use for kim drone-->
       <!--<define name="SENSOR_SYNC_SEND_SONAR" value="TRUE"/>-->
     <!--</module>-->
     <module name="pose_history"/>
@@ -83,7 +83,12 @@
       <define name="VIDEO_CAPTURE_CAMERA" value="front_camera"/>
       <define name="VIDEO_CAPTURE_PATH" value="/data/ftp/internal_000/images"/>
     </module>
-
+    
+    <module name="digital_cam_video">
+      <define name="DC_AUTOSHOOT_PERIOD" value="0.25"/>
+      <define name="DC_SHOT_SYNC_SEND" value="false"/>
+    </module>
+    
     <module name="video_rtp_stream">
       <define name="VIEWVIDEO_CAMERA" value="bottom_camera"/>
       <define name="VIEWVIDEO_CAMERA2" value="front_camera"/>

@@ -14,4 +14,8 @@ BEBOP with bumpers, passing through the window
     <define name="G1_R" value="0.002595"/>
     <define name="G2_R" value="0.136735"/>
   </section>
+  
+  <modules main_freq="512">
+    <module name="sonar_bebop"/>
+  </modules>
 </airframe>

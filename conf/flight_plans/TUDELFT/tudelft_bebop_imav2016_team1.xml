@@ -14,6 +14,7 @@
     #include "modules/flight_plan_guided/flight_plan_guided.h"
     #include "subsystems/datalink/datalink.h"
     #include "subsystems/radio_control.h"
+    #include "modules/digital_cam/dc.h"
   </header>
 
   <waypoints>
@@ -22,9 +23,9 @@
   </waypoints>
 
   <exceptions>
-    <exception cond="datalink_time > 5" deroute="Land here"/>
+    <!--exception cond="datalink_time > 5" deroute="Land here"/-->
     <exception cond="radio_control.status == RC_REALLY_LOST" deroute="Land here"/>
-    <exception cond="stateGetPositionEnu_f()->z > 8." deroute="Land here"/>
+    <!--exception cond="stateGetPositionEnu_f()->z > 8." deroute="Land here"/-->
   </exceptions>
 
   <blocks>
@@ -46,7 +47,7 @@
     <block name="Fly into window and out of window (position)">
       <call_once fun="detector_disable_all()"/>
       <call_once fun="front_cam_set_x_offset(896)"/>
-      <call_once fun="win_state = 0"/>
+      <set var="win_state" value="0"/>
       <call fun="fly_through_window(SNAKE_WINDOW)"/>
       <call_once fun="detector_disable_all()"/>
       <call_once fun="guidance_h_set_guided_pos_relative(filtered_x_gate - 1.5, filtered_y_gate)"/>
@@ -58,7 +59,7 @@
     <block name="Fly into and out of window (velocity)">
       <call_once fun="detector_disable_all()"/>
       <call_once fun="front_cam_set_x_offset(896)"/>
-      <call_once fun="win_state = 0"/>
+      <set var="win_state" value="0"/>
       <call fun="fly_through_window(SNAKE_WINDOW)"/>
       <call_once fun="detector_disable_all()"/>
       <call_once fun="guidance_h_set_guided_body_vel(-0.3, 0)"/>
@@ -69,10 +70,12 @@
     
     <block name="Survey Room">
       <call_once fun="front_cam_set_x_offset(896)"/>
+      <set var="dc_autoshoot" value="DC_AUTOSHOOT_PERIODIC"/>
       <call_once fun="guidance_h_set_guided_pos_relative(6., 0.)"/>
       <while cond="25 > block_time"/>
       <call_once fun="guidance_h_set_guided_heading_rate(0.25)"/>
       <while cond="14 > block_time"/>
+      <set var="dc_autoshoot" value="DC_AUTOSHOOT_STOP"/>
       <deroute block="Hover"/>
     </block>
 
@@ -106,7 +109,7 @@
       <call_once fun="guidance_v_set_guided_z(nom_flight_alt)"/>
       <call_once fun="detector_disable_all()"/>
       <call_once fun="front_cam_set_x_offset(896)"/>
-      <call_once fun="win_state = 0"/>
+      <set var="win_state" value="0"/>
       <call fun="fly_through_window(SNAKE_WINDOW)"/>
       <call_once fun="detector_disable_all()"/>
       <call_once fun="guidance_h_set_guided_pos_relative(filtered_x_gate - 1.5, filtered_y_gate)"/>
@@ -122,7 +125,7 @@
     
     <block name="Find Landing pad">
       <call_once fun="detector.bottom_red_item->active = true"/>
-      <call_once fun="landing_state = 0"/>
+      <set var="landing_state" value="0"/>
       <call_once fun="Decend_on_landing_pad(1.5)"/>
     </block>
     
@@ -134,7 +137,7 @@
       <call_once fun="detector_disable_all()"/>
       <call_once fun="front_cam_set_x_offset(896)"/>
       <call_once fun="detector.front_white_building->active = true"/>
-      <call_once fun="object_state = 0"/>
+      <set var="object_state" value="0"/>
       <set var="max_pixel_building" value="1000"/> <!-- max amount of pixels that the building need to exceed (MAKE A SETTING FROM THIS)-->
       <set var="approach_white_building" value="true"/>  
       <call fun="go_to_object(false)"/>  <!-- go to the building until a pixel count is reached (CALIBRATE THIS!!)-->
@@ -145,7 +148,7 @@
     <block name="Fly through entrance">
       <call_once fun="detector_disable_all()"/>
       <call_once fun="front_cam_set_x_offset(896)"/>
-      <call_once fun="win_state = 0"/>
+      <set var="win_state" value="0"/>
       <set var="disable_sideways_forcefield" value="true"/>
       <call fun="fly_through_window(SNAKE_WINDOW)"/>
       <set var="disable_sideways_forcefield" value="false"/>
@@ -157,7 +160,7 @@
       <call_once fun="detector.front_red_item->active = true"/>
       <call_once fun="detector.bottom_red_item->active = true"/>
       <call_once fun="open_gripper()"/>
-      <call_once fun="object_state = 0"/>
+      <set var="object_state" value="0"/>
       <call fun="go_to_object(true)"/>
     </block>
 
@@ -182,7 +185,7 @@
     <!-- TODO: determine in what heading the door is and turn to it-->
       <call_once fun="detector_disable_all()"/>
       <call_once fun="front_cam_set_x_offset(896)"/>
-      <call_once fun="win_state = 0"/>
+      <set var="win_state" value="0"/>
       <call_once fun="guidance_h_set_guided_heading_rate(0.5)"/>
       <call fun="fly_through_window(SNAKE_WINDOW)"/>
     </block>
