@@ -306,7 +306,7 @@
       <exception cond="!nav_is_in_flight()" deroute="landed"/>
       <call fun="NavStartDetectGround()"/>
       <!--stay climb="nav_descend_vspeed" vmode="climb" wp="ETD"/-->
-      <attitude pitch="0" roll="0" throttle="0.2" until="FALSE" vmode="throttle"/>
+      <attitude pitch="0" roll="0" throttle="0.3" until="FALSE" vmode="throttle"/>
       <deroute block="landed"/>
     </block>
 

@@ -5,6 +5,7 @@
   <firmware name="rotorcraft">
     <target name="ap" board="bebop2"/>
     <define name="USE_GPS_UBX_RTCM" value="TRUE"/>
+    <!--define name="USE_INS_NAV_INIT" value="TRUE"/-->
 
     <target name="nps" board="pc">
       <module name="fdm" type="jsbsim"/>
@@ -89,7 +90,7 @@
       <define name="VIEWVIDEO_QUALITY_FACTOR" value="60"/>
       <define name="VIEWVIDEO_FPS" value="5"/>
 
-      <configure name="VIEWVIDEO_HOST" value="192.168.42.68" />
+      <configure name="VIEWVIDEO_HOST" value="192.168.42.27" />
       <configure name="VIEWVIDEO_BROADCAST" value="FALSE" />
     </module>
 
@@ -155,9 +156,9 @@
   <section name="AHRS" prefix="AHRS_">
     <!-- values used if no GPS fix, on 3D fix is update by geo_mag module -->
     <!-- Delft -->
-    <define name="H_X" value="0.3892503"/>
-    <define name="H_Y" value="0.0017972"/>
-    <define name="H_Z" value="0.9211303"/>
+    <define name="H_X" value="0.51118171"/>
+    <define name="H_Y" value="-0.06081404"/>
+    <define name="H_Z" value="0.85731844"/>
   </section>
 
   <section name="INS" prefix="INS_">
