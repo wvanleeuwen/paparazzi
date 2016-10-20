@@ -35,10 +35,20 @@
     </block>
 
     <block name="Take-off">
-      <call fun="StartEngines()"/>
       <call_once fun="ResetAlt()"/>
-      <call fun="TakeOff(0.2)"/>
+      <call fun="StartEngines()"/>
+      <call fun="TakeOff(1.0)"/>
       <call fun="WaitUntilAltitude(NOM_FLIGHT_ALT - 0.2)"/>
+      <deroute block="Hover after take-off"/>
+    </block>
+
+    <block name="TakeOffEnthusiastically">
+      <call_once fun="ResetAlt()"/>
+      <call_once fun="ResetSpecialTimer()"/>
+      <call fun="StartEngines()"/>
+      <call fun="LiftOff(0.85)"/>
+      <call fun="WaitUntilTimerOrAltitude(0.9f,6.0f)"/><!-- sec, meter(failsafe) -->
+      <deroute block="Hover after take-off"/>
     </block>
 
     <block name="Hover after take-off">
@@ -299,8 +309,25 @@
        <call fun="RotateToHeading(stateGetNedToBodyEulers_f()->psi+DegOfRad(90))"/>
       <!--deroute block="Hover"/-->
     </block>
+
+    <block name="TESTING - door fly through">
+      <call_once fun="detector_disable_all()"/>
+      <call_once fun="front_cam_set_x_offset(896)"/>
+      <call_once fun="win_state = 0"/>
+      <call fun="fly_through_window(SNAKE_DOOR)"/>
+      <while cond="1"/>
+    </block>
     
+    <block name="TESTING - window fly through">
+      <call_once fun="detector_disable_all()"/>
+      <call_once fun="front_cam_set_x_offset(896)"/>
+      <call_once fun="win_state = 0"/>
+      <call fun="fly_through_window(SNAKE_WINDOW)"/>
+      <while cond="1"/>
+    </block>
+
   </blocks>
+
 
 
 

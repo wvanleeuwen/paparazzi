@@ -63,11 +63,14 @@ uint8_t good_color[4] = {0, 127, 0, 127};
 #define INITIAL_Z 0
 
 //initial position and speed safety margins
-#define X_POS_MARGIN 0.15 //m
-#define Y_POS_MARGIN 0.5 //m
-#define Z_POS_MARGIN 0.15 //m
-#define X_SPEED_MARGIN 0.15 //m/s
-#define Y_SPEED_MARGIN 0.15 //m/s
+//#define X_POS_MARGIN 0.15 //m
+//#define Y_POS_MARGIN 0.5 //m
+//#define Z_POS_MARGIN 0.15 //m
+//#define X_SPEED_MARGIN 0.15 //m/s
+//#define Y_SPEED_MARGIN 0.15 //m/s
+
+float gate_speed_margin = 0.15;
+float gate_pos_margin = 0.15;
 
 struct video_listener *listener = NULL;
 
@@ -154,7 +157,11 @@ int counter_gate_detected = 0;
 int init_pos_filter = 0;
 int ready_pass_through;
 
-bool snake_gate_filter = false;
+// these two things can be set to false to return to the last successfully tried pass-through:
+bool use_previous_gate = false;
+bool search_whole_image = false;
+float decide_time_to_go_through_window = 1.5;
+
 // timers
 float last_processed, time_gate_detected, time_tracked;
 // color 0 = red, 1 = blue
@@ -701,12 +708,8 @@ static struct image_t *snake_gate_detection_func(struct image_t *img)
       }
     }
 
-    if(!snake_gate_filter)
-    {
-    previous_gate.x=0;
-    }
     // if there is a previous gate, also make a fit around that:
-    if(previous_gate.x > 0)
+    if(use_previous_gate && previous_gate.x > 0)
     {
       // temporary variables:
       float fitness, angle_1, angle_2;
@@ -755,7 +758,8 @@ static struct image_t *snake_gate_detection_func(struct image_t *img)
     int we_have_a_gate = 0;
 
     // if there is a previous gate, also make a fit around that:
-    if(previous_gate.x > 0)
+
+    if(use_previous_gate && previous_gate.x > 0)
     {
       // temporary variables:
       float fitness, angle_1, angle_2;
@@ -776,6 +780,45 @@ static struct image_t *snake_gate_detection_func(struct image_t *img)
 
       // use best gate a seed for elite population
       previous_gen_gate = previous_gate;
+      // detect the gate:
+      // TODO: instead of define, use a parameter to decide on SHAPE:
+      gate_detection(img, &previous_gen_gate.x, &previous_gen_gate.y, &previous_gen_gate.sz, &fitness, min_x, min_y, max_x, max_y, clock_arms, &angle_1, &angle_2, &angle_to_gate, &previous_gen_gate.sz_left, &previous_gen_gate.sz_right);
+      if(!door)
+      {
+        check_gate(img, previous_gen_gate, &previous_gen_gate.q, &previous_gen_gate.n_sides);
+      }
+      else {
+        check_door(img, previous_gen_gate, &previous_gen_gate.q, &previous_gen_gate.n_sides);
+      }
+
+      if(previous_gen_gate.q > min_gate_quality) {
+        we_have_a_gate = 1;
+        // store the information in the gate:
+        best_gate = previous_gen_gate;
+      }
+    }
+    else if(search_whole_image) {
+      // if there is no snake gate and no previous gate, search a gate in the whole image
+      // temporary variables:
+      float fitness, angle_1, angle_2;
+      int clock_arms = 0;
+
+      // prepare the Region of Interest (ROI), which is larger than the gate:
+      float size_factor = 1.25;//2;//1.25;
+
+      int16_t min_x = 0;
+      min_x = (min_x < 0) ? 0 : min_x;
+      int16_t max_x = img->h-1;
+      max_x = (max_x < img->h) ? max_x : img->h;
+      int16_t min_y = 0;
+      min_y = (min_y < 0) ? 0 : min_y;
+      int16_t max_y = img->w-1;
+      max_y = (max_y < img->w) ? max_y : img->w;
+
+      // use best gate a seed for elite population
+      previous_gen_gate.x = img->h/2;
+      previous_gen_gate.y = img->w/2;
+      previous_gen_gate.sz = 100;
       // detect the gate:
       // TODO: instead of define, use a parameter to decide on SHAPE:
       gate_detection(img, &previous_gen_gate.x, &previous_gen_gate.y, &previous_gen_gate.sz, &fitness, min_x, min_y, max_x, max_y, clock_arms, &angle_1, &angle_2, &angle_to_gate, &previous_gen_gate.sz_left, &previous_gen_gate.sz_right);
@@ -880,8 +923,8 @@ void snake_gate_detection_periodic(void)
     float dy_gate = dt * body_vy; //(velocity_gate - sin(current_angle_gate) * gate_turn_rate * current_distance);
 
     // If the drone keeps incrementing the setpoint, than remove dx and dy gate
-    predicted_x_gate = previous_x_gate + dx_gate;
-    predicted_y_gate = previous_y_gate + dy_gate;
+    predicted_x_gate = previous_x_gate; // + dx_gate;
+    predicted_y_gate = previous_y_gate; // + dy_gate;
     predicted_z_gate = previous_z_gate;
 
     if (gate_detected == 1) {
@@ -918,9 +961,12 @@ void snake_gate_detection_periodic(void)
 
     //SAFETY ready_pass_trough
     printf("gate at %f %d %f %f %f %f\n", time_gate_detected - time_tracked, gate_detected, filtered_x_gate, filtered_y_gate, body_vx, body_vy);
-    if (gate_detected && fabs(filtered_x_gate - INITIAL_X) < X_POS_MARGIN && fabs(filtered_y_gate - INITIAL_Y) < Y_POS_MARGIN
-        && fabs(body_vx) < X_SPEED_MARGIN && fabs(body_vy) < Y_SPEED_MARGIN) {
-      if (time_gate_detected - time_tracked > 1.5) {
+    //    if (gate_detected && fabs(filtered_x_gate - INITIAL_X) < X_POS_MARGIN && fabs(filtered_y_gate - INITIAL_Y) < Y_POS_MARGIN
+    //        && fabs(body_vx) < X_SPEED_MARGIN && fabs(body_vy) < Y_SPEED_MARGIN) {
+    if (gate_detected && fabs(filtered_x_gate - INITIAL_X) < gate_pos_margin && fabs(filtered_y_gate - INITIAL_Y) < gate_pos_margin
+        && fabs(body_vx) < gate_speed_margin && fabs(body_vy) < gate_speed_margin) {
+      // if the drone does not want to pass, reduce the time here:
+      if (time_gate_detected - time_tracked > decide_time_to_go_through_window) { //time when deciding to go to window
         ready_pass_through = 1;
       }
     } else {

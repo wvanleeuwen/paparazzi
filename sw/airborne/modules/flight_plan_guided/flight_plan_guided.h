@@ -56,7 +56,12 @@ extern uint8_t MoveRight(float vy);
 extern bool RotateToHeading(float heading);
 
 extern bool TakeOff(float climb_rate);
+extern bool LiftOff(float throttle);
+
 extern bool WaitUntilAltitude(float altitude);
+extern bool WaitUntilSpeedOrAltitude(float speed, float fail_altitude);
+extern bool ResetSpecialTimer(void);
+extern bool WaitUntilTimerOrAltitude(float sec, float fail_altitude);
 extern bool Land(float end_altitude);
 
 extern bool close_gripper(void);
