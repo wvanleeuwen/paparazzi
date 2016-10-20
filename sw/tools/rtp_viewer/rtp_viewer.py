@@ -13,6 +13,7 @@ from pprzlink.message import PprzMessage
 
 class RtpViewer:
     running = False
+    scale = 1
     rotate = 0
     frame = None
     mouse = dict()
@@ -59,6 +60,10 @@ class RtpViewer:
         if self.mouse.get('start'):
             # Draw a rectangle indicating the region of interest
             cv2.rectangle(self.frame, self.mouse['start'], self.mouse['now'], (0, 255, 0), 2)
+
+        if self.scale != 1:
+            h, w = self.frame.shape[:2]
+            self.frame = cv2.resize(self.frame, (int(self.scale * w), int(self.scale * h)))
 
         # Show the image in a window
         cv2.imshow('rtp', self.frame)
@@ -111,12 +116,19 @@ class RtpViewer:
 
 if __name__ == '__main__':
     import sys
+    import os
 
-    viewer = RtpViewer(sys.argv[1])
+    filename = os.path.join(os.path.dirname(os.path.abspath(__file__)), sys.argv[1])
+    scale = float(sys.argv[2])
+    rotate = int(sys.argv[3])
+
+    viewer = RtpViewer(filename)
+    viewer.scale = scale
+    viewer.rotate = 3 if rotate else 0
 
     if not viewer.cap.isOpened():
         viewer.cleanup()
-        sys.exit("Can't open video stream")
+        raise IOError("Can't open video stream")
 
     viewer.run()
     viewer.cleanup()
