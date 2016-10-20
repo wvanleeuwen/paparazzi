@@ -27,7 +27,7 @@
 #include "lib/isp/libisp.h"
 #include <stdio.h>
 
-#define MAX_HIST_Y 256-10
+#define MAX_HIST_Y 256-60
 
 #include "boards/bebop/mt9f002.h"
 extern struct mt9f002_t mt9f002;
