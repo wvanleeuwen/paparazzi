@@ -1,5 +1,11 @@
 <!DOCTYPE airframe SYSTEM "../../airframe.dtd">
 
+<!--
+
+BEBOP with bumpers, passing through the window
+
+-->
+
 <airframe>
   <section name="STABILIZATION_ATTITUDE_INDI" prefix="STABILIZATION_INDI_">
     <!-- bebop (no legs, with bumpers) -->

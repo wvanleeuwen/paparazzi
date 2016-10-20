@@ -1,5 +1,11 @@
 <!DOCTYPE airframe SYSTEM "../../airframe.dtd">
 
+<!--
+
+FROG: Pick up and drop drone
+
+-->
+
 <airframe>
   <section name="STABILIZATION_ATTITUDE_INDI" prefix="STABILIZATION_INDI_">
     <!-- bebop TUBB05 (plastic legs and gripper) -->

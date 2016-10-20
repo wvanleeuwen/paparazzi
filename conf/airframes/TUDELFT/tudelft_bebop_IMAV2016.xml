@@ -6,10 +6,6 @@
   <firmware name="rotorcraft">
     <target name="ap" board="bebop"/>
     
-    <!--include href="conf/airframes/TUDELFT/indi_config/frog_legs.xml"/-->
-    <include href="conf/airframes/TUDELFT/indi_config/bebop_clean.xml"/>
-    <!--include href="conf/airframes/TUDELFT/indi_config/bebop_bumpers.xml"/-->
-
     <define name="MT9F002_OUTPUT_HEIGHT" value="640"/>  <!-- full height 4608 -->
     <define name="MT9F002_OUTPUT_WIDTH" value="640"/>  <!-- full width 2592 (3288) -->
     <define name="MT9F002_INITIAL_OFFSET_Y" value="384"/>
@@ -142,6 +138,9 @@
     <servo name="BOTTOM_LEFT" no="3" min="3000" neutral="3000" max="12000"/>
   </servos>
 
+  <!-- all differences for the imav bebops are in the includes -->
+  <include href="conf/airframes/TUDELFT/indi_config/imav_$AC_ID.xml"/>
+
   <section name="MIXING" prefix="MOTOR_MIXING_">
     <!-- Time cross layout (X), with order NW (CW), NE (CCW), SE (CW), SW (CCW) -->
     <define name="TYPE" value="QUAD_X"/>
@@ -185,6 +184,7 @@
     <define name="SONAR_UPDATE_ON_AGL" value="TRUE"/>
     <define name="VFF_R_SONAR_OF_M" value="0."/>
     <define name="VFF_R_SONAR_0" value="0.1"/>
+    <!-- =========== AIRFRAME SPECIFIC GAINS MOVED TO INCLUDE =========== -->
     <!--define name="BARO_AGL_OFFSET" value="0.23"/--><!--This should be set the the length of the legs, positive-->
   </section>
 
@@ -217,6 +217,8 @@
   </section>
 
   <section name="STABILIZATION_ATTITUDE_INDI" prefix="STABILIZATION_INDI_">
+
+    <!-- =========== AIRFRAME SPECIFIC GAINS MOVED TO INCLUDE =========== -->
     <!-- bebop TUBB04 (steel legs) -->
     <!--<define name="G1_P" value="0.01304"/>-->
     <!--<define name="G1_Q" value="0.00976"/>-->

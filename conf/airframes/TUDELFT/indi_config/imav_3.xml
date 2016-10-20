@@ -1,5 +1,11 @@
 <!DOCTYPE airframe SYSTEM "../../airframe.dtd">
 
+<!--
+
+extra broken stupid bebop
+
+-->
+
 <airframe>
   <section name="STABILIZATION_ATTITUDE_INDI" prefix="STABILIZATION_INDI_">
     <!-- bebop (no legs, no bumpers) -->
