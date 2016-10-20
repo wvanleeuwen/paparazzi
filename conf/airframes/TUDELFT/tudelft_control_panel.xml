@@ -56,6 +56,9 @@
       <arg flag="4252" />
     </program>
     <program name="SVInfo" command="sw/ground_segment/python/svinfo/svinfo.py"/>
+    <program name="VLC" command="../../../usr/bin/vlc">
+      <arg flag="~/paparazzi/video.sdp &"/>
+    </program>
   </section>
 
   <section name="sessions">
