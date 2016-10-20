@@ -68,6 +68,9 @@ bool disable_sideways_forcefield = false;
 #define LEGS_HEIGHT 0.2
 #endif
 
+#define NOM_FLIGHT_ALT 1.7  // nominal flight altitude
+float nom_flight_alt; // nominal flight altitude
+
 #ifndef RANGE_SENSORS_ABI_ID
 #define RANGE_SENSORS_ABI_ID ABI_BROADCAST
 #endif
@@ -80,10 +83,11 @@ static void agl_cb(uint8_t sender_id, float agl);
 
 void flight_plan_guided_init(void)
 {
+  nom_flight_alt = NOM_FLIGHT_ALT;
   marker_lost = true;
   AbiBindMsgRANGE_SENSORS(RANGE_SENSORS_ABI_ID, &range_sensors_ev, range_sensors_cb);
   AbiBindMsgAGL(RANGE_SENSORS_ABI_ID, &agl_ev, agl_cb); // ABI to the altitude above ground level
-} // Dummy
+}
 
 
 /* Kill throttle */
@@ -132,6 +136,14 @@ bool WaitUntilAltitude(float altitude) {
     return false;
 }
 
+bool WaitUntilMarker(void) {
+    if (autopilot_mode != AP_MODE_GUIDED) { return true; }
+
+    if (marker1.detected) { return false; }
+
+    return true;
+}
+
 bool WaitUntilSpeedOrAltitude(float speed, float fail_altitude) {
     if (autopilot_mode != AP_MODE_GUIDED) { return true; }
 
@@ -169,11 +181,12 @@ bool RotateToHeading(float heading) {
   return false;
 }
 
-uint8_t Hover(float altitude) {
+uint8_t Hover(float alt) {
     if (autopilot_mode != AP_MODE_GUIDED) { return true; }
     // Horizontal velocities are set to zero
+    guidance_h_set_guided_heading(stateGetNedToBodyEulers_f()->psi);
     guidance_h_set_guided_body_vel(0, 0);
-    guidance_v_set_guided_z(-altitude);
+    guidance_v_set_guided_z(-alt);
 
     return false;
 }
@@ -394,7 +407,7 @@ bool go_to_object(bool descent) {
     case 0:
       // Initialize
 
-      guidance_v_set_guided_z(-NOM_FLIGHT_ALT);
+      guidance_v_set_guided_z(-nom_flight_alt);
       object_retries--;
 
       object_state++; // Go to next state + switch fallthrough
@@ -493,9 +506,9 @@ bool fly_through_window(uint8_t color) {
     switch (win_state){
       case 0:
         //guidance_h_set_guided_heading(ANGLE_BUILDING_ENTRY);
-        //guidance_h_set_guided_heading();
+        guidance_h_set_guided_heading(stateGetNedToBodyEulers_f()->psi);
         guidance_h_set_guided_pos(stateGetPositionNed_f()->x, stateGetPositionNed_f()->y);
-        guidance_v_set_guided_z(-1.7);
+        guidance_v_set_guided_z(-nom_flight_alt);
         mytime = get_sys_time_float();
         init_pos_filter = 1;
         set_snake_gate_color_filter(color);
@@ -674,4 +687,52 @@ static void range_sensors_cb(uint8_t sender_id,
   }
   // calculate velocity offset for guidance
   guidance_h_set_speed_offset(vel_offset_body_x, vel_offset_body_y);
+}
+
+uint8_t landing_state = 0;
+float initial_heading = 0;
+bool Decend_on_landing_pad(float alt) {
+  // If we are not in guided mode
+  if (autopilot_mode != AP_MODE_GUIDED) {
+    // Reset the approach strategy and loop
+    landing_state = 0;
+    return true;
+  }
+
+  if (stateGetPositionEnu_f()->z <= alt){
+    guidance_v_set_guided_z(alt);
+    if (marker1.detected){
+      guidance_h_set_guided_pos(marker1.geo_location.x, marker1.geo_location.y);
+    }
+    landing_state = 3;
+  }
+
+  switch (landing_state){
+    case 0: // find marker
+      if (marker1.detected){
+        guidance_h_set_guided_pos(marker1.geo_location.x, marker1.geo_location.y);
+        guidance_v_set_guided_vz(-0.5);
+        landing_state++;
+      }
+      break;
+    case 1:  // track marker
+      if(!marker1.detected){
+        guidance_v_set_guided_z(stateGetPositionNed_f()->z);
+        landing_state++;
+      }
+      break;
+    case 2:  // pause decent
+      if(marker1.detected){
+        guidance_v_set_guided_z(stateGetPositionNed_f()->z);
+        landing_state = 0;
+      }
+      break;
+    case 3: // wait for marker detected
+      if(marker1.detected){
+        return false;
+      }
+    default:
+      break;
+  }
+  return true;
 }
