@@ -193,9 +193,9 @@ STATIC_INLINE void main_init(void)
   ahrs_init();
 #endif
 
-  autopilot_init();
-
   modules_init();
+
+  autopilot_init();
 
   settings_init();
 
