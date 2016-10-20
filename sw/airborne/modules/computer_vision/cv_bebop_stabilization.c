@@ -46,9 +46,9 @@ static const GLfloat textureVertices[] = {
 };
 
 static GLfloat lens[] = {
-		 1.0, // a
-		  1.0, // b
-		  1.0,  // F
+		-0.2411, // a
+		0.0377, // b
+		  1.58,  // F
 		  1.0     // scale
 };
 
@@ -62,7 +62,7 @@ struct image_t* cv_bebop_stabilization_func (struct image_t *img)
 {
 	printf("Passing to GPU\n");
 	glUseProgram(opengl.programObject);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, mt9f002.output_width, mt9f002.output_height, 0, GL_RGBA, GL_UNSIGNED_BYTE, img->buf);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, mt9f002.output_width/2, mt9f002.output_height, 0, GL_RGBA, GL_UNSIGNED_BYTE, img->buf);
 	// Set the vertices
 	glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 0, vVertices);
 	glEnableVertexAttribArray(0);
@@ -75,7 +75,7 @@ struct image_t* cv_bebop_stabilization_func (struct image_t *img)
 	glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
 	// Read the image back
 	glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
-	glReadPixels(0, 0, mt9f002.output_width, mt9f002.output_height, GL_RGBA, GL_UNSIGNED_BYTE, img->buf);
+	glReadPixels(0, 0, mt9f002.output_width/2, mt9f002.output_height, GL_RGBA, GL_UNSIGNED_BYTE, img->buf);
 	return img;
 }
 

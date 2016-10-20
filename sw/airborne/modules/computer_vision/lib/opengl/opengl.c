@@ -62,7 +62,7 @@ static EGLint opengl_context_att[] = {
 
 /* OpenGL Pixel Buffer attributes */
 static EGLint opengl_pbuffer_att[] = {
-  EGL_WIDTH, MT9F002_OUTPUT_WIDTH,
+  EGL_WIDTH, MT9F002_OUTPUT_WIDTH/2,
   EGL_HEIGHT, MT9F002_OUTPUT_HEIGHT,
 /*  EGL_COLORSPACE, GL_RGB, */
   EGL_TEXTURE_FORMAT, EGL_TEXTURE_RGBA,
