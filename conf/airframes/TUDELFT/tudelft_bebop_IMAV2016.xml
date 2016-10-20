@@ -52,6 +52,7 @@
     <!--</module>-->
     <module name="pose_history"/>
     <module name="video_thread"/>
+    <!--<module name="video_exif"/>-->
     <module name="flight_plan_guided"/>
 
     <module name="cv_opticflow">
@@ -76,6 +77,11 @@
 
     <module name="cv_snake_gate_detection.xml">
       <define name="SGD_CAMERA" value="front_camera"/>
+    </module>
+
+    <module name="video_capture">
+      <define name="VIDEO_CAPTURE_CAMERA" value="front_camera"/>
+      <define name="VIDEO_CAPTURE_PATH" value="/data/ftp/internal_000/images"/>
     </module>
 
     <module name="video_rtp_stream">
