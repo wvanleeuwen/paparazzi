@@ -9,9 +9,11 @@
         alt="2.0">
 
   <header>
-    #define NOM_FLIGHT_ALT 1.7  // nominal flight altitude
     #include "guidance/guidance_h.h"
+    #include "guidance/guidance_v.h"
     #include "modules/flight_plan_guided/flight_plan_guided.h"
+    #include "subsystems/datalink/datalink.h"
+    #include "subsystems/radio_control.h"
   </header>
 
   <waypoints>
@@ -19,9 +21,11 @@
     <waypoint name="HOME" x="0.0" y="0.0"/>
   </waypoints>
 
-  <!--<exceptions>-->
-    <!--<exception cond="datalink_time > 2 && nav_is_in_flight()" deroute="Hover"/>-->
-  <!--</exceptions>-->
+  <exceptions>
+    <exception cond="datalink_time > 5" deroute="Land here"/>
+    <exception cond="radio_control.status == RC_REALLY_LOST" deroute="Land here"/>
+    <exception cond="stateGetPositionEnu_f()->z > 8." deroute="Land here"/>
+  </exceptions>
 
   <blocks>
     <block name="Wait">
