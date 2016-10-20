@@ -8,6 +8,7 @@
 #include "subsystems/electrical.h"
 #include "modules/sonar/sonar_bebop.h"
 #include "subsystems/datalink/datalink.h"
+#include "subsystems/radio_control.h"
 
 #ifdef dc_Survey
 #define LINE_START_FUNCTION dc_Survey(dc_distance_interval);
