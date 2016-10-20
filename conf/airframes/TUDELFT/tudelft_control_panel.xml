@@ -65,12 +65,12 @@
     <program name="RTP.py-Bottom" command="sw/tools/rtp_viewer/rtp_viewer.py">
       <arg flag="rtp_bottom.sdp"/>
       <arg flag="1.5"/>
-      <arg flag="3"/>
+      <arg flag="0"/>
     </program>
     <program name="RTP.py-Front" command="sw/tools/rtp_viewer/rtp_viewer.py">
       <arg flag="rtp_front.sdp"/>
       <arg flag="0.75"/>
-      <arg flag="3"/>
+      <arg flag="1"/>
     </program>
     <program name="Colortuning-Bottom" command="sw/tools/blob_detector/blob_detector.py">
       <arg flag="../rtp_viewer/rtp_bottom.sdp"/>

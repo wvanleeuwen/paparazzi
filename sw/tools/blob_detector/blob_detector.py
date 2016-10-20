@@ -10,7 +10,7 @@ if __name__ == '__main__':
 
     viewer = VideoViewer(filename)
     viewer.scale = float(sys.argv[2])
-    viewer.rotate = sys.argv[3]
+    viewer.rotate = int(sys.argv[3])
     viewer.write_frames = False
     viewer.run()
 

@@ -62,10 +62,18 @@ class Viewer(object):
                 break
 
             if key == ord('c'):
-                print "--- filter settings ---"
+                print "--- detector.c settings ---"
                 for c in ('Y', 'U', 'V'):
                     print "filter.%s_min = %i;" % (c.lower(), settings[c + 'min'])
                     print "filter.%s_max = %i;" % (c.lower(), settings[c + 'max'])
+                print "--- snake_gate_detection.c ---"
+                print "color_lum_min = %s;" % settings['Ymin']
+                print "color_lum_max = %s;" % settings['Ymax']
+                print "color_cb_min  = %s;" % settings['Umin']
+                print "color_cb_max  = %s;" % settings['Umax']
+                print "color_cr_min  = %s;" % settings['Vmin']
+                print "color_cr_max  = %s;" % settings['Vmax']
+
 
             self.yuv_frame = cv2.cvtColor(self.frame.copy(), cv2.COLOR_RGB2YUV)
 
