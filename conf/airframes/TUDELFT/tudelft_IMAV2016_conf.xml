@@ -1,6 +1,6 @@
 <conf>
   <aircraft
-   name="BrokenCam [3]"
+   name="BrokenCam_3"
    ac_id="3"
    airframe="airframes/TUDELFT/tudelft_bebop_IMAV2016.xml"
    radio="radios/dummy.xml"
@@ -11,7 +11,7 @@
    gui_color="#fffff996b847"
   />
   <aircraft
-   name="Froggy [2]"
+   name="Froggy_2"
    ac_id="2"
    airframe="airframes/TUDELFT/tudelft_bebop_IMAV2016.xml"
    radio="radios/dummy.xml"
@@ -22,7 +22,7 @@
    gui_color="#fffff996b847"
   />
   <aircraft
-   name="WindowBumper [1]"
+   name="WindowBumper_1"
    ac_id="1"
    airframe="airframes/TUDELFT/tudelft_bebop_IMAV2016.xml"
    radio="radios/dummy.xml"
