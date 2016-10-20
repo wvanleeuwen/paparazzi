@@ -110,6 +110,7 @@ const float gate_size_m = 1.1;   // gate size in meters
 struct gate_img gates[MAX_GATES];
 struct gate_img best_gate = {0};
 struct gate_img previous_gate = {0};
+struct gate_img previous_gen_gate = {0};
 struct gate_img gen_gate = {0};
 struct image_t img_result;
 int n_gates = 0;
@@ -153,6 +154,7 @@ int counter_gate_detected = 0;
 int init_pos_filter = 0;
 int ready_pass_through;
 
+bool snake_gate_filter = false;
 // timers
 float last_processed, time_gate_detected, time_tracked;
 // color 0 = red, 1 = blue
@@ -161,18 +163,18 @@ void set_snake_gate_color_filter(uint8_t color){
   if (color == SNAKE_DOOR){
     // red door
     door = 1;
-    color_lum_min = 75;// 60;//105;
-    color_lum_max = 197;//228;//205;
-    color_cb_min  = 0;//66;//52;
-    color_cb_max  = 156;//194;//140;
-    color_cr_min  = 127;//140;//180;
+    color_lum_min = 80; //75;// 60;//105;
+    color_lum_max = 143;//228;//205;
+    color_cb_min  = 112;//66;//52;
+    color_cb_max  = 145;//194;//140;
+    color_cr_min  = 141;//12;//140;//180;
     color_cr_max  = 255;//230;//255;
   } else if(color == SNAKE_WINDOW) {
     // blue window
     door = 0;
     color_lum_min = 70;// 60;//105;
     color_lum_max = 128;//228;//205;
-    color_cb_min  = 141;//140;//180;
+    color_cb_min  = 143;//140;//180;
     color_cb_max  = 200;//230;//255;
     color_cr_min  = 104;//66;//52;
     color_cr_max  = 177;//194;//140;
@@ -549,9 +551,7 @@ static struct image_t *snake_gate_detection_func(struct image_t *img)
   float best_quality = 0.;
   n_gates = 0;
 
-  //color picker
-  //check_color_center(img,&y_center_picker,&cb_center,&cr_center);
-
+  // Find new gates with snake gate detection:
   if (n_samples > img->w * img->h) {n_samples = img->w * img->h;}
   for (i = 0; i < n_samples; i++) {
     if (i == 0){
@@ -650,6 +650,7 @@ static struct image_t *snake_gate_detection_func(struct image_t *img)
     }
   }
 
+  // do an additional fit around the snake gate:
   if (n_gates > 0) {
     best_gate = gates[n_gates - 1];
 
@@ -699,12 +700,113 @@ static struct image_t *snake_gate_detection_func(struct image_t *img)
         }
       }
     }
+
+    if(!snake_gate_filter)
+    {
+    previous_gate.x=0;
+    }
+    // if there is a previous gate, also make a fit around that:
+    if(previous_gate.x > 0)
+    {
+      // temporary variables:
+      float fitness, angle_1, angle_2;
+      int clock_arms = 0;
+
+      // prepare the Region of Interest (ROI), which is larger than the gate:
+      float size_factor = 1.25;//2;//1.25;
+
+      int16_t ROI_size = (int16_t)(((float) previous_gate.sz) * size_factor);
+      int16_t min_x = previous_gate.x - ROI_size;
+      min_x = (min_x < 0) ? 0 : min_x;
+      int16_t max_x = previous_gate.x + ROI_size;
+      max_x = (max_x < img->h) ? max_x : img->h;
+      int16_t min_y = previous_gate.y - ROI_size;
+      min_y = (min_y < 0) ? 0 : min_y;
+      int16_t max_y = previous_gate.y + ROI_size;
+      max_y = (max_y < img->w) ? max_y : img->w;
+
+      // use best gate a seed for elite population
+      previous_gen_gate = previous_gate;
+      // detect the gate:
+      // TODO: instead of define, use a parameter to decide on SHAPE:
+      gate_detection(img, &previous_gen_gate.x, &previous_gen_gate.y, &previous_gen_gate.sz, &fitness, min_x, min_y, max_x, max_y, clock_arms, &angle_1, &angle_2, &angle_to_gate, &previous_gen_gate.sz_left, &previous_gen_gate.sz_right);
+      if(!door)
+      {
+        check_gate(img, previous_gen_gate, &previous_gen_gate.q, &previous_gen_gate.n_sides);
+      }
+      else {
+        check_door(img, previous_gen_gate, &previous_gen_gate.q, &previous_gen_gate.n_sides);
+      }
+
+      if(previous_gen_gate.q > best_gate.q) {
+        // store the information in the gate:
+        best_gate = previous_gen_gate;
+      }
+    }
+
+    // calculate the position of the best gate:
     calculate_gate_position(best_gate.x, best_gate.y, best_gate.sz, img, best_gate);
     time_gate_detected = get_sys_time_float();
-
+    // set the previous gate:
+    previous_gate = best_gate;
   } else {
-    printf("NO GATES!!\n\n");
-    gate_detected = 0;
+
+    // snake gate found no gate, but perhaps we have a previous detection we can use
+    int we_have_a_gate = 0;
+
+    // if there is a previous gate, also make a fit around that:
+    if(previous_gate.x > 0)
+    {
+      // temporary variables:
+      float fitness, angle_1, angle_2;
+      int clock_arms = 0;
+
+      // prepare the Region of Interest (ROI), which is larger than the gate:
+      float size_factor = 1.25;//2;//1.25;
+
+      int16_t ROI_size = (int16_t)(((float) previous_gate.sz) * size_factor);
+      int16_t min_x = previous_gate.x - ROI_size;
+      min_x = (min_x < 0) ? 0 : min_x;
+      int16_t max_x = previous_gate.x + ROI_size;
+      max_x = (max_x < img->h) ? max_x : img->h;
+      int16_t min_y = previous_gate.y - ROI_size;
+      min_y = (min_y < 0) ? 0 : min_y;
+      int16_t max_y = previous_gate.y + ROI_size;
+      max_y = (max_y < img->w) ? max_y : img->w;
+
+      // use best gate a seed for elite population
+      previous_gen_gate = previous_gate;
+      // detect the gate:
+      // TODO: instead of define, use a parameter to decide on SHAPE:
+      gate_detection(img, &previous_gen_gate.x, &previous_gen_gate.y, &previous_gen_gate.sz, &fitness, min_x, min_y, max_x, max_y, clock_arms, &angle_1, &angle_2, &angle_to_gate, &previous_gen_gate.sz_left, &previous_gen_gate.sz_right);
+      if(!door)
+      {
+        check_gate(img, previous_gen_gate, &previous_gen_gate.q, &previous_gen_gate.n_sides);
+      }
+      else {
+        check_door(img, previous_gen_gate, &previous_gen_gate.q, &previous_gen_gate.n_sides);
+      }
+
+      if(previous_gen_gate.q > min_gate_quality) {
+        we_have_a_gate = 1;
+        // store the information in the gate:
+        best_gate = previous_gen_gate;
+      }
+    }
+
+    if(we_have_a_gate)
+    {
+      // calculate the position of the best gate:
+      calculate_gate_position(best_gate.x, best_gate.y, best_gate.sz, img, best_gate);
+      time_gate_detected = get_sys_time_float();
+      // set the previous gate:
+      previous_gate = best_gate;
+      gate_detected = 1;
+    }
+    else{
+      printf("NO GATES!!\n\n");
+      gate_detected = 0;
+    }
   }
 
 #ifdef DRAW_GATE
@@ -732,6 +834,7 @@ void snake_gate_detection_start(void){
 void snake_gate_detection_stop(void){
   gate_detected = 0;
   ready_pass_through = 0;
+  previous_gate.x = 0;
   listener->active = false;
 }
 
