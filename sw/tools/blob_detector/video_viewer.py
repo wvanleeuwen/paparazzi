@@ -15,7 +15,8 @@ class VideoViewer(Viewer):
         self.cap = cv2.VideoCapture(video_file)
         self.folder = datetime.datetime.now().isoformat()
 
-        os.mkdir(self.folder)
+        if self.write_frames:
+            os.mkdir(self.folder)
 
         if not self.cap.isOpened():
             raise IOError("Cannot open video stream")
