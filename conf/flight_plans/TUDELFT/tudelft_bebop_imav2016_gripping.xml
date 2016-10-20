@@ -45,7 +45,7 @@
       <call_once fun="detector.bottom_blue_item->active = true"/>
       <call_once fun="open_gripper()"/>
       <call_once fun="object_state = 0"/>
-      <call fun="Hover(NOM_FLIGHT_ALT)"/>
+      <call fun="Hover(nom_flight_alt)"/>
       <while cond="1"/>
     </block>
 
@@ -64,7 +64,7 @@
     </block>
 
     <block name="HOVER AFTER BLUE ITEM">
-      <call fun="Hover(NOM_FLIGHT_ALT)"/>
+      <call fun="Hover(nom_flight_alt)"/>
       <while cond="1"/>
     </block>
 
@@ -75,7 +75,7 @@
       <call_once fun="detector.bottom_red_item->active = true"/>
       <call_once fun="open_gripper()"/>
       <call_once fun="object_state = 0"/>
-      <call fun="Hover(NOM_FLIGHT_ALT)"/>
+      <call fun="Hover(nom_flight_alt)"/>
       <while cond="1"/>
     </block>
 
@@ -94,7 +94,7 @@
     </block>
 
     <block name="HOVER AFTER RED ITEM">
-      <call fun="Hover(NOM_FLIGHT_ALT)"/>
+      <call fun="Hover(nom_flight_alt)"/>
       <while cond="1"/>
     </block>
 
@@ -105,7 +105,7 @@
       <call_once fun="detector.bottom_blue_bucket->active = true"/>
       <call_once fun="close_gripper()"/>
       <call_once fun="object_state = 0"/>
-      <call fun="Hover(NOM_FLIGHT_ALT)"/>
+      <call fun="Hover(nom_flight_alt)"/>
       <while cond="1"/>
     </block>
 
@@ -118,7 +118,7 @@
     </block>
 
     <block name="HOVER AFTER BLUE BUCKET">
-      <call fun="Hover(NOM_FLIGHT_ALT)"/>
+      <call fun="Hover(nom_flight_alt)"/>
       <while cond="1"/>
     </block>
 
@@ -129,7 +129,7 @@
       <call_once fun="detector.bottom_red_bucket->active = true"/>
       <call_once fun="close_gripper()"/>
       <call_once fun="object_state = 0"/>
-      <call fun="Hover(NOM_FLIGHT_ALT)"/>
+      <call fun="Hover(nom_flight_alt)"/>
       <while cond="1"/>
     </block>
 
@@ -142,7 +142,7 @@
     </block>
 
     <block name="HOVER AFTER RED BUCKET">
-      <call fun="Hover(NOM_FLIGHT_ALT)"/>
+      <call fun="Hover(nom_flight_alt)"/>
       <while cond="1"/>
     </block>
 
@@ -163,14 +163,14 @@
     </block>
     
     <block name="TESTING - Hover forever">
-      <call fun="Hover(NOM_FLIGHT_ALT)"/>
+      <call fun="Hover(nom_flight_alt)"/>
       <while cond="1"/>
     </block>
 
     <block name="TESTING - Hover over red bucket">
       <call_once fun="detector_disable_all()"/>
       <call_once fun="detector.bottom_red_bucket->active = true"/>
-      <call fun="Hover(NOM_FLIGHT_ALT)"/>
+      <call fun="Hover(nom_flight_alt)"/>
       <call fun="marker_center_descent(0, 0, 0)"/>
     </block>
 
