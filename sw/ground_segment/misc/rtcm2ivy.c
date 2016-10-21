@@ -29,6 +29,11 @@
  * over the Ivy bus to inject them for DGPS and RTK positioning.
  */
 
+#include "std.h"
+#include "serial_port.h"
+/** Used variables **/
+struct SerialPort *serial_port;
+
 #include <glib.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -41,19 +46,23 @@
 #include <CRC24Q.h>
 #include <math/pprz_geodetic_float.h>
 
-#include "std.h"
-#include "serial_port.h"
 
-/** Used variables **/
-struct SerialPort *serial_port;
+#define UBX_CFG_TMODE3_CFG  0
+#define UBX_CFG_TMODE3_WAIT 1
+#define UBX_CFG_TMODE3_READ 2
+#define UBX_CFG_TMODE3_DONE 3
+
 
 /* ubx structure definitions*/
 msg_state_t msg_state;
-rtcm3_msg_callbacks_node_t rtcm3_1005_node;
-rtcm3_msg_callbacks_node_t rtcm3_1077_node;
-rtcm3_msg_callbacks_node_t rtcm3_1087_node;
+msg_callbacks_node_t rtcm3_1005_node;
+msg_callbacks_node_t rtcm3_1077_node;
+msg_callbacks_node_t rtcm3_1087_node;
 
-rtcm3_msg_callbacks_node_t ubx_nav_svin_node;
+msg_callbacks_node_t ubx_nav_svin_node;
+
+msg_callbacks_node_t ubx_ack_ack_node;
+msg_callbacks_node_t ubx_ack_nak_node;
 
 /** Default values **/
 uint8_t ac_id = 0;
@@ -79,7 +88,7 @@ char *ivy_bus                   = "127.255.255.255"; // 192.168.1.255   127.255.
  * Read bytes from the Piksi UART connection
  * This is a wrapper functions used in the librtcm3 library
  */
-static uint32_t uart_read(unsigned char (*buff)[], uint32_t n) //, void *context __attribute__((unused))
+static uint32_t uart_read(unsigned char (*buff)[], uint32_t n)
 {
 	int ret = read(serial_port->fd, buff, n);
 	if(ret > 0)
@@ -189,14 +198,37 @@ static void ubx_navsvin_callback(uint8_t len, uint8_t msg[])
 {
    if (len>0) {
 
-		u32 iTow      = UBX_NAV_SVIN_ITOW(msg);
-		u32 dur       = UBX_NAV_SVIN_dur (msg);
-		float meanAcc = (float) 0.1 * UBX_NAV_SVIN_meanACC(msg);
-		u8 valid      = UBX_NAV_SVIN_Valid(msg);
-		u8 active     = UBX_NAV_SVIN_Active(msg);
-  printf ("iTow: %u \t dur: %u \t meaAcc: %f \t valid: %u \t active: %u \n", iTow, dur, meanAcc,valid,active);
+	   u32 iTow      = UBX_NAV_SVIN_ITOW(msg);
+	   u32 dur       = UBX_NAV_SVIN_dur (msg);
+	   float meanAcc = (float) 0.1 * UBX_NAV_SVIN_meanACC(msg);
+	   u8 valid      = UBX_NAV_SVIN_Valid(msg);
+	   u8 active     = UBX_NAV_SVIN_Active(msg);
+	   printf ("iTow: %u \t dur: %u \t meaAcc: %f \t valid: %u \t active: %u \n", iTow, dur, meanAcc,valid,active);
    }
 }
+
+
+static void ubx_ackack_callback(uint8_t len, uint8_t msg[])
+
+{
+   if (len>0) {
+	   u8 ack_ClsId = UBX_ACK_ACK_ClsID(msg);
+	   u8 ack_MsgId = UBX_ACK_ACK_MsgID(msg);
+	   printf("Acknowledge: Success! \t Msg_class: %0x \t Msg_id: %0x\n", ack_ClsId, ack_MsgId);
+   }
+}
+
+static void ubx_acknak_callback(uint8_t len, uint8_t msg[])
+
+{
+   if (len>0) {
+	   u8 nak_ClsId = UBX_ACK_NAK_ClsID(msg);
+	   u8 nak_MsgId = UBX_ACK_NAK_MsgID(msg);
+	   printf("Acknowledge: Failed! \t Msg_class: %u \t Msg_id: %u \n", nak_ClsId, nak_MsgId);
+
+   }
+}
+
 /**
  * Parse the tty data when bytes are available
  */
@@ -237,8 +269,10 @@ void print_usage(int argc __attribute__((unused)), char ** argv) {
 	fprintf(stderr, usage, argv[0]);
 }
 
+
 int main(int argc, char** argv)
 {
+
 	// Parse the options from cmdline
 	char c;
 	while ((c = getopt (argc, argv, "hvld:b:i:")) != EOF) {
@@ -275,6 +309,7 @@ int main(int argc, char** argv)
 			abort();
 		}
 	}
+
 	// Create the Ivy Client
 	GMainLoop *ml =  g_main_loop_new(NULL, FALSE);
 	IvyInit("Paparazzi server", "Paparazzi server READY", 0, 0, 0, 0);
@@ -293,17 +328,29 @@ int main(int argc, char** argv)
 	// Setup RTCM3 callbacks
 	printf_debug("Setup RTCM3 callbacks...\n");
 	msg_state_init(&msg_state);
-	rtcm3_register_callback(&msg_state, RTCM3_MSG_1005, &rtcm3_1005_callback, &rtcm3_1005_node);
-	rtcm3_register_callback(&msg_state, RTCM3_MSG_1077, &rtcm3_1077_callback, &rtcm3_1077_node);
-	rtcm3_register_callback(&msg_state, RTCM3_MSG_1087, &rtcm3_1087_callback, &rtcm3_1087_node);
+	register_callback(&msg_state, RTCM3_MSG_1005, &rtcm3_1005_callback, &rtcm3_1005_node);
+	register_callback(&msg_state, RTCM3_MSG_1077, &rtcm3_1077_callback, &rtcm3_1077_node);
+	register_callback(&msg_state, RTCM3_MSG_1087, &rtcm3_1087_callback, &rtcm3_1087_node);
 
-	rtcm3_register_callback(&msg_state, UBX_NAV_SVIN, &ubx_navsvin_callback, &ubx_nav_svin_node);
-
+	register_callback(&msg_state, UBX_NAV_SVIN, &ubx_navsvin_callback, &ubx_nav_svin_node);
+	register_callback(&msg_state, UBX_ACK_ACK_ID, &ubx_ackack_callback, &ubx_ack_ack_node);
+	register_callback(&msg_state, UBX_ACK_NAK_ID, &ubx_acknak_callback, &ubx_ack_nak_node);
 
 	// Add IO watch for tty connection
 	printf_debug("Adding IO watch...\n");
 	GIOChannel *sk = g_io_channel_unix_new(serial_port->fd);
 	g_io_add_watch(sk, G_IO_IN, parse_device_data, NULL);
+
+
+	// Configuring the chip for TMODE3 (svin parameters)
+	//	uint16_t ubx_flags;
+	uint8_t lla = 1; // 0 - ECEF
+	uint8_t mode =1; // 1- suvery in, 0 - disabled , 2- Fixed mode
+	uint16_t ubx_flags = (lla<<8)+mode; // Fix me : mind the reserve bytes get shifted
+	uint32_t svinacclimit= 10 * 25000; // in  mm
+	uint32_t svinmindur= 10;
+
+	UbxSend_CFG_TMODE3(0,0, ubx_flags,0,0,0,0,0,0,0,0,svinmindur,svinacclimit,0,0);
 
 	// Run the main loop
 	printf_debug("Started rtcm2ivy for aircraft id %d!\n", ac_id);
@@ -311,3 +358,4 @@ int main(int argc, char** argv)
 
 	return 0;
 }
+
