@@ -17,4 +17,8 @@ FROG: Pick up and drop drone
   <section name="INS" prefix="INS_">
     <define name="BARO_AGL_OFFSET" value="0.22"/>
   </section>
+  
+  <section name="GUIDANCE_H" prefix="GUIDANCE_H_">
+   <define name="REF_MAX_SPEED" value="0.2" unit="m/s"/>
+ </section>
 </airframe>

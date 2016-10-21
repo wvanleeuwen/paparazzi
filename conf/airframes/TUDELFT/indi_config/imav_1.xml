@@ -18,4 +18,17 @@ BEBOP with bumpers, passing through the window
   <modules main_freq="512">
     <module name="sonar_bebop"/>
   </modules>
+  
+  <firmware name="rotorcraft">
+    <define name="RANGE_ORIENTATION" value="1"/>
+    <define name="RANGE_FRONT" value="2"/>
+    <define name="RANGE_LEFT" value="3"/>
+    <define name="RANGE_BACK" value="0"/>
+    <define name="RANGE_RIGHT" value="1"/>
+    <define name="RANGE_DOWN" value="4"/>
+  </firmware>
+  
+  <section name="GUIDANCE_H" prefix="GUIDANCE_H_">
+   <define name="REF_MAX_SPEED" value="0.3" unit="m/s"/>
+ </section>
 </airframe>

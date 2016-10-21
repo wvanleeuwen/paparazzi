@@ -74,13 +74,26 @@
     </block>
 
     
-    <block name="Survey Room">
+    <block name="Survey Room Simple">
       <call_once fun="front_cam_set_x_offset(896)"/>
       <set var="dc_autoshoot" value="DC_AUTOSHOOT_PERIODIC"/>
-      <call_once fun="guidance_h_set_guided_pos_relative(6., 0.)"/>
-      <set var="end_block_time" value="block_time+25" />
+      <call_once fun="guidance_h_set_guided_pos_relative(0., 9.)"/>
+      <set var="end_block_time" value="block_time+20" />
       <while cond="LessThan(block_time,end_block_time)"/>
       <call_once fun="guidance_h_set_guided_heading_rate(0.25)"/>
+      <set var="end_block_time" value="block_time+14" />
+      <while cond="LessThan(block_time,end_block_time)"/>
+      <set var="dc_autoshoot" value="DC_AUTOSHOOT_STOP"/>
+      <deroute block="Hover"/>
+    </block>
+    
+    <block name="Survey Room Awesome">
+      <call_once fun="front_cam_set_x_offset(896)"/>
+      <set var="dc_autoshoot" value="DC_AUTOSHOOT_PERIODIC"/>
+      <call_once fun="guidance_h_set_guided_pos_relative(0., 9.)"/>
+      <set var="end_block_time" value="block_time+20" />
+      <while cond="LessThan(block_time,end_block_time)"/>
+      <call_once fun="RotateToHeadingWithRate(11./7., 0.25)"/>
       <set var="end_block_time" value="block_time+14" />
       <while cond="LessThan(block_time,end_block_time)"/>
       <set var="dc_autoshoot" value="DC_AUTOSHOOT_STOP"/>
@@ -135,11 +148,13 @@
     <block name="Find Landing pad">
       <call_once fun="detector.bottom_red_item->active = true"/>
       <set var="landing_state" value="0"/>
-      <call_once fun="Decend_on_landing_pad(1.5)"/>
+      <set var="lost_frames" value="0"/>
+      <call fun="init_landing_pad()"/>
+      <call_once fun="Decend_on_landing_pad(0.8)"/>
     </block>
     
     <block name="Land on platform">
-      <call_once fun="Decend_on_landing_pad(1.5)"/>
+      <call_once fun="guidance_v_set_guided_th(0.3)"/>
     </block>
 
     <block name="Approach building">

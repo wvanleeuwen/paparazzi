@@ -171,15 +171,27 @@ bool WaitUntilTimerOrAltitude(float sec, float fail_altitude) {
 }
 
 
-
-
 bool RotateToHeading(float heading) {
   if (autopilot_mode != AP_MODE_GUIDED) { return true; }
 
   guidance_h_set_guided_heading(heading);
-
   return false;
 }
+
+
+bool RotateToHeadingWithRate(float heading, float rate) {
+  if (autopilot_mode != AP_MODE_GUIDED) { return true; }
+
+  guidance_h_set_guided_heading_rate(rate);
+
+  if (fabs(heading - stateGetNedToBodyEulers_f()->psi) < 0.1) {
+    guidance_h_set_guided_heading(heading);
+    return false;
+  }
+
+  return true;
+}
+
 
 uint8_t Hover(float alt) {
     if (autopilot_mode != AP_MODE_GUIDED) { return true; }
@@ -689,48 +701,51 @@ static void range_sensors_cb(uint8_t sender_id,
   guidance_h_set_speed_offset(vel_offset_body_x, vel_offset_body_y);
 }
 
+bool init_landing_pad(void) {
+  marker1.geo_location.x = stateGetPositionNed_f()->x;
+  marker1.geo_location.y = stateGetPositionNed_f()->y;
+
+  return false;
+}
+
 uint8_t landing_state = 0;
 float initial_heading = 0;
+int8_t lost_frames = 0;
 bool Decend_on_landing_pad(float alt) {
   // If we are not in guided mode
   if (autopilot_mode != AP_MODE_GUIDED) {
     // Reset the approach strategy and loop
     landing_state = 0;
+    lost_frames = 0;
     return true;
   }
 
-  if (stateGetPositionEnu_f()->z <= alt){
-    guidance_v_set_guided_z(alt);
-    if (marker1.detected){
-      guidance_h_set_guided_pos(marker1.geo_location.x, marker1.geo_location.y);
-    }
-    landing_state = 3;
-  }
-
   switch (landing_state){
-    case 0: // find marker
-      if (marker1.detected){
+    case 0: // find and decend marker
+      if (marker1.detected && !marker1.processed){
         guidance_h_set_guided_pos(marker1.geo_location.x, marker1.geo_location.y);
         guidance_v_set_guided_vz(-0.5);
-        landing_state++;
-      }
-      break;
-    case 1:  // track marker
-      if(!marker1.detected){
+        marker1.processed = true;
+
+        if (stateGetPositionEnu_f()->z <= alt){
+          guidance_v_set_guided_z(alt);
+          landing_state++;
+        }
+      } else {  // lost marker
         guidance_v_set_guided_z(stateGetPositionNed_f()->z);
-        landing_state++;
       }
       break;
-    case 2:  // pause decent
+    case 1: // wait for marker detected
       if(marker1.detected){
-        guidance_v_set_guided_z(stateGetPositionNed_f()->z);
-        landing_state = 0;
+        lost_frames--;
+        if (lost_frames < 0){
+          lost_frames = 0;
+        } else {lost_frames++;}
+        if (lost_frames >= 3){
+          return false;
+        }
       }
       break;
-    case 3: // wait for marker detected
-      if(marker1.detected){
-        return false;
-      }
     default:
       break;
   }

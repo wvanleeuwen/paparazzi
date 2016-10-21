@@ -27,6 +27,14 @@
 
 #include "subsystems/datalink/telemetry.h"
 
+#ifndef RANGE_ORIENTATION
+#define RANGE_FRONT 0
+#define RANGE_LEFT  1
+#define RANGE_BACK  2
+#define RANGE_RIGHT 3
+#define RANGE_DOWN 4
+#endif
+
 struct MedianFilter3Int global_filter;
 struct MedianFilter3Int pixelwise_filter;
 
@@ -97,11 +105,11 @@ void stereo_to_state_periodic(void)
   } else if (stereocam_data.fresh && stereocam_data.len == 10) {  // array from range finders
     int16_t int16Arrray[100];
     memcpy(int16Arrray, stereocam_data.data, stereocam_data.len);    // fix me, this was to remove the -Wcast-align warning
-    range_finder[0] = int16Arrray[0];
-    range_finder[1] = int16Arrray[1];
-    range_finder[2] = int16Arrray[2];
-    range_finder[3] = int16Arrray[3];
-    range_finder[4] = int16Arrray[4];
+    range_finder[RANGE_FRONT] = int16Arrray[0];
+    range_finder[RANGE_LEFT] = int16Arrray[1];
+    range_finder[RANGE_BACK] = int16Arrray[2];
+    range_finder[RANGE_RIGHT] = int16Arrray[3];
+    range_finder[RANGE_DOWN] = int16Arrray[4];
     //send abi messages (from the body axis of the drone, front, right, back, left)
     AbiSendMsgRANGE_SENSORS(STEREOCAM2STATE_SENDER_ID, range_finder[0], range_finder[3], range_finder[2], range_finder[1]);
     if (range_finder[4] > 0 && range_finder[4] < 2000 && abs(range_finder[4] - previous_agl) / (get_sys_time_float() - previous_agl_time) < AGL_OUTLIER_GRAD) {
