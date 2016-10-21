@@ -65,7 +65,7 @@ bool disable_sideways_forcefield = false;
 #ifdef INS_BARO_AGL_OFFSET
 #define LEGS_HEIGHT INS_BARO_AGL_OFFSET
 #else
-#define LEGS_HEIGHT 20.0
+#define LEGS_HEIGHT 0.2
 #endif
 
 #define NOM_FLIGHT_ALT 1.7  // nominal flight altitude
@@ -481,8 +481,7 @@ bool go_to_object(bool descent) {
       if (filtered_agl < LEGS_HEIGHT + 0.02) {
         // We are almost touching the table
 
-        if (marker1.detected &&
-            marker1.pixel.y > 120 && marker1.pixel.y < 230 &&
+        if (marker1.detected && marker1.pixel.y > 120 &&
             marker1.pixel.x > 40  && marker1.pixel.x < 200) {
           return false;
           // Go to next block
@@ -641,6 +640,13 @@ static void range_sensor_force_field(float *vel_body_x, float *vel_body_y, int16
 
 static void agl_cb(uint8_t sender_id, float agl) {
   filtered_agl = filtered_agl * 0.9 + agl * 0.1;
+
+//  int height = (filtered_agl < LEGS_HEIGHT + 0.02);
+//
+//  int marker =  (marker1.detected && marker1.pixel.y > 120 &&
+//        marker1.pixel.x > 40  && marker1.pixel.x < 200);
+//
+//  fprintf(stderr, "[gripping] %i, %i, %.3f.\n", height, marker, filtered_agl);
 }
 
 static void range_sensors_cb(uint8_t sender_id,

@@ -15,6 +15,6 @@ FROG: Pick up and drop drone
     <define name="G2_R" value="0.12"/>
   </section>
   <section name="INS" prefix="INS_">
-    <define name="BARO_AGL_OFFSET" value="0.23"/>
+    <define name="BARO_AGL_OFFSET" value="0.22"/>
   </section>
 </airframe>
