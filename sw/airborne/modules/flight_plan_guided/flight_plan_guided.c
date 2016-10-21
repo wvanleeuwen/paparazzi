@@ -667,38 +667,43 @@ static void range_sensors_cb(uint8_t sender_id,
   static int32_t front_wall_detect_counter = 0;
   static const int32_t max_sensor_range = 2000;
 
-  // save range finders values
-  range_finders.front = range_front;
-  range_finders.right = range_right;
-  range_finders.left = range_left;
-  range_finders.back = range_back;
+  if (autopilot_mode == AP_MODE_GUIDED) {
 
-  if (range_finders.front > 1) {  // good sensor reading
-    if(range_finders.front < max_sensor_range) {  // wall in view
-      if(front_wall_detect_counter > 5) { // outlier detection for positive wall detection
-        front_wall_detected = true;
-      } else {
-        front_wall_detect_counter++;
+    // save range finders values
+    range_finders.front = range_front;
+    range_finders.right = range_right;
+    range_finders.left = range_left;
+    range_finders.back = range_back;
+
+    if (range_finders.front > 1) {  // good sensor reading
+      if(range_finders.front < max_sensor_range) {  // wall in view
+        if(front_wall_detect_counter > 5) { // outlier detection for positive wall detection
+          front_wall_detected = true;
+        } else {
+          front_wall_detect_counter++;
+        }
+      } else if(--front_wall_detect_counter < 0){  // outlier detection for negative wall detection
+        front_wall_detected = false;
+        front_wall_detect_counter = 0;
       }
-    } else if(--front_wall_detect_counter < 0){  // outlier detection for negative wall detection
-      front_wall_detected = false;
-      front_wall_detect_counter = 0;
     }
+
+    // add extra velocity command to avoid walls based on range sensors
+    float vel_offset_body_x = 0.0f;
+    float vel_offset_body_y = 0.0f;
+
+    range_sensor_force_field(&vel_offset_body_x, &vel_offset_body_y, 500, 1000, 1600, 0.0f, 0.3f);
+    // printf("front %d, back %d, right %d, left %d\n, vel x %f, vel_y %f",range_finders.front,range_finders.back,range_finders.right,range_finders.left, vel_offset_body_x,vel_offset_body_y);
+
+    if(disable_sideways_forcefield) // disable forcefield for the side if the drone is going through a door for instance
+    {
+      vel_offset_body_y = 0.0f;
+    }
+    // calculate velocity offset for guidance
+    guidance_h_set_speed_offset(vel_offset_body_x, vel_offset_body_y);
+  } else {
+    guidance_h_set_speed_offset(0.,0.);
   }
-
-  // add extra velocity command to avoid walls based on range sensors
-  float vel_offset_body_x = 0.0f;
-  float vel_offset_body_y = 0.0f;
-
-  range_sensor_force_field(&vel_offset_body_x, &vel_offset_body_y, 500, 1000, 1600, 0.0f, 0.3f);
-  // printf("front %d, back %d, right %d, left %d\n, vel x %f, vel_y %f",range_finders.front,range_finders.back,range_finders.right,range_finders.left, vel_offset_body_x,vel_offset_body_y);
-
-  if(disable_sideways_forcefield) // disable forcefield for the side if the drone is going through a door for instance
-  {
-    vel_offset_body_y = 0.0f;
-  }
-  // calculate velocity offset for guidance
-  guidance_h_set_speed_offset(vel_offset_body_x, vel_offset_body_y);
 }
 
 bool init_landing_pad(void) {
