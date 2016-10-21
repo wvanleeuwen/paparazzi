@@ -4,15 +4,16 @@
 
   <firmware name="rotorcraft">
     <target name="ap" board="bebop2"/>
-    <!-- Use for swarmhub
+    <!-- Use for swarmhub -->
     <configure name="HOST" value="192.168.40.30" />
     <configure name="MODEM_HOST" value="192.168.40.255" />
-    -->
+    
     <target name="nps" board="pc">
       <module name="fdm" type="jsbsim"/>
       <module name="udp"/>
     </target>
     <define name="USE_GPS_UBX_RTCM" value="TRUE"/>
+    <define name="GPS_TIMEOUT" value="3"/>
     <module name="telemetry" type="transparent_udp"/>
     <module name="radio_control" type="datalink"/>
     <module name="motor_mixing"/>
@@ -102,7 +103,7 @@
     <define name="SONAR_MAX_RANGE" value="2.2"/>
     <define name="SONAR_UPDATE_ON_AGL" value="TRUE"/>
     <define name="USE_GPS_ALT" value="1"/> <!-- does this also work outside? -->
-    <define name="VFF_R_GPS" value="0.02"/> <!-- should this be set for M8P RTK? -->
+    <!-- <define name="VFF_R_GPS" value="0.02"/> should this be set for M8P RTK? -->
   </section>
 
 

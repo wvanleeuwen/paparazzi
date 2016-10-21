@@ -7,10 +7,10 @@
   <waypoints>
     <waypoint name="HOME" x="0.0" y="0.0"/>
     <waypoint name="STDBY" x="0.0" y="0.0"/>
-    <waypoint name="p1" x="-4.0" y="4.0"/>
-    <waypoint name="p2" x="-4.0" y="8.0"/>
-    <waypoint name="p3" x="4.0" y="8.0"/>
-    <waypoint name="p4" x="4.0" y="4.0"/>
+    <waypoint name="p1" lat="52.1706849" lon="4.4089571"/>
+    <waypoint name="p2" lat="52.1706502" lon="4.4088454"/>
+    <waypoint name="p3" lat="52.1707183" lon="4.4087813"/>
+    <waypoint name="p4" lat="52.1707419" lon="4.4088974"/>
     <waypoint name="TD" x="0.0" y="0.0"/>
   </waypoints>
   <blocks>
@@ -21,7 +21,7 @@
     <block name="Geo init">
       <while cond="LessThan(NavBlockTime(), 10)"/>
       <call fun="NavSetGroundReferenceHere()"/>
-      <!--<call fun="NavSetAltitudeReferenceHere()"/>-->
+      <call fun="NavSetAltitudeReferenceHere()"/>
     </block>
     <block name="Holding point">
       <call fun="NavKillThrottle()"/>

@@ -46,12 +46,13 @@ struct SerialPort *serial_port;
 #include <CRC24Q.h>
 #include <math/pprz_geodetic_float.h>
 
+#include "std.h"
+#include "serial_port.h"
 
-#define UBX_CFG_TMODE3_CFG  0
-#define UBX_CFG_TMODE3_WAIT 1
-#define UBX_CFG_TMODE3_READ 2
-#define UBX_CFG_TMODE3_DONE 3
 
+
+/** Used variables **/
+struct SerialPort *serial_port;
 
 /* ubx structure definitions*/
 msg_state_t msg_state;
@@ -85,7 +86,7 @@ char *ivy_bus                   = "127.255.255.255"; // 192.168.1.255   127.255.
 #endif
 
 /*
- * Read bytes from the Piksi UART connection
+ * Read bytes from the uBlox UART connection
  * This is a wrapper functions used in the librtcm3 library
  */
 static uint32_t uart_read(unsigned char (*buff)[], uint32_t n)
@@ -190,7 +191,7 @@ static void rtcm3_1087_callback(uint8_t len, uint8_t msg[])
 
 
 /*
- * Callback for UBX message
+ * Callback for UBX survey-in message
  */
 
 static void ubx_navsvin_callback(uint8_t len, uint8_t msg[])
