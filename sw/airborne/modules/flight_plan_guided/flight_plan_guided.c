@@ -597,10 +597,10 @@ static void range_sensor_force_field(float *vel_body_x, float *vel_body_y, int16
   {
     //do nothing
   } else if(range_finders.left < avoid_inner_border){
-    avoid_y_command -= max_vel_command;
+    avoid_y_command += max_vel_command;
   } else if (range_finders.left < avoid_outer_border) {
     // Linear
-    avoid_y_command -= (max_vel_command - min_vel_command) *
+    avoid_y_command += (max_vel_command - min_vel_command) *
         ((float)avoid_outer_border - (float)range_finders.left)
         / (float)difference_inner_outer;
   } else {}
