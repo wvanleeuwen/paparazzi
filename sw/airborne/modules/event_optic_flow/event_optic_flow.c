@@ -156,6 +156,7 @@ void event_optic_flow_start(void) {
 	// Reset low pass filter for rates
 	eofState.ratesMA.p = 0;
 	eofState.ratesMA.q = 0;
+	eofState.ratesMA.r = 0;
 	// (Re-)initialization
 	eofState.moduleFrequency = 100.0f;
 	eofState.z_NED = 0.0f;
@@ -173,6 +174,7 @@ void event_optic_flow_periodic(void) {
   // Moving average filtering of body rates
   eofState.ratesMA.p += (rates->p - eofState.ratesMA.p) * derotationMovingAverageFactor;
   eofState.ratesMA.q += (rates->q - eofState.ratesMA.q) * derotationMovingAverageFactor;
+  eofState.ratesMA.r += (rates->r - eofState.ratesMA.r) * derotationMovingAverageFactor;
 
   // Obtain UART data if available
   int32_t NNew;
@@ -217,14 +219,14 @@ void event_optic_flow_periodic(void) {
   }
 
 	// Derotate flow field if enabled
-	if (enableDerotation) {
-		derotateFlowField(&eofState.field, &eofState.ratesMA);
-	}
-	else {
+//	if (enableDerotation) {
+//		derotateFlowField(&eofState.field, &eofState.ratesMA);
+//	}
+//	else {
 	  // Default: simply copy result
 	  eofState.field.wxDerotated = eofState.field.wx;
 	  eofState.field.wyDerotated = eofState.field.wy;
-	}
+//	}
 
 	// Update height/ground truth speeds from Optitrack
   struct NedCoor_f *pos = stateGetPositionNed_f();
@@ -242,7 +244,6 @@ void event_optic_flow_periodic(void) {
   velB.z = rot->m[2][0] * vel->x + rot->m[2][1] * vel->y + rot->m[2][2] * vel->z;
   float R = -pos->z/(cosf(ang->theta)*cosf(ang->phi));*/
 
-  //FIXME verify signs in calculation below
   eofState.wxTruth = (vel->y*cosf(ang->psi) -vel->x*sinf(ang->psi)) / (pos->z - 0.01);
   eofState.wyTruth = (vel->x*cosf(ang->psi) +vel->y*sinf(ang->psi)) / (pos->z - 0.01);
   eofState.DTruth = -vel->z / (pos->z - 0.01);
@@ -315,7 +316,7 @@ enum updateStatus processUARTInput(struct flowStats* s, int32_t *N) {
         e.u = (float) u / UART_INT16_TO_FLOAT;
         e.v = (float) v / UART_INT16_TO_FLOAT;
 
-        flowStatsUpdate(s, e, dvs128Intrinsics);
+        flowStatsUpdate(s, e, eofState.ratesMA, enableDerotation, dvs128Intrinsics);
         returnStatus = UPDATE_STATS;
         if (!eofState.caerInputReceived) {
           eofState.caerInputReceived = TRUE;
@@ -347,8 +348,8 @@ static void sendFlowFieldState(struct transport_tx *trans, struct link_device *d
   float D  = eofState.field.D;
   float wxDerotated = eofState.ratesMA.p;
   float wyDerotated = eofState.ratesMA.q;
-  wxDerotated = eofState.field.wxDerotated;
-  wyDerotated = eofState.field.wyDerotated;
+//  wxDerotated = eofState.field.wxDerotated;
+//  wyDerotated = eofState.field.wyDerotated;
   float wxTruth = eofState.wxTruth;
   float wyTruth = eofState.wyTruth;
   float DTruth = eofState.DTruth;

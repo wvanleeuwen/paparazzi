@@ -28,8 +28,8 @@ void flowStatsInit(struct flowStats *s) {
   }
 }
 
-void flowStatsUpdate(struct flowStats* s, struct flowEvent e,
-    struct cameraIntrinsicParameters intrinsics) {
+void flowStatsUpdate(struct flowStats* s, struct flowEvent e, struct FloatRates rates,
+    bool enableDerotation, struct cameraIntrinsicParameters intrinsics) {
   // X,Y are defined around the camera's principal point
     float x = e.x - intrinsics.principalPointX;
     float y = e.y - intrinsics.principalPointY;
@@ -50,6 +50,12 @@ void flowStatsUpdate(struct flowStats* s, struct flowEvent e,
     // Transform flow to direction reference frame
     float S = x * s->cos_angles[a] + y * s->sin_angles[a];
     float V = u * s->cos_angles[a] + v * s->sin_angles[a];
+
+    // Derotation in direction of flow field
+    if (enableDerotation) {
+      V -= s->cos_angles[a] *(intrinsics.focalLengthX*rates.p - y*rates.r)
+          - s->sin_angles[a] *(intrinsics.focalLengthY*rates.q - x*rates.r);
+    }
 
     // Update flow field statistics
     s->sumS [a] += S;
@@ -187,12 +193,12 @@ void derotateFlowField(struct flowField* field, struct FloatRates* rates) {
 }
 
 void lowPassFilterWithThreshold(float *val, float new, float factor, float limit) {
-  float delta = new - *val;
+  float delta = (new - *val)*factor;
   if (delta > limit) {
     delta = limit;
   }
   if (delta < -limit) {
       delta = -limit;
     }
-  *val += delta * factor;
+  *val += delta;
 }

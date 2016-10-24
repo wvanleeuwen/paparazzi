@@ -107,8 +107,8 @@ void flowStatsInit(struct flowStats *s);
 /**
  * Performs an update of all flow field statistics with a new event.
  */
-void flowStatsUpdate(struct flowStats* s, struct flowEvent e,
-    struct cameraIntrinsicParameters intrinsics);
+void flowStatsUpdate(struct flowStats* s, struct flowEvent e, struct FloatRates rates,
+    bool enableDerotation, struct cameraIntrinsicParameters intrinsics);
 
 /**
  * Recomputation of the flow field using the latest statistics.
