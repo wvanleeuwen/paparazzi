@@ -55,7 +55,7 @@ extern uint8_t MoveForward(float vx);
 extern uint8_t MoveRight(float vy);
 
 extern bool RotateToHeading(float heading);
-extern bool RotateToHeadingWithRate(float heading, float rate);
+extern bool WaitforHeading(float heading);
 
 extern bool TakeOff(float climb_rate);
 extern bool LiftOff(float throttle);
@@ -90,7 +90,7 @@ extern bool disable_sideways_forcefield;
 extern bool range_sensor_wall_following_between_doors(float travel_time);
 
 extern bool init_landing_pad(void);
-extern bool Decend_on_landing_pad(float alt);
+extern bool Decend_on_landing_pad(float alt, bool yaw_to_sp);
 extern uint8_t landing_state;
 extern int8_t lost_frames;
 extern float initial_heading;

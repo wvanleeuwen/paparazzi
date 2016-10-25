@@ -85,7 +85,7 @@
     </module>
     
     <module name="digital_cam_video">
-      <define name="DC_AUTOSHOOT_PERIOD" value="0.25"/>
+      <define name="DC_AUTOSHOOT_PERIOD" value="3."/>
       <define name="DC_SHOT_SYNC_SEND" value="false"/>
     </module>
     

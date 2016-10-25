@@ -76,33 +76,41 @@
     
     <block name="Survey Room Simple">
       <call_once fun="front_cam_set_x_offset(896)"/>
-      <set var="dc_autoshoot" value="DC_AUTOSHOOT_PERIODIC"/>
-      <call_once fun="guidance_h_set_guided_pos_relative(0., 9.)"/>
+      <set var="dc_autoshoot_period" value="0.25"/>
+      <call_once fun="guidance_h_set_guided_pos_relative(9., 0.)"/>
       <set var="end_block_time" value="block_time+20" />
       <while cond="LessThan(block_time,end_block_time)"/>
+      <call_once fun="Hover(nom_flight_alt)"/>
       <call_once fun="guidance_h_set_guided_heading_rate(0.25)"/>
       <set var="end_block_time" value="block_time+14" />
       <while cond="LessThan(block_time,end_block_time)"/>
-      <set var="dc_autoshoot" value="DC_AUTOSHOOT_STOP"/>
+      <call_once fun="Hover(nom_flight_alt)"/>
+      <set var="dc_autoshoot_period" value="DC_AUTOSHOOT_PERIOD"/>
       <deroute block="Hover"/>
     </block>
     
     <block name="Survey Room Awesome">
       <call_once fun="front_cam_set_x_offset(896)"/>
-      <set var="dc_autoshoot" value="DC_AUTOSHOOT_PERIODIC"/>
+      <set var="dc_autoshoot_period" value="0.25"/>
+      <call_once fun="guidance_h_set_guided_pos_relative(9., 0.)"/>
+      <set var="end_block_time" value="block_time+20" />
+      <while cond="LessThan(block_time,end_block_time)"/>
+      <call_once fun="Hover(nom_flight_alt)"/>
+      <set var="initial_heading" value="stateGetNedToBodyEulers_f()->psi"/>
+      <call_once fun="WaitforHeading(initial_heading - 11./7.)"/>
       <call_once fun="guidance_h_set_guided_pos_relative(0., 9.)"/>
       <set var="end_block_time" value="block_time+20" />
       <while cond="LessThan(block_time,end_block_time)"/>
-      <call_once fun="RotateToHeadingWithRate(11./7., 0.25)"/>
+      <call_once fun="Hover(nom_flight_alt)"/>
+      <call_once fun="guidance_h_set_guided_heading_rate(0.25)"/>
       <set var="end_block_time" value="block_time+14" />
-      <while cond="LessThan(block_time,end_block_time)"/>
-      <set var="dc_autoshoot" value="DC_AUTOSHOOT_STOP"/>
+      <set var="dc_autoshoot_period" value="DC_AUTOSHOOT_PERIOD"/>
       <deroute block="Hover"/>
     </block>
 
     <block name="Take-off">
       <call_once fun="ResetAlt()"/>
-      <call_once fun="initial_heading = stateGetNedToBodyEulers_f()->psi"/>
+      <set var="initial_heading" value="stateGetNedToBodyEulers_f()->psi"/>
       <call fun="StartEngines()"/>
       <call fun="TakeOff(1.0)"/>
       <call fun="WaitUntilAltitude(nom_flight_alt - 0.2)"/>
@@ -110,6 +118,7 @@
     </block>
 
     <block name="TakeOffEnthusiastically">
+      <set var="initial_heading" value="stateGetNedToBodyEulers_f()->psi"/>
       <call_once fun="ResetAlt()"/>
       <call_once fun="ResetSpecialTimer()"/>
       <call fun="StartEngines()"/>
@@ -120,37 +129,41 @@
     
     <block name="Hover after take-off">
       <call_once fun="Hover(3)"/>
-      <call_once fun="guidance_h_set_guided_heading(initial_heading)"/>
+      <call fun="WaitforHeading(initial_heading)"/>
       <while cond="2 > block_time"/>
     </block>
     
     <!-- takeoff, set initial_heading-->
     <block name="Fly to and into House">
-      <call_once fun="guidance_h_set_guided_body_vel(0.3, 0.1)"/>
+      <call_once fun="guidance_h_set_guided_body_vel(0.3, 0.)"/>
+        <set var="end_block_time" value="block_time+10" />
+      <while cond="LessThan(block_time,end_block_time)"/>
       <call_once fun="guidance_v_set_guided_z(nom_flight_alt)"/>
       <call_once fun="detector_disable_all()"/>
       <call_once fun="front_cam_set_x_offset(896)"/>
       <set var="win_state" value="0"/>
       <call fun="fly_through_window(SNAKE_WINDOW)"/>
       <call_once fun="detector_disable_all()"/>
-      <call_once fun="guidance_h_set_guided_pos_relative(filtered_x_gate - 1.5, filtered_y_gate)"/>
-      <set var="end_block_time" value="block_time+10" />
+      <!--call_once fun="guidance_h_set_guided_pos_relative(filtered_x_gate - 1.5, filtered_y_gate)"/-->
+      <call_once fun="guidance_h_set_guided_body_vel(-0.3, 0)"/>
+      <set var="end_block_time" value="block_time+6" />
       <while cond="LessThan(block_time,end_block_time)"/>
     </block>
     
     <block name="Move to Landing pad">
-      <call_once fun="guidance_h_set_guided_heading_relative(22./7.)"/>
+      <set var="initial_heading" value="stateGetNedToBodyEulers_f()->psi"/>
+      <call fun="WaitforHeading(initial_heading + 22./7.)"/>
       <call_once fun="guidance_h_set_guided_body_vel(0.3, 0.1)"/>
-      <call_once fun="guidance_v_set_guided_vz(0.3)"/>
-      <call fun="WaitUntilMarker()"/>
+      <call_once fun="guidance_v_set_guided_vz(-0.3)"/>
+      <set var="end_block_time" value="block_time+6" />
+      <while cond="LessThan(block_time,end_block_time)"/>
     </block>
     
     <block name="Find Landing pad bottom only">
       <call_once fun="detector.bottom_red_item->active = true"/>
-      <set var="landing_state" value="0"/>
-      <set var="lost_frames" value="0"/>
       <call fun="init_landing_pad()"/>
-      <call_once fun="Decend_on_landing_pad(0.8)"/>
+      <call_once fun="Decend_on_landing_pad(0.8, 0)"/>
+      <deroute block="Land on platform"/>
     </block>
     
     <block name="Find Landing pad front search bottom only">
@@ -159,7 +172,8 @@
       <set var="landing_state" value="0"/>
       <set var="lost_frames" value="0"/>
       <call fun="init_landing_pad()"/>
-      <call_once fun="Decend_on_landing_pad(0.8)"/>
+      <call_once fun="Decend_on_landing_pad(0.8, 1)"/>
+      <deroute block="Land on platform"/>
     </block>
     
     <block name="Land on platform">
@@ -242,6 +256,12 @@
        <call_once fun="snake_gate_detection_snake_gate_detection_periodic_status = MODULES_STOP"/>
        <while cond="1"/>
     </block>
+    
+    <block name = "Reset autoshoot period">
+       <set var="dc_autoshoot_period" value="DC_AUTOSHOOT_PERIOD"/>
+       <while cond="1"/>
+    </block>
+    
     
     <block name="TESTING - Hover forever">
       <call fun="Hover(nom_flight_alt)"/>

@@ -179,11 +179,10 @@ bool RotateToHeading(float heading) {
 }
 
 
-bool RotateToHeadingWithRate(float heading, float rate) {
+bool WaitforHeading(float heading) {
   if (autopilot_mode != AP_MODE_GUIDED) { return true; }
 
-  guidance_h_set_guided_heading_rate(rate);
-
+  guidance_h_set_guided_heading_rate(1.);
   if (fabs(heading - stateGetNedToBodyEulers_f()->psi) < 0.1) {
     guidance_h_set_guided_heading(heading);
     return false;
@@ -710,13 +709,16 @@ bool init_landing_pad(void) {
   marker1.geo_location.x = stateGetPositionNed_f()->x;
   marker1.geo_location.y = stateGetPositionNed_f()->y;
 
+  landing_state = 0;
+  lost_frames = 0;
+
   return false;
 }
 
 uint8_t landing_state = 0;
 float initial_heading = 0;
 int8_t lost_frames = 0;
-bool Decend_on_landing_pad(float alt) {
+bool Decend_on_landing_pad(float alt, bool yaw_to_sp) {
   // If we are not in guided mode
   if (autopilot_mode != AP_MODE_GUIDED) {
     // Reset the approach strategy and loop
@@ -726,10 +728,22 @@ bool Decend_on_landing_pad(float alt) {
   }
 
   switch (landing_state){
-    case 0: // find and decend marker
+    case 0: // find marker
       if (marker1.detected && !marker1.processed){
         guidance_h_set_guided_pos(marker1.geo_location.x, marker1.geo_location.y);
-        guidance_v_set_guided_vz(-0.5);
+        guidance_v_set_guided_vz(0.5);
+        marker1.processed = true;
+        landing_state++;
+      } else {
+        if (yaw_to_sp && marker2.detected && !marker2.processed){
+          guidance_h_set_guided_heading_relative((marker2.pixel.y - 320) * 0.00328125);
+        }
+      }
+      break;
+    case 1: // marker found, track and descend
+      if (marker1.detected && !marker1.processed){
+        guidance_h_set_guided_pos(marker1.geo_location.x, marker1.geo_location.y);
+        guidance_v_set_guided_vz(0.5);
         marker1.processed = true;
 
         if (stateGetPositionEnu_f()->z <= alt){
@@ -740,13 +754,13 @@ bool Decend_on_landing_pad(float alt) {
         guidance_v_set_guided_z(stateGetPositionNed_f()->z);
       }
       break;
-    case 1: // wait for marker detected
+    case 2: // wait for marker detected
       if(marker1.detected){
         lost_frames--;
         if (lost_frames < 0){
           lost_frames = 0;
         } else {lost_frames++;}
-        if (lost_frames >= 3){
+        if (lost_frames >= 5){
           return false;
         }
       }

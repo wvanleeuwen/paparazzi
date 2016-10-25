@@ -237,7 +237,7 @@ void viewvideo_init(void)
 
 #ifdef VIEWVIDEO_CAMERA2
   struct video_listener *listener2 = cv_add_to_device(&VIEWVIDEO_CAMERA2, viewvideo_function2);
-  listener2->maximum_fps = 5; // VIEWVIDEO_FPS;
+  listener2->maximum_fps = 5; // RVIEWVIDEO_FPS;
 #endif
 
   viewvideo.is_streaming = true;
