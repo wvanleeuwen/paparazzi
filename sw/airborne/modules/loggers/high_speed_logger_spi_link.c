@@ -99,6 +99,7 @@ void high_speed_logger_spi_link_periodic(void)
     high_speed_logger_spi_link_data.theta      = eofState.wyTruth*1000000;
     high_speed_logger_spi_link_data.psi        = eofState.DTruth *1000000;
     high_speed_logger_spi_link_data.extra1     = get_sys_time_usec()-startTime;
+    high_speed_logger_spi_link_data.extra2     = eofState.controlThrottleLast;
 
     spi_submit(&(HIGH_SPEED_LOGGER_SPI_LINK_DEVICE), &high_speed_logger_spi_link_transaction);
   }

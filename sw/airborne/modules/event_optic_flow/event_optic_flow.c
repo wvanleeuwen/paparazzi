@@ -32,7 +32,6 @@
  */
 
 #include "event_optic_flow.h"
-//#include "divergence_landing_control.h"
 
 #include "mcu_periph/uart.h"
 #include "mcu_periph/sys_time.h"
@@ -40,6 +39,9 @@
 #include "subsystems/datalink/telemetry.h"
 #include "math/pprz_algebra_float.h"
 #include "state.h"
+
+#include "paparazzi.h"
+#include "firmwares/rotorcraft/stabilization.h"
 
 
 #ifndef DVS_PORT
@@ -58,7 +60,7 @@ PRINT_CONFIG_VAR(EOF_ENABLE_DEROTATION)
 PRINT_CONFIG_VAR(EOF_FILTER_TIME_CONSTANT)
 
 #ifndef EOF_INLIER_MAX_DIFF
-#define EOF_INLIER_MAX_DIFF 0.1f
+#define EOF_INLIER_MAX_DIFF 0.3f
 #endif
 PRINT_CONFIG_VAR(EOF_INLIER_MAX_DIFF)
 
@@ -68,7 +70,7 @@ PRINT_CONFIG_VAR(EOF_INLIER_MAX_DIFF)
 PRINT_CONFIG_VAR(EOF_DEROTATION_MOVING_AVERAGE_FACTOR)
 
 #ifndef EOF_MIN_EVENT_RATE
-#define EOF_MIN_EVENT_RATE 2000.0f
+#define EOF_MIN_EVENT_RATE 1500.0f
 #endif
 PRINT_CONFIG_VAR(EOF_MIN_EVENT_RATE)
 
@@ -83,14 +85,24 @@ PRINT_CONFIG_VAR(EOF_MIN_POSITION_VARIANCE)
 PRINT_CONFIG_VAR(EOF_MIN_R2)
 
 #ifndef EOF_DIVERGENCE_CONTROL_PGAIN
-#define EOF_DIVERGENCE_CONTROL_PGAIN 1.0f
+#define EOF_DIVERGENCE_CONTROL_PGAIN 0.2f
 #endif
 PRINT_CONFIG_VAR(EOF_DIVERGENCE_CONTROL_PGAIN)
 
 #ifndef EOF_DIVERGENCE_CONTROL_DIV_SETPOINT
-#define EOF_DIVERGENCE_CONTROL_DIV_SETPOINT 0.3f
+#define EOF_DIVERGENCE_CONTROL_DIV_SETPOINT 0.2f
 #endif
 PRINT_CONFIG_VAR(EOF_DIVERGENCE_CONTROL_DIV_SETPOINT)
+
+#ifndef EOF_DIVERGENCE_CONTROL_HEIGHT_LIMIT
+#define EOF_DIVERGENCE_CONTROL_HEIGHT_LIMIT 0.8f
+#endif
+PRINT_CONFIG_VAR(EOF_DIVERGENCE_CONTROL_HEIGHT_LIMIT)
+
+#ifndef EOF_DIVERGENCE_CONTROL_USE_VISION
+#define EOF_DIVERGENCE_CONTROL_USE_VISION 0
+#endif
+PRINT_CONFIG_VAR(EOF_DIVERGENCE_CONTROL_USE_VISION)
 
 #ifndef EOF_CONTROL_HOVER
 #define EOF_CONTROL_HOVER 0
@@ -102,20 +114,28 @@ PRINT_CONFIG_VAR(EOF_DIVERGENCE_CONTROL_DIV_SETPOINT)
 
 #define IR_LEDS_SWITCH 0
 
-// State redeclaration
+/**************
+* DEFINITIONS *
+***************/
+
+// State definition
 struct module_state eofState;
 
-// Algorithm parameters
+// Sensing parameters
 uint8_t enableDerotation = EOF_ENABLE_DEROTATION;
 float inlierMaxDiff = EOF_INLIER_MAX_DIFF;
-float divergenceControlGainP = EOF_DIVERGENCE_CONTROL_PGAIN;
-float divergenceControlSetpoint = EOF_DIVERGENCE_CONTROL_DIV_SETPOINT;
 float derotationMovingAverageFactor = EOF_DEROTATION_MOVING_AVERAGE_FACTOR;
 
 // Confidence thresholds
 float minPosVariance = EOF_MIN_POSITION_VARIANCE;
 float minEventRate = EOF_MIN_EVENT_RATE;
 float minR2 = EOF_MIN_R2;
+
+// Control parameters
+float divergenceControlGainP = EOF_DIVERGENCE_CONTROL_PGAIN;
+float divergenceControlSetpoint = EOF_DIVERGENCE_CONTROL_DIV_SETPOINT;
+float divergenceControlHeightLimit = EOF_DIVERGENCE_CONTROL_HEIGHT_LIMIT;
+uint8_t divergenceControlUseVision = EOF_DIVERGENCE_CONTROL_USE_VISION;
 
 // Logging controls
 bool irLedSwitch = IR_LEDS_SWITCH;
@@ -129,6 +149,10 @@ const float LENS_DISTANCE_TO_CENTER = 0.13f; // approximate distance of lens foc
 const uint32_t EVENT_BYTE_SIZE = 13; // +1 for separator
 const float inactivityDecayFactor = 0.8f;
 const float power = 1;
+const float NOMINAL_THRUST = 0.7f; //TODO find MAVTEC value
+const float LANDING_THRUST_FRACTION = 0.95f; //TODO find MAVTEC value
+const float CONTROL_CONFIDENCE_LIMIT = 0.2f;
+const float CONTROL_CONFIDENCE_MAX_DT = 0.2f;
 
 // Camera intrinsic parameters
 const struct cameraIntrinsicParameters dvs128Intrinsics = {
@@ -143,8 +167,12 @@ enum updateStatus processUARTInput(struct flowStats* s, int32_t* N);
 static void sendFlowFieldState(struct transport_tx *trans, struct link_device *dev);
 int16_t uartGetInt16(struct uart_periph *p);
 int32_t uartGetInt32(struct uart_periph *p);
+void divergenceControlReset(void);
 
-// ----- Implementations start here -----
+
+/*************************
+* MAIN SENSING FUNCTIONS *
+*************************/
 void event_optic_flow_init(void) {
 	register_periodic_telemetry(DefaultPeriodic,
 	    PPRZ_MSG_ID_EVENT_OPTIC_FLOW_EST, sendFlowFieldState);
@@ -167,6 +195,7 @@ void event_optic_flow_start(void) {
   eofState.field = field;
   flowStatsInit(&eofState.stats);
   eofState.caerInputReceived = false;
+  divergenceControlReset();
 }
 
 void event_optic_flow_periodic(void) {
@@ -202,8 +231,10 @@ void event_optic_flow_periodic(void) {
 	else {
 	  // Assign timestamp to last update
 	  eofState.field.t = currentTime;
+	  // Allow controller to update
+	  eofState.divergenceUpdated = true;
 	}
-  // Set confidence level globally
+  // Set  status globally
   eofState.status = status;
 
   // Reset sums for next iteration
@@ -218,15 +249,9 @@ void event_optic_flow_periodic(void) {
     eofState.stats.N[i] *= d;
   }
 
-	// Derotate flow field if enabled
-//	if (enableDerotation) {
-//		derotateFlowField(&eofState.field, &eofState.ratesMA);
-//	}
-//	else {
-	  // Default: simply copy result
+  //TODO get rid of wx/wyDerotated correctly
 	  eofState.field.wxDerotated = eofState.field.wx;
 	  eofState.field.wyDerotated = eofState.field.wy;
-//	}
 
 	// Update height/ground truth speeds from Optitrack
   struct NedCoor_f *pos = stateGetPositionNed_f();
@@ -248,7 +273,7 @@ void event_optic_flow_periodic(void) {
   eofState.wyTruth = (vel->x*cosf(ang->psi) +vel->y*sinf(ang->psi)) / (pos->z - 0.01);
   eofState.DTruth = -vel->z / (pos->z - 0.01);
 
-	// Set control signals
+	// Set hover control signals
 	if (EOF_CONTROL_HOVER) {
 
 	  // Assuming a perfectly aligned downward facing camera,
@@ -263,12 +288,108 @@ void event_optic_flow_periodic(void) {
 	  // Update control state
 	  AbiSendMsgVELOCITY_ESTIMATE(1, timestamp, vxB, vyB, vzB, 0);
 	}
+
+	// TEST CONTROLLER MAINLOOP
+	guidance_v_module_run(true);
 }
 
 void event_optic_flow_stop(void) {
   //TODO is now present as dummy, may be removed if not required
 }
 
+/******************************
+* VERTICAL GUIDANCE FUNCTIONS *
+******************************/
+void guidance_v_module_init() {
+  //TODO is this part necessary?
+  divergenceControlReset();
+}
+
+void guidance_v_module_enter() {
+  divergenceControlReset();
+}
+
+void guidance_v_module_run(bool in_flight) {
+  if (!in_flight) {
+    // When not flying and in mode module:
+    // Reset state
+    divergenceControlReset();
+  }
+  else {
+    /*
+     * UPDATE
+     */
+    if (divergenceControlUseVision) {
+      // Use latest divergence estimate
+      if (eofState.divergenceUpdated) {
+        eofState.divergenceControlLast = eofState.field.D;
+        eofState.divergenceUpdated = false;
+      }
+      else {
+        // after re-entering the module, the divergence should be equal to the set point:
+        if (eofState.controlReset) {
+          eofState.divergenceControlLast = divergenceControlSetpoint;
+          int32_t nominal_throttle = NOMINAL_THRUST * MAX_PPRZ;
+          //stabilization_cmd[COMMAND_THRUST] = nominal_throttle;
+          eofState.controlReset = false;
+          eofState.controlThrottleLast = nominal_throttle;
+        }
+        // else: do nothing
+        return;
+      }
+    }
+    else {
+      // Use ground truth divergence
+      // Update height/ground truth speeds from Optitrack
+      struct NedCoor_f *pos = stateGetPositionNed_f();
+      struct NedCoor_f *vel = stateGetSpeedNed_f();
+      float DTruth = -vel->z / (pos->z - 0.01);
+      float deltaD = DTruth-eofState.divergenceControlLast;
+      // Cap update rate to prevent outliers
+      Bound(deltaD, -inlierMaxDiff, inlierMaxDiff);
+      eofState.divergenceControlLast += deltaD;
+      eofState.DTruth = eofState.divergenceControlLast;
+    }
+
+    // Cap divergence in case of unreliable values
+    float divergenceLimit = 1.5;
+    Bound(eofState.divergenceControlLast, -divergenceLimit, divergenceLimit);
+
+    /*
+     * CONTROL
+     */
+    int32_t nominalThrottle = NOMINAL_THRUST * MAX_PPRZ;
+
+    // landing indicates whether the drone is already performing a final landing procedure (flare):
+    if (!eofState.landing) {
+        // use the divergence for control:
+        float err = divergenceControlSetpoint - eofState.divergenceControlLast;
+        // Negative P-gain - positive control yields negative increase in div
+        int32_t thrust = nominalThrottle - divergenceControlGainP * err * MAX_PPRZ;
+
+        if (eofState.z_NED > -divergenceControlHeightLimit) {
+        // land by setting 90% nominal thrust:
+          eofState.landing = true;
+          thrust = LANDING_THRUST_FRACTION * nominalThrottle;
+        }
+        // bound thrust:
+        Bound(thrust, 0.8 * nominalThrottle, 0.8 * MAX_PPRZ);
+        //stabilization_cmd[COMMAND_THRUST] = thrust;
+        eofState.controlThrottleLast = thrust;
+
+    } else {
+      // land with constant fraction of nominal thrust:
+      int32_t thrust = LANDING_THRUST_FRACTION * nominalThrottle;
+      Bound(thrust, 0.6 * nominalThrottle, 0.8 * MAX_PPRZ);
+      // stabilization_cmd[COMMAND_THRUST] = thrust;
+      eofState.controlThrottleLast = thrust;
+    }
+  }
+}
+
+/***********************
+* SUPPORTING FUNCTIONS
+***********************/
 int16_t uartGetInt16(struct uart_periph *p) {
   int16_t out = 0;
   out |= uart_getch(p);
@@ -346,16 +467,23 @@ static void sendFlowFieldState(struct transport_tx *trans, struct link_device *d
   float wx = eofState.field.wx;
   float wy = eofState.field.wy;
   float D  = eofState.field.D;
-  float wxDerotated = eofState.ratesMA.p;
-  float wyDerotated = eofState.ratesMA.q;
-//  wxDerotated = eofState.field.wxDerotated;
-//  wyDerotated = eofState.field.wyDerotated;
+  float p = eofState.ratesMA.p;
+  float q = eofState.ratesMA.q;
   float wxTruth = eofState.wxTruth;
   float wyTruth = eofState.wyTruth;
   float DTruth = eofState.DTruth;
+  int32_t controlThrottle = eofState.controlThrottleLast;
+  uint8_t controlMode = eofState.landing;
 
   pprz_msg_send_EVENT_OPTIC_FLOW_EST(trans, dev, AC_ID,
-      &fps, &status, &confidence, &eventRate, &wx, &wy, &D, &wxDerotated, &wyDerotated,
-      &wxTruth,&wyTruth,&DTruth);
+      &fps, &status, &confidence, &eventRate, &wx, &wy, &D, &p, &q,
+      &wxTruth,&wyTruth,&DTruth,&controlThrottle,&controlMode);
 }
 
+void divergenceControlReset(void) {
+  eofState.controlReset = true;
+  eofState.landing = false;
+  eofState.divergenceUpdated = false;
+  eofState.divergenceControlLast = 0.0f;
+  eofState.controlThrottleLast = 0;
+}

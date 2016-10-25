@@ -17,7 +17,7 @@
         <define name="RADIO_MODE" value="RADIO_AUX2"/>
       </module>
       <configure name="NO_LUFTBOOT" value="1"/>
-      <!--configure name="USE_BARO_BOARD" value="TRUE"/-->
+      <configure name="USE_BARO_BOARD" value="TRUE"/>
       <configure name="USE_MAGNETOMETER" value="1"/>
       <configure name="FLASH_MODE" value="SWD" />
       <!-- MPU6000 is configured to output data at 2kHz, but polled at 512Hz PERIODIC_FREQUENCY -->
@@ -233,7 +233,7 @@
   <section name="AUTOPILOT">
     <define name="MODE_MANUAL" value="AP_MODE_ATTITUDE_DIRECT"/>
     <define name="MODE_AUTO1"  value="AP_MODE_HOVER_Z_HOLD"/>
-    <define name="MODE_AUTO2"  value="AP_MODE_NAV"/>
+    <define name="MODE_AUTO2"  value="AP_MODE_MODULE"/>
   </section>
 
   <section name="BAT">

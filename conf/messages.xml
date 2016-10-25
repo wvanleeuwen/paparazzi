@@ -2041,11 +2041,13 @@
     <field name="ventral_flow_x"    	type="float" unit="1/s"/>
     <field name="ventral_flow_y"    	type="float" unit="1/s"/>
     <field name="divergence"    	type="float" unit="1/s"/>
-    <field name="flow_x_der"    	type="float" unit="1/s"/>
-    <field name="flow_y_der"    	type="float" unit="1/s"/>
+    <field name="rate_p"    		type="float" unit="rad/s"/>
+    <field name="rate_q"    		type="float" unit="rad/s"/>
     <field name="wx_T"    		type="float" unit="1/s"/>
     <field name="wy_T"    		type="float" unit="1/s"/>
     <field name="D_T"    		type="float" unit="1/s"/>
+    <field name="control_throttle"    	type="int32" unit="-"/>
+    <field name="control_mode"		type="uint8" values="DESCENDING|LANDING"/>
   </message>
 
   <message name="ROTORCRAFT_STATUS" id="231">
