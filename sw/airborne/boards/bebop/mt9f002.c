@@ -94,19 +94,6 @@ struct video_config_t front_camera = {
        __typeof__ (a1) _r = _x%_a1; \
        _r ? _x + (_a1 - _r) : _x; })
 
-#define CFG_SCALER_M_MIN 						16
-#define CFG_SCALER_M_MAX 						128
-#define CFG_MT9F002_PIXEL_ARRAY_HEIGHT			3492 // 3418
-#define CFG_MT9F002_PIXEL_ARRAY_WIDTH			4282
-#define	CFG_MT9F002_X_ADDR_MIN			        416
-#define	CFG_MT9F002_X_ADDR_MAX			        4282
-#define	CFG_MT9F002_Y_ADDR_MIN			        0
-#define	CFG_MT9F002_Y_ADDR_MAX			        3492 // 3418
-#define	CFG_MT9F002_WINDOW_HEIGHT_MIN           1
-#define	CFG_MT9F002_WINDOW_HEIGHT_MAX			3492 // 3418
-#define	CFG_MT9F002_WINDOW_WIDTH_MIN        	1
-#define	CFG_MT9F002_WINDOW_WIDTH_MAX			3866
-
 struct blanking_ {
 	uint16_t min_line_blanking_pck;
 	uint16_t min_line_length_pck;
@@ -576,7 +563,6 @@ static inline void mt9f002_parallel_stage2(struct mt9f002_t *mt)
   if(mt->x_odd_inc > 1 && mt->y_odd_inc > 1)
   {
 	  write_reg(mt, MT9F002_READ_MODE			, 0x0441, 2);
-	  //write_reg(mt, MT9F002_READ_MODE			, 0x0041, 2);
 	  write_reg(mt, MT9F002_X_ODD_INC			, mt->x_odd_inc, 2);
 	  write_reg(mt, MT9F002_Y_ODD_INC			, mt->y_odd_inc, 2);
 	  // bayer resampling
@@ -633,34 +619,34 @@ static void mt9f002_blanking_init(struct mt9f002_t *mt)
 		if (mt->y_odd_inc > 1)
 		{
 			/* Binning XY */
-			mt9f002_blanking.min_line_blanking_pck 	= 2950;
-			mt9f002_blanking.min_line_length_pck 	= 4650;
-			mt9f002_blanking.min_line_fifo_pck 		= 120;
-			mt9f002_blanking.fine_integration_time_max_margin = 2000;
-			mt9f002_blanking.fine_integration_time_min = 2200;
+			mt9f002_blanking.min_line_blanking_pck 				= 2950;
+			mt9f002_blanking.min_line_length_pck 				= 4650;
+			mt9f002_blanking.min_line_fifo_pck 					= 120;
+			mt9f002_blanking.fine_integration_time_max_margin 	= 2000;
+			mt9f002_blanking.fine_integration_time_min 			= 2200;
 		} else {
 			/* Binning X */
-			mt9f002_blanking.min_line_blanking_pck 	= 0;
-			mt9f002_blanking.min_line_length_pck 	= 3495;
-			mt9f002_blanking.min_line_fifo_pck 		= 60;
-			mt9f002_blanking.fine_integration_time_max_margin = 1500;
-			mt9f002_blanking.fine_integration_time_min = 1900;
+			mt9f002_blanking.min_line_blanking_pck 				= 0;
+			mt9f002_blanking.min_line_length_pck 				= 3495;
+			mt9f002_blanking.min_line_fifo_pck 					= 60;
+			mt9f002_blanking.fine_integration_time_max_margin 	= 1500;
+			mt9f002_blanking.fine_integration_time_min 			= 1900;
 		}
 	} else {
 		if (mt->output_scaler != 1) {
 			/* Scaler mode */
-			mt9f002_blanking.min_line_blanking_pck 	= 2400;
-			mt9f002_blanking.min_line_length_pck 	= 1750;
-			mt9f002_blanking.min_line_fifo_pck 		= 60;
-			mt9f002_blanking.fine_integration_time_max_margin = 1316;
-			mt9f002_blanking.fine_integration_time_min = 1032;
+			mt9f002_blanking.min_line_blanking_pck 				= 2400;
+			mt9f002_blanking.min_line_length_pck 				= 1750;
+			mt9f002_blanking.min_line_fifo_pck 					= 60;
+			mt9f002_blanking.fine_integration_time_max_margin 	= 1316;
+			mt9f002_blanking.fine_integration_time_min 			= 1032;
 		} else {
 			/* Normal mode */
-			mt9f002_blanking.min_line_blanking_pck 	= 1316;
-			mt9f002_blanking.min_line_length_pck 	= 1032;
-			mt9f002_blanking.min_line_fifo_pck 		= 60;
-			mt9f002_blanking.fine_integration_time_max_margin = 1316;
-			mt9f002_blanking.fine_integration_time_min = 1032;
+			mt9f002_blanking.min_line_blanking_pck 				= 1316;
+			mt9f002_blanking.min_line_length_pck 				= 1032;
+			mt9f002_blanking.min_line_fifo_pck 					= 60;
+			mt9f002_blanking.fine_integration_time_max_margin 	= 1316;
+			mt9f002_blanking.fine_integration_time_min 			= 1032;
 		}
 	}
 
@@ -675,7 +661,7 @@ static void mt9f002_set_blanking(struct mt9f002_t *mt)
   uint16_t min_line_fifo_pck 		= mt9f002_blanking.min_line_fifo_pck;
 
   //uint16_t min_line_blanking_pck = read_reg(mt, MT9F002_MIN_LINE_BLANKING_PCK, 2);
-  uint16_t x_odd_inc = read_reg(mt, MT9F002_X_ODD_INC, 2);
+  uint16_t x_odd_inc = mt->x_odd_inc;
   uint16_t min_frame_blanking_lines = read_reg(mt, MT9F002_MIN_FRAME_BLANKING_LINES, 2);
   //uint16_t min_line_length_pck = read_reg(mt, MT9F002_MIN_LINE_LENGTH_PCK, 2);
 
@@ -703,7 +689,7 @@ static void mt9f002_set_blanking(struct mt9f002_t *mt)
   /* Calculate minimum horizontal blanking, since fpga line_length must be divideable by 2 */
   uint32_t min_horizontal_blanking = clkRatio_num;
   if((clkRatio_den % 2) != 0) {
-    min_horizontal_blanking = 2 * clkRatio_num;
+    min_horizontal_blanking = 1 * clkRatio_num; // used to be 2 ?
   }
 
   /* Fix fpga correction based on min horizontal blanking */
@@ -713,7 +699,6 @@ static void mt9f002_set_blanking(struct mt9f002_t *mt)
 
   /* Calculate minimum frame length lines */
   uint16_t min_frame_length = (mt->scaled_height) / subsampling_factor + min_frame_blanking_lines; // (EQ 10)
-
   /* Calculate FPS we get using these minimums (Maximum FPS) */
   mt->line_length = min_line_length;
   mt->frame_length = min_frame_length;
@@ -939,7 +924,6 @@ void mt9f002_calc_resolution(struct mt9f002_t *mt)
 				rect.height);
 		/* Calculate binning / skipping for X */
 		div_res = rect.width / width;
-		printf("I wanted div: %i\n", div_res);
 		div_res = clamp_t(unsigned int,div_res, 1U, 4U);
 		x_odd_inc = xy_odd_inc_tab[div_res];
 		/* Calculate binning / skipping for Y */

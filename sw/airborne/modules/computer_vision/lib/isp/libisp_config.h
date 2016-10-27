@@ -42,14 +42,14 @@ struct libisp_config isp_config = {
 
   /* Don't bypass a bayer function */
   .bayer_inter = {{
-      .pedestal_bypass     = 0,
+      .pedestal_bypass     = 0,//0
       .grim_bypass         = 1,
       .rip_bypass          = 1,
-      .denoise_bypass      = 0,
-      .lsc_bypass          = 0,
+      .denoise_bypass      = 0,//0
+      .lsc_bypass          = 0,//0
       .chroma_aber_bypass  = 1,
-      .bayer_bypass        = 0,
-      .color_matrix_bypass = 0,
+      .bayer_bypass        = 0,//0
+      .color_matrix_bypass = 0,//0
   }},
 
   /* Pedestal */
@@ -145,7 +145,7 @@ struct libisp_config isp_config = {
     .circle_pos_y_center   = {{ CAMERA_H_FISHEYE_CENTER_Y }},
     .circle_pos_y_squared  = {{ CAMERA_H_FISHEYE_CENTER_Y * CAMERA_H_FISHEYE_CENTER_Y }},
     .circle_radius_squared = {{ CAMERA_H_FISHEYE_RADIUS * CAMERA_H_FISHEYE_RADIUS}},
-    .increments_log2       = {{ MT9F002_X_ODD_INC_VAL, MT9F002_Y_ODD_INC_VAL}},
+    .increments_log2       = {{ 2, 2}},
     .sat_threshold         = {{ 980 }}, //1022 - pedestal
     .cfa                   = {{ ISP_CFA }},
     .max_nb_windows        = {{ .x_window_count=BAYERSTATS_STATX, .y_window_count=BAYERSTATS_STATY }},
@@ -228,7 +228,7 @@ struct libisp_config isp_config = {
     .circle_pos_y_squared = {{ 2512225 }},
     .cfa = {{ ISP_CFA }},
     .green_variation = {{ 1 }},
-    .increments_log2 = {{ .x_log2_inc=0, .y_log2_inc=0 }},
+    .increments_log2 = {{ .x_log2_inc=2, .y_log2_inc=2 }},
   },
   */
 
@@ -465,7 +465,7 @@ struct libisp_config isp_config = {
     .circle_pos_y_center   = {{ CAMERA_H_FISHEYE_CENTER_Y }},
     .circle_pos_y_squared  = {{ CAMERA_H_FISHEYE_CENTER_Y * CAMERA_H_FISHEYE_CENTER_Y }},
     .circle_radius_squared = {{ CAMERA_H_FISHEYE_RADIUS * CAMERA_H_FISHEYE_RADIUS }},
-    .increments_log2       = {{ 0, 0 }},
+    .increments_log2       = {{ 2, 2 }},
     .awb_threshold         = { ._register = 0x00000021 },
   },
 

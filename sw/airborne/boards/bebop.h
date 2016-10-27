@@ -33,27 +33,28 @@
 #define MT9F002_THETA_OFFSET -30 * M_PI / 180
 #endif
 
-#ifndef MT9F002_OUTPUT_HEIGHT
-#define MT9F002_OUTPUT_HEIGHT 848
+#ifndef MT9F002_OUTPUT_WIDTH
+#define MT9F002_OUTPUT_WIDTH 960 // 960
 #endif
 
-#ifndef MT9F002_OUTPUT_WIDTH
-#define MT9F002_OUTPUT_WIDTH 960
+#ifndef MT9F002_OUTPUT_HEIGHT
+#define MT9F002_OUTPUT_HEIGHT 834 // 834
+#endif
+
+#ifndef MT9F002_SENSOR_HEIGHT
+#define MT9F002_SENSOR_HEIGHT (CFG_MT9F002_Y_ADDR_MAX - CFG_MT9F002_Y_ADDR_MIN)
 #endif
 
 #ifndef MT9F002_SENSOR_WIDTH
-#define MT9F002_SENSOR_WIDTH 3866
-#endif
-#ifndef MT9F002_SENSOR_HEIGHT
-#define MT9F002_SENSOR_HEIGHT 3418
+#define MT9F002_SENSOR_WIDTH  (CFG_MT9F002_X_ADDR_MAX - CFG_MT9F002_X_ADDR_MIN)
 #endif
 
 #ifndef MT9F002_INITIAL_OFFSET_X
-#define MT9F002_INITIAL_OFFSET_X 416 // pixels in the raw sensor(please make steps of 2 for ISP)!!
+#define MT9F002_INITIAL_OFFSET_X (CFG_MT9F002_X_ADDR_MIN) // pixels in the raw sensor(please make steps of 2 for ISP)!!
 #endif
 
 #ifndef MT9F002_INITIAL_OFFSET_Y
-#define MT9F002_INITIAL_OFFSET_Y 0 // pixels in the raw sensor(please make steps of 2 for ISP)!!
+#define MT9F002_INITIAL_OFFSET_Y (CFG_MT9F002_Y_ADDR_MIN) // pixels in the raw sensor(please make steps of 2 for ISP)!!
 #endif
 
 /** Our output is only OUTPUT_SCALER of the pixels we take of the sensor
@@ -88,7 +89,7 @@
 #endif
 
 #ifndef MT9F002_TARGET_FPS
-#define MT9F002_TARGET_FPS 15
+#define MT9F002_TARGET_FPS 30
 #endif
 
 /* Set the colour balance gains */

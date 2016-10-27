@@ -15,10 +15,10 @@
 	
 	<define name="MT9F002_TARGET_FPS" value="30" />
 	<define name="MT9F002_TARGET_EXPOSURE" value="4" /> 
-	<define name="MT9F002_GAIN_GREEN1" value="50.0" />
-	<define name="MT9F002_GAIN_GREEN2" value="50.0" />
-	<define name="MT9F002_GAIN_RED" value="65.0" />
-	<define name="MT9F002_GAIN_BLUE" value="65.0" />
+	<define name="MT9F002_GAIN_GREEN1" value="6.0" />
+	<define name="MT9F002_GAIN_GREEN2" value="6.0" />
+	<define name="MT9F002_GAIN_RED" value="8.0" />
+	<define name="MT9F002_GAIN_BLUE" value="8.0" />
 
 	<!--<define name="USE_GPS_UBX_RTCM" value="TRUE"/> -->
     <module name="telemetry" type="transparent_udp"/>
@@ -54,14 +54,14 @@
 		<define name="WV_INIT_GLOBAL_ATTRACTOR" value="2" />
 	</module>
 	-->
-	<!-- <module name="cv_bebop_stabilization"/> -->
+	<module name="cv_bebop_stabilization"/>
 	<module name="video_rtp_stream">
 		<!--configure name="VIEWVIDEO_HOST" value="192.168.40.74" /-->
 		<configure name="VIEWVIDEO_HOST" value="192.168.42.65" />
 		<configure name="VIEWVIDEO_BROADCAST" value="FALSE" />
 		<define name="VIEWVIDEO_CAMERA" value="front_camera" />
 		<define name="VIEWVIDEO_SHOT_PATH" value="/data/ftp/internal_000" />
-		<define name="VIEWVIDEO_FPS" value="10" />
+		<define name="VIEWVIDEO_FPS" value="30" />
 		<define name="VIEWVIDEO_WRITE_VIDEO" value="FALSE"/>
 		<define name="VIEWVIDEO_VIDEO_FILE" value="fisheye_stabilization"/>
 		<define name="VIEWVIDEO_STREAM_VIDEO" value="TRUE"/>

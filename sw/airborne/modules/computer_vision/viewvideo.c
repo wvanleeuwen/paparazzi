@@ -82,7 +82,7 @@ PRINT_CONFIG_VAR(VIEWVIDEO_SHOT_PATH)
 
 // Define stream framerate
 #ifndef VIEWVIDEO_FPS
-#define VIEWVIDEO_FPS 15
+#define VIEWVIDEO_FPS 30
 #endif
 PRINT_CONFIG_VAR(VIEWVIDEO_FPS)
 
@@ -164,9 +164,8 @@ struct image_t *viewvideo_function(struct image_t *img)
                  img->w / VIEWVIDEO_DOWNSIZE_FACTOR,
                  img->h / VIEWVIDEO_DOWNSIZE_FACTOR,
                  IMAGE_YUV422);
-
-
   if (viewvideo.is_streaming) {
+#if VIEWVIDEO_WRITE_VIDEO || VIEWVIDEO_STREAM_VIDEO
 /*
 
 	  /////////////////////////////////////////////////////
@@ -259,11 +258,10 @@ struct image_t *viewvideo_function(struct image_t *img)
       }
       P7_H264_releaseOutputBuffer(&videoEncoder, h264BufferIndex);
     }
-
+#endif
   } else {
     v4l2_image_free(VIEWVIDEO_CAMERA.thread.dev, img);
   }
-
   return NULL; // No new images were created
 }
 
@@ -289,17 +287,20 @@ void viewvideo_init(void)
   struct video_listener *listener = cv_add_to_device(&VIEWVIDEO_CAMERA, viewvideo_function);
   listener->maximum_fps = 0;
 
+#if VIEWVIDEO_WRITE_VIDEO || VIEWVIDEO_STREAM_VIDEO
   viewvideo.is_streaming = true;
   videoEncoder.inputType = H264ENC_YUV422_INTERLEAVED_UYVY;
-#if VIEWVIDEO_WRITE_VIDEO
-  videoEncoder.bitRate   = 6*8*1000*1000; // 10 MBps
-#else
-  videoEncoder.bitRate   = 1*8*1000*1000; // 1 MBps
 #endif
+#if VIEWVIDEO_WRITE_VIDEO
+  videoEncoder.bitRate   = 6*8*1000*1000; // 6 MBps
+#else
+  videoEncoder.bitRate   = 1000*1000; // 1 Mbps
+#endif
+#if VIEWVIDEO_WRITE_VIDEO || VIEWVIDEO_STREAM_VIDEO
   videoEncoder.frameRate = VIEWVIDEO_FPS;
   videoEncoder.intraRate = VIEWVIDEO_FPS;
   P7_H264_open(&videoEncoder, VIEWVIDEO_CAMERA.thread.dev);
-
+#endif
   // Open udp socket
 #if VIEWVIDEO_STREAM_VIDEO
   char save_name[512];

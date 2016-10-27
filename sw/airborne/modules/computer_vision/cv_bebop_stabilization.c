@@ -78,13 +78,12 @@ GLuint ULMVPMat, ULscalar, ULlensCentre, ULaspectRatio, ULfocalLength, ULk;
 struct image_t* cv_bebop_stabilization_func (struct image_t *img)
 {
 	glUseProgram(opengl.programObject);
-	glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, mt9f002.output_width/2, mt9f002.output_height, GL_RGBA, GL_UNSIGNED_BYTE, img->buf);
+		glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, mt9f002.output_width/2, mt9f002.output_height, GL_RGBA, GL_UNSIGNED_BYTE, img->buf);
 	// Set the vertices
 	glVertexAttribPointer((GLuint) 0, 2, GL_FLOAT, GL_FALSE, 0, vVertices);
 	glEnableVertexAttribArray(0);
 	glVertexAttribPointer((GLuint) 1, 2, GL_FLOAT, 0, 0, textureVertices);
 	glEnableVertexAttribArray(1);
-
 	mat4 modelviewProjection, modelMat, viewMat, modelviewMat, projectionMat;
 	vec4 eye, forward, up;
 	eye[0] 		= 0.0;  eye[1] 		=  0.0; eye[2] 		= -1.0; 	eye[3] 		= 1.0;
@@ -119,6 +118,7 @@ struct image_t* cv_bebop_stabilization_func (struct image_t *img)
 	}
 	matrixMultiply(viewMat, modelMat, modelviewMat);
 	matrixMultiply(projectionMat, modelviewMat, modelviewProjection);
+
 	/*
 	printf("          Projection                          View                              Model\n");
 	printf("| %5.2f\t%5.2f\t%5.2f\t%5.2f |   | %5.2f\t%5.2f\t%5.2f\t%5.2f |   | %5.2f\t%5.2f\t%5.2f\t%5.2f |\n", projectionMat[0], projectionMat[4], projectionMat[8],  projectionMat[12], viewMat[0], viewMat[4], viewMat[8],  viewMat[12], modelMat[0], modelMat[4], modelMat[8],  modelMat[12]);
@@ -139,14 +139,14 @@ struct image_t* cv_bebop_stabilization_func (struct image_t *img)
 	glUniform2fv(ULlensCentre, 	1, &lensCentre[0]);
 	glUniform1fv(ULaspectRatio, 1, &aspectRatio);
 	glUniform1fv(ULfocalLength, 1, &focalLength);
-	glUniform1fv(ULk, 			1, &k_fisheye);
+	glUniform1fv(ULk,			1, &k_fisheye);
 	// Draw the square
 	//glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
 	glDrawElements(GL_TRIANGLE_STRIP, 6, GL_UNSIGNED_SHORT,  &indices[0]);
 	// Read the image back
 	glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
 	glReadPixels(0, 0, mt9f002.output_width/2, mt9f002.output_height, GL_RGBA, GL_UNSIGNED_BYTE, img->buf);
-	//glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	glFinish();
 	return img;
 }
@@ -194,7 +194,7 @@ void cv_bebop_stabilization_init ()
 			// in bool gl_FrontFacing
 			// in vec2 gl_PointCoord
 			vec2 outPos     = TextureCoord2GLCoord(v_textCoord.xy);
-			//gl_FragColor = texture2D(videoFrame, outPos.xy);
+			//gl_FragColor = texture2D(videoFrame, v_textCoord.xy);
 			if(outPos.y > 1.0 || outPos.y < -1.0 || outPos.x > 1.0 || outPos.x < -1.0)
 			{
 				gl_FragColor   = vec4(0.5, 0.0, 0.5, 0.0);

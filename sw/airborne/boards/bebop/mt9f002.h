@@ -27,6 +27,17 @@
 #ifndef MT9F002H
 #define MT9F002H
 
+#define CFG_SCALER_M_MIN 						16
+#define CFG_SCALER_M_MAX 						128
+#define	CFG_MT9F002_WINDOW_WIDTH_MIN        	1
+#define	CFG_MT9F002_WINDOW_HEIGHT_MIN           1
+#define CFG_MT9F002_PIXEL_ARRAY_HEIGHT			3344
+#define CFG_MT9F002_PIXEL_ARRAY_WIDTH			4256
+#define	CFG_MT9F002_X_ADDR_MIN			        416
+#define	CFG_MT9F002_X_ADDR_MAX			        CFG_MT9F002_PIXEL_ARRAY_WIDTH
+#define	CFG_MT9F002_Y_ADDR_MIN			        0
+#define	CFG_MT9F002_Y_ADDR_MAX			        CFG_MT9F002_PIXEL_ARRAY_HEIGHT
+
 #include "std.h"
 #include "mcu_periph/i2c.h"
 
