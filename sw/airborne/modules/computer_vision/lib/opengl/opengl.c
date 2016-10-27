@@ -123,94 +123,39 @@ bool opengl_init(void)
     eglTerminate(opengl.display);
     return FALSE;
   }
+  opengl_createProgram();
+  return TRUE;
+}
 
-  char vShaderStr[] = STRINGIFY(
-	attribute vec4 aVertexPosition;
-	attribute vec4 inputTextureCoordinate;
-    varying vec4 vPosition;
-    varying vec2 vTextureCoord;
-    void main() {
-      vPosition = aVertexPosition;
-      vTextureCoord = inputTextureCoordinate.xy;
-      gl_Position = vPosition;
-    }
-  );
-
-  printf("Shader string:\n");
-  char fShaderStr[] = STRINGIFY(
-  precision highp float;
-  uniform sampler2D videoFrame;
-
-  uniform vec4 uLens;
-  uniform vec2 uFov;
-
-  varying vec4 vPosition;
-  varying vec2 vTextureCoord;
-
-  vec2 GLCoord2TextureCoord(vec2 glCoord) {
-	  return glCoord  * vec2(1.0, -1.0)/ 2.0 + vec2(0.5, 0.5);
-  }
-
-  void main(){
-	  float scale = uLens.w;
-	  float F = uLens.z;
-
-	  float L = length(vec3(vPosition.xy/scale, F));
-
-	  vec2 vMapping = vPosition.xy * F / L;
-	  vMapping = vMapping * uLens.xy;
-
-	  vMapping = GLCoord2TextureCoord(vMapping/scale);
-
-	  vec4 texture = texture2D(videoFrame, vMapping);
-	  if(vMapping.x > 0.99 || vMapping.x < 0.01 || vMapping.y > 0.99 || vMapping.y < 0.01){
-		  texture = vec4(0.0, 0.0, 0.0, 1.0);
-	  }
-	  gl_FragColor = texture;
-  });
-
-  GLuint vertexShader = opengl_shader_load(vShaderStr, GL_VERTEX_SHADER);
-  GLuint fragmentShader = opengl_shader_load(fShaderStr, GL_FRAGMENT_SHADER);
-  opengl.programObject = glCreateProgram();
-
-  printf("Linking!\n");
-  glAttachShader(opengl.programObject, vertexShader);
-  glBindAttribLocation(opengl.programObject, 0, "aVertexPosition");
-  glBindAttribLocation(opengl.programObject, 1, "inputTextureCoordinate");
-
-  glAttachShader(opengl.programObject, fragmentShader);
-  glBindAttribLocation(opengl.programObject, 2, "uLens");
-  glBindAttribLocation(opengl.programObject, 3, "uFov");
+bool opengl_createProgram(){
+  opengl.programObject  = glCreateProgram();
+  return TRUE;
+}
 
 
+bool opengl_linkProgram(){
   glLinkProgram(opengl.programObject);
-
   GLint linked;
   glGetProgramiv(opengl.programObject, GL_LINK_STATUS, &linked);
   if (!linked)
   {
     printf("[opengl] Could not link program\n");
+    return FALSE;
   }
-  printf("Linking done!\n");
-
-
+  printf("[opengl] Shader linking successful\n");
   // Clear the color buffer (UYVY)
   glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
-
   //Create a texture
   glEnable(GL_TEXTURE_2D);
   glActiveTexture(GL_TEXTURE0);
   GLint texUnitLoc = glGetUniformLocation(opengl.programObject, "videoFrame");
   glUniform1i(texUnitLoc, 1);
   glBindTexture(GL_TEXTURE_2D, 1);
-
   glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_NEAREST);
   glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_LINEAR);
-
   // Set the viewport
   glViewport(0, 0, MT9F002_OUTPUT_WIDTH/2, MT9F002_OUTPUT_HEIGHT);
   glClear(GL_COLOR_BUFFER_BIT);
-
   return TRUE;
 }
 
@@ -231,9 +176,24 @@ GLuint opengl_shader_load(const char *shaderSrc, GLenum type)
 
   // Create the shader object
   shader = glCreateShader(type);
+  char shaderType[10];
+  switch(type)
+  {
+  case 0x8B30:
+	  strcpy(shaderType,"fragment");
+	  break;
+  case 0x8B31:
+	  strcpy(shaderType,"vertex");
+	  break;
+  default:
+	  strcpy(shaderType,"unknown");
+	  break;
+  }
   if (shader == 0) {
-    printf("[opengl] Failed to create shader of type %d\n", type);
+    printf("[opengl] Failed to create %s shader (type %d)\n", shaderType, type);
     return 0;
+  }else{
+	  printf("[opengl] Compiling %s shader..\n--------------------\n%s\n--------------------\n", shaderType, shaderSrc);
   }
 
   // Load the shader source
@@ -256,6 +216,8 @@ GLuint opengl_shader_load(const char *shaderSrc, GLenum type)
     }
     glDeleteShader(shader);
     return 0;
+  }else{
+	  printf("[opengl] Successfully compiled %s shader\n", shaderType);
   }
   return shader;
 }

@@ -46,6 +46,9 @@ extern struct opengl_t opengl;
 
 bool opengl_init(void);
 void opengl_free(void);
+bool opengl_linkProgram(void);
+bool opengl_createProgram(void);
 GLuint opengl_shader_load(const char *shaderSrc, GLenum type);
+GLuint opengl_shader_load_file(const char *shaderFile, GLenum type);
 
 #endif /* _CV_LIB_OPENGL_H */

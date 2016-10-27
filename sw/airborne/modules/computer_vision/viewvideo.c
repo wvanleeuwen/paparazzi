@@ -272,7 +272,6 @@ struct image_t *viewvideo_function(struct image_t *img)
  */
 void viewvideo_init(void)
 {
-  char save_name[512];
 #if VIEWVIDEO_WRITE_VIDEO
   char video_name[512];
   sprintf(video_name, "%s/%s.h264", STRINGIFY(VIEWVIDEO_SHOT_PATH), STRINGIFY(VIEWVIDEO_VIDEO_FILE));
@@ -293,9 +292,9 @@ void viewvideo_init(void)
   viewvideo.is_streaming = true;
   videoEncoder.inputType = H264ENC_YUV422_INTERLEAVED_UYVY;
 #if VIEWVIDEO_WRITE_VIDEO
-  videoEncoder.bitRate   = 3*8*1000*1000; // 3 MBps
+  videoEncoder.bitRate   = 6*8*1000*1000; // 10 MBps
 #else
-  videoEncoder.bitRate   = 10*1000*1000; // 10 Mbps
+  videoEncoder.bitRate   = 1*8*1000*1000; // 1 MBps
 #endif
   videoEncoder.frameRate = VIEWVIDEO_FPS;
   videoEncoder.intraRate = VIEWVIDEO_FPS;
@@ -303,6 +302,7 @@ void viewvideo_init(void)
 
   // Open udp socket
 #if VIEWVIDEO_STREAM_VIDEO
+  char save_name[512];
   udp_socket_create(&video_sock, STRINGIFY(VIEWVIDEO_HOST), VIEWVIDEO_PORT_OUT, -1, VIEWVIDEO_BROADCAST);
   udp_socket_set_sendbuf(&video_sock, 1500*10);
   // Create an SDP file for the streaming

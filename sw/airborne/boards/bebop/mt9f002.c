@@ -58,7 +58,7 @@ struct video_config_t front_camera = {
   },
   .dev_name = "/dev/video1",
   .subdev_name = "/dev/v4l-subdev1",
-  .format = V4L2_PIX_FMT_UYVY,
+  .format = V4L2_PIX_FMT_UYVY, /* V4L2_PIX_FMT_YUV422P V4L2_PIX_FMT_UYVY */
   .subdev_format = V4L2_MBUS_FMT_SGRBG10_1X10,
   .buf_cnt = 8,
   .filters = VIDEO_FILTER_ISP,
@@ -96,16 +96,16 @@ struct video_config_t front_camera = {
 
 #define CFG_SCALER_M_MIN 						16
 #define CFG_SCALER_M_MAX 						128
-#define CFG_MT9F002_PIXEL_ARRAY_HEIGHT			3418
-#define CFG_MT9F002_PIXEL_ARRAY_WIDTH			4647
-#define	CFG_MT9F002_X_ADDR_MIN			        24
-#define	CFG_MT9F002_X_ADDR_MAX			        4608
+#define CFG_MT9F002_PIXEL_ARRAY_HEIGHT			3492 // 3418
+#define CFG_MT9F002_PIXEL_ARRAY_WIDTH			4282
+#define	CFG_MT9F002_X_ADDR_MIN			        416
+#define	CFG_MT9F002_X_ADDR_MAX			        4282
 #define	CFG_MT9F002_Y_ADDR_MIN			        0
-#define	CFG_MT9F002_Y_ADDR_MAX			        3418
+#define	CFG_MT9F002_Y_ADDR_MAX			        3492 // 3418
 #define	CFG_MT9F002_WINDOW_HEIGHT_MIN           1
-#define	CFG_MT9F002_WINDOW_HEIGHT_MAX			3418
+#define	CFG_MT9F002_WINDOW_HEIGHT_MAX			3492 // 3418
 #define	CFG_MT9F002_WINDOW_WIDTH_MIN        	1
-#define	CFG_MT9F002_WINDOW_WIDTH_MAX			4608
+#define	CFG_MT9F002_WINDOW_WIDTH_MAX			3866
 
 struct blanking_ {
 	uint16_t min_line_blanking_pck;

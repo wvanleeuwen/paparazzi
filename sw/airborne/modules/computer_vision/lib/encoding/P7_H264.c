@@ -96,18 +96,18 @@ static int OpenEncoder(P7_H264_context_t* context)
       return -1;
     }
 
-    cfg.width = context->height;
-    cfg.height = context->width;
+    cfg.width = context->width;
+    cfg.height = context->height;
 
     cfg.frameRateDenom = 1;
     cfg.frameRateNum = context->frameRate;
 
     cfg.streamType = H264ENC_BYTE_STREAM;
 
-    cfg.level = H264ENC_LEVEL_5; // level 4 minimum for 1080p
+    cfg.level = H264ENC_LEVEL_4; // level 4 minimum for 1080p
     cfg.viewMode = H264ENC_BASE_VIEW_DOUBLE_BUFFER; // maybe H264ENC_BASE_VIEW_SINGLE_BUFFER
-    cfg.scaledWidth = 0; // 0
-    cfg.scaledHeight = 0; // 0
+    cfg.scaledWidth = 16; // 0
+    cfg.scaledHeight = 16; // 0
 
     VERBOSE_PRINT("Init config: size %dx%d   %d/%d fps  %s L %d\n",
          cfg.width, cfg.height, cfg.frameRateNum,
@@ -224,10 +224,10 @@ static int OpenEncoder(P7_H264_context_t* context)
          preProcCfg.videoStabilization, preProcCfg.colorConversion.type);
 
     preProcCfg.inputType = context->inputType;
-    preProcCfg.rotation = H264ENC_ROTATE_90L;
+    preProcCfg.rotation = H264ENC_ROTATE_0;
     preProcCfg.origWidth = context->width;
     preProcCfg.origHeight = context->height;
-    //preProcCfg.scaledOutput = 2;
+    preProcCfg.scaledOutput = 1;
 
 
     VERBOSE_PRINT
@@ -1136,11 +1136,11 @@ P7_H264_frameType_t P7_H264_bufferIndex2OutputType(P7_H264_context_t* context, i
   }
 }
 
-int P7_H264_find_FreeBuffer(P7_H264_buffer_t *inputBuffers, int state, uint32_t nbuf)
+int P7_H264_find_FreeBuffer(P7_H264_buffer_t *inputBuffers, int buf_state, uint32_t nbuf)
 {
   int itr;
   for(itr = 0; itr < nbuf; itr++)
-    if (inputBuffers[itr].status == state)
+    if (inputBuffers[itr].status == buf_state)
 	return itr;
   return -1;
 }

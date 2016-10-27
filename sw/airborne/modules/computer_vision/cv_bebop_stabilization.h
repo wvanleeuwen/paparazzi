@@ -26,7 +26,32 @@
 #ifndef CV_BEBOP_STABILIZATION_H
 #define CV_BEBOP_STABILIZATION_H
 
-extern void cv_bebop_stabilization_init(void);
+extern float k_fisheye;
+extern float focalLength;
+extern float scale_x;
+extern float scale_y;
+extern float near;
+extern float far;
+extern float angleOfView;
+extern int   noroll;
+extern int   nopitch;
+extern int   noprojection;
+extern float imgRot;
+extern float frameRot;
 
+typedef float mat4[16];
+typedef float vec4[4];
+
+void setPerspectiveMat(mat4);
+void setRotationMat(float, float, float, mat4);
+void setIdentityMatrix(mat4 m);
+void matrixMultiply(mat4 m1, mat4 m2, mat4 result);
+struct image_t* cv_bebop_stabilization_func(struct image_t * img);
+extern void cv_bebop_stabilization_init(void);
+void view_set_lookat(mat4 result, vec4 eye, vec4 center, vec4 up);
+float vector_length(const float x, const float y, const float z);
+void translate_xyz(float* result, const float translatex, const float translatey, const float translatez);
+void rotateVector(float x, float y, float z, vec4 vector);
+void setTranslationMat(float x, float y, float z, mat4 outputMat);
 #endif
 

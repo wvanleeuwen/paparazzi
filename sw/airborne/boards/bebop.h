@@ -29,6 +29,10 @@
 #include "peripherals/video_device.h"
 #include "boards/bebop/mt9f002.h"
 
+#ifndef MT9F002_THETA_OFFSET
+#define MT9F002_THETA_OFFSET -30 * M_PI / 180
+#endif
+
 #ifndef MT9F002_OUTPUT_HEIGHT
 #define MT9F002_OUTPUT_HEIGHT 848
 #endif

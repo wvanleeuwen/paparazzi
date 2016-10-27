@@ -35,6 +35,8 @@
 #include <sys/time.h>
 #include <math.h>
 
+#include <state.h>
+
 // Video
 #include "lib/v4l/v4l2.h"
 #include "lib/vision/image.h"
@@ -138,17 +140,23 @@ static void *video_thread_function(void *data)
       if (dt_us < fps_period_us) {
         usleep(fps_period_us - dt_us);
       } else {
-        //fprintf(stderr, "[%s] desired %i fps, only managing %.1f fps\n", print_tag, vid->fps, 1000000.f / dt_us);
+        fprintf(stderr, "[%s] desired %i fps, only managing %.1f fps\n", print_tag, vid->fps, 1000000.f / dt_us);
       }
     }
 
     // Wait for a new frame (blocking)
     struct image_t img;
+    struct FloatEulers *beforeEuler, *afterEuler;
+    beforeEuler = stateGetNedToBodyEulers_f();
     v4l2_image_get(vid->thread.dev, &img);
-
+    afterEuler  = stateGetNedToBodyEulers_f();
+    struct FloatEulers image_euler;
+    image_euler.phi   = (beforeEuler->phi + afterEuler->phi ) / 2;
+    image_euler.psi   = (beforeEuler->psi + afterEuler->psi ) / 2;
+    image_euler.theta = (beforeEuler->theta + afterEuler->theta ) / 2;
+    img.eulerAngles  = &image_euler;
     // pointer to the final image to pass for saving and further processing
     struct image_t *img_final = &img;
-
     // run selected filters
     if (vid->filters & VIDEO_FILTER_DEBAYER) {
     	BayerToYUV(&img, &img_color, 0, 0);
