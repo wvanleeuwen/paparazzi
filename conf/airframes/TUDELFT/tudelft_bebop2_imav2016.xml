@@ -4,6 +4,7 @@
 
   <firmware name="rotorcraft">
     <target name="ap" board="bebop2"/>
+    <define name="USE_GPS_UBX_RTCM" value="TRUE"/>
 
     <target name="nps" board="pc">
       <module name="fdm" type="jsbsim"/>
@@ -43,7 +44,7 @@
     <module name="video_rtp_stream">
       <define name="VIEWVIDEO_CAMERA" value="bottom_camera"/>
       <define name="VIEWVIDEO_QUALITY_FACTOR" value="80"/>
-      <define name="VIEWVIDEO_DOWNSIZE_FACTOR" value="4"/>
+      <define name="VIEWVIDEO_DOWNSIZE_FACTOR" value="8"/>
       <configure name="VIEWVIDEO_HOST" value="192.168.42.255" />
       <configure name="VIEWVIDEO_PORT_OUT" value="5000" />
       <configure name="VIEWVIDEO_BROADCAST" value="TRUE" />
@@ -57,6 +58,7 @@
     </module>
     <module name="video_capture">
       <define name="VIDEO_CAPTURE_CAMERA" value="bottom_camera"/>
+      <define name="VIDEO_CAPTURE_PATH" value="/data/ftp/internal_000/images"/>
     </module>
     <module name="digital_cam_video">
       <define name="DC_AUTOSHOOT_DISTANCE_INTERVAL" value="5"/>
