@@ -27,6 +27,13 @@
 #include "librtcm3/CRC24Q.h"
 #endif
 
+#if PRINT_DEBUG_GPS_UBX_UCENTER
+#define DEBUG_PRINT(...) printf(__VA_ARGS__)
+#else
+#define DEBUG_PRINT(...) {}
+#endif
+
+
 /** Includes macros generated from ubx.xml */
 #include "ubx_protocol.h"
 
@@ -432,6 +439,7 @@ void gps_ubx_msg(void)
  * Write bytes to the ublox UART connection
  * This is a wrapper functions used in the librtcm library
  */
+void gps_ublox_write(struct link_device *dev, uint8_t *buff, uint32_t n);
 void gps_ublox_write(struct link_device *dev, uint8_t *buff, uint32_t n)
 {
   uint32_t i = 0;
