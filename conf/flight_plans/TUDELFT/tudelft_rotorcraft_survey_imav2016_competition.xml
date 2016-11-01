@@ -45,15 +45,14 @@
     <waypoint x="-3.7" y="24.0" name="STDBY"/>
     <waypoint x="-3.7" y="24.0" name="CRUISE"/> <!-- Help with large horizontal displacements -->
 
-    <waypoint x="150.0" y=".0" name="DROP"/> <!-- Drop LifeVest -->
+    <waypoint lat="39.7341917" lon="116.1631473" name="DROP"/> <!-- Drop LifeVest -->
 
-    <waypoint x="100.0" y=".0" name="WG"/> <!-- Get Water -->
-    <waypoint x="100.0" y=".0" name="WD"/> <!-- Drop Water -->
-
+    <waypoint lat="39.7348971" lon="116.1642900" name="WG"/> <!-- Get Water -->
+    <waypoint lat="39.7348969" lon="116.1642898" alt="44.36" name="WD"/> <!-- Drop Water -->
     <waypoint x="250.0" y=".0" name="CAM"/>  <!-- Visual Guided Hovering -->
 
-    <waypoint height="15" x="10" y="0" name="TD"/> <!-- Normal Landing Location -->
-    <waypoint height="15" x="0" y="10" name="ETD"/> <!-- Emergency Tough Down -->
+    <waypoint alt="45.1" x="10" y="0" name="TD"/> <!-- Normal Landing Location -->
+    <waypoint lat="39.7352229" lon="116.1645240" height="15" x="0" y="10" name="ETD"/> <!-- Emergency Tough Down -->
 
     <waypoint x="300" y="-300" name="p1"/> <!-- Camera projection -->
     <waypoint x="300" y="300" name="p2"/>
@@ -62,9 +61,9 @@
 
   
     <waypoint lat="39.734362" lon="116.163435" name="_water1"/>
-    <waypoint lat="39.734377" lon="116.162869" name="_water2"/>
+    <waypoint lat="39.734377" lon="116.162869" name="_water4"/>
     <waypoint lat="39.733997" lon="116.162890" name="_water3"/>
-    <waypoint lat="39.734002" lon="116.163352" name="_water4"/>
+    <waypoint lat="39.734002" lon="116.163352" name="_water2"/>
     
     <waypoint lat="39.735189" lon="116.163665" name="map1"/>
     <waypoint lat="39.735201" lon="116.162002" name="map2"/>
@@ -72,14 +71,14 @@
     <waypoint lat="39.733947" lon="116.163645" name="map4"/>
     
     <waypoint lat="39.735540" lon="116.166135" name="_OZ1"/>
-    <waypoint lat="39.735523" lon="116.161088" name="_OZ2"/>
+    <waypoint lat="39.735523" lon="116.161088" name="_OZ4"/>
     <waypoint lat="39.732761" lon="116.161074" name="_OZ3"/>    
-    <waypoint lat="39.732736" lon="116.166134" name="_OZ4"/>
+    <waypoint lat="39.732736" lon="116.166134" name="_OZ2"/>
         
     <waypoint lat="39.735425" lon="116.165030" name="_land1"/>
-    <waypoint lat="39.735419" lon="116.164086" name="_land2"/>
+    <waypoint lat="39.735419" lon="116.164086" name="_land4"/>
     <waypoint lat="39.734731" lon="116.164080" name="_land3"/>
-    <waypoint lat="39.734723" lon="116.165012" name="_land4"/>
+    <waypoint lat="39.734723" lon="116.165012" name="_land2"/>
   </waypoints>
 
   <sectors>
