@@ -42,6 +42,7 @@
 
 #include "paparazzi.h"
 #include "firmwares/rotorcraft/stabilization.h"
+#include "firmwares/rotorcraft/guidance/guidance_v.h"
 
 
 #ifndef DVS_PORT
@@ -85,7 +86,7 @@ PRINT_CONFIG_VAR(EOF_MIN_POSITION_VARIANCE)
 PRINT_CONFIG_VAR(EOF_MIN_R2)
 
 #ifndef EOF_DIVERGENCE_CONTROL_PGAIN
-#define EOF_DIVERGENCE_CONTROL_PGAIN 0.2f
+#define EOF_DIVERGENCE_CONTROL_PGAIN 0.1f
 #endif
 PRINT_CONFIG_VAR(EOF_DIVERGENCE_CONTROL_PGAIN)
 
@@ -100,7 +101,7 @@ PRINT_CONFIG_VAR(EOF_DIVERGENCE_CONTROL_DIV_SETPOINT)
 PRINT_CONFIG_VAR(EOF_DIVERGENCE_CONTROL_HEIGHT_LIMIT)
 
 #ifndef EOF_DIVERGENCE_CONTROL_USE_VISION
-#define EOF_DIVERGENCE_CONTROL_USE_VISION 0
+#define EOF_DIVERGENCE_CONTROL_USE_VISION 1
 #endif
 PRINT_CONFIG_VAR(EOF_DIVERGENCE_CONTROL_USE_VISION)
 
@@ -149,13 +150,12 @@ const float LENS_DISTANCE_TO_CENTER = 0.13f; // approximate distance of lens foc
 const uint32_t EVENT_BYTE_SIZE = 13; // +1 for separator
 const float inactivityDecayFactor = 0.8f;
 const float power = 1;
-const float NOMINAL_THRUST = 0.7f; //TODO find MAVTEC value
 const float LANDING_THRUST_FRACTION = 0.95f; //TODO find MAVTEC value
 const float CONTROL_CONFIDENCE_LIMIT = 0.2f;
 const float CONTROL_CONFIDENCE_MAX_DT = 0.2f;
 
 // SWITCH THIS ON TO ENABLE CONTROL THROTTLE
-const bool ASSIGN_CONTROL = false;
+const bool ASSIGN_CONTROL = true;
 
 // Camera intrinsic parameters
 const struct cameraIntrinsicParameters dvs128Intrinsics = {
@@ -198,7 +198,6 @@ void event_optic_flow_start(void) {
   eofState.field = field;
   flowStatsInit(&eofState.stats);
   eofState.caerInputReceived = false;
-  divergenceControlReset();
 }
 
 void event_optic_flow_periodic(void) {
@@ -293,7 +292,7 @@ void event_optic_flow_periodic(void) {
 	}
 
 	// TEST CONTROLLER MAINLOOP
-	guidance_v_module_run(true);
+	//guidance_v_module_run(true);
 }
 
 void event_optic_flow_stop(void) {
@@ -306,6 +305,8 @@ void event_optic_flow_stop(void) {
 void guidance_v_module_init() {
   //TODO is this part necessary?
   divergenceControlReset();
+  eofState.nominalThrottleEnter = guidance_v_nominal_throttle * MAX_PPRZ;
+  eofState.controlThrottleLast = eofState.nominalThrottleEnter; // set to nominal
 }
 
 void guidance_v_module_enter() {
@@ -332,7 +333,7 @@ void guidance_v_module_run(bool in_flight) {
         // after re-entering the module, the divergence should be equal to the set point:
         if (eofState.controlReset) {
           eofState.divergenceControlLast = divergenceControlSetpoint;
-          int32_t nominal_throttle = NOMINAL_THRUST * MAX_PPRZ;
+          int32_t nominal_throttle = eofState.nominalThrottleEnter;
           if (ASSIGN_CONTROL) {
             stabilization_cmd[COMMAND_THRUST] = nominal_throttle;
           }
@@ -363,20 +364,20 @@ void guidance_v_module_run(bool in_flight) {
     /*
      * CONTROL
      */
-    int32_t nominalThrottle = NOMINAL_THRUST * MAX_PPRZ;
+    int32_t nominalThrottle = eofState.nominalThrottleEnter;
 
     // landing indicates whether the drone is already performing a final landing procedure (flare):
-    if (!eofState.landing) {
+//    if (!eofState.landing) {
         // use the divergence for control:
         float err = divergenceControlSetpoint - eofState.divergenceControlLast;
         // Negative P-gain - positive control yields negative increase in div
         int32_t thrust = nominalThrottle - divergenceControlGainP * err * MAX_PPRZ;
 
-        if (eofState.z_NED > -divergenceControlHeightLimit) {
-        // land by setting 90% nominal thrust:
-          eofState.landing = true;
-          thrust = LANDING_THRUST_FRACTION * nominalThrottle;
-        }
+//        if (eofState.z_NED > -divergenceControlHeightLimit) {
+//        // land by setting 90% nominal thrust:
+//          eofState.landing = true;
+//          thrust = LANDING_THRUST_FRACTION * nominalThrottle;
+//        }
         // bound thrust:
         Bound(thrust, 0.8 * nominalThrottle, 0.8 * MAX_PPRZ);
         if (ASSIGN_CONTROL){
@@ -384,7 +385,7 @@ void guidance_v_module_run(bool in_flight) {
         }
         eofState.controlThrottleLast = thrust;
 
-    } else {
+    /*} else {
       // land with constant fraction of nominal thrust:
       int32_t thrust = LANDING_THRUST_FRACTION * nominalThrottle;
       Bound(thrust, 0.6 * nominalThrottle, 0.8 * MAX_PPRZ);
@@ -392,7 +393,7 @@ void guidance_v_module_run(bool in_flight) {
         stabilization_cmd[COMMAND_THRUST] = thrust;
       }
       eofState.controlThrottleLast = thrust;
-    }
+    }*/
   }
 }
 
@@ -417,7 +418,6 @@ int32_t uartGetInt32(struct uart_periph *p) {
 
 enum updateStatus processUARTInput(struct flowStats* s, int32_t *N) {
   enum updateStatus returnStatus = UPDATE_NONE;
-  // SKIPS RING BUFFER PART
 
   *N = 0;
   // Now scan across received data and extract events
@@ -477,7 +477,8 @@ static void sendFlowFieldState(struct transport_tx *trans, struct link_device *d
   float wy = eofState.field.wy;
   float D  = eofState.field.D;
   float p = eofState.ratesMA.p;
-  float q = eofState.ratesMA.q;
+  //float q = eofState.ratesMA.q;
+  float q = eofState.divergenceControlLast;
   float wxTruth = eofState.wxTruth;
   float wyTruth = eofState.wyTruth;
   float DTruth = eofState.DTruth;
@@ -494,5 +495,6 @@ void divergenceControlReset(void) {
   eofState.landing = false;
   eofState.divergenceUpdated = false;
   eofState.divergenceControlLast = 0.0f;
-  eofState.controlThrottleLast = 0;
+  eofState.nominalThrottleEnter = stabilization_cmd[COMMAND_THRUST];
+  eofState.controlThrottleLast = eofState.nominalThrottleEnter; // set to nominal
 }

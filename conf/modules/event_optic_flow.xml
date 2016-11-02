@@ -16,8 +16,8 @@
         <dl_setting var="minR2" min="0.1" step="0.05" max="1" shortname="min_R2" param="EOF_MIN_R2"/>
         <dl_setting var="irLedSwitch" min="0" step="1" max="1" shortname="led setting" values="OFF|ON" param="IR_LEDS_SWITCH"/>
 	<dl_setting var="divergenceControlUseVision" min="0" step="1" max="1" shortname="control_use_vision" values="OFF|ON" param="EOF_DIVERGENCE_CONTROL_USE_VISION"/>
-	<dl_setting var="divergenceControlGainP" min="0.01" step="0.01" max="1" shortname="control_P" param="EOF_DIVERGENCE_CONTROL_PGAIN"/>
-	<dl_setting var="divergenceControlSetpoint" min="0.05" step="0.01" max="1" shortname="control_setpoint" param="EOF_DIVERGENCE_CONTROL_DIV_SETPOINT"/>
+	<dl_setting var="divergenceControlGainP" min="0.01" step="0.01" max="0.5" shortname="control_P" param="EOF_DIVERGENCE_CONTROL_PGAIN"/>
+	<dl_setting var="divergenceControlSetpoint" min="0.0" step="0.05" max="1" shortname="control_setpoint" param="EOF_DIVERGENCE_CONTROL_DIV_SETPOINT"/>
 	<dl_setting var="divergenceControlHeightLimit" min="0.1" step="0.05" max="1" shortname="control_height_limit" param="EOF_DIVERGENCE_CONTROL_HEIGHT_LIMIT"/>
       </dl_settings>
     </dl_settings>

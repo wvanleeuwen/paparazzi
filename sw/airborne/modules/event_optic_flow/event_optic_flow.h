@@ -58,6 +58,7 @@ struct module_state {
   bool    divergenceUpdated;
   float   divergenceControlLast;
   int32_t controlThrottleLast;
+  int32_t nominalThrottleEnter;
 };
 
 extern struct module_state eofState;

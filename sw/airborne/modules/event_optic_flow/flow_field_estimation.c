@@ -8,7 +8,7 @@
 #include "flow_field_estimation.h"
 #include "mcu_periph/sys_time.h"
 
-float DET_MIN_RESOLUTION = 1;
+float DET_MIN_RESOLUTION = 1e-2;
 
 void lowPassFilterWithThreshold(float *val, float new, float factor, float limit);
 
@@ -31,10 +31,10 @@ void flowStatsInit(struct flowStats *s) {
 void flowStatsUpdate(struct flowStats* s, struct flowEvent e, struct FloatRates rates,
     bool enableDerotation, struct cameraIntrinsicParameters intrinsics) {
   // X,Y are defined around the camera's principal point
-    float x = e.x - intrinsics.principalPointX;
-    float y = e.y - intrinsics.principalPointY;
-    float u = e.u;
-    float v = e.v;
+    float x = (e.x - intrinsics.principalPointX)/intrinsics.focalLengthX;
+    float y = (e.y - intrinsics.principalPointY)/intrinsics.focalLengthY;
+    float u = e.u/intrinsics.focalLengthX;
+    float v = e.v/intrinsics.focalLengthY;
 
     // Find direction/index of flow
     float alpha = atan2f(v,u);
@@ -53,8 +53,8 @@ void flowStatsUpdate(struct flowStats* s, struct flowEvent e, struct FloatRates 
 
     // Derotation in direction of flow field
     if (enableDerotation) {
-      V -= s->cos_angles[a] *(intrinsics.focalLengthX*rates.p - y*rates.r)
-          - s->sin_angles[a] *(intrinsics.focalLengthY*rates.q - x*rates.r);
+      V -= s->cos_angles[a] *(rates.p - y*rates.r)
+          - s->sin_angles[a] *(rates.q - x*rates.r);
     }
 
     // Update flow field statistics
@@ -105,11 +105,7 @@ enum updateStatus recomputeFlowField(struct flowField* field, struct flowStats* 
       float meanSV = s->sumSV[i] / s->N[i];
 
       // Compute position variances and confidence values from mean statistics
-      varS[i] = meanSS - meanS * meanS;
-      if (varS[i] < 100) {
-        c_var[i] = 0;
-        continue;
-      }
+      varS[i] = (meanSS - meanS * meanS)*powf(intrinsics.focalLengthX,2);
       c_var[i] = 1;
       if (varS[i] < minPosVariance) {
         c_var[i] *= powf(varS[i] / minPosVariance, power);
@@ -164,8 +160,8 @@ enum updateStatus recomputeFlowField(struct flowField* field, struct flowStats* 
     }
 
     // Convert solution to ventral flow and divergence using camera intrinsics
-    float wx = p[0]/intrinsics.focalLengthX;
-    float wy = p[1]/intrinsics.focalLengthY;
+    float wx = p[0];
+    float wy = p[1];
     float D  = p[2];
 
     // Now update the field parameters based on the confidence values
