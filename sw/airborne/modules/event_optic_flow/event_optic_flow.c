@@ -95,7 +95,7 @@ PRINT_CONFIG_VAR(EOF_DIVERGENCE_CONTROL_PGAIN)
 PRINT_CONFIG_VAR(EOF_DIVERGENCE_CONTROL_DIV_SETPOINT)
 
 #ifndef EOF_DIVERGENCE_CONTROL_HEIGHT_LIMIT
-#define EOF_DIVERGENCE_CONTROL_HEIGHT_LIMIT 0.8f
+#define EOF_DIVERGENCE_CONTROL_HEIGHT_LIMIT 0.5f
 #endif
 PRINT_CONFIG_VAR(EOF_DIVERGENCE_CONTROL_HEIGHT_LIMIT)
 
@@ -153,6 +153,9 @@ const float NOMINAL_THRUST = 0.7f; //TODO find MAVTEC value
 const float LANDING_THRUST_FRACTION = 0.95f; //TODO find MAVTEC value
 const float CONTROL_CONFIDENCE_LIMIT = 0.2f;
 const float CONTROL_CONFIDENCE_MAX_DT = 0.2f;
+
+// SWITCH THIS ON TO ENABLE CONTROL THROTTLE
+const bool ASSIGN_CONTROL = false;
 
 // Camera intrinsic parameters
 const struct cameraIntrinsicParameters dvs128Intrinsics = {
@@ -330,7 +333,9 @@ void guidance_v_module_run(bool in_flight) {
         if (eofState.controlReset) {
           eofState.divergenceControlLast = divergenceControlSetpoint;
           int32_t nominal_throttle = NOMINAL_THRUST * MAX_PPRZ;
-          //stabilization_cmd[COMMAND_THRUST] = nominal_throttle;
+          if (ASSIGN_CONTROL) {
+            stabilization_cmd[COMMAND_THRUST] = nominal_throttle;
+          }
           eofState.controlReset = false;
           eofState.controlThrottleLast = nominal_throttle;
         }
@@ -374,14 +379,18 @@ void guidance_v_module_run(bool in_flight) {
         }
         // bound thrust:
         Bound(thrust, 0.8 * nominalThrottle, 0.8 * MAX_PPRZ);
-        //stabilization_cmd[COMMAND_THRUST] = thrust;
+        if (ASSIGN_CONTROL){
+          stabilization_cmd[COMMAND_THRUST] = thrust;
+        }
         eofState.controlThrottleLast = thrust;
 
     } else {
       // land with constant fraction of nominal thrust:
       int32_t thrust = LANDING_THRUST_FRACTION * nominalThrottle;
       Bound(thrust, 0.6 * nominalThrottle, 0.8 * MAX_PPRZ);
-      // stabilization_cmd[COMMAND_THRUST] = thrust;
+      if (ASSIGN_CONTROL) {
+        stabilization_cmd[COMMAND_THRUST] = thrust;
+      }
       eofState.controlThrottleLast = thrust;
     }
   }

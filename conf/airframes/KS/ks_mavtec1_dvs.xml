@@ -139,6 +139,7 @@
 
  <section name="INS" prefix="INS_">
     <!-- Use GPS altitude measurments and set the R gain -->
+    <define name="USE_VFF_EXTENDED" value="true"/>
     <define name="USE_GPS_ALT" value="1"/>
     <define name="VFF_R_GPS" value="0.01"/>
     <define name="VFF_VZ_R_GPS" value="0.01"/>

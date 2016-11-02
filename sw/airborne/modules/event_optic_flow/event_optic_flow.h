@@ -38,8 +38,8 @@
 #include "flow_field_estimation.h"
 
 // Guidance definitions
-//#define GUIDANCE_H_MODE_MODULE_SETTING GUIDANCE_H_MODE_HOVER
-//#define GUIDANCE_V_MODE_MODULE_SETTING GUIDANCE_V_MODE_MODULE
+#define GUIDANCE_H_MODE_MODULE_SETTING GUIDANCE_H_MODE_HOVER
+#define GUIDANCE_V_MODE_MODULE_SETTING GUIDANCE_V_MODE_MODULE
 
 // Module state (extern here, since the high speed logger module uses the info in this state
 struct module_state {
