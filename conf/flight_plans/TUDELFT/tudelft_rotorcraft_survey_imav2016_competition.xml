@@ -123,7 +123,7 @@
 
   <exceptions>
     <exception cond="(!InsideOZ(GetPosX(), GetPosY()) && !(nav_block == IndexOfBlock('flare_emergency')) && !(nav_block == IndexOfBlock('landed')) && !(nav_block == IndexOfBlock('WaitGPS')))" deroute="land_emergency"/>
-    <exception cond="gps.hmsl > 104.36" deroute="land_emergency"/>
+    <exception cond="gps.hmsl > 104360" deroute="land_emergency"/>
     <exception cond="datalink_time > 40" deroute="land_emergency"/>
   </exceptions>
 
