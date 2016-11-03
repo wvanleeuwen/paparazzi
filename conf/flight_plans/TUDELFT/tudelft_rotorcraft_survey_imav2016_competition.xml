@@ -6,6 +6,7 @@
 #include "autopilot.h"
 #include "subsystems/electrical.h"
 #include "modules/sonar/sonar_bebop.h"
+#include "subsystems/datalink/datalink.h"
 
 #ifdef dc_Survey
 #define LINE_START_FUNCTION dc_Survey(dc_distance_interval);
@@ -121,6 +122,8 @@
 
   <exceptions>
     <exception cond="(!InsideOZ(GetPosX(), GetPosY()) && !(nav_block == IndexOfBlock('flare_emergency')) && !(nav_block == IndexOfBlock('landed')) && !(nav_block == IndexOfBlock('WaitGPS')))" deroute="land_emergency"/>
+    <exception cond="stateGetPositionEnu_f()->z > 104.36" deroute="land_emergency"/>
+    <exception cond="datalink_time > 22" deroute="land_emergency"/>
   </exceptions>
 
   <blocks>
