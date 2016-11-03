@@ -4,6 +4,7 @@
   <header>
 
 #include "autopilot.h"
+#include "subsystems/gps.h"
 #include "subsystems/electrical.h"
 #include "modules/sonar/sonar_bebop.h"
 #include "subsystems/datalink/datalink.h"
@@ -122,8 +123,8 @@
 
   <exceptions>
     <exception cond="(!InsideOZ(GetPosX(), GetPosY()) && !(nav_block == IndexOfBlock('flare_emergency')) && !(nav_block == IndexOfBlock('landed')) && !(nav_block == IndexOfBlock('WaitGPS')))" deroute="land_emergency"/>
-    <exception cond="stateGetPositionEnu_f()->z > 104.36" deroute="land_emergency"/>
-    <exception cond="datalink_time > 22" deroute="land_emergency"/>
+    <exception cond="gps.hmsl > 104.36" deroute="land_emergency"/>
+    <exception cond="datalink_time > 40" deroute="land_emergency"/>
   </exceptions>
 
   <blocks>
@@ -300,7 +301,8 @@
       <exception cond="NavDetectGround()" deroute="landed"/>
       <exception cond="!nav_is_in_flight()" deroute="landed"/>
       <call fun="NavStartDetectGround()"/>
-      <stay climb="nav_descend_vspeed" vmode="climb" wp="ETD"/>
+      <!--stay climb="nav_descend_vspeed" vmode="climb" wp="ETD"/-->
+      <attitude pitch="0" roll="0" throttle="0.2" until="FALSE" vmode="throttle"/>
       <deroute block="landed"/>
     </block>
 
