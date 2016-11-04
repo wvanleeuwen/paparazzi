@@ -22,6 +22,10 @@
     <waypoint name="HOME" x="0.0" y="0.0"/>
   </waypoints>
 
+  <variables>
+    <variable var="end_block_time" />
+  </variables>
+
   <exceptions>
     <!--exception cond="datalink_time > 5" deroute="Land here"/-->
     <exception cond="radio_control.status == RC_REALLY_LOST" deroute="Land here"/>
@@ -51,7 +55,8 @@
       <call fun="fly_through_window(SNAKE_WINDOW)"/>
       <call_once fun="detector_disable_all()"/>
       <call_once fun="guidance_h_set_guided_pos_relative(filtered_x_gate - 1.5, filtered_y_gate)"/>
-      <while cond="10 > block_time"/>
+      <set var="end_block_time" value="block_time+10" />
+      <while cond="LessThan(block_time,end_block_time)"/>
       <deroute block="Hover"/>
     </block>
 
@@ -63,7 +68,8 @@
       <call fun="fly_through_window(SNAKE_WINDOW)"/>
       <call_once fun="detector_disable_all()"/>
       <call_once fun="guidance_h_set_guided_body_vel(-0.3, 0)"/>
-      <while cond="6 > block_time"/>
+      <set var="end_block_time" value="block_time+6" />
+      <while cond="LessThan(block_time,end_block_time)"/>
       <deroute block="Hover"/>
     </block>
 
@@ -72,9 +78,11 @@
       <call_once fun="front_cam_set_x_offset(896)"/>
       <set var="dc_autoshoot" value="DC_AUTOSHOOT_PERIODIC"/>
       <call_once fun="guidance_h_set_guided_pos_relative(6., 0.)"/>
-      <while cond="25 > block_time"/>
+      <set var="end_block_time" value="block_time+25" />
+      <while cond="LessThan(block_time,end_block_time)"/>
       <call_once fun="guidance_h_set_guided_heading_rate(0.25)"/>
-      <while cond="14 > block_time"/>
+      <set var="end_block_time" value="block_time+14" />
+      <while cond="LessThan(block_time,end_block_time)"/>
       <set var="dc_autoshoot" value="DC_AUTOSHOOT_STOP"/>
       <deroute block="Hover"/>
     </block>
@@ -113,7 +121,8 @@
       <call fun="fly_through_window(SNAKE_WINDOW)"/>
       <call_once fun="detector_disable_all()"/>
       <call_once fun="guidance_h_set_guided_pos_relative(filtered_x_gate - 1.5, filtered_y_gate)"/>
-      <while cond="10 > block_time"/>
+      <set var="end_block_time" value="block_time+10" />
+      <while cond="LessThan(block_time,end_block_time)"/>
     </block>
     
     <block name="Move to Landing pad">
