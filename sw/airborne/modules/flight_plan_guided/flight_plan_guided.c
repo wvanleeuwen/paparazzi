@@ -171,15 +171,26 @@ bool WaitUntilTimerOrAltitude(float sec, float fail_altitude) {
 }
 
 
-
-
 bool RotateToHeading(float heading) {
   if (autopilot_mode != AP_MODE_GUIDED) { return true; }
 
   guidance_h_set_guided_heading(heading);
-
   return false;
 }
+
+
+bool WaitforHeading(float heading) {
+  if (autopilot_mode != AP_MODE_GUIDED) { return true; }
+
+  guidance_h_set_guided_heading_rate(1.);
+  if (fabs(heading - stateGetNedToBodyEulers_f()->psi) < 0.1) {
+    guidance_h_set_guided_heading(heading);
+    return false;
+  }
+
+  return true;
+}
+
 
 uint8_t Hover(float alt) {
     if (autopilot_mode != AP_MODE_GUIDED) { return true; }
@@ -655,82 +666,105 @@ static void range_sensors_cb(uint8_t sender_id,
   static int32_t front_wall_detect_counter = 0;
   static const int32_t max_sensor_range = 2000;
 
-  // save range finders values
-  range_finders.front = range_front;
-  range_finders.right = range_right;
-  range_finders.left = range_left;
-  range_finders.back = range_back;
+  if (autopilot_mode == AP_MODE_GUIDED) {
 
-  if (range_finders.front > 1) {  // good sensor reading
-    if(range_finders.front < max_sensor_range) {  // wall in view
-      if(front_wall_detect_counter > 5) { // outlier detection for positive wall detection
-        front_wall_detected = true;
-      } else {
-        front_wall_detect_counter++;
+    // save range finders values
+    range_finders.front = range_front;
+    range_finders.right = range_right;
+    range_finders.left = range_left;
+    range_finders.back = range_back;
+
+    if (range_finders.front > 1) {  // good sensor reading
+      if(range_finders.front < max_sensor_range) {  // wall in view
+        if(front_wall_detect_counter > 5) { // outlier detection for positive wall detection
+          front_wall_detected = true;
+        } else {
+          front_wall_detect_counter++;
+        }
+      } else if(--front_wall_detect_counter < 0){  // outlier detection for negative wall detection
+        front_wall_detected = false;
+        front_wall_detect_counter = 0;
       }
-    } else if(--front_wall_detect_counter < 0){  // outlier detection for negative wall detection
-      front_wall_detected = false;
-      front_wall_detect_counter = 0;
     }
+
+    // add extra velocity command to avoid walls based on range sensors
+    float vel_offset_body_x = 0.0f;
+    float vel_offset_body_y = 0.0f;
+
+    range_sensor_force_field(&vel_offset_body_x, &vel_offset_body_y, 500, 1000, 1600, 0.0f, 0.3f);
+    // printf("front %d, back %d, right %d, left %d\n, vel x %f, vel_y %f",range_finders.front,range_finders.back,range_finders.right,range_finders.left, vel_offset_body_x,vel_offset_body_y);
+
+    if(disable_sideways_forcefield) // disable forcefield for the side if the drone is going through a door for instance
+    {
+      vel_offset_body_y = 0.0f;
+    }
+    // calculate velocity offset for guidance
+    guidance_h_set_speed_offset(vel_offset_body_x, vel_offset_body_y);
+  } else {
+    guidance_h_set_speed_offset(0.,0.);
   }
+}
 
-  // add extra velocity command to avoid walls based on range sensors
-  float vel_offset_body_x = 0.0f;
-  float vel_offset_body_y = 0.0f;
+bool init_landing_pad(void) {
+  marker1.geo_location.x = stateGetPositionNed_f()->x;
+  marker1.geo_location.y = stateGetPositionNed_f()->y;
 
-  range_sensor_force_field(&vel_offset_body_x, &vel_offset_body_y, 500, 1000, 1600, 0.0f, 0.3f);
-  // printf("front %d, back %d, right %d, left %d\n, vel x %f, vel_y %f",range_finders.front,range_finders.back,range_finders.right,range_finders.left, vel_offset_body_x,vel_offset_body_y);
+  landing_state = 0;
+  lost_frames = 0;
 
-  if(disable_sideways_forcefield) // disable forcefield for the side if the drone is going through a door for instance
-  {
-    vel_offset_body_y = 0.0f;
-  }
-  // calculate velocity offset for guidance
-  guidance_h_set_speed_offset(vel_offset_body_x, vel_offset_body_y);
+  return false;
 }
 
 uint8_t landing_state = 0;
 float initial_heading = 0;
-bool Decend_on_landing_pad(float alt) {
+int8_t lost_frames = 0;
+bool Decend_on_landing_pad(float alt, bool yaw_to_sp) {
   // If we are not in guided mode
   if (autopilot_mode != AP_MODE_GUIDED) {
     // Reset the approach strategy and loop
     landing_state = 0;
+    lost_frames = 0;
     return true;
-  }
-
-  if (stateGetPositionEnu_f()->z <= alt){
-    guidance_v_set_guided_z(alt);
-    if (marker1.detected){
-      guidance_h_set_guided_pos(marker1.geo_location.x, marker1.geo_location.y);
-    }
-    landing_state = 3;
   }
 
   switch (landing_state){
     case 0: // find marker
-      if (marker1.detected){
+      if (marker1.detected && !marker1.processed){
         guidance_h_set_guided_pos(marker1.geo_location.x, marker1.geo_location.y);
-        guidance_v_set_guided_vz(-0.5);
+        guidance_v_set_guided_vz(0.5);
+        marker1.processed = true;
         landing_state++;
+      } else {
+        if (yaw_to_sp && marker2.detected && !marker2.processed){
+          guidance_h_set_guided_heading_relative((marker2.pixel.y - 320) * 0.00328125);
+        }
       }
       break;
-    case 1:  // track marker
-      if(!marker1.detected){
+    case 1: // marker found, track and descend
+      if (marker1.detected && !marker1.processed){
+        guidance_h_set_guided_pos(marker1.geo_location.x, marker1.geo_location.y);
+        guidance_v_set_guided_vz(0.5);
+        marker1.processed = true;
+
+        if (stateGetPositionEnu_f()->z <= alt){
+          guidance_v_set_guided_z(alt);
+          landing_state++;
+        }
+      } else {  // lost marker
         guidance_v_set_guided_z(stateGetPositionNed_f()->z);
-        landing_state++;
       }
       break;
-    case 2:  // pause decent
+    case 2: // wait for marker detected
       if(marker1.detected){
-        guidance_v_set_guided_z(stateGetPositionNed_f()->z);
-        landing_state = 0;
+        lost_frames--;
+        if (lost_frames < 0){
+          lost_frames = 0;
+        } else {lost_frames++;}
+        if (lost_frames >= 5){
+          return false;
+        }
       }
       break;
-    case 3: // wait for marker detected
-      if(marker1.detected){
-        return false;
-      }
     default:
       break;
   }

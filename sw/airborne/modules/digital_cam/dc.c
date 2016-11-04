@@ -43,6 +43,8 @@
 
 #include "mcu_periph/sys_time.h"
 
+#include "autopilot.h"
+
 /** default time interval for periodic mode: 1sec */
 #ifndef DC_AUTOSHOOT_PERIOD
 #define DC_AUTOSHOOT_PERIOD 1.0
@@ -240,6 +242,12 @@ static float dim_mod(float a, float b, float m)
 void dc_periodic(void)
 {
   static float last_shot_time = 0.;
+
+  if (autopilot_mode == AP_MODE_GUIDED) {
+    dc_autoshoot = DC_AUTOSHOOT_PERIODIC;
+  } else {
+    dc_autoshoot = DC_AUTOSHOOT_STOP;
+  }
 
   switch (dc_autoshoot) {
 

@@ -85,7 +85,7 @@
     </module>
     
     <module name="digital_cam_video">
-      <define name="DC_AUTOSHOOT_PERIOD" value="0.25"/>
+      <define name="DC_AUTOSHOOT_PERIOD" value="3."/>
       <define name="DC_SHOT_SYNC_SEND" value="false"/>
     </module>
     
@@ -98,7 +98,7 @@
       <define name="VIEWVIDEO_FPS" value="5"/>
 
       <configure name="VIEWVIDEO_BROADCAST" value="FALSE"/>
-      <configure name="VIEWVIDEO_HOST" value="192.168.42.68"/>
+      <configure name="VIEWVIDEO_HOST" value="192.168.42.97"/>
     </module>
     
     <module name="cv_ae_awb"/>
@@ -281,9 +281,6 @@
   </section>
 
   <section name="GUIDANCE_H" prefix="GUIDANCE_H_">
-    <define name="USE_SPEED_REF" value="TRUE"/>
-    <define name="REF_MAX_SPEED" value="0.2" unit="m/s"/>
-
     <!-- Good weather -->
     <define name="MAX_BANK" value="20" unit="deg"/>
     <!-- Bad weather -->

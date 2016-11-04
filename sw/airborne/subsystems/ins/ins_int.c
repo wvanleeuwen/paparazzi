@@ -544,11 +544,11 @@ static void vel_est_cb(uint8_t sender_id __attribute__((unused)),
                        float x, float y, float z,
                        float noise __attribute__((unused)))
 {
-
-  struct FloatVect3 vel_body = {x, y, z};
   static uint32_t last_stamp = 0, last_pos_stamp = 0;
   static float sum_x = 0., sum_y = 0.;
-  struct FloatVect3 prev_vel = {0};
+  static struct FloatVect3 prev_vel = {0};
+
+  struct FloatVect3 vel_body = {x, y, z};
 
   /* rotate velocity estimate to nav/ltp frame */
   struct FloatQuat q_b2n = *stateGetNedToBodyQuat_f();
@@ -559,8 +559,8 @@ static void vel_est_cb(uint8_t sender_id __attribute__((unused)),
   // du to time tep resolution on bebop need to average velocity over longer time window for int position resolution
   if (last_stamp > 0) {
     // integrate area under speed curve assuming constant gradient between speed measurements (ie trapezoid)
-    sum_x += (prev_vel.x + vel_ned.x) * (stamp - last_stamp) / 2.;
-    sum_y += (prev_vel.y + vel_ned.y) * (stamp - last_stamp) / 2.;
+    sum_x += (prev_vel.x + vel_ned.x) * (float)(stamp - last_stamp) / 2.;
+    sum_y += (prev_vel.y + vel_ned.y) * (float)(stamp - last_stamp) / 2.;
   }
 
   last_stamp = stamp;

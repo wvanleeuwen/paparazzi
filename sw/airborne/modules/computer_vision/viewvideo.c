@@ -231,13 +231,13 @@ void viewvideo_init(void)
   char save_name[512];
 
 #ifdef VIEWVIDEO_CAMERA
-  struct video_listener *listener = cv_add_to_device_async(&VIEWVIDEO_CAMERA, viewvideo_function1, VIEWVIDEO_NICE_LEVEL);
-  listener->maximum_fps = VIEWVIDEO_FPS;
+  struct video_listener *listener = cv_add_to_device(&VIEWVIDEO_CAMERA, viewvideo_function1);
+  listener->maximum_fps = 5; //VIEWVIDEO_FPS;
 #endif
 
 #ifdef VIEWVIDEO_CAMERA2
-  struct video_listener *listener2 = cv_add_to_device_async(&VIEWVIDEO_CAMERA2, viewvideo_function2, VIEWVIDEO_NICE_LEVEL);
-  listener2->maximum_fps = VIEWVIDEO_FPS;
+  struct video_listener *listener2 = cv_add_to_device(&VIEWVIDEO_CAMERA2, viewvideo_function2);
+  listener2->maximum_fps = 5; // RVIEWVIDEO_FPS;
 #endif
 
   viewvideo.is_streaming = true;
