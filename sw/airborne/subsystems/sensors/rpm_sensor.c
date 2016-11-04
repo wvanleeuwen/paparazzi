@@ -24,7 +24,7 @@
  */
 
 // Telemetry to test values
-//#include "subsystems/datalink/telemetry.h"
+#include "subsystems/datalink/telemetry.h"
 
 #include "subsystems/sensors/rpm_sensor.h"
 
