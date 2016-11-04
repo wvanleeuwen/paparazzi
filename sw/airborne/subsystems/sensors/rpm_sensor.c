@@ -36,6 +36,7 @@ uint8_t pulse_per_rot = PULSES_PER_ROTATION;
 void rpm_sensor_init(void)
 {
   rpm_sensor_arch_init();
+  register_periodic_telemetry(DefaultPeriodic, PPRZ_MSG_RPM, send_rpm);
 }
 
 void rpm_sensor_process_pulse(uint16_t cnt, uint8_t overflow_cnt)
@@ -52,5 +53,11 @@ void rpm_sensor_process_pulse(uint16_t cnt, uint8_t overflow_cnt)
   /* Remember count */
   rpm_sensor.previous_cnt = cnt;
 }
+
+static void send_rpm(struct transport_tx *trans, struct link_device *dev)
+ {
+   pprz_msg_send_RPM(trans, dev, AC_ID,
+                         &rpm_sensor.previous_cnt, &rpm_sensor.motor_frequency);
+ }
 
 
