@@ -205,7 +205,7 @@
     </block>
 
     <block name="CAM" strip_button="Follow-Vision-Geolocation-Results" strip_icon="lookdown.png" group="hover">
-      <call fun="StartVision()"/>
+      <call fun="StartVisionMovingLandPad()"/>
       <stay wp="CAM"/>
     </block>
 
