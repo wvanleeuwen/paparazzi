@@ -32,9 +32,11 @@
 		<!-- Necessary to build succesfully, but not used -->
 		<module name="motor_mixing"/>
 		
+		<!-- Rpm sensing settings start - cannot be pushed to master -->
 		<subsystem name="rpm_sensor" type="eagletree">
  			<define name="PULSES_PER_ROTATION" value="5"/>
  		</subsystem>	
+		<!-- Rpm sensing settings end -->
 			
 		<module name="actuators" type="pwm">
 			<define name="SERVO_HZ" value="400"/>
