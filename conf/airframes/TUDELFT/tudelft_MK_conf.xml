@@ -2,12 +2,23 @@
   <aircraft
    name="DelFly_LisaS"
    ac_id="111"
-   airframe="airframes/TUDELFT/tudelft_delfly_stereoboard.xml"
+   airframe="airframes/TUDELFT/tudelft_delfly_lisas.xml"
    radio="radios/DT_Rx31_Devo10.xml"
    telemetry="telemetry/rotorcraft_with_logger.xml"
    flight_plan="flight_plans/rotorcraft_basic.xml"
    settings="settings/rotorcraft_basic.xml settings/control/rotorcraft_guidance.xml settings/control/stabilization_att_int.xml ../conf/modules/logger_sd_spi_direct.xml"
    settings_modules="modules/imu_common.xml modules/gps.xml modules/ahrs_int_cmpl_quat.xml modules/logger_sd_spi_direct.xml"
+   gui_color="blue"
+  />
+  <aircraft
+   name="DelFly_The_Explorer"
+   ac_id="112"
+   airframe="airframes/TUDELFT/tudelft_delfly_the_explorer.xml"
+   radio="radios/cockpitSX.xml"
+   telemetry="telemetry/default_rotorcraft.xml"
+   flight_plan="flight_plans/rotorcraft_basic.xml"
+   settings="settings/rotorcraft_basic.xml settings/control/rotorcraft_guidance.xml settings/control/stabilization_att_int.xml settings/persistent_settings.xml settings/superbitrf.xml"
+   settings_modules="modules/imu_common.xml modules/gps.xml modules/ahrs_int_cmpl_quat.xml"
    gui_color="blue"
   />
   <aircraft
