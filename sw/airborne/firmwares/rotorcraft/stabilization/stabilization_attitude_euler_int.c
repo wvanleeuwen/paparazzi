@@ -27,6 +27,8 @@
 
 #include "generated/airframe.h"
 
+#include "subsystems/radio_control.h"
+
 #include "firmwares/rotorcraft/stabilization/stabilization_attitude.h"
 #include "firmwares/rotorcraft/stabilization/stabilization_attitude_rc_setpoint.h"
 
@@ -274,8 +276,11 @@ void stabilization_attitude_run(bool  in_flight)
   stabilization_cmd[COMMAND_PITCH] =
     OFFSET_AND_ROUND((stabilization_att_fb_cmd[COMMAND_PITCH] + stabilization_att_ff_cmd[COMMAND_PITCH]), CMD_SHIFT);
 
-  stabilization_cmd[COMMAND_YAW] =
-    OFFSET_AND_ROUND((stabilization_att_fb_cmd[COMMAND_YAW] + stabilization_att_ff_cmd[COMMAND_YAW]), CMD_SHIFT);
+//  stabilization_cmd[COMMAND_YAW] =
+//    OFFSET_AND_ROUND((stabilization_att_fb_cmd[COMMAND_YAW] + stabilization_att_ff_cmd[COMMAND_YAW]), CMD_SHIFT);
+  stabilization_cmd[COMMAND_YAW] = radio_control.values[RADIO_YAW] +
+      OFFSET_AND_ROUND((stabilization_att_fb_cmd[COMMAND_YAW] + stabilization_att_ff_cmd[COMMAND_YAW]), CMD_SHIFT);
+
 
   /* bound the result */
   BoundAbs(stabilization_cmd[COMMAND_ROLL], MAX_PPRZ);
