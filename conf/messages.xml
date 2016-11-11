@@ -2240,7 +2240,12 @@
       <field name="yaw_c"  type="float"/>
   </message>
 
-   <!--251 is free -->
+  <message name="STEREO_DATA" id="251">
+    <field name="win_x" type="int8"/>
+    <field name="win_y" type="int8"/>
+    <field name="win_radius" type="int8"/>
+ 	<field name="win_fitness" type="int8"/>
+  </message>
 
    <message name="GPS_SMALL" id="252">
     <field name="multiplex_speed"  type="uint32">bits 31-21 course in decideg : bits 20-10 ground speed in cm/s : bits 9-0 climb speed in cm/s</field>

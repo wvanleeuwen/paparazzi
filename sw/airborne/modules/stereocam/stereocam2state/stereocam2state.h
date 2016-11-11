@@ -19,5 +19,9 @@
 extern void stereo_to_state_init(void);
 extern void stereo_to_state_periodic(void);
 
+extern int8_t win_x, win_y, win_radius, win_fitness;
+extern int16_t nus_turn_cmd;
+extern uint8_t pos_thresh, fit_thresh;
+
 #endif
 
