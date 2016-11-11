@@ -23,7 +23,7 @@
 #define STEREOCAM2STATE_RECEIVED_DATA_TYPE 0
 #endif
 
-#include "subsystems/datalink/telemetry.h"
+//#include "subsystems/datalink/telemetry.h"
 
 void stereocam_to_state(void);
 
