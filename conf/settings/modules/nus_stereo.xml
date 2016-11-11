@@ -5,6 +5,7 @@
     <dl_settings NAME="NUS Stereo">
       <dl_setting var="pos_thresh" min="0" step="1" max="100" module="stereocam/stereocam2state/stereocam2state" shortname="POS Thresh" persistent="true"/>
       <dl_setting var="fit_thresh" min="0" step="1" max="255" module="stereocam/stereocam2state/stereocam2state" shortname="FIT Thresh" persistent="true"/>
+	  <dl_setting var="max_cmd_div" min="1" step="1" max="10" module="stereocam/stereocam2state/stereocam2state" shortname="Max cmd div" persistent="true"/>      
     </dl_settings>  
   </dl_settings>
 </settings>

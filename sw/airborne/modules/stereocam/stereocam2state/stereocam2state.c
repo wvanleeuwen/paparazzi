@@ -28,7 +28,9 @@
 int8_t win_x, win_y, win_radius, win_fitness=111;
 int16_t nus_turn_cmd=0;
 uint8_t pos_thresh=5;
-uint8_t fit_thresh=0;
+uint8_t fit_thresh=30;
+uint8_t max_cmd_div=2;
+
 
 static void send_stereo_data(struct transport_tx *trans, struct link_device *dev)
  {
@@ -55,11 +57,11 @@ void stereo_to_state_periodic(void)
     win_fitness = pointer[3];
     stereocam_data.fresh = 0;
 
-    if (win_x>pos_thresh && win_fitness < fit_thresh){
-  	  nus_turn_cmd=MAX_PPRZ;
+    if (win_x>pos_thresh && win_radius > fit_thresh){
+  	  nus_turn_cmd=MAX_PPRZ/max_cmd_div;
     }
-    else if (win_x<-pos_thresh && win_fitness < fit_thresh){
-  	  nus_turn_cmd=-MAX_PPRZ;
+    else if (win_x<-pos_thresh && win_radius > fit_thresh){
+  	  nus_turn_cmd=-MAX_PPRZ/max_cmd_div;
     }
     else{
   	  nus_turn_cmd=0;
