@@ -258,6 +258,10 @@ STATIC_INLINE void handle_periodic_tasks(void)
 
 STATIC_INLINE void main_periodic(void)
 {
+#if INTER_MCU_AP
+  /* Inter-MCU watchdog */
+  intermcu_periodic();
+#endif
 
   /* run control loops */
   autopilot_periodic();
@@ -347,8 +351,6 @@ STATIC_INLINE void main_event(void)
 {
   /* event functions for mcu peripherals: i2c, usb_serial.. */
   mcu_event();
-
-  DatalinkEvent();
 
   if (autopilot_rc) {
     RadioControlEvent(autopilot_on_rc_frame);

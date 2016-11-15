@@ -103,6 +103,18 @@
 #define AGL_SONAR_NPS_ID 3
 #endif
 
+#ifndef AGL_SONAR_PX4FLOW_ID
+#define AGL_SONAR_PX4FLOW_ID 4
+#endif
+
+#ifndef AGL_TERARANGER_ONE_ID
+#define AGL_TERARANGER_ONE_ID 5
+#endif
+
+#ifndef AGL_LIDAR_LITE_ID
+#define AGL_LIDAR_LITE_ID 6
+#endif
+
 /*
  * IDs of magnetometer sensors (including IMUs with mag)
  */
@@ -168,6 +180,10 @@
 
 #ifndef GPS_VECTORNAV_ID
 #define GPS_VECTORNAV_ID 13
+#endif
+
+#ifndef GPS_IMCU_ID
+#define GPS_IMCU_ID 14
 #endif
 
 /*
