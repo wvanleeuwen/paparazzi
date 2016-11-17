@@ -15,6 +15,8 @@
 #include "subsystems/abi.h"
 #include "subsystems/datalink/telemetry.h"
 
+#include "subsystems/radio_control.h"
+
 #include "paparazzi.h"
 
 #ifndef STEREOCAM2STATE_SENDER_ID
@@ -27,16 +29,20 @@
 
 int8_t win_x, win_y, win_radius, win_fitness=111;
 int16_t nus_turn_cmd=0;
-uint8_t pos_thresh=5;
-uint8_t fit_thresh=30;
-uint8_t max_cmd_div=2;
+uint16_t fps=0;
+
+uint8_t pos_thresh=15; // steer only if window center is more than pos_thresh of the center
+uint8_t fit_thresh=30; // maximal fitness that is still considered as correct detection
+uint8_t rad_thresh=15; // minimal radius that is considered to be a window
+uint8_t cmd_max=75; // percentage of MAX_PPRZ
+
 
 
 static void send_stereo_data(struct transport_tx *trans, struct link_device *dev)
  {
    pprz_msg_send_STEREO_DATA(trans, dev, AC_ID,
                          &win_x, &win_y,
-                         &win_radius, &win_fitness);
+                         &win_radius, &win_fitness, &nus_turn_cmd, &fps);
  }
 
 void stereocam_to_state(void);
@@ -48,7 +54,10 @@ void stereo_to_state_init(void)
 
 void stereo_to_state_periodic(void)
 {
-  if (stereocam_data.fresh && stereocam_data.len == 4) { // length of NUS window detection code
+	static uint16_t ii=0;
+	ii++;
+
+	if (stereocam_data.fresh && stereocam_data.len == 4) { // length of NUS window detection code
 	int8_t* pointer=stereocam_data.data; // to transform uint8 message back to int8
 
 	win_x = pointer[0];
@@ -57,11 +66,29 @@ void stereo_to_state_periodic(void)
     win_fitness = pointer[3];
     stereocam_data.fresh = 0;
 
-    if (win_x>pos_thresh && win_radius > fit_thresh){
-  	  nus_turn_cmd=MAX_PPRZ/max_cmd_div;
+    /* radio switch */
+//      static uint8_t counter = 0;
+      static uint8_t nus_switch = 0;
+//
+//      if (radio_control.values[6] < -1000) // this should be GEAR
+//      	  {
+//            if (counter < 100) counter++;
+//          }
+//      else counter--;
+//
+//      if (counter>50) nus_switch = 1;
+//      else nus_switch = 0;
+      if (radio_control.values[6] < -1000) nus_switch=1; // this should be GEAR
+      else nus_switch=0;
+
+    fps = 100.0*PERIODIC_FREQUENCY/ii;
+    ii=0;
+
+    if (win_x>pos_thresh && win_radius > rad_thresh && win_fitness < fit_thresh){
+  	  nus_turn_cmd=MAX_PPRZ/100*cmd_max*nus_switch;
     }
-    else if (win_x<-pos_thresh && win_radius > fit_thresh){
-  	  nus_turn_cmd=-MAX_PPRZ/max_cmd_div;
+    else if (win_x<-pos_thresh && win_radius > rad_thresh && win_fitness < fit_thresh){
+  	  nus_turn_cmd=-MAX_PPRZ/100*cmd_max*nus_switch;
     }
     else{
   	  nus_turn_cmd=0;

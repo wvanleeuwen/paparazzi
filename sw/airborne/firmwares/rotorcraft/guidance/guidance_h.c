@@ -152,16 +152,16 @@ static void send_href(struct transport_tx *trans, struct link_device *dev)
 static void send_tune_hover(struct transport_tx *trans, struct link_device *dev)
 {
   pprz_msg_send_ROTORCRAFT_TUNE_HOVER(trans, dev, AC_ID,
-                                      &radio_control.values[RADIO_ROLL],
-                                      &radio_control.values[RADIO_PITCH],
+//                                      &radio_control.values[RADIO_ROLL],
+//                                      &radio_control.values[RADIO_PITCH],
                                       &radio_control.values[RADIO_YAW],
-                                      &stabilization_cmd[COMMAND_ROLL],
-                                      &stabilization_cmd[COMMAND_PITCH],
-                                      &stabilization_cmd[COMMAND_YAW],
-                                      &stabilization_cmd[COMMAND_THRUST],
-                                      &(stateGetNedToBodyEulers_i()->phi),
-                                      &(stateGetNedToBodyEulers_i()->theta),
-                                      &(stateGetNedToBodyEulers_i()->psi));
+//                                      &stabilization_cmd[COMMAND_ROLL],
+//                                      &stabilization_cmd[COMMAND_PITCH],
+                                      &stabilization_cmd[COMMAND_YAW]);
+//                                      &stabilization_cmd[COMMAND_THRUST],
+//                                      &(stateGetNedToBodyEulers_i()->phi),
+//                                      &(stateGetNedToBodyEulers_i()->theta),
+//                                      &(stateGetNedToBodyEulers_i()->psi));
 }
 
 #endif

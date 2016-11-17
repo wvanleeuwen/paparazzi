@@ -29,6 +29,7 @@
 
 #include "subsystems/radio_control.h"
 #include "modules/stereocam/stereocam2state/stereocam2state.h"
+#include "filters/low_pass_filter.h"
 
 #include "firmwares/rotorcraft/stabilization/stabilization_attitude.h"
 #include "firmwares/rotorcraft/stabilization/stabilization_attitude_rc_setpoint.h"
@@ -65,6 +66,8 @@ int32_t stabilization_att_ff_cmd[COMMANDS_NB];
 
 struct Int32Eulers stab_att_sp_euler;
 struct AttRefEulerInt att_ref_euler_i;
+
+struct SecondOrderLowPass_int filter_yaw;
 
 static inline void reset_psi_ref_from_body(void)
 {
@@ -154,6 +157,10 @@ void stabilization_attitude_init(void)
   register_periodic_telemetry(DefaultPeriodic, PPRZ_MSG_ID_STAB_ATTITUDE_INT, send_att);
   register_periodic_telemetry(DefaultPeriodic, PPRZ_MSG_ID_STAB_ATTITUDE_REF_INT, send_att_ref);
 #endif
+
+  // Initialize low pass filters
+  // void init_second_order_low_pass_int(struct SecondOrderLowPass_int *filter, float cut_off, float Q, float sample_time, int32_t value)
+  init_second_order_low_pass_int(&filter_yaw, 10.0, 0.7071, 1.0/PERIODIC_FREQUENCY, 0.0);
 }
 
 void stabilization_attitude_read_rc(bool in_flight, bool in_carefree, bool coordinated_turn)
@@ -282,6 +289,12 @@ void stabilization_attitude_run(bool  in_flight)
 
   stabilization_cmd[COMMAND_YAW] = radio_control.values[RADIO_YAW] + nus_turn_cmd +
       OFFSET_AND_ROUND((stabilization_att_fb_cmd[COMMAND_YAW] + stabilization_att_ff_cmd[COMMAND_YAW]), CMD_SHIFT);
+
+  /* Filtering the commands */
+
+  // int32_t update_second_order_low_pass_int(struct SecondOrderLowPass_int *filter, int32_t value)
+  stabilization_cmd[COMMAND_YAW]=update_second_order_low_pass_int(&filter_yaw, stabilization_cmd[COMMAND_YAW]);
+
 
 
   /* bound the result */

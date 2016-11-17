@@ -66,7 +66,7 @@
 		<module name="stereocam">
 			<configure name="STEREO_UART" value="UART1"/>
 			<configure name="STEREO_BAUD" value="B921600"/>
-			<define name="SEND_STEREO" value="TRUE"/>
+			<define name="SEND_STEREO" value="FALSE"/>
 		</module>
 <!--		<module name="stereocam_state2camera"-->
 <!--			<configure name="STEREO_UART" value="UART1"/>-->
