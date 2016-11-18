@@ -77,9 +77,10 @@ void stereo_to_state_periodic(void)
 
     if (win_size > size_thresh && win_fitness > fit_thresh) // valid measurement
     {
-        if (win_x>pos_thresh) nus_turn_cmd=MAX_PPRZ/100*cmd_max*nus_switch;
-        else if (win_x<-pos_thresh) nus_turn_cmd=-MAX_PPRZ/100*cmd_max*nus_switch;
-        else nus_turn_cmd=0;
+//        if (win_x>pos_thresh) nus_turn_cmd=MAX_PPRZ/100*cmd_max*nus_switch;
+//        else if (win_x<-pos_thresh) nus_turn_cmd=-MAX_PPRZ/100*cmd_max*nus_switch;
+//        else nus_turn_cmd=0;
+    	nus_turn_cmd=MAX_PPRZ/100*cmd_max*nus_switch*win_x/64;
     }
     else if (win_size < size_thresh && win_fitness > fit_thresh) // incomplete window detected, use previous command
     {

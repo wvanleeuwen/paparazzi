@@ -28,6 +28,9 @@
 			<configure name="AHRS_PROPAGATE_FREQUENCY" value="500"/>
 			<configure name="LOW_NOISE_TIME" value="50"/> <!--Set the time of the ahrs alignement, 1 = 100 samples = 0.2s at 500 Hz -->
 			<define name="USE_PERSISTENT_SETTINGS" value="TRUE"/>
+			
+			<define name="USE_BARO_BOARD" value="1"/>
+			<define name="BARO_PERIODIC_FREQUENCY" value="100"/>			
 		</target>
 		
 		<!-- Necessary to build succesfully, but not used -->
