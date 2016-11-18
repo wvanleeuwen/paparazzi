@@ -2243,10 +2243,10 @@
   <message name="STEREO_DATA" id="251">
     <field name="win_x" type="int8"/>
     <field name="win_y" type="int8"/>
-    <field name="win_radius" type="int8"/>
+    <field name="win_size" type="int8"/>
  	<field name="win_fitness" type="int8"/>
 	<field name="nus_turn_cmd" type="int16"/>
-	<field name="fps" type="uint16"/>	
+	<field name="fps" type="uint8"/>	
   </message>
 
    <message name="GPS_SMALL" id="252">

@@ -27,14 +27,13 @@
 #define STEREOCAM2STATE_RECEIVED_DATA_TYPE 0
 #endif
 
-int8_t win_x, win_y, win_radius, win_fitness=111;
+int8_t win_x, win_y, win_size, win_fitness, fps;
 int16_t nus_turn_cmd=0;
-uint16_t fps=0;
 
-uint8_t pos_thresh=15; // steer only if window center is more than pos_thresh of the center
-uint8_t fit_thresh=30; // maximal fitness that is still considered as correct detection
-uint8_t rad_thresh=15; // minimal radius that is considered to be a window
-uint8_t cmd_max=75; // percentage of MAX_PPRZ
+uint8_t pos_thresh=10; // steer only if window center is more than pos_thresh of the center
+uint8_t fit_thresh=10; // maximal fitness that is still considered as correct detection
+uint8_t size_thresh=10; // minimal size that is considered to be a window
+uint8_t cmd_max=50; // percentage of MAX_PPRZ
 
 
 
@@ -42,7 +41,7 @@ static void send_stereo_data(struct transport_tx *trans, struct link_device *dev
  {
    pprz_msg_send_STEREO_DATA(trans, dev, AC_ID,
                          &win_x, &win_y,
-                         &win_radius, &win_fitness, &nus_turn_cmd, &fps);
+                         &win_size, &win_fitness, &nus_turn_cmd, &fps);
  }
 
 void stereocam_to_state(void);
@@ -54,44 +53,41 @@ void stereo_to_state_init(void)
 
 void stereo_to_state_periodic(void)
 {
-	static uint16_t ii=0;
-	ii++;
+//	static uint16_t ii=0;
+//	ii++;
 
-	if (stereocam_data.fresh && stereocam_data.len == 4) { // length of NUS window detection code
+	if (stereocam_data.fresh && stereocam_data.len == 5) { // length of NUS window detection code
 	int8_t* pointer=stereocam_data.data; // to transform uint8 message back to int8
 
 	win_x = pointer[0];
     win_y = pointer[1];
-    win_radius = pointer[2];
+    win_size = pointer[2];
     win_fitness = pointer[3];
+    fps = pointer[4];
     stereocam_data.fresh = 0;
 
     /* radio switch */
-//      static uint8_t counter = 0;
-      static uint8_t nus_switch = 0;
-//
-//      if (radio_control.values[6] < -1000) // this should be GEAR
-//      	  {
-//            if (counter < 100) counter++;
-//          }
-//      else counter--;
-//
-//      if (counter>50) nus_switch = 1;
-//      else nus_switch = 0;
-      if (radio_control.values[6] < -1000) nus_switch=1; // this should be GEAR
-      else nus_switch=0;
+    static uint8_t nus_switch = 0;
 
-    fps = 100.0*PERIODIC_FREQUENCY/ii;
-    ii=0;
+    if (radio_control.values[6] < -1000) nus_switch=1; // this should be GEAR
+    else nus_switch=0;
 
-    if (win_x>pos_thresh && win_radius > rad_thresh && win_fitness < fit_thresh){
-  	  nus_turn_cmd=MAX_PPRZ/100*cmd_max*nus_switch;
+//    fps = 100.0*PERIODIC_FREQUENCY/ii;
+//    ii=0;
+
+    if (win_size > size_thresh && win_fitness > fit_thresh) // valid measurement
+    {
+        if (win_x>pos_thresh) nus_turn_cmd=MAX_PPRZ/100*cmd_max*nus_switch;
+        else if (win_x<-pos_thresh) nus_turn_cmd=-MAX_PPRZ/100*cmd_max*nus_switch;
+        else nus_turn_cmd=0;
     }
-    else if (win_x<-pos_thresh && win_radius > rad_thresh && win_fitness < fit_thresh){
-  	  nus_turn_cmd=-MAX_PPRZ/100*cmd_max*nus_switch;
+    else if (win_size < size_thresh && win_fitness > fit_thresh) // incomplete window detected, use previous command
+    {
+    	// keeping the same command
     }
-    else{
-  	  nus_turn_cmd=0;
+    else if (win_fitness < fit_thresh) // no window detected
+    {
+    	nus_turn_cmd=0;
     }
   }
 }
