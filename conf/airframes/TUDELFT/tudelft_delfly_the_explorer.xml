@@ -24,8 +24,9 @@
         		<define name="RADIO_YAW" value="RADIO_ROLL"/>
         	</module-->
 			
-			<configure name="USE_MAGNETOMETER" value="1"/>
+			<configure name="USE_MAGNETOMETER" value="0"/>
 			<configure name="AHRS_PROPAGATE_FREQUENCY" value="500"/>
+			<configure name="LOW_NOISE_TIME" value="50"/> <!--Set the time of the ahrs alignement, 1 = 100 samples = 0.2s at 500 Hz -->
 			<define name="USE_PERSISTENT_SETTINGS" value="TRUE"/>
 		</target>
 		
@@ -47,14 +48,14 @@
 <!--		</module>-->
 		
 		<module name="imu" type="lisa_s_v1.0"/>
-		<module name="gps" type="ublox"/>
+		<module name="gps" type="datalink"/>
 		<module name="stabilization" type="int_euler"/>
 		<module name="ahrs" type="int_cmpl_quat">
 			<define name="AHRS_PROPAGATE_LOW_PASS_RATES" value="TRUE"/>
 		</module>
 		<module name="ins">
 			<!-- Check what is this setting? -->
-			<define name="INS_INT_GPS_ID" value="ABI_DISABLE"/>
+<!--			<define name="INS_INT_GPS_ID" value="ABI_DISABLE"/-->
 		</module>
 	</firmware>
 	
@@ -122,7 +123,7 @@
 		<define name="H_X" value="0.39049610"/>
 		<define name="H_Y" value="0.00278894"/>
 		<define name="H_Z" value="0.92060036"/>
-		<define name="USE_GPS_HEADING" value="0"/>
+		<define name="USE_GPS_HEADING" value="1"/>
 		
 		<!-- For vibrating airfames -->
 	<define name="GRAVITY_HEURISTIC_FACTOR" value="0"/>
@@ -175,7 +176,7 @@
 		<define name="THETA_DGAIN" value="200"/>
 		<define name="THETA_IGAIN" value="800"/>
 		
-		<define name="PSI_PGAIN" value="1"/>
+		<define name="PSI_PGAIN" value="1000"/>
 		<define name="PSI_DGAIN" value="4000"/>
 		<define name="PSI_IGAIN" value="0"/>
 		
@@ -190,15 +191,15 @@
 	</section>
 	
 	<section name="INS" prefix="INS_">
-		<define name="USE_GPS_ALT" value="1"/>
+		<define name="USE_GPS_ALT" value="0"/>
 	</section>
 	
-	<section name="GPS" prefix="GPS_">
-		<define name="USE_DATALINK_SMALL" value="1"/>
-		<define name="LOCAL_ECEF_ORIGIN_X" value="392433200"/>
-		<define name="LOCAL_ECEF_ORIGIN_Y" value="30036200"/>
-		<define name="LOCAL_ECEF_ORIGIN_Z" value="500219700"/>
-	</section>
+<!--	<section name="GPS" prefix="GPS_"-->
+<!--		<define name="USE_DATALINK_SMALL" value="1"/-->
+<!--		<define name="LOCAL_ECEF_ORIGIN_X" value="392433200"/-->
+<!--		<define name="LOCAL_ECEF_ORIGIN_Y" value="30036200"/-->
+<!--		<define name="LOCAL_ECEF_ORIGIN_Z" value="500219700"/-->
+<!--	</section-->
 	
 	<section name="GUIDANCE_V" prefix="GUIDANCE_V_">
 		<define name="HOVER_KP" value="276"/>

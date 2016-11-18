@@ -33,6 +33,8 @@
 #include "firmwares/rotorcraft/autopilot_rc_helpers.h"
 #include "mcu_periph/sys_time.h"
 
+#include "modules/stereocam/stereocam2state/stereocam2state.h"
+
 #ifndef STABILIZATION_ATTITUDE_DEADBAND_A
 #define STABILIZATION_ATTITUDE_DEADBAND_A 0
 #endif
@@ -42,8 +44,8 @@
 #endif
 
 #define YAW_DEADBAND_EXCEEDED()                                         \
-  (radio_control.values[RADIO_YAW] >  STABILIZATION_ATTITUDE_DEADBAND_R || \
-   radio_control.values[RADIO_YAW] < -STABILIZATION_ATTITUDE_DEADBAND_R)
+  ((radio_control.values[RADIO_YAW]+nus_turn_cmd) >  STABILIZATION_ATTITUDE_DEADBAND_R || \
+   (radio_control.values[RADIO_YAW]+nus_turn_cmd) < -STABILIZATION_ATTITUDE_DEADBAND_R)
 
 float care_free_heading = 0;
 
@@ -75,7 +77,7 @@ static int32_t get_rc_pitch(void)
 static int32_t get_rc_yaw(void)
 {
   const int32_t max_rc_r = (int32_t) ANGLE_BFP_OF_REAL(STABILIZATION_ATTITUDE_SP_MAX_R);
-  int32_t yaw = radio_control.values[RADIO_YAW];
+  int32_t yaw = radio_control.values[RADIO_YAW] + nus_turn_cmd;
   DeadBand(yaw, STABILIZATION_ATTITUDE_DEADBAND_R);
   return yaw * max_rc_r / (MAX_PPRZ - STABILIZATION_ATTITUDE_DEADBAND_R);
 }
@@ -104,7 +106,7 @@ static float get_rc_pitch_f(void)
 
 static inline float get_rc_yaw_f(void)
 {
-  int32_t yaw = radio_control.values[RADIO_YAW];
+  int32_t yaw = radio_control.values[RADIO_YAW] + nus_turn_cmd;
   DeadBand(yaw, STABILIZATION_ATTITUDE_DEADBAND_R);
   return yaw * STABILIZATION_ATTITUDE_SP_MAX_R / (MAX_PPRZ - STABILIZATION_ATTITUDE_DEADBAND_R);
 }

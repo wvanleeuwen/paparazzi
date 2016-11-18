@@ -28,7 +28,7 @@
 #include "generated/airframe.h"
 
 #include "subsystems/radio_control.h"
-#include "modules/stereocam/stereocam2state/stereocam2state.h"
+//#include "modules/stereocam/stereocam2state/stereocam2state.h"
 #include "filters/low_pass_filter.h"
 
 #include "firmwares/rotorcraft/stabilization/stabilization_attitude.h"
@@ -287,7 +287,7 @@ void stabilization_attitude_run(bool  in_flight)
 //  stabilization_cmd[COMMAND_YAW] =
 //    OFFSET_AND_ROUND((stabilization_att_fb_cmd[COMMAND_YAW] + stabilization_att_ff_cmd[COMMAND_YAW]), CMD_SHIFT);
 
-  stabilization_cmd[COMMAND_YAW] = radio_control.values[RADIO_YAW] + nus_turn_cmd +
+  stabilization_cmd[COMMAND_YAW] = //radio_control.values[RADIO_YAW] + nus_turn_cmd +
       OFFSET_AND_ROUND((stabilization_att_fb_cmd[COMMAND_YAW] + stabilization_att_ff_cmd[COMMAND_YAW]), CMD_SHIFT);
 
   /* Filtering the commands */
