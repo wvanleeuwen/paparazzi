@@ -108,6 +108,8 @@ extern void gps_ubx_read_message(void);
 extern void gps_ubx_parse(uint8_t c);
 extern void gps_ubx_msg(void);
 
+void gps_ublox_write(struct link_device *dev, uint8_t *buff, uint32_t n);
+
 /*
  * GPS Reset
  */

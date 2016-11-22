@@ -25,6 +25,7 @@
 #include "led.h"
 #ifdef USE_GPS_UBX_RTCM
 #include "librtcm3/CRC24Q.h"
+#include "modules/gps/gps_ubx_ucenter.h"
 #endif
 
 /** Includes macros generated from ubx.xml */
@@ -55,8 +56,6 @@
 #define UTM_HEM_SOUTH 1
 
 struct GpsUbx gps_ubx;
-
-extern int gps_ubx_ucenter_get_status(void);
 
 #if USE_GPS_UBX_RXM_RAW
 struct GpsUbxRaw gps_ubx_raw;
@@ -214,7 +213,7 @@ if (gps_ubx.state.fix == GPS_FIX_3D) {
 				}else{
 					gps_ubx.state.fix =0;
 				}
-				printf("GNSS Fix OK: %i\tDGNSS: %i\tRTK: %i\trelPosValid: %i\trefStationId: %i\n", gps_relposned.gnssFixOK, gps_relposned.diffSoln, gps_relposned.carrSoln, gps_relposned.relPosValid, gps_relposned.refStationId);
+				//printf("GNSS Fix OK: %i\tDGNSS: %i\tRTK: %i\trelPosValid: %i\trefStationId: %i\n", gps_relposned.gnssFixOK, gps_relposned.diffSoln, gps_relposned.carrSoln, gps_relposned.relPosValid, gps_relposned.refStationId);
 			}
 		}
 	} else if (gps_ubx.msg_class == UBX_RXM_ID) {
@@ -271,12 +270,12 @@ else
 			}
 		}
 		else{
-			printf("Unknown RXM_RTCM version: %i\n", version);
+			//printf("Unknown RXM_RTCM version: %i\n", version);
 		}
 	}
 #endif // USE_GPS_UBX_RTCM
 	} else {
-		printf("Unknown msg_class: 0x%x\tmsg_id: 0x%x\n", gps_ubx.msg_class, gps_ubx.msg_id);
+		//printf("Unknown msg_class: 0x%x\tmsg_id: 0x%x\n", gps_ubx.msg_class, gps_ubx.msg_id);
 	}
 }
 
@@ -455,7 +454,7 @@ void gps_ublox_write(struct link_device *dev, uint8_t *buff, uint32_t n)
 /**
  * Override the default GPS packet injector to inject the data
  */
-void gpss_inject_data(uint8_t packet_id, uint8_t length, uint8_t *data)
+void gps_inject_data(uint8_t packet_id, uint8_t length, uint8_t *data)
 {
 #ifdef GPS_UBX_UCENTER
 	if(gps_ubx_ucenter_get_status() == 0)
@@ -477,15 +476,15 @@ void gpss_inject_data(uint8_t packet_id, uint8_t length, uint8_t *data)
 			case 105 : break;
 			case 177 : break;
 			case 187 : break;
-			default: printf("Unknown type: %i", packet_id); break;
+			default: /*printf("Unknown type: %i", packet_id);*/ break;
 			}
 		}else{
-			printf("Skipping message %i (CRC failed) - %d", packet_id, data[0]);
+			/*printf("Skipping message %i (CRC failed) - %d", packet_id, data[0]);
 			int i;
 			for (i = 1; i < length; i++) {
 				printf(",%d", data[i]);
 			}
-			printf("\n");
+			printf("\n");*/
 		}
 #ifdef GPS_UBX_UCENTER
 	}

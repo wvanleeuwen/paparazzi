@@ -5,7 +5,7 @@
   <firmware name="rotorcraft">
     <target name="ap" board="bebop2"/>
     <!-- Use for swarmhub -->
-    <configure name="HOST" value="192.168.40.30" />
+    <configure name="HOST" value="192.168.40.$(AC_ID)" />
     <configure name="MODEM_HOST" value="192.168.40.255" />
     
     <target name="nps" board="pc">

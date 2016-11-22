@@ -616,3 +616,8 @@ static bool gps_ubx_ucenter_configure(uint8_t nr)
   gps_ubx_ucenter.reply = GPS_UBX_UCENTER_REPLY_NONE;
   return true; // Continue, except for the last case
 }
+
+int gps_ubx_ucenter_get_status(void)
+{ 
+	return gps_ubx_ucenter.status; 
+}
