@@ -12,7 +12,8 @@
     <!--configure name="HOST" value="192.168.40.30" />
     <configure name="MODEM_HOST" value="192.168.40.255" /-->
 
-	
+	<define name="MT9F002_OUTPUT_WIDTH" value="480" />
+	<define name="MT9F002_OUTPUT_HEIGHT" value="418" />
 	<define name="MT9F002_TARGET_FPS" value="30" />
 	<define name="MT9F002_TARGET_EXPOSURE" value="4" /> 
 	<define name="MT9F002_GAIN_GREEN1" value="6.0" />
@@ -54,7 +55,7 @@
 		<define name="WV_INIT_GLOBAL_ATTRACTOR" value="2" />
 	</module>
 	-->
-	<module name="cv_bebop_stabilization"/>
+	<!-- module name="cv_bebop_stabilization"/ -->
 	<module name="video_rtp_stream">
 		<!--configure name="VIEWVIDEO_HOST" value="192.168.40.74" /-->
 		<configure name="VIEWVIDEO_HOST" value="192.168.42.65" />
