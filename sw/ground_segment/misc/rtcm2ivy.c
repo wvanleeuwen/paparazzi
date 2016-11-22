@@ -47,11 +47,10 @@ struct SerialPort *serial_port;
 #include <math/pprz_geodetic_float.h>
 
 
-#define UBX_CFG_TMODE3_CFG  0
-#define UBX_CFG_TMODE3_WAIT 1
-#define UBX_CFG_TMODE3_READ 2
-#define UBX_CFG_TMODE3_DONE 3
 
+
+/** Used variables **/
+struct SerialPort *serial_port;
 
 /* ubx structure definitions*/
 msg_state_t msg_state;
