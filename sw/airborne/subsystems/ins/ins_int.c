@@ -102,6 +102,10 @@ PRINT_CONFIG_MSG("INS_SONAR_UPDATE_ON_AGL defaulting to FALSE")
 #endif
 #endif // USE_GPS
 
+#ifndef INS_GPS_ONLY_FOR_HORIZONTAL
+#define INS_GPS_ONLY_FOR_HORIZONTAL 0
+#endif
+
 /** maximum number of propagation steps without any updates in between */
 #ifndef INS_MAX_PROPAGATION_STEPS
 #define INS_MAX_PROPAGATION_STEPS 200

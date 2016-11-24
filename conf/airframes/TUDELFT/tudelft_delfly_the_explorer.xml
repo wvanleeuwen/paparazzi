@@ -15,7 +15,10 @@
 	
 	<firmware name="rotorcraft">
 		<target name="ap" board="lisa_s_1.0">
-			<module name="radio_control" type="superbitrf_rc"/>
+			<module name="radio_control" type="superbitrf_rc">
+				<define name="RADIO_KILL_SWITCH" value="6"/>
+			</module>
+			
 			<!-- Comment the above line and uncomment the block below if DelTang is used instead
 				of SuperbitRF -->
 			<!--module name="radio_control" type="ppm">
@@ -126,7 +129,7 @@
 		<define name="H_X" value="0.39049610"/>
 		<define name="H_Y" value="0.00278894"/>
 		<define name="H_Z" value="0.92060036"/>
-		<define name="USE_GPS_HEADING" value="1"/>
+		<define name="USE_GPS_HEADING" value="0"/>
 		
 		<!-- For vibrating airfames -->
 	<define name="GRAVITY_HEURISTIC_FACTOR" value="0"/>
@@ -134,12 +137,16 @@
 	
 	<section name="AUTOPILOT">
 		<define name="MODE_STARTUP" value="AP_MODE_RC_DIRECT"/>
-		<define name="MODE_MANUAL" value="AP_MODE_RC_DIRECT"/>
-		<define name="MODE_AUTO1" value="AP_MODE_ATTITUDE_DIRECT"/>
-		<define name="MODE_AUTO2" value="AP_MODE_ATTITUDE_DIRECT"/>
-		
-		<define name="USE_THROTTLE_FOR_MOTOR_ARMING" value="TRUE"/>
-		<!--define name="USE_KILL_SWITCH_FOR_MOTOR_ARMING" value="TRUE"/-->
+		<define name="MODE_MANUAL" value="AP_MODE_ATTITUDE_DIRECT"/>
+<!--		<define name="MODE_AUTO1" value="AP_MODE_ATTITUDE_DIRECT"/-->
+<!--		<define name="MODE_AUTO2" value="AP_MODE_ATTITUDE_DIRECT"/-->
+		<define name="MODE_AUTO1" value="AP_MODE_ATTITUDE_Z_HOLD"/>
+		<define name="MODE_AUTO2" value="AP_MODE_ATTITUDE_Z_HOLD"/>
+<!--		<define name="MODE_AUTO1" value="AP_MODE_ATTITUDE_RC_CLIMB"/-->
+<!--		<define name="MODE_AUTO2" value="AP_MODE_ATTITUDE_RC_CLIMB"/-->
+				
+<!--		<define name="USE_THROTTLE_FOR_MOTOR_ARMING" value="TRUE"/-->
+		<define name="USE_KILL_SWITCH_FOR_MOTOR_ARMING" value="TRUE"/>
       	<define name="NO_RC_THRUST_LIMIT" value="TRUE"/>
 	</section>
 	
@@ -195,6 +202,7 @@
 	
 	<section name="INS" prefix="INS_">
 		<define name="USE_GPS_ALT" value="0"/>
+		<define name="USE_GPS_ALT_SPEED" value="0"/>
 	</section>
 	
 <!--	<section name="GPS" prefix="GPS_"-->
@@ -206,9 +214,9 @@
 	
 	<section name="GUIDANCE_V" prefix="GUIDANCE_V_">
 		<define name="HOVER_KP" value="276"/>
-		<define name="HOVER_KD" value="455"/>
+		<define name="HOVER_KD" value="300"/>
 		<define name="HOVER_KI" value="100"/>
-		<define name="NOMINAL_HOVER_THROTTLE" value="0.65"/>
+		<define name="NOMINAL_HOVER_THROTTLE" value="0.77"/>
 		<define name="ADAPT_THROTTLE_ENABLED" value="FALSE"/>
 	</section>
 	
