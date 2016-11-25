@@ -2247,6 +2247,7 @@
  	<field name="win_fitness" type="int8"/>
 	<field name="nus_turn_cmd" type="int16"/>
 	<field name="nus_climb_cmd" type="int16"/>
+	<field name="nus_gate_heading" type="int8"/>
 	<field name="fps" type="uint8"/>	
   </message>
 

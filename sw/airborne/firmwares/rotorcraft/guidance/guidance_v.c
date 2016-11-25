@@ -37,6 +37,8 @@
 
 #include "math/pprz_algebra_int.h"
 
+#include "modules/stereocam/stereocam2state/stereocam2state.h"
+
 
 /* error if some gains are negative */
 #if (GUIDANCE_V_HOVER_KP < 0) ||                   \
@@ -100,6 +102,8 @@ uint8_t guidance_v_mode;
 int32_t guidance_v_ff_cmd;
 int32_t guidance_v_fb_cmd;
 int32_t guidance_v_delta_t;
+
+int32_t rc_climb_cmd;
 
 float guidance_v_nominal_throttle;
 bool guidance_v_adapt_throttle_enabled;
@@ -207,13 +211,16 @@ void guidance_v_read_rc(void)
   guidance_v_rc_delta_t = (int32_t)radio_control.values[RADIO_THROTTLE];
 
   /* used in RC_CLIMB */
-  guidance_v_rc_zd_sp = (MAX_PPRZ / 2) - (int32_t)radio_control.values[RADIO_THROTTLE];
-  DeadBand(guidance_v_rc_zd_sp, GUIDANCE_V_CLIMB_RC_DEADBAND);
+  rc_climb_cmd=(int32_t)radio_control.values[RADIO_THROTTLE_CLIMB];
+  DeadBand(rc_climb_cmd, GUIDANCE_V_CLIMB_RC_DEADBAND);
+
+  guidance_v_rc_zd_sp = rc_climb_cmd + nus_climb_cmd;
+  Bound(guidance_v_rc_zd_sp, MIN_PPRZ, MAX_PPRZ);
 
   static const int32_t climb_scale = ABS(SPEED_BFP_OF_REAL(GUIDANCE_V_MAX_RC_CLIMB_SPEED) /
-                                         (MAX_PPRZ / 2 - GUIDANCE_V_CLIMB_RC_DEADBAND));
+                                         (MAX_PPRZ / 2));
   static const int32_t descent_scale = ABS(SPEED_BFP_OF_REAL(GUIDANCE_V_MAX_RC_DESCENT_SPEED) /
-                                       (MAX_PPRZ / 2 - GUIDANCE_V_CLIMB_RC_DEADBAND));
+                                       (MAX_PPRZ / 2));
 
   if (guidance_v_rc_zd_sp > 0) {
     guidance_v_rc_zd_sp *= descent_scale;

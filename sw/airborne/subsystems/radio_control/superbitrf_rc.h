@@ -39,7 +39,8 @@
 
 /* The channel ordering is always the same for DSM2 and DSMX */
 #define RADIO_THROTTLE   0
-#define RADIO_ROLL       1
+#define RADIO_THROTTLE_CLIMB 1 // used in the climb mode
+#define RADIO_ROLL       8 // roll not used
 #define RADIO_PITCH      2
 #define RADIO_YAW        3
 #define RADIO_GEAR       4
