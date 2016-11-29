@@ -390,11 +390,11 @@ void ins_int_update_gps(struct GpsState *gps_s)
   struct NedCoor_i gps_speed_cm_s_ned;
   ned_of_ecef_vect_i(&gps_speed_cm_s_ned, &ins_int.ltp_def, &gps_s->ecef_vel);
 
-#if INS_USE_GPS_ALT
-  vff_update_z_conf(((float)gps_pos_cm_ned.z) / 100.0, INS_VFF_R_GPS);
-#endif
 #if INS_USE_GPS_ALT_SPEED
   vff_update_vz_conf(((float)gps_speed_cm_s_ned.z) / 100.0, INS_VFF_VZ_R_GPS);
+#endif
+#if INS_USE_GPS_ALT
+  vff_update_z_conf(((float)gps_pos_cm_ned.z) / 100.0, INS_VFF_R_GPS);
 #endif
 
 #if USE_HFF

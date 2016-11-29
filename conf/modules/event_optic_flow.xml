@@ -9,6 +9,7 @@
     <dl_settings>
       <dl_settings NAME="Event-based Optic Flow">
         <dl_setting var="enableDerotation" min="0" step="1" max="1" shortname="derotation" values="NO|YES" param="EOF_ENABLE_DEROTATION"/>
+        <dl_setting var="filterTimeConstant" min="0.005" step="0.0025" max="0.1" shortname="filter_time_constant" param="EOF_FILTER_TIME_CONSTANT"/>
         <dl_setting var="inlierMaxDiff" min="0.05" step="0.05" max="2.0" shortname="flow_speed_threshold" param="EOF_INLIER_MAX_DIFF"/>
 		<dl_setting var="derotationMovingAverageFactor" min="0.05" step="0.05" max="0.9" shortname="derotation_MA_factor" param="EOF_DEROTATION_MOVING_AVERAGE_FACTOR"/>
         <dl_setting var="minEventRate" min="100" step="100" max="5000" shortname="event_rate" param="EOF_MIN_EVENT_RATE"/>

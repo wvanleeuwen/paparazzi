@@ -56,7 +56,7 @@
 PRINT_CONFIG_VAR(EOF_ENABLE_DEROTATION)
 
 #ifndef EOF_FILTER_TIME_CONSTANT
-#define EOF_FILTER_TIME_CONSTANT 0.01f
+#define EOF_FILTER_TIME_CONSTANT 0.02f
 #endif
 PRINT_CONFIG_VAR(EOF_FILTER_TIME_CONSTANT)
 
@@ -76,7 +76,7 @@ PRINT_CONFIG_VAR(EOF_DEROTATION_MOVING_AVERAGE_FACTOR)
 PRINT_CONFIG_VAR(EOF_MIN_EVENT_RATE)
 
 #ifndef EOF_MIN_POSITION_VARIANCE
-#define EOF_MIN_POSITION_VARIANCE 300.0f
+#define EOF_MIN_POSITION_VARIANCE 600.0f
 #endif
 PRINT_CONFIG_VAR(EOF_MIN_POSITION_VARIANCE)
 
@@ -86,12 +86,12 @@ PRINT_CONFIG_VAR(EOF_MIN_POSITION_VARIANCE)
 PRINT_CONFIG_VAR(EOF_MIN_R2)
 
 #ifndef EOF_DIVERGENCE_CONTROL_PGAIN
-#define EOF_DIVERGENCE_CONTROL_PGAIN 0.1f
+#define EOF_DIVERGENCE_CONTROL_PGAIN 0.15f
 #endif
 PRINT_CONFIG_VAR(EOF_DIVERGENCE_CONTROL_PGAIN)
 
 #ifndef EOF_DIVERGENCE_CONTROL_DIV_SETPOINT
-#define EOF_DIVERGENCE_CONTROL_DIV_SETPOINT 0.2f
+#define EOF_DIVERGENCE_CONTROL_DIV_SETPOINT 0.3f
 #endif
 PRINT_CONFIG_VAR(EOF_DIVERGENCE_CONTROL_DIV_SETPOINT)
 
@@ -116,14 +116,15 @@ PRINT_CONFIG_VAR(EOF_DIVERGENCE_CONTROL_USE_VISION)
 #define IR_LEDS_SWITCH 0
 
 /**************
-* DEFINITIONS *
-***************/
+ * DEFINITIONS *
+ ***************/
 
 // State definition
 struct module_state eofState;
 
 // Sensing parameters
 uint8_t enableDerotation = EOF_ENABLE_DEROTATION;
+float filterTimeConstant = EOF_FILTER_TIME_CONSTANT;
 float inlierMaxDiff = EOF_INLIER_MAX_DIFF;
 float derotationMovingAverageFactor = EOF_DEROTATION_MOVING_AVERAGE_FACTOR;
 
@@ -174,26 +175,26 @@ void divergenceControlReset(void);
 
 
 /*************************
-* MAIN SENSING FUNCTIONS *
-*************************/
+ * MAIN SENSING FUNCTIONS *
+ *************************/
 void event_optic_flow_init(void) {
-	register_periodic_telemetry(DefaultPeriodic,
-	    PPRZ_MSG_ID_EVENT_OPTIC_FLOW_EST, sendFlowFieldState);
+  register_periodic_telemetry(DefaultPeriodic,
+      PPRZ_MSG_ID_EVENT_OPTIC_FLOW_EST, sendFlowFieldState);
 }
 
 void event_optic_flow_start(void) {
-	// Timing
-	eofState.lastTime = get_sys_time_float();
-	// Reset low pass filter for rates
-	eofState.ratesMA.p = 0;
-	eofState.ratesMA.q = 0;
-	eofState.ratesMA.r = 0;
-	// (Re-)initialization
-	eofState.moduleFrequency = 100.0f;
-	eofState.z_NED = 0.0f;
-	eofState.wxTruth = 0.0f;
-	eofState.wyTruth = 0.0f;
-	eofState.DTruth = 0.0f;
+  // Timing
+  eofState.lastTime = get_sys_time_float();
+  // Reset low pass filter for rates
+  eofState.ratesMA.p = 0;
+  eofState.ratesMA.q = 0;
+  eofState.ratesMA.r = 0;
+  // (Re-)initialization
+  eofState.moduleFrequency = 100.0f;
+  eofState.z_NED = 0.0f;
+  eofState.wxTruth = 0.0f;
+  eofState.wyTruth = 0.0f;
+  eofState.DTruth = 0.0f;
   struct flowField field = {0., 0., 0., 0., 0., 0.,0};
   eofState.field = field;
   flowStatsInit(&eofState.stats);
@@ -209,57 +210,64 @@ void event_optic_flow_periodic(void) {
 
   // Obtain UART data if available
   int32_t NNew;
-	enum updateStatus status = processUARTInput(&eofState.stats, &NNew);
+  enum updateStatus status = processUARTInput(&eofState.stats, &NNew);
 
   // Timing bookkeeping, do this after the most uncertain computations,
   // but before operations where timing info is necessary
   float currentTime = get_sys_time_float();
   float dt = currentTime - eofState.lastTime;
-  eofState.moduleFrequency = 1/dt;
+  eofState.moduleFrequency = 1.0f/dt;
   eofState.lastTime = currentTime;
   eofState.stats.eventRate = (float) NNew / dt;
+  float filterFactor = dt/filterTimeConstant;
+  if (filterFactor < 0.01f) {
+    filterFactor = 0.01f; // always perform a minimal update
+  }
+  if (filterFactor > 1.0f) {
+    filterFactor = 1.0f;
+  }
 
-	if (status == UPDATE_STATS) {
-		// If new events are received, recompute flow field
-		// In case the flow field is ill-posed, do not update
-		status = recomputeFlowField(&eofState.field, &eofState.stats,
-		    inlierMaxDiff, minEventRate, minPosVariance, minR2, power, dvs128Intrinsics);
-	}
+  if (status == UPDATE_STATS) {
+    // If new events are received, recompute flow field
+    // In case the flow field is ill-posed, do not update
+    status = recomputeFlowField(&eofState.field, &eofState.stats,filterFactor,
+        inlierMaxDiff, minEventRate, minPosVariance, minR2, power, dvs128Intrinsics);
+  }
 
-	// If no update has been performed, decay flow field parameters towards zero
-	if (status != UPDATE_SUCCESS) {
-	  eofState.field.confidence = 0;
-	}
-	else {
-	  // Assign timestamp to last update
-	  eofState.field.t = currentTime;
-	  // Allow controller to update
-	  eofState.divergenceUpdated = true;
-	}
+  // If no update has been performed, decay flow field parameters towards zero
+  if (status != UPDATE_SUCCESS) {
+    eofState.field.confidence = 0;
+  }
+  else {
+    // Assign timestamp to last update
+    eofState.field.t = currentTime;
+    // Allow controller to update
+    eofState.divergenceUpdated = true;
+  }
   // Set  status globally
   eofState.status = status;
 
   // Reset sums for next iteration
   int32_t i;
+  float retainFactor = 1.0f - filterFactor;
   for (i = 0; i < N_FIELD_DIRECTIONS; i++) {
-    float d = 0;
-    eofState.stats.sumS [i] *= d;
-    eofState.stats.sumSS[i] *= d;
-    eofState.stats.sumV [i] *= d;
-    eofState.stats.sumVV[i] *= d;
-    eofState.stats.sumSV[i] *= d;
-    eofState.stats.N[i] *= d;
+    eofState.stats.sumS [i] *= retainFactor;
+    eofState.stats.sumSS[i] *= retainFactor;
+    eofState.stats.sumV [i] *= retainFactor;
+    eofState.stats.sumVV[i] *= retainFactor;
+    eofState.stats.sumSV[i] *= retainFactor;
+    eofState.stats.N[i] *= retainFactor;
   }
 
-  //TODO get rid of wx/wyDerotated correctly
-	  eofState.field.wxDerotated = eofState.field.wx;
-	  eofState.field.wyDerotated = eofState.field.wy;
+  //TODO get rid of wx/wyDerotated correctly; they are no longer necessary
+  eofState.field.wxDerotated = eofState.field.wx;
+  eofState.field.wyDerotated = eofState.field.wy;
 
-	// Update height/ground truth speeds from Optitrack
+  // Update height/ground truth speeds from Optitrack
   struct NedCoor_f *pos = stateGetPositionNed_f();
   struct NedCoor_f *vel = stateGetSpeedNed_f();
 
-//  struct FloatRMat *rot = stateGetNedToBodyRMat_f();
+  //  struct FloatRMat *rot = stateGetNedToBodyRMat_f();
   struct FloatEulers *ang = stateGetNedToBodyEulers_f();
   eofState.z_NED = pos->z; // for downlink
 
@@ -275,24 +283,24 @@ void event_optic_flow_periodic(void) {
   eofState.wyTruth = (vel->x*cosf(ang->psi) +vel->y*sinf(ang->psi)) / (pos->z - 0.01);
   eofState.DTruth = -vel->z / (pos->z - 0.01);
 
-	// Set hover control signals
-	if (EOF_CONTROL_HOVER) {
+  // Set hover control signals (not used for now)
+  if (EOF_CONTROL_HOVER) {
 
-	  // Assuming a perfectly aligned downward facing camera,
-	  // the camera X-axis is opposite to the body Y-axis
-	  // and the Y-axis is aligned to its X-axis
-	  // Further assumption: body Euler angles are small
-	  float vxB = eofState.z_NED * -eofState.field.wyDerotated;
-	  float vyB = eofState.z_NED * -eofState.field.wxDerotated;
-	  float vzB = eofState.z_NED * eofState.field.D;
-	  uint32_t timestamp = get_sys_time_usec();
+    // Assuming a perfectly aligned downward facing camera,
+    // the camera X-axis is opposite to the body Y-axis
+    // and the Y-axis is aligned to its X-axis
+    // Further assumption: body Euler angles are small
+    float vxB = eofState.z_NED * -eofState.field.wyDerotated;
+    float vyB = eofState.z_NED * -eofState.field.wxDerotated;
+    float vzB = eofState.z_NED * eofState.field.D;
+    uint32_t timestamp = get_sys_time_usec();
 
-	  // Update control state
-	  AbiSendMsgVELOCITY_ESTIMATE(1, timestamp, vxB, vyB, vzB, 0);
-	}
+    // Update control state
+    AbiSendMsgVELOCITY_ESTIMATE(1, timestamp, vxB, vyB, vzB, 0);
+  }
 
-	// TEST CONTROLLER MAINLOOP
-	//guidance_v_module_run(true);
+  // TEST CONTROLLER MAINLOOP
+  //guidance_v_module_run(true);
 }
 
 void event_optic_flow_stop(void) {
@@ -300,8 +308,8 @@ void event_optic_flow_stop(void) {
 }
 
 /******************************
-* VERTICAL GUIDANCE FUNCTIONS *
-******************************/
+ * VERTICAL GUIDANCE FUNCTIONS *
+ ******************************/
 void guidance_v_module_init() {
   //TODO is this part necessary?
   divergenceControlReset();
@@ -367,23 +375,23 @@ void guidance_v_module_run(bool in_flight) {
     int32_t nominalThrottle = eofState.nominalThrottleEnter;
 
     // landing indicates whether the drone is already performing a final landing procedure (flare):
-//    if (!eofState.landing) {
-        // use the divergence for control:
-        float err = divergenceControlSetpoint - eofState.divergenceControlLast;
-        // Negative P-gain - positive control yields negative increase in div
-        int32_t thrust = nominalThrottle - divergenceControlGainP * err * MAX_PPRZ;
+    //    if (!eofState.landing) {
+    // use the divergence for control:
+    float err = divergenceControlSetpoint - eofState.divergenceControlLast;
+    // Negative P-gain - positive control yields negative increase in div
+    int32_t thrust = nominalThrottle - divergenceControlGainP * err * MAX_PPRZ;
 
-//        if (eofState.z_NED > -divergenceControlHeightLimit) {
-//        // land by setting 90% nominal thrust:
-//          eofState.landing = true;
-//          thrust = LANDING_THRUST_FRACTION * nominalThrottle;
-//        }
-        // bound thrust:
-        Bound(thrust, 0.8 * nominalThrottle, 0.8 * MAX_PPRZ);
-        if (ASSIGN_CONTROL){
-          stabilization_cmd[COMMAND_THRUST] = thrust;
-        }
-        eofState.controlThrottleLast = thrust;
+    //        if (eofState.z_NED > -divergenceControlHeightLimit) {
+    //        // land by setting 90% nominal thrust:
+    //          eofState.landing = true;
+    //          thrust = LANDING_THRUST_FRACTION * nominalThrottle;
+    //        }
+    // bound thrust:
+    Bound(thrust, 0.2 * MAX_PPRZ, MAX_PPRZ);
+    if (ASSIGN_CONTROL){
+      stabilization_cmd[COMMAND_THRUST] = thrust;
+    }
+    eofState.controlThrottleLast = thrust;
 
     /*} else {
       // land with constant fraction of nominal thrust:
@@ -398,8 +406,8 @@ void guidance_v_module_run(bool in_flight) {
 }
 
 /***********************
-* SUPPORTING FUNCTIONS
-***********************/
+ * SUPPORTING FUNCTIONS
+ ***********************/
 int16_t uartGetInt16(struct uart_periph *p) {
   int16_t out = 0;
   out |= uart_getch(p);
@@ -425,43 +433,53 @@ enum updateStatus processUARTInput(struct flowStats* s, int32_t *N) {
   static bool synchronized = false;
   while(uart_char_available(&DVS_PORT) > (int32_t) EVENT_BYTE_SIZE
       && *N < 500) {
-    if (synchronized) {
-      // Next set of bytes contains a new event
-      struct flowEvent e;
-      uint8_t separator;
-      int16_t x,y,u,v;
-      x = uartGetInt16(&DVS_PORT);
-      y = uartGetInt16(&DVS_PORT);
-      e.t = uartGetInt32(&DVS_PORT);
-      u = uartGetInt16(&DVS_PORT);
-      v = uartGetInt16(&DVS_PORT);
-      separator = uart_getch(&DVS_PORT);
-      if (separator == EVENT_SEPARATOR) {
-        // Full event received - we can process this further
-        //TODO add timestamp checking - reject events that are outdated
-
-        // Extract floating point position and velocity
-        e.x = (float) x / UART_INT16_TO_FLOAT;
-        e.y = (float) y / UART_INT16_TO_FLOAT;
-        e.u = (float) u / UART_INT16_TO_FLOAT;
-        e.v = (float) v / UART_INT16_TO_FLOAT;
-
-        flowStatsUpdate(s, e, eofState.ratesMA, enableDerotation, dvs128Intrinsics);
-        returnStatus = UPDATE_STATS;
-        if (!eofState.caerInputReceived) {
-          eofState.caerInputReceived = TRUE;
-        }
-        (*N)++;
-      }
-      else {
-        // we are apparently out of sync - do not process event
-        synchronized = false;
+    // Timestamp syncing at first event reception, by generating artificial event rate
+    if (!eofState.caerInputReceived) {
+      if (uart_getch(&DVS_PORT) == EVENT_SEPARATOR) {
+        eofState.caerInputReceived = TRUE;
+        *N = 10;
+        returnStatus = UPDATE_WARNING_RATE;
       }
     }
     else {
-      // (Re)synchronize at next separator
-      if (uart_getch(&DVS_PORT) == EVENT_SEPARATOR) {
-        synchronized = true;
+      if (synchronized) {
+        // Next set of bytes contains a new event
+        struct flowEvent e;
+        uint8_t separator;
+        int16_t x,y,u,v;
+        x = uartGetInt16(&DVS_PORT);
+        y = uartGetInt16(&DVS_PORT);
+        e.t = uartGetInt32(&DVS_PORT);
+        u = uartGetInt16(&DVS_PORT);
+        v = uartGetInt16(&DVS_PORT);
+        separator = uart_getch(&DVS_PORT);
+        if (separator == EVENT_SEPARATOR) {
+          // Full event received - we can process this further
+          //TODO add timestamp checking - reject events that are outdated
+
+          // Extract floating point position and velocity
+          e.x = (float) x / UART_INT16_TO_FLOAT;
+          e.y = (float) y / UART_INT16_TO_FLOAT;
+          e.u = (float) u / UART_INT16_TO_FLOAT;
+          e.v = (float) v / UART_INT16_TO_FLOAT;
+
+          flowStatsUpdate(s, e, eofState.ratesMA, enableDerotation, dvs128Intrinsics);
+          returnStatus = UPDATE_STATS;
+          //        if (!eofState.caerInputReceived) {
+          //          eofState.caerInputReceived = TRUE;
+          //        }
+          (*N)++;
+        }
+        else {
+          // we are apparently out of sync - do not process event
+          synchronized = false;
+        }
+      }
+      else {
+        // (Re)synchronize at next separator
+        if (uart_getch(&DVS_PORT) == EVENT_SEPARATOR) {
+          synchronized = true;
+        }
       }
     }
   }

@@ -53,8 +53,8 @@ void flowStatsUpdate(struct flowStats* s, struct flowEvent e, struct FloatRates 
 
     // Derotation in direction of flow field
     if (enableDerotation) {
-      V -= s->cos_angles[a] *(rates.p - y*rates.r)
-          - s->sin_angles[a] *(rates.q - x*rates.r);
+      V -= s->cos_angles[a] *(rates.p - y*rates.r - x*y*rates.q + x*x*rates.p)
+          - s->sin_angles[a] *(rates.q - x*rates.r - x*y*rates.p + y*y*rates.q);
     }
 
     // Update flow field statistics
@@ -68,8 +68,8 @@ void flowStatsUpdate(struct flowStats* s, struct flowEvent e, struct FloatRates 
 }
 
 enum updateStatus recomputeFlowField(struct flowField* field, struct flowStats* s,
-    float inlierMaxDiff, float minEventRate, float minPosVariance, float minR2, float power,
-    struct cameraIntrinsicParameters intrinsics) {
+    float filterFactor, float inlierMaxDiff, float minEventRate, float minPosVariance,
+    float minR2, float power, struct cameraIntrinsicParameters intrinsics) {
 
   // Compute rate confidence value
     float c_rate = 1;
@@ -90,8 +90,9 @@ enum updateStatus recomputeFlowField(struct flowField* field, struct flowStats* 
     // Loop over all directions and collect total flow field information
     for (i = 0; i < N_FIELD_DIRECTIONS; i++) {
       // Skip if too few new events were added along this direction
-      // Minimum is 2 in order to obtain a nonzero variance
-      if (s->N[i] < 2) {
+      // If the 'moving' number of events is below 1, skip
+      if (s->N[i] <= 1.0f) {
+//      if (s->N[i] < 2) {
         varS[i] = 0;
         c_var[i] = 0;
         continue;
@@ -172,7 +173,7 @@ enum updateStatus recomputeFlowField(struct flowField* field, struct flowStats* 
       }
     }
 
-    float c_total = c_rate * c_var_max * c_R2;
+    float c_total = c_rate * c_var_max * c_R2 * filterFactor;
     lowPassFilterWithThreshold(&field->wx,wx,c_total,inlierMaxDiff);
     lowPassFilterWithThreshold(&field->wy,wy,c_total,inlierMaxDiff);
     lowPassFilterWithThreshold(&field->D,D,c_total,inlierMaxDiff);
@@ -183,10 +184,10 @@ enum updateStatus recomputeFlowField(struct flowField* field, struct flowStats* 
 }
 
 
-void derotateFlowField(struct flowField* field, struct FloatRates* rates) {
-  field->wxDerotated = field->wx - rates->p;
-  field->wyDerotated = field->wy + rates->q;
-}
+//void derotateFlowField(struct flowField* field, struct FloatRates* rates) {
+//  field->wxDerotated = field->wx - rates->p;
+//  field->wyDerotated = field->wy + rates->q;
+//}
 
 void lowPassFilterWithThreshold(float *val, float new, float factor, float limit) {
   float delta = (new - *val)*factor;

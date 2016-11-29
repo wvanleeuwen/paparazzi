@@ -65,6 +65,7 @@ extern struct module_state eofState;
 
 // Setting variables
 extern uint8_t enableDerotation;
+extern float filterTimeConstant;
 extern float inlierMaxDiff;
 extern float derotationMovingAverageFactor;
 extern float minPosVariance;
