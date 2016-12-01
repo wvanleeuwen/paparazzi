@@ -214,7 +214,7 @@ void guidance_v_read_rc(void)
   rc_climb_cmd=(int32_t)radio_control.values[RADIO_THROTTLE_CLIMB];
   DeadBand(rc_climb_cmd, GUIDANCE_V_CLIMB_RC_DEADBAND);
 
-  guidance_v_rc_zd_sp = rc_climb_cmd + nus_climb_cmd;
+  guidance_v_rc_zd_sp = rc_climb_cmd - nus_climb_cmd;
   Bound(guidance_v_rc_zd_sp, MIN_PPRZ, MAX_PPRZ);
 
   static const int32_t climb_scale = ABS(SPEED_BFP_OF_REAL(GUIDANCE_V_MAX_RC_CLIMB_SPEED) /
