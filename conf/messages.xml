@@ -2248,7 +2248,10 @@
 	<field name="nus_turn_cmd" type="int16"/>
 	<field name="nus_climb_cmd" type="int16"/>
 	<field name="nus_gate_heading" type="int8"/>
-	<field name="fps" type="uint8"/>	
+	<field name="fps" type="int8"/>
+	<field name="cnt_left" type="uint8"/>
+	<field name="cnt_middle" type="uint8"/>
+ 	<field name="cnt_right" type="uint8"/>
   </message>
 
    <message name="GPS_SMALL" id="252">

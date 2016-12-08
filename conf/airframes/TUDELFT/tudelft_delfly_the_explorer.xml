@@ -218,6 +218,8 @@
 		<define name="HOVER_KI" value="100"/>
 		<define name="NOMINAL_HOVER_THROTTLE" value="0.77"/>
 		<define name="ADAPT_THROTTLE_ENABLED" value="FALSE"/>
+		<define name="MAX_RC_CLIMB_SPEED" value="0.5"/>
+		<define name="MAX_RC_DESCENT_SPEED" value="0.5"/>
 	</section>
 	
 	

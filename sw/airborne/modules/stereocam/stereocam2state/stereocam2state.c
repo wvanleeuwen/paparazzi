@@ -28,6 +28,7 @@
 #endif
 
 int8_t win_x, win_y, win_size, win_fitness, fps;
+uint8_t cnt_left, cnt_middle, cnt_right;
 int16_t nus_turn_cmd=0;
 int16_t nus_climb_cmd=0;
 int8_t nus_gate_heading=0; // gate heading relative to the current heading, in degrees
@@ -43,7 +44,7 @@ uint8_t climb_cmd_max=10; // percentage of MAX_PPRZ
 static void send_stereo_data(struct transport_tx *trans, struct link_device *dev)
  {
    pprz_msg_send_STEREO_DATA(trans, dev, AC_ID,
-                         &win_x, &win_y, &win_size, &win_fitness, &nus_turn_cmd, &nus_climb_cmd, &nus_gate_heading, &fps);
+                         &win_x, &win_y, &win_size, &win_fitness, &nus_turn_cmd, &nus_climb_cmd, &nus_gate_heading, &fps, &cnt_left, &cnt_middle, &cnt_right);
  }
 
 void stereocam_to_state(void);
@@ -58,7 +59,7 @@ void stereo_to_state_periodic(void)
 //	static uint16_t ii=0;
 //	ii++;
 
-	if (stereocam_data.fresh && stereocam_data.len == 5) { // length of NUS window detection code
+	if (stereocam_data.fresh && stereocam_data.len == 8) { // length of NUS window detection code
 	int8_t* pointer=stereocam_data.data; // to transform uint8 message back to int8
 
 	win_x = pointer[0];
@@ -66,6 +67,13 @@ void stereo_to_state_periodic(void)
     win_size = pointer[2];
     win_fitness = pointer[3];
     fps = pointer[4];
+    cnt_left = stereocam_data.data[5];
+    cnt_middle = stereocam_data.data[6];
+    cnt_right = stereocam_data.data[7];
+    //cnt_left = 0;
+    //cnt_middle = 0;
+    //cnt_right = 0;
+
     stereocam_data.fresh = 0;
 
     /* radio switch */
@@ -80,7 +88,9 @@ void stereo_to_state_periodic(void)
 
     	nus_gate_heading=nus_switch*60*win_x/64; //*win_fitness/100;
 
-    	nus_climb_cmd=MAX_PPRZ/100*climb_cmd_max*nus_switch*win_y/48*100/(2*win_size); // gate size is 1 meter, win size is half of the gate size in pixels
+    	// nus_climb_cmd=MAX_PPRZ*climb_cmd_max/100*nus_switch*win_y/48*100/(2*win_size); // gate size is 1 meter, win size is half of the gate size in pixels
+    	// TODO change climb cmd based on body pitch
+    	nus_climb_cmd=0;
     }
     else if (win_size < size_thresh && win_fitness > fit_thresh) // incomplete window detected, use previous command
     {
