@@ -34,10 +34,11 @@ int16_t nus_climb_cmd=0;
 int8_t nus_gate_heading=0; // gate heading relative to the current heading, in degrees
 
 uint8_t pos_thresh=10; // steer only if window center is more than pos_thresh of the center
-uint8_t fit_thresh=10; // maximal fitness that is still considered as correct detection
+uint8_t fit_thresh=20; // maximal fitness that is still considered as correct detection
 uint8_t size_thresh=10; // minimal size that is considered to be a window
 uint8_t turn_cmd_max=50; // percentage of MAX_PPRZ
 uint8_t climb_cmd_max=10; // percentage of MAX_PPRZ
+uint8_t cnt_thresh=80; // threshold for max amount of pixels in a bin (x10)
 
 
 
@@ -70,9 +71,6 @@ void stereo_to_state_periodic(void)
     cnt_left = stereocam_data.data[5];
     cnt_middle = stereocam_data.data[6];
     cnt_right = stereocam_data.data[7];
-    //cnt_left = 0;
-    //cnt_middle = 0;
-    //cnt_right = 0;
 
     stereocam_data.fresh = 0;
 
@@ -82,7 +80,7 @@ void stereo_to_state_periodic(void)
     if (radio_control.values[5] < -1000) nus_switch=1; // this should be ELEV D/R
     else nus_switch=0;
 
-    if (win_size > size_thresh && win_fitness > fit_thresh) // valid measurement
+    if (win_size > size_thresh && win_fitness > fit_thresh) // valid gate detection
     {
     	nus_turn_cmd=MAX_PPRZ/100*turn_cmd_max*nus_switch*win_x/64;
 
@@ -96,9 +94,17 @@ void stereo_to_state_periodic(void)
     {
     	// keeping the same command
     }
-    else if (win_fitness < fit_thresh) // no window detected
+    else // no window detected - if (win_fitness < fit_thresh)
     {
-    	nus_turn_cmd=0;
+    	if (cnt_left > cnt_thresh && cnt_right < cnt_thresh) {
+			nus_turn_cmd=nus_switch*MAX_PPRZ/3;
+    	}
+    	else if (cnt_left < cnt_thresh && cnt_right > cnt_thresh) {
+    		nus_turn_cmd=-nus_switch*MAX_PPRZ/3;
+    	}
+    	else {
+    	  	nus_turn_cmd=0;
+    	}
     	nus_climb_cmd=0;
     }
 
