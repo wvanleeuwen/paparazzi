@@ -28,3 +28,6 @@
 [submodule "sw/ext/flyingrobotcommander"]
 	path = sw/ext/flyingrobotcommander
 	url = https://github.com/wv-tud/flyingrobotcommander.git
+[submodule "sw/ext/librtcm3"]
+	path = sw/ext/librtcm3
+	url = https://github.com/wv-tud/ubx_RTK_groundstation
