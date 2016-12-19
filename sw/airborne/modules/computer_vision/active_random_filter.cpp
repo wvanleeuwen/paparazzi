@@ -1047,17 +1047,17 @@ void calibrateEstimation(vector<trackResults> trackRes)
 	calPositions[4][1] 	=  0.50;
 	calPositions[4][2] 	=  0.25;
 */
-	double k_opt;
+	double k_opt        = 0;
 	double k_min 		= 1.0;
 	double k_max 		= 1.05;
 	double k_step 		= 0.0025;
 
-	int calArea_opt;
+	int calArea_opt     = 0;
 	int calArea_min 	= 9000;
 	int calArea_max 	= 12000;
 	int calArea_step 	=   10;
 
-	int orbDiag_opt;
+	int orbDiag_opt     = 0;
 	int orbDiag_min 	= 1900;
 	int orbDiag_max 	= 2500;
 	int orbDiag_step 	=   10;

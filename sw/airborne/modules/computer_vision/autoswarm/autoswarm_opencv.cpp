@@ -57,7 +57,7 @@ static void autoswarm_opencv_run_trailer(void);
 #define AUTOSWARM_SHOW_MEM      1                   // Show the neighbours identified and their location
 #define AUTOSWARM_WRITE_RESULTS 1                   // Write measurements to text file
 #define AUTOSWARM_CALIBRATE_CAM 1                   // Calibrate the camera
-#define AUTOSWARM_BENCHMARK     1                   // Print benchmark table
+#define AUTOSWARM_BENCHMARK     0                   // Print benchmark table
 #define AUTOSWARM_BODYFRAME     1                   // Fake euler angles and pos to be 0
 #define AUTOSWARM_SAVE_FRAME    1                   // Save a frame for post-processing
 

@@ -11,7 +11,8 @@
 
     <!--configure name="HOST" value="192.168.40.30" />
     <configure name="MODEM_HOST" value="192.168.40.255" /-->
-
+	<define name="USE_GPS_UBX_RTCM" value="TRUE"/>
+    	<define name="GPS_TIMEOUT" value="3"/>
 	<define name="MT9F002_OUTPUT_WIDTH" value="480" />
 	<define name="MT9F002_OUTPUT_HEIGHT" value="418" />
 	<define name="MT9F002_TARGET_FPS" value="30" />
@@ -27,7 +28,7 @@
     <module name="motor_mixing"/>
     <module name="actuators" type="bebop"/>
     <module name="imu" type="bebop"/>
-    <module name="gps" type="datalink"/>
+    <module name="gps" type="ublox"/>
     <module name="stabilization" type="indi"/>
     <module name="stabilization" type="rate_indi" />
     <module name="guidance" type="indi">
@@ -35,7 +36,7 @@
     </module>
     <module name="ahrs" type="int_cmpl_quat">
       <configure name="USE_MAGNETOMETER" value="TRUE"/>
-      <define name="AHRS_USE_GPS_HEADING" value="FALSE"/>
+      <define name="AHRS_USE_GPS_HEADING" value="TRUE"/>
     </module>
     <module name="ins" type="extended"/>
   </firmware>
@@ -44,6 +45,7 @@
     <module name="geo_mag"/>
     <module name="air_data"/>
     <module name="send_imu_mag_current"/>
+    <module name="gps" type="ubx_ucenter"/>
     <module name="video_thread">
     </module>
 
