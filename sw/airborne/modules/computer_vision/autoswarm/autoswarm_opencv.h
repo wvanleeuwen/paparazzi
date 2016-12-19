@@ -43,7 +43,6 @@ extern "C" {
 //#define FILTER_FLOOD_OMNI 			0
 //#define FILTER_FLOOD_CW				1
 
-
 #define WP__TD 2
 #define WP__GOAL 4
 #define WP__CAM 5
@@ -85,13 +84,13 @@ extern double 	AUTOSWARM_EPS;
 // Initialize global attractor
 struct originPoint { double cx; double cy; double cz;};
 struct originPoint globalOrigin;
-static inline void setGlobalOrigin(double x, double y, double z){ globalOrigin.cx = x; globalOrigin.cy = y; globalOrigin.cz = z;};
-static inline bool setGlobalMode(int mode){ AUTOSWARM_ATTRACTOR = mode; return false; };
-static inline bool setSwarmMode(int mode){ 	AUTOSWARM_MODE = mode; return false; };
+static inline void setGlobalOrigin  (double x, double y, double z){ globalOrigin.cx = x; globalOrigin.cy = y; globalOrigin.cz = z;};
+static inline bool setGlobalMode    (int mode){ AUTOSWARM_ATTRACTOR = mode; return false; };
+static inline bool setSwarmMode     (int mode){ 	AUTOSWARM_MODE = mode; return false; };
 
-void autoswarm_opencv_init(int globalMode);
-void autoswarm_opencv_run(void);
-bool amIhome(void);
+void autoswarm_opencv_init          (int globalMode);
+void autoswarm_opencv_run           (void);
+bool amIhome                        (void);
 
 #ifdef __cplusplus
 }

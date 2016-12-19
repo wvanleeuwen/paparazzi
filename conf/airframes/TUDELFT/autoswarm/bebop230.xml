@@ -46,7 +46,7 @@
     <module name="send_imu_mag_current"/>
     <module name="video_thread">
     </module>
-    <!--
+
     <module name="cv_active_random_filter">
     	<define name="AR_FILTER_CAMERA" value="front_camera" />
     </module> 
@@ -54,10 +54,9 @@
 		<define name="AUTOSWARM_CAMERA" value="front_camera" />
 		<define name="WV_INIT_GLOBAL_ATTRACTOR" value="2" />
 	</module>
-	-->
 	<!-- module name="cv_bebop_stabilization"/ -->
-	<module name="video_rtp_stream">
-		<!--configure name="VIEWVIDEO_HOST" value="192.168.40.74" /-->
+	<!--<module name="video_rtp_stream">
+		<configure name="VIEWVIDEO_HOST" value="192.168.40.74" />
 		<configure name="VIEWVIDEO_HOST" value="192.168.42.65" />
 		<configure name="VIEWVIDEO_BROADCAST" value="FALSE" />
 		<define name="VIEWVIDEO_CAMERA" value="front_camera" />
@@ -67,14 +66,14 @@
 		<define name="VIEWVIDEO_VIDEO_FILE" value="fisheye_stabilization"/>
 		<define name="VIEWVIDEO_STREAM_VIDEO" value="TRUE"/>
 		
-	</module>
+	</module>-->
 	<module name="cv_ae_awb">
 	  <define name="CV_AE_AWB_AV" value="1" />
 	  <define name="CV_AE_AWB_VERBOSE" value="0"/>
 	</module>
-	<module name="logger_file">
+	<!--<module name="logger_file">
       <define name="FILE_LOGGER_PATH" value="/data/ftp/internal_000"/>
-    </module>
+    </module>-->
   </modules>
 
   <commands>
