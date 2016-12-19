@@ -23,8 +23,8 @@
  * Autonomous bebop swarming module based on vision
  */
 
-#ifndef OPENCV_EXAMPLE_H
-#define OPENCV_EXAMPLE_H
+#ifndef AUTOSWARM_OPENCV_H
+#define AUTOSWARM_OPENCV_H
 
 #ifdef __cplusplus
 extern "C" {

@@ -24,11 +24,13 @@
  */
 
 #include "active_random_filter.h"
+#include <vector>
+#include <ctime>
 
 extern "C" {
-#include <state.h>
-#include <ctime>
-//#include <random>
+    #include "boards/bebop.h"                       // C header used for bebop specific settings
+    #include <state.h>                              // C header used for state functions and data
+    extern struct mt9f002_t mt9f002;
 }
 
 using namespace std;
@@ -37,19 +39,20 @@ using namespace std;
 using namespace cv;
 
 #define AR_FILTER_CV_CONTOURS   1 // Use opencv to detect contours
-#define AR_FILTER_ISP_CROP      0 // Use the ISP to crop the frame according to FOV-Y
-#define AR_FILTER_SHOW_REJECT   0 // Print why shapes are rejected
+#define AR_FILTER_ISP_CROP      1 // Use the ISP to crop the frame according to FOV-Y
+#define AR_FILTER_SHOW_REJECT   1 // Print why shapes are rejected
 #define AR_FILTER_MOD_VIDEO     1 // Modify the frame to show relevant info
 #define AR_FILTER_DRAW_CONTOURS 1 // Use drawContours function iso circle
 #define AR_FILTER_DRAW_CIRCLES  1 // Draw circles
-#define AR_FILTER_DRAW_BOXES 	0 // Draw boxes
-#define AR_FILTER_SHOW_MEM      0 // Print object locations to terminal
-#define AR_FILTER_SAVE_FRAME    0 // Save a frame for post-processing
-#define AR_FILTER_MEASURE_FPS   0
-#define AR_FILTER_CALIBRATE_CAM 0 // Calibrate camera
-#define AR_FILTER_WORLDPOS 		0 // Use world coordinates
+#define AR_FILTER_DRAW_BOXES 	1 // Draw boxes
+#define AR_FILTER_SHOW_MEM      1 // Print object locations to terminal
+#define AR_FILTER_SAVE_FRAME    1 // Save a frame for post-processing
+#define AR_FILTER_MEASURE_FPS   1
+#define AR_FILTER_CALIBRATE_CAM 1 // Calibrate camera
+#define AR_FILTER_WORLDPOS 		1 // Use world coordinates
 #define AR_FILTER_NOYAW 		1 // Output in body horizontal XY
 
+static void             active_random_filter_header(void);
 static void 			trackGreyObjects	(Mat& sourceFrame, Mat& greyFrame, vector<trackResults>* trackRes);
 static void             identifyObjects     (vector<trackResults> trackRes);
 static void 			addContour			(vector<Point> contour, vector<trackResults>* trackRes, int offsetX, int offsetY);
@@ -75,9 +78,6 @@ static void 			mod_video			(Mat& sourceFrame, Mat& frameGrey);
 #if AR_FILTER_SAVE_FRAME
 static void 			saveBuffer			(Mat sourceFrame, const char *filename);
 #endif
-/* #if AR_FILTER_MOD_VIDEO
-static void 			mat2Buffer			(Mat& source, char* buf, bool greyscale = false);
-#endif */
 
 #if AR_FILTER_MEASURE_FPS
 static time_t 	startTime;
@@ -95,21 +95,22 @@ double 	AR_FILTER_MAX_CIRCLE_DEF 	= 0.3;
 
 int 	AR_FILTER_SAMPLE_STYLE 		= AR_FILTER_STYLE_RANDOM;
 int 	AR_FILTER_FLOOD_STYLE 	    = AR_FILTER_FLOOD_OMNI;
-int 	AR_FILTER_Y_MIN 			= 31;                      // 0  [0,65 84,135 170,255]zoo 45
-int 	AR_FILTER_Y_MAX 			= 179;                     // 255
-int 	AR_FILTER_CB_MIN 			= 101;                      // 84
-int 	AR_FILTER_CB_MAX 			= 129;                     // 113
-int 	AR_FILTER_CR_MIN 			= 167;                     // 218 -> 150?
-int 	AR_FILTER_CR_MAX 			= 255;                     // 240 -> 255?
-int 	AR_FILTER_IMAGE_CROP_FOVY 	= 90; 		               // Degrees
+int 	AR_FILTER_Y_MIN 			= 31;                           // 0  [0,65 84,135 170,255]zoo 45
+int 	AR_FILTER_Y_MAX 			= 179;                          // 255
+int 	AR_FILTER_CB_MIN 			= 101;                          // 84
+int 	AR_FILTER_CB_MAX 			= 129;                          // 113
+int 	AR_FILTER_CR_MIN 			= 167;                          // 218 -> 150?
+int 	AR_FILTER_CR_MAX 			= 255;                          // 240 -> 255?
+int 	AR_FILTER_IMAGE_CROP_FOVY 	= 90; 		                    // Degrees
 int 	AR_FILTER_SAVE_RESULTS 		= 0;
 double 	AR_FILTER_CROP_X 			= 1.2;
 int     AR_FILTER_MEMORY 			= 15;
+int     AR_FILTER_FPS               = 15;
 int     AR_FILTER_VMAX              = 1;
 
 // Set up platform parameters
-int 	AR_FILTER_BEBOP_CAMERA_ANGLE 		= -13; 		       // Degrees
-double 	AR_FILTER_BEBOP_CAMERA_OFFSET_X 	= 0.10; 	       // Meters
+int 	AR_FILTER_BEBOP_CAMERA_ANGLE 		= -30; 		            // Degrees
+double 	AR_FILTER_BEBOP_CAMERA_OFFSET_X 	= 0.10; 	            // Meters
 
 // Initialize parameters to be assigned during runtime
 static struct 	FloatEulers * 	eulerAngles;
@@ -128,58 +129,117 @@ vector<Rect> 			cropAreas;
 vector<Point> 			objCont;
 vector<vector<Point> > allContours;
 vector<memoryBlock>    neighbourMem;
-vector<trackResults>   trackRes;                               // Create empty struct _trackResults to store our neighbours in
+vector<trackResults>   trackRes;                                    // Create empty struct _trackResults to store our neighbours in
 
-void active_random_filter(char* buff, int width, int height)
+void active_random_filter(char* buff, int width, int height, struct FloatEulers* eulerAngles)
 {
+    trackRes.clear();
+    Mat sourceFrame (height, width, CV_8UC2, buff);                 // Initialize current frame in openCV (UYVY) 2 channel
+    Mat frameGrey   (height, width, CV_8UC1, cvScalar(0.0));        // Initialize an empty 1 channel frame
 #if AR_FILTER_SAVE_FRAME
-	if(runCount == 25) saveBuffer(sourceFrame, "testBuffer.txt");
+    if(runCount == 25) saveBuffer(sourceFrame, "testBuffer.txt");   // (optional) save a raw UYVY frame
 #endif // AR_FILTER_SAVE_FRAME
-#if AR_FILTER_MEASURE_FPS
-	if(runCount == 0)
+    active_random_filter_header();                                  // Mostly printing and storing
+	Rect crop 	= setISPvars(width, height, true); 	                // Calculate ISP related parameters
+	sourceFrame = sourceFrame(crop); 				                // Crop the frame
+	trackGreyObjects(sourceFrame, frameGrey, &trackRes);            // Track objects in sourceFrame
+	for(unsigned int r=0; r < trackRes.size(); r++)                 // Convert angles & Write/Print output
 	{
-		startTime 		= time(0);
-	}else{
-		currentTime 	= time(0); 												// Get the current time
-		curT 			= difftime(currentTime,startTime); 						// Calculate time-difference between startTime and currentTime
-		printf("Measured FPS: %0.2f\n", runCount / ((double) curT));
+		cam2body(&trackRes[r]);						                // Convert from camera angles to body angles (correct for roll)
+		body2world(&trackRes[r], eulerAngles); 		                // Convert from body angles to world coordinates (correct yaw and pitch)
 	}
-#endif
-	if(!AR_FILTER_CV_CONTOURS && AR_FILTER_FLOOD_STYLE != AR_FILTER_FLOOD_CW)
-	{
-		printf("[AR-FILTER-ERR] No openCV contours is only possible with clockwise flooding.\n");
-	}
-	trackRes.clear();
-	eulerAngles 			= stateGetNedToBodyEulers_f(); 	   // Get Euler angles
-	Mat sourceFrame	(height, width, CV_8UC2, buff); 	           // Initialize current frame in openCV (UYVY) 2 channel
-	Mat frameGrey	(sourceFrame.rows, sourceFrame.cols, CV_8UC1, cvScalar(0.0));
-	Rect crop 	= setISPvars(width, height, true); 	           // Calculate ISP related parameters
-#if !AR_FILTER_ISP_CROP
-	sourceFrame = sourceFrame(crop); 				           // Crop the frame
-#endif // AR_FILTER_ISP_CROP
-	trackGreyObjects(sourceFrame, frameGrey, &trackRes);    // Track objects in sourceFrame
-	for(unsigned int r=0; r < trackRes.size(); r++)         // Convert angles & Write/Print output
-	{
-		cam2body(&trackRes[r]);						       // Convert from camera angles to body angles (correct for roll)
-		body2world(&trackRes[r], eulerAngles); 		       // Convert from body angles to world coordinates (correct yaw and pitch)
-	}
-	identifyObjects(trackRes);
+	identifyObjects(trackRes);                                      // Identify the spotted neighbours
 #if AR_FILTER_MOD_VIDEO
-	mod_video(sourceFrame, frameGrey);
+	mod_video(sourceFrame, frameGrey);                              // Modify the sourceframe
 #endif // AR_FILTER_MOD_VIDEO
-#if AR_FILTER_SHOW_MEM
-	for(unsigned int r=0; r < neighbourMem.size(); r++)        // Print to file & terminal
-		{
-			printf("%i - Object at (%0.2f m, %0.2f m, %0.2f m)\n", runCount, neighbourMem[r].x_w, neighbourMem[r].y_w, neighbourMem[r].z_w); 														// Print to terminal
-		}
-#endif // AR_FILTER_SHOW_MEM
-#if AR_FILTER_CALIBRATE_CAM
-	if(runCount==50) 	calibrateEstimation(trackRes);
-#endif // AR_FILTER_CALIBRATE_CAM
-	frameGrey.release(); 			                           // Release Mat
-	sourceFrame.release();
-	runCount++;
+	frameGrey.release(); 			                                // Release Mat
+	sourceFrame.release();                                          // Release Mat
+	runCount++;                                                     // Increase counter
 	return;
+}
+
+Rect setISPvars(int width, int height, bool crop)
+{
+    int heightRange = 3288; // Property of CMOS sensor
+    ispScalar       = (double) 16 / round(16 / ((double) width / heightRange)); //
+#if AR_FILTER_ISP_CROP
+    ispHeight       = MT9F002_OUTPUT_WIDTH;
+    ispWidth        = MT9F002_OUTPUT_HEIGHT;
+#else
+    ispHeight       = width;
+    ispWidth        = height;
+#endif
+    if (crop==true)
+    {
+        double fovY             = AR_FILTER_IMAGE_CROP_FOVY * M_PI / 180;
+        double cmosPixelSize    = 0.0000014;    // 1.4um (see manual of mt9f002 CMOS sensor)
+        double focalLength      = (2400 * cmosPixelSize * 1000 / ispScalar) / (4 * sin(M_PI / 4));
+        double cY               = round(sin((-eulerAngles->theta - AR_FILTER_BEBOP_CAMERA_ANGLE * M_PI / 180)) * 2 * focalLength * ispScalar / (1000 * cmosPixelSize));
+        double desHeight        = round(sin(fovY / 4) * 4 * focalLength * ispScalar / (1000 * cmosPixelSize) + ispWidth * tan(eulerAngles->phi));
+        int desOffset           = round((ispHeight - desHeight) / 2) + cY;
+        if(desOffset < 0)                       desOffset = 0;
+        if(desOffset > ispHeight)               desOffset = 0;
+        if(desHeight < 0)                       desHeight = ispHeight;
+        if(desHeight > ispHeight)               desHeight = ispHeight;
+        if(desHeight + desOffset > ispHeight)   desOffset = ispHeight - desHeight;
+        if((desOffset & 1) != 0)                desOffset--;
+#if AR_FILTER_ISP_CROP
+        cropCol                 = 0;
+        mt9f002.offset_x        = MT9F002_INITIAL_OFFSET_X + desOffset;
+        mt9f002.output_width    = desHeight / ispScalar;
+        Rect crop               = cvRect(0,0,width,height);
+        mt9f002_set_resolution(&mt9f002);
+#else
+        cropCol                 = desOffset;
+        Rect crop               = cvRect(desOffset,0,desHeight,ispWidth);
+#endif
+        return crop;
+    }else{
+        return cvRect(0, 0, width, height);
+    }
+}
+
+void trackGreyObjects(Mat& sourceFrame, Mat& frameGrey, vector<trackResults>* trackRes)
+{
+    // Main function for tracking object on a frame
+    pixCount    = 0;
+    pixSucCount = 0;
+    rndRedGrayscale(sourceFrame, frameGrey, AR_FILTER_RND_PIX_SAMPLE);
+#if AR_FILTER_BENCHMARK
+    addBenchmark("image Thresholded");
+#endif
+    if(AR_FILTER_FLOOD_STYLE == AR_FILTER_FLOOD_CW && !AR_FILTER_CV_CONTOURS)
+    {
+        for(unsigned int tc=0; tc < allContours.size(); tc++)
+        {
+            if(allContours[tc].size() > 0)
+            {
+                addContour(allContours[tc], trackRes, 0, 0);
+            }
+        }
+    }else{
+        vector<vector<Point> > contours;
+        for(unsigned int r=0; r < cropAreas.size(); r++)
+        {
+            if(cropAreas[r].x != 0 && cropAreas[r].width != 0)
+            {
+                contours.clear();
+#if AR_FILTER_MOD_VIDEO && AR_FILTER_DRAW_BOXES
+                findContours(frameGrey(cropAreas[r]).clone(), contours, CV_RETR_EXTERNAL, CV_CHAIN_APPROX_SIMPLE);
+#else
+                findContours(frameGrey(cropAreas[r]), contours, CV_RETR_EXTERNAL, CV_CHAIN_APPROX_SIMPLE);
+#endif
+                for(unsigned int tc=0; tc < contours.size(); tc++)
+                {
+                    addContour(contours[tc], trackRes, cropAreas[r].x, cropAreas[r].y);
+                }
+            }
+        }
+    }
+#if AR_FILTER_BENCHMARK
+    addBenchmark("Contours found");
+#endif
+    return;
 }
 
 void identifyObjects(vector<trackResults> trackRes)
@@ -199,7 +259,7 @@ void identifyObjects(vector<trackResults> trackRes)
 		identified = false;
 		for(unsigned int i=0; i < neighbourMem.size(); i++)
 		{
-			double radius	= (runCount - neighbourMem[i].lastSeen) * AR_FILTER_VMAX;
+			double radius	= (runCount - neighbourMem[i].lastSeen) * 1.0/((double) AR_FILTER_FPS) * AR_FILTER_VMAX;
 			double dx 		= trackRes[r].x_w - neighbourMem[i].x_w;
 			if(dx <= radius)
 			{
@@ -237,96 +297,110 @@ void identifyObjects(vector<trackResults> trackRes)
 	return;
 }
 
-Rect setISPvars(int width, int height, bool crop)
+vector<double> estimatePosition(int xp, int yp, double area, double k, int calArea, int orbDiag)
 {
-	int heightRange = 3288; // Property of CMOS sensor
-	ispScalar 		= (double) 16 / round(16 / ((double) width / heightRange)); // (re)Calculate the scalar set originally in bebop_front_camera.c
-#if AR_FILTER_ISP_CROP
-	ispHeight 		= MT9F002_OUTPUT_WIDTH;
-	ispWidth 		= MT9F002_OUTPUT_HEIGHT;
-#else
-	ispHeight 		= width;
-	ispWidth 		= height;
-#endif
-	if (crop==true)
-	{
-		double fovY 			= AR_FILTER_IMAGE_CROP_FOVY * M_PI / 180;
-		double cmosPixelSize 	= 0.0000014; 	// 1.4um (see manual of mt9f002 CMOS sensor)
-		double focalLength		= (2400 * cmosPixelSize * 1000 / ispScalar) / (4 * sin(M_PI / 4));
-		double cY 				= round(sin((-eulerAngles->theta - AR_FILTER_BEBOP_CAMERA_ANGLE * M_PI / 180)) * 2 * focalLength * ispScalar / (1000 * cmosPixelSize));
-		double desHeight 		= round(sin(fovY / 4) * 4 * focalLength * ispScalar / (1000 * cmosPixelSize) + ispWidth * tan(eulerAngles->phi));
-		int desOffset 			= round((ispHeight - desHeight) / 2) + cY;
-		if(desOffset < 0) 			desOffset = 0;
-		if(desOffset > ispHeight) 	desOffset = 0;
-
-		if(desHeight < 0) 			desHeight = ispHeight;
-		if(desHeight > ispHeight) 	desHeight = ispHeight;
-
-		if(desHeight + desOffset > ispHeight)
-		{
-			desOffset = ispHeight - desHeight;
-		}
-		if((desOffset & 1) != 0)
-		{
-			desOffset--;
-		}
-#if AR_FILTER_ISP_CROP
-		cropCol 	= 0;
-		Rect crop 	= cvRect(0,0,desHeight,ispWidth);
-		mt9f002.offset_x = MT9F002_INITIAL_OFFSET_X + desOffset;
-		mt9f002.output_width = desHeight / ispScalar;
-		mt9f002_set_resolution(&mt9f002);
-#else
-		cropCol 	= desOffset;
-		Rect crop 	= cvRect(desOffset,0,desHeight,ispWidth);
-#endif
-		return crop;
-	}else{
-		return cvRect(0, 0, width, height);
-	}
+    // This function estimates the 3D position (in camera  coordinate system) according to pixel position
+    // (Default) calibration parameters
+    if(k==0)        k       = 1.085; // Fisheye correction factor (1.085)
+    if(calArea==0)  calArea = 5530; // Calibrate at full resolution (5330)
+    if(orbDiag==0)  orbDiag = 2400; // Measured circular image diagonal using resolution of 2024x2048 org: 2400 (2200)
+    // Calculate corrected calibration parameters
+    calArea                 = (int) round(calArea * (ispWidth / 2048.0) * (ispWidth / 2048.0));
+    orbDiag                 = (int) round(orbDiag * (ispWidth / 2048.0));
+    double cmosPixelSize    = 0.0000014;    // 1.4um (see manual of CMOS sensor)
+    double fovDiag          = M_PI;         // [degrees] Diagonal field of view (see bebop manual)
+    // Calculate relevant parameters
+    int cX                  = round(ispHeight / 2);
+    int cY                  = round(ispWidth / 2);
+    double frameSizeDiag    = orbDiag * cmosPixelSize * 1000 / ispScalar; // [mm] Find used diagonal size of CMOS sensor
+    double f                = frameSizeDiag / (4 * sin(fovDiag / 4)); // [mm]
+    double useableX         = (ispWidth - sqrt(calArea / M_PI));
+    double useableY         = (ispHeight - sqrt(calArea / M_PI));
+    // Calculate FoV in x and y direction
+    double fovX             = 4*asin((useableX * 1 / ispScalar * cmosPixelSize * 1000)/(4 * f));
+    double fovY             = 4*asin((useableY * 1 / ispScalar * cmosPixelSize * 1000)/(4 * f));
+    //printf("fovX: %0.2f - fovY: %0.2f\n",fovX * 180 / M_PI, fovY * 180 / M_PI);
+    // rotate frame cc 90 degrees (ISP is rotated 90 degrees cc)
+    int x                   = yp - cY;
+    int y                   = xp - cX;
+    // Convert to polar coordinates
+    double r                = sqrt((double) x * x + y * y) * 1 / ispScalar * cmosPixelSize * 1000; // [mm] radial distance from middle of CMOS
+    double theta            = atan2(y,x);
+    // Correct radius for radial distortion using correction parameter k
+    double corR             = correctRadius(r, f, k);
+    // Convert back to Cartesian
+    double corX             = corR * cos(theta);
+    double corY             = corR * sin(theta);
+    double corArea          = area * pow(corR / r, 2.0);    // radius = sqrt(area) / sqrt(M_PI)     --->    newRadius = radius * corR / r   --->    corArea = M_PI * newRadius * newRadius
+    // Calculate distance
+    double dist             = sqrt(calArea) / sqrt(corArea);
+    // Calculate max width and height of undistorted frame
+    double maxX             = correctRadius(useableX / 2 * 1 / ispScalar * cmosPixelSize * 1000, f, k);
+    double maxY             = correctRadius(useableY / 2 * 1 / ispScalar * cmosPixelSize * 1000, f, k);
+    // Calculate angles wrt camera
+    double xAngle           = fovX / 2 * corX / maxX; // Assume all non-linearities have been removed from corX and corY
+    double yAngle           = fovY / 2 * corY / maxY; // Then scale them according to the max values and axis FoV
+    // Store in dest and parse it back
+    vector<double> dest(3);
+    dest[0] = xAngle;
+    dest[1] = yAngle;
+    dest[2] = dist;
+    return dest;
 }
 
-void trackGreyObjects(Mat& sourceFrame, Mat& frameGrey, vector<trackResults>* trackRes)
+double correctRadius(double r, double f, double k)
 {
-	// Main function for tracking object on a frame
-	pixCount 	= 0;
-	pixSucCount = 0;
-	rndRedGrayscale(sourceFrame, frameGrey, AR_FILTER_RND_PIX_SAMPLE);
-#if AR_FILTER_BENCHMARK
-	addBenchmark("image Thresholded");
-#endif
-	if(AR_FILTER_FLOOD_STYLE == AR_FILTER_FLOOD_CW && !AR_FILTER_CV_CONTOURS)
-	{
-		for(unsigned int tc=0; tc < allContours.size(); tc++)
-		{
-			if(allContours[tc].size() > 0)
-			{
-				addContour(allContours[tc], trackRes, 0, 0);
-			}
-		}
-	}else{
-		vector<vector<Point> > contours;
-		for(unsigned int r=0; r < cropAreas.size(); r++)
-		{
-			if(cropAreas[r].x != 0 && cropAreas[r].width != 0)
-			{
-				contours.clear();
-#if AR_FILTER_MOD_VIDEO && AR_FILTER_DRAW_BOXES
-				findContours(frameGrey(cropAreas[r]).clone(), contours, CV_RETR_EXTERNAL, CV_CHAIN_APPROX_SIMPLE);
+    // This function calculates the corrected radius for radial distortion
+    // According to the article "A Generic Non-Linear Method for Fisheye Correction" by Dhane, Kutty and Bangadkar
+    return f / k * tan(asin(sin(atan(r / f)) * k));
+}
+
+void cam2body(trackResults* trackRes)
+{
+    // Neighbour position returned in 2 angles and a radius.
+    // x_c is the angle wrt vertical camera axis.   Defined clockwise/right positive
+    // y_c is angle wrt camera horizon axis.        Defined upwards positive
+    // r_c is radial distance in m.
+    trackRes->x_b = trackRes->r_c * cos(-trackRes->y_c - M_PI / 180 * AR_FILTER_BEBOP_CAMERA_ANGLE) * cos(trackRes->x_c) + AR_FILTER_BEBOP_CAMERA_OFFSET_X;
+    trackRes->y_b = trackRes->r_c * cos(-trackRes->y_c - M_PI / 180 * AR_FILTER_BEBOP_CAMERA_ANGLE) * sin(trackRes->x_c);
+    trackRes->z_b = trackRes->r_c * sin(-trackRes->y_c - M_PI / 180 * AR_FILTER_BEBOP_CAMERA_ANGLE);
+    return;
+}
+
+void body2world(trackResults* trackRes, struct  FloatEulers * eulerAngles)
+{
+    struct NedCoor_f *pos;
+#if AR_FILTER_WORLDPOS
+    pos     = stateGetPositionNed_f();      // Get your current position
 #else
-				findContours(frameGrey(cropAreas[r]), contours, CV_RETR_EXTERNAL, CV_CHAIN_APPROX_SIMPLE);
+    struct NedCoor_f fakePos;
+    fakePos.x   = 0.0;
+    fakePos.y   = 0.0;
+    fakePos.z   = 0.0;
+    pos         = &fakePos;
 #endif
-				for(unsigned int tc=0; tc < contours.size(); tc++)
-				{
-					addContour(contours[tc], trackRes, cropAreas[r].x, cropAreas[r].y);
-				}
-			}
-		}
-	}
-#if AR_FILTER_BENCHMARK
-	addBenchmark("Contours found");
+#if AR_FILTER_NOYAW
+    double phi      = 0.0;
+#else
+    double phi      = eulerAngles->phi;
 #endif
-	return;
+    double theta    = eulerAngles->theta;
+    double psi      = eulerAngles->psi;
+    Matx33f rotX(    1,          0,          0,
+                     0,          cos(phi),  -sin(phi),
+                     0,          sin(phi),   cos(phi));
+    Matx33f rotY(    cos(theta), 0,          sin(theta),
+                     0,          1,          0,
+                    -sin(theta), 0,          cos(theta));
+    Matx33f rotZ(    cos(psi),  -sin(psi),   0,
+                     sin(psi),   cos(psi),   0,
+                     0,          0,          1);
+    Matx31f bodyPos(trackRes->x_b, trackRes->y_b, trackRes->z_b);
+    Matx31f worldPos = rotZ * rotY * rotX * bodyPos;
+    trackRes->x_w = worldPos(0,0) + pos->x;
+    trackRes->y_w = worldPos(1,0) + pos->y;
+    trackRes->z_w = worldPos(2,0) + pos->z;
+    return;
 }
 
 void addContour(vector<Point> contour, vector<trackResults>* trackRes, int offsetX, int offsetY)
@@ -354,6 +428,66 @@ void addContour(vector<Point> contour, vector<trackResults>* trackRes, int offse
 		}else if(AR_FILTER_SHOW_REJECT) 	printf("Rejected. object %f, area %f, fill %f < min fill %f.\n",objArea, contArea, contArea / objArea, AR_FILTER_MAX_CIRCLE_DEF);
 	}else if(AR_FILTER_SHOW_REJECT) 	printf("Rejected. Area %0.1f\n",contArea);
 	return;
+}
+
+void addObject(void)
+{
+    for(unsigned int r=0; r < cropAreas.size(); r++)
+    {
+        bool overlap = false;
+        if(!overlap && (inRectangle(Point(objCrop.x, objCrop.y), cropAreas[r]) || inRectangle(Point(objCrop.x + objCrop.width, objCrop.y), cropAreas[r]) || inRectangle(Point(objCrop.x + objCrop.width, objCrop.y + objCrop.height), cropAreas[r]) || inRectangle(Point(objCrop.x, objCrop.y + objCrop.height), cropAreas[r])))
+        {
+            overlap = true; // One of the corner points is inside the cropAreas rectangle
+        }
+        if(!overlap && objCrop.x >= cropAreas[r].x && (objCrop.x + objCrop.width) <= (cropAreas[r].x + cropAreas[r].width) && objCrop.y <= cropAreas[r].y && (objCrop.y + objCrop.height) >= (cropAreas[r].y + cropAreas[r].height))
+        {
+            overlap = true; // less wide, yet fully overlapping in height
+        }
+        if(!overlap && objCrop.y >= cropAreas[r].y && (objCrop.y + objCrop.height) <= (cropAreas[r].y + cropAreas[r].height) && objCrop.x <= cropAreas[r].x && (objCrop.x + objCrop.width) >= (cropAreas[r].x + cropAreas[r].width))
+        {
+            overlap = true; // less high, yet fully overlapping in width
+        }
+        if(!overlap && (inRectangle(Point(cropAreas[r].x, cropAreas[r].y), objCrop) || inRectangle(Point(cropAreas[r].x + cropAreas[r].width, cropAreas[r].y), objCrop) || inRectangle(Point(cropAreas[r].x + cropAreas[r].width, cropAreas[r].y + cropAreas[r].height), objCrop) || inRectangle(Point(cropAreas[r].x, cropAreas[r].y + cropAreas[r].height), objCrop)))
+        {
+            overlap = true; // One of the corner points is inside the objCrop rectangle
+        }
+        if(overlap == true)
+        {
+            objCrop.width       = max(objCrop.x + objCrop.width, cropAreas[r].x + cropAreas[r].width) - min(objCrop.x, cropAreas[r].x);
+            objCrop.height      = max(objCrop.y + objCrop.height, cropAreas[r].y + cropAreas[r].height) - min(objCrop.y, cropAreas[r].y);
+            objCrop.x           = min(objCrop.x, cropAreas[r].x);
+            objCrop.y           = min(objCrop.y, cropAreas[r].y);
+            cropAreas[r].x      = 0;
+            cropAreas[r].y      = 0;
+            cropAreas[r].width  = 0;
+            cropAreas[r].height = 0;
+        }
+    }
+    if(objCrop.width * objCrop.height >= AR_FILTER_MIN_CROP_AREA)
+    {
+        cropAreas.push_back(objCrop);
+    }
+    return;
+}
+
+bool inRectangle(Point pt, Rect rectangle)
+{
+    if(pt.x >= rectangle.x && pt.x <= (rectangle.x + rectangle.width) && pt.y >= rectangle.y && pt.y <= (rectangle.y + rectangle.height))
+    {
+        return true;
+    }else{
+        return false;
+    }
+}
+
+Rect enlargeRectangle(Mat& sourceFrame, Rect rectangle, double scale){
+    int Hincrease = round(scale / 2 * rectangle.width);
+    int Vincrease = round(scale / 2 * rectangle.height);
+    rectangle.width = min(sourceFrame.cols - 1, rectangle.x + rectangle.width + Hincrease) - max(0, rectangle.x - Hincrease);
+    rectangle.height = min(sourceFrame.rows - 1, rectangle.y + rectangle.height + Vincrease) - max(0, rectangle.y - Vincrease);
+    rectangle.x = max(0, rectangle.x - Hincrease);
+    rectangle.y = max(0, rectangle.y - Vincrease);
+    return rectangle;
 }
 
 bool rndRedGrayscale(Mat& sourceFrame, Mat& destFrame, int sampleSize)
@@ -836,110 +970,6 @@ void getNewPosition(int nextDir, int* newRow, int* newCol)
 	}
 }
 
-vector<double> estimatePosition(int xp, int yp, double area, double k, int calArea, int orbDiag)
-{
-	// This function estimates the 3D position (in camera  coordinate system) according to pixel position
-	// (Default) calibration parameters
-	if(k==0) 		k 		= 1.085; // Fisheye correction factor (1.085)
-	if(calArea==0) 	calArea = 5530; // Calibrate at full resolution (5330)
-	if(orbDiag==0) 	orbDiag = 2400; // Measured circular image diagonal using resolution of 2024x2048 org: 2400 (2200)
-	// Calculate corrected calibration parameters
-	calArea 				= (int) round(calArea * (ispWidth / 2048.0) * (ispWidth / 2048.0));
-	orbDiag 				= (int) round(orbDiag * (ispWidth / 2048.0));
-	double cmosPixelSize 	= 0.0000014; 	// 1.4um (see manual of CMOS sensor)
-	double fovDiag 			= M_PI; 		// [degrees] Diagonal field of view (see bebop manual)
-	// Calculate relevant parameters
-	int cX 					= round(ispHeight / 2);
-	int cY 					= round(ispWidth / 2);
-	double frameSizeDiag 	= orbDiag * cmosPixelSize * 1000 / ispScalar; // [mm] Find used diagonal size of CMOS sensor
-	double f 				= frameSizeDiag / (4 * sin(fovDiag / 4)); // [mm]
-	double useableX 		= (ispWidth - sqrt(calArea / M_PI));
-	double useableY 		= (ispHeight - sqrt(calArea / M_PI));
-	// Calculate FoV in x and y direction
-	double fovX 			= 4*asin((useableX * 1 / ispScalar * cmosPixelSize * 1000)/(4 * f));
-	double fovY				= 4*asin((useableY * 1 / ispScalar * cmosPixelSize * 1000)/(4 * f));
-	//printf("fovX: %0.2f - fovY: %0.2f\n",fovX * 180 / M_PI, fovY * 180 / M_PI);
-	// rotate frame cc 90 degrees (ISP is rotated 90 degrees cc)
-	int x 					= yp - cY;
-	int y 					= xp - cX;
-	// Convert to polar coordinates
-	double r 				= sqrt((double) x * x + y * y) * 1 / ispScalar * cmosPixelSize * 1000; // [mm] radial distance from middle of CMOS
-	double theta 			= atan2(y,x);
-	// Correct radius for radial distortion using correction parameter k
-	double corR 			= correctRadius(r, f, k);
-	// Convert back to Cartesian
-	double corX 			= corR * cos(theta);
-	double corY 			= corR * sin(theta);
-	double corArea 			= area * pow(corR / r, 2.0);	// radius = sqrt(area) / sqrt(M_PI) 	---> 	newRadius = radius * corR / r 	---> 	corArea = M_PI * newRadius * newRadius
-	// Calculate distance
-	double dist 			= sqrt(calArea) / sqrt(corArea);
-	// Calculate max width and height of undistorted frame
-	double maxX 			= correctRadius(useableX / 2 * 1 / ispScalar * cmosPixelSize * 1000, f, k);
-	double maxY				= correctRadius(useableY / 2 * 1 / ispScalar * cmosPixelSize * 1000, f, k);
-	// Calculate angles wrt camera
-	double xAngle 			= fovX / 2 * corX / maxX; // Assume all non-linearities have been removed from corX and corY
-	double yAngle 			= fovY / 2 * corY / maxY; // Then scale them according to the max values and axis FoV
-	// Store in dest and parse it back
-	vector<double> dest(3);
-	dest[0] = xAngle;
-	dest[1] = yAngle;
-	dest[2] = dist;
-	return dest;
-}
-
-double correctRadius(double r, double f, double k)
-{
-	// This function calculates the corrected radius for radial distortion
-	// According to the article "A Generic Non-Linear Method for Fisheye Correction" by Dhane, Kutty and Bangadkar
-	return f / k * tan(asin(sin(atan(r / f)) * k));
-}
-
-void cam2body(trackResults* trackRes)
-{
-	// Neighbour position returned in 2 angles and a radius.
-	// x_c is the angle wrt vertical camera axis. 	Defined clockwise/right positive
-	// y_c is angle wrt camera horizon axis. 		Defined upwards positive
-	// r_c is radial distance in m.
-	trackRes->x_b = trackRes->r_c * cos(-trackRes->y_c - M_PI / 180 * AR_FILTER_BEBOP_CAMERA_ANGLE) * cos(trackRes->x_c) + AR_FILTER_BEBOP_CAMERA_OFFSET_X;
-	trackRes->y_b = trackRes->r_c * cos(-trackRes->y_c - M_PI / 180 * AR_FILTER_BEBOP_CAMERA_ANGLE) * sin(trackRes->x_c);
-	trackRes->z_b = trackRes->r_c * sin(-trackRes->y_c - M_PI / 180 * AR_FILTER_BEBOP_CAMERA_ANGLE);
-	return;
-}
-
-void body2world(trackResults* trackRes, struct 	FloatEulers * eulerAngles)
-{
-	struct NedCoor_f pos;
-#if AR_FILTER_WORLDPOS
-	pos 	= stateGetPositionNed_f(); 		// Get your current position
-#else
-	pos.x = 0.0;
-	pos.y = 0.0;
-	pos.z = 0.0;
-#endif
-#if AR_FILTER_NOYAW
-	double phi 		= 0.0;
-#else
-	double phi 		= eulerAngles->phi;
-#endif
-	double theta 	= eulerAngles->theta;
-	double psi 		= eulerAngles->psi;
-	Matx33f rotX(	 1,  		 0, 	 	 0,
-					 0,			 cos(phi), 	-sin(phi),
-					 0,			 sin(phi),   cos(phi));
-	Matx33f rotY(	 cos(theta), 0, 		 sin(theta),
-					 0,  		 1, 		 0,
-					-sin(theta), 0, 		 cos(theta));
-	Matx33f rotZ(	 cos(psi),  -sin(psi), 	 0,
-					 sin(psi),   cos(psi), 	 0,
-					 0, 		 0, 		 1);
-	Matx31f bodyPos(trackRes->x_b, trackRes->y_b, trackRes->z_b);
-	Matx31f worldPos = rotZ * rotY * rotX * bodyPos;
-	trackRes->x_w = worldPos(0,0) + pos.x;
-	trackRes->y_w = worldPos(1,0) + pos.y;
-	trackRes->z_w = worldPos(2,0) + pos.z;
-	return;
-}
-
 #if AR_FILTER_MOD_VIDEO
 void mod_video(Mat& sourceFrame, Mat& frameGrey)
 {
@@ -1102,85 +1132,29 @@ void saveBuffer(Mat sourceFrame, const char *filename)
 }
 #endif
 
-void addObject(void)
+void active_random_filter_header(void)
 {
-	for(unsigned int r=0; r < cropAreas.size(); r++)
-	{
-		bool overlap = false;
-		if(!overlap && (inRectangle(Point(objCrop.x, objCrop.y), cropAreas[r]) || inRectangle(Point(objCrop.x + objCrop.width, objCrop.y), cropAreas[r]) || inRectangle(Point(objCrop.x + objCrop.width, objCrop.y + objCrop.height), cropAreas[r]) || inRectangle(Point(objCrop.x, objCrop.y + objCrop.height), cropAreas[r])))
-		{
-			overlap = true; // One of the corner points is inside the cropAreas rectangle
-		}
-		if(!overlap && objCrop.x >= cropAreas[r].x && (objCrop.x + objCrop.width) <= (cropAreas[r].x + cropAreas[r].width) && objCrop.y <= cropAreas[r].y && (objCrop.y + objCrop.height) >= (cropAreas[r].y + cropAreas[r].height))
-		{
-			overlap = true; // less wide, yet fully overlapping in height
-		}
-		if(!overlap && objCrop.y >= cropAreas[r].y && (objCrop.y + objCrop.height) <= (cropAreas[r].y + cropAreas[r].height) && objCrop.x <= cropAreas[r].x && (objCrop.x + objCrop.width) >= (cropAreas[r].x + cropAreas[r].width))
-		{
-			overlap = true; // less high, yet fully overlapping in width
-		}
-		if(!overlap && (inRectangle(Point(cropAreas[r].x, cropAreas[r].y), objCrop) || inRectangle(Point(cropAreas[r].x + cropAreas[r].width, cropAreas[r].y), objCrop) || inRectangle(Point(cropAreas[r].x + cropAreas[r].width, cropAreas[r].y + cropAreas[r].height), objCrop) || inRectangle(Point(cropAreas[r].x, cropAreas[r].y + cropAreas[r].height), objCrop)))
-		{
-			overlap = true; // One of the corner points is inside the objCrop rectangle
-		}
-		if(overlap == true)
-		{
-			objCrop.width 		= max(objCrop.x + objCrop.width, cropAreas[r].x + cropAreas[r].width) - min(objCrop.x, cropAreas[r].x);
-			objCrop.height 		= max(objCrop.y + objCrop.height, cropAreas[r].y + cropAreas[r].height) - min(objCrop.y, cropAreas[r].y);
-			objCrop.x 			= min(objCrop.x, cropAreas[r].x);
-			objCrop.y 			= min(objCrop.y, cropAreas[r].y);
-			cropAreas[r].x 		= 0;
-			cropAreas[r].y 		= 0;
-			cropAreas[r].width 	= 0;
-			cropAreas[r].height = 0;
-		}
-	}
-	if(objCrop.width * objCrop.height >= AR_FILTER_MIN_CROP_AREA)
-	{
-		cropAreas.push_back(objCrop);
-	}
-	return;
-}
-
-bool inRectangle(Point pt, Rect rectangle)
-{
-	if(pt.x >= rectangle.x && pt.x <= (rectangle.x + rectangle.width) && pt.y >= rectangle.y && pt.y <= (rectangle.y + rectangle.height))
-	{
-		return true;
-	}else{
-		return false;
-	}
-}
-
-Rect enlargeRectangle(Mat& sourceFrame, Rect rectangle, double scale){
-	int Hincrease = round(scale / 2 * rectangle.width);
-	int Vincrease = round(scale / 2 * rectangle.height);
-	rectangle.width = min(sourceFrame.cols - 1, rectangle.x + rectangle.width + Hincrease) - max(0, rectangle.x - Hincrease);
-	rectangle.height = min(sourceFrame.rows - 1, rectangle.y + rectangle.height + Vincrease) - max(0, rectangle.y - Vincrease);
-	rectangle.x = max(0, rectangle.x - Hincrease);
-	rectangle.y = max(0, rectangle.y - Vincrease);
-	return rectangle;
-}
-
-/* Deprecated
-#if AR_FILTER_MOD_VIDEO
-void mat2Buffer(Mat& source,char* buf, bool greyscale)
-{
-	// Put it in place of the original image for video stream and compatibility with cv_run()
-	for (int row=0; row < source.rows; row++){
-		for (int col=0; col < source.cols; col++){
-			// Put back YUV image (Y1U/Y2V)
-			if(greyscale)
-			{
-				buf[(row*source.cols+col)*2+0] 	= 127;
-				buf[(row*source.cols+col)*2+1] 	= source.at<uint8_t>(row,col);
-			}else{
-				buf[(row*source.cols+col)*2+0] 	= source.at<Vec2b>(row,col)[0];
-				buf[(row*source.cols+col)*2+1] 	= source.at<Vec2b>(row,col)[1];
-			}
-		}
-	}
-	return;
-}
+#if AR_FILTER_MEASURE_FPS
+    if(runCount == 0)
+    {
+        startTime       = time(0);
+    }else{
+        currentTime     = time(0);                                              // Get the current time
+        curT            = difftime(currentTime,startTime);                      // Calculate time-difference between startTime and currentTime
+        printf("Measured FPS: %0.2f\n", runCount / ((double) curT));
+    }
 #endif
-*/
+    if(!AR_FILTER_CV_CONTOURS && AR_FILTER_FLOOD_STYLE != AR_FILTER_FLOOD_CW)
+    {
+        printf("[AR-FILTER-ERR] No openCV contours is only possible with clockwise flooding.\n");
+    }
+#if AR_FILTER_SHOW_MEM
+    for(unsigned int r=0; r < neighbourMem.size(); r++)        // Print to file & terminal
+    {
+        printf("%i - Object at (%0.2f m, %0.2f m, %0.2f m)\n", runCount, neighbourMem[r].x_w, neighbourMem[r].y_w, neighbourMem[r].z_w);                                                        // Print to terminal
+    }
+#endif // AR_FILTER_SHOW_MEM
+#if AR_FILTER_CALIBRATE_CAM
+    if(runCount==50)    calibrateEstimation(trackRes);
+#endif // AR_FILTER_CALIBRATE_CAM
+}

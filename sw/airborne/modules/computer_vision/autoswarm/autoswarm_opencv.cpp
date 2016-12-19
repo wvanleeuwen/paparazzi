@@ -30,14 +30,14 @@ using namespace std;
 #include <ctime>                                    // Used to write time to results.txt
 #include <algorithm>                                // Used for min() and max()
 #include <string>                                   // Used for strlen
-#include <vector>
-#include <stdio.h>
+#include <vector>                                   // Used for active random filter
+#include <stdio.h>                                  // Used for printing
 
 extern "C" {
-    #include <firmwares/rotorcraft/navigation.h>    // C header used for navigation functions
-    #include <state.h>                              // C header used for state functions and data
-    #include <errno.h>
-    //#include <generated/flight_plan.h>            // C header used for WP definitions (causes problems) TODO: fix this
+    #include "state.h"                              // Used for accessing state variables
+    #include "navigation.h"                         // Used for navigation functions
+    #include <errno.h>                              // Used for error handling
+    //#include "generated/flight_plan.h"              // C header used for WP definitions (causes problems) TODO: fix this
 }
 
 static void calcCamPosition(struct NedCoor_f *pos, double totV[3], double cPos[3], double gi[3]);
@@ -58,7 +58,6 @@ static void autoswarm_opencv_run_trailer(void);
 #define AUTOSWARM_WRITE_RESULTS 1                   // Write measurements to text file
 #define AUTOSWARM_CALIBRATE_CAM 1                   // Calibrate the camera
 #define AUTOSWARM_BENCHMARK     1                   // Print benchmark table
-#define AUTOSWARM_MEASURE_FPS   1                   // Measure the FPS using built-in clock and framecount
 #define AUTOSWARM_BODYFRAME     1                   // Fake euler angles and pos to be 0
 #define AUTOSWARM_SAVE_FRAME    1                   // Save a frame for post-processing
 
@@ -100,13 +99,10 @@ static double               prev_v_d[3]     = {0.0, 0.0, 0.0};
     clock_t                     bench_start, bench_end;
 #endif
 
-#if AUTOSWARM_MEASURE_FPS || AUTOSWARM_WRITE_RESULTS
+#if AUTOSWARM_WRITE_RESULTS
     static time_t               startTime;
     static time_t               currentTime;
     static int                  curT;
-#endif
-
-#if AUTOSWARM_WRITE_RESULTS
     FILE *                      pFile;
     char                        resultFile [50];
 #endif
@@ -321,10 +317,8 @@ bool amIhome(void){
 }
 
 void autoswarm_opencv_init(int globalMode){
-#if AUTOSWARM_MEASURE_FPS || AUTOSWARM_MEASURE_FPS
-    startTime = time(0);
-#endif
 #if AUTOSWARM_WRITE_RESULTS
+    startTime = time(0);
     tm * startTM    = localtime(&startTime);
     sprintf(resultFile, "/data/ftp/internal_000/%d-%02d-%02d_%02d-%02d-%02d.txt", startTM->tm_year, startTM->tm_mon, startTM->tm_mday, startTM->tm_hour, startTM->tm_min, startTM->tm_sec);
     pFile           = fopen(resultFile,"w");
@@ -343,14 +337,9 @@ void autoswarm_opencv_init(int globalMode){
 }
 
 void autoswarm_opencv_run_header(void){
-#if AUTOSWARM_MEASURE_FPS || AUTOSWARM_WRITE_RESULTS
+#if AUTOSWARM_WRITE_RESULTS
     currentTime = time(0);                                                  // Get the current time
     curT        = difftime(currentTime,startTime);                          // Calculate time-difference between startTime and currentTime
-#endif
-#if AUTOSWARM_MEASURE_FPS
-    if (runCount > 0){
-        printf("Measured FPS: %0.2f\n", runCount / ((double) curT));        // Print the measured FPS
-    }
 #endif
 }
 

@@ -89,7 +89,7 @@ extern int 		AR_FILTER_FLOOD_STYLE;
 extern "C" {
 #endif
 
-void active_random_filter(char* buff, int width, int height);
+void active_random_filter(char* buff, int width, int height, struct FloatEulers* eulerAngles);
 
 #ifdef __cplusplus
 }
