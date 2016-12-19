@@ -597,12 +597,25 @@ void image_show_flow(struct image_t *img, struct flow_t *vectors, uint16_t point
 }
 
 /**
- * Draw a line on the image
+ * Draw a pink line on the image
  * @param[in,out] *img The image to show the line on
  * @param[in] *from The point to draw from
  * @param[in] *to The point to draw to
  */
-void image_draw_line(struct image_t *img, struct point_t *from, struct point_t *to)
+void image_draw_line(struct image_t *img, struct point_t *from, struct point_t *to) {
+  static uint8_t color[4] = {255, 255, 255, 255};
+  image_draw_line_color(img, from, to, color);
+}
+
+/**
+ * Draw a line on the image
+ * @param[in,out] *img The image to show the line on
+ * @param[in] *from The point to draw from
+ * @param[in] *to The point to draw to
+ * @param[in] *color The line color as a [U, Y1, V, Y2] uint8_t array, or a uint8_t value pointer for grayscale images.
+ *                   Example colors: white = {127, 255, 127, 255}, green = {0, 127, 0, 127};
+ */
+void image_draw_line_color(struct image_t *img, struct point_t *from, struct point_t *to, uint8_t *color)
 {
   int xerr = 0, yerr = 0;
   uint8_t *img_buf = (uint8_t *)img->buf;
@@ -637,14 +650,15 @@ void image_draw_line(struct image_t *img, struct point_t *from, struct point_t *
   /* draw the line */
   for (uint16_t t = 0; /* starty >= 0 && */ starty < img->h && /* startx >= 0 && */ startx < img->w
        && t <= distance + 1; t++) {
-    img_buf[img->w * pixel_width * starty + startx * pixel_width] = (t <= 3) ? 0 : 255;
+    uint32_t buf_loc = img->w * pixel_width * starty + startx * pixel_width;
+    img_buf[buf_loc] = (t <= 3) ? 0 : color[0]; // u (or grayscale)
 
     if (img->type == IMAGE_YUV422) {
-      img_buf[img->w * pixel_width * starty + startx * pixel_width + 1] = 255;
+      img_buf[buf_loc + 1] = color[1]; // y1
 
       if (startx + 1 < img->w) {
-        img_buf[img->w * pixel_width * starty + startx * pixel_width + 2] = (t <= 3) ? 0 : 255;
-        img_buf[img->w * pixel_width * starty + startx * pixel_width + 3] = 255;
+        img_buf[buf_loc + 2] = (t <= 3) ? 0 : color[2]; // v
+        img_buf[buf_loc + 3] = color[3]; // y2
       }
     }
 

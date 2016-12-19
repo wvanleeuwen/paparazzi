@@ -198,7 +198,7 @@ let expand_includes = fun ac_id xml ->
         else x @ [c]
       ) [] children)
 
-exception Firmware_Found of string
+exception Firmware_Found of Xml.xml
 (** [get_modules_of_airframe xml]
  * Returns a list of module configuration from airframe file *)
 let rec get_modules_of_airframe = fun ?target xml ->
@@ -210,10 +210,9 @@ let rec get_modules_of_airframe = fun ?target xml ->
     | Some t -> begin try
         Xml.iter (fun x ->
           if Xml.tag x = "firmware" then begin
-            let name = ExtXml.attrib x "name" in
-            Xml.iter (fun x ->
-              if Xml.tag x = "target" then begin
-                if Xml.attrib x "name" = t then raise (Firmware_Found name)
+            Xml.iter (fun xt ->
+              if Xml.tag xt = "target" then begin
+                if Xml.attrib xt "name" = t then raise (Firmware_Found x)
               end) x
           end) xml;
           None
@@ -236,9 +235,8 @@ let rec get_modules_of_airframe = fun ?target xml ->
           else failwith ("Unkown module " ^ file)
         end
     | Xml.Element (tag, _attrs, children) when tag = "firmware" ->
-        let name = Xml.attrib xml "name" in
         begin match firmware with
-        | Some f when f = name ->
+        | Some f when String.compare (Xml.to_string f) (Xml.to_string xml) = 0 ->
             List.fold_left (fun acc xml ->
               iter_modules targets acc xml) modules children
         | None ->
@@ -334,8 +332,8 @@ let singletonize_modules = fun ?(verbose=false) ?target xml ->
 let get_modules_of_config = fun ?target ?verbose ac_id af_xml fp_xml ->
   let af_modules = get_modules_of_airframe ?target (expand_includes ac_id af_xml)
   and fp_modules = get_modules_of_flight_plan fp_xml in
-  (* singletonize modules list *)
-  singletonize_modules ?verbose ?target (af_modules @ fp_modules)
+  (* singletonize modules list and reverse list to have it in the correct order *)
+  List.rev (singletonize_modules ?verbose ?target (af_modules @ fp_modules))
 
 (** [get_modules_name xml]
  * Returns a list of loaded modules' name *)

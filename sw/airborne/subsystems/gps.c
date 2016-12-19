@@ -79,7 +79,7 @@ struct GpsRelposNED gps_relposned;
 struct RtcmMan rtcm_man;
 
 #ifdef SECONDARY_GPS
-static uint8_t current_gps_id = 0;
+static uint8_t current_gps_id = GpsId(PRIMARY_GPS);
 #endif
 
 uint8_t multi_gps_mode;

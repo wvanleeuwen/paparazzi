@@ -31,9 +31,9 @@
 #include "subsystems/gps/gps_ubx.h"
 #include "ubx_protocol.h"
 #include "subsystems/datalink/downlink.h"
-#include <stdio.h>
 
 #if PRINT_DEBUG_GPS_UBX_UCENTER
+#include <stdio.h>
 #define DEBUG_PRINT(...) printf(__VA_ARGS__)
 #else
 #define DEBUG_PRINT(...) {}
@@ -195,6 +195,7 @@ void gps_ubx_ucenter_event(void)
         gps_ubx_ucenter.reply = GPS_UBX_UCENTER_REPLY_CFG_PRT;
         gps_ubx_ucenter.port_id = UBX_CFG_PRT_PortId(gps_ubx.msg_buf, 0);
         gps_ubx_ucenter.baud_run = UBX_CFG_PRT_Baudrate(gps_ubx.msg_buf, 0);
+
         DEBUG_PRINT("gps_ubx_ucenter.baud_run: %u\n", gps_ubx_ucenter.baud_run);
         DEBUG_PRINT("gps_ubx_ucenter.port_id: %u\n", gps_ubx_ucenter.port_id);
       }
@@ -346,6 +347,10 @@ static bool gps_ubx_ucenter_autobaud(uint8_t nr)
 #define GPS_UBX_NAV5_DYNAMICS NAV5_DYN_AIRBORNE_2G
 #endif
 
+#ifndef GPS_UBX_ENABLE_NMEA_DATA_MASK
+#define GPS_UBX_ENABLE_NMEA_DATA_MASK 0x00
+#endif
+
 #define NAV5_MASK 0x05 // Apply dynamic model and position fix mode settings
 
 #define NAV5_2D_ONLY 1
@@ -366,7 +371,6 @@ static inline void gps_ubx_ucenter_config_nav(void)
 {
   // New ublox firmware v5 or higher uses CFG_NAV5 message, CFG_NAV is no longer available
   // If version message couldn't be fetched, default to NAV5
-	printf("sw_ver: %i, hw_ver: %i\n", gps_ubx_ucenter.sw_ver_h, gps_ubx_ucenter.hw_ver_h);
   if (gps_ubx_ucenter.sw_ver_h < 5 && gps_ubx_ucenter.hw_ver_h < 6 &&
       gps_ubx_ucenter.sw_ver_h != 0 && gps_ubx_ucenter.hw_ver_h != 0) {
     UbxSend_CFG_NAV(gps_ubx_ucenter.dev,
@@ -400,9 +404,9 @@ static inline void gps_ubx_ucenter_config_nav(void)
 // UART mode: 8N1 with reserved1 set for compatability with A4
 #define UBX_UART_MODE_MASK 0x000008D0
 
-#define UBX_PROTO_MASK   0x0001
-#define NMEA_PROTO_MASK  0x0002
-#define RTCM_PROTO_MASK  0x0004
+#define UBX_PROTO_MASK  0x0001
+#define NMEA_PROTO_MASK 0x0002
+#define RTCM_PROTO_MASK 0x0004
 #define RTCM3_PROTO_MASK 0x0020
 
 #define GPS_PORT_DDC      0x00
@@ -431,15 +435,15 @@ static inline void gps_ubx_ucenter_config_port(void)
     case GPS_PORT_UART1:
     case GPS_PORT_UART2:
       UbxSend_CFG_PRT(gps_ubx_ucenter.dev,
-          gps_ubx_ucenter.port_id, RESERVED, RESERVED,
-          UBX_UART_MODE_MASK, UART_SPEED(gps_ubx_ucenter.baud_target), UBX_PROTO_MASK | NMEA_PROTO_MASK | RTCM3_PROTO_MASK,
-          UBX_PROTO_MASK, 0x0, 0x0); //TODO: Figure out why NMEA output is enabled by default
+          gps_ubx_ucenter.port_id, 0x0, 0x0,
+          UBX_UART_MODE_MASK, UART_SPEED(gps_ubx_ucenter.baud_target), UBX_PROTO_MASK | NMEA_PROTO_MASK,
+          UBX_PROTO_MASK | (NMEA_PROTO_MASK & GPS_UBX_ENABLE_NMEA_DATA_MASK), 0x0, 0x0);
       break;
       // USB Interface
     case GPS_PORT_USB:
       UbxSend_CFG_PRT(gps_ubx_ucenter.dev,
           gps_ubx_ucenter.port_id, 0x0, 0x0, 0x0, 0x0,
-          UBX_PROTO_MASK | NMEA_PROTO_MASK, UBX_PROTO_MASK| NMEA_PROTO_MASK, 0x0, 0x0);
+          UBX_PROTO_MASK | NMEA_PROTO_MASK, UBX_PROTO_MASK| (NMEA_PROTO_MASK & GPS_UBX_ENABLE_NMEA_DATA_MASK), 0x0, 0x0);
       break;
     case GPS_PORT_SPI:
       DEBUG_PRINT("WARNING: ublox SPI port is currently not supported.\n");
@@ -561,13 +565,13 @@ static bool gps_ubx_ucenter_configure(uint8_t nr)
       break;
     case 15:
       // Raw Measurement Data
-#ifdef USE_GPS_UBX_RXM_RAW
+#if USE_GPS_UBX_RXM_RAW
       gps_ubx_ucenter_enable_msg(UBX_RXM_ID, UBX_RXM_RAW_ID, 1);
 #endif
       break;
     case 16:
       // Subframe Buffer
-#ifdef USE_GPS_UBX_RXM_SFRB
+#if USE_GPS_UBX_RXM_SFRB
       gps_ubx_ucenter_enable_msg(UBX_RXM_ID, UBX_RXM_SFRB_ID, 1);
 #endif
       break;
