@@ -37,7 +37,11 @@ for flg in cflags:
             qflg = qflg +  "\\\""
         else:
             qflg = qflg + flg[i]
-    cmd = cmd + qflg + ' '
+    if ('g++' in cc):
+        if (qflg != "-Wstrict-prototypes") and (qflg != "-Wnested-externs") and (qflg != "-Wmissing-prototypes") and (qflg != "-Wimplicit") and (qflg != "-std=gnu99"):     
+            cmd = cmd + qflg + ' '
+    else:
+        cmd = cmd + qflg + ' '
 
 for i in range(0,len(srcs)):
     f = srcs[i]

@@ -12,7 +12,6 @@
     <file name="cv_active_random_filter.c"/>
     <file name="active_random_filter.cpp"/>
     <flag name="CXXFLAGS" value="I$(PAPARAZZI_SRC)/sw/ext/opencv_bebop/install/include"/>
-
     <flag name="LDFLAGS" value="L$(PAPARAZZI_SRC)/sw/ext/opencv_bebop/install/lib" />
     <flag name="LDFLAGS" value="lopencv_imgcodecs" />
     <flag name="LDFLAGS" value="lopencv_imgproc" />
@@ -25,7 +24,5 @@
     <flag name="LDFLAGS" value="lm" />
     <flag name="LDFLAGS" value="lpthread" />
     <flag name="LDFLAGS" value="lrt" />
-    
   </makefile>
 </module>
-
