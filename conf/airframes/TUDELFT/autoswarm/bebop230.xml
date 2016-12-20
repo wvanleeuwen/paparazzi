@@ -3,16 +3,21 @@
 <airframe name="bebop2_indi">
 
   <firmware name="rotorcraft">
-    <target name="ap" board="bebop2"/>
+    <target name="ap" board="bebop2">
+      <define name="STABILIZATION_INDI_G2_R" value="0.20"/>
+    </target>
+
     <target name="nps" board="pc">
       <module name="fdm" type="jsbsim"/>
       <module name="udp"/>
+      <!-- rotor inertia not modelled in simple_quad JSBSim model, set G2 to zero -->
+      <define name="STABILIZATION_INDI_G2_R" value="0.0"/>
     </target>
 
     <!--configure name="HOST" value="192.168.40.30" />
     <configure name="MODEM_HOST" value="192.168.40.255" /-->
 	<define name="USE_GPS_UBX_RTCM" value="TRUE"/>
-    	<define name="GPS_TIMEOUT" value="3"/>
+    	<!--<define name="GPS_TIMEOUT" value="3"/>-->
 	<define name="MT9F002_OUTPUT_WIDTH" value="480" />
 	<define name="MT9F002_OUTPUT_HEIGHT" value="418" />
 	<define name="MT9F002_TARGET_FPS" value="30" />
@@ -21,22 +26,21 @@
 	<define name="MT9F002_GAIN_GREEN2" value="6.0" />
 	<define name="MT9F002_GAIN_RED" value="8.0" />
 	<define name="MT9F002_GAIN_BLUE" value="8.0" />
-
-	<!--<define name="USE_GPS_UBX_RTCM" value="TRUE"/> -->
     <module name="telemetry" type="transparent_udp"/>
     <module name="radio_control" type="datalink"/>
     <module name="motor_mixing"/>
     <module name="actuators" type="bebop"/>
     <module name="imu" type="bebop"/>
     <module name="gps" type="ublox"/>
-    <module name="stabilization" type="indi"/>
-    <module name="stabilization" type="rate_indi" />
+    <module name="stabilization" type="indi_simple"/>
+    <!--<module name="stabilization" type="indi"/> TODO: check if normal works
+    <module name="stabilization" type="rate_indi" />-->
     <module name="guidance" type="indi">
       <define name="GUIDANCE_INDI_SPECIFIC_FORCE_GAIN" value="-500.0"/>
     </module>
     <module name="ahrs" type="int_cmpl_quat">
       <configure name="USE_MAGNETOMETER" value="TRUE"/>
-      <define name="AHRS_USE_GPS_HEADING" value="TRUE"/>
+      <define name="AHRS_USE_GPS_HEADING" value="FALSE"/>
     </module>
     <module name="ins" type="extended"/>
   </firmware>
@@ -46,16 +50,18 @@
     <module name="air_data"/>
     <module name="send_imu_mag_current"/>
     <module name="gps" type="ubx_ucenter"/>
-    <module name="video_thread">
+    <module name="logger_file">
+      <define name="FILE_LOGGER_PATH" value="/data/ftp/internal_000"/>
     </module>
-
+<!--
     <module name="cv_active_random_filter">
     	<define name="AR_FILTER_CAMERA" value="front_camera" />
-    </module> 
+    </module> -->
+<!--
 	<module name="autoswarm">
 		<define name="AUTOSWARM_CAMERA" value="front_camera" />
 		<define name="WV_INIT_GLOBAL_ATTRACTOR" value="2" />
-	</module>
+	</module>-->
 	<!-- module name="cv_bebop_stabilization"/ -->
 	<!--<module name="video_rtp_stream">
 		<configure name="VIEWVIDEO_HOST" value="192.168.40.74" />
@@ -69,13 +75,11 @@
 		<define name="VIEWVIDEO_STREAM_VIDEO" value="TRUE"/>
 		
 	</module>-->
+<!--
 	<module name="cv_ae_awb">
 	  <define name="CV_AE_AWB_AV" value="1" />
 	  <define name="CV_AE_AWB_VERBOSE" value="0"/>
-	</module>
-	<!--<module name="logger_file">
-      <define name="FILE_LOGGER_PATH" value="/data/ftp/internal_000"/>
-    </module>-->
+	</module>-->
   </modules>
 
   <commands>
@@ -111,26 +115,25 @@
   <section name="AIR_DATA" prefix="AIR_DATA_">
     <define name="CALC_AIRSPEED" value="FALSE"/>
     <define name="CALC_TAS_FACTOR" value="FALSE"/>
-    <define name="CALC_AMSL_BARO" value="FALSE"/>
+    <define name="CALC_AMSL_BARO" value="TRUE"/>
   </section>
 
-  <!-- Magnetometer still needs to be calibrated -->
   <section name="IMU" prefix="IMU_">
-<!-- Magneto calibration -->
-<define name="MAG_X_NEUTRAL" value="-33"/> <!-- -83 from calibration + 50 -->
-<define name="MAG_Y_NEUTRAL" value="109"/>
-<define name="MAG_Z_NEUTRAL" value="287"/>
-<define name="MAG_X_SENS" value="7.61887090248" integer="16"/>
-<define name="MAG_Y_SENS" value="7.69470968438" integer="16"/>
-<define name="MAG_Z_SENS" value="7.82064847944" integer="16"/>
-
+    <!-- Magneto calibration -->
+    <define name="MAG_X_NEUTRAL" value="18"/>
+    <define name="MAG_Y_NEUTRAL" value="46"/>
+    <define name="MAG_Z_NEUTRAL" value="202"/>
+    <define name="MAG_X_SENS" value="8.32441255621" integer="16"/>
+    <define name="MAG_Y_SENS" value="8.25720085664" integer="16"/>
+    <define name="MAG_Z_SENS" value="8.60009819293" integer="16"/>
+<!--
 <define name="ACCEL_X_NEUTRAL" value="10" />
 <define name="ACCEL_Y_NEUTRAL" value="0" />
 <define name="ACCEL_Z_NEUTRAL" value="0.0" />
 
 <define name="BODY_TO_IMU_PHI" value="0." unit="deg" />
 <define name="BODY_TO_IMU_THETA" value="0." unit="deg" />
-<define name="BODY_TO_IMU_PSI" value="0." unit="deg" />
+<define name="BODY_TO_IMU_PSI" value="0." unit="deg" />-->
   </section>
 
   <!-- local magnetic field -->
@@ -184,31 +187,26 @@
 
   <section name="STABILIZATION_ATTITUDE_INDI" prefix="STABILIZATION_INDI_">
     <!-- control effectiveness -->
-    <define name="G1_P" value="0.0520"/> <!-- was 0.05   -->
-    <define name="G1_Q" value="0.0380"/> <!-- was 0.04   -->
-    <define name="G1_R" value="0.0007"/> <!-- was 0.0022 -->
-    <define name="G2_R" value="0.3000"/> <!-- was 0.20   -->
+    <define name="G1_P" value="0.05"/>
+    <define name="G1_Q" value="0.025"/>
+    <define name="G1_R" value="0.0022"/>
 
-    <!-- Here it is assumed that your removed the damping from your bebop2!
-         The dampers do not really damp, but cause oscillation. By removing/
-         fixing them, the bebop2 will fly much better -->
-    <define name="FILTER_ROLL_RATE" value="FALSE"/>
+    <!-- For the bebop2 we need to filter the roll rate due to the dampers -->
+    <define name="FILTER_ROLL_RATE" value="TRUE"/> <!-- ROLL FILTER SHOULD BE FALSE (NO DAMPING) -->
     <define name="FILTER_PITCH_RATE" value="FALSE"/>
     <define name="FILTER_YAW_RATE" value="FALSE"/>
 
     <!-- reference acceleration for attitude control -->
-    <define name="REF_ERR_P" value="600.0"/>
+    <define name="REF_ERR_P" value="170.0"/>
     <define name="REF_ERR_Q" value="600.0"/>
     <define name="REF_ERR_R" value="600.0"/>
-    <define name="REF_RATE_P" value="28.0"/>
+    <define name="REF_RATE_P" value="14.3"/>
     <define name="REF_RATE_Q" value="28.0"/>
     <define name="REF_RATE_R" value="28.0"/>
 
     <!-- second order filter parameters -->
-    <define name="FILT_OMEGA" value="20.0"/>
-    <define name="FILT_ZETA" value="0.7"/>
-    <define name="FILT_OMEGA_R" value="20.0"/>
-    <define name="FILT_ZETA_R" value="0.7"/>
+    <define name="FILT_CUTOFF" value="3.2"/>
+    <define name="FILT_CUTOFF_R" value="3.2"/>
 
     <!-- first order actuator dynamics -->
     <define name="ACT_DYN_P" value="0.06"/>
@@ -217,7 +215,7 @@
 
     <!-- Adaptive Learning Rate -->
     <define name="USE_ADAPTIVE" value="FALSE"/>
-    <define name="ADAPTIVE_MU" value="0.00005"/>
+    <define name="ADAPTIVE_MU" value="0.0001"/>
   </section>
 
   <section name="GUIDANCE_V" prefix="GUIDANCE_V_">
@@ -226,18 +224,23 @@
     <define name="HOVER_KI" value="20"/> <!-- orig: 20 / 43 -->
     <define name="NOMINAL_HOVER_THROTTLE" value="0.52"/>
     <define name="ADAPT_THROTTLE_ENABLED" value="TRUE"/>
-    <define name="ADAPT_INITIAL_HOVER_THROTTLE" value="0.55" /> 	<!-- Default = 0.3 // 0.52 almost perfect -->
-    <define name="ADAPT_MIN_HOVER_THROTTLE" value="0.48" /> 		<!-- Default = 0.2 // -->
-    <define name="ADAPT_MAX_HOVER_THROTTLE" value="0.62" /> 		<!-- Default = 0.2 // -->
-    <define name="ADAPT_NOISE_FACTOR" value="0.8" /> 			<!-- default = 1 -->
+<!--
+    <define name="ADAPT_INITIAL_HOVER_THROTTLE" value="0.55" />
+    <define name="ADAPT_MIN_HOVER_THROTTLE" value="0.48" />
+    <define name="ADAPT_MAX_HOVER_THROTTLE" value="0.62" />
+    <define name="ADAPT_NOISE_FACTOR" value="0.8" /> 
+-->
   </section>
 
   <section name="GUIDANCE_H" prefix="GUIDANCE_H_">
-    <define name="REF_MAX_SPEED" value="2" unit="m/s"/>
+    <!-- Good weather -->
     <define name="MAX_BANK" value="32" unit="deg"/>
-    <define name="PGAIN" value="120"/> <!-- orig: 120 / 100 -->
-    <define name="DGAIN" value="100"/> <!-- orig: 100 / 150 -->
-    <define name="IGAIN" value="30"/> <!-- orig: 30 / 50 -->
+    <define name="REF_MAX_SPEED" value="2" unit="m/s"/>
+    <!-- Bad weather -->
+    <!-- define name="MAX_BANK" value="32" unit="deg"/ -->
+    <define name="PGAIN" value="120"/>
+    <define name="DGAIN" value="100"/>
+    <define name="IGAIN" value="30"/>
   </section>
 
   <section name="NAVIGATION" prefix="NAV_">
@@ -247,7 +250,7 @@
 
   <section name="SIMULATOR" prefix="NPS_">
     <define name="ACTUATOR_NAMES" value="nw_motor, ne_motor, se_motor, sw_motor" type="string[]"/>
-    <define name="JSBSIM_MODEL" value="simple_x_quad_ccw" type="string"/>
+    <define name="JSBSIM_MODEL" value="simple_x_quad" type="string"/>
     <define name="SENSORS_PARAMS" value="nps_sensors_params_default.h" type="string"/>
   </section>
 
