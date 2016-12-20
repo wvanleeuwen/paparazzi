@@ -39,18 +39,18 @@ using namespace std;
 using namespace cv;
 
 #define AR_FILTER_CV_CONTOURS   1 // Use opencv to detect contours
-#define AR_FILTER_ISP_CROP      1 // Use the ISP to crop the frame according to FOV-Y
-#define AR_FILTER_SHOW_REJECT   1 // Print why shapes are rejected
+#define AR_FILTER_ISP_CROP      0 // Use the ISP to crop the frame according to FOV-Y
+#define AR_FILTER_SHOW_REJECT   0 // Print why shapes are rejected
 #define AR_FILTER_MOD_VIDEO     1 // Modify the frame to show relevant info
-#define AR_FILTER_DRAW_CONTOURS 1 // Use drawContours function iso circle
-#define AR_FILTER_DRAW_CIRCLES  1 // Draw circles
+#define AR_FILTER_DRAW_CONTOURS 0 // Use drawContours function iso circle
+#define AR_FILTER_DRAW_CIRCLES  0 // Draw circles
 #define AR_FILTER_DRAW_BOXES 	1 // Draw boxes
 #define AR_FILTER_SHOW_MEM      1 // Print object locations to terminal
-#define AR_FILTER_SAVE_FRAME    1 // Save a frame for post-processing
+#define AR_FILTER_SAVE_FRAME    0 // Save a frame for post-processing
 #define AR_FILTER_MEASURE_FPS   1
-#define AR_FILTER_CALIBRATE_CAM 1 // Calibrate camera
+#define AR_FILTER_CALIBRATE_CAM 0 // Calibrate camera
 #define AR_FILTER_WORLDPOS 		1 // Use world coordinates
-#define AR_FILTER_NOYAW 		1 // Output in body horizontal XY
+#define AR_FILTER_NOYAW 		0 // Output in body horizontal XY
 
 static void             active_random_filter_header(void);
 static void 			trackGreyObjects	(Mat& sourceFrame, Mat& greyFrame, vector<trackResults>* trackRes);
@@ -61,7 +61,7 @@ static void 			body2world 			(trackResults* trackRes, struct 	FloatEulers * eule
 static bool 			rndRedGrayscale		(Mat& sourceFrame, Mat& destFrame, int sampleSize);
 static int 				pixFindContour		(Mat& sourceFrame, Mat& destFrame, int row, int col, int prevDir, bool cascade);
 static double 			correctRadius		(double r, double f, double k);
-static Rect 			setISPvars 			(int width, int height, bool crop = false);
+static Rect 			setISPvars 			(struct FloatEulers* eulerAngles, int width, int height, bool crop = false);
 static vector<double> 	estimatePosition	(int xp, int yp, double area, double k = 0, int calArea = 0, int orbDiag = 0);
 static void 			addObject			(void);
 static Rect 			enlargeRectangle	(Mat& sourceFrame, Rect rectangle, double scale);
@@ -140,7 +140,7 @@ void active_random_filter(char* buff, int width, int height, struct FloatEulers*
     if(runCount == 25) saveBuffer(sourceFrame, "testBuffer.txt");   // (optional) save a raw UYVY frame
 #endif // AR_FILTER_SAVE_FRAME
     active_random_filter_header();                                  // Mostly printing and storing
-	Rect crop 	= setISPvars(width, height, true); 	                // Calculate ISP related parameters
+	Rect crop 	= setISPvars(eulerAngles, width, height, true); 	// Calculate ISP related parameters
 	sourceFrame = sourceFrame(crop); 				                // Crop the frame
 	trackGreyObjects(sourceFrame, frameGrey, &trackRes);            // Track objects in sourceFrame
 	for(unsigned int r=0; r < trackRes.size(); r++)                 // Convert angles & Write/Print output
@@ -158,7 +158,7 @@ void active_random_filter(char* buff, int width, int height, struct FloatEulers*
 	return;
 }
 
-Rect setISPvars(int width, int height, bool crop)
+Rect setISPvars(struct FloatEulers* eulerAngles, int width, int height, bool crop)
 {
     int heightRange = 3288; // Property of CMOS sensor
     ispScalar       = (double) 16 / round(16 / ((double) width / heightRange)); //
@@ -171,7 +171,7 @@ Rect setISPvars(int width, int height, bool crop)
 #endif
     if (crop==true)
     {
-        double fovY             = AR_FILTER_IMAGE_CROP_FOVY * M_PI / 180;
+        double fovY             = AR_FILTER_IMAGE_CROP_FOVY * M_PI / 180.0;
         double cmosPixelSize    = 0.0000014;    // 1.4um (see manual of mt9f002 CMOS sensor)
         double focalLength      = (2400 * cmosPixelSize * 1000 / ispScalar) / (4 * sin(M_PI / 4));
         double cY               = round(sin((-eulerAngles->theta - AR_FILTER_BEBOP_CAMERA_ANGLE * M_PI / 180)) * 2 * focalLength * ispScalar / (1000 * cmosPixelSize));

@@ -1,8 +1,4 @@
 /*
- * P7_H264.c
- *
- *  Created on: 4 févr. 2013
- *      Author: peline
  */
 
 #define P7R2

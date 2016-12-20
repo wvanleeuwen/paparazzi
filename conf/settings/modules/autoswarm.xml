@@ -2,8 +2,7 @@
 <settings>
   <dl_settings>
     <dl_settings NAME="Swarm">
-    	<dl_setting var="AUTOSWARM_AMAX" 		min="0.1" 	step="0.1" 	max="20" 	module="computer_vision/autoswarm/autoswarm_opencv" shortname="Max Acc. (m/s2)"/> 
-      	<dl_setting var="AUTOSWARM_VMAX" 		min="0.1" 	step="0.1" 	max="20" 	module="computer_vision/autoswarm/autoswarm_opencv" shortname="Max Vel. (m/s)"/> 
+    	<dl_setting var="AUTOSWARM_VMAX" 		min="0.1" 	step="0.1" 	max="20" 	module="computer_vision/autoswarm/autoswarm_opencv" shortname="Max Vel. (m/s)"/> 
       	<dl_setting var="AUTOSWARM_YAWRATEMAX" 	min="0" 	step="1" 	max="360" 	module="computer_vision/autoswarm/autoswarm_opencv" shortname="Max Yaw (deg/s)"/>
     	<dl_setting var="AUTOSWARM_MODE" 		min="1" 	step="1" 	max="2" 	module="computer_vision/autoswarm/autoswarm_opencv" shortname="Swarm Mode" values="See where you fly|Look towards global attractor"/>
       	<dl_setting var="AUTOSWARM_SEPERATION" 	min="1" 	step="0.1" 	max="2.5" 	module="computer_vision/autoswarm/autoswarm_opencv" shortname="Seperation (m)"/>
