@@ -619,34 +619,34 @@ static void mt9f002_blanking_init(struct mt9f002_t *mt)
 		if (mt->y_odd_inc > 1)
 		{
 			/* Binning XY */
-			mt9f002_blanking.min_line_blanking_pck 				= (uint16_t) 2950.0;// * 30.0/((float) mt->target_fps);
-			mt9f002_blanking.min_line_length_pck 				= (uint16_t) 4650.0;// * 30.0/((float) mt->target_fps);
-			mt9f002_blanking.min_line_fifo_pck 					= (uint16_t) 120.0;// * 30.0/((float) mt->target_fps);
-			mt9f002_blanking.fine_integration_time_max_margin 	= (uint16_t) 2000.0;// * 30.0/((float) mt->target_fps);
-			mt9f002_blanking.fine_integration_time_min 			= (uint16_t) 2200.0;// * 30.0/((float) mt->target_fps);
+			mt9f002_blanking.min_line_blanking_pck 				= 2950;// * 30.0/((float) mt->target_fps);
+			mt9f002_blanking.min_line_length_pck 				= 4650;// * 30.0/((float) mt->target_fps);
+			mt9f002_blanking.min_line_fifo_pck 					= 120;// * 30.0/((float) mt->target_fps);
+			mt9f002_blanking.fine_integration_time_max_margin 	= 2000;// * 30.0/((float) mt->target_fps);
+			mt9f002_blanking.fine_integration_time_min 			= 2200;// * 30.0/((float) mt->target_fps);
 		} else {
 			/* Binning X */
-			mt9f002_blanking.min_line_blanking_pck 				= (uint16_t) 0.0;// * 30.0/((float) mt->target_fps);
-			mt9f002_blanking.min_line_length_pck 				= (uint16_t) 3495.0;// * 30.0/((float) mt->target_fps);
-			mt9f002_blanking.min_line_fifo_pck 					= (uint16_t) 60.0;// * 30.0/((float) mt->target_fps);
-			mt9f002_blanking.fine_integration_time_max_margin 	= (uint16_t) 1500.0;// * 30.0/((float) mt->target_fps);
-			mt9f002_blanking.fine_integration_time_min 			= (uint16_t) 1900.0;// * 30.0/((float) mt->target_fps);
+			mt9f002_blanking.min_line_blanking_pck 				= 0;// * 30.0/((float) mt->target_fps);
+			mt9f002_blanking.min_line_length_pck 				= 3495;// * 30.0/((float) mt->target_fps);
+			mt9f002_blanking.min_line_fifo_pck 					= 60;// * 30.0/((float) mt->target_fps);
+			mt9f002_blanking.fine_integration_time_max_margin 	= 1500;// * 30.0/((float) mt->target_fps);
+			mt9f002_blanking.fine_integration_time_min 			= 1900;// * 30.0/((float) mt->target_fps);
 		}
 	} else {
 		if (mt->output_scaler != 1) {
 			/* Scaler mode */
-			mt9f002_blanking.min_line_blanking_pck 				= (uint16_t) 2400.0;// * 30.0/((float) mt->target_fps);
-			mt9f002_blanking.min_line_length_pck 				= (uint16_t) 1750.0;// * 30.0/((float) mt->target_fps);
-			mt9f002_blanking.min_line_fifo_pck 					= (uint16_t) 60.0;// * 30.0/((float) mt->target_fps);
-			mt9f002_blanking.fine_integration_time_max_margin 	= (uint16_t) 1316.0;// * 30.0/((float) mt->target_fps);
-			mt9f002_blanking.fine_integration_time_min 			= (uint16_t) 1032.0;// * 30.0/((float) mt->target_fps);
+			mt9f002_blanking.min_line_blanking_pck 				= 2400;// * 30.0/((float) mt->target_fps);
+			mt9f002_blanking.min_line_length_pck 				= 1750;// * 30.0/((float) mt->target_fps);
+			mt9f002_blanking.min_line_fifo_pck 					= 60;// * 30.0/((float) mt->target_fps);
+			mt9f002_blanking.fine_integration_time_max_margin 	= 1316;// * 30.0/((float) mt->target_fps);
+			mt9f002_blanking.fine_integration_time_min 			= 1032;// * 30.0/((float) mt->target_fps);
 		} else {
 			/* Normal mode */
-			mt9f002_blanking.min_line_blanking_pck 				= (uint16_t) 1316.0;// * 30.0/((float) mt->target_fps);
-			mt9f002_blanking.min_line_length_pck 				= (uint16_t) 1032.0;// * 30.0/((float) mt->target_fps);
-			mt9f002_blanking.min_line_fifo_pck 					= (uint16_t) 60.0;// * 30.0/((float) mt->target_fps);
-			mt9f002_blanking.fine_integration_time_max_margin 	= (uint16_t) 1316.0;// * 30.0/((float) mt->target_fps);
-			mt9f002_blanking.fine_integration_time_min 			= (uint16_t) 1032.0;// * 30.0/((float) mt->target_fps);
+			mt9f002_blanking.min_line_blanking_pck 				= 1316;// * 30.0/((float) mt->target_fps);
+			mt9f002_blanking.min_line_length_pck 				= 1032;// * 30.0/((float) mt->target_fps);
+			mt9f002_blanking.min_line_fifo_pck 					= 60;// * 30.0/((float) mt->target_fps);
+			mt9f002_blanking.fine_integration_time_max_margin 	= 1316;// * 30.0/((float) mt->target_fps);
+			mt9f002_blanking.fine_integration_time_min 			= 1032;// * 30.0/((float) mt->target_fps);
 		}
 	}
 
@@ -731,7 +731,7 @@ static void mt9f002_set_blanking(struct mt9f002_t *mt)
       }
 
       // Calculate if next step is still needed (since we only need to go one step below target_fps)
-      new_fps = mt->vt_pix_clk * 1000000 / (float)(ll * mt->frame_length);
+      new_fps = mt->vt_pix_clk * 1000000 / (float)(ll * min_frame_length);
 
       // Stop searching if FPS is lower or equal
       if(mt->target_fps > new_fps) {

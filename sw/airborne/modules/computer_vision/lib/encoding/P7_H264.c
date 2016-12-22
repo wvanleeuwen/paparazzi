@@ -32,7 +32,7 @@
 //#define VERBOSE
 
 #define PRINT(string,...) fprintf(stderr, "[P7_venc->%s()] " string,__FUNCTION__ , ##__VA_ARGS__)
-
+#define VERBOSE 1
 #ifdef VERBOSE
 #define VERBOSE_PRINT PRINT
 static char* streamType[2] = { "BYTE_STREAM", "NAL_UNITS" };
