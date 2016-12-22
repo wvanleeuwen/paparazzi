@@ -157,13 +157,6 @@ struct image_t *viewvideo_function(struct image_t *img)
   int32_t h264BufferIndex, size;
   uint8_t* h264Buffer;
   struct image_t releaseImg;
-
-  // Resize image if needed
-    struct image_t img_small;
-    image_create(&img_small,
-                 img->w / VIEWVIDEO_DOWNSIZE_FACTOR,
-                 img->h / VIEWVIDEO_DOWNSIZE_FACTOR,
-                 IMAGE_YUV422);
   if (viewvideo.is_streaming) {
 #if VIEWVIDEO_WRITE_VIDEO || VIEWVIDEO_STREAM_VIDEO
 /*

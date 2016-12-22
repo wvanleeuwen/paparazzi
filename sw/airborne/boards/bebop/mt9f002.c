@@ -619,34 +619,34 @@ static void mt9f002_blanking_init(struct mt9f002_t *mt)
 		if (mt->y_odd_inc > 1)
 		{
 			/* Binning XY */
-			mt9f002_blanking.min_line_blanking_pck 				= (uint16_t) 2950.0 * 30.0/((float) mt->target_fps);
-			mt9f002_blanking.min_line_length_pck 				= (uint16_t) 4650.0 * 30.0/((float) mt->target_fps);
-			mt9f002_blanking.min_line_fifo_pck 					= (uint16_t) 120.0 * 30.0/((float) mt->target_fps);
-			mt9f002_blanking.fine_integration_time_max_margin 	= (uint16_t) 2000.0 * 30.0/((float) mt->target_fps);
-			mt9f002_blanking.fine_integration_time_min 			= (uint16_t) 2200.0 * 30.0/((float) mt->target_fps);
+			mt9f002_blanking.min_line_blanking_pck 				= (uint16_t) 2950.0;// * 30.0/((float) mt->target_fps);
+			mt9f002_blanking.min_line_length_pck 				= (uint16_t) 4650.0;// * 30.0/((float) mt->target_fps);
+			mt9f002_blanking.min_line_fifo_pck 					= (uint16_t) 120.0;// * 30.0/((float) mt->target_fps);
+			mt9f002_blanking.fine_integration_time_max_margin 	= (uint16_t) 2000.0;// * 30.0/((float) mt->target_fps);
+			mt9f002_blanking.fine_integration_time_min 			= (uint16_t) 2200.0;// * 30.0/((float) mt->target_fps);
 		} else {
 			/* Binning X */
-			mt9f002_blanking.min_line_blanking_pck 				= (uint16_t) 0.0 * 30.0/((float) mt->target_fps);
-			mt9f002_blanking.min_line_length_pck 				= (uint16_t) 3495.0 * 30.0/((float) mt->target_fps);
-			mt9f002_blanking.min_line_fifo_pck 					= (uint16_t) 60.0 * 30.0/((float) mt->target_fps);
-			mt9f002_blanking.fine_integration_time_max_margin 	= (uint16_t) 1500.0 * 30.0/((float) mt->target_fps);
-			mt9f002_blanking.fine_integration_time_min 			= (uint16_t) 1900.0 * 30.0/((float) mt->target_fps);
+			mt9f002_blanking.min_line_blanking_pck 				= (uint16_t) 0.0;// * 30.0/((float) mt->target_fps);
+			mt9f002_blanking.min_line_length_pck 				= (uint16_t) 3495.0;// * 30.0/((float) mt->target_fps);
+			mt9f002_blanking.min_line_fifo_pck 					= (uint16_t) 60.0;// * 30.0/((float) mt->target_fps);
+			mt9f002_blanking.fine_integration_time_max_margin 	= (uint16_t) 1500.0;// * 30.0/((float) mt->target_fps);
+			mt9f002_blanking.fine_integration_time_min 			= (uint16_t) 1900.0;// * 30.0/((float) mt->target_fps);
 		}
 	} else {
 		if (mt->output_scaler != 1) {
 			/* Scaler mode */
-			mt9f002_blanking.min_line_blanking_pck 				= (uint16_t) 2400.0 * 30.0/((float) mt->target_fps);
-			mt9f002_blanking.min_line_length_pck 				= (uint16_t) 1750.0 * 30.0/((float) mt->target_fps);
-			mt9f002_blanking.min_line_fifo_pck 					= (uint16_t) 60.0 * 30.0/((float) mt->target_fps);
-			mt9f002_blanking.fine_integration_time_max_margin 	= (uint16_t) 1316.0 * 30.0/((float) mt->target_fps);
-			mt9f002_blanking.fine_integration_time_min 			= (uint16_t) 1032.0 * 30.0/((float) mt->target_fps);
+			mt9f002_blanking.min_line_blanking_pck 				= (uint16_t) 2400.0;// * 30.0/((float) mt->target_fps);
+			mt9f002_blanking.min_line_length_pck 				= (uint16_t) 1750.0;// * 30.0/((float) mt->target_fps);
+			mt9f002_blanking.min_line_fifo_pck 					= (uint16_t) 60.0;// * 30.0/((float) mt->target_fps);
+			mt9f002_blanking.fine_integration_time_max_margin 	= (uint16_t) 1316.0;// * 30.0/((float) mt->target_fps);
+			mt9f002_blanking.fine_integration_time_min 			= (uint16_t) 1032.0;// * 30.0/((float) mt->target_fps);
 		} else {
 			/* Normal mode */
-			mt9f002_blanking.min_line_blanking_pck 				= (uint16_t) 1316.0 * 30.0/((float) mt->target_fps);
-			mt9f002_blanking.min_line_length_pck 				= (uint16_t) 1032.0 * 30.0/((float) mt->target_fps);
-			mt9f002_blanking.min_line_fifo_pck 					= (uint16_t) 60.0 * 30.0/((float) mt->target_fps);
-			mt9f002_blanking.fine_integration_time_max_margin 	= (uint16_t) 1316.0 * 30.0/((float) mt->target_fps);
-			mt9f002_blanking.fine_integration_time_min 			= (uint16_t) 1032.0 * 30.0/((float) mt->target_fps);
+			mt9f002_blanking.min_line_blanking_pck 				= (uint16_t) 1316.0;// * 30.0/((float) mt->target_fps);
+			mt9f002_blanking.min_line_length_pck 				= (uint16_t) 1032.0;// * 30.0/((float) mt->target_fps);
+			mt9f002_blanking.min_line_fifo_pck 					= (uint16_t) 60.0;// * 30.0/((float) mt->target_fps);
+			mt9f002_blanking.fine_integration_time_max_margin 	= (uint16_t) 1316.0;// * 30.0/((float) mt->target_fps);
+			mt9f002_blanking.fine_integration_time_min 			= (uint16_t) 1032.0;// * 30.0/((float) mt->target_fps);
 		}
 	}
 

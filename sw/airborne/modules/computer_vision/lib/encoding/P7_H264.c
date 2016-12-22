@@ -679,12 +679,15 @@ static void *P7_H264_encoderThread(void* param)
  */
 int P7_H264_open(P7_H264_context_t* context, struct v4l2_device *v4l2_dev)
 {
-  P7_H264_res_t res = P7_H264_OK;
+   PRINT("Opening video encoder...\n");
+   P7_H264_res_t res = P7_H264_OK;
 
    context->numInputBuffers = v4l2_dev->buffers_cnt;
    context->numOutputBuffers = v4l2_dev->buffers_cnt;
+
    context->width = v4l2_dev->w;
    context->height = v4l2_dev->h;
+
    context->v4l2_dev = v4l2_dev;
 
 
@@ -696,11 +699,12 @@ int P7_H264_open(P7_H264_context_t* context, struct v4l2_device *v4l2_dev)
 
   if (!context->intraRate )
   {
+    PRINT("%s %d, No intraRate set, setting default %d\n", __func__, __LINE__, P7_H264_INTRA_RATE_DEFAULT);
     context->intraRate = P7_H264_INTRA_RATE_DEFAULT;
   }
 
   // check number of buffer
-  if (!res)
+  if (!res) // TODO: Useless check?
   {
     if (context->numInputBuffers == 0)
     {
@@ -723,6 +727,7 @@ int P7_H264_open(P7_H264_context_t* context, struct v4l2_device *v4l2_dev)
   if (!res)
   {
     /* Allocate input and output buffers */
+    PRINT("Allocating buffers...\n");
     if(AllocRes(context) != 0)
     {
       PRINT( "P7 h264 Failed to allocate the external resources!\n");

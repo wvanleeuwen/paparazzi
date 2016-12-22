@@ -30,7 +30,6 @@
 extern "C" {
     #include "boards/bebop.h"                       // C header used for bebop specific settings
     #include <state.h>                              // C header used for state functions and data
-    extern struct mt9f002_t mt9f002;
 }
 
 using namespace std;

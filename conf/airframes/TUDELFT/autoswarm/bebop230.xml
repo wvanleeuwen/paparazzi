@@ -17,10 +17,10 @@
     <configure name="HOST" value="192.168.40.$(AC_ID)" />
     <configure name="MODEM_HOST" value="192.168.40.255" />
 	<define name="USE_GPS_UBX_RTCM" value="TRUE"/>
-	<define name="H264_ROTATE" value="TRUE"/>
+	<define name="H264_ROTATE" value="FALSE"/>
     	<!--<define name="GPS_TIMEOUT" value="3"/>-->
-	<define name="MT9F002_OUTPUT_WIDTH" value="1920" /> <!-- 480 / 960 / 1920 -->
-	<define name="MT9F002_OUTPUT_HEIGHT" value="1680" /> <!-- 420 / 840 / 1680 -->
+	<define name="MT9F002_OUTPUT_WIDTH" value="480" /> <!-- 480 / 960 / 1920 -->
+	<define name="MT9F002_OUTPUT_HEIGHT" value="420" /> <!-- 420 / 840 / 1680 -->
 	<define name="MT9F002_TARGET_FPS" value="30" />
 	<define name="MT9F002_TARGET_EXPOSURE" value="4" /> 
 	<define name="MT9F002_GAIN_GREEN1" value="6.0" />
@@ -55,21 +55,26 @@
       <define name="FILE_LOGGER_PATH" value="/data/ftp/internal_000"/>
     </module>
     <module name="video_thread"/>
+    <!--
+    <module name="cv_ae_awb">
+	  <define name="CV_AE_AWB_AV" value="1" />
+	  <define name="CV_AE_AWB_VERBOSE" value="0"/>
+    </module>
 
     <module name="cv_active_random_filter">
     	<define name="AR_FILTER_CAMERA" value="front_camera" />
     </module>
 
-    <!--
+
 	<module name="autoswarm">
 		<define name="AUTOSWARM_CAMERA" value="front_camera" />
 		<define name="WV_INIT_GLOBAL_ATTRACTOR" value="2" />
 	</module>
 	-->
 	<!-- module name="cv_bebop_stabilization"/ -->
+
 	<module name="video_rtp_stream">
 		<configure name="VIEWVIDEO_HOST" value="192.168.40.141"/>
-		<!--<configure name="VIEWVIDEO_HOST" value="192.168.42.65" />-->
 		<configure name="VIEWVIDEO_BROADCAST" value="FALSE" />
 		<define name="VIEWVIDEO_CAMERA" value="front_camera" />
 		<define name="VIEWVIDEO_SHOT_PATH" value="/data/ftp/internal_000" />
@@ -77,10 +82,6 @@
 		<define name="VIEWVIDEO_WRITE_VIDEO" value="FALSE"/>
 		<define name="VIEWVIDEO_VIDEO_FILE" value="fisheye_stabilization"/>
 		<define name="VIEWVIDEO_STREAM_VIDEO" value="TRUE"/>
-	</module>
-	<module name="cv_ae_awb">
-	  <define name="CV_AE_AWB_AV" value="1" />
-	  <define name="CV_AE_AWB_VERBOSE" value="0"/>
 	</module>
   </modules>
 
