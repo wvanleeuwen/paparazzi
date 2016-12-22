@@ -38,7 +38,7 @@
 #endif
 
 #ifndef MT9F002_OUTPUT_HEIGHT
-#define MT9F002_OUTPUT_HEIGHT 834 // 834
+#define MT9F002_OUTPUT_HEIGHT 840 // 834
 #endif
 
 #ifndef MT9F002_SENSOR_HEIGHT
@@ -133,6 +133,8 @@
 /* Cameras */
 extern struct video_config_t bottom_camera;
 extern struct video_config_t front_camera;
+
+extern struct mt9f002_t mt9f002;
 
 /* by default activate onboard baro */
 #ifndef USE_BARO_BOARD

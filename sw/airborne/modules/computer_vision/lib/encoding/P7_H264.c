@@ -92,18 +92,23 @@ static int OpenEncoder(P7_H264_context_t* context)
       return -1;
     }
 
-    cfg.width = context->width;
-    cfg.height = context->height;
+#if H264_ROTATE
+    cfg.width   = context->height;
+    cfg.height  = context->width;
+#else
+    cfg.width   = context->width;
+    cfg.height  = context->height;
+#endif
 
     cfg.frameRateDenom = 1;
     cfg.frameRateNum = context->frameRate;
 
     cfg.streamType = H264ENC_BYTE_STREAM;
 
-    cfg.level = H264ENC_LEVEL_4; // level 4 minimum for 1080p
+    cfg.level = H264ENC_LEVEL_5; // level 4 minimum for 1080p
     cfg.viewMode = H264ENC_BASE_VIEW_DOUBLE_BUFFER; // maybe H264ENC_BASE_VIEW_SINGLE_BUFFER
-    cfg.scaledWidth = 16; // 0
-    cfg.scaledHeight = 16; // 0
+    cfg.scaledWidth = 0; // 0
+    cfg.scaledHeight = 0; // 0
 
     VERBOSE_PRINT("Init config: size %dx%d   %d/%d fps  %s L %d\n",
          cfg.width, cfg.height, cfg.frameRateNum,
@@ -220,10 +225,14 @@ static int OpenEncoder(P7_H264_context_t* context)
          preProcCfg.videoStabilization, preProcCfg.colorConversion.type);
 
     preProcCfg.inputType = context->inputType;
+#if H264_ROTATE
+    preProcCfg.rotation = H264ENC_ROTATE_90L;
+#else
     preProcCfg.rotation = H264ENC_ROTATE_0;
+#endif
     preProcCfg.origWidth = context->width;
     preProcCfg.origHeight = context->height;
-    preProcCfg.scaledOutput = 1;
+    preProcCfg.scaledOutput = 0;
 
 
     VERBOSE_PRINT

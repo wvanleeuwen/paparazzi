@@ -577,19 +577,19 @@ static bool gps_ubx_ucenter_configure(uint8_t nr)
       break;
 #ifdef USE_GPS_UBX_RTCM
     case 17:
-    	printf("CFG_DGNSS\n");
+        DEBUG_PRINT("CFG_DGNSS\n");
     	UbxSend_CFG_DGNSS(gps_ubx_ucenter.dev, 0x03, RESERVED, RESERVED);
     	break;
     case 18:
-    	printf("Enable RELPOSNED\n");
+        DEBUG_PRINT("Enable RELPOSNED\n");
     	gps_ubx_ucenter_enable_msg(UBX_NAV_ID, UBX_NAV_RELPOSNED_ID, 1);
     	break;
     case 19:
-    	printf("Enable HPPPOSLLH\n");
+        DEBUG_PRINT("Enable HPPPOSLLH\n");
     	gps_ubx_ucenter_enable_msg(UBX_NAV_ID, UBX_NAV_HPPOSLLH_ID, 1);
     	break;
     case 20:
-    	printf("Enable RXM_RTCM\n");
+        DEBUG_PRINT("Enable RXM_RTCM\n");
     	gps_ubx_ucenter_enable_msg(UBX_RXM_ID, UBX_RXM_RTCM_ID, 1);
     	break;
     case 21:

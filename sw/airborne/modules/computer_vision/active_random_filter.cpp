@@ -43,16 +43,17 @@ using namespace cv;
 #define AR_FILTER_SHOW_REJECT   0 // Print why shapes are rejected
 #define AR_FILTER_MOD_VIDEO     1 // Modify the frame to show relevant info
 #define AR_FILTER_DRAW_CONTOURS 0 // Use drawContours function iso circle
-#define AR_FILTER_DRAW_CIRCLES  0 // Draw circles
-#define AR_FILTER_DRAW_BOXES 	1 // Draw boxes
+#define AR_FILTER_DRAW_CIRCLES  1 // Draw circles
+#define AR_FILTER_DRAW_BOXES 	0 // Draw boxes
 #define AR_FILTER_SHOW_MEM      1 // Print object locations to terminal
 #define AR_FILTER_SAVE_FRAME    0 // Save a frame for post-processing
-#define AR_FILTER_MEASURE_FPS   1
+#define AR_FILTER_MEASURE_FPS   0
 #define AR_FILTER_CALIBRATE_CAM 0 // Calibrate camera
-#define AR_FILTER_WORLDPOS 		1 // Use world coordinates
-#define AR_FILTER_NOYAW 		0 // Output in body horizontal XY
+#define AR_FILTER_WORLDPOS 		0 // Use world coordinates
+#define AR_FILTER_NOYAW 		1 // Output in body horizontal XY
 
 static void             active_random_filter_header(void);
+static void             active_random_filter_footer(void);
 static void 			trackGreyObjects	(Mat& sourceFrame, Mat& greyFrame, vector<trackResults>* trackRes);
 static void             identifyObjects     (vector<trackResults> trackRes);
 static void 			addContour			(vector<Point> contour, vector<trackResults>* trackRes, int offsetX, int offsetY);
@@ -86,12 +87,13 @@ static int 		curT;
 #endif
 
 // Set up tracking parameters
-int 	AR_FILTER_MIN_CROP_AREA 	= 600;
 int 	AR_FILTER_RND_PIX_SAMPLE 	= 2500;
 int 	AR_FILTER_MAX_LAYERS  		= 1500;
-int 	AR_FILTER_MIN_LAYERS 		= 100;
-double 	AR_FILTER_MIN_CIRCLE_SIZE 	= 600;
-double 	AR_FILTER_MAX_CIRCLE_DEF 	= 0.3;
+int 	AR_FILTER_MIN_LAYERS 		= 50;
+
+int     AR_FILTER_MIN_CROP_AREA     = 700;
+double 	AR_FILTER_MIN_CIRCLE_SIZE 	= 800;
+double 	AR_FILTER_MAX_CIRCLE_DEF 	= 0.5;
 
 int 	AR_FILTER_SAMPLE_STYLE 		= AR_FILTER_STYLE_RANDOM;
 int 	AR_FILTER_FLOOD_STYLE 	    = AR_FILTER_FLOOD_OMNI;
@@ -101,19 +103,18 @@ int 	AR_FILTER_CB_MIN 			= 101;                          // 84
 int 	AR_FILTER_CB_MAX 			= 129;                          // 113
 int 	AR_FILTER_CR_MIN 			= 167;                          // 218 -> 150?
 int 	AR_FILTER_CR_MAX 			= 255;                          // 240 -> 255?
-int 	AR_FILTER_IMAGE_CROP_FOVY 	= 90; 		                    // Degrees
+int 	AR_FILTER_IMAGE_CROP_FOVY 	= 45; 		                    // Degrees
 int 	AR_FILTER_SAVE_RESULTS 		= 0;
 double 	AR_FILTER_CROP_X 			= 1.2;
 int     AR_FILTER_MEMORY 			= 15;
 int     AR_FILTER_FPS               = 15;
-int     AR_FILTER_VMAX              = 1;
+int     AR_FILTER_VMAX              = 3.5;
 
 // Set up platform parameters
 int 	AR_FILTER_BEBOP_CAMERA_ANGLE 		= -30; 		            // Degrees
 double 	AR_FILTER_BEBOP_CAMERA_OFFSET_X 	= 0.10; 	            // Meters
 
 // Initialize parameters to be assigned during runtime
-static struct 	FloatEulers * 	eulerAngles;
 static double 	ispScalar;
 static int 	ispWidth;
 static int 	ispHeight;
@@ -133,6 +134,7 @@ vector<trackResults>   trackRes;                                    // Create em
 
 void active_random_filter(char* buff, int width, int height, struct FloatEulers* eulerAngles)
 {
+    //printf("phi: %.2f  theta: %.2f  psi: %.2f\n",eulerAngles->phi * 180/M_PI,eulerAngles->theta * 180/M_PI,eulerAngles->psi * 180/M_PI);
     trackRes.clear();
     Mat sourceFrame (height, width, CV_8UC2, buff);                 // Initialize current frame in openCV (UYVY) 2 channel
     Mat frameGrey   (height, width, CV_8UC1, cvScalar(0.0));        // Initialize an empty 1 channel frame
@@ -154,14 +156,13 @@ void active_random_filter(char* buff, int width, int height, struct FloatEulers*
 #endif // AR_FILTER_MOD_VIDEO
 	frameGrey.release(); 			                                // Release Mat
 	sourceFrame.release();                                          // Release Mat
+	active_random_filter_footer();
 	runCount++;                                                     // Increase counter
 	return;
 }
 
 Rect setISPvars(struct FloatEulers* eulerAngles, int width, int height, bool crop)
 {
-    int heightRange = 3288; // Property of CMOS sensor
-    ispScalar       = (double) 16 / round(16 / ((double) width / heightRange)); //
 #if AR_FILTER_ISP_CROP
     ispHeight       = MT9F002_OUTPUT_WIDTH;
     ispWidth        = MT9F002_OUTPUT_HEIGHT;
@@ -169,14 +170,14 @@ Rect setISPvars(struct FloatEulers* eulerAngles, int width, int height, bool cro
     ispHeight       = width;
     ispWidth        = height;
 #endif
+    ispScalar       = mt9f002.output_scaler * 2.0/((double) mt9f002.x_odd_inc + 1.0);
     if (crop==true)
     {
-        double fovY             = AR_FILTER_IMAGE_CROP_FOVY * M_PI / 180.0;
-        double cmosPixelSize    = 0.0000014;    // 1.4um (see manual of mt9f002 CMOS sensor)
-        double focalLength      = (2400 * cmosPixelSize * 1000 / ispScalar) / (4 * sin(M_PI / 4));
-        double cY               = round(sin((-eulerAngles->theta - AR_FILTER_BEBOP_CAMERA_ANGLE * M_PI / 180)) * 2 * focalLength * ispScalar / (1000 * cmosPixelSize));
-        double desHeight        = round(sin(fovY / 4) * 4 * focalLength * ispScalar / (1000 * cmosPixelSize) + ispWidth * tan(eulerAngles->phi));
-        int desOffset           = round((ispHeight - desHeight) / 2) + cY;
+        double horizonDeviation = 0.5 * M_PI - eulerAngles->theta - AR_FILTER_BEBOP_CAMERA_ANGLE * M_PI / 180;
+        int top                 = (int) round((CFG_MT9F002_X_ADDR_MAX - CFG_MT9F002_X_ADDR_MIN) * ispScalar * (horizonDeviation + AR_FILTER_IMAGE_CROP_FOVY * M_PI / 360.0) / M_PI);
+        int bottom              = (int) round((CFG_MT9F002_X_ADDR_MAX - CFG_MT9F002_X_ADDR_MIN) * ispScalar * (horizonDeviation - AR_FILTER_IMAGE_CROP_FOVY * M_PI / 360.0) / M_PI);
+        int desOffset           = bottom;
+        int desHeight           = top - bottom - ispWidth * tan(eulerAngles->phi);
         if(desOffset < 0)                       desOffset = 0;
         if(desOffset > ispHeight)               desOffset = 0;
         if(desHeight < 0)                       desHeight = ispHeight;
@@ -302,29 +303,29 @@ vector<double> estimatePosition(int xp, int yp, double area, double k, int calAr
     // This function estimates the 3D position (in camera  coordinate system) according to pixel position
     // (Default) calibration parameters
     if(k==0)        k       = 1.085; // Fisheye correction factor (1.085)
-    if(calArea==0)  calArea = 5530; // Calibrate at full resolution (5330)
-    if(orbDiag==0)  orbDiag = 2400; // Measured circular image diagonal using resolution of 2024x2048 org: 2400 (2200)
+    if(calArea==0)  calArea = 9920; // Calibrate at full resolution (5330)
+    if(orbDiag==0)  orbDiag = sqrt(2) * (CFG_MT9F002_X_ADDR_MAX - CFG_MT9F002_X_ADDR_MIN); // Measured circular image diagonal using full resolution
     // Calculate corrected calibration parameters
-    calArea                 = (int) round(calArea * (ispWidth / 2048.0) * (ispWidth / 2048.0));
-    orbDiag                 = (int) round(orbDiag * (ispWidth / 2048.0));
+    calArea                 = (int) round(calArea * pow(ispScalar,2.0));
     double cmosPixelSize    = 0.0000014;    // 1.4um (see manual of CMOS sensor)
     double fovDiag          = M_PI;         // [degrees] Diagonal field of view (see bebop manual)
     // Calculate relevant parameters
-    int cX                  = round(ispHeight / 2);
-    int cY                  = round(ispWidth / 2);
-    double frameSizeDiag    = orbDiag * cmosPixelSize * 1000 / ispScalar; // [mm] Find used diagonal size of CMOS sensor
+    int cX                  = round(ispWidth / 2);
+    int cY                  = round(ispHeight / 2);
+    double frameSizeDiag    = orbDiag * cmosPixelSize * 1000; // [mm] Find used diagonal size of CMOS sensor
     double f                = frameSizeDiag / (4 * sin(fovDiag / 4)); // [mm]
-    double useableX         = (ispWidth - sqrt(calArea / M_PI));
-    double useableY         = (ispHeight - sqrt(calArea / M_PI));
+    double useableX         = ispWidth;
+    double useableY         = ispHeight;
     // Calculate FoV in x and y direction
-    double fovX             = 4*asin((useableX * 1 / ispScalar * cmosPixelSize * 1000)/(4 * f));
-    double fovY             = 4*asin((useableY * 1 / ispScalar * cmosPixelSize * 1000)/(4 * f));
-    //printf("fovX: %0.2f - fovY: %0.2f\n",fovX * 180 / M_PI, fovY * 180 / M_PI);
+    double fovX             = 4 * asin((useableX / ispScalar * cmosPixelSize * 1000)/(4 * f));
+    double fovY             = 4 * asin((useableY /  ispScalar * cmosPixelSize * 1000)/(4 * f));
+    printf("fsD: %.2f    usY: %.2f\n",frameSizeDiag, useableY /  ispScalar * cmosPixelSize * 1000);
+    printf("f: %.2f  fovX: %0.2f  fovY: %0.2f\n",f,fovX * 180 / M_PI, fovY * 180 / M_PI);
     // rotate frame cc 90 degrees (ISP is rotated 90 degrees cc)
-    int x                   = yp - cY;
-    int y                   = xp - cX;
+    int x                   = yp - cX;
+    int y                   = xp - cY;
     // Convert to polar coordinates
-    double r                = sqrt((double) x * x + y * y) * 1 / ispScalar * cmosPixelSize * 1000; // [mm] radial distance from middle of CMOS
+    double r                = sqrt(pow((double) x,2.0) + pow((double) y,2.0)) * ispScalar * cmosPixelSize * 1000; // [mm] radial distance from middle of CMOS
     double theta            = atan2(y,x);
     // Correct radius for radial distortion using correction parameter k
     double corR             = correctRadius(r, f, k);
@@ -335,13 +336,14 @@ vector<double> estimatePosition(int xp, int yp, double area, double k, int calAr
     // Calculate distance
     double dist             = sqrt(calArea) / sqrt(corArea);
     // Calculate max width and height of undistorted frame
-    double maxX             = correctRadius(useableX / 2 * 1 / ispScalar * cmosPixelSize * 1000, f, k);
-    double maxY             = correctRadius(useableY / 2 * 1 / ispScalar * cmosPixelSize * 1000, f, k);
+    double maxX             = correctRadius(useableX / 2 * ispScalar * cmosPixelSize * 1000, f, k);
+    double maxY             = correctRadius(useableY / 2 * ispScalar * cmosPixelSize * 1000, f, k);
     // Calculate angles wrt camera
     double xAngle           = fovX / 2 * corX / maxX; // Assume all non-linearities have been removed from corX and corY
     double yAngle           = fovY / 2 * corY / maxY; // Then scale them according to the max values and axis FoV
     // Store in dest and parse it back
     vector<double> dest(3);
+    printf("pixel (%d, %d) angle (%.2f, %.2f) area(%.2f) dist(%.2f)\n",xp,yp,xAngle * 180/M_PI,yAngle * 180/M_PI, area, dist);
     dest[0] = xAngle;
     dest[1] = yAngle;
     dest[2] = dist;
@@ -380,12 +382,12 @@ void body2world(trackResults* trackRes, struct  FloatEulers * eulerAngles)
     pos         = &fakePos;
 #endif
 #if AR_FILTER_NOYAW
-    double phi      = 0.0;
+    double psi      = 0.0;
 #else
-    double phi      = eulerAngles->phi;
+    double psi      = eulerAngles->psi;
 #endif
     double theta    = eulerAngles->theta;
-    double psi      = eulerAngles->psi;
+    double phi      = eulerAngles->phi;
     Matx33f rotX(    1,          0,          0,
                      0,          cos(phi),  -sin(phi),
                      0,          sin(phi),   cos(phi));
@@ -400,13 +402,14 @@ void body2world(trackResults* trackRes, struct  FloatEulers * eulerAngles)
     trackRes->x_w = worldPos(0,0) + pos->x;
     trackRes->y_w = worldPos(1,0) + pos->y;
     trackRes->z_w = worldPos(2,0) + pos->z;
+    //printf("body(%.2f, %.2f, %.2f) world(%.2f, %.2f, %.2f) pos(%.2f, %.2f, %.2f) euler(%.2f, %.2f, %.2f)\n", trackRes->x_b, trackRes->y_b, trackRes->z_b, trackRes->x_w, trackRes->y_w, trackRes->z_w, pos->x, pos->y, pos->z, phi, theta, psi);
     return;
 }
 
 void addContour(vector<Point> contour, vector<trackResults>* trackRes, int offsetX, int offsetY)
 {
 	double contArea = contourArea(contour);
-	if (contArea > (AR_FILTER_MIN_CROP_AREA * ispScalar * ispScalar))
+	if (contArea > (AR_FILTER_MIN_CIRCLE_SIZE * AR_FILTER_MAX_CIRCLE_DEF * ispScalar * ispScalar))
 	{
 		Point2f objCentre;
 		float 	objRadius;
@@ -463,7 +466,7 @@ void addObject(void)
             cropAreas[r].height = 0;
         }
     }
-    if(objCrop.width * objCrop.height >= AR_FILTER_MIN_CROP_AREA)
+    if(objCrop.width * objCrop.height >= AR_FILTER_MIN_CROP_AREA * ispScalar * ispScalar)
     {
         cropAreas.push_back(objCrop);
     }
@@ -859,7 +862,7 @@ void getNextDirection(int prevDir, int* nextDir, int* nextDirCnt)
 	}
 	case AR_FILTER_FLOOD_CW :
 	{
-		*nextDirCnt = 6;
+		*nextDirCnt = 5;
 		switch(prevDir) // Find out which directions to try next
 		{
 		default:
@@ -876,7 +879,7 @@ void getNextDirection(int prevDir, int* nextDir, int* nextDirCnt)
 			nextDir[2] = ARF_UP;
 			nextDir[3] = ARF_UP_RIGHT;
 			nextDir[4] = ARF_RIGHT;
-			nextDir[5] = ARF_RIGHT_DOWN;
+			//nextDir[5] = ARF_RIGHT_DOWN;
 			break;
 		case ARF_UP_RIGHT :
 			nextDir[0] = ARF_LEFT_UP;
@@ -884,7 +887,7 @@ void getNextDirection(int prevDir, int* nextDir, int* nextDirCnt)
 			nextDir[2] = ARF_UP_RIGHT;
 			nextDir[3] = ARF_RIGHT;
 			nextDir[4] = ARF_RIGHT_DOWN;
-			nextDir[5] = ARF_DOWN;
+			//nextDir[5] = ARF_DOWN;
 			break;
 		case ARF_RIGHT :
 			nextDir[0] = ARF_UP;
@@ -892,7 +895,7 @@ void getNextDirection(int prevDir, int* nextDir, int* nextDirCnt)
 			nextDir[2] = ARF_RIGHT;
 			nextDir[3] = ARF_RIGHT_DOWN;
 			nextDir[4] = ARF_DOWN;
-			nextDir[5] = ARF_DOWN_LEFT;
+			//nextDir[5] = ARF_DOWN_LEFT;
 			break;
 		case ARF_RIGHT_DOWN :
 			nextDir[0] = ARF_UP_RIGHT;
@@ -900,7 +903,7 @@ void getNextDirection(int prevDir, int* nextDir, int* nextDirCnt)
 			nextDir[2] = ARF_RIGHT_DOWN;
 			nextDir[3] = ARF_DOWN;
 			nextDir[4] = ARF_DOWN_LEFT;
-			nextDir[5] = ARF_LEFT;
+			//nextDir[5] = ARF_LEFT;
 			break;
 		case ARF_DOWN :
 			nextDir[0] = ARF_RIGHT;
@@ -908,7 +911,7 @@ void getNextDirection(int prevDir, int* nextDir, int* nextDirCnt)
 			nextDir[2] = ARF_DOWN;
 			nextDir[3] = ARF_DOWN_LEFT;
 			nextDir[4] = ARF_LEFT;
-			nextDir[5] = ARF_LEFT_UP;
+			//nextDir[5] = ARF_LEFT_UP;
 			break;
 		case ARF_DOWN_LEFT :
 			nextDir[0] = ARF_RIGHT_DOWN;
@@ -916,7 +919,7 @@ void getNextDirection(int prevDir, int* nextDir, int* nextDirCnt)
 			nextDir[2] = ARF_DOWN_LEFT;
 			nextDir[3] = ARF_LEFT;
 			nextDir[4] = ARF_LEFT_UP;
-			nextDir[5] = ARF_UP;
+			//nextDir[5] = ARF_UP;
 			break;
 		case ARF_LEFT :
 			nextDir[0] = ARF_DOWN;
@@ -924,7 +927,7 @@ void getNextDirection(int prevDir, int* nextDir, int* nextDirCnt)
 			nextDir[2] = ARF_LEFT;
 			nextDir[3] = ARF_LEFT_UP;
 			nextDir[4] = ARF_UP;
-			nextDir[5] = ARF_UP_RIGHT;
+			//nextDir[5] = ARF_UP_RIGHT;
 			break;
 		case ARF_LEFT_UP :
 			nextDir[0] = ARF_DOWN_LEFT;
@@ -932,7 +935,7 @@ void getNextDirection(int prevDir, int* nextDir, int* nextDirCnt)
 			nextDir[2] = ARF_LEFT_UP;
 			nextDir[3] = ARF_UP;
 			nextDir[4] = ARF_UP_RIGHT;
-			nextDir[5] = ARF_RIGHT;
+			//nextDir[5] = ARF_RIGHT;
 			break;
 		}
 		break;
@@ -975,7 +978,7 @@ void mod_video(Mat& sourceFrame, Mat& frameGrey)
 {
 	char text[15];
 #if AR_FILTER_MEASURE_FPS
-	sprintf(text,"FPS: %0.2f", runCount / ((double) curT));
+	sprintf(text,"%0.2f", runCount / ((double) curT));
 #else
 	sprintf(text,"frame %i", runCount);
 #endif // AR_FILTER_MEASURE_FPS
@@ -987,7 +990,7 @@ void mod_video(Mat& sourceFrame, Mat& frameGrey)
 			if(cropAreas[r].x != 0 && cropAreas[r].width != 0)
 			{
 				vector<Mat> channels;
-				Mat thr_frame(cropAreas[r].height, cropAreas[r].width, CV_8UC2);
+				Mat thr_frame(cropAreas[r].height, cropAreas[r].width, CV_8UC2, cvScalar(0.0,0.0));
 				Mat emptyCH(cropAreas[r].height, cropAreas[r].width, CV_8UC1, cvScalar(127.0));
 				channels.push_back(emptyCH);
 				channels.push_back(frameGrey(cropAreas[r]));
@@ -995,24 +998,24 @@ void mod_video(Mat& sourceFrame, Mat& frameGrey)
 				thr_frame.copyTo(sourceFrame(cropAreas[r])); 			               // Copy threshold result to black frame
 				emptyCH.release();
 				thr_frame.release();
-				rectangle(sourceFrame, cropAreas[r], Scalar(0,255), 5);
+				rectangle(sourceFrame, cropAreas[r], Scalar(0,255), 2);
 			}
 		}
 #endif
 	}else{
 #if AR_FILTER_DRAW_CONTOURS
-		drawContours(sourceFrame, allContours, -1, cvScalar(0,255), 3);
+		drawContours(sourceFrame, allContours, -1, cvScalar(0,255), 2);
 #endif
 	}
 #if AR_FILTER_DRAW_CIRCLES
 	for(unsigned int r=0; r < trackRes.size(); r++)         // Convert angles & Write/Print output
 	{
-		circle(sourceFrame,cvPoint(trackRes[r].x_p - cropCol, trackRes[r].y_p), sqrt(trackRes[r].area_p / M_PI), cvScalar(0,255), 5);
+		circle(sourceFrame,cvPoint(trackRes[r].x_p - cropCol, trackRes[r].y_p), sqrt(trackRes[r].area_p / M_PI), cvScalar(0,255), 2);
 	}
 #endif // AR_FILTER_DRAW_CONTOURS
-	putText(sourceFrame, text, Point(10,sourceFrame.rows-100), FONT_HERSHEY_SIMPLEX, 2, Scalar(0,255,255), 5);
-	line(sourceFrame, Point(0,0), Point(0, sourceFrame.rows-1), Scalar(0,255), 5);
-	line(sourceFrame, Point(sourceFrame.cols - 1,0), Point(sourceFrame.cols - 1, sourceFrame.rows-1), Scalar(0,255), 5);
+	putText(sourceFrame, text, Point(10,sourceFrame.rows-40), FONT_HERSHEY_SIMPLEX, 1, Scalar(0,255,255), 2);
+	line(sourceFrame, Point(0,0), Point(0, sourceFrame.rows-1), Scalar(0,255), 2);
+	line(sourceFrame, Point(sourceFrame.cols - 1,0), Point(sourceFrame.cols - 1, sourceFrame.rows-1), Scalar(0,255), 2);
 }
 #endif // AR_FILTER_MOD_VIDEO
 
@@ -1148,11 +1151,16 @@ void active_random_filter_header(void)
     {
         printf("[AR-FILTER-ERR] No openCV contours is only possible with clockwise flooding.\n");
     }
+}
+
+void active_random_filter_footer(void)
+{
 #if AR_FILTER_SHOW_MEM
     for(unsigned int r=0; r < neighbourMem.size(); r++)        // Print to file & terminal
     {
-        printf("%i - Object at (%0.2f m, %0.2f m, %0.2f m)\n", runCount, neighbourMem[r].x_w, neighbourMem[r].y_w, neighbourMem[r].z_w);                                                        // Print to terminal
+        printf("%i - Object %d at (%0.2f m, %0.2f m, %0.2f m)\n", runCount, neighbourMem[r].id, neighbourMem[r].x_w, neighbourMem[r].y_w, neighbourMem[r].z_w);                                                        // Print to terminal
     }
+    printf("\n");
 #endif // AR_FILTER_SHOW_MEM
 #if AR_FILTER_CALIBRATE_CAM
     if(runCount==50)    calibrateEstimation(trackRes);

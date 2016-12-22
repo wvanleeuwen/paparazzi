@@ -294,7 +294,7 @@ void viewvideo_init(void)
 #if VIEWVIDEO_WRITE_VIDEO
   videoEncoder.bitRate   = 6*8*1000*1000; // 6 MBps
 #else
-  videoEncoder.bitRate   = 1000*1000; // 1 Mbps
+  videoEncoder.bitRate   = 150*1000; // 250 Kbps almost no errors
 #endif
 #if VIEWVIDEO_WRITE_VIDEO || VIEWVIDEO_STREAM_VIDEO
   videoEncoder.frameRate = VIEWVIDEO_FPS;
@@ -311,10 +311,15 @@ void viewvideo_init(void)
   FILE *fp = fopen(save_name, "w");
   if (fp != NULL) {
 	  fprintf(fp, "v=0\n");
-	  fprintf(fp, "m=video %d RTP/AVP 96\n", (int)(VIEWVIDEO_PORT_OUT));
-	  fprintf(fp, "a=rtpmap:96 H264\n");
-	  fprintf(fp, "a=framerate:%d\n", (int)(VIEWVIDEO_FPS));
+	  fprintf(fp, "o=bebop 1 1 IN IP4 0.0.0.0\n");
+	  fprintf(fp, "s=Bebop RTP stream\n");
 	  fprintf(fp, "c=IN IP4 0.0.0.0\n");
+	  fprintf(fp, "t=0 0\n");
+	  fprintf(fp, "a=recvonly\n");
+	  fprintf(fp, "m=video %d RTP/AVP 96\n", (int)(VIEWVIDEO_PORT_OUT));
+	  fprintf(fp, "a=rtpmap:96 H264/90000\n");
+	  fprintf(fp, "a=fmtp:96 packetization-mode=0;\n");
+	  fprintf(fp, "a=framerate:%d\n", (int)(VIEWVIDEO_FPS));
 	  fclose(fp);
   } else {
 	  printf_debug("[viewvideo] Failed to create SDP file.\n");

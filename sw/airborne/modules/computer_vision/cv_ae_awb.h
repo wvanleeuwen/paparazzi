@@ -27,7 +27,7 @@
 #define CV_AE_AWB_H
 
 extern void cv_ae_awb_init(void);
-extern void cv_ae_awb_periodic(void);
+struct image_t*  cv_ae_awb_periodic(struct image_t* img);
 
 #endif
 
