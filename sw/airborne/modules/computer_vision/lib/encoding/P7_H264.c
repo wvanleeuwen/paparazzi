@@ -704,18 +704,15 @@ int P7_H264_open(P7_H264_context_t* context, struct v4l2_device *v4l2_dev)
   }
 
   // check number of buffer
-  if (!res) // TODO: Useless check?
+  if (context->numInputBuffers == 0)
   {
-    if (context->numInputBuffers == 0)
-    {
       PRINT("error, cannot use 0 input buffers \n");
       res = P7_H264_FAILED;
-    }
-    if (context->numOutputBuffers == 0)
-    {
+  }
+  if (context->numOutputBuffers == 0)
+  {
       PRINT("error, cannot use 0 output buffers \n");
       res = P7_H264_FAILED;
-    }
   }
 
   /* Encoder initialization */
@@ -851,6 +848,8 @@ P7_H264_res_t P7_H264_getInputBuffer(P7_H264_context_t* context, int32_t* buffer
         *bufferIndex = i;
         VERBOSE_PRINT("user took input %d\n",i);
         break;
+      }else{
+          printf("Input buffer %d not FREE (%d)\n",i,context->inputBuffers[i].status);
       }
     }
   }
@@ -963,6 +962,8 @@ P7_H264_res_t P7_H264_getOutputBuffer(P7_H264_context_t* context, int32_t* buffe
           VERBOSE_PRINT("user took output %d (frame type %d)\n",i,context->outputBuffers[i].frameType);
           break;
         }
+      }else{
+          VERBOSE_PRINT("Output buffer %d not READY (%d)\n",i,context->outputBuffers[i].status);
       }
     }
   }
@@ -970,7 +971,7 @@ P7_H264_res_t P7_H264_getOutputBuffer(P7_H264_context_t* context, int32_t* buffe
 
   if (res)
   {
-    VERBOSE_PRINT("error, failed to get ouput buffer\n");
+    VERBOSE_PRINT("error, failed to get any of %d ouput buffers (status: %d)\n",context->numOutputBuffers,res);
   }
 
   return res;
