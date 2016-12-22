@@ -48,7 +48,7 @@ extern struct mt9f002_t mt9f002;
 #define AR_FILTER_DRAW_BOXES 	0 // Draw boxes
 #define AR_FILTER_SHOW_MEM      1 // Print object locations to terminal
 #define AR_FILTER_SAVE_FRAME    0 // Save a frame for post-processing
-#define AR_FILTER_MEASURE_FPS   0
+#define AR_FILTER_MEASURE_FPS   1
 #define AR_FILTER_CALIBRATE_CAM 0 // Calibrate camera
 #define AR_FILTER_WORLDPOS 		0 // Use world coordinates
 #define AR_FILTER_NOYAW 		1 // Output in body horizontal XY

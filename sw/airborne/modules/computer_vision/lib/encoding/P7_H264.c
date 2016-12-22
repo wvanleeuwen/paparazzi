@@ -6,7 +6,6 @@
  */
 
 #define P7R2
-#define H264_ROTATE 1
 
 #include "P7_H264.h"
 

@@ -26,8 +26,8 @@
 #ifndef CV_AE_AWB_H
 #define CV_AE_AWB_H
 
+#include "modules/computer_vision/cv.h"
 extern void cv_ae_awb_init(void);
-void  cv_ae_awb_periodic(struct image_t* img);
 
 #endif
 

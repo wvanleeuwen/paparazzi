@@ -23,7 +23,6 @@
  * Auto exposure and Auto white balancing for the Bebop 1 and 2
  */
 
-#include "modules/computer_vision/cv.h"
 #include "modules/computer_vision/cv_ae_awb.h"
 #include "lib/isp/libisp.h"
 #include <stdio.h>
@@ -43,12 +42,8 @@
 #define MAX_HIST_Y 256-30
 
 #include "boards/bebop/mt9f002.h"
-
-void cv_ae_awb_init(void) {
-    cv_add_to_device(&CV_AE_AWB_CAMERA, cv_ae_awb_periodic);
-}
-
-void  cv_ae_awb_periodic(struct image_t* img) {
+struct image_t* cv_ae_awb_periodic(struct image_t* img);
+struct image_t* cv_ae_awb_periodic(struct image_t* img) {
     struct isp_yuv_stats_t yuv_stats;
     if(isp_get_statistics_yuv(&yuv_stats) == 0) {
         //printf("%d, %d, %d, %d, %d\r\n", yuv_stats.awb_sum_Y, yuv_stats.awb_sum_U, yuv_stats.awb_sum_V,
@@ -123,7 +118,9 @@ void  cv_ae_awb_periodic(struct image_t* img) {
             mt9f002_set_gains(&mt9f002);
         }
     }
-  return;
+  return img;
 }
 
-
+void cv_ae_awb_init(void) {
+    cv_add_to_device(&CV_AE_AWB_CAMERA, cv_ae_awb_periodic);
+}
