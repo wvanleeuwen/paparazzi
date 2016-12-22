@@ -66,10 +66,8 @@ static void *v4l2_capture_thread(void *data)
     FD_SET(dev->fd, &fds);
 
     // Set the timeout to 2 seconds
-    tv.tv_sec = 20;
+    tv.tv_sec = 2;
     tv.tv_usec = 0;
-
-    printf("[v4l2_capture_thread] While top\n");
 
     // Wait until an image was taken, with a timeout of tv
     int sr = select(dev->fd + 1, &fds, NULL, NULL, &tv);
@@ -121,7 +119,7 @@ static void *v4l2_capture_thread(void *data)
         printf("[v4l2-capture] Could not enqueue %d for %s\n", prev_idx, dev->name);
       }
     }
-    printf("[v4l2_capture_thread] While bottom\n");
+
   }
   return (void *)0;
 }

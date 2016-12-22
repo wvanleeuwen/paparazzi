@@ -86,7 +86,7 @@ void video_thread_periodic(void)
 
 /**
  * Handles all the video streaming and saving of the image shots
- * This is a separate thread, so it needs to be thread safe!
+ * This is a sepereate thread, so it needs to be thread safe!
  */
 static void *video_thread_function(void *data)
 {
@@ -101,6 +101,7 @@ static void *video_thread_function(void *data)
   if (vid->filters & VIDEO_FILTER_DEBAYER) {
     // fixme: don't hardcode size, works for bebop front camera for now
 #define IMG_FLT_SIZE 272
+    //image_create(&img_color, IMG_FLT_SIZE, IMG_FLT_SIZE, IMAGE_YUV422);
     image_create(&img_color, IMG_FLT_SIZE, IMG_FLT_SIZE, IMAGE_YUV422);
   }
 
@@ -112,7 +113,7 @@ static void *video_thread_function(void *data)
 
   // Configure ISP if needed
   if (vid->filters & VIDEO_FILTER_ISP) {
-    configure_isp(vid->thread.dev);
+	  configure_isp(vid->thread.dev);
   }
 
   // be nice to the more important stuff
@@ -156,10 +157,9 @@ static void *video_thread_function(void *data)
     img.eulerAngles  = &image_euler;
     // pointer to the final image to pass for saving and further processing
     struct image_t *img_final = &img;
-
     // run selected filters
     if (vid->filters & VIDEO_FILTER_DEBAYER) {
-      BayerToYUV(&img, &img_color, 0, 0);
+    	BayerToYUV(&img, &img_color, 0, 0);
       // use color image for further processing
       img_final = &img_color;
     }
@@ -170,6 +170,7 @@ static void *video_thread_function(void *data)
     // Free the image
     //v4l2_image_free(vid->thread.dev, &img);
   }
+
   image_free(&img_color);
 
   return 0;
@@ -271,6 +272,10 @@ static void stop_video_thread(struct video_config_t *device)
  */
 void video_thread_init(void)
 {
+  // Initialise all camera pointers to be NULL
+  for (int indexCameras = 0; indexCameras < VIDEO_THREAD_MAX_CAMERAS; indexCameras++) {
+    cameras[indexCameras] = NULL;
+  }
 }
 
 /**
@@ -293,11 +298,13 @@ void video_thread_start()
  */
 void video_thread_stop()
 {
+
   for (int indexCameras = 0; indexCameras < VIDEO_THREAD_MAX_CAMERAS; indexCameras++) {
     if (cameras[indexCameras] != NULL) {
       stop_video_thread(cameras[indexCameras]);
     }
   }
+
 
   // TODO: wait for the thread to finish to be able to start the thread again!
 }

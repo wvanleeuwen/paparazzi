@@ -37,6 +37,8 @@ using namespace std;
 #include <opencv2/imgproc/imgproc.hpp>
 using namespace cv;
 
+extern struct mt9f002_t mt9f002;
+
 #define AR_FILTER_CV_CONTOURS   1 // Use opencv to detect contours
 #define AR_FILTER_ISP_CROP      0 // Use the ISP to crop the frame according to FOV-Y
 #define AR_FILTER_SHOW_REJECT   0 // Print why shapes are rejected

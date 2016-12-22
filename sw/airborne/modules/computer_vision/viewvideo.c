@@ -154,10 +154,16 @@ static FILE *video_file;
 struct image_t *viewvideo_function(struct image_t *img);
 struct image_t *viewvideo_function(struct image_t *img)
 {
-    printf("[viewvideo_function] Start of function\n");
   int32_t h264BufferIndex, size;
   uint8_t* h264Buffer;
   struct image_t releaseImg;
+
+  // Resize image if needed
+    struct image_t img_small;
+    image_create(&img_small,
+                 img->w / VIEWVIDEO_DOWNSIZE_FACTOR,
+                 img->h / VIEWVIDEO_DOWNSIZE_FACTOR,
+                 IMAGE_YUV422);
   if (viewvideo.is_streaming) {
 #if VIEWVIDEO_WRITE_VIDEO || VIEWVIDEO_STREAM_VIDEO
 /*
@@ -222,16 +228,15 @@ struct image_t *viewvideo_function(struct image_t *img)
       // Here, we set the time increment to the lowest possible value
       // (1 = 1/90000 s) which is probably stupid but is actually working.
     }*/
-    printf("[viewvideo_function] Release input buffer\n");
+
     P7_H264_releaseInputBuffer(&videoEncoder, img->buf_idx);
-    printf("[viewvideo_function] Find and clear to be released input buffer\n");
+
     while ((h264BufferIndex = P7_H264_find_FreeBuffer(videoEncoder.inputBuffers, BUFFER_TOBE_RELEASED, videoEncoder.numInputBuffers)) != -1){
       releaseImg.buf_idx = h264BufferIndex;
       videoEncoder.inputBuffers[h264BufferIndex].status = BUFFER_FREE;
       v4l2_image_free(VIEWVIDEO_CAMERA.thread.dev, &releaseImg);
     }
-    printf("[viewvideo_function] Found input buffer\n");
-    printf("[viewvideo_function] Find a READY output buffer\n");
+
     while (!P7_H264_getOutputBuffer(&videoEncoder, &h264BufferIndex))
     {
 
@@ -253,13 +258,10 @@ struct image_t *viewvideo_function(struct image_t *img)
       }
       P7_H264_releaseOutputBuffer(&videoEncoder, h264BufferIndex);
     }
-    printf("[viewvideo_function] Found output buffer and transmitted frame\n");
 #endif
   } else {
-    printf("Not streaming, freeing image\n"); // TODO: remove print
     v4l2_image_free(VIEWVIDEO_CAMERA.thread.dev, img);
   }
-  printf("[viewvideo_function] End of function\n\n");
   return NULL; // No new images were created
 }
 
@@ -292,7 +294,7 @@ void viewvideo_init(void)
 #if VIEWVIDEO_WRITE_VIDEO
   videoEncoder.bitRate   = 6*8*1000*1000; // 6 MBps
 #else
-  videoEncoder.bitRate   = 150*1000; // 250 Kbps almost no errors
+  videoEncoder.bitRate   = 1000*1000; // 1 Mbps
 #endif
 #if VIEWVIDEO_WRITE_VIDEO || VIEWVIDEO_STREAM_VIDEO
   videoEncoder.frameRate = VIEWVIDEO_FPS;
@@ -309,15 +311,10 @@ void viewvideo_init(void)
   FILE *fp = fopen(save_name, "w");
   if (fp != NULL) {
 	  fprintf(fp, "v=0\n");
-	  fprintf(fp, "o=bebop 1 1 IN IP4 0.0.0.0\n");
-	  fprintf(fp, "s=Bebop RTP stream\n");
-	  fprintf(fp, "c=IN IP4 0.0.0.0\n");
-	  fprintf(fp, "t=0 0\n");
-	  fprintf(fp, "a=recvonly\n");
 	  fprintf(fp, "m=video %d RTP/AVP 96\n", (int)(VIEWVIDEO_PORT_OUT));
-	  fprintf(fp, "a=rtpmap:96 H264/90000\n");
-	  fprintf(fp, "a=fmtp:96 packetization-mode=0;\n");
+	  fprintf(fp, "a=rtpmap:96 H264\n");
 	  fprintf(fp, "a=framerate:%d\n", (int)(VIEWVIDEO_FPS));
+	  fprintf(fp, "c=IN IP4 0.0.0.0\n");
 	  fclose(fp);
   } else {
 	  printf_debug("[viewvideo] Failed to create SDP file.\n");

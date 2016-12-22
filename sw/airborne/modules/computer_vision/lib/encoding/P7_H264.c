@@ -1,7 +1,12 @@
 /*
+ * P7_H264.c
+ *
+ *  Created on: 4 fvr. 2013
+ *      Author: peline
  */
 
 #define P7R2
+#define H264_ROTATE 1
 
 #include "P7_H264.h"
 
@@ -32,7 +37,7 @@
 //#define VERBOSE
 
 #define PRINT(string,...) fprintf(stderr, "[P7_venc->%s()] " string,__FUNCTION__ , ##__VA_ARGS__)
-#define VERBOSE 1
+
 #ifdef VERBOSE
 #define VERBOSE_PRINT PRINT
 static char* streamType[2] = { "BYTE_STREAM", "NAL_UNITS" };
@@ -91,14 +96,8 @@ static int OpenEncoder(P7_H264_context_t* context)
       PRINT( "No device found\n");
       return -1;
     }
-
-#if H264_ROTATE
-    cfg.width   = context->height;
-    cfg.height  = context->width;
-#else
-    cfg.width   = context->width;
-    cfg.height  = context->height;
-#endif
+    cfg.width = context->width;
+    cfg.height = context->height;
 
     cfg.frameRateDenom = 1;
     cfg.frameRateNum = context->frameRate;
@@ -107,8 +106,8 @@ static int OpenEncoder(P7_H264_context_t* context)
 
     cfg.level = H264ENC_LEVEL_5; // level 4 minimum for 1080p
     cfg.viewMode = H264ENC_BASE_VIEW_DOUBLE_BUFFER; // maybe H264ENC_BASE_VIEW_SINGLE_BUFFER
-    cfg.scaledWidth = 0; // 0
-    cfg.scaledHeight = 0; // 0
+    cfg.scaledWidth = 16; // 0
+    cfg.scaledHeight = 16; // 0
 
     VERBOSE_PRINT("Init config: size %dx%d   %d/%d fps  %s L %d\n",
          cfg.width, cfg.height, cfg.frameRateNum,
@@ -227,12 +226,14 @@ static int OpenEncoder(P7_H264_context_t* context)
     preProcCfg.inputType = context->inputType;
 #if H264_ROTATE
     preProcCfg.rotation = H264ENC_ROTATE_90L;
+    preProcCfg.origWidth = context->height;
+    preProcCfg.origHeight = context->width;
 #else
     preProcCfg.rotation = H264ENC_ROTATE_0;
-#endif
     preProcCfg.origWidth = context->width;
     preProcCfg.origHeight = context->height;
-    preProcCfg.scaledOutput = 0;
+#endif
+    preProcCfg.scaledOutput = 1;
 
 
     VERBOSE_PRINT
@@ -679,15 +680,17 @@ static void *P7_H264_encoderThread(void* param)
  */
 int P7_H264_open(P7_H264_context_t* context, struct v4l2_device *v4l2_dev)
 {
-   PRINT("Opening video encoder...\n");
-   P7_H264_res_t res = P7_H264_OK;
+  P7_H264_res_t res = P7_H264_OK;
 
    context->numInputBuffers = v4l2_dev->buffers_cnt;
    context->numOutputBuffers = v4l2_dev->buffers_cnt;
-
+#if H264_ROTATE
+   context->width = v4l2_dev->h;
+   context->height = v4l2_dev->w;
+#else
    context->width = v4l2_dev->w;
    context->height = v4l2_dev->h;
-
+#endif
    context->v4l2_dev = v4l2_dev;
 
 
@@ -699,20 +702,22 @@ int P7_H264_open(P7_H264_context_t* context, struct v4l2_device *v4l2_dev)
 
   if (!context->intraRate )
   {
-    PRINT("%s %d, No intraRate set, setting default %d\n", __func__, __LINE__, P7_H264_INTRA_RATE_DEFAULT);
     context->intraRate = P7_H264_INTRA_RATE_DEFAULT;
   }
 
   // check number of buffer
-  if (context->numInputBuffers == 0)
+  if (!res)
   {
+    if (context->numInputBuffers == 0)
+    {
       PRINT("error, cannot use 0 input buffers \n");
       res = P7_H264_FAILED;
-  }
-  if (context->numOutputBuffers == 0)
-  {
+    }
+    if (context->numOutputBuffers == 0)
+    {
       PRINT("error, cannot use 0 output buffers \n");
       res = P7_H264_FAILED;
+    }
   }
 
   /* Encoder initialization */
@@ -724,7 +729,6 @@ int P7_H264_open(P7_H264_context_t* context, struct v4l2_device *v4l2_dev)
   if (!res)
   {
     /* Allocate input and output buffers */
-    PRINT("Allocating buffers...\n");
     if(AllocRes(context) != 0)
     {
       PRINT( "P7 h264 Failed to allocate the external resources!\n");
@@ -848,8 +852,6 @@ P7_H264_res_t P7_H264_getInputBuffer(P7_H264_context_t* context, int32_t* buffer
         *bufferIndex = i;
         VERBOSE_PRINT("user took input %d\n",i);
         break;
-      }else{
-          printf("Input buffer %d not FREE (%d)\n",i,context->inputBuffers[i].status);
       }
     }
   }
@@ -962,8 +964,6 @@ P7_H264_res_t P7_H264_getOutputBuffer(P7_H264_context_t* context, int32_t* buffe
           VERBOSE_PRINT("user took output %d (frame type %d)\n",i,context->outputBuffers[i].frameType);
           break;
         }
-      }else{
-          VERBOSE_PRINT("Output buffer %d not READY (%d)\n",i,context->outputBuffers[i].status);
       }
     }
   }
@@ -971,7 +971,7 @@ P7_H264_res_t P7_H264_getOutputBuffer(P7_H264_context_t* context, int32_t* buffe
 
   if (res)
   {
-    VERBOSE_PRINT("error, failed to get any of %d ouput buffers (status: %d)\n",context->numOutputBuffers,res);
+    VERBOSE_PRINT("error, failed to get ouput buffer\n");
   }
 
   return res;
