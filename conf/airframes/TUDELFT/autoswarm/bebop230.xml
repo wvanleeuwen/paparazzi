@@ -57,7 +57,7 @@
     <module name="video_thread"/>
     <module name="cv_ae_awb">
 	  <define name="CV_AE_AWB_AV" value="1" />
-	  <define name="CV_AE_AWB_VERBOSE" value="0"/>
+	  <define name="CV_AE_AWB_VERBOSE" value="1"/>
     </module>
     <module name="cv_active_random_filter">
     	<define name="AR_FILTER_CAMERA" value="front_camera" />

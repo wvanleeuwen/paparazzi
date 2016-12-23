@@ -41,6 +41,8 @@
 
 #define MAX_HIST_Y 256-30
 
+bool gains_maxed = false;
+
 #include "boards/bebop/mt9f002.h"
 struct image_t* cv_ae_awb_periodic(struct image_t* img);
 struct image_t* cv_ae_awb_periodic(struct image_t* img) {
@@ -87,13 +89,28 @@ struct image_t* cv_ae_awb_periodic(struct image_t* img) {
         float desiredExposure = mt9f002.real_exposure * adjustment * CV_AE_AWB_AV;
         mt9f002.target_exposure = desiredExposure;
         mt9f002_set_exposure(&mt9f002);
+        if(mt9f002.target_exposure > mt9f002.real_exposure && mt9f002.gain_blue < 55 && mt9f002.gain_red < 55)
+        {
+            mt9f002.gain_blue *= 1.01;
+            mt9f002.gain_red  *= 1.01;
+            if(!gains_maxed){
+                mt9f002.gain_green1  *= 1.01;
+                mt9f002.gain_green2  *= 1.01;
+                if(mt9f002.gain_blue > 55 || mt9f002.gain_red > 55){
+                    gains_maxed = true;
+                }
+            }
 #if CV_AE_AWB_VERBOSE
-        printf("New exposure: %f (old: %f)\r\n", desiredExposure, mt9f002.real_exposure);
+        printf("exposure saturated: new gains(B %f, R %f, G %f, G %f)\r\n", mt9f002.gain_blue, mt9f002.gain_red, mt9f002.gain_green1, mt9f002.gain_green2);
+#endif
+        }
+#if CV_AE_AWB_VERBOSE
+        printf("New exposure: %f (real: %f)\r\n", desiredExposure, mt9f002.real_exposure);
 #endif
         // Calculate AWB
         float avgU = (float) yuv_stats.awb_sum_U / (float) yuv_stats.nb_valid_Y;
         float avgV = (float) yuv_stats.awb_sum_V / (float) yuv_stats.nb_valid_Y;
-        float fTolerance = 0.025f;
+        float fTolerance = 0.001f;
         float targetAWB = 0.0f;
         if (avgU - avgV + targetAWB < -fTolerance) {
             // Want more red
@@ -104,6 +121,8 @@ struct image_t* cv_ae_awb_periodic(struct image_t* img) {
             mt9f002.gain_red  -= 0.01;
             Bound(mt9f002.gain_blue, 2, 75);
             Bound(mt9f002.gain_red, 2, 75);
+            Bound(mt9f002.gain_green1, 2, 75);
+            Bound(mt9f002.gain_green2, 2, 75);
             mt9f002_set_gains(&mt9f002);
         }
         else if(avgU - avgV + targetAWB > fTolerance) {
@@ -115,6 +134,14 @@ struct image_t* cv_ae_awb_periodic(struct image_t* img) {
             mt9f002.gain_red  += 0.01;
             Bound(mt9f002.gain_blue, 2, 75);
             Bound(mt9f002.gain_red, 2, 75);
+            Bound(mt9f002.gain_green1, 2, 75);
+            Bound(mt9f002.gain_green2, 2, 75);
+            mt9f002_set_gains(&mt9f002);
+        }else if(mt9f002.target_exposure > mt9f002.real_exposure){
+            Bound(mt9f002.gain_blue, 2, 75);
+            Bound(mt9f002.gain_red, 2, 75);
+            Bound(mt9f002.gain_green1, 2, 75);
+            Bound(mt9f002.gain_green2, 2, 75);
             mt9f002_set_gains(&mt9f002);
         }
     }
