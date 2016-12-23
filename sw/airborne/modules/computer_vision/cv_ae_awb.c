@@ -110,7 +110,7 @@ struct image_t* cv_ae_awb_periodic(struct image_t* img) {
         // Calculate AWB
         float avgU = (float) yuv_stats.awb_sum_U / (float) yuv_stats.nb_valid_Y;
         float avgV = (float) yuv_stats.awb_sum_V / (float) yuv_stats.nb_valid_Y;
-        float fTolerance = 0.001f;
+        float fTolerance = 0.005f;
         float targetAWB = 0.0f;
         if (avgU - avgV + targetAWB < -fTolerance) {
             // Want more red

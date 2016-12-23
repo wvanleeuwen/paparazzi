@@ -57,7 +57,7 @@
     <module name="video_thread"/>
     <module name="cv_ae_awb">
 	  <define name="CV_AE_AWB_AV" value="1" />
-	  <define name="CV_AE_AWB_VERBOSE" value="1"/>
+	  <define name="CV_AE_AWB_VERBOSE" value="0"/>
     </module>
     <module name="cv_active_random_filter">
     	<define name="AR_FILTER_CAMERA" value="front_camera" />
@@ -70,7 +70,6 @@
 	</module>
 	-->
 	<!-- module name="cv_bebop_stabilization"/ -->
-
 	<module name="video_rtp_stream">
 		<configure name="VIEWVIDEO_HOST" value="192.168.42.65"/>
 		<configure name="VIEWVIDEO_BROADCAST" value="FALSE" />

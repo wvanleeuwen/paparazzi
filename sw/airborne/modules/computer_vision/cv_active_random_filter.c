@@ -34,7 +34,7 @@
 struct image_t* cv_ar_filter_func(struct image_t* img);
 struct image_t* cv_ar_filter_func(struct image_t* img)
 {
-	active_random_filter((char*) img->buf, img->w, img->h, img->eulerAngles);
+	active_random_filter((char*) img->buf, (uint16_t) img->w, (uint16_t) img->h, img->eulerAngles);
 	return img;
 }
 

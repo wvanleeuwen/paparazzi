@@ -22,11 +22,12 @@
  * @author Wilco Vlenterie (wv-tud)
  * Active random sampling colour filter
  */
+#include "std.h"
 
 typedef struct _trackResults {
-    int     x_p;
-    int     y_p;
-    double  area_p;
+    uint16_t     x_p;
+    uint16_t     y_p;
+    uint32_t  area_p;
     double 	x_c;
     double 	y_c;
     double 	r_c;
@@ -39,26 +40,27 @@ typedef struct _trackResults {
 } trackResults;
 
 typedef struct _memBlock {
-	int lastSeen;
-	int id;
-	int     x_p;
-	int     y_p;
+	uint32_t lastSeen;
+	uint16_t id;
+	uint16_t x_p;
+	uint16_t y_p;
+	uint32_t area_p;
 	double x_w;
 	double y_w;
 	double z_w;
 } memoryBlock;
 
-extern int 		AR_FILTER_GREY_THRESHOLD;
-extern int 		AR_FILTER_IMAGE_CROP_FOVY;
-extern int 		AR_FILTER_RND_PIX_SAMPLE;
-extern int 		AR_FILTER_Y_MIN;
-extern int 		AR_FILTER_Y_MAX;
-extern int 		AR_FILTER_CB_MIN;
-extern int 		AR_FILTER_CB_MAX;
-extern int 		AR_FILTER_CR_MIN;
-extern int 		AR_FILTER_CR_MAX;
-extern int		AR_FILTER_SAMPLE_STYLE;
-extern int 		AR_FILTER_FLOOD_STYLE;
+extern uint8_t 		AR_FILTER_GREY_THRESHOLD;
+extern uint8_t 		AR_FILTER_IMAGE_CROP_FOVY;
+extern uint16_t     AR_FILTER_RND_PIX_SAMPLE;
+extern uint8_t 		AR_FILTER_Y_MIN;
+extern uint8_t 		AR_FILTER_Y_MAX;
+extern uint8_t 		AR_FILTER_CB_MIN;
+extern uint8_t 		AR_FILTER_CB_MAX;
+extern uint8_t 		AR_FILTER_CR_MIN;
+extern uint8_t 		AR_FILTER_CR_MAX;
+extern uint8_t		AR_FILTER_SAMPLE_STYLE;
+extern uint8_t 		AR_FILTER_FLOOD_STYLE;
 
 // Filter sample styles
 #define AR_FILTER_STYLE_FULL   0
@@ -89,7 +91,7 @@ extern int 		AR_FILTER_FLOOD_STYLE;
 extern "C" {
 #endif
 
-void active_random_filter(char* buff, int width, int height, struct FloatEulers* eulerAngles);
+void active_random_filter(char* buff, uint16_t width, uint16_t height, struct FloatEulers* eulerAngles);
 
 #ifdef __cplusplus
 }
