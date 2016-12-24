@@ -19,8 +19,8 @@
 	<define name="USE_GPS_UBX_RTCM" value="TRUE"/>
 	<define name="H264_ROTATE" value="TRUE"/>
     	<!--<define name="GPS_TIMEOUT" value="3"/>-->
-	<define name="MT9F002_OUTPUT_WIDTH" value="960" /> <!-- 480 / 960 / 1920 -->
-	<define name="MT9F002_OUTPUT_HEIGHT" value="840" /> <!-- 420 / 840 / 1680 -->
+	<define name="MT9F002_OUTPUT_WIDTH" value="1920" /> <!-- 480 / 960 / 1920 -->
+	<define name="MT9F002_OUTPUT_HEIGHT" value="1680" /> <!-- 420 / 840 / 1680 -->
 	<define name="MT9F002_TARGET_FPS" value="30" />
 	<define name="MT9F002_TARGET_EXPOSURE" value="4" /> 
 	<define name="MT9F002_GAIN_GREEN1" value="6.0" />

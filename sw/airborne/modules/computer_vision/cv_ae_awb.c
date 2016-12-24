@@ -89,16 +89,14 @@ struct image_t* cv_ae_awb_periodic(struct image_t* img) {
         float desiredExposure = mt9f002.real_exposure * adjustment * CV_AE_AWB_AV;
         mt9f002.target_exposure = desiredExposure;
         mt9f002_set_exposure(&mt9f002);
-        if(mt9f002.target_exposure > mt9f002.real_exposure && mt9f002.gain_blue < 55 && mt9f002.gain_red < 55)
+        if(mt9f002.target_exposure > mt9f002.real_exposure && !gains_maxed)
         {
-            mt9f002.gain_blue *= 1.01;
-            mt9f002.gain_red  *= 1.01;
-            if(!gains_maxed){
-                mt9f002.gain_green1  *= 1.01;
-                mt9f002.gain_green2  *= 1.01;
-                if(mt9f002.gain_blue > 55 || mt9f002.gain_red > 55){
-                    gains_maxed = true;
-                }
+            mt9f002.gain_blue     *= 1.01;
+            mt9f002.gain_red      *= 1.01;
+            mt9f002.gain_green1   *= 1.008;
+            mt9f002.gain_green2   *= 1.008;
+            if(mt9f002.gain_blue >= 55 || mt9f002.gain_red >= 55){
+                gains_maxed = true;
             }
 #if CV_AE_AWB_VERBOSE
         printf("exposure saturated: new gains(B %f, R %f, G %f, G %f)\r\n", mt9f002.gain_blue, mt9f002.gain_red, mt9f002.gain_green1, mt9f002.gain_green2);
@@ -117,8 +115,8 @@ struct image_t* cv_ae_awb_periodic(struct image_t* img) {
 #if CV_AE_AWB_VERBOSE
             printf("Too red (%0.4f, %0.4f) %f\r\n", mt9f002.gain_blue, mt9f002.gain_red, avgU - avgV);
 #endif
-            mt9f002.gain_blue += 0.01;
-            mt9f002.gain_red  -= 0.01;
+            mt9f002.gain_blue *= 1.01;
+            mt9f002.gain_red  *= 0.99;
             Bound(mt9f002.gain_blue, 2, 75);
             Bound(mt9f002.gain_red, 2, 75);
             Bound(mt9f002.gain_green1, 2, 75);
@@ -130,8 +128,8 @@ struct image_t* cv_ae_awb_periodic(struct image_t* img) {
 #if CV_AE_AWB_VERBOSE
             printf("Too blue (%0.4f, %0.4f) %f\r\n", mt9f002.gain_blue, mt9f002.gain_red, avgU - avgV);
 #endif
-            mt9f002.gain_blue -= 0.01;
-            mt9f002.gain_red  += 0.01;
+            mt9f002.gain_blue *= 0.99;
+            mt9f002.gain_red  *= 1.01;
             Bound(mt9f002.gain_blue, 2, 75);
             Bound(mt9f002.gain_red, 2, 75);
             Bound(mt9f002.gain_green1, 2, 75);

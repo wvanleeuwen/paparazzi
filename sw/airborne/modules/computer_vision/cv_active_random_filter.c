@@ -39,5 +39,6 @@ struct image_t* cv_ar_filter_func(struct image_t* img)
 }
 
 void cv_ar_filter_init() {
+    active_random_filter_init();
     cv_add_to_device(&AR_FILTER_CAMERA, cv_ar_filter_func);
 }

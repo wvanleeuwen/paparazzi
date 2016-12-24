@@ -40,8 +40,8 @@ using namespace cv;
 
 #define PRINT(string,...) fprintf(stderr, "[AR-FILTER->%s()] " string,__FUNCTION__ , ##__VA_ARGS__)
 
-#define AR_FILTER_VERBOSE TRUE
-#ifdef AR_FILTER_VERBOSE
+#define AR_FILTER_VERBOSE FALSE
+#if AR_FILTER_VERBOSE
 #define VERBOSE_PRINT PRINT
 #else
 #define VERBOSE_PRINT(...)
@@ -62,6 +62,7 @@ extern struct mt9f002_t mt9f002;
 #define AR_FILTER_CALIBRATE_CAM 0 // Calibrate camera
 #define AR_FILTER_WORLDPOS 		0 // Use world coordinates
 #define AR_FILTER_NOYAW 		1 // Output in body horizontal XY
+#define AR_FILTER_TIMEOUT       150 // Frames from start
 
 static void             active_random_filter_header(void);
 static void             active_random_filter_footer(void);
@@ -102,7 +103,7 @@ static uint32_t curT;
 // Set up tracking parameters
 #define 	AR_FILTER_RND_PIX_SAMPLE 	2500
 #define 	AR_FILTER_MAX_LAYERS        3000
-#define 	AR_FILTER_MIN_LAYERS 		25
+uint16_t    AR_FILTER_MIN_LAYERS 		= 1000;
 #define     AR_FILTER_MAX_SEARCH        150
 #define     AR_FILTER_MIN_POINTS        15
 
@@ -112,12 +113,21 @@ double 	AR_FILTER_MAX_CIRCLE_DEF 	= 0.5;
 
 uint8_t 	AR_FILTER_SAMPLE_STYLE 		= AR_FILTER_STYLE_RANDOM;
 uint8_t 	AR_FILTER_FLOOD_STYLE 	    = AR_FILTER_FLOOD_CW;
+
+uint8_t     AR_FILTER_Y_MIN             = 0;                           // 0  [0,65 84,135 170,255]zoo 45
+uint8_t     AR_FILTER_Y_MAX             = 110;                          // 255
+uint8_t     AR_FILTER_CB_MIN            = 118;                          // 84
+uint8_t     AR_FILTER_CB_MAX            = 154;                          // 113
+uint8_t     AR_FILTER_CR_MIN            = 140;                          // 218 -> 150?
+uint8_t     AR_FILTER_CR_MAX            = 177;                          // 240 -> 255?
+/*
 uint8_t 	AR_FILTER_Y_MIN 			= 31;                           // 0  [0,65 84,135 170,255]zoo 45
 uint8_t 	AR_FILTER_Y_MAX 			= 179;                          // 255
 uint8_t 	AR_FILTER_CB_MIN 			= 101;                          // 84
 uint8_t 	AR_FILTER_CB_MAX 			= 129;                          // 113
 uint8_t 	AR_FILTER_CR_MIN 			= 167;                          // 218 -> 150?
 uint8_t 	AR_FILTER_CR_MAX 			= 255;                          // 240 -> 255?
+*/
 uint8_t 	AR_FILTER_IMAGE_CROP_FOVY 	= 45; 		                    // Degrees
 bool 	AR_FILTER_SAVE_RESULTS 		= 0;
 double 	AR_FILTER_CROP_X 			= 1.2;
@@ -146,15 +156,26 @@ static uint16_t 	maxId 		= 0;
 Rect 			        objCrop;
 vector<Rect> 			cropAreas;
 
-static Point objCont_store[AR_FILTER_MAX_LAYERS+1];
-static unsigned int objCont_size = 0;
+static Point        objCont_store[AR_FILTER_MAX_LAYERS+1];
+static uint16_t     objCont_size = 0;
+static uint16_t     objCont_sCol = 0;
+static uint16_t     objCont_sRow = 0;
 
 vector<vector<Point> > allContours;
 vector<memoryBlock>    neighbourMem;
 vector<trackResults>   trackRes;                                    // Create empty struct _trackResults to store our neighbours in
 
+void active_random_filter_init(void){
+    AR_FILTER_MIN_LAYERS *= pow(2.0/((double) mt9f002.x_odd_inc + 1.0) * mt9f002.output_scaler,2.0);
+    VERBOSE_PRINT("Changed AR_FILTER_MIN_LAYERS to %d due to scaling (%f)",AR_FILTER_MIN_LAYERS,pow(2.0/((double) mt9f002.x_odd_inc + 1.0)*mt9f002.output_scaler,2.0));
+}
+
 void active_random_filter(char* buff, uint16_t width, uint16_t height, struct FloatEulers* eulerAngles)
 {
+    if(runCount < AR_FILTER_TIMEOUT) {
+        runCount++;
+        return;
+    }
     //("phi: %.2f  theta: %.2f  psi: %.2f\n",eulerAngles->phi * 180/M_PI,eulerAngles->theta * 180/M_PI,eulerAngles->psi * 180/M_PI);
     trackRes.clear();
     Mat sourceFrame (height, width, CV_8UC2, buff);                 // Initialize current frame in openCV (UYVY) 2 channel
@@ -236,17 +257,8 @@ void trackGreyObjects(Mat& sourceFrame, Mat& frameGrey, vector<trackResults>* tr
 #if AR_FILTER_BENCHMARK
     addBenchmark("image Thresholded");
 #endif
-    if(AR_FILTER_FLOOD_STYLE == AR_FILTER_FLOOD_CW && !AR_FILTER_CV_CONTOURS)
+    if(AR_FILTER_FLOOD_STYLE != AR_FILTER_FLOOD_CW || AR_FILTER_CV_CONTOURS)
     {
-        for(unsigned int tc=0; tc < allContours.size(); tc++)
-        {
-            VERBOSE_PRINT("Analyzing contour of length %d\n",allContours[tc].size());
-            if(allContours[tc].size() > 0)
-            {
-                addContour(allContours[tc], trackRes, (uint16_t) 0, (uint16_t) 0);
-            }
-        }
-    }else{
         vector<vector<Point> > contours;
         for(unsigned int r=0; r < cropAreas.size(); r++)
         {
@@ -456,8 +468,12 @@ void addContour(vector<Point> contour, vector<trackResults>* trackRes, uint16_t 
 			curRes.y_c 		= position[1];
 			curRes.r_c 		= position[2];
 			trackRes->push_back(curRes); 	// Save results and push into trackRes
-		}else if(AR_FILTER_SHOW_REJECT) 	VERBOSE_PRINT("Rejected. object %f, area %f, fill %f < min fill %f.\n",objArea, contArea, contArea / objArea, AR_FILTER_MAX_CIRCLE_DEF);
-	}else if(AR_FILTER_SHOW_REJECT) 	VERBOSE_PRINT("Rejected. Area %0.1f\n",contArea);
+		}else if(AR_FILTER_SHOW_REJECT) {
+		    VERBOSE_PRINT("Rejected. object %f, area %f, fill %f < min fill %f.\n",objArea, contArea, contArea / objArea, AR_FILTER_MAX_CIRCLE_DEF);
+		}
+	}else if(AR_FILTER_SHOW_REJECT){
+	    VERBOSE_PRINT("Rejected. Area %0.1f\n",contArea);
+	}
 	return;
 }
 
@@ -550,7 +566,7 @@ bool rndRedGrayscale(Mat& sourceFrame, Mat& destFrame, uint16_t sampleSize)
 				uint8_t searchPoints = 17;
 				Point searchGrid[searchPoints];
 				bool foundObj       = false; // We're pessimistic that we can find the same object
-				uint16_t sGridSize  =  sqrt(neighbourMem[rnm].area_p / M_PI);
+				uint16_t sGridSize  =  0.5 * sqrt(neighbourMem[rnm].area_p / M_PI);
 
 				searchGrid[0]   = Point(neighbourMem[rnm].y_p,                neighbourMem[rnm].x_p - cropCol);
 				searchGrid[1]   = Point(neighbourMem[rnm].y_p,                neighbourMem[rnm].x_p - cropCol + sGridSize);
@@ -578,21 +594,18 @@ bool rndRedGrayscale(Mat& sourceFrame, Mat& destFrame, uint16_t sampleSize)
 				{
 				    layerDepth = 0;
 				    if(pixFindContour(sourceFrame, destFrame, searchGrid[rsg].x, searchGrid[rsg].y, ARF_SEARCH, true) == ARF_FINISHED){
-				        foundObj = true;
-				        break;
+				        if(layerDepth > AR_FILTER_MIN_LAYERS){
+				            foundObj = true;
+				            break;
+				        }
 				    }
 				}
 				if(foundObj){
 					if(AR_FILTER_FLOOD_STYLE == AR_FILTER_FLOOD_CW && !AR_FILTER_CV_CONTOURS)
 					{
-						if(layerDepth > AR_FILTER_MIN_LAYERS)
-						{
-						    add_current_contour();
-						    VERBOSE_PRINT("Found object %d from (%d, %d) at (%d, %d)\n",neighbourMem[rnm].id, neighbourMem[rnm].x_p, neighbourMem[rnm].y_p, searchGrid[rsg].x, searchGrid[rsg].y);
-							obj_detected = true;
-						}else{
-						    VERBOSE_PRINT("Object %d from (%d, %d) at (%d, %d) now too small (%d)\n",neighbourMem[rnm].id, neighbourMem[rnm].x_p, neighbourMem[rnm].y_p, searchGrid[rsg].x, searchGrid[rsg].y, layerDepth);
-						}
+						add_current_contour();
+						VERBOSE_PRINT("Found object %d from (%d, %d) at (%d, %d)\n",neighbourMem[rnm].id, neighbourMem[rnm].x_p, neighbourMem[rnm].y_p, searchGrid[rsg].x, searchGrid[rsg].y);
+						obj_detected = true;
 					}else{
 						objCrop = enlargeRectangle(sourceFrame, objCrop, AR_FILTER_CROP_X);
 						addObject();
@@ -646,18 +659,21 @@ bool rndRedGrayscale(Mat& sourceFrame, Mat& destFrame, uint16_t sampleSize)
 					}
 					if(pixFindContour(sourceFrame, destFrame, r, c, ARF_SEARCH, true) == ARF_FINISHED)
 					{
-						if(AR_FILTER_FLOOD_STYLE == AR_FILTER_FLOOD_CW && !AR_FILTER_CV_CONTOURS)
-						{
-						    if(layerDepth > AR_FILTER_MIN_LAYERS)
-						    {
-						        add_current_contour();
-						        obj_detected = true;
-						    }
-						}else{
-							objCrop = enlargeRectangle(sourceFrame, objCrop, AR_FILTER_CROP_X);
-							addObject();
-						}
-						obj_detected = true;
+					    if(AR_FILTER_FLOOD_STYLE == AR_FILTER_FLOOD_CW && !AR_FILTER_CV_CONTOURS)
+					    {
+					        if(layerDepth > AR_FILTER_MIN_LAYERS)
+					        {
+					            if(layerDepth > AR_FILTER_MIN_LAYERS)
+					            {
+					                add_current_contour();
+					                obj_detected = true;
+					            }
+					        }
+					    }else{
+					        objCrop         = enlargeRectangle(sourceFrame, objCrop, AR_FILTER_CROP_X);
+					        obj_detected    = true;
+					        addObject();
+					    }
 					}
 				}
 			}
@@ -680,6 +696,11 @@ bool rndRedGrayscale(Mat& sourceFrame, Mat& destFrame, uint16_t sampleSize)
 					objCrop.y 		= rndRow;
 					objCrop.width 	= 0;
 					objCrop.height 	= 0;
+				}
+				for(unsigned int tr = 0; tr < trackRes.size(); tr++){
+				    if(sqrt(pow(rndCol - (trackRes[tr].x_p - cropCol),2.0)+pow(rndRow - trackRes[tr].y_p,2.0)) <= sqrt(trackRes[tr].area_p / M_PI)){
+				        continue;
+				    }
 				}
 				if(pixFindContour(sourceFrame, destFrame, rndRow, rndCol, ARF_SEARCH, true) == ARF_FINISHED)
 				{
@@ -721,9 +742,10 @@ void add_current_contour(void)
         for(unsigned int r = 0; r < objCont_size; r++){
             objCont.push_back(objCont_store[r]);
         }
+        addContour(objCont, &trackRes, (uint16_t) 0, (uint16_t) 0);
         allContours.push_back(objCont);
-        objCont_size = 0;
     }
+    objCont_size = 0;
 }
 
 void add_point_to_contour(uint16_t row, uint16_t col, uint8_t prevDir)
@@ -751,18 +773,22 @@ int pixFindContour(Mat& sourceFrame, Mat& destFrame, uint16_t row, uint16_t col,
 	}
 	if(destFrame.at<uint8_t>(row, col) == 75  && prevDir != ARF_SEARCH)
 	{
-	    if(layerDepth > AR_FILTER_MIN_LAYERS){
-	        destFrame.at<uint8_t>(row, col) = 255;
-	        add_point_to_contour(row,col,prevDir);
-	        //VERBOSE_PRINT("ARF_FINISHED back at startpos (%d, %d) after %d pixels\n",row, col, layerDepth);
-	        pixSucCount++;
-	        return ARF_FINISHED;
-	    }
-	    else{
-	        //VERBOSE_PRINT("ARF_NO_FOUND back at startpos (%d, %d) after only %d pixels\n",row, col, layerDepth);
-	        pixNofCount++;
-	        objCont_size = 0;
-	        return ARF_FINISHED;
+	    if (abs(col - objCont_sCol) <= 1 && abs(row - objCont_sRow) <= 1){
+	        if(layerDepth > AR_FILTER_MIN_LAYERS){
+	            destFrame.at<uint8_t>(row, col) = 255;
+	            add_point_to_contour(row,col,prevDir);
+	            VERBOSE_PRINT("ARF_FINISHED back at (%d, %d) near startpos (%d, %d) after %d pixels\n",row, col, objCont_sRow, objCont_sCol, layerDepth);
+	            pixSucCount++;
+	            return ARF_FINISHED;
+	        }
+	        else{
+	            VERBOSE_PRINT("ARF_NO_FOUND back at (%d, %d) near startpos (%d, %d) after only %d pixels\n",row, col, objCont_sRow, objCont_sCol, layerDepth);
+	            pixNofCount++;
+	            objCont_size = 0;
+	            return ARF_FINISHED;
+	        }
+	    }else{
+	        VERBOSE_PRINT("Found different starting position at (%d, %d) iso startpos (%d, %d) diff (%d, %d) after %d pixels\n",row, col, objCont_sRow, objCont_sCol, abs(col - objCont_sCol), abs(row - objCont_sRow), layerDepth);
 	    }
 	}
 	if((destFrame.at<uint8_t>(row, col) >= 75 && prevDir == ARF_SEARCH) || (AR_FILTER_FLOOD_STYLE == AR_FILTER_FLOOD_OMNI && destFrame.at<uint8_t>(row, col) == 255))
@@ -845,6 +871,11 @@ int pixFindContour(Mat& sourceFrame, Mat& destFrame, uint16_t row, uint16_t col,
 					newRow = row;
 					newCol = col;
 					getNewPosition(nextDir[d], &newRow, &newCol);
+					if(prevDir == ARF_SEARCH && d == 1){
+					    objCont_sCol = newCol;
+					    objCont_sRow = newRow;
+					    objCont_size = 0;
+					}
 					if(newRow < sourceFrame.rows && newCol < sourceFrame.cols)
 					{
 					    switch(pixFindContour(sourceFrame, destFrame, newRow, newCol, nextDir[d], true)) // Catch the proper response for the tested pixel
@@ -1118,9 +1149,9 @@ void getNewPosition(uint8_t nextDir, uint16_t* newRow, uint16_t* newCol)
 #if AR_FILTER_MOD_VIDEO
 void mod_video(Mat& sourceFrame, Mat& frameGrey)
 {
-	char text[15];
+	char text[200];
 #if AR_FILTER_MEASURE_FPS
-	sprintf(text,"%0.2f", runCount / ((double) curT));
+	sprintf(text,"%0.2f %5.d %0.0fs", (runCount - AR_FILTER_TIMEOUT) / ((double) curT),(runCount - AR_FILTER_TIMEOUT),((double) curT));
 #else
 	sprintf(text,"frame %i", runCount);
 #endif // AR_FILTER_MEASURE_FPS
@@ -1155,7 +1186,17 @@ void mod_video(Mat& sourceFrame, Mat& frameGrey)
 		circle(sourceFrame,cvPoint(trackRes[r].x_p - cropCol, trackRes[r].y_p), sqrt(trackRes[r].area_p / M_PI), cvScalar(0,255), 2);
 	}
 #endif // AR_FILTER_DRAW_CONTOURS
-	putText(sourceFrame, text, Point(10,sourceFrame.rows-40), FONT_HERSHEY_SIMPLEX, 1, Scalar(0,255,255), 2);
+	putText(sourceFrame, text, Point(10,sourceFrame.rows-20), FONT_HERSHEY_PLAIN, 1, Scalar(0,255,255), 2);
+	for(unsigned int r=0; r < trackRes.size(); r++)         // Convert angles & Write/Print output
+	{
+	    sprintf(text,"x:%5.2f y:%5.2f", trackRes[r].x_w, trackRes[r].y_w);
+	    putText(sourceFrame, text, Point(10,20+r*20), FONT_HERSHEY_PLAIN, 1, Scalar(0,255,255), 2);
+	}
+	sprintf(text,"t:%4.1f%% o:%4.1f%%", pixCount/((float) ispHeight * ispWidth) * 100, pixSucCount/((float) pixCount) * 100);
+	putText(sourceFrame, text, Point(10,sourceFrame.rows-60), FONT_HERSHEY_PLAIN, 1, Scalar(0,255,255), 2);
+	sprintf(text,"d:%4.1f%% n:%4.1f%% s:%4.1f%%", pixDupCount/((float) pixCount) * 100, pixNofCount/((float) pixCount) * 100, pixSrcCount/((float) pixCount) * 100);
+	putText(sourceFrame, text, Point(10,sourceFrame.rows-40), FONT_HERSHEY_PLAIN, 1, Scalar(0,255,255), 2);
+
 	line(sourceFrame, Point(0,0), Point(0, sourceFrame.rows-1), Scalar(0,255), 2);
 	line(sourceFrame, Point(sourceFrame.cols - 1,0), Point(sourceFrame.cols - 1, sourceFrame.rows-1), Scalar(0,255), 2);
 }
@@ -1280,13 +1321,13 @@ void saveBuffer(Mat sourceFrame, const char *filename)
 void active_random_filter_header(void)
 {
 #if AR_FILTER_MEASURE_FPS
-    if(runCount == 0)
+    if(runCount == AR_FILTER_TIMEOUT)
     {
         startTime       = time(0);
     }else{
         currentTime     = time(0);                                              // Get the current time
         curT            = difftime(currentTime,startTime);                      // Calculate time-difference between startTime and currentTime
-        PRINT("Measured FPS: %0.2f\n", runCount / ((double) curT));
+        VERBOSE_PRINT("Measured FPS: %0.2f\n", (runCount - AR_FILTER_TIMEOUT) / ((double) curT));
     }
 #endif
     if(!AR_FILTER_CV_CONTOURS && AR_FILTER_FLOOD_STYLE != AR_FILTER_FLOOD_CW)
