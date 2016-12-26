@@ -38,13 +38,13 @@
     <module name="cv_opticflow">
       <define name="OPTICFLOW_CAMERA" value="bottom_camera"/>
     </module>
-
+  
     <module name="video_capture">
       <define name="VIDEO_CAPTURE_CAMERA" value="bottom_camera"/>
       <define name="VIDEO_CAPTURE_PATH" value="/data/ftp/internal_000/images"/>
     </module>
 
-    <!--module name="opticflow_hover"/-->
+    <module name="optical_flow_landing"/>
   </modules>
 
   <commands>
