@@ -50,7 +50,7 @@ using namespace cv;
 extern struct mt9f002_t mt9f002;
 
 #define AR_FILTER_CV_CONTOURS   0 // Use opencv to detect contours
-#define AR_FILTER_ISP_CROP      0 // Use the ISP to crop the frame according to FOV-Y
+#define AR_FILTER_ISP_CROP      1 // Use the ISP to crop the frame according to FOV-Y
 #define AR_FILTER_SHOW_REJECT   0 // Print why shapes are rejected
 #define AR_FILTER_MOD_VIDEO     1 // Modify the frame to show relevant info
 #define AR_FILTER_DRAW_CONTOURS 1 // Use drawContours function iso circle
@@ -230,7 +230,7 @@ Rect setISPvars(struct FloatEulers* eulerAngles, uint16_t width, uint16_t height
         if((desOffset & 1) != 0)                desOffset--;
 #if AR_FILTER_ISP_CROP
         cropCol                 = 0;
-        mt9f002.offset_x        = MT9F002_INITIAL_OFFSET_X + desOffset;
+        mt9f002.offset_x        = MT9F002_INITIAL_OFFSET_X + desOffset / ispScalar;
         mt9f002.output_width    = desHeight / ispScalar;
         Rect crop               = cvRect(0,0,width,height);
         mt9f002_set_resolution(&mt9f002);

@@ -145,7 +145,7 @@ struct libisp_config isp_config = {
     .circle_pos_y_center   = {{ CAMERA_H_FISHEYE_CENTER_Y }},
     .circle_pos_y_squared  = {{ CAMERA_H_FISHEYE_CENTER_Y * CAMERA_H_FISHEYE_CENTER_Y }},
     .circle_radius_squared = {{ CAMERA_H_FISHEYE_RADIUS * CAMERA_H_FISHEYE_RADIUS}},
-    .increments_log2       = {{ 2, 2}},
+    .increments_log2       = {{ 8, 8}},
     .sat_threshold         = {{ 980 }}, //1022 - pedestal
     .cfa                   = {{ ISP_CFA }},
     .max_nb_windows        = {{ .x_window_count=BAYERSTATS_STATX, .y_window_count=BAYERSTATS_STATY }},
@@ -465,7 +465,7 @@ struct libisp_config isp_config = {
     .circle_pos_y_center   = {{ CAMERA_H_FISHEYE_CENTER_Y }},
     .circle_pos_y_squared  = {{ CAMERA_H_FISHEYE_CENTER_Y * CAMERA_H_FISHEYE_CENTER_Y }},
     .circle_radius_squared = {{ CAMERA_H_FISHEYE_RADIUS * CAMERA_H_FISHEYE_RADIUS }},
-    .increments_log2       = {{ 2, 2 }},
+    .increments_log2       = {{ 8, 8 }},
     .awb_threshold         = { ._register = 0x00000021 },
   },
 
