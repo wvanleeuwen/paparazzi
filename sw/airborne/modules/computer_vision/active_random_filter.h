@@ -51,14 +51,14 @@ typedef struct _memBlock {
 } memoryBlock;
 
 extern uint8_t 		AR_FILTER_GREY_THRESHOLD;
-extern uint8_t 		AR_FILTER_IMAGE_CROP_FOVY;
+extern double 		AR_FILTER_IMAGE_CROP_FOVY;
 extern uint16_t     AR_FILTER_RND_PIX_SAMPLE;
 extern uint8_t 		AR_FILTER_Y_MIN;
 extern uint8_t 		AR_FILTER_Y_MAX;
-extern uint8_t 		AR_FILTER_CB_MIN;
-extern uint8_t 		AR_FILTER_CB_MAX;
-extern uint8_t 		AR_FILTER_CR_MIN;
-extern uint8_t 		AR_FILTER_CR_MAX;
+extern uint8_t 		AR_FILTER_U_MIN;
+extern uint8_t 		AR_FILTER_U_MAX;
+extern uint8_t 		AR_FILTER_V_MIN;
+extern uint8_t 		AR_FILTER_V_MAX;
 extern uint8_t		AR_FILTER_SAMPLE_STYLE;
 extern uint8_t 		AR_FILTER_FLOOD_STYLE;
 

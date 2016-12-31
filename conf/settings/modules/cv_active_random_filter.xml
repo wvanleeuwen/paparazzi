@@ -5,10 +5,10 @@
       <!-- <dl_setting var="AR_FILTER_RND_PIX_SAMPLE"  min="1000" step="100" 	max="25000" module="computer_vision/active_random_filter" shortname="Filter sample size"/>  -->
       <dl_setting var="AR_FILTER_Y_MIN"          min="0" 	step="1" 	max="255" 	module="computer_vision/active_random_filter" shortname="Y min"/>
 	  <dl_setting var="AR_FILTER_Y_MAX"          min="0" 	step="1" 	max="255" 	module="computer_vision/active_random_filter" shortname="Y max"/>
-	  <dl_setting var="AR_FILTER_CB_MIN"         min="0" 	step="1" 	max="255" 	module="computer_vision/active_random_filter" shortname="Cb min"/>
-	  <dl_setting var="AR_FILTER_CB_MAX"         min="0" 	step="1" 	max="255" 	module="computer_vision/active_random_filter" shortname="Cb max"/>
-	  <dl_setting var="AR_FILTER_CR_MIN"         min="0" 	step="1" 	max="255" 	module="computer_vision/active_random_filter" shortname="Cr min"/>
-	  <dl_setting var="AR_FILTER_CR_MAX"         min="0" 	step="1" 	max="255" 	module="computer_vision/active_random_filter" shortname="Cr max"/>
+	  <dl_setting var="AR_FILTER_U_MIN"         min="0" 	step="1" 	max="255" 	module="computer_vision/active_random_filter" shortname="U min"/>
+	  <dl_setting var="AR_FILTER_U_MAX"         min="0" 	step="1" 	max="255" 	module="computer_vision/active_random_filter" shortname="U max"/>
+	  <dl_setting var="AR_FILTER_V_MIN"         min="0" 	step="1" 	max="255" 	module="computer_vision/active_random_filter" shortname="V min"/>
+	  <dl_setting var="AR_FILTER_V_MAX"         min="0" 	step="1" 	max="255" 	module="computer_vision/active_random_filter" shortname="V max"/>
       <dl_setting var="AR_FILTER_IMAGE_CROP_FOVY" min="1" 	step="1" 	max="145" 	module="computer_vision/active_random_filter" shortname="Vertical FOV clipping"/> 	
     </dl_settings>
   </dl_settings>

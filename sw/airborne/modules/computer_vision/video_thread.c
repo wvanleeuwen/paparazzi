@@ -168,7 +168,9 @@ static void *video_thread_function(void *data)
     cv_run_device(vid, img_final);
 
     // Free the image
+#if !H264_ROTATE
     v4l2_image_free(vid->thread.dev, &img);
+#endif
   }
 
   image_free(&img_color);

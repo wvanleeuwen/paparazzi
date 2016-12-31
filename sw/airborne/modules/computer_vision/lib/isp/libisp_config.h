@@ -43,11 +43,11 @@ struct libisp_config isp_config = {
   /* Don't bypass a bayer function */
   .bayer_inter = {{
       .pedestal_bypass     = 0,//0
-      .grim_bypass         = 1,
+      .grim_bypass         = 0,
       .rip_bypass          = 1,
       .denoise_bypass      = 0,//0
       .lsc_bypass          = 0,//0
-      .chroma_aber_bypass  = 1,
+      .chroma_aber_bypass  = 0,
       .bayer_bypass        = 0,//0
       .color_matrix_bypass = 0,//0
   }},
@@ -145,7 +145,7 @@ struct libisp_config isp_config = {
     .circle_pos_y_center   = {{ CAMERA_H_FISHEYE_CENTER_Y }},
     .circle_pos_y_squared  = {{ CAMERA_H_FISHEYE_CENTER_Y * CAMERA_H_FISHEYE_CENTER_Y }},
     .circle_radius_squared = {{ CAMERA_H_FISHEYE_RADIUS * CAMERA_H_FISHEYE_RADIUS}},
-    .increments_log2       = {{ 8, 8}},
+    .increments_log2       = {{ 4, 4}},
     .sat_threshold         = {{ 980 }}, //1022 - pedestal
     .cfa                   = {{ ISP_CFA }},
     .max_nb_windows        = {{ .x_window_count=BAYERSTATS_STATX, .y_window_count=BAYERSTATS_STATY }},
@@ -160,10 +160,10 @@ struct libisp_config isp_config = {
     .cell_h      = {{ 274 }},
     .cell_w_inv  = {{ 455 }},
     .cell_h_inv  = {{ 478 }},
-    .alpha       = {{ 58254 }},
-    .beta        = {{ 34442 }},
+    .alpha       = {{ 0 }},
+    .beta        = {{ 0 }},
     .threshold   = {{ .threshold_r=981, .threshold_g=981, .threshold_b=981 }}, // 1023 - pedestal
-    .gain        = {{ .gain_r = 1<<8, .gain_g = 1<<8, .gain_b = 1<<8 }}, // For AWB
+    .gain        = {{ .gain_r = 386, .gain_g = 256, .gain_b = 318 }}, // For AWB
   },
 
   .lsc_red_coeffs = {
@@ -221,22 +221,22 @@ struct libisp_config isp_config = {
   },
 
   /* Chromatic abberation (For now just bypass as it has too many difficult registers to set) */
-  /*.chromatic_aberration = {
+  /*
+    .chromatic_aberration = {
     .circle_pos_x_center = {{ 2356 }},
     .circle_pos_x_squared = {{ 5550736 }},
     .circle_pos_y_center = {{ 1585 }},
     .circle_pos_y_squared = {{ 2512225 }},
     .cfa = {{ ISP_CFA }},
     .green_variation = {{ 1 }},
-    .increments_log2 = {{ .x_log2_inc=2, .y_log2_inc=2 }},
-  },
-  */
+    .increments_log2 = {{ .x_log2_inc=4, .y_log2_inc=4 }},
+  },*/
 
   /* Demosaicking */
   .bayer = {
     .cfa         = {{ ISP_CFA }}, /* GRGB (top left to bottom right order) */
-    .threshold_1 = {{   25 }}, /* Lower threshold */
-    .threshold_2 = {{  200 }}, /* Upper threshold */
+    .threshold_1 = {{   20 }}, /* Lower threshold */
+    .threshold_2 = {{  500 }}, /* Upper threshold */
   },
 
   /* Color correction */
@@ -465,8 +465,8 @@ struct libisp_config isp_config = {
     .circle_pos_y_center   = {{ CAMERA_H_FISHEYE_CENTER_Y }},
     .circle_pos_y_squared  = {{ CAMERA_H_FISHEYE_CENTER_Y * CAMERA_H_FISHEYE_CENTER_Y }},
     .circle_radius_squared = {{ CAMERA_H_FISHEYE_RADIUS * CAMERA_H_FISHEYE_RADIUS }},
-    .increments_log2       = {{ 8, 8 }},
-    .awb_threshold         = { ._register = 0x00000021 },
+    .increments_log2       = {{ 4, 4 }},
+    .awb_threshold         = {{ 33 }},
   },
 
   /* Edge enhancement + Color reduction filter */
@@ -478,7 +478,8 @@ struct libisp_config isp_config = {
   },
 
   .eecrf_lut = {
-    .ee_lut = {
+     /* Office
+     .ee_lut = {
      {{ 0}},  {{ 0}},  {{ 0}},  {{ 0}},  {{ 0}},  {{ 0}},  {{ 0}},  {{ 0}},  {{ 0}},  {{ 0}},
      {{ 0}},  {{ 0}},  {{ 0}},  {{ 0}},  {{ 0}},  {{ 0}},  {{ 1}},  {{ 1}},  {{ 1}},  {{ 1}},
      {{ 1}},  {{ 1}},  {{ 2}},  {{ 2}},  {{ 2}},  {{ 2}},  {{ 2}},  {{ 3}},  {{ 3}},  {{ 3}},
@@ -505,6 +506,35 @@ struct libisp_config isp_config = {
      {{14}},  {{14}},  {{14}},  {{14}},  {{14}},  {{14}},  {{14}},  {{14}},  {{14}},  {{14}},
      {{14}},  {{14}},  {{14}},  {{14}},  {{14}},  {{14}},  {{14}},  {{14}},  {{13}},  {{13}},
      {{12}},  {{11}},  {{ 8}},  {{ 6}},  {{ 3}},  {{ 1}}
+    }*/
+    /* Cloudy */
+    .ee_lut = {
+            {{0}}, {{ 0}}, {{ 0}}, {{ 0}}, {{ 0}}, {{ 0}}, {{ 0}}, {{ 0}}, {{ 0}}, {{ 1}},
+            {{1}}, {{ 1}}, {{ 1}}, {{ 2}}, {{ 2}}, {{ 2}}, {{ 2}}, {{ 3}}, {{ 3}}, {{ 3}},
+            {{4}}, {{ 4}}, {{ 4}}, {{ 4}}, {{ 5}}, {{ 5}}, {{ 5}}, {{ 5}}, {{ 6}}, {{ 6}},
+            {{6}}, {{ 6}}, {{ 7}}, {{ 7}}, {{ 7}}, {{ 8}}, {{ 8}}, {{ 8}}, {{ 8}}, {{ 9}},
+            {{9}}, {{ 9}}, {{ 9}}, {{10}}, {{10}}, {{10}}, {{10}}, {{11}}, {{11}}, {{11}},
+            {{11}}, {{11}}, {{11}}, {{11}}, {{11}}, {{11}}, {{11}}, {{11}}, {{11}}, {{11}},
+            {{11}}, {{11}}, {{11}}, {{11}}, {{11}}, {{11}}, {{11}}, {{11}}, {{11}}, {{11}},
+            {{11}}, {{11}}, {{11}}, {{11}}, {{11}}, {{11}}, {{11}}, {{11}}, {{11}}, {{11}},
+            {{11}}, {{11}}, {{11}}, {{11}}, {{11}}, {{11}}, {{11}}, {{11}}, {{10}}, {{10}},
+            {{10}}, {{10}}, {{10}}, {{10}}, {{10}}, {{10}}, {{10}}, {{10}}, {{10}}, {{10}},
+            {{10}}, {{10}}, {{10}}, {{10}}, {{10}}, {{10}}, {{10}}, {{10}}, {{10}}, {{10}},
+            {{10}}, {{10}}, {{10}}, {{10}}, {{10}}, {{10}}, {{10}}, {{10}}, {{10}}, {{10}},
+            {{10}}, {{10}}, {{10}}, {{10}}, {{10}}, {{10}}, {{ 9}}, {{ 9}}, {{ 9}}, {{ 9}},
+            {{9}}, {{ 9}}, {{ 9}}, {{ 9}}, {{ 9}}, {{ 9}}, {{ 9}}, {{ 9}}, {{ 9}}, {{ 9}},
+            {{9}}, {{ 9}}, {{ 9}}, {{ 9}}, {{ 9}}, {{ 9}}, {{ 9}}, {{ 9}}, {{ 9}}, {{ 9}},
+            {{9}}, {{ 9}}, {{ 9}}, {{ 9}}, {{ 9}}, {{ 9}}, {{ 9}}, {{ 9}}, {{ 9}}, {{ 9}},
+            {{9}}, {{ 9}}, {{ 9}}, {{ 8}}, {{ 8}}, {{ 8}}, {{ 8}}, {{ 8}}, {{ 8}}, {{ 8}},
+            {{8}}, {{ 8}}, {{ 8}}, {{ 8}}, {{ 8}}, {{ 8}}, {{ 8}}, {{ 8}}, {{ 8}}, {{ 8}},
+            {{8}}, {{ 8}}, {{ 8}}, {{ 8}}, {{ 8}}, {{ 8}}, {{ 8}}, {{ 8}}, {{ 8}}, {{ 8}},
+            {{8}}, {{ 8}}, {{ 8}}, {{ 8}}, {{ 8}}, {{ 8}}, {{ 8}}, {{ 8}}, {{ 8}}, {{ 7}},
+            {{7}}, {{ 7}}, {{ 7}}, {{ 7}}, {{ 7}}, {{ 7}}, {{ 7}}, {{ 6}}, {{ 6}}, {{ 6}},
+            {{6}}, {{ 6}}, {{ 6}}, {{ 6}}, {{ 6}}, {{ 5}}, {{ 5}}, {{ 5}}, {{ 5}}, {{ 5}},
+            {{5}}, {{ 5}}, {{ 4}}, {{ 4}}, {{ 4}}, {{ 4}}, {{ 4}}, {{ 4}}, {{ 3}}, {{ 3}},
+            {{3}}, {{ 3}}, {{ 3}}, {{ 3}}, {{ 3}}, {{ 3}}, {{ 2}}, {{ 2}}, {{ 2}}, {{ 2}},
+            {{2}}, {{ 2}}, {{ 2}}, {{ 1}}, {{ 1}}, {{ 1}}, {{ 1}}, {{ 1}}, {{ 1}}, {{ 0}},
+            {{0}}, {{ 0}}, {{ 0}}, {{ 0}}, {{ 0}}, {{ 0 }}
     }
   },
 
