@@ -111,9 +111,11 @@ void stereo_to_state_periodic(void)
     }
 
     //autopilot_guided_goto_body_relative(0.0, 0.0, nus_climb_cmd, 0.0)
-  } else if (stereocam_data.fresh && stereocam_data.len == 9)
+  } else if (stereocam_data.fresh && stereocam_data.len == 20)
   {
-    run_droplet((uint32_t)stereocam_data.data[0], (uint32_t)stereocam_data.data[4]);
+    //run_droplet((uint32_t)stereocam_data.data[0], (uint32_t)stereocam_data.data[4]);
+    uint32_t* buffer32 = (uint32_t*)stereocam_data.data;
+    run_droplet_low_texture(buffer32[0], buffer32[1], buffer32[2], buffer32[3], buffer32[4]);
     stereocam_data.fresh = 0;
   }
 }
