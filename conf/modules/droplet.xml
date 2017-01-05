@@ -1,0 +1,16 @@
+<!DOCTYPE module SYSTEM "module.dtd">
+
+<module name="droplet">
+  <doc>
+    <description>Droplet collision avoidance system</description>
+  </doc>
+  <header>
+    <file name="droplet.h"/>
+  </header>
+  <init fun="droplet_init()"/>
+  <periodic fun="droplet_periodic()" freq="10" autorun="TRUE"/>
+  <makefile>
+    <file name="droplet.c"/>
+  </makefile>
+</module>
+
