@@ -35,7 +35,9 @@ extern void run_droplet_low_texture(uint32_t disparities_high, uint32_t disparit
     uint32_t count_disps_left, uint32_t count_disps_right);
 
 extern uint16_t obst_thr_1;      // obstacle threshold for phase 1
-extern uint16_t disp_thr_1;      // obstacle count minimum threshold for phase 1
+extern uint16_t obst_thr_3;
+extern uint16_t obst_thr_4;      // obstacle threshold for phase 1
+extern int16_t turn_direction;
 extern float wall_following_trim;// yaw rate trim to force vehicle to follow wall
 
 #endif

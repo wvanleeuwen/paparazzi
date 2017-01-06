@@ -187,7 +187,7 @@
 		<define name="THETA_DGAIN" value="200"/>
 		<define name="THETA_IGAIN" value="800"/>
 		
-		<define name="PSI_PGAIN" value="1000"/>
+		<define name="PSI_PGAIN" value="1600"/>
 		<define name="PSI_DGAIN" value="4000"/>
 		<define name="PSI_IGAIN" value="0"/>
 		
@@ -205,13 +205,6 @@
 		<define name="USE_GPS_ALT" value="0"/>
 		<define name="USE_GPS_ALT_SPEED" value="0"/>
 	</section>
-	
-<!--	<section name="GPS" prefix="GPS_"-->
-<!--		<define name="USE_DATALINK_SMALL" value="1"/-->
-<!--		<define name="LOCAL_ECEF_ORIGIN_X" value="392433200"/-->
-<!--		<define name="LOCAL_ECEF_ORIGIN_Y" value="30036200"/-->
-<!--		<define name="LOCAL_ECEF_ORIGIN_Z" value="500219700"/-->
-<!--	</section-->
 	
 	<section name="GUIDANCE_V" prefix="GUIDANCE_V_">
 		<define name="HOVER_KP" value="276"/>

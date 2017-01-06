@@ -36,11 +36,11 @@ enum {
 };
 
 // parameter setting
-uint16_t obst_thr_1 = 60;//7;      // obstacle threshold for phase 1
+uint16_t obst_thr_1 = 120;//7;      // obstacle threshold for phase 1
 uint16_t disp_thr_1 = 5;//10;     // obstacle count minimum threshold for phase 1
 uint32_t obst_wait_2 = 3000;  // -->1800<-- wait time for phase 2
-uint16_t obst_thr_3 = 10;     // obstacle threshold for phase 3
-uint16_t obst_thr_4 = 10;     // obstacle threshold for phase 4
+uint16_t obst_thr_3 = 40;     // obstacle threshold for phase 3
+uint16_t obst_thr_4 = 40;     // obstacle threshold for phase 4
 uint16_t obst_wait_4 = 500;   // wait time for phase 4
 
 uint16_t obst_cons_1 = 3;     // obstacle consistency threshold for phase 1
@@ -51,37 +51,33 @@ uint16_t obst_cons_5 = 2;     // obstacle consistency threshold for phase 4
 uint16_t obst_count_1 = 0;    // counter for sequential obstacle detections in phase 1
 uint16_t obst_free_3 = 0;     // counter for sequential no-obstacle detections in phase 3
 uint16_t obst_dect_4 = 0;     // counter for sequential obstacle detections in phase 4
-uint32_t obst_time = 0;       // timer for phase 2 and 4
+float obst_time = 0;       // timer for phase 2 and 4
 
 uint8_t droplet_state = DROPLET_UNDEFINED;
 uint32_t prev_time = 0;
-uint32_t passed_time = 0;     // in milliseconds
 
-float wall_following_trim = -0.1;   // yaw rate trim to force vehicle to follow wall
+float wall_following_trim = -0.2;   // yaw rate trim to force vehicle to follow wall
+int16_t turn_direction = -1;
 
 void droplet_init(void)
 {
 }
 
-/* radio switch */
-uint8_t droplet_active = 0;
-
 /* Set turn command based on current droplet state
  *
  */
 void droplet_periodic(void){
-  if (radio_control.values[5] < -1000){ droplet_active = 1;} // this should be ELEV D/R
-  else {droplet_active = 0;}
+  if (radio_control.values[5] < 0){nus_turn_cmd = 0; return;} // this should be ELEV D/R
 
   switch(droplet_state){
     case DROPLET_UNOBSTRUCTED:
-      nus_turn_cmd = droplet_active*wall_following_trim*MAX_PPRZ; // go slight left to follow wall
+      nus_turn_cmd = (int16_t)(wall_following_trim * turn_direction * MAX_PPRZ / STABILIZATION_ATTITUDE_SP_MAX_R); // go slight left to follow wall
       break;
     case DROPLET_WAIT_AFTER_DETECTION:
       nus_turn_cmd = 0; // go straight
       break;
     case DROPLET_AVOID:
-      nus_turn_cmd = droplet_active*MAX_PPRZ/3; // avoid right
+      nus_turn_cmd =  1 * turn_direction * MAX_PPRZ / STABILIZATION_ATTITUDE_SP_MAX_R; // avoid right with 1. m/s
       break;
     case DROPLET_UNDEFINED:
       nus_turn_cmd = 0; // go straight until we are sure there are no obstacles
@@ -99,8 +95,6 @@ void droplet_periodic(void){
  */
 void run_droplet(uint32_t disparities_total, uint32_t disparities_high)
 {
-  passed_time = 1000*(sys_time.nb_tick - obst_time) / sys_time.cpu_ticks_per_sec;
-
   // Control logic
   switch(droplet_state){
     case DROPLET_UNOBSTRUCTED: // DROPLET_UNOBSTRUCTED flight
@@ -113,11 +107,11 @@ void run_droplet(uint32_t disparities_total, uint32_t disparities_high)
       if (obst_count_1 > obst_cons_1) { // if true, obstacle is consistent
         droplet_state = DROPLET_WAIT_AFTER_DETECTION;
         obst_count_1 = 0; // set zero for later
-        obst_time = sys_time.nb_tick;
+        obst_time = get_sys_time_float();
       }
       break;
     case DROPLET_WAIT_AFTER_DETECTION: // obstacle detected, wait for action
-      if (passed_time > obst_wait_2) {
+      if (1000*(get_sys_time_float() - obst_time) > obst_wait_2) {
         droplet_state = DROPLET_AVOID;
       }
       break;
@@ -131,7 +125,7 @@ void run_droplet(uint32_t disparities_total, uint32_t disparities_high)
       if (obst_free_3 > obst_cons_3) { // if true, consistently no obstacles
         droplet_state = DROPLET_UNDEFINED;
         obst_free_3 = 0; // set zero for later
-        obst_time = sys_time.nb_tick;
+        obst_time = get_sys_time_float();
       }
       break;
     case DROPLET_UNDEFINED: // fly straight, but be aware of undetected obstacles
@@ -144,7 +138,7 @@ void run_droplet(uint32_t disparities_total, uint32_t disparities_high)
       if (obst_dect_4 > obst_cons_5) { // if true, obstacle is consistent
         droplet_state = DROPLET_AVOID; // go back to droplet_state 3
         obst_dect_4 = 0; // set zero for later
-      } else if (passed_time > obst_wait_4) {
+      } else if (1000*(get_sys_time_float() - obst_time) > obst_wait_4) {
         droplet_state = DROPLET_UNOBSTRUCTED;
         obst_dect_4 = 0;
       }
@@ -162,7 +156,8 @@ void run_droplet(uint32_t disparities_total, uint32_t disparities_high)
 void run_droplet_low_texture(uint32_t disparities_high, uint32_t disparities_total, uint32_t histogram_obs,
     uint32_t count_disps_left, uint32_t count_disps_right)
 {
-  passed_time = 1000*(sys_time.nb_tick - obst_time) / sys_time.cpu_ticks_per_sec;
+  nus_climb_cmd = histogram_obs;
+  nus_gate_heading = droplet_state;
 
   // => max_Y = 500 mm
   // 35 too sensitive, many turns
@@ -179,7 +174,6 @@ void run_droplet_low_texture(uint32_t disparities_high, uint32_t disparities_tot
     case DROPLET_UNOBSTRUCTED: // unobstructed flight
       if (histogram_obs > obst_thr_1 || count_disps_left < disp_thr_1 || count_disps_right < disp_thr_1 ) { // if true, obstacle in sight
         droplet_state = DROPLET_AVOID;
-        obst_time =  sys_time.nb_tick;
       }
       break;
     case DROPLET_AVOID: // avoid
@@ -192,7 +186,7 @@ void run_droplet_low_texture(uint32_t disparities_high, uint32_t disparities_tot
       if (obst_free_3 > obst_cons_3) { // if true, consistently no obstacles
         droplet_state = DROPLET_UNDEFINED;
         obst_free_3 = 0; // set zero for later
-        obst_time =  sys_time.nb_tick;
+        obst_time = get_sys_time_float();
       }
       break;
     case DROPLET_UNDEFINED: // fly straight, but be aware of undetected obstacles
@@ -205,7 +199,7 @@ void run_droplet_low_texture(uint32_t disparities_high, uint32_t disparities_tot
       if (obst_dect_4 > obst_cons_5) { // if true, obstacle is consistent
         droplet_state = DROPLET_AVOID; // go back to phase 3
         obst_dect_4 = 0; // set zero for later
-      } else if (passed_time > obst_wait_4) {
+      } else if (1000*(get_sys_time_float() - obst_time) > obst_wait_4) {
         droplet_state = DROPLET_UNOBSTRUCTED;
         obst_dect_4 = 0;
       }
