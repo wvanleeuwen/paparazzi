@@ -67,11 +67,7 @@ struct OpticalFlowLanding {
 
 extern struct OpticalFlowLanding of_landing_ctrl;
 
-// arrays containing histories for determining covariance
-float thrust_history[COV_WINDOW_SIZE];
-float divergence_history[COV_WINDOW_SIZE];
-float past_divergence_history[COV_WINDOW_SIZE];
-unsigned long ind_hist;
+
 
 // Without optitrack set to: GUIDANCE_H_MODE_ATTITUDE
 // With optitrack set to: GUIDANCE_H_MODE_HOVER / NAV

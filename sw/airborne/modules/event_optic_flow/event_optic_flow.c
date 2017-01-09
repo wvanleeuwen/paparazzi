@@ -42,7 +42,7 @@
 
 #include "paparazzi.h"
 #include "firmwares/rotorcraft/stabilization.h"
-#include "firmwares/rotorcraft/guidance/guidance_v.h"
+//#include "firmwares/rotorcraft/guidance/guidance_v.h"
 
 
 #ifndef DVS_PORT
@@ -115,6 +115,10 @@ PRINT_CONFIG_VAR(EOF_DIVERGENCE_CONTROL_USE_VISION)
 
 #define IR_LEDS_SWITCH 0
 
+#ifndef OPTICFLOW_SENDER_ID
+#define OPTICFLOW_SENDER_ID 1
+#endif
+
 /**************
  * DEFINITIONS *
  ***************/
@@ -156,7 +160,7 @@ const float CONTROL_CONFIDENCE_LIMIT = 0.2f;
 const float CONTROL_CONFIDENCE_MAX_DT = 0.2f;
 
 // SWITCH THIS ON TO ENABLE CONTROL THROTTLE
-const bool ASSIGN_CONTROL = true;
+const bool ASSIGN_CTRL = false; //TODO Strange, had to rename this to make code compatible with optical_flow_landing
 
 // Camera intrinsic parameters
 const struct cameraIntrinsicParameters dvs128Intrinsics = {
@@ -242,7 +246,16 @@ void event_optic_flow_periodic(void) {
     // Assign timestamp to last update
     eofState.field.t = currentTime;
     // Allow controller to update
-    eofState.divergenceUpdated = true;
+//    eofState.divergenceUpdated = true;
+    uint32_t now_ts = get_sys_time_usec();
+    AbiSendMsgOPTICAL_FLOW(OPTICFLOW_SENDER_ID, now_ts,
+        0,//FIXME only divergence is sent now
+        0,
+        0,
+        0,
+        0,
+        eofState.field.D,
+        0.0);
   }
   // Set  status globally
   eofState.status = status;
@@ -307,30 +320,31 @@ void event_optic_flow_stop(void) {
   //TODO is now present as dummy, may be removed if not required
 }
 
-/******************************
+/*******************************
  * VERTICAL GUIDANCE FUNCTIONS *
- ******************************/
-void guidance_v_module_init() {
+ *******************************/
+/*
+void UNUSED_guidance_v_module_init() {
   //TODO is this part necessary?
   divergenceControlReset();
   eofState.nominalThrottleEnter = guidance_v_nominal_throttle * MAX_PPRZ;
   eofState.controlThrottleLast = eofState.nominalThrottleEnter; // set to nominal
 }
 
-void guidance_v_module_enter() {
+void UNUSED_guidance_v_module_enter() {
   divergenceControlReset();
 }
 
-void guidance_v_module_run(bool in_flight) {
+void UNUSED_guidance_v_module_run(bool in_flight) {
   if (!in_flight) {
     // When not flying and in mode module:
     // Reset state
     divergenceControlReset();
   }
   else {
-    /*
-     * UPDATE
-     */
+
+     // UPDATE
+
     if (divergenceControlUseVision) {
       // Use latest divergence estimate
       if (eofState.divergenceUpdated) {
@@ -369,9 +383,8 @@ void guidance_v_module_run(bool in_flight) {
     float divergenceLimit = 1.5;
     Bound(eofState.divergenceControlLast, -divergenceLimit, divergenceLimit);
 
-    /*
-     * CONTROL
-     */
+    // CONTROL
+
     int32_t nominalThrottle = eofState.nominalThrottleEnter;
 
     // landing indicates whether the drone is already performing a final landing procedure (flare):
@@ -393,17 +406,17 @@ void guidance_v_module_run(bool in_flight) {
     }
     eofState.controlThrottleLast = thrust;
 
-    /*} else {
-      // land with constant fraction of nominal thrust:
-      int32_t thrust = LANDING_THRUST_FRACTION * nominalThrottle;
-      Bound(thrust, 0.6 * nominalThrottle, 0.8 * MAX_PPRZ);
-      if (ASSIGN_CONTROL) {
-        stabilization_cmd[COMMAND_THRUST] = thrust;
-      }
-      eofState.controlThrottleLast = thrust;
-    }*/
+//    } else {
+//      // land with constant fraction of nominal thrust:
+//      int32_t thrust = LANDING_THRUST_FRACTION * nominalThrottle;
+//      Bound(thrust, 0.6 * nominalThrottle, 0.8 * MAX_PPRZ);
+//      if (ASSIGN_CONTROL) {
+//        stabilization_cmd[COMMAND_THRUST] = thrust;
+//      }
+//      eofState.controlThrottleLast = thrust;
+//    }
   }
-}
+}*/
 
 /***********************
  * SUPPORTING FUNCTIONS
@@ -495,8 +508,8 @@ static void sendFlowFieldState(struct transport_tx *trans, struct link_device *d
   float wy = eofState.field.wy;
   float D  = eofState.field.D;
   float p = eofState.ratesMA.p;
-  //float q = eofState.ratesMA.q;
-  float q = eofState.divergenceControlLast;
+  float q = eofState.ratesMA.q;
+  //float q = eofState.divergenceControlLast;
   float wxTruth = eofState.wxTruth;
   float wyTruth = eofState.wyTruth;
   float DTruth = eofState.DTruth;

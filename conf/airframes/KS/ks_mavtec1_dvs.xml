@@ -48,10 +48,11 @@
       <define name="HS_LOG_SPI_DEV" value="SPI1"/>
       <define name="HS_LOG_SPI_SLAVE_IDX" value="SPI_SLAVE1"/>
     </module>
-  	<module name="event_optic_flow">
-  	  <define name="DVS_PORT" value="uart3"/>
-	  <define name="EOF_DIVERGENCE_CONTROL_PGAIN" value="0.1"/>
-  	</module>
+    <module name="event_optic_flow">
+      <define name="DVS_PORT" value="uart3"/>
+      <define name="EOF_DIVERGENCE_CONTROL_PGAIN" value="0.1"/>
+    </module>
+    <module name="optical_flow_landing"/>
   </modules>
 
   <servos driver="Pwm">

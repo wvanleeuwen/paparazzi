@@ -37,9 +37,9 @@
 #include <inttypes.h>
 #include "flow_field_estimation.h"
 
-// Guidance definitions
-#define GUIDANCE_H_MODE_MODULE_SETTING GUIDANCE_H_MODE_HOVER
-#define GUIDANCE_V_MODE_MODULE_SETTING GUIDANCE_V_MODE_MODULE
+// Guidance definitions (DISABLED: USE OPTICAL_FLOW_LANDING NOW)
+//#define GUIDANCE_H_MODE_MODULE_SETTING GUIDANCE_H_MODE_HOVER
+//#define GUIDANCE_V_MODE_MODULE_SETTING GUIDANCE_V_MODE_MODULE
 
 // Module state (extern here, since the high speed logger module uses the info in this state
 struct module_state {
@@ -83,10 +83,10 @@ extern void event_optic_flow_start(void);
 extern void event_optic_flow_periodic(void);
 extern void event_optic_flow_stop(void);
 
-// Vertical control loop functions
-extern void guidance_v_module_init(void);
-extern void guidance_v_module_enter(void);
-extern void guidance_v_module_run(bool in_flight);
+// Vertical control loop functions (DISABLED: USE OPTICAL_FLOW_LANDING NOW)
+//extern void guidance_v_module_init(void);
+//extern void guidance_v_module_enter(void);
+//extern void guidance_v_module_run(bool in_flight);
 
 #endif
 
