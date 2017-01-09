@@ -25,6 +25,7 @@
 #include "modules/event_optic_flow/event_optic_flow.h"
 #include "generated/airframe.h"
 #include "subsystems/actuators.h"
+#include "state.h"
 
 #include "subsystems/imu.h"
 #include "mcu_periph/spi.h"
@@ -86,9 +87,10 @@ void high_speed_logger_spi_link_periodic(void)
     // USES DATA FROM EVENT_OPTIC_FLOW MODULE
     // The standard data slot assignment is used, but we store data differently
     high_speed_logger_spi_link_ready = false;
-    high_speed_logger_spi_link_data.gyro_p     = eofState.ratesMA.p*1000;
-    high_speed_logger_spi_link_data.gyro_q     = eofState.ratesMA.q*1000;
-    high_speed_logger_spi_link_data.gyro_r     = eofState.ratesMA.r*1000;
+    struct FloatRates *rates = stateGetBodyRates_f();
+    high_speed_logger_spi_link_data.gyro_p     = rates->p*1000;
+    high_speed_logger_spi_link_data.gyro_q     = rates->q*1000;
+    high_speed_logger_spi_link_data.gyro_r     = rates->r*1000;
     high_speed_logger_spi_link_data.acc_x      = eofState.field.wx*1000000;
     high_speed_logger_spi_link_data.acc_y      = eofState.field.wy*1000000;
     high_speed_logger_spi_link_data.acc_z      = eofState.field.D*1000000;
