@@ -156,7 +156,7 @@ static void send_tune_hover(struct transport_tx *trans, struct link_device *dev)
 //                                      &radio_control.values[RADIO_PITCH],
                                       &radio_control.values[RADIO_YAW],
 //                                      &stabilization_cmd[COMMAND_ROLL],
-//                                      &stabilization_cmd[COMMAND_PITCH],
+                                      &stabilization_cmd[COMMAND_PITCH],
                                       &stabilization_cmd[COMMAND_YAW]);
 //                                      &stabilization_cmd[COMMAND_THRUST],
 //                                      &(stateGetNedToBodyEulers_i()->phi),
