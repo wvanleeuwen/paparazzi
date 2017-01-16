@@ -11,12 +11,11 @@
 <airframe name="MAVTec1">
 
   <firmware name="rotorcraft">
-    <target name="ap" board="lisa_m_2.0">
+    <target name="ap" board="lisa_mx_2.1">
       <module name="radio_control" type="spektrum">
         <define name="RADIO_KILL_SWITCH" value="RADIO_GEAR"/>
         <define name="RADIO_MODE" value="RADIO_AUX2"/>
       </module>
-      <configure name="NO_LUFTBOOT" value="1"/>
       <configure name="USE_BARO_BOARD" value="FALSE"/>
       <configure name="USE_MAGNETOMETER" value="0"/>
       <!-- MPU6000 is configured to output data at 2kHz, but polled at 512Hz PERIODIC_FREQUENCY -->
@@ -27,7 +26,7 @@
       <define name="SERVO_HZ"    value="400"/>
     </module>
     <module name="telemetry"     type="xbee_api"/>
-    <module name="imu"           type="aspirin_v2.2"/>
+    <module name="imu"           type="lisa_mx_v2.1"/>
     <module name="gps"           type="optitrack"/>
     <module name="stabilization" type="indi_simple"/>
     <module name="ahrs"          type="int_cmpl_quat">
