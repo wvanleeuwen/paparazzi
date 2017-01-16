@@ -94,7 +94,7 @@ void high_speed_logger_spi_link_periodic(void)
     high_speed_logger_spi_link_data.acc_x      = eofState.field.wx*1000000;
     high_speed_logger_spi_link_data.acc_y      = eofState.field.wy*1000000;
     high_speed_logger_spi_link_data.acc_z      = eofState.field.D*1000000;
-    high_speed_logger_spi_link_data.mag_x      = eofState.stats.eventRate*1000;
+    high_speed_logger_spi_link_data.mag_x      = eofState.NNew*1000;
     high_speed_logger_spi_link_data.mag_y      = eofState.z_NED*1000000;
     high_speed_logger_spi_link_data.mag_z      = eofState.field.confidence * 1000000;
     high_speed_logger_spi_link_data.phi        = eofState.wxTruth*1000000;
@@ -102,6 +102,7 @@ void high_speed_logger_spi_link_periodic(void)
     high_speed_logger_spi_link_data.psi        = eofState.DTruth *1000000;
     high_speed_logger_spi_link_data.extra1     = get_sys_time_usec()-startTime;
     high_speed_logger_spi_link_data.extra2     = eofState.controlThrottleLast;
+    high_speed_logger_spi_link_data.extra3     = eofState.moduleFrequency*1000;
 
     spi_submit(&(HIGH_SPEED_LOGGER_SPI_LINK_DEVICE), &high_speed_logger_spi_link_transaction);
   }

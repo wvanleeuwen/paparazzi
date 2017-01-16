@@ -52,6 +52,7 @@ struct module_state {
   float   moduleFrequency;
   enum    updateStatus status;
   bool    caerInputReceived;
+  int32_t NNew;
 
   bool    controlReset;
   bool    landing;

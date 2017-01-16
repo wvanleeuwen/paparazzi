@@ -71,7 +71,7 @@ PRINT_CONFIG_VAR(EOF_INLIER_MAX_DIFF)
 PRINT_CONFIG_VAR(EOF_DEROTATION_MOVING_AVERAGE_FACTOR)
 
 #ifndef EOF_MIN_EVENT_RATE
-#define EOF_MIN_EVENT_RATE 1500.0f
+#define EOF_MIN_EVENT_RATE 0.01f
 #endif
 PRINT_CONFIG_VAR(EOF_MIN_EVENT_RATE)
 
@@ -147,23 +147,23 @@ uint8_t divergenceControlUseVision = EOF_DIVERGENCE_CONTROL_USE_VISION;
 bool irLedSwitch = IR_LEDS_SWITCH;
 
 // Constants
-const int32_t MAX_NUMBER_OF_UART_EVENTS = 100;
-const float MOVING_AVERAGE_MIN_WINDOW = 5.0f;
-const uint8_t EVENT_SEPARATOR = 255;
-const float UART_INT16_TO_FLOAT = 10.0f;
-const float LENS_DISTANCE_TO_CENTER = 0.13f; // approximate distance of lens focal length to center of OptiTrack markers
-const uint32_t EVENT_BYTE_SIZE = 13; // +1 for separator
-const float inactivityDecayFactor = 0.8f;
-const float power = 1;
-const float LANDING_THRUST_FRACTION = 0.95f; //TODO find MAVTEC value
-const float CONTROL_CONFIDENCE_LIMIT = 0.2f;
-const float CONTROL_CONFIDENCE_MAX_DT = 0.2f;
+//static const int32_t MAX_NUMBER_OF_UART_EVENTS = 100;
+//static const float MOVING_AVERAGE_MIN_WINDOW = 5.0f;
+static const uint8_t EVENT_SEPARATOR = 255;
+static const float UART_INT16_TO_FLOAT = 10.0f;
+//static const float LENS_DISTANCE_TO_CENTER = 0.13f; // approximate distance of lens focal length to center of OptiTrack markers
+static const uint32_t EVENT_BYTE_SIZE = 13; // +1 for separator
+//static const float inactivityDecayFactor = 0.8f;
+static const float power = 1;
+//static const float LANDING_THRUST_FRACTION = 0.95f; //TODO find MAVTEC value
+//static const float CONTROL_CONFIDENCE_LIMIT = 0.2f;
+//static const float CONTROL_CONFIDENCE_MAX_DT = 0.2f;
 
 // SWITCH THIS ON TO ENABLE CONTROL THROTTLE
-const bool ASSIGN_CTRL = false; //TODO Strange, had to rename this to make code compatible with optical_flow_landing
+//static const bool ASSIGN_CONTROL = false; //TODO Strange, had to rename this to make code compatible with optical_flow_landing
 
 // Camera intrinsic parameters
-const struct cameraIntrinsicParameters dvs128Intrinsics = {
+static const struct cameraIntrinsicParameters dvs128Intrinsics = {
     .principalPointX = 76.70f,
     .principalPointY = 56.93f,
     .focalLengthX = 115.0f,
@@ -203,6 +203,7 @@ void event_optic_flow_start(void) {
   eofState.field = field;
   flowStatsInit(&eofState.stats);
   eofState.caerInputReceived = false;
+  eofState.NNew = 0;
 }
 
 void event_optic_flow_periodic(void) {
@@ -213,8 +214,8 @@ void event_optic_flow_periodic(void) {
   eofState.ratesMA.r += (rates->r - eofState.ratesMA.r) * derotationMovingAverageFactor;
 
   // Obtain UART data if available
-  int32_t NNew;
-  enum updateStatus status = processUARTInput(&eofState.stats, &NNew);
+  eofState.NNew = 0;
+  enum updateStatus status = processUARTInput(&eofState.stats, &eofState.NNew);
 
   // Timing bookkeeping, do this after the most uncertain computations,
   // but before operations where timing info is necessary
@@ -222,7 +223,7 @@ void event_optic_flow_periodic(void) {
   float dt = currentTime - eofState.lastTime;
   eofState.moduleFrequency = 1.0f/dt;
   eofState.lastTime = currentTime;
-  eofState.stats.eventRate = (float) NNew / dt;
+  eofState.stats.eventRate = (float) eofState.NNew / dt;
   float filterFactor = dt/filterTimeConstant;
   if (filterFactor < 0.01f) {
     filterFactor = 0.01f; // always perform a minimal update
@@ -453,8 +454,7 @@ enum updateStatus processUARTInput(struct flowStats* s, int32_t *N) {
         *N = 10;
         returnStatus = UPDATE_WARNING_RATE;
       }
-    }
-    else {
+    } else {
       if (synchronized) {
         // Next set of bytes contains a new event
         struct flowEvent e;

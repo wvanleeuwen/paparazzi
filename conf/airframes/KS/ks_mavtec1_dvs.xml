@@ -12,6 +12,8 @@
 
   <firmware name="rotorcraft">
     <target name="ap" board="lisa_m_2.0">
+
+      <define name="UART_RX_BUFFER_SIZE" value="1024" />
       <module name="radio_control" type="spektrum">
         <define name="RADIO_KILL_SWITCH" value="RADIO_GEAR"/>
         <define name="RADIO_MODE" value="RADIO_AUX2"/>
@@ -88,7 +90,7 @@
   <section name="MISC">
     <define name="NAV_CLIMB_VSPEED" value="2.5"/>
     <define name="NAV_DESCEND_VSPEED" value="-1.0"/>
-    <define name="NO_RC_THRUST_LIMIT" value="TRUE"/>
+    <define name="NO_RC_THRUST_LIMIT" value="FALSE"/>
   </section>
 
   <section name="IMU" prefix="IMU_">
