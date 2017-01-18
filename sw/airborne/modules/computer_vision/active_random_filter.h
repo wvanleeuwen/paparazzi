@@ -45,22 +45,32 @@ typedef struct _memBlock {
 	uint16_t x_p;
 	uint16_t y_p;
 	uint32_t area_p;
+	double r_c;
 	double x_w;
 	double y_w;
 	double z_w;
 } memoryBlock;
 
-extern uint8_t 		AR_FILTER_GREY_THRESHOLD;
+
 extern double 		AR_FILTER_IMAGE_CROP_FOVY;
-extern uint16_t     AR_FILTER_RND_PIX_SAMPLE;
 extern uint8_t 		AR_FILTER_Y_MIN;
 extern uint8_t 		AR_FILTER_Y_MAX;
 extern uint8_t 		AR_FILTER_U_MIN;
 extern uint8_t 		AR_FILTER_U_MAX;
 extern uint8_t 		AR_FILTER_V_MIN;
 extern uint8_t 		AR_FILTER_V_MAX;
-extern uint8_t		AR_FILTER_SAMPLE_STYLE;
-extern uint8_t 		AR_FILTER_FLOOD_STYLE;
+extern uint16_t     AR_FILTER_RND_PIX_SAMPLE;
+extern uint16_t     AR_FILTER_MIN_CROP_AREA;
+extern uint16_t     AR_FILTER_MAX_LAYERS;
+extern uint16_t     AR_FILTER_MIN_LAYERS;
+extern uint16_t     AR_FILTER_MIN_POINTS;
+extern double       AR_FILTER_MIN_CIRCLE_SIZE;
+extern double       AR_FILTER_MAX_CIRCLE_DEF;
+extern uint8_t      AR_FILTER_FLOOD_STYLE;
+extern uint8_t      AR_FILTER_SAMPLE_STYLE;
+extern uint8_t      AR_FILTER_CDIST_YTHRES;
+extern uint8_t      AR_FILTER_CDIST_UTHRES;
+extern uint8_t      AR_FILTER_CDIST_VTHRES;
 
 // Filter sample styles
 #define AR_FILTER_STYLE_FULL   0

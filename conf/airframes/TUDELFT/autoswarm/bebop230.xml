@@ -57,12 +57,12 @@
     <module name="video_thread"/>
     <module name="cv_ae_awb">
 	  <define name="CV_AE_AWB_AV" value="1" />
-	  <define name="CV_AE_AWB_VERBOSE" value="1"/>
+	  <define name="CV_AE_AWB_VERBOSE" value="0"/>
     </module>
-<!--
+
     <module name="cv_active_random_filter">
     	<define name="AR_FILTER_CAMERA" value="front_camera" />
-    </module> -->
+    </module>
 <!--
 
 	<module name="autoswarm">
@@ -78,7 +78,7 @@
 		<define name="VIEWVIDEO_SHOT_PATH" value="/data/ftp/internal_000" />
 		<define name="VIEWVIDEO_FPS" value="30" />
 		<define name="VIEWVIDEO_WRITE_VIDEO" value="FALSE"/>
-		<define name="VIEWVIDEO_VIDEO_FILE" value="fisheye_stabilization"/>
+		<define name="VIEWVIDEO_VIDEO_FILE" value="ar_filter_demo"/>
 		<define name="VIEWVIDEO_STREAM_VIDEO" value="TRUE"/>
 	</module>
   </modules>
