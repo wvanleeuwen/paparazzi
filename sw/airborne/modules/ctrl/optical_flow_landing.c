@@ -255,7 +255,7 @@ void vertical_ctrl_module_run(bool in_flight)
   if (!in_flight) {
 
     // When not flying and in mode module:
-    // Reset integrators
+    // Reset integrators, landing phases, etc.
     reset_all_vars();
 
   } else {
