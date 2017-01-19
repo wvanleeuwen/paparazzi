@@ -65,6 +65,7 @@ float elc_p_gain_start;
 // used for calculating velocity from height measurements:
 #include <time.h>
 long previous_time;
+long module_enter_time;
 
 // sending the divergence message to the ground station:
 static void send_divergence(struct transport_tx *trans, struct link_device *dev)
@@ -158,8 +159,9 @@ void vertical_ctrl_module_init(void)
   of_landing_ctrl.dgain_adaptive = 0.00;
 
   struct timespec spec;
-  clock_gettime(CLOCK_REALTIME, &spec);
-  previous_time = spec.tv_nsec / 1.0E6;
+  clock_gettime(CLOCK_MONOTONIC, &spec);
+  previous_time = spec.tv_sec * 1E3 + spec.tv_nsec / 1.0E6;
+  module_enter_time = previous_time;
   //previous_time = time(NULL);
 
   // clear histories:
@@ -215,8 +217,8 @@ void reset_all_vars()
   previous_cov_err = 0.0f;
   divergence = of_landing_ctrl.divergence_setpoint;
   struct timespec spec;
-  clock_gettime(CLOCK_REALTIME, &spec);
-  previous_time = spec.tv_nsec / 1.0E6;
+  clock_gettime(CLOCK_MONOTONIC, &spec);
+  previous_time = spec.tv_sec * 1E3 + spec.tv_nsec / 1.0E6;
   vision_message_nr = 1;
   previous_message_nr = 0;
   for (i = 0; i < COV_WINDOW_SIZE; i++) {
@@ -242,8 +244,8 @@ void vertical_ctrl_module_run(bool in_flight)
 
   // get delta time, dt, to scale the divergence measurements correctly when using "simulated" vision:
   struct timespec spec;
-  clock_gettime(CLOCK_REALTIME, &spec);
-  long new_time = spec.tv_nsec / 1.0E6;
+  clock_gettime(CLOCK_MONOTONIC, &spec);
+  long new_time = spec.tv_sec * 1E3 + spec.tv_nsec / 1.0E6;
   long delta_t = new_time - previous_time;
   dt += ((float)delta_t) / 1000.0f;
   if (dt > 10.0f) {
@@ -251,6 +253,9 @@ void vertical_ctrl_module_run(bool in_flight)
     return;
   }
   previous_time = new_time;
+  long module_active_time = new_time - module_enter_time;
+  float module_active_time_sec = (float) module_active_time / 1000.0f;
+
 
   if (!in_flight) {
 
@@ -344,6 +349,13 @@ void vertical_ctrl_module_run(bool in_flight)
 
     // landing indicates whether the drone is already performing a final landing procedure (flare):
     if (!landing) {
+
+      if(module_active_time_sec < 2.5f) {
+        // First seconds, don't do anything crazy:
+        int32_t thrust = nominal_throttle;
+        stabilization_cmd[COMMAND_THRUST] = thrust;
+        return;
+      } 
 
       if (of_landing_ctrl.CONTROL_METHOD == 0) {
         // fixed gain control, cov_limit for landing:
@@ -439,7 +451,7 @@ void vertical_ctrl_module_run(bool in_flight)
           // increase the gain till you start oscillating:
           float phase_0_set_point = 0.0f;
           // increase the p-gain:
-          pstate += 0.01;
+          pstate += 0.005;
           pused = pstate;
           // use the divergence for control:
           float err = phase_0_set_point - divergence;
@@ -465,10 +477,10 @@ void vertical_ctrl_module_run(bool in_flight)
           if (ind_hist >= COV_WINDOW_SIZE && fabs(cov_div) > of_landing_ctrl.cov_limit) {
             // next phase:
             elc_phase=1;
-            clock_gettime(CLOCK_REALTIME, &spec);
-            elc_time_start = spec.tv_nsec / 1.0E6;
+            clock_gettime(CLOCK_MONOTONIC, &spec);
+            elc_time_start = spec.tv_sec * 1E3 + spec.tv_nsec / 1E6;
             // we don't want to oscillate, so reduce the gain:
-            elc_p_gain_start = 0.5f*pstate;          
+            elc_p_gain_start = 0.8f*pstate;          
           }
           stabilization_cmd[COMMAND_THRUST] = thrust;
           of_landing_ctrl.sum_err += err;
@@ -476,10 +488,13 @@ void vertical_ctrl_module_run(bool in_flight)
         }
         else if (elc_phase == 1) {
           // land while exponentially decreasing the gain:
-          clock_gettime(CLOCK_REALTIME, &spec);
-          new_time = spec.tv_nsec / 1.0E6;
+          clock_gettime(CLOCK_MONOTONIC, &spec);
+          new_time = spec.tv_sec * 1E3 + spec.tv_nsec / 1E6;
           float t_interval = (new_time - elc_time_start) / 1000.0f;
           printf("start = %d, now = %d, time interval = %f\n", elc_time_start, new_time, t_interval);
+          // this should not happen, but just to be sure to prevent too high gain values:
+          if(t_interval < 0) t_interval = 0.0f;
+          // determine the P-gain, exponentially decaying: 
           pstate = elc_p_gain_start*exp(of_landing_ctrl.divergence_setpoint*t_interval);
           // use the divergence for control:
           float err = of_landing_ctrl.divergence_setpoint - divergence;
@@ -606,8 +621,9 @@ void guidance_v_module_enter(void)
   divergence = of_landing_ctrl.divergence_setpoint;
   dt = 0.0f;
   struct timespec spec;
-  clock_gettime(CLOCK_REALTIME, &spec);
-  previous_time = spec.tv_nsec / 1.0E6;
+  clock_gettime(CLOCK_MONOTONIC, &spec);
+  previous_time = spec.tv_sec* 1E3 + spec.tv_nsec / 1.0E6;
+  module_enter_time = previous_time;
   vision_message_nr = 1;
   previous_message_nr = 0;
   for (i = 0; i < COV_WINDOW_SIZE; i++) {
