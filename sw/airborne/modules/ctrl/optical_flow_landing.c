@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2015
+ * Copyright (C) 2015 Guido de Croon.
  *
  * This file is part of Paparazzi.
  *
@@ -473,8 +473,8 @@ void vertical_ctrl_module_run(bool in_flight)
           } else {
             cov_div = get_cov(past_divergence_history, divergence_history, COV_WINDOW_SIZE);
           }
-          printf("ELC phase 0, gain = %f, cov_div = %f\n", pstate, cov_div);
-          if (ind_hist >= COV_WINDOW_SIZE && fabs(cov_div) > of_landing_ctrl.cov_limit) {
+          // printf("ELC phase 0, gain = %f, cov_div = %f\n", pstate, cov_div);
+          if (ind_hist >= COV_WINDOW_SIZE && fabs(cov_div - of_landing_ctrl.cov_set_point) < of_landing_ctrl.cov_limit) {
             // next phase:
             elc_phase=1;
             clock_gettime(CLOCK_MONOTONIC, &spec);
@@ -491,7 +491,7 @@ void vertical_ctrl_module_run(bool in_flight)
           clock_gettime(CLOCK_MONOTONIC, &spec);
           new_time = spec.tv_sec * 1E3 + spec.tv_nsec / 1E6;
           float t_interval = (new_time - elc_time_start) / 1000.0f;
-          printf("start = %d, now = %d, time interval = %f\n", elc_time_start, new_time, t_interval);
+          // printf("start = %d, now = %d, time interval = %f\n", elc_time_start, new_time, t_interval);
           // this should not happen, but just to be sure to prevent too high gain values:
           if(t_interval < 0) t_interval = 0.0f;
           // determine the P-gain, exponentially decaying: 
@@ -504,7 +504,7 @@ void vertical_ctrl_module_run(bool in_flight)
           // bound thrust:
           Bound(thrust, 0.8 * nominal_throttle, 0.75 * MAX_PPRZ);
 
-          printf("ELC phase 2, gain = %f\n", pstate);
+          // printf("ELC phase 1, gain = %f\n", pstate);
           // histories and cov detection:
           normalized_thrust = (float)(thrust / (MAX_PPRZ / 100));
           thrust_history[ind_hist % COV_WINDOW_SIZE] = normalized_thrust;
@@ -526,11 +526,21 @@ void vertical_ctrl_module_run(bool in_flight)
           }
           stabilization_cmd[COMMAND_THRUST] = thrust;
           of_landing_ctrl.sum_err += err;
+
+          float p_land_threshold = 0.1;
+          if(pstate < p_land_threshold) {
+            elc_phase = 2;
+          }
+        }
+        else {
+          // land with 90% nominal thrust:
+          int32_t thrust = 0.90 * nominal_throttle;
+          Bound(thrust, 0.6 * nominal_throttle, 0.9 * MAX_PPRZ);
+          stabilization_cmd[COMMAND_THRUST] = thrust;          
         }
       }
     }
     else {
-      printf("Landing???\n");
       // land with 90% nominal thrust:
       int32_t thrust = 0.90 * nominal_throttle;
       Bound(thrust, 0.6 * nominal_throttle, 0.9 * MAX_PPRZ);
