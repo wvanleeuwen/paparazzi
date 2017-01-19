@@ -51,6 +51,7 @@ struct OpticalFlowLanding {
   float igain;                  ///< I-gain for constant divergence control
   float dgain;                  ///< D-gain for constant divergence control
   float sum_err;                ///< integration of the error for I-gain
+  float d_err;                  ///< difference of error for the D-gain
   float nominal_thrust;         ///< nominal thrust around which the PID-control operates
   int VISION_METHOD;            ///< whether to use vision (1) or Optitrack / sonar (0)
   int CONTROL_METHOD;           ///< type of divergence control: 0 = fixed gain, 1 = adaptive gain
@@ -61,6 +62,7 @@ struct OpticalFlowLanding {
   float dgain_adaptive;         ///< D-gain for adaptive gain control
   int COV_METHOD;               ///< method to calculate the covariance: between thrust and div (0) or div and div past (1)
   int delay_steps;              ///< number of delay steps for div past
+  float reduction_factor_elc;   ///< reduction factor - after oscillation, how much to reduce the gain...
 };
 
 extern struct OpticalFlowLanding of_landing_ctrl;

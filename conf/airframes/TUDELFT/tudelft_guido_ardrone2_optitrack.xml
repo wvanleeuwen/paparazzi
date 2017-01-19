@@ -124,7 +124,7 @@
     <define name="REF_ERR_P" value="380.0"/>
     <define name="REF_ERR_Q" value="380.0"/>
     <define name="REF_ERR_R" value="70.0"/>
-    <define name="REF_RATE_P" value="11."/>
+    <define name="REF_RATE_P" value="21.6"/>
     <define name="REF_RATE_Q" value="21.6"/>
     <define name="REF_RATE_R" value="11.0"/>
 
@@ -177,13 +177,13 @@
 
   <section name="GUIDANCE_H" prefix="GUIDANCE_H_">
     <!-- Good weather -->
-    <define name="MAX_BANK" value="20" unit="deg"/>
+    <!-- define name="MAX_BANK" value="20" unit="deg"/ -->
     <!-- Bad weather -->
-    <!-- define name="MAX_BANK" value="32" unit="deg"/ -->
+    <define name="MAX_BANK" value="32" unit="deg"/>
 
-    <define name="PGAIN" value="124"/>
-    <define name="DGAIN" value="81"/>
-    <define name="IGAIN" value="18"/>
+    <define name="PGAIN" value="80"/>
+    <define name="DGAIN" value="40"/>
+    <define name="IGAIN" value="13"/>
     <define name="VGAIN" value="0"/>
     <define name="AGAIN" value="0"/>
   </section>

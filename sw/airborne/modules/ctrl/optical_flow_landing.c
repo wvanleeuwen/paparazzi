@@ -41,6 +41,8 @@ float normalized_thrust;
 float cov_div;
 float pstate;
 float pused;
+float istate;
+float dstate;
 float dt;
 int vision_message_nr;
 int previous_message_nr;
@@ -52,6 +54,9 @@ float previous_cov_err;
 int elc_phase;
 long elc_time_start;
 float elc_p_gain_start;
+float elc_i_gain_start;
+float elc_d_gain_start;
+
 
 // minimum value of the P-gain for divergence control
 // adaptive control will not be able to go lower
@@ -95,15 +100,15 @@ PRINT_CONFIG_VAR(OPTICAL_FLOW_LANDING_OPTICAL_FLOW_ID)
 
 // Other default values:
 #ifndef OPTICAL_FLOW_LANDING_PGAIN
-#define OPTICAL_FLOW_LANDING_PGAIN 1.0
+#define OPTICAL_FLOW_LANDING_PGAIN 0.50
 #endif
 
 #ifndef OPTICAL_FLOW_LANDING_IGAIN
-#define OPTICAL_FLOW_LANDING_IGAIN 0.0
+#define OPTICAL_FLOW_LANDING_IGAIN 0.005
 #endif
 
 #ifndef OPTICAL_FLOW_LANDING_DGAIN
-#define OPTICAL_FLOW_LANDING_DGAIN 0.0
+#define OPTICAL_FLOW_LANDING_DGAIN 0.50
 #endif
 
 #ifndef OPTICAL_FLOW_LANDING_VISION_METHOD
@@ -111,7 +116,7 @@ PRINT_CONFIG_VAR(OPTICAL_FLOW_LANDING_OPTICAL_FLOW_ID)
 #endif
 
 #ifndef OPTICAL_FLOW_LANDING_CONTROL_METHOD
-#define OPTICAL_FLOW_LANDING_CONTROL_METHOD 0
+#define OPTICAL_FLOW_LANDING_CONTROL_METHOD 2
 #endif
 
 #ifndef OPTICAL_FLOW_LANDING_COV_METHOD
@@ -143,13 +148,14 @@ void vertical_ctrl_module_init(void)
   of_landing_ctrl.vel = 0.0f;
   of_landing_ctrl.divergence_setpoint = 0.0f;
   of_landing_ctrl.cov_set_point = -0.025f;
-  of_landing_ctrl.cov_limit = 0.025f; //1.0f; // for cov(uz,div)
+  of_landing_ctrl.cov_limit = 0.005f; //1.0f; // for cov(uz,div)
   of_landing_ctrl.lp_factor = 0.95f;
   of_landing_ctrl.pgain = OPTICAL_FLOW_LANDING_PGAIN;
   of_landing_ctrl.igain = OPTICAL_FLOW_LANDING_IGAIN;
   of_landing_ctrl.dgain = OPTICAL_FLOW_LANDING_DGAIN;
   of_landing_ctrl.sum_err = 0.0f;
-  of_landing_ctrl.nominal_thrust = 0.710f; //0.666f; // 0.640 with small battery
+  of_landing_ctrl.d_err = 0.0f;
+  of_landing_ctrl.nominal_thrust = 0.630f; // 0.710f; //0.666f; // 0.640 with small battery
   of_landing_ctrl.VISION_METHOD = OPTICAL_FLOW_LANDING_VISION_METHOD;
   of_landing_ctrl.CONTROL_METHOD = OPTICAL_FLOW_LANDING_CONTROL_METHOD;
   of_landing_ctrl.COV_METHOD = OPTICAL_FLOW_LANDING_COV_METHOD;
@@ -157,6 +163,7 @@ void vertical_ctrl_module_init(void)
   of_landing_ctrl.pgain_adaptive = 10.0;
   of_landing_ctrl.igain_adaptive = 0.25;
   of_landing_ctrl.dgain_adaptive = 0.00;
+  of_landing_ctrl.reduction_factor_elc = 0.5f;
 
   struct timespec spec;
   clock_gettime(CLOCK_MONOTONIC, &spec);
@@ -182,6 +189,8 @@ void vertical_ctrl_module_init(void)
   dt = 0.0f;
   pstate = of_landing_ctrl.pgain;
   pused = pstate;
+  istate = of_landing_ctrl.igain;
+  dstate = of_landing_ctrl.dgain;
   vision_message_nr = 1;
   previous_message_nr = 0;
   of_landing_ctrl.agl_lp = 0.0f;
@@ -207,6 +216,7 @@ void reset_all_vars()
 
   int i;
   of_landing_ctrl.sum_err = 0;
+  of_landing_ctrl.d_err = 0;
   stabilization_cmd[COMMAND_THRUST] = 0;
   ind_hist = 0;
   of_landing_ctrl.agl_lp = 0;
@@ -362,7 +372,7 @@ void vertical_ctrl_module_run(bool in_flight)
 
         // use the divergence for control:
         float err = of_landing_ctrl.divergence_setpoint - divergence;
-        int32_t thrust = nominal_throttle + of_landing_ctrl.pgain * err * MAX_PPRZ + of_landing_ctrl.igain * of_landing_ctrl.sum_err * MAX_PPRZ;
+        int32_t thrust = nominal_throttle + of_landing_ctrl.pgain * err * MAX_PPRZ + of_landing_ctrl.igain * of_landing_ctrl.sum_err * MAX_PPRZ + of_landing_ctrl.dgain * of_landing_ctrl.d_err * MAX_PPRZ;
         // make sure the p gain is logged:
         pstate = of_landing_ctrl.pgain;
         pused = pstate;
@@ -392,6 +402,9 @@ void vertical_ctrl_module_run(bool in_flight)
         }
         stabilization_cmd[COMMAND_THRUST] = thrust;
         of_landing_ctrl.sum_err += err;
+        of_landing_ctrl.d_err = of_landing_ctrl.lp_factor * of_landing_ctrl.d_err + (1-of_landing_ctrl.lp_factor) * (err - previous_err) * 10.0f; // 10.0f to make it similarly sized to the error
+        previous_err = err;
+        // printf("d_err = %f, err = %f\n", of_landing_ctrl.d_err, err);
       } else if(of_landing_ctrl.CONTROL_METHOD == 1){
         // ADAPTIVE GAIN CONTROL:
 
@@ -451,11 +464,13 @@ void vertical_ctrl_module_run(bool in_flight)
           // increase the gain till you start oscillating:
           float phase_0_set_point = 0.0f;
           // increase the p-gain:
-          pstate += 0.005;
+          pstate *= 1.001f; //+= 0.001;
           pused = pstate;
+          istate *= 1.001f;
+          dstate *= 1.001f;
           // use the divergence for control:
           float err = phase_0_set_point - divergence;
-          int32_t thrust = nominal_throttle + pused * err * MAX_PPRZ + of_landing_ctrl.igain * of_landing_ctrl.sum_err * MAX_PPRZ;
+          int32_t thrust = nominal_throttle + pused * err * MAX_PPRZ + istate * of_landing_ctrl.sum_err * MAX_PPRZ + dstate * of_landing_ctrl.d_err * MAX_PPRZ;;
           // bound thrust:
           Bound(thrust, 0.8 * nominal_throttle, 0.75 * MAX_PPRZ);
           // histories and cov detection:
@@ -474,17 +489,20 @@ void vertical_ctrl_module_run(bool in_flight)
             cov_div = get_cov(past_divergence_history, divergence_history, COV_WINDOW_SIZE);
           }
           // printf("ELC phase 0, gain = %f, cov_div = %f\n", pstate, cov_div);
-          if (ind_hist >= COV_WINDOW_SIZE && fabs(cov_div - of_landing_ctrl.cov_set_point) < of_landing_ctrl.cov_limit) {
+          if (ind_hist >= COV_WINDOW_SIZE && module_active_time_sec > 10.0f && fabs(cov_div - of_landing_ctrl.cov_set_point) < of_landing_ctrl.cov_limit) {
             // next phase:
             elc_phase=1;
             clock_gettime(CLOCK_MONOTONIC, &spec);
             elc_time_start = spec.tv_sec * 1E3 + spec.tv_nsec / 1E6;
             // we don't want to oscillate, so reduce the gain:
-            elc_p_gain_start = 0.8f*pstate;          
+            elc_p_gain_start = of_landing_ctrl.reduction_factor_elc * pstate;
+            elc_i_gain_start = of_landing_ctrl.reduction_factor_elc * istate;
+            elc_d_gain_start = of_landing_ctrl.reduction_factor_elc * dstate;
           }
           stabilization_cmd[COMMAND_THRUST] = thrust;
           of_landing_ctrl.sum_err += err;
-
+          of_landing_ctrl.d_err = of_landing_ctrl.lp_factor * of_landing_ctrl.d_err + (1-of_landing_ctrl.lp_factor) * (err - previous_err) * 10.0f; // 10.0f to make it similarly sized to the error
+          previous_err = err;
         }
         else if (elc_phase == 1) {
           // land while exponentially decreasing the gain:
@@ -496,9 +514,11 @@ void vertical_ctrl_module_run(bool in_flight)
           if(t_interval < 0) t_interval = 0.0f;
           // determine the P-gain, exponentially decaying: 
           pstate = elc_p_gain_start*exp(of_landing_ctrl.divergence_setpoint*t_interval);
+          istate = elc_i_gain_start*exp(of_landing_ctrl.divergence_setpoint*t_interval);
+          dstate = elc_d_gain_start*exp(of_landing_ctrl.divergence_setpoint*t_interval);
           // use the divergence for control:
           float err = of_landing_ctrl.divergence_setpoint - divergence;
-          int32_t thrust = nominal_throttle + pstate * err * MAX_PPRZ + of_landing_ctrl.igain * of_landing_ctrl.sum_err * MAX_PPRZ;
+          int32_t thrust = nominal_throttle + pstate * err * MAX_PPRZ + istate * of_landing_ctrl.sum_err * MAX_PPRZ + dstate * of_landing_ctrl.d_err * MAX_PPRZ;;
           // make sure the p gain is logged:
           pused = pstate;
           // bound thrust:
@@ -526,7 +546,8 @@ void vertical_ctrl_module_run(bool in_flight)
           }
           stabilization_cmd[COMMAND_THRUST] = thrust;
           of_landing_ctrl.sum_err += err;
-
+          of_landing_ctrl.d_err = of_landing_ctrl.lp_factor * of_landing_ctrl.d_err + (1-of_landing_ctrl.lp_factor) * (err - previous_err) * 10.0f; // 10.0f to make it similarly sized to the error
+          previous_err = err;
           float p_land_threshold = 0.1;
           if(pstate < p_land_threshold) {
             elc_phase = 2;
@@ -621,6 +642,7 @@ void guidance_v_module_enter(void)
   int i;
   // reset integrator
   of_landing_ctrl.sum_err = 0.0f;
+  of_landing_ctrl.d_err = 0.0f;
   landing = 0;
   ind_hist = 0;
   previous_err = 0.0f;
@@ -645,7 +667,7 @@ void guidance_v_module_enter(void)
   elc_time_start = 0;
   pstate = of_landing_ctrl.pgain;
   pused = pstate;
-
+  istate = of_landing_ctrl.igain;
 }
 
 void guidance_v_module_run(bool in_flight)
