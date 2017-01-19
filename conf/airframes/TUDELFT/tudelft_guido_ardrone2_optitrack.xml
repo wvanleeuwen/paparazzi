@@ -29,7 +29,7 @@
 
   <modules main_freq="512">
     <module name="bat_voltage_ardrone2"/>
-    <module name="stereocam_droplet" />
+    <module name="stereocam_droplet"/>
     <module name="video_thread"/>
     <module name="pose_history"/>
     <module name="cv_opticflow">
@@ -124,7 +124,7 @@
     <define name="REF_ERR_P" value="380.0"/>
     <define name="REF_ERR_Q" value="380.0"/>
     <define name="REF_ERR_R" value="70.0"/>
-    <define name="REF_RATE_P" value="21.6"/>
+    <define name="REF_RATE_P" value="11."/>
     <define name="REF_RATE_Q" value="21.6"/>
     <define name="REF_RATE_R" value="11.0"/>
 
@@ -181,9 +181,9 @@
     <!-- Bad weather -->
     <!-- define name="MAX_BANK" value="32" unit="deg"/ -->
 
-    <define name="PGAIN" value="363"/>
-    <define name="DGAIN" value="237"/>
-    <define name="IGAIN" value="30"/>
+    <define name="PGAIN" value="124"/>
+    <define name="DGAIN" value="81"/>
+    <define name="IGAIN" value="18"/>
     <define name="VGAIN" value="0"/>
     <define name="AGAIN" value="0"/>
   </section>
