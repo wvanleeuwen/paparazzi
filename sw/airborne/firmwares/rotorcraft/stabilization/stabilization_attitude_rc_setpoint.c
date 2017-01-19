@@ -196,14 +196,14 @@ void stabilization_attitude_read_rc_setpoint_eulers(struct Int32Eulers *sp, bool
     	/* get current heading */
     	int32_t heading = stabilization_attitude_get_heading_i();
 
-    	/* check if (heading - setpoint) is within the range of a typical steady state error */
-    	int32_t error_limit = ANGLE_BFP_OF_REAL(RadOfDeg(10));
-    	int32_t delta_psi = sp->psi - heading;
-    	INT32_ANGLE_NORMALIZE(delta_psi);
-    	if (abs(delta_psi) < error_limit) delta_psi=0; // if below, assume steady state has been reached
+//    	/* check if (heading - setpoint) is within the range of a typical steady state error */
+//    	int32_t error_limit = ANGLE_BFP_OF_REAL(RadOfDeg(10));
+//    	int32_t delta_psi = sp->psi - heading;
+//    	INT32_ANGLE_NORMALIZE(delta_psi);
+//    	if (abs(delta_psi) < error_limit) delta_psi=0; // if below, assume steady state has been reached
 
-    	/* add the gate heading to the current setpoint */
-    	sp->psi += ANGLE_BFP_OF_REAL(RadOfDeg(nus_gate_heading)) + delta_psi;
+    	/* add the gate heading to the current heading */
+    	sp->psi = ANGLE_BFP_OF_REAL(RadOfDeg(nus_gate_heading)) + heading;
     	INT32_ANGLE_NORMALIZE(sp->psi);
     }
 
