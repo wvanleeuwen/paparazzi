@@ -32,6 +32,7 @@ uint8_t cnt_left, cnt_middle, cnt_right;
 int16_t nus_turn_cmd=0;
 int16_t nus_climb_cmd=0;
 int8_t nus_gate_heading=0; // gate heading relative to the current heading, in degrees
+int8_t body2cam=0; // offset between heading and camera direction, in degrees
 bool nus_gate_detected=0;
 
 uint8_t pos_thresh=10; // steer only if window center is more than pos_thresh of the center
@@ -39,7 +40,8 @@ uint8_t fit_thresh=20; // maximal fitness that is still considered as correct de
 uint8_t size_thresh=10; // minimal size that is considered to be a window
 uint8_t turn_cmd_max=50; // percentage of MAX_PPRZ
 uint8_t climb_cmd_max=10; // percentage of MAX_PPRZ
-uint8_t cnt_thresh=80; // threshold for max amount of pixels in a bin (x10)
+uint8_t cnt_thresh=75; // threshold for max amount of pixels in a bin (x10)
+uint8_t nus_filter_order=1; // complementary filter setting
 
 
 
@@ -76,7 +78,8 @@ void stereo_to_state_periodic(void)
     stereocam_data.fresh = 0;
 
     /* radio switch */
-    static bool nus_switch = 0;
+    static int8_t nus_switch = 0;
+    static int8_t gate_heading = 0;
 
     if (radio_control.values[5] < -1000) nus_switch=1; // this should be ELEV D/R
     else nus_switch=0;
@@ -86,7 +89,7 @@ void stereo_to_state_periodic(void)
     	// nus_turn_cmd=MAX_PPRZ/100*turn_cmd_max*nus_switch*win_x/64;
     	nus_turn_cmd=0;
 
-    	nus_gate_heading=30*win_x/64;
+    	gate_heading=30*win_x/64+body2cam;
     	nus_gate_detected=nus_switch;
 
     	// nus_climb_cmd=MAX_PPRZ*climb_cmd_max/100*nus_switch*win_y/48*100/(2*win_size); // gate size is 1 meter, win size is half of the gate size in pixels
@@ -98,21 +101,27 @@ void stereo_to_state_periodic(void)
     	// keeping the same command
     	nus_gate_detected=0;
     	nus_climb_cmd=0;
+    	gate_heading=0;
     }
     else // no window detected - if (win_fitness < fit_thresh)
     {
     	if (cnt_left > cnt_thresh && cnt_right < cnt_thresh) {
-			nus_turn_cmd=nus_switch*MAX_PPRZ/3;
+			nus_turn_cmd=nus_switch*MAX_PPRZ/100*turn_cmd_max;
     	}
     	else if (cnt_left < cnt_thresh && cnt_right > cnt_thresh) {
-    		nus_turn_cmd=-nus_switch*MAX_PPRZ/3;
+    		nus_turn_cmd=-nus_switch*MAX_PPRZ/100*turn_cmd_max;
     	}
     	else {
     	  	nus_turn_cmd=0;
     	}
     	nus_gate_detected=0;
     	nus_climb_cmd=0;
+    	gate_heading=0;
     }
+
+    /* simple filter */
+   	nus_gate_heading=(nus_filter_order-1)*nus_gate_heading/nus_filter_order+gate_heading/nus_filter_order;
+
 
     //autopilot_guided_goto_body_relative(0.0, 0.0, nus_climb_cmd, 0.0)
   }
