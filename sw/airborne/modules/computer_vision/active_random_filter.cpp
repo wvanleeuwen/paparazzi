@@ -73,10 +73,10 @@ static void 			trackObjects	    ( Mat& sourceFrame, Mat& greyFrame );
 static void             identifyObject      ( trackResults* trackRes );
 static bool 			addContour			( vector<Point> contour, uint16_t offsetX, uint16_t offsetY );
 static void 			cam2body 			( trackResults* trackRes );
-static void 			body2world 			( trackResults* trackRes, struct 	FloatEulers * eulerAngles );
+static void 			body2world 			( trackResults* trackRes );
 static double 			correctRadius		( double r, double f, double k );
-static Rect 			setISPvars 			( struct FloatEulers* eulerAngles, uint16_t width, uint16_t height );
-static vector<double> 	estimatePosition	( uint16_t xp, uint16_t yp, uint32_t area, double k = 0, uint16_t calArea = 0, uint16_t orbDiag = 0 );
+static Rect 			setISPvars 			( uint16_t width, uint16_t height );
+static vector<double> 	estimatePosition	( uint16_t xp, uint16_t yp, uint32_t area);
 static void             correctPerspective  (double x_in, double y_in, double max, double* x_out, double* y_out);
 static bool 			getNewPosition		( uint8_t nextDir, uint16_t* newRow, uint16_t* newCol, int* maxRow, int* maxCol );
 static void             eraseMemory         ( void );
@@ -210,6 +210,7 @@ static uint8_t          cmpY            = 0;
 static uint8_t          cmpU            = 0;
 static uint8_t          cmpV            = 0;
 
+struct FloatEulers*     eulerAngles;
 vector<vector<Point> >  allContours;
 vector<memoryBlock>     neighbourMem;
 vector<trackResults>    trackRes;
@@ -223,23 +224,24 @@ void active_random_filter_init(void){
 
 }
 
-void active_random_filter(char* buff, uint16_t width, uint16_t height, struct FloatEulers* eulerAngles){
+void active_random_filter(char* buff, uint16_t width, uint16_t height, struct FloatEulers* curEulerAngles){
     if(runCount < AR_FILTER_TIMEOUT) {
         runCount++;
         PRINT("Timeout %d\n", AR_FILTER_TIMEOUT - runCount);
         return;
     }
+    eulerAngles = curEulerAngles;
     Mat sourceFrame (height, width, CV_8UC2, buff);                 // Initialize current frame in openCV (UYVY) 2 channel
     Mat frameGrey   (height, width, CV_8UC1, cvScalar(0.0));        // Initialize an empty 1 channel frame
     active_random_filter_header(sourceFrame);                       // Mostly printing and storing
-    Rect crop 	        = setISPvars(eulerAngles, width, height); 	        // Calculate ISP related parameters
+    Rect crop 	        = setISPvars( width, height); 	            // Calculate ISP related parameters
 	Mat sourceFrameCrop = sourceFrame(crop); 				                // Crop the frame
 	trackObjects(sourceFrameCrop, frameGrey);                       // Track objects in sourceFrame
 	eraseMemory();
 	uint8_t r;
 	for(r=0; r < trackRes.size(); r++){                             // Convert angles & Write/Print output
 		cam2body(&trackRes[r]);						                // Convert from camera angles to body angles (correct for roll)
-		body2world(&trackRes[r], eulerAngles); 		                // Convert from body angles to world coordinates (correct yaw and pitch)
+		body2world(&trackRes[r]); 		                            // Convert from body angles to world coordinates (correct yaw and pitch)
 		identifyObject(&trackRes[r]);                               // Identify the spotted neighbours
 	}
 #if AR_FILTER_MOD_VIDEO
@@ -256,7 +258,7 @@ void active_random_filter(char* buff, uint16_t width, uint16_t height, struct Fl
 	return;
 }
 
-Rect setISPvars(struct FloatEulers* eulerAngles, uint16_t width, uint16_t height){
+Rect setISPvars( uint16_t width, uint16_t height){
     // This function computes the cropping according to the desires FOV Y and the current euler angles
 #if !AR_FILTER_ISP_CROP
     ispHeight                   = width;
@@ -426,12 +428,13 @@ void identifyObject(trackResults* trackRes){
     return;
 }
 
-vector<double> estimatePosition(uint16_t xp, uint16_t yp, uint32_t area, double k, uint16_t calArea, uint16_t orbDiag){
+vector<double> estimatePosition(uint16_t xp, uint16_t yp, uint32_t area){
     // This function estimates the 3D position (in camera  coordinate system) according to pixel position
     // (Default) calibration parameters
-    if(!k)          k       = default_k;        // Fisheye correction factor (1.085)
-    if(!calArea)    calArea = default_calArea;  // Calibrate at full resolution (5330)
-    if(!orbDiag)    orbDiag = default_orbDiag;  // Measured circular image diagonal using full resolution
+    // TODO: clean up
+    double k       = default_k;        // Fisheye correction factor (1.085)
+    double calArea = default_calArea;  // Calibrate at full resolution (5330)
+    double orbDiag = default_orbDiag;  // Measured circular image diagonal using full resolution
     // Calculate corrected calibration parameters
     calArea                 = (int) round(calArea * pow(ispScalar,2.0));
     //double cmosPixelSize    = 0.0000014;                                                    // 1.4um (see manual of CMOS sensor)
@@ -496,13 +499,13 @@ double reversePixel(double angle){
     double maxY     = correctRadius(ispHeight * 0.5, f, default_k);
     double maxPerY, tmp;
     correctPerspective(0.0 , maxY, maxY, &tmp, &maxPerY);
-    double minZ     = sinf(AR_FILTER_CAMERA_ANGLE);
+    double minZ     = sinf(AR_FILTER_CAMERA_ANGLE + eulerAngles->theta);
     double zCor     = 3.45;
     double corFrac  = 1.0 / (1.0 + zCor * (-minZ));
     // Reverse correct angle
     double perY     = angle / (0.5 * M_PI) * maxPerY;
     // Reverse correct perspective
-    double corY     = perY / (cosf(AR_FILTER_CAMERA_ANGLE) * corFrac);
+    double corY     = perY / (cosf(AR_FILTER_CAMERA_ANGLE + eulerAngles->theta) * corFrac);
     // Reverse correft fisheye
     double y        = f * tan( asin( sin( atan( corY / f ) ) / default_k ) );
     // Translate to image coords
@@ -517,7 +520,7 @@ double reversePixel(double angle){
 
 void correctPerspective(double x_in, double y_in, double max, double* x_out, double* y_out){
     // Rotate vector around x
-    double x        = AR_FILTER_CAMERA_ANGLE;
+    double x        = AR_FILTER_CAMERA_ANGLE + eulerAngles->theta;
     double x_rot    = x_in / max;
     double y_rot    = y_in / max * cosf(x);
     double z_rot    = sinf(x) * y_in / max;
@@ -544,7 +547,7 @@ void cam2body(trackResults* trackRes){
     return;
 }
 
-void body2world(trackResults* trackRes, struct  FloatEulers * eulerAngles){
+void body2world(trackResults* trackRes){
     struct NedCoor_f *pos;
 #if AR_FILTER_WORLDPOS
     pos     = stateGetPositionNed_f();      // Get your current position
@@ -1708,16 +1711,17 @@ void calibrateEstimation(void){
 		//{
 			//for(double orbDiag = orbDiag_min; orbDiag <= orbDiag_max; orbDiag += orbDiag_step)
 			//{
+	    default_k = k;
 				err = 0;
 				for(unsigned int r=0; r < trackRes.size(); r++)		// Convert angles & Write/Print output
 				{
 					vector<double> position(3);
-					position 		= estimatePosition(trackRes[r].x_p, trackRes[r].y_p, trackRes[r].area_p, k);
+					position 		= estimatePosition(trackRes[r].x_p, trackRes[r].y_p, trackRes[r].area_p);
 					trackRes[r].x_c = position[0];
 					trackRes[r].y_c = position[1];
 					trackRes[r].r_c = position[2];
 					cam2body(&trackRes[r]);							// Convert from camera angles to body angles (correct for roll)
-					body2world(&trackRes[r], &fakeEulerAngles); 	// Convert from body angles to world coordinates (correct yaw and pitch)
+					body2world(&trackRes[r]); 	                    // TODO: FIX FAKE EULER Convert from body angles to world coordinates (correct yaw and pitch)
 					double ball_err = 1000;
 					for(unsigned int i=0; i < calPositions.size(); i++)
 					{
