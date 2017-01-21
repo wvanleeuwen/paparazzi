@@ -5,9 +5,9 @@
 
 #include "boards/bebop.h"
 
-#define CAMERA_H_FISHEYE_RADIUS 1911
-#define CAMERA_H_FISHEYE_CENTER_X (MT9F002_SENSOR_WIDTH/2)
-#define CAMERA_H_FISHEYE_CENTER_Y (MT9F002_SENSOR_HEIGHT/2)
+#define CAMERA_H_FISHEYE_RADIUS 1920
+#define CAMERA_H_FISHEYE_CENTER_X ((CFG_MT9F002_X_ADDR_MAX - CFG_MT9F002_X_ADDR_MIN)/2)
+#define CAMERA_H_FISHEYE_CENTER_Y ((CFG_MT9F002_Y_ADDR_MAX - CFG_MT9F002_Y_ADDR_MIN)/2)
 
 #define COMPLEMENT_2(i, r) (((i) >= 0) ? (r) : (~(r) + 1) & 0x3fff)
 #define Q311(i) (COMPLEMENT_2(i, (unsigned)(((ABS(i)) * (1 << 11)) + 0.5)))
@@ -47,7 +47,7 @@ struct libisp_config isp_config = {
       .rip_bypass          = 1,
       .denoise_bypass      = 0,//0
       .lsc_bypass          = 0,//0
-      .chroma_aber_bypass  = 0,
+      .chroma_aber_bypass  = 1,
       .bayer_bypass        = 0,//0
       .color_matrix_bypass = 0,//0
   }},
@@ -145,7 +145,7 @@ struct libisp_config isp_config = {
     .circle_pos_y_center   = {{ CAMERA_H_FISHEYE_CENTER_Y }},
     .circle_pos_y_squared  = {{ CAMERA_H_FISHEYE_CENTER_Y * CAMERA_H_FISHEYE_CENTER_Y }},
     .circle_radius_squared = {{ CAMERA_H_FISHEYE_RADIUS * CAMERA_H_FISHEYE_RADIUS}},
-    .increments_log2       = {{ 4, 4}},
+    .increments_log2       = {{ 0, 0}},
     .sat_threshold         = {{ 980 }}, //1022 - pedestal
     .cfa                   = {{ ISP_CFA }},
     .max_nb_windows        = {{ .x_window_count=BAYERSTATS_STATX, .y_window_count=BAYERSTATS_STATY }},
@@ -229,7 +229,7 @@ struct libisp_config isp_config = {
     .circle_pos_y_squared = {{ 2512225 }},
     .cfa = {{ ISP_CFA }},
     .green_variation = {{ 1 }},
-    .increments_log2 = {{ .x_log2_inc=4, .y_log2_inc=4 }},
+    .increments_log2 = {{ .x_log2_inc=0, .y_log2_inc=0 }},
   },*/
 
   /* Demosaicking */
@@ -465,7 +465,7 @@ struct libisp_config isp_config = {
     .circle_pos_y_center   = {{ CAMERA_H_FISHEYE_CENTER_Y }},
     .circle_pos_y_squared  = {{ CAMERA_H_FISHEYE_CENTER_Y * CAMERA_H_FISHEYE_CENTER_Y }},
     .circle_radius_squared = {{ CAMERA_H_FISHEYE_RADIUS * CAMERA_H_FISHEYE_RADIUS }},
-    .increments_log2       = {{ 4, 4 }},
+    .increments_log2       = {{ 0, 0 }},
     .awb_threshold         = {{ 33 }},
   },
 

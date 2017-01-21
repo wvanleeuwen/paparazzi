@@ -27,6 +27,12 @@
 #define CV_AE_AWB_H
 
 #include "modules/computer_vision/cv.h"
+
+extern float setting_target_bright;
+extern float setting_max_saturated;
+extern float awb_fTolerance;
+extern float awb_targetAWB;
+extern float awb_mu;
 extern void cv_ae_awb_init(void);
 
 #endif

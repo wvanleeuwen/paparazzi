@@ -27,6 +27,7 @@
 #include "std.h"
 #include "mt9f002.h"
 #include "mt9f002_regs.h"
+#include "lib/isp/libisp.h"
 #include "math/pprz_algebra_int.h"
 #include "boards/bebop.h"
 
@@ -37,6 +38,14 @@
 #include <linux/i2c-dev.h>
 #include <linux/videodev2.h>
 #include <linux/v4l2-mediabus.h>
+
+#define PRINT(string,...) fprintf(stderr, "[MT9F002->%s()] " string,__FUNCTION__ , ##__VA_ARGS__)
+
+#if MT9F002_VERBOSE
+#define VERBOSE_PRINT PRINT
+#else
+#define VERBOSE_PRINT(...)
+#endif
 
 #define MAX(x,y) (((x) > (y)) ? (x) : (y))
 
@@ -125,7 +134,7 @@ static void write_reg(struct mt9f002_t *mt, uint16_t addr, uint32_t val, uint8_t
     mt->i2c_trans.buf[5] = val & 0xFF;
   }
   else {
-    printf("[MT9F002] write_reg with incorrect length %d\r\n", len);
+    PRINT("write_reg with incorrect length %d\r\n", len);
   }
 
   // Transmit the buffer
@@ -657,24 +666,24 @@ static void mt9f002_set_blanking(struct mt9f002_t *mt)
 {
   /* Read some config values in order to calculate blanking configuration */
   uint16_t min_line_blanking_pck 	= mt9f002_blanking.min_line_blanking_pck;
-  uint16_t min_line_length_pck 		= mt9f002_blanking.min_line_length_pck;
+  uint16_t min_line_length_pck 	    = mt9f002_blanking.min_line_length_pck;
   uint16_t min_line_fifo_pck 		= mt9f002_blanking.min_line_fifo_pck;
 
-  //uint16_t min_line_blanking_pck = read_reg(mt, MT9F002_MIN_LINE_BLANKING_PCK, 2);
-  uint16_t x_odd_inc = mt->x_odd_inc;
+  //uint16_t min_line_fifo_pck        = 0x005E;
+  //uint16_t min_line_blanking_pck    = read_reg(mt, MT9F002_MIN_LINE_BLANKING_PCK, 2);
+  //uint16_t min_line_length_pck      = read_reg(mt, MT9F002_MIN_LINE_LENGTH_PCK, 2);
   uint16_t min_frame_blanking_lines = read_reg(mt, MT9F002_MIN_FRAME_BLANKING_LINES, 2);
-  //uint16_t min_line_length_pck = read_reg(mt, MT9F002_MIN_LINE_LENGTH_PCK, 2);
+  float subsamplingX_factor          = (float)(1 + mt->x_odd_inc) / 2.0f; // See page 52
+  float subsamplingY_factor          = (float)(1 + mt->y_odd_inc) / 2.0f; // See page 52
 
   /* Calculate minimum line length */
-  float subsampling_factor = (float)(1 + x_odd_inc) / 2.0f; // See page 52
-  uint16_t min_line_length = MAX(min_line_length_pck, mt->scaled_width/subsampling_factor + min_line_blanking_pck); // EQ 9
-  min_line_length = MAX(min_line_length, (mt->scaled_width-1 + x_odd_inc) / subsampling_factor/2 + min_line_blanking_pck);
+  uint16_t min_line_length = MAX(min_line_length_pck, ((uint16_t) ((mt->sensor_width - 1 + mt->x_odd_inc)/subsamplingX_factor)) + min_line_blanking_pck); // EQ 9
   if (mt->interface == MT9F002_MIPI ||
       mt->interface == MT9F002_HiSPi) {
-    min_line_length = MAX(min_line_length, ((uint16_t)((float)mt->scaled_width * mt->vt_pix_clk / mt->op_pix_clk)/2) + min_line_fifo_pck); // 2 lanes, pll clocks
+    min_line_length = MAX(min_line_length, ((uint16_t)((float)mt->output_width * mt->vt_pix_clk / mt->op_pix_clk)/2) + min_line_fifo_pck); // 2 lanes, pll clocks
   }
   else {
-    min_line_length = MAX(min_line_length, ((uint16_t)((float)mt->scaled_width * mt->vt_pix_clk / mt->op_pix_clk)) + min_line_fifo_pck); // pll clocks
+    min_line_length = MAX(min_line_length, ((uint16_t)((float)mt->output_width * mt->vt_pix_clk / mt->op_pix_clk)) + min_line_fifo_pck); // pll clocks
   }
 
   /* Do some magic to get it to work with P7 ISP (with horizontal blanking) */
@@ -689,21 +698,20 @@ static void mt9f002_set_blanking(struct mt9f002_t *mt)
   /* Calculate minimum horizontal blanking, since fpga line_length must be divideable by 2 */
   uint32_t min_horizontal_blanking = clkRatio_num;
   if((clkRatio_den % 2) != 0) {
-    min_horizontal_blanking = 2 * clkRatio_num; // used to be 2 ?
+    min_horizontal_blanking *= 2;
   }
-
   /* Fix fpga correction based on min horizontal blanking */
   if ((min_line_length % min_horizontal_blanking) != 0) {
     min_line_length += min_horizontal_blanking - (min_line_length % min_horizontal_blanking);
   }
 
   /* Calculate minimum frame length lines */
-  uint16_t min_frame_length = (mt->scaled_height) / subsampling_factor + min_frame_blanking_lines; // (EQ 10)
+  uint16_t min_frame_length = (mt->sensor_height) / subsamplingY_factor + min_frame_blanking_lines; // (EQ 10)
   /* Calculate FPS we get using these minimums (Maximum FPS) */
   mt->line_length = min_line_length;
   mt->frame_length = min_frame_length;
   mt->real_fps = mt->vt_pix_clk * 1000000 / (float)(mt->line_length * mt->frame_length);
-
+  VERBOSE_PRINT("Maximum FPS: %0.3f\n",mt->real_fps);
   /* Check if we need to downscale the FPS and bruteforce better solution */
   if(mt->target_fps < mt->real_fps) {
     float min_fps_err = fabs(mt->target_fps - mt->real_fps);
@@ -714,18 +722,16 @@ static void mt9f002_set_blanking(struct mt9f002_t *mt)
       // Go through all possible frame lengths
       for(uint16_t fl = min_frame_length; fl < MT9F002_FRAME_LENGTH_MAX; ++fl) {
         new_fps = mt->vt_pix_clk * 1000000 / (float)(ll * fl);
-
         // Calculate FPS error and save if it is better
         float fps_err = fabs(mt->target_fps - new_fps);
         if(fps_err < min_fps_err) {
           min_fps_err = fps_err;
-          mt->line_length = ll;
-          mt->frame_length = fl;
-          mt->real_fps = new_fps;
+          mt->line_length   = ll;
+          mt->frame_length  = fl;
+          mt->real_fps      = new_fps;
         }
-
         // Stop searching if FPS is lower or equal
-        if(mt->target_fps > new_fps) {
+        if(mt->target_fps >= new_fps) {
           break;
         }
       }
@@ -896,8 +902,8 @@ void mt9f002_calc_resolution(struct mt9f002_t *mt)
 		crop.width  = mt->sensor_width;
 		crop.height = mt->sensor_height;
 
-		printf("[MT9F002] Requested output    - width: %i, height: %i\n", mt->output_width, mt->output_height);
-		printf("[MT9F002] Requested crop      - top: %i, left: %i, width: %i, height: %i\n", crop.top, crop.left, crop.width, crop.height);
+		VERBOSE_PRINT("Requested output    - width: %i, height: %i\n", mt->output_width, mt->output_height);
+		VERBOSE_PRINT("Requested crop      - top: %i, left: %i, width: %i, height: %i\n", crop.top, crop.left, crop.width, crop.height);
 
 		/* Clamp the crop rectangle boundaries and align them to a multiple of 2
 		 * pixels to ensure a GRBG Bayer pattern.
@@ -908,9 +914,9 @@ void mt9f002_calc_resolution(struct mt9f002_t *mt)
 		rect.top = clamp(ALIGN(crop.top, 2),
 				CFG_MT9F002_Y_ADDR_MIN,
 				CFG_MT9F002_Y_ADDR_MAX);
-		rect.width = clamp(ALIGN(crop.width, 2), 1,
+		rect.width = clamp(ALIGN(crop.width, 4), 1,
 				CFG_MT9F002_PIXEL_ARRAY_WIDTH);
-		rect.height = clamp(ALIGN(crop.height, 2), 1,
+		rect.height = clamp(ALIGN(crop.height, 4), 1,
 				CFG_MT9F002_PIXEL_ARRAY_HEIGHT);
 		rect.width = min(rect.width, CFG_MT9F002_PIXEL_ARRAY_WIDTH - rect.left);
 		rect.height = min(rect.height, CFG_MT9F002_PIXEL_ARRAY_HEIGHT - rect.top);
@@ -950,12 +956,12 @@ void mt9f002_calc_resolution(struct mt9f002_t *mt)
 			rect.height = mt->output_height * ratio * ((y_odd_inc + 1) / 2) /
 					MT9F002_SCALER_N;
 		}
-		printf("[MT9F002] Calculated skipping - x: %i, y: %i\n", x_odd_inc, y_odd_inc);
-		printf("[MT9F002] Calculated scaler   - %i/%i = %0.3f\n", MT9F002_SCALER_N, ratio, ((float) MT9F002_SCALER_N) / ((float) ratio));
+		VERBOSE_PRINT("Calculated skipping - x: %i, y: %i\n", x_odd_inc, y_odd_inc);
+		VERBOSE_PRINT("Calculated scaler   - %i/%i = %0.3f\n", MT9F002_SCALER_N, ratio, ((float) MT9F002_SCALER_N) / ((float) ratio));
 		/* Update crop */
 		crop = rect;
-		printf("[MT9F002] Granted crop        - top: %i, left: %i, width: %i, height: %i\n", crop.top, crop.left, crop.width, crop.height);
-		printf("[MT9F002] Granted output      - width: %i, height: %i\n", width, height);
+		VERBOSE_PRINT("Granted crop        - top: %i, left: %i, width: %i, height: %i\n", crop.top, crop.left, crop.width, crop.height);
+		VERBOSE_PRINT("Granted output      - width: %i, height: %i\n", width, height);
 
 		/* Check if scaling configuration has changed */
 		if (mt->x_odd_inc != x_odd_inc ||
@@ -986,7 +992,7 @@ void mt9f002_set_resolution(struct mt9f002_t *mt)
 			/* enable scaling mode */
 			write_reg(mt, MT9F002_SCALING_MODE, 2, 2);
 			write_reg(mt, MT9F002_SCALE_M, (int) ceil((float)MT9F002_SCALER_N / mt->output_scaler), 2);
-			printf("[MT9F002] SCALE_M: %i\n", (int) ceil((float)MT9F002_SCALER_N / mt->output_scaler));
+			VERBOSE_PRINT("SCALE_M: %i\n", (int) ceil((float)MT9F002_SCALER_N / mt->output_scaler));
 		}
 		return;
 }
@@ -1047,4 +1053,19 @@ void mt9f002_init(struct mt9f002_t *mt)
 
   /* Turn the stream on */
   write_reg(mt, MT9F002_MODE_SELECT, 0x01, 1);
+}
+
+void mt9f002_update_resolution(struct mt9f002_t *mt){
+    /* Calculate binning/skipping/scaling for requested sensor domain and output resolution */
+    mt9f002_calc_resolution(mt);
+    /* Update blanking timings based on chosen binning/skipping/scaling */
+    mt9f002_blanking_init(mt);
+    mt9f002_set_resolution(mt);
+    /* Update blanking (based on FPS) */
+    mt9f002_set_blanking(mt);
+    // Update the isp_config
+    //double xScaler = mt->output_scaler * 2.0/(mt->x_odd_inc + 1);
+    //double yScaler = mt->output_scaler * 2.0/(mt->y_odd_inc + 1);
+    //isp_request_statistics_yuv_window(ALIGN(mt->offset_x,16), ALIGN(mt->offset_x + mt->sensor_width,16), ALIGN(mt->offset_y,16), ALIGN(mt->offset_y + mt->sensor_height,16));
+    isp_request_statistics_yuv_window(0 , (uint16_t) mt->sensor_width, 0, mt->sensor_height, mt->x_odd_inc, mt->y_odd_inc);
 }

@@ -4,9 +4,10 @@
     <program name="Flying Robot Commander" command="sw/ext/flyingrobotcommander/frc.py -f ~/paparazzi/sw/ext/flyingrobotcommander/wv_conf.xml -s -i 192.168.40.222"/>
     <program name="FlyingRC: Flight blocks" command="& google-chrome --app=http://192.168.40.222:5000/show/flightblock/"/>
     <program name="FlyingRC: Status" command="& google-chrome --app=http://192.168.40.222:5000/show/status/"/>
-    <program name="Bebop Stream" command="sw/tools/parrot/bebop/start_mplayer.sh 192.168.40.">
+    <program name="Bebop Stream (swarmhub)" command="sw/tools/parrot/bebop/start_mplayer.sh 192.168.40.">
     	<arg flag="" constant="@AC_ID"/>
     </program>
+    <program name="Bebop Stream" command="/usr/bin/cvlc ftp://192.168.42.1/internal_000/stream.sdp --avcodec-hw=vaapi --no-xlib"/>
     <program name="Server" command="sw/ground_segment/tmtc/server"/>
     <program name="Data Link" command="sw/ground_segment/tmtc/link">
       <arg flag="-d" constant="/dev/ttyUSB0"/>

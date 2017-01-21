@@ -101,5 +101,5 @@ void mt9f002_calc_resolution(struct mt9f002_t *mt);
 void mt9f002_set_resolution(struct mt9f002_t *mt);
 void mt9f002_set_exposure(struct mt9f002_t *mt);
 void mt9f002_set_gains(struct mt9f002_t *mt);
-
+void mt9f002_update_resolution(struct mt9f002_t *mt);
 #endif /* MT9F002_H */

@@ -47,22 +47,24 @@ using namespace cv;
 #define VERBOSE_PRINT(...)
 #endif
 
+#define xSign(x) ( ( x ) >= ( 0 ) ? ( 1 ) : ( -1 ) )
+
 extern struct mt9f002_t mt9f002;
 
-#define AR_FILTER_ISP_CROP      0   // Use the ISP to crop the frame according to FOV-Y
+#define AR_FILTER_ISP_CROP      1   // Use the ISP to crop the frame according to FOV-Y
 #define AR_FILTER_SHOW_REJECT   0   // Print why shapes are rejected
 #define AR_FILTER_MOD_VIDEO     1   // Modify the frame to show relevant info
-#define AR_FILTER_CROSSHAIR     0   // Show centre of frame with crosshair
-#define AR_FILTER_DRAW_CONTOURS 1   // Use drawContours function iso circle
+#define AR_FILTER_CROSSHAIR     1   // Show centre of frame with crosshair
+#define AR_FILTER_DRAW_CONTOURS 0   // Use drawContours function iso circle
 #define AR_FILTER_DRAW_CIRCLES  1   // Draw circles
 #define AR_FILTER_DRAW_BOXES 	1   // Draw boxes
 #define AR_FILTER_SHOW_MEM      1   // Print object locations to terminal
 #define AR_FILTER_SAVE_FRAME    0   // Save a frame for post-processing
 #define AR_FILTER_MEASURE_FPS   1   // Measure average FPS
 #define AR_FILTER_CALIBRATE_CAM 0   // Calibrate camera
-#define AR_FILTER_WORLDPOS 		0   // Use world coordinates
-#define AR_FILTER_NOYAW 		1   // Output in body horizontal XY
-#define AR_FILTER_TIMEOUT       150 // Frames from start
+#define AR_FILTER_WORLDPOS 		1   // Use world coordinates
+#define AR_FILTER_NOYAW 		0   // Output in body horizontal XY
+#define AR_FILTER_TIMEOUT       50 // Frames from start
 #define AR_FILTER_MAX_OBJECTS   25  // Maximum nr of objects
 
 static void             active_random_filter_header ( Mat& sourceFrame );
@@ -75,10 +77,12 @@ static void 			body2world 			( trackResults* trackRes, struct 	FloatEulers * eul
 static double 			correctRadius		( double r, double f, double k );
 static Rect 			setISPvars 			( struct FloatEulers* eulerAngles, uint16_t width, uint16_t height );
 static vector<double> 	estimatePosition	( uint16_t xp, uint16_t yp, uint32_t area, double k = 0, uint16_t calArea = 0, uint16_t orbDiag = 0 );
+static void             correctPerspective  (double x_in, double y_in, double max, double* x_out, double* y_out);
 static bool 			getNewPosition		( uint8_t nextDir, uint16_t* newRow, uint16_t* newCol, int* maxRow, int* maxCol );
 static void             eraseMemory         ( void );
 static void             getYUVColours       ( Mat& sourceFrame, uint16_t row, uint16_t col, uint8_t* Y, uint8_t* U, uint8_t* V );
 static void             createSearchGrid    (uint16_t x_p, uint16_t y_p, Point searchGrid[], uint8_t searchLayer, uint16_t sGridSize, int* maxRow, int* maxCol);
+static double           reversePixel        (double r);
 // Flood CW declarations
 static bool             processImage_cw     ( Mat& sourceFrame, Mat& destFrame, uint16_t sampleSize );
 static int              pixFindContour_cw   ( Mat& sourceFrame, Mat& destFrame, uint16_t row, uint16_t col, uint8_t prevDir, bool cascade );
@@ -130,18 +134,17 @@ uint8_t     AR_FILTER_CDIST_YTHRES      = 2;
 uint8_t     AR_FILTER_CDIST_UTHRES      = 0;
 uint8_t     AR_FILTER_CDIST_VTHRES      = 0;
 // 1.525 too much - 1.5 (just) too little
-double      default_k                   = 1.11; // 1.053? 1.22425040841 max                                                      // Fisheye correction factor (1.085)
+double      default_k                   = 1.07; // 1.11/1.207? 1.22425040841 max                                                      // Fisheye correction factor (1.085)
 uint16_t    default_calArea             = 10635;                                                         // Calibrate at full resolution (5330)
 double      default_orbDiag             = /*sqrt(2) */ (CFG_MT9F002_X_ADDR_MAX - CFG_MT9F002_X_ADDR_MIN);  // Measured circular image diagonal using full resolution
 
-/* FAKE LIGHT
-uint8_t     AR_FILTER_Y_MIN             = 0;                            // 0  [0,65 84,135 170,255]zoo 45
-uint8_t     AR_FILTER_Y_MAX             = 255;                          // 255
-uint8_t     AR_FILTER_U_MIN             = 118;                          // 84
-uint8_t     AR_FILTER_U_MAX             = 170;                          // 113
-uint8_t     AR_FILTER_V_MIN             = 155;                          // 218 -> 150?
-uint8_t     AR_FILTER_V_MAX             = 255;                          // 240 -> 255?
-*/
+/* FAKE LIGHT */
+uint8_t     AR_FILTER_Y_MIN             = 60;                            // 0  [0,65 84,135 170,255]zoo 45
+uint8_t     AR_FILTER_Y_MAX             = 200;                          // 255
+uint8_t     AR_FILTER_U_MIN             = 115;                          // 84
+uint8_t     AR_FILTER_U_MAX             = 145;                          // 113
+uint8_t     AR_FILTER_V_MIN             = 160;                          // 218 -> 150?
+uint8_t     AR_FILTER_V_MAX             = 195;                          // 240 -> 255?
 
 /* DAYLIGHT
 uint8_t 	AR_FILTER_Y_MIN 			= 0;                           // 0  [0,65 84,135 170,255]zoo 45
@@ -161,14 +164,14 @@ uint8_t     AR_FILTER_V_MIN             = 150;                          // 218 -
 uint8_t     AR_FILTER_V_MAX             = 209;                          // 240 -> 255?
 */
 
-/* Cyberzoo */
+/* Cyberzoo
 uint8_t     AR_FILTER_Y_MIN             = 120;                           // 0  [0,65 84,135 170,255]zoo 45
 uint8_t     AR_FILTER_Y_MAX             = 200;                          // 255
 uint8_t     AR_FILTER_U_MIN             = 115;                          // 84
 uint8_t     AR_FILTER_U_MAX             = 145;                          // 113
 uint8_t     AR_FILTER_V_MIN             = 145;                          // 218 -> 150?
 uint8_t     AR_FILTER_V_MAX             = 195;                          // 240 -> 255?
-
+*/
 double 	    AR_FILTER_IMAGE_CROP_FOVY 	= 45 * M_PI / 180.0; 		    // Radians
 double 	    AR_FILTER_CROP_X 			= 1.2;
 uint8_t     AR_FILTER_MEMORY 			= 15;
@@ -189,8 +192,10 @@ static uint16_t 	    layerDepth      = 0;
 static uint16_t 	    sample          = 0;
 static uint16_t 	    runCount        = 0;
 static uint16_t 	    maxId 		    = 0;
-static uint16_t         ispWidth;
-static uint16_t         ispHeight;
+static uint16_t         ispWidth        = MT9F002_OUTPUT_HEIGHT;
+static uint16_t         ispHeight       = MT9F002_OUTPUT_WIDTH;
+static uint16_t         initialWidth;
+static uint16_t         initialHeight;
 static uint16_t         cropCol;
 static double           ispScalar;
 Rect 			        objCrop;
@@ -210,6 +215,12 @@ vector<memoryBlock>     neighbourMem;
 vector<trackResults>    trackRes;
 
 void active_random_filter_init(void){
+    ispScalar                   = mt9f002.output_scaler * 2.0/((double) mt9f002.y_odd_inc + 1.0);
+    ispHeight                   = round((CFG_MT9F002_X_ADDR_MAX - CFG_MT9F002_X_ADDR_MIN) * ispScalar);
+    ispWidth                    = round((CFG_MT9F002_Y_ADDR_MAX - CFG_MT9F002_Y_ADDR_MIN) * ispScalar);
+    initialWidth                = mt9f002.output_width;
+    initialHeight               = mt9f002.output_height;
+
 }
 
 void active_random_filter(char* buff, uint16_t width, uint16_t height, struct FloatEulers* eulerAngles){
@@ -229,14 +240,14 @@ void active_random_filter(char* buff, uint16_t width, uint16_t height, struct Fl
 	for(r=0; r < trackRes.size(); r++){                             // Convert angles & Write/Print output
 		cam2body(&trackRes[r]);						                // Convert from camera angles to body angles (correct for roll)
 		body2world(&trackRes[r], eulerAngles); 		                // Convert from body angles to world coordinates (correct yaw and pitch)
-		identifyObject(&trackRes[r]);                              // Identify the spotted neighbours
+		identifyObject(&trackRes[r]);                               // Identify the spotted neighbours
 	}
 #if AR_FILTER_MOD_VIDEO
-	mod_video(sourceFrameCrop, frameGrey);                              // Modify the sourceframe
+	mod_video(sourceFrameCrop, frameGrey);                              // Modify the sourceframesourceFrame.cols-1
 #endif
 #if AR_FILTER_CROSSHAIR
-	line(sourceFrame, Point(0,sourceFrame.rows / 2), Point(sourceFrame.cols-1, sourceFrame.rows / 2), Scalar(0,0), 4);
-	line(sourceFrame, Point(sourceFrame.cols / 2,0), Point(sourceFrame.cols / 2, sourceFrame.rows-1), Scalar(0,0), 4);
+	line(sourceFrame, Point(crop.x, sourceFrame.rows / 2 + 0.25 * ispHeight * (tan(eulerAngles->phi))), Point(crop.x + crop.width, sourceFrame.rows / 2 - 0.25 * ispHeight * (tan(eulerAngles->phi))), Scalar(0,0), 1);
+	line(sourceFrame, Point(sourceFrame.cols / 2 - 0.25 * ispWidth * (tan(eulerAngles->phi)),0), Point(sourceFrame.cols / 2 + 0.25 * ispWidth * (tan(eulerAngles->phi)), sourceFrame.rows-1), Scalar(0,0), 1);
 #endif // AR_FILTER_MOD_VIDEO
 	frameGrey.release(); 			                                // Release Mat
 	sourceFrameCrop.release();
@@ -247,24 +258,36 @@ void active_random_filter(char* buff, uint16_t width, uint16_t height, struct Fl
 
 Rect setISPvars(struct FloatEulers* eulerAngles, uint16_t width, uint16_t height){
     // This function computes the cropping according to the desires FOV Y and the current euler angles
-#if AR_FILTER_ISP_CROP
-    ispHeight                   = MT9F002_OUTPUT_WIDTH;
-    ispWidth                    = MT9F002_OUTPUT_HEIGHT;
-#else
+#if !AR_FILTER_ISP_CROP
     ispHeight                   = width;
     ispWidth                    = height;
 #endif
-    ispScalar                   = mt9f002.output_scaler * 2.0/((double) mt9f002.x_odd_inc + 1.0);
-    double horizonDeviation     = 0.5 * M_PI - eulerAngles->theta - AR_FILTER_CAMERA_ANGLE;
-    uint16_t top                = (uint16_t) round((CFG_MT9F002_X_ADDR_MAX - CFG_MT9F002_X_ADDR_MIN) * ispScalar * (horizonDeviation + AR_FILTER_IMAGE_CROP_FOVY * 0.5) / M_PI);
-    uint16_t desOffset          = (uint16_t) round((CFG_MT9F002_X_ADDR_MAX - CFG_MT9F002_X_ADDR_MIN) * ispScalar * (horizonDeviation - AR_FILTER_IMAGE_CROP_FOVY * 0.5) / M_PI);
-    desOffset                  += 0.5 * ((uint16_t) ispWidth * tan(eulerAngles->phi));
-    uint16_t desHeight          = top - desOffset - 0.5 * ((uint16_t) ispWidth * tan(eulerAngles->phi));
-    if(desOffset > ispHeight){
-        desOffset                   = 0;
-    }
+    double horizonPos           = reversePixel(-eulerAngles->theta - AR_FILTER_CAMERA_ANGLE);
+    double horizonDeviation     = - eulerAngles->theta - AR_FILTER_CAMERA_ANGLE;
+    uint16_t desOffset          = (uint16_t) reversePixel(horizonDeviation - AR_FILTER_IMAGE_CROP_FOVY * 0.5);
+    uint16_t top                = (uint16_t) reversePixel(horizonDeviation + AR_FILTER_IMAGE_CROP_FOVY * 0.5);
+#if AR_FILTER_VERBOSE
+    vector<double> topPos       = estimatePosition(top, (uint16_t) ispWidth/2.0, default_calArea);
+    vector<double> botPos       = estimatePosition(desOffset, (uint16_t) ispWidth/2.0, default_calArea);
+    VERBOSE_PRINT("topPos: %0.2f  botPos: %0.2f (hD: %0.2f  fov: %0.2f)\n", topPos[1] * 180 / M_PI, botPos[1] * 180 / M_PI, horizonDeviation * 180 / M_PI, AR_FILTER_IMAGE_CROP_FOVY * 0.5 * 180 / M_PI);
+#endif
+    desOffset                  -=  0.25 * ispWidth * fabs(tan(eulerAngles->phi));
+    top                        +=  0.25 * ispWidth * fabs(tan(eulerAngles->phi));
+    uint16_t desHeight          = (top - desOffset);
+#if AR_FILTER_ISP_CROP
+    int16_t fillHeight          = (int16_t) round( 0.5*initialWidth - (horizonPos - desOffset) );
+    desOffset                  -= fillHeight;
+    desHeight                  += fillHeight;
+#endif
+    VERBOSE_PRINT("ispScalar: %0.2f, desOffset: %d, ispHeight: %d, desHeight: %d\n",ispScalar, desOffset,ispHeight,desHeight);
+
     if(desHeight > ispHeight){
-        desHeight                   = ispHeight;
+        desOffset = 0;
+        desHeight = ispHeight;
+    }
+    if(desHeight > initialWidth){
+        desOffset                  += (uint16_t) round((desHeight - initialWidth) / 2.0);
+        desHeight                   = initialWidth;
     }
     if((desHeight + desOffset) > ispHeight){
         desOffset                   = ispHeight - desHeight;
@@ -273,11 +296,18 @@ Rect setISPvars(struct FloatEulers* eulerAngles, uint16_t width, uint16_t height
         desOffset--;
     }
 #if AR_FILTER_ISP_CROP
-    cropCol                     = 0;
+    cropCol                     = desOffset + fillHeight;
     mt9f002.offset_x            = MT9F002_INITIAL_OFFSET_X + desOffset / ispScalar;
-    mt9f002.output_width        = desHeight / ispScalar;
-    Rect crop                   = cvRect(0,0,width,height);
-    mt9f002_set_resolution(&mt9f002);
+    mt9f002.output_width        = desHeight;
+    mt9f002.sensor_width        = desHeight / ispScalar;
+    Rect crop;
+    if(fillHeight >= 0 && desHeight <= width){
+        crop                   = cvRect(fillHeight, 0, desHeight - fillHeight, height);
+    }
+    else{
+        crop                   = cvRect(0, 0, width, height);
+    }
+    mt9f002_update_resolution(&mt9f002);
 #else
     cropCol                     = desOffset;
     Rect crop                   = cvRect(desOffset,0,desHeight,ispWidth);
@@ -380,7 +410,7 @@ void identifyObject(trackResults* trackRes){
         }
     }
     // We haven't identified
-    PRINT("New object at (%d, %d)p (%f, %f)c (%f, %f)b (%f, %f)w\n", trackRes->x_p, trackRes->y_p, trackRes->x_c, trackRes->y_c, trackRes->x_b, trackRes->y_b, trackRes->x_w, trackRes->y_w);
+    PRINT("New object at (%4d, %4d)p (%6.2f, %6.2f)c (%5.2f, %5.2f)b (%5.2f, %5.2f)w\n", trackRes->x_p, trackRes->y_p, trackRes->x_c * 180 / M_PI, trackRes->y_c * 180 / M_PI, trackRes->x_b, trackRes->y_b, trackRes->x_w, trackRes->y_w);
     memoryBlock curN;
     curN.lastSeen 	= runCount;
     curN.id 		= maxId;
@@ -425,16 +455,23 @@ vector<double> estimatePosition(uint16_t xp, uint16_t yp, uint32_t area, double 
     // Convert back to Cartesian
     double corX             = corR * cos(theta);
     double corY             = corR * sin(theta);
-    double corArea          = area * pow(corR / r, 2.0);                                    // radius = sqrt(area) / sqrt(M_PI)     --->    newRadius = radius * corR / r   --->    corArea = M_PI * newRadius * newRadius
-    // Calculate distance
-    double dist             = sqrt((double) calArea) / sqrt(corArea);
     // Calculate max width and height of undistorted frame
     double maxX             = correctRadius(ispWidth * 0.5, f, k);
     double maxY             = correctRadius(ispHeight * 0.5, f, k);
+    double perX, perY;
+    correctPerspective(corX, corY, maxY, &perX, &perY);
+    double maxPerX, maxPerY, tmp;
+    correctPerspective(maxX,  0.0, maxY, &maxPerX, &tmp);
+    correctPerspective(0.0 , maxY, maxY, &tmp, &maxPerY);
+    VERBOSE_PRINT("Point (%0f, %0f) corrected to (%0f, %0f) corMax(%0f, %0f)\n",corX, corY, perX, perY, maxPerX, maxPerY);
+    double corArea          = area * pow(corR / r, 2.0);                                    // radius = sqrt(area) / sqrt(M_PI)     --->    newRadius = radius * corR / r   --->    corArea = M_PI * newRadius * newRadius
+    // Calculate distance
+    double dist             = sqrt((double) calArea) / sqrt(corArea);
+
     VERBOSE_PRINT("orbDiag (%0.4f) fovX (%0.4f - %d px) corX/maxX (%0.4f / %0.4f) fovY (%0.4f - %d px) corY/maxY (%0.4f / %0.4f)\n", orbDiag * ispScalar, fovX * 180/M_PI, ispWidth, corX, maxX, fovY * 180/M_PI, ispHeight, corY, maxY);
     // Calculate angles wrt camera
-    double xAngle           = (fovX * 0.5) * (corX / maxX);                                   // Assume all non-linearities have been removed from corX and corY
-    double yAngle           = (fovY * 0.5) * (corY / maxY);                                   // Then scale them according to the max values and axis FoV
+    double xAngle           = (fovX * 0.5) * (perX / maxPerX);                                   // Assume all non-linearities have been removed from corX and corY
+    double yAngle           = (fovY * 0.5) * (perY / maxPerY);                                   // Then scale them according to the max values and axis FoV
     //double xAngle = atan(corX/f);
     //double yAngle = atan(corY/f);
     // Store in dest and parse it back
@@ -450,7 +487,49 @@ vector<double> estimatePosition(uint16_t xp, uint16_t yp, uint32_t area, double 
 double correctRadius(double r, double f, double k){
     // This function calculates the corrected radius for radial distortion
     // According to the article "A Generic Non-Linear Method for Fisheye Correction" by Dhane, Kutty and Bangadkar
-    return f / k * tan( asin( sin( atan( r / f ) ) * k ) );
+    return f * tan( asin( sin( atan( r / f ) ) * k ) );
+}
+
+double reversePixel(double angle){
+    // Calclate used parameters
+    double f        = default_orbDiag * ispScalar / (4 * sin(M_PI / 4));
+    double maxY     = correctRadius(ispHeight * 0.5, f, default_k);
+    double maxPerY, tmp;
+    correctPerspective(0.0 , maxY, maxY, &tmp, &maxPerY);
+    double minZ     = sinf(AR_FILTER_CAMERA_ANGLE);
+    double zCor     = 3.45;
+    double corFrac  = 1.0 / (1.0 + zCor * (-minZ));
+    // Reverse correct angle
+    double perY     = angle / (0.5 * M_PI) * maxPerY;
+    // Reverse correct perspective
+    double corY     = perY / (cosf(AR_FILTER_CAMERA_ANGLE) * corFrac);
+    // Reverse correft fisheye
+    double y        = f * tan( asin( sin( atan( corY / f ) ) / default_k ) );
+    // Translate to image coords
+    double y_p      = y + (0.5 * ispHeight);
+    VERBOSE_PRINT("angle: %0.2f, perY: %0.0f / %0.0f, corY: %0.0f / %0.0f, y: %0.0f / %0.0f, y_p: %0.0f / %d\n",angle * 180 / M_PI,perY, maxPerY,corY, maxY,y, ispHeight * 0.5,y_p, ispHeight);
+    return y_p;
+    //double y        = angle / (0.5 * M_PI) * 0.5 * ispHeight;
+    //double f = default_orbDiag * ispScalar / (4 * sin(M_PI / 4));
+    //r =  r / (0.5 * 4 * asin((((double) ispHeight))/(4 * f))) * correctRadius(ispHeight * 0.5, f, default_k);
+    //return f * tan( asin( sin( atan( r * default_k / f ) ) / default_k ) );
+}
+
+void correctPerspective(double x_in, double y_in, double max, double* x_out, double* y_out){
+    // Rotate vector around x
+    double x        = AR_FILTER_CAMERA_ANGLE;
+    double x_rot    = x_in / max;
+    double y_rot    = y_in / max * cosf(x);
+    double z_rot    = sinf(x) * y_in / max;
+    double minZ     = sinf(x);
+    double zCor     = 3.45;
+    double corFrac  = 1.0 / (1.0 + zCor * (-minZ));
+    //printf("x_rot: %0.2f, y_rot: %0.2f, z_rot: %0.2f, max: %0.2f, minZ: %0.2f, corFrac: %0.2f\n", x_rot, y_rot, z_rot, max, minZ, corFrac);
+    //printf("x_out = %0.2f * %0.2f * (%0.2f + %0.2f * %0.2f * (%0.2f - %0.2f))\n", max, corFrac, x_rot, x_rot, zCor, z_rot, minZ);
+    //printf("y_out = %0.2f * %0.2f * %0.2f\n", max, corFrac, y_rot);
+    *x_out          = max * corFrac * (x_rot + x_rot * zCor * (z_rot - minZ));
+    *y_out          = max * corFrac * y_rot;
+    return;
 }
 
 void cam2body(trackResults* trackRes){
@@ -511,7 +590,7 @@ bool addContour(vector<Point> contour, uint16_t offsetX, uint16_t offsetY){
         VERBOSE_PRINT("Analyzing contour of length %d\n", contour.size());
         m = moments(contour);
     }
-    PRINT("m00: %f  x: %f  y: %f\n",m.m00, m.m10 / m.m00, m.m01 / m.m00);
+    VERBOSE_PRINT("m00: %f  x: %f  y: %f\n",m.m00, m.m10 / m.m00, m.m01 / m.m00);
     //double e = (pow(m.mu20 - m.mu02,2.0) - 4 * pow(m.mu11,2.0)) / pow(m.mu20 + m.mu02,2.0);
     double semi_major   = sqrt( 2 * ( m.mu20 + m.mu02 + sqrt( pow(m.mu20 - m.mu02, 2.0) + 4 * pow( m.mu11, 2.0 ) ) ) / m.m00 );
     double semi_minor   = sqrt( 2 * ( m.mu20 + m.mu02 - sqrt( pow(m.mu20 - m.mu02, 2.0) + 4 * pow( m.mu11, 2.0 ) ) ) / m.m00 );
@@ -522,7 +601,7 @@ bool addContour(vector<Point> contour, uint16_t offsetX, uint16_t offsetY){
         if ( m.m00 / corArea > AR_FILTER_MIN_CIRCLE_PERC && corArea > (AR_FILTER_MIN_CIRCLE_SIZE * ispScalar * ispScalar) )
         {
 
-            PRINT("ecc: %f   smax: %f    smin: %f    corArea: %f\n", e, semi_major, semi_minor, corArea);
+            VERBOSE_PRINT("ecc: %f   smax: %f    smin: %f    corArea: %f\n", e, semi_major, semi_minor, corArea);
             trackResults curRes;
             vector<double> position(3);
             curRes.x_p 		    = m.m10 / m.m00 + cropCol + offsetX;
@@ -534,6 +613,15 @@ bool addContour(vector<Point> contour, uint16_t offsetX, uint16_t offsetY){
             curRes.y_c 		    = position[1];
             curRes.r_c 		    = position[2];
             if(curRes.r_c <= AR_FILTER_CAM_RANGE){
+                for(uint8_t tr = 0; tr < trackRes.size(); tr++){
+                    if( sqrt( pow( (double) (curRes.x_p - trackRes[tr].x_p), 2.0) + pow( (double) (curRes.y_p - trackRes[tr].y_p),2.0)) < sqrt( max( curRes.area_p, trackRes[tr].area_p ) / M_PI ) ){
+                        if(curRes.area_p < trackRes[tr].area_p){
+                            return false;
+                        }
+                        trackRes.erase(trackRes.begin() + tr);
+                        tr--;
+                    }
+                }
                 if(trackRes.size() >= AR_FILTER_MAX_OBJECTS){
                     uint8_t maxInd  = 0;
                     double  maxDist = 0.0;
@@ -1456,7 +1544,7 @@ void mod_video(Mat& sourceFrame, Mat& frameGrey){
 	putText(sourceFrame, text, Point(10,sourceFrame.rows-40), FONT_HERSHEY_PLAIN, 2, Scalar(0,255,255), 2);
 	for(unsigned int r=0; r < trackRes.size(); r++)         // Convert angles & Write/Print output
 	{
-	    sprintf(text,"x:%5.2f y:%5.2f", trackRes[r].x_w, trackRes[r].y_w);
+	    sprintf(text,"x%5.2f y%5.2f z%5.2f", trackRes[r].x_w, trackRes[r].y_w, trackRes[r].z_w);
 	    putText(sourceFrame, text, Point(10,40+r*40), FONT_HERSHEY_PLAIN, 2, Scalar(0,255,255), 2);
 	}
 	sprintf(text,"t:%4.1f%% o:%4.1f%%", pixCount/((float) ispHeight * ispWidth) * 100, pixSucCount/((float) pixCount) * 100);

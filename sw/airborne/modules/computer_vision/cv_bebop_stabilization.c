@@ -63,13 +63,13 @@ static const GLfloat textureVertices[] = {
 int   noroll 		= 0;
 int   nopitch 		= 0;
 int   noprojection 	= 0;
-float k_fisheye 	= 1.053;
-float scale_x 		= 0.52;
-float scale_y 		= 0.52;
-float focalLength 	= 1 / ( 4 * 0.70711 ); // = sind(180/4) 0.70711
-float near 			= 0.1;
-float far 			= 100.0;
-float angleOfView 	= 150; // 160 degrees
+float k_fisheye 	= 1.207;
+float scale_x 		= 1.0;
+float scale_y 		= 1.0;
+float focalLength 	= 2 / ( 4 * 0.70711 ); // = sind(180/4) 0.70711
+float near 			= 0.075;
+float far 			= 1.5;
+float angleOfView 	= 140.0; // 160 degrees
 float imgRot 		= 0.0;
 float frameRot 		= 0.0;
 
@@ -86,7 +86,7 @@ struct image_t* cv_bebop_stabilization_func (struct image_t *img)
 	glEnableVertexAttribArray(1);
 	mat4 modelviewProjection, modelMat, viewMat, modelviewMat, projectionMat;
 	vec4 eye, forward, up;
-	eye[0] 		= 0.0;  eye[1] 		=  0.0; eye[2] 		= -1.0; 	eye[3] 		= 1.0;
+	eye[0] 		= 0.0;  eye[1] 		=  0.0; eye[2] 		= -0.25; 	eye[3] 		= 1.0;
 	forward[0]  = 0.0;  forward[1] 	=  0.0; forward[2]  =  1.0; 	forward[3] 	= 1.0;
 	up[0] 		= 0.0;  up[1] 		=  1.0; up[2] 		=  0.0; 	up[3] 		= 1.0;
 	// Create The model matrix
@@ -119,13 +119,61 @@ struct image_t* cv_bebop_stabilization_func (struct image_t *img)
 	matrixMultiply(viewMat, modelMat, modelviewMat);
 	matrixMultiply(projectionMat, modelviewMat, modelviewProjection);
 
-	/*
+	printf("Eye:\n");
+	printf("| %5.2f\t%5.2f\t%5.2f\t%5.2f |\n",eye[0],eye[1],eye[2],eye[3]);
+	printf("Forward:\n");
+	printf("| %5.2f\t%5.2f\t%5.2f\t%5.2f |\n",forward[0],forward[1],forward[2],forward[3]);
+	printf("Up:\n");
+	printf("| %5.2f\t%5.2f\t%5.2f\t%5.2f |\n",up[0],up[1],up[2],up[3]);
+	printf("Center:\n");
+	printf("| %5.2f\t%5.2f\t%5.2f\t%5.2f |\n",center[0],center[1],center[2],center[3]);
+
 	printf("          Projection                          View                              Model\n");
 	printf("| %5.2f\t%5.2f\t%5.2f\t%5.2f |   | %5.2f\t%5.2f\t%5.2f\t%5.2f |   | %5.2f\t%5.2f\t%5.2f\t%5.2f |\n", projectionMat[0], projectionMat[4], projectionMat[8],  projectionMat[12], viewMat[0], viewMat[4], viewMat[8],  viewMat[12], modelMat[0], modelMat[4], modelMat[8],  modelMat[12]);
 	printf("| %5.2f\t%5.2f\t%5.2f\t%5.2f |   | %5.2f\t%5.2f\t%5.2f\t%5.2f |   | %5.2f\t%5.2f\t%5.2f\t%5.2f |\n", projectionMat[1], projectionMat[5], projectionMat[9],  projectionMat[13], viewMat[1], viewMat[5], viewMat[9],  viewMat[13], modelMat[1], modelMat[5], modelMat[9],  modelMat[13]);
 	printf("| %5.2f\t%5.2f\t%5.2f\t%5.2f | * | %5.2f\t%5.2f\t%5.2f\t%5.2f | * | %5.2f\t%5.2f\t%5.2f\t%5.2f |\n", projectionMat[2], projectionMat[6], projectionMat[10], projectionMat[14], viewMat[2], viewMat[6], viewMat[10], viewMat[14], modelMat[2], modelMat[6], modelMat[10], modelMat[14]);
 	printf("| %5.2f\t%5.2f\t%5.2f\t%5.2f |   | %5.2f\t%5.2f\t%5.2f\t%5.2f |   | %5.2f\t%5.2f\t%5.2f\t%5.2f |\n", projectionMat[3], projectionMat[7], projectionMat[11], projectionMat[15], viewMat[3], viewMat[7], viewMat[11], viewMat[15], modelMat[3], modelMat[7], modelMat[11], modelMat[15]);
-	*/
+
+	printf("          MVP                 \n");
+	printf("| %5.2f\t%5.2f\t%5.2f\t%5.2f |\n", modelviewProjection[0], modelviewProjection[4], modelviewProjection[8],  modelviewProjection[12]);
+	printf("| %5.2f\t%5.2f\t%5.2f\t%5.2f |\n", modelviewProjection[1], modelviewProjection[5], modelviewProjection[9],  modelviewProjection[13]);
+	printf("| %5.2f\t%5.2f\t%5.2f\t%5.2f |\n", modelviewProjection[2], modelviewProjection[6], modelviewProjection[10], modelviewProjection[14]);
+	printf("| %5.2f\t%5.2f\t%5.2f\t%5.2f |\n", modelviewProjection[3], modelviewProjection[7], modelviewProjection[11], modelviewProjection[15]);
+
+	vec4 testPoint;
+	testPoint[0] =-1.0;
+	testPoint[1] = 1.0;
+	testPoint[2] = 0.0;
+	testPoint[3] = 1.0;
+	vec4 testOutput;
+	matvecMultiply(modelviewProjection, testPoint, testOutput);
+	printf("point1:\n");
+	printf("| %5.2f\t%5.2f\t%5.2f\t%5.2f |\n",testOutput[0],testOutput[1],testOutput[2],testOutput[3]);
+
+	testPoint[0] = 1.0;
+	testPoint[1] = 1.0;
+	testPoint[2] = 0.0;
+	testPoint[3] = 1.0;
+	matvecMultiply(modelviewProjection, testPoint, testOutput);
+	printf("point2:\n");
+	printf("| %5.2f\t%5.2f\t%5.2f\t%5.2f |\n",testOutput[0],testOutput[1],testOutput[2],testOutput[3]);
+
+	testPoint[0] = 1.0;
+	testPoint[1] =-1.0;
+	testPoint[2] = 0.0;
+	testPoint[3] = 1.0;
+	matvecMultiply(modelviewProjection, testPoint, testOutput);
+	printf("point3:\n");
+	printf("| %5.2f\t%5.2f\t%5.2f\t%5.2f |\n",testOutput[0],testOutput[1],testOutput[2],testOutput[3]);
+
+	testPoint[0] =-1.0;
+	testPoint[1] =-1.0;
+	testPoint[2] = 0.0;
+	testPoint[3] = 1.0;
+	matvecMultiply(modelviewProjection, testPoint, testOutput);
+	printf("point4:\n");
+	printf("| %5.2f\t%5.2f\t%5.2f\t%5.2f |\n",testOutput[0],testOutput[1],testOutput[2],testOutput[3]);
+
 	float aspectRatio 			= mt9f002.output_width /  mt9f002.output_height;
 	// Calulate parameters
 	const GLfloat lensCentre[] 	= { 0, 0 };
