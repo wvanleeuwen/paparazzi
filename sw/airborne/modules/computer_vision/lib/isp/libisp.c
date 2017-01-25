@@ -207,18 +207,19 @@ int isp_request_statistics_yuv_window( uint16_t x_start, uint16_t x_end, uint16_
     requestWindow[3] = y_end;
     requestWindow[4] = 0;//x_odd_inc;
     requestWindow[5] = 0;//y_odd_inc;
-    printf("[YUV-STAT] Requesting window: [%d %d],[%d %d], [%d %d]\n", requestWindow[0], requestWindow[1], requestWindow[2], requestWindow[3], requestWindow[4], requestWindow[5]);
+    //printf("[YUV-STAT] Requesting window: [%d %d],[%d %d], [%d %d]\n", requestWindow[0], requestWindow[1], requestWindow[2], requestWindow[3], requestWindow[4], requestWindow[5]);
     return 0;
 }
 
 int isp_set_statistics_yuv_window( void ){
-    printf("[YUV-STAT] Setting window: [%d %d],[%d %d]\n", requestWindow[0], requestWindow[1], requestWindow[2], requestWindow[3]);
+    //printf("[YUV-STAT] Setting window: [%d %d],[%d %d]\n", requestWindow[0], requestWindow[1], requestWindow[2], requestWindow[3]);
     isp_config.statistics_yuv.window_pos_x.window_x_start   = requestWindow[0];
     isp_config.statistics_yuv.window_pos_x.window_x_end     = requestWindow[1];
     isp_config.statistics_yuv.window_pos_y.window_y_start   = requestWindow[2];
     isp_config.statistics_yuv.window_pos_y.window_y_end     = requestWindow[3];
     isp_config.statistics_yuv.increments_log2.x_log2_inc    = requestWindow[4];
     isp_config.statistics_yuv.increments_log2.y_log2_inc    = requestWindow[5];
+    /*
     printf("[YUV-STAT] Current settings: [%d %d] [%d %d] [%d %d] [%d %d] [%d] [%d %d] [%d]\n",
             isp_config.statistics_yuv.window_pos_x.window_x_start,
             isp_config.statistics_yuv.window_pos_x.window_x_end,
@@ -233,6 +234,7 @@ int isp_set_statistics_yuv_window( void ){
             isp_config.statistics_yuv.increments_log2.y_log2_inc,
             isp_config.statistics_yuv.awb_threshold.awb_threshold
     );
+    */
     return 0;
 }
 
@@ -249,7 +251,7 @@ int isp_get_statistics_yuv(struct isp_yuv_stats_t *yuv_stats) {
     avi_isp_statistics_yuv_get_registers(&isp_ctx, &stats_yuv);
 
     if(!stats_yuv.measure_status.done){
-        printf("[YUV-STAT] Waiting for YUV stats\n");
+        //printf("[YUV-STAT] Waiting for YUV stats\n");
         curWait++;
         if(curWait <= AVI_ISP_STAT_YUV_MAX_WAIT){
             isp_config.statistics_yuv.measure_req.clear = 0; // Clear current results

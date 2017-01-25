@@ -20,7 +20,13 @@
       <dl_setting var="AR_FILTER_MIN_POINTS"        min="1" step="1"        max="5000"     	module="computer_vision/active_random_filter" shortname="Minimum contour length"/>     
       <dl_setting var="AR_FILTER_MIN_CIRCLE_SIZE"   min="1" step="1"        max="145"     	module="computer_vision/active_random_filter" shortname="Minimum contour area"/>     
       <dl_setting var="AR_FILTER_MAX_CIRCLE_DEF"    min="0" step="0.001" 	max="1"     	module="computer_vision/active_random_filter" shortname="Maximum contour eccentricity"/>  
-      <dl_setting var="AR_FILTER_MIN_CROP_AREA"     min="1" step="10"     	max="5000"     	module="computer_vision/active_random_filter" shortname="Minimum rectangle crop area"/>     
+      <dl_setting var="AR_FILTER_MIN_CROP_AREA"     min="1" step="10"     	max="5000"     	module="computer_vision/active_random_filter" shortname="Minimum rectangle crop area"/>
+      
+      <dl_setting var="default_calArea"   			min="1" step="1"        max="30000"    	module="computer_vision/active_random_filter" shortname="calArea"/>     
+      <dl_setting var="default_k"    				min="1" step="0.001" 	max="1.22"     	module="computer_vision/active_random_filter" shortname="k"/>  
+      <dl_setting var="perspective_zCor"     		min="0" step="0.001"   	max="5"     	module="computer_vision/active_random_filter" shortname="zCor"/> 
+      <dl_setting var="scale_f"    					min="0" step="0.001" 	max="3"     	module="computer_vision/active_random_filter" shortname="scale f"/>      
+    
     </dl_settings>
   </dl_settings>
 </settings>

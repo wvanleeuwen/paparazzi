@@ -36,11 +36,11 @@
 #endif
 
 #ifndef CV_AE_AWB_TARGET_BRIGHT
-#define CV_AE_AWB_TARGET_BRIGHT 0.05
+#define CV_AE_AWB_TARGET_BRIGHT 0.125
 #endif
 
 #ifndef CV_AE_AWB_MAX_SATURATED
-#define CV_AE_AWB_MAX_SATURATED 0.0015
+#define CV_AE_AWB_MAX_SATURATED 0.01
 #endif
 
 #ifndef CV_AE_AWB_FTOLERANCE
@@ -52,7 +52,7 @@
 #endif
 
 #ifndef CV_AE_AWB_MU
-#define CV_AE_AWB_MU 0.0312 // 0.0312
+#define CV_AE_AWB_MU 0.0015 // 0.0312
 #endif
 
 #ifndef CV_AE_AWB_MAX_GAINS
@@ -138,27 +138,27 @@ struct image_t* cv_ae_awb_periodic(struct image_t* img) {
                 // filter output: avgU
                 float error = awb_targetAWB - avgU;
                 VERBOSE_PRINT("Adjust blue gain (error: %f)  blue_gain = %f + %f * %d\n", error, mt9f002.gain_blue, awb_mu, awb_muK(error));
-                mt9f002.gain_blue   += awb_mu * awb_muK(error);
+                mt9f002.gain_blue   *= 1 + awb_mu * awb_muK(error);
             }else if((fabs(avgU) + awb_fTolerance) < fabs(avgV)){
                 // filter output: avgV
                 float error = awb_targetAWB - avgV;
                 VERBOSE_PRINT("Adjust red gain (error: %f)  red_gain = %f + %f * %d\n", error, mt9f002.gain_red, awb_mu, awb_muK(error));
-                mt9f002.gain_red    += awb_mu * awb_muK(error);
+                mt9f002.gain_red    *= 1 + awb_mu * awb_muK(error);
             }else{
                 VERBOSE_PRINT("White balance achieved\n");
-                // filter output: 0
-                //error = awb_targetAWB - 0.0;
-                if((mt9f002.target_exposure * 0.95 > mt9f002.real_exposure) && !gains_maxed)
-                {
-                    mt9f002.gain_blue     *= 1 + mt9f002.target_exposure / mt9f002.real_exposure * awb_mu;
-                    mt9f002.gain_red      *= 1 + mt9f002.target_exposure / mt9f002.real_exposure * awb_mu;
-                    mt9f002.gain_green1   *= 1 + mt9f002.target_exposure / mt9f002.real_exposure * awb_mu;
-                    mt9f002.gain_green2   *= 1 + mt9f002.target_exposure / mt9f002.real_exposure * awb_mu;
-                    if(mt9f002.gain_blue >= CV_AE_AWB_MAX_GAINS || mt9f002.gain_red >= CV_AE_AWB_MAX_GAINS  || mt9f002.gain_green1 >= CV_AE_AWB_MAX_GAINS  || mt9f002.gain_green2 >= CV_AE_AWB_MAX_GAINS){
-                        gains_maxed = true;
-                    }
-                    VERBOSE_PRINT("Exposure saturated: new gains(B %f, R %f, G %f, G %f)\r\n", mt9f002.gain_blue, mt9f002.gain_red, mt9f002.gain_green1, mt9f002.gain_green2);
+            }
+            // filter output: 0
+            //error = awb_targetAWB - 0.0;
+            if((mt9f002.target_exposure > mt9f002.real_exposure) && !gains_maxed)
+            {
+                mt9f002.gain_blue     *= 1 + mt9f002.target_exposure / mt9f002.real_exposure * awb_mu;
+                mt9f002.gain_red      *= 1 + mt9f002.target_exposure / mt9f002.real_exposure * awb_mu;
+                mt9f002.gain_green1   *= 1 + mt9f002.target_exposure / mt9f002.real_exposure * awb_mu;
+                mt9f002.gain_green2   *= 1 + mt9f002.target_exposure / mt9f002.real_exposure * awb_mu;
+                if(mt9f002.gain_blue >= CV_AE_AWB_MAX_GAINS || mt9f002.gain_red >= CV_AE_AWB_MAX_GAINS  || mt9f002.gain_green1 >= CV_AE_AWB_MAX_GAINS  || mt9f002.gain_green2 >= CV_AE_AWB_MAX_GAINS){
+                    gains_maxed = true;
                 }
+                VERBOSE_PRINT("Exposure saturated: new gains(B %f, R %f, G %f, G %f)\r\n", mt9f002.gain_blue, mt9f002.gain_red, mt9f002.gain_green1, mt9f002.gain_green2);
             }
             Bound(mt9f002.gain_blue,    2, 75);
             Bound(mt9f002.gain_red,     2, 75);

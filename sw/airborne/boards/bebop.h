@@ -30,7 +30,19 @@
 #include "boards/bebop/mt9f002.h"
 
 #ifndef MT9F002_THETA_OFFSET
-#define MT9F002_THETA_OFFSET -30 * M_PI / 180
+#define MT9F002_THETA_OFFSET -32 * M_PI / 180
+#endif
+
+#ifndef MT9F002_X_OFFSET
+#define MT9F002_X_OFFSET 0.1
+#endif
+
+#ifndef MT9F002_Y_OFFSET
+#define MT9F002_Y_OFFSET 0.0
+#endif
+
+#ifndef MT9F002_Z_OFFSET
+#define MT9F002_Z_OFFSET 0.0
 #endif
 
 #ifndef MT9F002_OUTPUT_WIDTH

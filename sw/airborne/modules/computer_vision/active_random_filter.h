@@ -24,6 +24,8 @@
  */
 #include "std.h"
 
+#define AR_FILTER_MAX_OBJECTS   19  // Maximum nr of objects
+
 typedef struct _trackResults {
     uint16_t     x_p;
     uint16_t     y_p;
@@ -71,6 +73,10 @@ extern uint8_t      AR_FILTER_SAMPLE_STYLE;
 extern uint8_t      AR_FILTER_CDIST_YTHRES;
 extern uint8_t      AR_FILTER_CDIST_UTHRES;
 extern uint8_t      AR_FILTER_CDIST_VTHRES;
+extern double       default_k;
+extern uint16_t     default_calArea;
+extern double       perspective_zCor;
+extern double       scale_f;
 
 // Filter sample styles
 #define AR_FILTER_STYLE_FULL   0

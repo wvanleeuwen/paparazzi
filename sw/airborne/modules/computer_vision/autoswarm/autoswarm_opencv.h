@@ -43,6 +43,7 @@ extern "C" {
 //#define FILTER_FLOOD_OMNI 			0
 //#define FILTER_FLOOD_CW				1
 
+/*
 #define WP__TD 2
 #define WP__GOAL 4
 #define WP__CAM 5
@@ -69,6 +70,7 @@ extern "C" {
  "dec_circle" , \
  "HOME" , \
 }
+*/
 
 extern double 	AUTOSWARM_CIRCLE_R;
 extern double 	AUTOSWARM_SEPERATION;

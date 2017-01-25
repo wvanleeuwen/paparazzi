@@ -4,6 +4,10 @@
     <program name="Flying Robot Commander" command="sw/ext/flyingrobotcommander/frc.py -f ~/paparazzi/sw/ext/flyingrobotcommander/wv_conf.xml -s -i 192.168.40.222"/>
     <program name="FlyingRC: Flight blocks" command="& google-chrome --app=http://192.168.40.222:5000/show/flightblock/"/>
     <program name="FlyingRC: Status" command="& google-chrome --app=http://192.168.40.222:5000/show/status/"/>
+    <program name="Shutdown drone" command="sw/tools/autoswarm/shutdown_drone.sh"/>
+    <program name="Mass uploader CB" command="sw/tools/autoswarm/clean_build.sh"/>
+    <program name="Mass uploader U" command="sw/tools/autoswarm/upload.sh"/>
+    <program name="Mass uploader CBU" command="sw/tools/autoswarm/clean_build_upload.sh"/>
     <program name="Bebop Stream (swarmhub)" command="sw/tools/parrot/bebop/start_mplayer.sh 192.168.40.">
     	<arg flag="" constant="@AC_ID"/>
     </program>

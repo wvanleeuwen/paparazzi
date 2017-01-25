@@ -14,15 +14,16 @@
       <define name="STABILIZATION_INDI_G2_R" value="0.0"/>
     </target>
 
-   <!-- <configure name="HOST" value="192.168.40.$(AC_ID)" />
-    <configure name="MODEM_HOST" value="192.168.40.255" /> -->
+   <configure name="HOST" value="192.168.40.$(AC_ID)" />
+    <configure name="MODEM_HOST" value="192.168.40.255" />
+
 	<define name="USE_GPS_UBX_RTCM" value="TRUE"/>
 	<define name="H264_ROTATE" value="TRUE"/>
     	<!--<define name="GPS_TIMEOUT" value="3"/>-->
     	<define name="MT9F002_SENSOR_WIDTH" value="1920" />
-	<define name="MT9F002_OUTPUT_WIDTH" value="960" /> <!-- 480 / 960 / 1920 -->
-	<define name="MT9F002_OUTPUT_HEIGHT" value="1680" /> <!-- 420 / 840 / 1680 -->
-	<define name="MT9F002_TARGET_FPS" value="20" />
+	<define name="MT9F002_OUTPUT_WIDTH" value="960" /> <!-- 480 / 960 / 1920 / 3840-->
+	<define name="MT9F002_OUTPUT_HEIGHT" value="1680" /> <!-- 420 / 840 / 1680 / 3360 -->
+	<define name="MT9F002_TARGET_FPS" value="30" />
 	<define name="MT9F002_TARGET_EXPOSURE" value="4" /> 
 	<define name="MT9F002_GAIN_GREEN1" value="8.0" />
 	<define name="MT9F002_GAIN_GREEN2" value="8.0" />
@@ -33,18 +34,23 @@
     <module name="motor_mixing"/>
     <module name="actuators" type="bebop"/>
     <module name="imu" type="bebop"/>
-    <!--
+
     <module name="gps" type="ublox"/>
+    <!--
+    <module name="gps" type="datalink"/>
     -->
     <module name="stabilization" type="indi_simple"/>
-    <!--<module name="stabilization" type="indi"/> TODO: check if normal works
-    <module name="stabilization" type="rate_indi" />-->
+    
+    <!--
+    <module name="stabilization" type="indi"/>
+    <module name="stabilization" type="rate_indi" />
+    -->
     <module name="guidance" type="indi">
       <define name="GUIDANCE_INDI_SPECIFIC_FORCE_GAIN" value="-500.0"/>
     </module>
     <module name="ahrs" type="int_cmpl_quat">
-      <configure name="USE_MAGNETOMETER" value="TRUE"/>
-      <define name="AHRS_USE_GPS_HEADING" value="FALSE"/>
+      <configure name="USE_MAGNETOMETER" value="FALSE"/> <!-- TURN ON OUTSIDE -->
+      <define name="AHRS_USE_GPS_HEADING" value="TRUE"/>
     </module>
     <module name="ins" type="extended"/>
   </firmware>
@@ -53,10 +59,7 @@
     <module name="geo_mag"/>
     <module name="air_data"/>
     <module name="send_imu_mag_current"/>
-    <module name="gps" type="datalink"/>
-    <!--
     <module name="gps" type="ubx_ucenter"/>
-    -->
     <module name="logger_file">
       <define name="FILE_LOGGER_PATH" value="/data/ftp/internal_000"/>
     </module>
@@ -65,29 +68,26 @@
 	  <define name="CV_AE_AWB_AV" value="1" />
 	  <define name="CV_AE_AWB_VERBOSE" value="0"/>
     </module>
-
     <module name="cv_active_random_filter">
     	<define name="AR_FILTER_CAMERA" value="front_camera" />
     </module>
-
-<!--
-
-	<module name="autoswarm">
-		<define name="AUTOSWARM_CAMERA" value="front_camera" />
-		<define name="WV_INIT_GLOBAL_ATTRACTOR" value="2" />
-	</module>
-	-->
+    <module name="autoswarm">
+    	<define name="AUTOSWARM_GLOBAL_ATTRACTOR" value="2" />
+	<define name="AUTOSWARM_CAMERA" value="front_camera" />
+    </module>
 	<!--
-	<module name="cv_bebop_stabilization"/> -->
+	<module name="cv_bebop_stabilization"/>
+	-->
 	<module name="video_rtp_stream">
-		<configure name="VIEWVIDEO_HOST" value="192.168.42.65"/>
+		<!--<configure name="VIEWVIDEO_HOST" value="192.168.42.65"/>-->
+		<configure name="VIEWVIDEO_HOST" value="192.168.40.141"/>
 		<configure name="VIEWVIDEO_BROADCAST" value="FALSE" />
 		<define name="VIEWVIDEO_CAMERA" value="front_camera" />
 		<define name="VIEWVIDEO_SHOT_PATH" value="/data/ftp/internal_000" />
-		<define name="VIEWVIDEO_FPS" value="20" />
-		<define name="VIEWVIDEO_WRITE_VIDEO" value="TRUE"/>
+		<define name="VIEWVIDEO_FPS" value="18" />
+		<define name="VIEWVIDEO_WRITE_VIDEO" value="FALSE"/>
 		<define name="VIEWVIDEO_VIDEO_FILE" value="ar_filter_demo"/>
-		<define name="VIEWVIDEO_STREAM_VIDEO" value="FALSE"/>
+		<define name="VIEWVIDEO_STREAM_VIDEO" value="TRUE"/>
 	</module>
   </modules>
 

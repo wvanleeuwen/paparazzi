@@ -31,9 +31,12 @@
 #include "modules/computer_vision/autoswarm/autoswarm.h"
 #include "modules/computer_vision/autoswarm/autoswarm_opencv.h"
 
+#ifndef AUTOSWARM_CAMERA
+#define AUTOSWARM_CAMERA front_camera
+#endif
 
-#if !(WV_INIT_GLOBAL_ATTRACTOR)
-#define WV_INIT_GLOBAL_ATTRACTOR 1
+#ifndef AUTOSWARM_GLOBAL_ATTRACTOR
+#define AUTOSWARM_GLOBAL_ATTRACTOR AUTOSWARM_CIRCLE_CW
 #endif
 
 // Function
@@ -50,8 +53,7 @@ struct image_t* autoswarm_func(struct image_t* img)
 
 void autoswarm_init(void)
 {
-	autoswarm_opencv_init(WV_INIT_GLOBAL_ATTRACTOR);
-	//cv_add_to_device_async(&AUTOSWARM_CAMERA, autoswarm_func, 5);
+	autoswarm_opencv_init(AUTOSWARM_GLOBAL_ATTRACTOR);
 	cv_add_to_device(&AUTOSWARM_CAMERA, autoswarm_func);
 }
 

@@ -27,51 +27,52 @@
     </sector>
   </sectors>
   <exceptions>
-    <exception cond="!InsideCyberZoo(GetPosX(), GetPosY())" deroute="Land here"/>
-    <exception cond="LessThan(5, datalink_time)" deroute="Land here"/>
-    <exception cond="!GpsFixValid()" deroute="Land here" />
+    <exception cond="!InsideCyberZoo(GetPosX(), GetPosY())" 	deroute="Land here"/>
+    <exception cond="LessThan(3, datalink_time)" 		deroute="Land here"/>
+    <exception cond="!GpsFixValid()" 				deroute="Land here" />
+    <exception cond="LessThan(2.5, GetPosAlt())" 			deroute="Land here"/>
   </exceptions>
   <blocks>
     <block name="Wait GPS">
-      <call fun="NavKillThrottle()"/>
+      <call_once fun="NavKillThrottle()"/>
       <while cond="!GpsFixValid()"/>
     </block>
     <block name="Geo init">
       <while cond="LessThan(NavBlockTime(), 2)"/>
-      <call fun="NavSetAltitudeReferenceHere()"/>
+      <call_once fun="NavSetAltitudeReferenceHere()"/>
  	  <!-- <call fun="NavSetGroundReferenceHere()"/> Messes up the InsideCyberZoo function-->   
     </block>
     <block name="Holding point">
-      <call fun="NavKillThrottle()"/>
+      <call_once fun="NavKillThrottle()"/>
       <attitude pitch="0" roll="0" throttle="0" until="FALSE" vmode="throttle"/>
     </block>
     <block key="r" name="Start Engine" strip_button="Start engines" strip_icon="resurrect.png">
-      <call fun="NavResurrect()"/>
-      <call fun="NavSetWaypointHere(WP__TD)"/>
+      <call_once fun="NavResurrect()"/>
+      <call_once fun="NavSetWaypointHere(WP__TD)"/>
       <attitude pitch="0" roll="0" throttle="0" until="FALSE" vmode="throttle"/>
     </block>
     <block key="t" name="Takeoff">
-      <call fun="NavSetWaypointHere(WP__TD)"/>
+      <call_once fun="NavSetWaypointHere(WP__TD)"/>
     </block>
     <block key="s" name="Standby" strip_button="Standby" strip_icon="home.png">
-      <call fun="NavSetWaypointHere(WP_STDBY)"/>
+      <call_once fun="NavSetWaypointHere(WP_STDBY)"/>
       <stay wp="STDBY"/>
     </block>
     <block name="Swarm" strip_button="Swarm" strip_icon="lookfore.png">
-		<call fun="setSwarmMode(2)"/>
-    	<call fun="nav_set_heading_towards_waypoint(WP__CAM)"/>
+	<call_once fun="setSwarmMode(2)"/>
+    	<call_once fun="nav_set_heading_towards_waypoint(WP__CAM)"/>
     	<stay wp="_GOAL"/>
     </block>
     <block name="Swarm Home">
     	<exception cond="amIhome()" deroute="Land"/>
-		<call fun="NavCopyWaypointPositionOnly(WP_GLOBAL, WP__TD)"/>
-		<call fun="setGlobalMode(0)"/>
-		<call fun="setSwarmMode(1)"/>
-		<call fun="nav_set_heading_towards_waypoint(WP__CAM)"/>
+	<call_once fun="NavCopyWaypointPositionOnly(WP_GLOBAL, WP__TD)"/>
+	<call_once fun="setGlobalMode(0)"/>
+	<call_once fun="setSwarmMode(1)"/>
+	<call_once fun="nav_set_heading_towards_waypoint(WP__CAM)"/>
     	<stay wp="_GOAL"/>
     </block>
     <block key="l" name="Land here" strip_button="Land Here" strip_icon="land-right.png">
-      <call fun="NavSetWaypointHere(WP__TD)"/>
+      <call_once fun="NavSetWaypointHere(WP__TD)"/>
       <go wp="_TD"/>
     </block>
     <block name="Land">
@@ -80,11 +81,11 @@
     <block name="Flare">
       <exception cond="LessThan(GetPosAlt(), 0.15)" deroute="Landed"/> <!-- TODO: see if this also works outside optitrack! -->
       <exception cond="!nav_is_in_flight()" deroute="Landed"/>
-      <call fun="NavStartDetectGround()"/>
+      <call_once fun="NavStartDetectGround()"/>
       <stay climb="nav_descend_vspeed" vmode="climb" wp="_TD"/>
     </block>
     <block name="Landed">
-      <call fun="NavKillThrottle()"/>
+      <call_once fun="NavKillThrottle()"/>
       <attitude pitch="0" roll="0" throttle="0" until="FALSE" vmode="throttle"/>
     </block>
     <block name="circle_cw">

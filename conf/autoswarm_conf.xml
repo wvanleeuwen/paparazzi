@@ -35,12 +35,12 @@
   <aircraft
    name="bebop2-30"
    ac_id="30"
-   airframe="airframes/TUDELFT/autoswarm/bebop230.xml"
+   airframe="airframes/TUDELFT/autoswarm/bebop230_cyberzoo.xml"
    radio="radios/cockpitSX.xml"
    telemetry="telemetry/TUDELFT/autoswarm/autoswarm.xml"
-   flight_plan="flight_plans/TUDELFT/tudelft_delft_basic.xml"
-   settings="settings/rotorcraft_basic.xml settings/control/rotorcraft_guidance.xml [settings/modules/autoswarm.xml] settings/control/stabilization_indi.xml settings/modules/cv_active_random_filter.xml [settings/modules/cv_bebop_stabilization.xml] settings/modules/cv_ae_awb.xml"
-   settings_modules="modules/video_rtp_stream.xml modules/gps_ubx_ucenter.xml modules/air_data.xml modules/geo_mag.xml modules/ins_extended.xml modules/ahrs_int_cmpl_quat.xml modules/gps.xml modules/imu_common.xml"
+   flight_plan="flight_plans/TUDELFT/autoswarm/follow_object_test.xml"
+   settings="settings/rotorcraft_basic.xml settings/control/rotorcraft_guidance.xml settings/modules/autoswarm.xml settings/modules/cv_active_random_filter.xml [settings/modules/cv_bebop_stabilization.xml] settings/modules/cv_ae_awb.xml settings/control/stabilization_indi_simple.xml"
+   settings_modules="modules/video_rtp_stream.xml modules/air_data.xml modules/geo_mag.xml modules/ins_extended.xml modules/ahrs_int_cmpl_quat.xml modules/gps.xml modules/imu_common.xml"
    gui_color="white"
   />
   <aircraft
@@ -50,8 +50,8 @@
    radio="radios/cockpitSX.xml"
    telemetry="telemetry/TUDELFT/autoswarm/autoswarm.xml"
    flight_plan="flight_plans/TUDELFT/autoswarm/follow_object_test.xml"
-   settings="settings/rotorcraft_basic.xml settings/control/rotorcraft_guidance.xml [settings/modules/autoswarm.xml] settings/control/stabilization_indi.xml [settings/modules/cv_active_random_filter.xml] [settings/modules/cv_bebop_stabilization.xml]"
-   settings_modules="modules/imu_common.xml modules/gps.xml modules/geo_mag.xml modules/air_data.xml"
+   settings="settings/rotorcraft_basic.xml settings/control/rotorcraft_guidance.xml settings/modules/autoswarm.xml settings/control/stabilization_indi.xml settings/modules/cv_active_random_filter.xml [settings/modules/cv_bebop_stabilization.xml]"
+   settings_modules="modules/video_rtp_stream.xml modules/gps_ubx_ucenter.xml modules/air_data.xml modules/geo_mag.xml modules/ins_extended.xml modules/ahrs_int_cmpl_quat.xml modules/gps.xml modules/imu_common.xml"
    gui_color="white"
   />
   <aircraft
@@ -62,19 +62,19 @@
    telemetry="telemetry/TUDELFT/autoswarm/autoswarm.xml"
    flight_plan="flight_plans/TUDELFT/autoswarm/follow_object_test.xml"
    settings="settings/rotorcraft_basic.xml settings/control/rotorcraft_guidance.xml [settings/modules/autoswarm.xml] settings/control/stabilization_indi.xml [settings/modules/cv_active_random_filter.xml] [settings/modules/cv_bebop_stabilization.xml]"
-   settings_modules="modules/imu_common.xml modules/gps.xml modules/geo_mag.xml modules/air_data.xml"
+   settings_modules="modules/video_rtp_stream.xml modules/air_data.xml modules/geo_mag.xml modules/ins_extended.xml modules/ahrs_int_cmpl_quat.xml modules/gps.xml modules/imu_common.xml"
    gui_color="white"
   />
   <aircraft
    name="bebop2-33"
    ac_id="33"
-   airframe="airframes/TUDELFT/autoswarm/bebop230.xml"
+   airframe="airframes/TUDELFT/autoswarm/bebop230_cyberzoo_nostream.xml"
    radio="radios/cockpitSX.xml"
    telemetry="telemetry/TUDELFT/autoswarm/autoswarm.xml"
    flight_plan="flight_plans/TUDELFT/autoswarm/follow_object_test.xml"
-   settings="settings/rotorcraft_basic.xml settings/control/rotorcraft_guidance.xml [settings/modules/autoswarm.xml] settings/control/stabilization_indi.xml [settings/modules/cv_active_random_filter.xml] [settings/modules/cv_bebop_stabilization.xml]"
-   settings_modules="modules/imu_common.xml modules/gps.xml modules/geo_mag.xml modules/air_data.xml"
+   settings="settings/rotorcraft_basic.xml settings/control/rotorcraft_guidance.xml settings/modules/autoswarm.xml settings/modules/cv_active_random_filter.xml [settings/modules/cv_bebop_stabilization.xml] settings/modules/cv_ae_awb.xml settings/control/stabilization_indi_simple.xml"
    gui_color="white"
+   settings_modules="modules/video_rtp_stream.xml modules/air_data.xml modules/geo_mag.xml modules/ins_extended.xml modules/ahrs_int_cmpl_quat.xml modules/gps.xml modules/imu_common.xml"
   />
   <aircraft
    name="bebop2-34"
@@ -145,45 +145,45 @@
   <aircraft
    name="bebop2-40"
    ac_id="40"
-   airframe="airframes/TUDELFT/autoswarm/bebop230.xml"
+   airframe="airframes/TUDELFT/autoswarm/bebop230_cyberzoo_nostream.xml"
    radio="radios/cockpitSX.xml"
    telemetry="telemetry/TUDELFT/autoswarm/autoswarm.xml"
    flight_plan="flight_plans/TUDELFT/autoswarm/follow_object_test.xml"
-   settings="settings/rotorcraft_basic.xml settings/control/rotorcraft_guidance.xml [settings/modules/autoswarm.xml] settings/control/stabilization_indi.xml [settings/modules/cv_active_random_filter.xml] [settings/modules/cv_bebop_stabilization.xml]"
-   settings_modules="modules/imu_common.xml modules/gps.xml modules/geo_mag.xml modules/air_data.xml"
+   settings="settings/rotorcraft_basic.xml settings/control/rotorcraft_guidance.xml settings/modules/autoswarm.xml settings/modules/cv_active_random_filter.xml [settings/modules/cv_bebop_stabilization.xml] settings/modules/cv_ae_awb.xml settings/control/stabilization_indi_simple.xml"
+   settings_modules="modules/video_rtp_stream.xml modules/air_data.xml modules/geo_mag.xml modules/ins_extended.xml modules/ahrs_int_cmpl_quat.xml modules/gps.xml modules/imu_common.xml"
    gui_color="white"
   />
   <aircraft
    name="bebop2-41"
    ac_id="41"
-   airframe="airframes/TUDELFT/autoswarm/bebop230.xml"
+   airframe="airframes/TUDELFT/autoswarm/bebop230_cyberzoo_nostream.xml"
    radio="radios/cockpitSX.xml"
    telemetry="telemetry/TUDELFT/autoswarm/autoswarm.xml"
    flight_plan="flight_plans/TUDELFT/autoswarm/follow_object_test.xml"
-   settings="settings/rotorcraft_basic.xml settings/control/rotorcraft_guidance.xml [settings/modules/autoswarm.xml] settings/control/stabilization_indi.xml [settings/modules/cv_active_random_filter.xml] [settings/modules/cv_bebop_stabilization.xml]"
-   settings_modules="modules/imu_common.xml modules/gps.xml modules/geo_mag.xml modules/air_data.xml"
+   settings="settings/rotorcraft_basic.xml settings/control/rotorcraft_guidance.xml settings/modules/autoswarm.xml settings/modules/cv_active_random_filter.xml [settings/modules/cv_bebop_stabilization.xml] settings/modules/cv_ae_awb.xml settings/control/stabilization_indi_simple.xml"
    gui_color="white"
+   settings_modules="modules/video_rtp_stream.xml modules/air_data.xml modules/geo_mag.xml modules/ins_extended.xml modules/ahrs_int_cmpl_quat.xml modules/gps.xml modules/imu_common.xml"
   />
   <aircraft
    name="bebop2-42"
    ac_id="42"
-   airframe="airframes/TUDELFT/autoswarm/bebop230.xml"
+   airframe="airframes/TUDELFT/autoswarm/bebop230_cyberzoo_nostream.xml"
    radio="radios/cockpitSX.xml"
    telemetry="telemetry/TUDELFT/autoswarm/autoswarm.xml"
    flight_plan="flight_plans/TUDELFT/autoswarm/follow_object_test.xml"
-   settings="settings/rotorcraft_basic.xml settings/control/rotorcraft_guidance.xml [settings/modules/autoswarm.xml] settings/control/stabilization_indi.xml [settings/modules/cv_active_random_filter.xml] [settings/modules/cv_bebop_stabilization.xml]"
-   settings_modules="modules/imu_common.xml modules/gps.xml modules/geo_mag.xml modules/air_data.xml"
+   settings="settings/rotorcraft_basic.xml settings/control/rotorcraft_guidance.xml settings/modules/autoswarm.xml settings/control/stabilization_indi.xml settings/modules/cv_active_random_filter.xml [settings/modules/cv_bebop_stabilization.xml] settings/modules/cv_ae_awb.xml"
    gui_color="white"
+   settings_modules="modules/video_rtp_stream.xml modules/air_data.xml modules/geo_mag.xml modules/ins_extended.xml modules/ahrs_int_cmpl_quat.xml modules/gps.xml modules/imu_common.xml"
   />
   <aircraft
    name="bebop2-43"
    ac_id="43"
-   airframe="airframes/TUDELFT/autoswarm/bebop230.xml"
+   airframe="airframes/TUDELFT/autoswarm/bebop230_cyberzoo_nostream.xml"
    radio="radios/cockpitSX.xml"
    telemetry="telemetry/TUDELFT/autoswarm/autoswarm.xml"
    flight_plan="flight_plans/TUDELFT/autoswarm/follow_object_test.xml"
-   settings="settings/rotorcraft_basic.xml settings/control/rotorcraft_guidance.xml [settings/modules/autoswarm.xml] settings/control/stabilization_indi.xml [settings/modules/cv_active_random_filter.xml] [settings/modules/cv_bebop_stabilization.xml]"
-   settings_modules="modules/imu_common.xml modules/gps.xml modules/geo_mag.xml modules/air_data.xml"
+   settings="settings/rotorcraft_basic.xml settings/control/rotorcraft_guidance.xml settings/modules/autoswarm.xml settings/modules/cv_active_random_filter.xml [settings/modules/cv_bebop_stabilization.xml] settings/modules/cv_ae_awb.xml settings/control/stabilization_indi_simple.xml"
+   settings_modules="modules/video_rtp_stream.xml modules/air_data.xml modules/geo_mag.xml modules/ins_extended.xml modules/ahrs_int_cmpl_quat.xml modules/gps.xml modules/imu_common.xml"
    gui_color="white"
   />
   <aircraft

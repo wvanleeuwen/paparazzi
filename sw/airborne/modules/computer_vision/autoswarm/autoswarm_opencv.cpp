@@ -33,12 +33,20 @@ using namespace std;
 #include <vector>                                   // Used for active random filter
 #include <stdio.h>                                  // Used for printing
 
+#define BOARD_CONFIG "boards/bebop.h"
+#define RADIO_CONTROL_TYPE_H "radio_control/rc_datalink.h"
+
 extern "C" {
     #include "state.h"                              // Used for accessing state variables
     #include "navigation.h"                         // Used for navigation functions
     #include <errno.h>                              // Used for error handling
-    //#include "generated/flight_plan.h"              // C header used for WP definitions (causes problems) TODO: fix this
+    #include "subsystems/gps/gps_datalink.h"
+    #include "generated/flight_plan.h"              // C header used for WP definitions (causes problems) TODO: fix this
 }
+
+#ifndef AUTOSWARM_GLOBAL_ATTRACTOR
+#define AUTOSWARM_GLOBAL_ATTRACTOR AUTOSWARM_CIRCLE_CW
+#endif
 
 static void calcCamPosition(struct NedCoor_f *pos, double totV[3], double cPos[3], double gi[3]);
 static void updateWaypoints(struct NedCoor_f *pos, double totV[3], double cPos[3]);
@@ -54,37 +62,35 @@ static void autoswarm_opencv_run_trailer(void);
 
 // Debug options
 #define AUTOSWARM_SHOW_WAYPOINT 1                   // Show the updated positions of the waypoints
-#define AUTOSWARM_SHOW_MEM      1                   // Show the neighbours identified and their location
+#define AUTOSWARM_SHOW_MEM      0                   // Show the neighbours identified and their location
 #define AUTOSWARM_WRITE_RESULTS 1                   // Write measurements to text file
-#define AUTOSWARM_CALIBRATE_CAM 1                   // Calibrate the camera
 #define AUTOSWARM_BENCHMARK     0                   // Print benchmark table
-#define AUTOSWARM_BODYFRAME     1                   // Fake euler angles and pos to be 0
-#define AUTOSWARM_SAVE_FRAME    1                   // Save a frame for post-processing
 
 // Set up swarm parameters
 int     AUTOSWARM_MODE          = 2;                // 0: follow (deprecated), 1: look in direction of flight, 2: look in direction of global component
-double  AUTOSWARM_SEPERATION    = 1.75;             // m
-double  AUTOSWARM_E             = 0.005;            // Was 0.01x - 0.0005 at 12m/s OK (but close)
-double  AUTOSWARM_EPS           = 0.05;             //
+double  AUTOSWARM_SEPERATION    = 1.5;              // m
+double  AUTOSWARM_E             = 0.0025;            // Was 0.01x - 0.0005 at 12m/s OK (but close)
+double  AUTOSWARM_EPS           = 0.025;             //
 double  AUTOSWARM_GLOBAL        = 0.9;              // % of V_MAX
-int     AUTOSWARM_FPS           = 15;               // Frames per second
+int     AUTOSWARM_FPS           = 18;               // Frames per second
 double  AUTOSWARM_VMAX          = 1;                // m/s
 double  AUTOSWARM_YAWRATEMAX    = 70;               // deg/s
 int     AUTOSWARM_MEMORY        = 1.5;              // seconds
 double  AUTOSWARM_HOME          = 0.3;              // m
 
 // Set up global attractor parameters
-int     AUTOSWARM_ATTRACTOR     = 1;
-double  AUTOSWARM_CIRCLE_R      = 2.25;
+int     AUTOSWARM_ATTRACTOR     = AUTOSWARM_GLOBAL_ATTRACTOR;
+double  AUTOSWARM_CIRCLE_R      = 2;
 double  AUTOSWARM_DEADZONE      = 0.1;
 
 // Initialize parameters to be assigned during runtime
 extern uint8_t              nav_block;
-extern vector<memoryBlock>  neighbourMem;
+extern memoryBlock          neighbourMem[AR_FILTER_MAX_OBJECTS];
+extern uint8_t              neighbourMem_size;
 static struct FloatEulers * eulerAngles;
 static struct NedCoor_f *   groundSpeed;
 static struct NedCoor_f *   pos;
-static int                  runCount        = 0;
+static uint32_t             runCount        = 0;
 static const char *         flight_blocks[] = FP_BLOCKS;
 static double               prev_v_d[3]     = {0.0, 0.0, 0.0};
 
@@ -107,43 +113,61 @@ static double               prev_v_d[3]     = {0.0, 0.0, 0.0};
     char                        resultFile [50];
 #endif
 
+#define PRINT(string,...) fprintf(stderr, "[autoswarm->%s()] " string,__FUNCTION__ , ##__VA_ARGS__)
+#define AUTOSWARM_VERBOSE FALSE
+
+#if AUTOSWARM_VERBOSE
+#define VERBOSE_PRINT PRINT
+#else
+#define VERBOSE_PRINT(...)
+#endif
+
 void autoswarm_opencv_run(){
     // Computer vision compatibility function used to call trackObjects and (optionally) parse modified data back to rtp stream as YUV
-    //if (nav_block < 3){ return; }    // Engines have not started yet, lets save some battery life and skip image processing for now
+    if (nav_block < 3){
+        VERBOSE_PRINT("Motor's haven't started yet, not running.\n");
+        return;
+    }    // Engines have not started yet, lets save some battery life and skip image processing for now
     autoswarm_opencv_run_header();                  // Mainly code for printing and debugging
-
+    VERBOSE_PRINT("Ran header\n");
     runCount++;                                     // Update global run-counter
     eulerAngles = stateGetNedToBodyEulers_f();      // Get Euler angles
     pos         = stateGetPositionNed_f();          // Get your current position
     groundSpeed = stateGetSpeedNed_f();             // Get groundspeed
-
+    VERBOSE_PRINT("Got states\n");
     double totV[3]  = {0.0, 0.0, 0.0};
     double cPos[3]  = {0.0, 0.0, 0.0};
     double gi[3]    = {0.0, 0.0, 0.0};
+    VERBOSE_PRINT("Initialized vectors\n");
     calcVelocityResponse(pos, totV, gi);            // Calculate the velocity response of the agent and store result in totV and gi
+    VERBOSE_PRINT("Calculated velocity response\n");
     calcCamPosition(pos, totV, cPos, gi);           // Calculate WP_CAM/heading based on pos,totV and gi and store in cPos
+    VERBOSE_PRINT("Calculated camera position\n");
     updateWaypoints(pos, totV, cPos);               // Update waypoints based on velocity contribution
-
+    VERBOSE_PRINT("Updated waypoints\n");
     autoswarm_opencv_run_trailer();                  // Mainly code for printing and debugging
+    VERBOSE_PRINT("Ran trailer\n");
     return;
 }
 
 void calcVelocityResponse(struct NedCoor_f *pos, double totV[3], double gi[3]){
     double li[3]    = {0.0, 0.0, 0.0};              // Initialize local contribution
     double di[3]    = {0.0, 0.0, 0.0};              // Initialize differential contribution
-
+    VERBOSE_PRINT("Initialized other vectors\n");
     calcLocalVelocity(pos, li);                     // Get the contribution due to the neighbours we see and have memorized
+    VERBOSE_PRINT("Calculated local\n");
     calcGlobalVelocity(pos, gi);                    // Get the contribution due to the "attraction" towards global origin
-
+    VERBOSE_PRINT("Calculated global\n");
     totV[0]         = li[0] + gi[0];                // Average the X local contribution (#neighbours independent) and add the X global contribution
     totV[1]         = li[1] + gi[1];                // Do the same for Y
-
+    VERBOSE_PRINT("Added local and global\n");
     limitNorm(totV, AUTOSWARM_VMAX);                // Check if ideal velocity exceeds AUTOSWARM_VMAX
+    VERBOSE_PRINT("Limited  norm\n");
     calcDiffVelocity(totV, di);                     // Calculate the differential component based on change in totV
-
+    VERBOSE_PRINT("Calculated diff\n");
     totV[0]         = totV[0] + di[0];              // Add differential x component
     totV[1]         = totV[1] + di[1];              // Add differential y component
-
+    VERBOSE_PRINT("Added all together\n");
     if (AUTOSWARM_MODE!=2){
         limitVelocityYaw(totV);   // Limit the velocity when relative angle gets larger
     }
@@ -154,7 +178,7 @@ void calcLocalVelocity(struct NedCoor_f *pos, double li[3]){
     double range, li_fac=0;                         // Initialize variables
     unsigned int r;                                 // Initialize r
 
-    for (r=0; r < neighbourMem.size(); r++){         // For all neighbours found
+    for (r=0; r < neighbourMem_size; r++){         // For all neighbours found
         range   = sqrt(pow((pos->x - neighbourMem[r].x_w), 2.0) + pow((pos->y - neighbourMem[r].y_w), 2.0));
         li_fac  = 12 * AUTOSWARM_E / range * (pow(AUTOSWARM_SEPERATION / range, 12.0) - pow(AUTOSWARM_SEPERATION / range, 6.0)); // Local contribution scaling factor
         li[0]   += li_fac * (pos->x - neighbourMem[r].x_w) / range; // Local contribution in x
@@ -351,7 +375,7 @@ void autoswarm_opencv_run_trailer(){
     }
 #endif
 #if AUTOSWARM_WRITE_RESULTS || AUTOSWARM_SHOW_MEM
-        for (unsigned int r=0; r < neighbourMem.size(); r++){                // Print to file & terminal
+        for (unsigned int r=0; r < neighbourMem_size; r++){                // Print to file & terminal
 #if AUTOSWARM_WRITE_RESULTS || AUTOSWARM_SHOW_MEM
             int memInt = 0;
             if (neighbourMem[r].lastSeen == runCount) memInt = 1;
@@ -367,7 +391,7 @@ void autoswarm_opencv_run_trailer(){
 #if AUTOSWARM_WRITE_RESULTS
         if (pFile != NULL) fclose(pFile);    // Close file
 #endif
-    if ((AUTOSWARM_SHOW_MEM==1 && neighbourMem.size() > 0) || AUTOSWARM_SHOW_WAYPOINT || AUTOSWARM_BENCHMARK) printf("\n"); // Separate terminal output by newline
+    if ((AUTOSWARM_SHOW_MEM==1 && neighbourMem_size > 0) || AUTOSWARM_SHOW_WAYPOINT || AUTOSWARM_BENCHMARK) printf("\n"); // Separate terminal output by newline
 }
 
 #if AUTOSWARM_BENCHMARK

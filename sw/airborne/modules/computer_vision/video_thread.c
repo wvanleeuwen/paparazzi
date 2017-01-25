@@ -158,11 +158,13 @@ static void *video_thread_function(void *data)
     // pointer to the final image to pass for saving and further processing
     struct image_t *img_final = &img;
     // run selected filters
+    /*
     if (vid->filters & VIDEO_FILTER_DEBAYER) {
     	BayerToYUV(&img, &img_color, 0, 0);
       // use color image for further processing
       img_final = &img_color;
     }
+    */
 
     // Run processing if required
     cv_run_device(vid, img_final);
