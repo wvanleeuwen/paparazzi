@@ -112,7 +112,8 @@ static void send_att_ref(struct transport_tx *trans, struct link_device *dev)
 //                                      &stab_att_sp_euler.psi,
 //                                      &att_ref_euler_i.euler.phi,
                                       &att_ref_euler_i.euler.theta,
-                                      &att_ref_euler_i.euler.psi);
+                                      &att_ref_euler_i.euler.psi,
+									  &radio_control.values[RADIO_YAW]);
 //                                      &att_ref_euler_i.rate.p,
 //                                      &att_ref_euler_i.rate.q,
 //                                      &att_ref_euler_i.rate.r,
@@ -283,10 +284,10 @@ void stabilization_attitude_run(bool  in_flight)
     OFFSET_AND_ROUND((stabilization_att_fb_cmd[COMMAND_ROLL] + stabilization_att_ff_cmd[COMMAND_ROLL]), CMD_SHIFT);
 
   stabilization_cmd[COMMAND_PITCH] =
-    OFFSET_AND_ROUND((stabilization_att_fb_cmd[COMMAND_PITCH] + stabilization_att_ff_cmd[COMMAND_PITCH]), CMD_SHIFT);
+    OFFSET_AND_ROUND((stabilization_att_fb_cmd[COMMAND_PITCH] + stabilization_att_ff_cmd[COMMAND_PITCH]), 8); // was 11 --> gains need to be 8 times smaller to have the same effect
 
   stabilization_cmd[COMMAND_YAW] =
-    OFFSET_AND_ROUND((stabilization_att_fb_cmd[COMMAND_YAW] + stabilization_att_ff_cmd[COMMAND_YAW]), CMD_SHIFT);
+    OFFSET_AND_ROUND((stabilization_att_fb_cmd[COMMAND_YAW] + stabilization_att_ff_cmd[COMMAND_YAW]), 8); // was 11 --> gains need to be 8 times smaller to have the same effect
 
   /* Filtering the commands */
 

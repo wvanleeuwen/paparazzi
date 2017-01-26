@@ -132,7 +132,7 @@
 		<define name="H_Y" value="0.00278894"/>
 		<define name="H_Z" value="0.92060036"/>
 		<define name="USE_GPS_HEADING" value="0"/>
-		
+<!--		<define name="HEADING_UPDATE_GPS_MIN_SPEED" value="0"/-->
 		<!-- For vibrating airfames -->
 	<define name="GRAVITY_HEURISTIC_FACTOR" value="0"/>
 	</section>
@@ -184,13 +184,13 @@
 		<define name="PHI_DGAIN" value="1"/>
 		<define name="PHI_IGAIN" value="1"/>
 		
-		<define name="THETA_PGAIN" value="8000"/>
-		<define name="THETA_DGAIN" value="200"/>
+		<define name="THETA_PGAIN" value="2000"/> <!--was 8000-->
+		<define name="THETA_DGAIN" value="50"/> <!--was 200-->
 		<define name="THETA_IGAIN" value="0"/>
 		
-		<define name="PSI_PGAIN" value="5000"/>
-		<define name="PSI_DGAIN" value="4000"/>
-		<define name="PSI_IGAIN" value="400"/>
+		<define name="PSI_PGAIN" value="1000"/> <!--was 5000-->
+		<define name="PSI_DGAIN" value="500"/> <!--was 4000-->
+		<define name="PSI_IGAIN" value="50"/> <!--was 400-->
 		
 		<!-- feedforward -->
 		<define name="PHI_DDGAIN" value="0"/>

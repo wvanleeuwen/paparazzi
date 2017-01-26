@@ -73,6 +73,10 @@ static void parse_gps_datalink_small(int16_t heading, uint32_t pos_xyz, uint32_t
   }
   enu_pos.z = (int32_t)(pos_xyz & 0x3FF); // bits 9-0 z position in cm
 
+  gps_datalink.utm_pos.east=enu_pos.x;
+  gps_datalink.utm_pos.north=enu_pos.y;
+  gps_datalink.utm_pos.alt=enu_pos.z;
+
   // Convert the ENU coordinates to ECEF
   ecef_of_enu_point_i(&gps_datalink.ecef_pos, &ltp_def, &enu_pos);
   SetBit(gps_datalink.valid_fields, GPS_VALID_POS_ECEF_BIT);

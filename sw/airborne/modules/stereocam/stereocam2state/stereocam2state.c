@@ -16,8 +16,10 @@
 #include "subsystems/datalink/telemetry.h"
 
 #include "subsystems/radio_control.h"
+#include "subsystems/gps/gps_datalink.h"
 
 #include "paparazzi.h"
+#include "math/pprz_algebra.h"
 
 #ifndef STEREOCAM2STATE_SENDER_ID
 #define STEREOCAM2STATE_SENDER_ID ABI_BROADCAST
@@ -40,15 +42,19 @@ uint8_t fit_thresh=20; // maximal fitness that is still considered as correct de
 uint8_t size_thresh=10; // minimal size that is considered to be a window
 uint8_t turn_cmd_max=50; // percentage of MAX_PPRZ
 uint8_t climb_cmd_max=10; // percentage of MAX_PPRZ
-uint8_t cnt_thresh=75; // threshold for max amount of pixels in a bin (x10)
+uint8_t cnt_thresh=80; // threshold for max amount of pixels in a bin (x10)
 uint8_t nus_filter_order=1; // complementary filter setting
-
 
 
 static void send_stereo_data(struct transport_tx *trans, struct link_device *dev)
  {
-   pprz_msg_send_STEREO_DATA(trans, dev, AC_ID,
-                         &win_x, &win_y, &win_size, &win_fitness, &nus_turn_cmd, &nus_climb_cmd, &nus_gate_heading, &fps, &cnt_left, &cnt_middle, &cnt_right);
+	int16_t course=(DegOfRad(gps_datalink.course) / ((int32_t)1e6)); // sent in deca degrees (0.1 deg)
+	int32_t north=gps_datalink.utm_pos.north;
+	int32_t east=gps_datalink.utm_pos.east;
+	int32_t alt=gps_datalink.utm_pos.alt;
+
+	pprz_msg_send_STEREO_DATA(trans, dev, AC_ID,
+                         &win_x, &win_y, &win_size, &win_fitness, &nus_turn_cmd, &nus_climb_cmd, &nus_gate_heading, &fps, &cnt_left, &cnt_middle, &cnt_right, &course, &north, &east, &alt);
  }
 
 void stereocam_to_state(void);
