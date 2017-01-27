@@ -172,7 +172,7 @@ void stabilization_attitude_read_rc_setpoint_eulers(struct Int32Eulers *sp, bool
   sp->phi = get_rc_roll();
   sp->theta = get_rc_pitch();
 
-  static uint16_t counter_switch=0;
+//  static uint16_t counter_switch=0;
 
   if (in_flight) {
     /* calculate dt for yaw integration */
@@ -210,7 +210,7 @@ void stabilization_attitude_read_rc_setpoint_eulers(struct Int32Eulers *sp, bool
     /* do not advance yaw setpoint if within a small deadband around stick center or if throttle is zero */
     if (YAW_DEADBAND_EXCEEDED() && !THROTTLE_STICK_DOWN()) {
       sp->psi += get_rc_yaw() * dt;
-      counter_switch=0;
+//      counter_switch=0;
       INT32_ANGLE_NORMALIZE(sp->psi);
     }
     if (coordinated_turn) {
