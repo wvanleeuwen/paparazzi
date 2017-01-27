@@ -83,7 +83,6 @@ extern void stereocam_start(void)
   extract_loc = 0;
   msg_start = 0;
 
-  //sys_time_init();
   freq_counter = 0;
   frequency = 0;
   previous_time = sys_time.nb_tick;
