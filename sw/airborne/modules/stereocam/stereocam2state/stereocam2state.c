@@ -29,7 +29,8 @@
 #define STEREOCAM2STATE_RECEIVED_DATA_TYPE 0
 #endif
 
-int8_t win_x, win_y, win_size, win_fitness, fps;
+float fps;
+int8_t win_x, win_y, win_size, win_fitness;
 uint8_t cnt_left, cnt_middle, cnt_right;
 int16_t nus_turn_cmd=0;
 int16_t nus_climb_cmd=0;
@@ -42,15 +43,13 @@ uint8_t turn_cmd_max=50; // percentage of MAX_PPRZ
 uint8_t climb_cmd_max=10; // percentage of MAX_PPRZ
 uint8_t cnt_thresh=80; // threshold for max amount of pixels in a bin (x10)
 
-
+void stereocam_to_state(void);
 
 static void send_stereo_data(struct transport_tx *trans, struct link_device *dev)
  {
    pprz_msg_send_STEREO_DATA(trans, dev, AC_ID,
                          &win_x, &win_y, &win_size, &win_fitness, &nus_turn_cmd, &nus_climb_cmd, &nus_gate_heading, &fps, &cnt_left, &cnt_middle, &cnt_right);
  }
-
-void stereocam_to_state(void);
 
 void stereo_to_state_init(void)
 {
@@ -63,9 +62,9 @@ void stereo_to_state_periodic(void)
 //	ii++;
 
 	if (stereocam_data.fresh && stereocam_data.len == 8) { // length of NUS window detection code
-	int8_t* pointer=stereocam_data.data; // to transform uint8 message back to int8
+	  int8_t* pointer=stereocam_data.data; // to transform uint8 message back to int8
 
-	win_x = pointer[0];
+	  win_x = pointer[0];
     win_y = pointer[1];
     win_size = pointer[2];
     win_fitness = pointer[3];
@@ -111,74 +110,78 @@ void stereo_to_state_periodic(void)
     }
 
     //autopilot_guided_goto_body_relative(0.0, 0.0, nus_climb_cmd, 0.0)
-  } else if (stereocam_data.fresh && stereocam_data.len == 20)
-  {
+  } else if (stereocam_data.fresh && stereocam_data.len == 20) {
     //run_droplet((uint32_t)stereocam_data.data[0], (uint32_t)stereocam_data.data[4]);
     uint32_t* buffer32 = (uint32_t*)stereocam_data.data;
     run_droplet_low_texture(buffer32[0], buffer32[1], buffer32[2], buffer32[3], buffer32[4]);
     stereocam_data.fresh = 0;
+  } else if (stereocam_data.fresh && stereocam_data.len == 24) {
+    int32_t* buffer32 = (int32_t*)stereocam_data.data;
+    wall_estimate(buffer32[0], buffer32[1], buffer32[2], buffer32[3], buffer32[4], buffer32[5]);
+    stereocam_data.fresh = 0;
+  } else if (stereocam_data.fresh && stereocam_data.len == 25) {
+    stereocam_to_state();
+    stereocam_data.fresh = 0;
   }
 }
 
-//void stereocam_to_state(void)
-//{
-//
-//  // Get info from stereocam data
-//  // 0 = stereoboard's #define SEND_EDGEFLOW
-//#if STEREOCAM2STATE_RECEIVED_DATA_TYPE == 0
-//  // opticflow
-//  int16_t div_x = (int16_t)stereocam_data.data[0] << 8;
-//  div_x |= (int16_t)stereocam_data.data[1];
-//  int16_t flow_x = (int16_t)stereocam_data.data[2] << 8;
-//  flow_x |= (int16_t)stereocam_data.data[3];
-//  int16_t div_y = (int16_t)stereocam_data.data[4] << 8;
-//  div_y |= (int16_t)stereocam_data.data[5];
-//  int16_t flow_y = (int16_t)stereocam_data.data[6] << 8;
-//  flow_y |= (int16_t)stereocam_data.data[7];
-//
-//  float fps = (float)stereocam_data.data[9];
-//  //int8_t agl = stereocam_data.data[8]; // in cm
-//
-//  // velocity
-//  int16_t vel_x_int = (int16_t)stereocam_data.data[10] << 8;
-//  vel_x_int |= (int16_t)stereocam_data.data[11];
-//  int16_t vel_y_int = (int16_t)stereocam_data.data[12] << 8;
-//  vel_y_int |= (int16_t)stereocam_data.data[13];
-//
-//  int16_t RES = 100;
-//
-//  float vel_x = (float)vel_x_int / RES;
-//  float vel_y = (float)vel_y_int / RES;
-//
-//  // Derotate velocity and transform from frame to body coordinates
-//  // TODO: send resolution directly from stereocam
-//
-//  float vel_body_x = - vel_x;
-//  float vel_body_y = vel_y;
-//
-//  //Send velocity estimate to state
-//  //TODO:: Make variance dependable on line fit error, after new horizontal filter is made
-//  uint32_t now_ts = get_sys_time_usec();
-//
-//  if (!(abs(vel_body_x) > 0.5 || abs(vel_body_x) > 0.5))
-//  {
-//    AbiSendMsgVELOCITY_ESTIMATE(STEREOCAM2STATE_SENDER_ID, now_ts,
-//                                vel_body_x,
-//                                vel_body_y,
-//                                0.0f,
-//                                0.3f
-//                               );
-//  }
-//
-//  // Reusing the OPTIC_FLOW_EST telemetry messages, with some values replaced by 0
-//
-//  uint16_t dummy_uint16 = 0;
-//  int16_t dummy_int16 = 0;
-//  float dummy_float = 0;
-//
-//  DOWNLINK_SEND_OPTIC_FLOW_EST(DefaultChannel, DefaultDevice, &fps, &dummy_uint16, &dummy_uint16, &flow_x, &flow_y, &dummy_int16, &dummy_int16,
-//		  &vel_x, &vel_y,&dummy_float, &dummy_float, &dummy_float);
-//
-//#endif
-//
-//}
+void stereocam_to_state(void)
+{
+
+  // Get info from stereocam data
+  // 0 = stereoboard's #define SEND_EDGEFLOW
+  // opticflow
+  int16_t div_x = (int16_t)stereocam_data.data[0] << 8;
+  div_x |= (int16_t)stereocam_data.data[1];
+  int16_t flow_x = (int16_t)stereocam_data.data[2] << 8;
+  flow_x |= (int16_t)stereocam_data.data[3];
+  int16_t div_y = (int16_t)stereocam_data.data[4] << 8;
+  div_y |= (int16_t)stereocam_data.data[5];
+  int16_t flow_y = (int16_t)stereocam_data.data[6] << 8;
+  flow_y |= (int16_t)stereocam_data.data[7];
+
+  fps = stereocam_data.data[9];
+  //int8_t agl = stereocam_data.data[8]; // in cm
+
+  // velocity
+  int16_t vel_y_int = (int16_t)stereocam_data.data[12] << 8;
+  vel_y_int |= (int16_t)stereocam_data.data[13];
+
+  int16_t vel_x_int = (int16_t)stereocam_data.data[20] << 8;
+  vel_x_int |= (int16_t)stereocam_data.data[21];
+  int16_t vel_z_int = (int16_t)stereocam_data.data[22] << 8;
+  vel_z_int |= (int16_t)stereocam_data.data[23];
+
+  int16_t RES = 100;
+
+  float vel_body_x = (float)vel_x_int / RES;
+  float vel_body_y = (float)vel_y_int / RES;
+  float vel_body_z = (float)vel_z_int / RES;
+
+  // Derotate velocity and transform from frame to body coordinates
+  // TODO: send resolution directly from stereocam
+
+  //Send velocity estimate to state
+  //TODO:: Make variance dependable on line fit error, after new horizontal filter is made
+  uint32_t now_ts = get_sys_time_usec();
+
+  if (!(abs(vel_body_x) > 5. || abs(vel_body_x) > 5.))
+  {
+    AbiSendMsgVELOCITY_ESTIMATE(STEREOCAM2STATE_SENDER_ID, now_ts,
+                                vel_body_x,
+                                vel_body_y,
+                                vel_body_z,
+                                0.3f
+                               );
+  }
+
+  // Reusing the OPTIC_FLOW_EST telemetry messages, with some values replaced by 0
+
+  uint16_t dummy_uint16 = 0;
+  int16_t dummy_int16 = 0;
+  float dummy_float = 0;
+
+  DOWNLINK_SEND_OPTIC_FLOW_EST(DefaultChannel, DefaultDevice, &fps, &dummy_uint16, &dummy_uint16, &flow_x, &flow_y, &dummy_int16, &dummy_int16,
+		  &vel_body_x, &vel_body_y,&dummy_float, &dummy_float, &dummy_float);
+
+}

@@ -208,3 +208,22 @@ void run_droplet_low_texture(uint32_t disparities_high, uint32_t disparities_tot
       break;
   }
 }
+
+#include "subsystems/datalink/telemetry.h"
+static float dist2left = 0, dist2right = 0, ang2left = 0, ang2right = 0;
+void wall_estimate(float slope_l, float intercept_l, float fit_l, float slope_r, float intercept_r, float fit_r)
+{
+  float alpha = 0.3;
+  if (fit_l < INT32_MAX) {
+    dist2left += alpha*(-(float)intercept_l/slope_l - dist2left);
+    ang2left += alpha*(1.57 - atan(100/slope_l) - ang2left);
+  }
+  if (fit_r < INT32_MAX) {
+    dist2right += alpha*(-(float)intercept_r/slope_r - dist2right);
+    ang2right += alpha*(1.57 - atan(100/slope_r) - ang2right);
+  }
+  float dummyf;
+  uint8_t dummy8;
+  uint16_t dummy16;
+  DOWNLINK_SEND_RANGEFINDER(DefaultChannel, DefaultDevice, &dummy16, &dist2left, &ang2left, &dist2right, &ang2right, &dummyf, &dummy8);
+}

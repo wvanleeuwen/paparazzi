@@ -33,6 +33,7 @@ extern void droplet_periodic(void);
 extern void run_droplet(uint32_t disparities_total, uint32_t disparities_high);
 extern void run_droplet_low_texture(uint32_t disparities_high, uint32_t disparities_total, uint32_t histogram_obs,
     uint32_t count_disps_left, uint32_t count_disps_right);
+extern void wall_estimate(float slope_l, float intercept_l, float fit_l, float slope_r, float intercept_r, float fit_r);
 
 extern uint16_t obst_thr_1;      // obstacle threshold for phase 1
 extern uint16_t obst_thr_3;
