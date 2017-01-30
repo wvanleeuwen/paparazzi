@@ -1212,18 +1212,19 @@
  </message>
 
  <message name="STAB_ATTITUDE_REF_INT" id="141">
-    <field name="sp_phi"    type="int32" alt_unit="deg" alt_unit_coef="0.0139882"/>
-    <field name="sp_theta"  type="int32" alt_unit="deg" alt_unit_coef="0.0139882"/>
-    <field name="sp_psi"    type="int32" alt_unit="deg" alt_unit_coef="0.0139882"/>
-    <field name="ref_phi"   type="int32" alt_unit="deg" alt_unit_coef="0.0000546"/>
+<!--    <field name="sp_phi"    type="int32" alt_unit="deg" alt_unit_coef="0.0139882"/-->
+<!--    <field name="sp_theta"  type="int32" alt_unit="deg" alt_unit_coef="0.0139882"/-->
+<!--    <field name="sp_psi"    type="int32" alt_unit="deg" alt_unit_coef="0.0139882"/-->
+<!--    <field name="ref_phi"   type="int32" alt_unit="deg" alt_unit_coef="0.0000546"/-->
     <field name="ref_theta" type="int32" alt_unit="deg" alt_unit_coef="0.0000546"/>
     <field name="ref_psi"   type="int32" alt_unit="deg" alt_unit_coef="0.0000546"/>
-    <field name="ref_p"     type="int32" alt_unit="deg/s" alt_unit_coef="0.0008743"/>
-    <field name="ref_q"     type="int32" alt_unit="deg/s" alt_unit_coef="0.0008743"/>
-    <field name="ref_r"     type="int32" alt_unit="deg/s" alt_unit_coef="0.0008743"/>
-    <field name="ref_pd"    type="int32" alt_unit="deg/s2" alt_unit_coef="0.0139882"/>
-    <field name="ref_qd"    type="int32" alt_unit="deg/s2" alt_unit_coef="0.0139882"/>
-    <field name="ref_rd"    type="int32" alt_unit="deg/s2" alt_unit_coef="0.0139882"/>
+    <field name="rc_yaw"     type="int16"/>
+<!--    <field name="ref_p"     type="int32" alt_unit="deg/s" alt_unit_coef="0.0008743"/-->
+<!--    <field name="ref_q"     type="int32" alt_unit="deg/s" alt_unit_coef="0.0008743"/-->
+<!--    <field name="ref_r"     type="int32" alt_unit="deg/s" alt_unit_coef="0.0008743"/-->
+<!--    <field name="ref_pd"    type="int32" alt_unit="deg/s2" alt_unit_coef="0.0139882"/-->
+<!--    <field name="ref_qd"    type="int32" alt_unit="deg/s2" alt_unit_coef="0.0139882"/-->
+<!--    <field name="ref_rd"    type="int32" alt_unit="deg/s2" alt_unit_coef="0.0139882"/-->
  </message>
 
  <message name="STAB_ATTITUDE_REF_FLOAT" id="142">
@@ -1338,12 +1339,12 @@
 <!--    <field name="rc_pitch"   type="int16"/-->
     <field name="rc_yaw"     type="int16"/>
 <!--    <field name="cmd_roll"   type="int32"/-->
-<!--    <field name="cmd_pitch"  type="int32"/-->
+    <field name="cmd_pitch"  type="int32"/>
     <field name="cmd_yaw"    type="int32"/>
-<!--    <field name="cmd_thrust" type="int32"/-->
-<!--    <field name="body_phi"   type="int32" alt_unit="deg" alt_unit_coef="0.0139882"/-->
-<!--    <field name="body_theta" type="int32" alt_unit="deg" alt_unit_coef="0.0139882"/-->
-<!--    <field name="body_psi"   type="int32" alt_unit="deg" alt_unit_coef="0.0139882"/-->
+    <field name="cmd_thrust" type="int32"/>
+    <field name="body_phi"   type="int32" alt_unit="deg" alt_unit_coef="0.0139882"/>
+    <field name="body_theta" type="int32" alt_unit="deg" alt_unit_coef="0.0139882"/>
+    <field name="body_psi"   type="int32" alt_unit="deg" alt_unit_coef="0.0139882"/>
   </message>
 
   <message name="INS_Z" id="151">
@@ -2252,7 +2253,11 @@
 	<field name="cnt_left" type="uint8"/>
 	<field name="cnt_middle" type="uint8"/>
  	<field name="cnt_right" type="uint8"/>
-  </message>
+ 	<field name="course" type="int16"/>
+ 	<field name="north" type="int32"/>
+ 	<field name="east" type="int32"/>
+  	<field name="alt" type="int32"/>
+   </message>
 
    <message name="GPS_SMALL" id="252">
     <field name="multiplex_speed"  type="uint32">bits 31-21 course in decideg : bits 20-10 ground speed in cm/s : bits 9-0 climb speed in cm/s</field>

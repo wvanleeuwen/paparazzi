@@ -172,15 +172,45 @@ void stabilization_attitude_read_rc_setpoint_eulers(struct Int32Eulers *sp, bool
   sp->phi = get_rc_roll();
   sp->theta = get_rc_pitch();
 
+//  static uint16_t counter_switch=0;
+
   if (in_flight) {
     /* calculate dt for yaw integration */
     float dt = get_sys_time_float() - last_ts;
     /* make sure nothing drastically weird happens, bound dt to 0.5sec */
     Bound(dt, 0, 0.5);
 
+    // step command for yaw loop testing, triggered by channel 5 (should be ELEV D/R)
+//	if (radio_control.values[5] < -1000 && counter_switch<10) counter_switch++;
+//	else if (radio_control.values[5] < -1000 && counter_switch==10) {
+//		sp->psi += INT32_ANGLE_PI_2;
+//		counter_switch++;
+//	}
+//	else if (radio_control.values[5] > 1000) counter_switch=0;
+//	INT32_ANGLE_NORMALIZE(sp->psi);
+
+    //////////////////////////////////////////////////////
+    /* if gate is detected, set the waypoint towards it */
+    //////////////////////////////////////////////////////
+    if (nus_gate_detected) {
+    	/* get current heading */
+    	int32_t heading = stabilization_attitude_get_heading_i();
+
+//    	/* check if (heading - setpoint) is within the range of a typical steady state error */
+//    	int32_t error_limit = ANGLE_BFP_OF_REAL(RadOfDeg(10));
+//    	int32_t delta_psi = sp->psi - heading;
+//    	INT32_ANGLE_NORMALIZE(delta_psi);
+//    	if (abs(delta_psi) < error_limit) delta_psi=0; // if below, assume steady state has been reached
+
+    	/* add the gate heading to the current heading */
+    	sp->psi = ANGLE_BFP_OF_REAL(RadOfDeg(nus_gate_heading)) + heading;
+    	INT32_ANGLE_NORMALIZE(sp->psi);
+    }
+
     /* do not advance yaw setpoint if within a small deadband around stick center or if throttle is zero */
     if (YAW_DEADBAND_EXCEEDED() && !THROTTLE_STICK_DOWN()) {
       sp->psi += get_rc_yaw() * dt;
+//      counter_switch=0;
       INT32_ANGLE_NORMALIZE(sp->psi);
     }
     if (coordinated_turn) {

@@ -55,7 +55,9 @@
 		
 		<module name="imu" type="lisa_s_v1.0"/>
 		<module name="gps" type="datalink"/>
-		<module name="stabilization" type="int_euler"/>
+		<module name="stabilization" type="int_euler">
+			<define name="STABILIZATION_ATTITUDE_SP_PSI_DELTA_LIMIT" value="1.57"/>
+		</module>
 		<module name="ahrs" type="int_cmpl_quat">
 			<define name="AHRS_PROPAGATE_LOW_PASS_RATES" value="TRUE"/>
 		</module>
@@ -80,6 +82,7 @@
 <!--			<configure name="STEREO_BAUD" value="B115200"/>-->
 <!--		</module-->
 		<module name="stereocam_stereocam2state"/>
+		<module name="droplet"/>
 	</modules>
 	
 	<!-- ACTUATORS & COMMANDS %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%-->
@@ -106,7 +109,7 @@
 	<!-- SETTINGS %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%-->
 	
 	<section name="IMU" prefix="IMU_">
-		<define name="BODY_TO_IMU_PHI" value="-70." unit="deg"/> <!-- Roll: true angle 0, -50 added for default pitch up of delfly -->
+		<define name="BODY_TO_IMU_PHI" value="-52." unit="deg"/> <!-- Roll: true angle 0, -50 added for default pitch up of delfly -->
     	<define name="BODY_TO_IMU_THETA" value="0." unit="deg"/> <!-- Pitch -->
 		<define name="BODY_TO_IMU_PSI" value="-90." unit="deg"/> <!-- Yaw -->
 		
@@ -130,7 +133,7 @@
 		<define name="H_Y" value="0.00278894"/>
 		<define name="H_Z" value="0.92060036"/>
 		<define name="USE_GPS_HEADING" value="0"/>
-		
+<!--		<define name="HEADING_UPDATE_GPS_MIN_SPEED" value="0"/-->
 		<!-- For vibrating airfames -->
 	<define name="GRAVITY_HEURISTIC_FACTOR" value="0"/>
 	</section>
@@ -154,7 +157,7 @@
 		
 		<!-- setpoints -->
 		<define name="SP_MAX_PHI" value="45." unit="deg"/>
-		<define name="SP_MAX_THETA" value="45." unit="deg"/>
+		<define name="SP_MAX_THETA" value="30." unit="deg"/>
 		<define name="SP_MAX_PSI" value="45." unit="deg"/>
 		<define name="SP_MAX_R" value="90." unit="deg/s"/>
 		<define name="SP_MAX_P" value="90." unit="deg/s"/>
@@ -182,13 +185,13 @@
 		<define name="PHI_DGAIN" value="1"/>
 		<define name="PHI_IGAIN" value="1"/>
 		
-		<define name="THETA_PGAIN" value="2024"/>
-		<define name="THETA_DGAIN" value="200"/>
-		<define name="THETA_IGAIN" value="800"/>
+		<define name="THETA_PGAIN" value="2000"/> <!--was 8000-->
+		<define name="THETA_DGAIN" value="50"/> <!--was 200-->
+		<define name="THETA_IGAIN" value="0"/>
 		
-		<define name="PSI_PGAIN" value="1000"/>
-		<define name="PSI_DGAIN" value="4000"/>
-		<define name="PSI_IGAIN" value="0"/>
+		<define name="PSI_PGAIN" value="1000"/> <!--was 5000-->
+		<define name="PSI_DGAIN" value="500"/> <!--was 4000-->
+		<define name="PSI_IGAIN" value="50"/> <!--was 400-->
 		
 		<!-- feedforward -->
 		<define name="PHI_DDGAIN" value="0"/>
@@ -204,13 +207,6 @@
 		<define name="USE_GPS_ALT" value="0"/>
 		<define name="USE_GPS_ALT_SPEED" value="0"/>
 	</section>
-	
-<!--	<section name="GPS" prefix="GPS_"-->
-<!--		<define name="USE_DATALINK_SMALL" value="1"/-->
-<!--		<define name="LOCAL_ECEF_ORIGIN_X" value="392433200"/-->
-<!--		<define name="LOCAL_ECEF_ORIGIN_Y" value="30036200"/-->
-<!--		<define name="LOCAL_ECEF_ORIGIN_Z" value="500219700"/-->
-<!--	</section-->
 	
 	<section name="GUIDANCE_V" prefix="GUIDANCE_V_">
 		<define name="HOVER_KP" value="276"/>

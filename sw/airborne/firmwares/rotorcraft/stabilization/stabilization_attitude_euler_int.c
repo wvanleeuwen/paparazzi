@@ -107,18 +107,19 @@ static void send_att(struct transport_tx *trans, struct link_device *dev)
 static void send_att_ref(struct transport_tx *trans, struct link_device *dev)
 {
   pprz_msg_send_STAB_ATTITUDE_REF_INT(trans, dev, AC_ID,
-                                      &stab_att_sp_euler.phi,
-                                      &stab_att_sp_euler.theta,
-                                      &stab_att_sp_euler.psi,
-                                      &att_ref_euler_i.euler.phi,
+//                                      &stab_att_sp_euler.phi,
+//                                      &stab_att_sp_euler.theta,
+//                                      &stab_att_sp_euler.psi,
+//                                      &att_ref_euler_i.euler.phi,
                                       &att_ref_euler_i.euler.theta,
                                       &att_ref_euler_i.euler.psi,
-                                      &att_ref_euler_i.rate.p,
-                                      &att_ref_euler_i.rate.q,
-                                      &att_ref_euler_i.rate.r,
-                                      &att_ref_euler_i.accel.p,
-                                      &att_ref_euler_i.accel.q,
-                                      &att_ref_euler_i.accel.r);
+									  &radio_control.values[RADIO_YAW]);
+//                                      &att_ref_euler_i.rate.p,
+//                                      &att_ref_euler_i.rate.q,
+//                                      &att_ref_euler_i.rate.r,
+//                                      &att_ref_euler_i.accel.p,
+//                                      &att_ref_euler_i.accel.q,
+//                                      &att_ref_euler_i.accel.r);
 }
 #endif
 
@@ -223,6 +224,7 @@ void stabilization_attitude_run(bool  in_flight)
     OFFSET_AND_ROUND(stabilization_gains.dd.y * att_ref_euler_i.accel.q, 5);
   stabilization_att_ff_cmd[COMMAND_YAW] =
     OFFSET_AND_ROUND(stabilization_gains.dd.z * att_ref_euler_i.accel.r, 5);
+//  stabilization_att_ff_cmd[COMMAND_YAW] = radio_control.values[RADIO_YAW]/2;
 
   /* compute feedback command */
   /* attitude error            */
@@ -258,17 +260,17 @@ void stabilization_attitude_run(bool  in_flight)
   stabilization_att_fb_cmd[COMMAND_ROLL] =
     stabilization_gains.p.x    * att_err.phi +
     stabilization_gains.d.x    * rate_err.p +
-    OFFSET_AND_ROUND2((stabilization_gains.i.x  * stabilization_att_sum_err.phi), 10);
+    OFFSET_AND_ROUND2((stabilization_gains.i.x  * stabilization_att_sum_err.phi), 8);
 
   stabilization_att_fb_cmd[COMMAND_PITCH] =
     stabilization_gains.p.y    * att_err.theta +
     stabilization_gains.d.y    * rate_err.q +
-    OFFSET_AND_ROUND2((stabilization_gains.i.y  * stabilization_att_sum_err.theta), 10);
+    OFFSET_AND_ROUND2((stabilization_gains.i.y  * stabilization_att_sum_err.theta), 8);
 
   stabilization_att_fb_cmd[COMMAND_YAW] =
     stabilization_gains.p.z    * att_err.psi +
     stabilization_gains.d.z    * rate_err.r +
-    OFFSET_AND_ROUND2((stabilization_gains.i.z  * stabilization_att_sum_err.psi), 10);
+    OFFSET_AND_ROUND2((stabilization_gains.i.z  * stabilization_att_sum_err.psi), 8);
 
 
   /* with P gain of 100, att_err of 180deg (3.14 rad)
@@ -282,13 +284,10 @@ void stabilization_attitude_run(bool  in_flight)
     OFFSET_AND_ROUND((stabilization_att_fb_cmd[COMMAND_ROLL] + stabilization_att_ff_cmd[COMMAND_ROLL]), CMD_SHIFT);
 
   stabilization_cmd[COMMAND_PITCH] =
-    OFFSET_AND_ROUND((stabilization_att_fb_cmd[COMMAND_PITCH] + stabilization_att_ff_cmd[COMMAND_PITCH]), CMD_SHIFT);
+    OFFSET_AND_ROUND((stabilization_att_fb_cmd[COMMAND_PITCH] + stabilization_att_ff_cmd[COMMAND_PITCH]), 8); // was 11 --> gains need to be 8 times smaller to have the same effect
 
-//  stabilization_cmd[COMMAND_YAW] =
-//    OFFSET_AND_ROUND((stabilization_att_fb_cmd[COMMAND_YAW] + stabilization_att_ff_cmd[COMMAND_YAW]), CMD_SHIFT);
-
-  stabilization_cmd[COMMAND_YAW] = //radio_control.values[RADIO_YAW] + nus_turn_cmd +
-      OFFSET_AND_ROUND((stabilization_att_fb_cmd[COMMAND_YAW] + stabilization_att_ff_cmd[COMMAND_YAW]), CMD_SHIFT);
+  stabilization_cmd[COMMAND_YAW] =
+    OFFSET_AND_ROUND((stabilization_att_fb_cmd[COMMAND_YAW] + stabilization_att_ff_cmd[COMMAND_YAW]), 8); // was 11 --> gains need to be 8 times smaller to have the same effect
 
   /* Filtering the commands */
 
