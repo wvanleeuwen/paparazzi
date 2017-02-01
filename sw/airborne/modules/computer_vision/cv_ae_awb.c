@@ -127,7 +127,7 @@ struct image_t* cv_ae_awb_periodic(struct image_t* img) {
             VERBOSE_PRINT("Desired exposure: %5.2f ms (real: %5.2f ms)\r\n", desiredExposure, mt9f002.real_exposure);
         }
         else{
-            PRINT("Error: nb_valid_Y = %d\n", yuv_stats.nb_valid_Y);
+            //PRINT("Error: nb_valid_Y = %d\n", yuv_stats.nb_valid_Y);
         }
         // Calculate AWB (Robust Automatic White Balance Algorithm using Gray Color Points in Images - Huo et al.)
         if(yuv_stats.awb_nb_grey_pixels > 0){
@@ -167,7 +167,7 @@ struct image_t* cv_ae_awb_periodic(struct image_t* img) {
             mt9f002_set_gains(&mt9f002);
         }
         else{
-            PRINT("Error: nb_grey_pixels = %d\n", yuv_stats.awb_nb_grey_pixels);
+            //PRINT("Error: nb_grey_pixels = %d\n", yuv_stats.awb_nb_grey_pixels);
         }
     }
     return img;

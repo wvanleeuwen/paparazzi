@@ -1,26 +1,27 @@
 <!DOCTYPE flight_plan SYSTEM "../../flight_plan.dtd">
 
-<flight_plan alt="1.5" ground_alt="0" lat0="51.990634" lon0="4.376789" max_dist_from_home="8" name="Bebop avoid orange TU Delft Cyberzoo" security_height="0.4">
+<flight_plan alt="1.0" ground_alt="0" lat0="51.9906224" lon0="4.3767678" max_dist_from_home="8" name="Bebop avoid orange TU Delft Cyberzoo" security_height="0.4">
   <header>
-#include "autopilot.h"
-#include "subsystems/ahrs.h"
-#include "subsystems/electrical.h"
-#include "subsystems/datalink/datalink.h"
+    #include "subsystems/datalink/datalink.h"
+    #include "subsystems/electrical.h"
+    #include "subsystems/radio_control.h"
+    #include "subsystems/ahrs.h"
 </header>
   <waypoints>
-    <waypoint height="0" name="HOME" x="0.0" y="0.0"/>
-    <waypoint height="5" name="CLIMB" x="1.2" y="-0.6"/>
-    <waypoint name="GOAL" x="2.0" y="2.0"/>
-    <waypoint height="1.342321" name="STDBY" x="-0.7" y="-0.8"/>
+    <waypoint lat="51.990631" lon="4.376796" name="HOME"/>
+    <waypoint name="CLIMB" x="1.9" y="1.0"/>
+    <waypoint name="STDBY" x="1.9" y="1.0"/>
     <waypoint name="TD" x="0.8" y="-1.7"/>
-    <waypoint lat="51.9906213" lon="4.3768628" name="_CZ1"/>
-    <waypoint lat="51.9905874" lon="4.3767766" name="_CZ2"/>
-    <waypoint lat="51.9906409" lon="4.3767226" name="_CZ3"/>
-    <waypoint lat="51.990667" lon="4.376806" name="_CZ4"/>
-    <waypoint lat="51.990624" lon="4.376845" name="_OZ1"/>
-    <waypoint lat="51.990601" lon="4.376782" name="_OZ2"/>
-    <waypoint alt="11.5" lat="51.990638" lon="4.376748" name="_OZ3"/>
-    <waypoint lat="51.990657" lon="4.376804" name="_OZ4"/>
+    <waypoint name="GOAL" x="1.9" y="1.0"/>
+    <waypoint name="TRAJECTORY" x="1.9" y="1.0"/>
+    <waypoint lat="51.9905836" lon="4.3767729" name="_CZ1"/>
+    <waypoint lat="51.9906365" lon="4.3767138" name="_CZ2"/>
+    <waypoint lat="51.990680" lon="4.376805" name="_CZ3"/>
+    <waypoint lat="51.9906226" lon="4.3768699" name="_CZ4"/>
+    <waypoint lat="51.990594" lon="4.376776" name="_OZ1"/>
+    <waypoint lat="51.990636" lon="4.376733" name="_OZ2"/>
+    <waypoint lat="51.990671" lon="4.376806" name="_OZ3"/>
+    <waypoint lat="51.990624" lon="4.376852" name="_OZ4"/>
   </waypoints>
   <sectors>
     <sector color="red" name="CyberZoo">
@@ -37,10 +38,40 @@
     </sector>
   </sectors>
   <exceptions>
-    <exception cond="!InsideCyberZoo(GetPosX(), GetPosY())" deroute="Standby"/>
-    <exception cond="datalink_time > 2" deroute="Land here"/>
-    <exception cond="electrical.bat_low && !(nav_block == IndexOfBlock('Land')) && !(nav_block == IndexOfBlock('Flare')) && !(nav_block == IndexOfBlock('Landed'))" deroute="Land"/>
-    <exception cond="electrical.bat_critical && !(nav_block == IndexOfBlock('Land')) && !(nav_block == IndexOfBlock('Flare')) && !(nav_block == IndexOfBlock('Landed'))" deroute="Land here"/>
+    <!-- RC lost -->
+    <exception cond="((radio_control.status == RC_REALLY_LOST) &&
+      !(IndexOfBlock('Holding point') > nav_block) &&
+      !(nav_block >= IndexOfBlock('Land here')) &&
+      (autopilot_in_flight == true) )" deroute="Standby"/>
+    <!-- Datalink lost -->  
+    <exception cond="((datalink_time > 2) &&
+      !(IndexOfBlock('Holding point') > nav_block) &&
+      !(nav_block >= IndexOfBlock('Land here')) &&
+      (autopilot_in_flight == true) )" deroute="Land here"/>
+    <!-- Geofencing XY -->
+    <exception cond="(!InsideCyberZoo(GetPosX(), GetPosY()) &&
+      !(IndexOfBlock('Holding point') > nav_block) &&
+      !(nav_block >= IndexOfBlock('Land here')) &&
+      (autopilot_in_flight == true) )" deroute="Land here"/>
+    <!-- Geofencing Z 2.5 -->
+    <exception cond="((GetPosAlt() > 2.5) &&
+      !(IndexOfBlock('Holding point') > nav_block) &&
+      !(nav_block >= IndexOfBlock('Land here')) &&
+      (autopilot_in_flight == true) )" deroute="Land here"/>
+    <!-- Geofencing Z 4.5 -->
+    <exception cond="((GetPosAlt() > 4.5) &&
+      !(IndexOfBlock('Holding point') > nav_block) &&
+      (autopilot_in_flight == true) )" deroute="Landed"/>
+    <!-- Bat low -->  
+    <exception cond="(electrical.bat_low &&
+      !(IndexOfBlock('Holding point') > nav_block) &&
+      !(nav_block >= IndexOfBlock('Land here')) &&
+      (autopilot_in_flight == true) )" deroute="Land here"/>
+    <!-- Bat critical -->
+    <exception cond="(electrical.bat_critical &&
+      !(IndexOfBlock('Holding point') > nav_block) &&
+      !(nav_block >= IndexOfBlock('Land here')) &&
+      (autopilot_in_flight == true) )" deroute="Land here"/>
   </exceptions>
   <blocks>
     <block name="Wait GPS">
@@ -58,9 +89,10 @@
     <block key="r" name="Start Engine">
       <call_once fun="NavResurrect()"/>
       <attitude pitch="0" roll="0" throttle="0" until="FALSE" vmode="throttle"/>
+      <call_once fun="NavResurrect()"/>
     </block>
     <block key="t" name="Takeoff" strip_button="Takeoff" strip_icon="takeoff.png">
-      <exception cond="stateGetPositionEnu_f()->z > 1.25" deroute="Standby"/>
+      <exception cond="GetPosAlt() > 1.5" deroute="Standby"/>
       <call_once fun="NavSetWaypointHere(WP_CLIMB)"/>
       <stay climb="nav_climb_vspeed" vmode="climb" wp="CLIMB"/>
     </block>
@@ -70,49 +102,37 @@
     </block>
     <block key="g" name="START" strip_button="Go" strip_icon="lookfore.png">
       <call_once fun="NavSetWaypointHere(WP_GOAL)"/>
+      <set var="trajectoryConfidence" value="1"/>
     </block>
     <block name="StayGoal">
-      <go wp="GOAL"/>
-      <exception cond="block_time > 1" deroute="MoveGoalForward"/>
-      <exception cond="!safeToGoForwards" deroute="ChangeHeading"/>
-      <exception cond="!InsideObstacleZone(GetPosX(),GetPosY())" deroute="PrepareObstacleRun"/>
-    </block>
-    <block name="MoveGoalForward">
-      <call_once fun="moveWaypointForwards(WP_GOAL,3.0)"/>
-      <deroute block="StayGoal"/>
-      <exception cond="!safeToGoForwards" deroute="ChangeHeading"/>
-      <exception cond="!InsideObstacleZone(WaypointX(WP_GOAL),WaypointY(WP_GOAL))" deroute="PrepareObstacleRun"/>
-    </block>
-    <block name="ChangeHeading">
-      <call_once fun="NavSetWaypointHere(WP_STDBY)"/>
-      <while cond="1">
-        <call_once fun="increase_nav_heading(&nav_heading, incrementForAvoidance)"/>
-        <call_once fun="moveWaypointForwards(WP_GOAL,3.0)"/>
-        <go wp="STDBY"/>
-      </while>
-      <exception cond="safeToGoForwards" deroute="StayGoal"/>
+      <stay wp="GOAL"/>
+      <exception cond="!InsideObstacleZone(WaypointX(WP_TRAJECTORY),WaypointY(WP_TRAJECTORY))" deroute="PrepareObstacleRun"/>
     </block>
     <block name="PrepareObstacleRun">
-      <call_once fun="NavSetWaypointHere(WP_STDBY)"/>
-      <call_once fun="nav_set_heading_towards_waypoint(WP_HOME)"/>
-      <stay wp="STDBY"/>
-      <exception cond="block_time > 1" deroute="GetOutOfObstacleZone"/>
+      <while cond="!InsideObstacleZone(WaypointX(WP_TRAJECTORY),WaypointY(WP_TRAJECTORY))">
+        <call_once fun="increase_nav_heading(&nav_heading, 5)"/>
+      </while>
     </block>
-    <block name="GetOutOfObstacleZone">
-      <call_once fun="moveWaypointForwards(WP_GOAL,0.5)"/>
-      <call_once fun="chooseRandomIncrementAvoidance()"/>
-      <stay wp="GOAL"/>
-      <exception cond="block_time > 1" deroute="START"/>
+    <block name="GetIntoObstacleZone">
+      <while cond="!InsideObstacleZone(GetPosX(),GetPosY())">
+        <call_once fun="moveWaypointForward(WP_GOAL, 0.1)"/>
+        <go wp="GOAL"/>
+      </while>
+      <deroute block="START"/>
     </block>
     <block key="l" name="Land here" strip_button="Land Here" strip_icon="land-right.png">
       <call_once fun="NavSetWaypointHere(WP_TD)"/>
+      <go wp="TD"/>
+      <deroute block="Flare"/>
     </block>
     <block name="Land">
       <go wp="TD"/>
+      <deroute block="Flare"/>
     </block>
     <block name="Flare">
       <exception cond="NavDetectGround()" deroute="Holding point"/>
       <exception cond="!nav_is_in_flight()" deroute="Landed"/>
+      <exception cond="0.08 > GetPosAlt()" deroute="Landed"/>
       <call_once fun="NavStartDetectGround()"/>
       <stay climb="nav_descend_vspeed" vmode="climb" wp="TD"/>
     </block>

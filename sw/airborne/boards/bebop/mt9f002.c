@@ -1039,7 +1039,7 @@ void mt9f002_init(struct mt9f002_t *mt)
   mt9f002_set_resolution(mt);
   /* Update blanking (based on FPS) */
   mt9f002_set_blanking(mt);
-
+  isp_request_statistics_yuv_window(0 , (uint16_t) mt->sensor_width, 0, mt->sensor_height, mt->x_odd_inc, mt->y_odd_inc);
   /* Update exposure (based on target_exposure) */
   mt9f002_set_exposure(mt);
 

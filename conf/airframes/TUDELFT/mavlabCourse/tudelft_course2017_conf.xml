@@ -1,7 +1,7 @@
 <conf>
   <aircraft
    name="bebop_avoid"
-   ac_id="1"
+   ac_id="30"
    airframe="airframes/TUDELFT/mavlabCourse/tudelft_course2017_bebop_avoider.xml"
    radio="radios/dummy.xml"
    telemetry="telemetry/default_rotorcraft.xml"
