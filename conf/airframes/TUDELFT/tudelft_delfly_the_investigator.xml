@@ -61,7 +61,7 @@
 		<module name="ahrs" type="int_cmpl_quat">
 			<define name="AHRS_PROPAGATE_LOW_PASS_RATES" value="TRUE"/>
 		</module>
-		<module name="ins">
+		<module name="ins" type="hff">
 			<!-- Check what is this setting? -->
 <!--			<define name="INS_INT_GPS_ID" value="ABI_DISABLE"/-->
 		</module>

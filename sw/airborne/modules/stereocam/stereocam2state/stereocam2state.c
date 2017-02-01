@@ -38,7 +38,7 @@ int16_t nus_turn_cmd=0;
 int16_t nus_climb_cmd=0;
 int8_t nus_gate_heading=0; // gate heading relative to the current heading, in degrees
 int8_t body2cam=0; // offset between heading and camera direction, in degrees
-bool nus_gate_detected=0;
+bool nus_gate_detected = 0;
 
 uint8_t pos_thresh=10; // steer only if window center is more than pos_thresh of the center
 uint8_t fit_thresh=20; // maximal fitness that is still considered as correct detection
@@ -72,10 +72,17 @@ void stereo_to_state_periodic(void)
 //	static uint16_t ii=0;
 //	ii++;
 
-	if (stereocam_data.fresh && stereocam_data.len == 8) { // length of NUS window detection code
-	int8_t* pointer=stereocam_data.data; // to transform uint8 message back to int8
+  /* radio switch */
+  static int8_t nus_switch = 0;
+  static int8_t gate_heading = 0;
 
-	win_x = pointer[0];
+  if (radio_control.values[5] < -1000) nus_switch=1; // this should be ELEV D/R
+  else nus_switch=0;
+
+	if (stereocam_data.fresh && stereocam_data.len == 8) { // length of NUS window detection code
+	  int8_t* pointer=stereocam_data.data; // to transform uint8 message back to int8
+
+	  win_x = pointer[0];
     win_y = pointer[1];
     win_size = pointer[2];
     win_fitness = pointer[3];
@@ -86,42 +93,31 @@ void stereo_to_state_periodic(void)
 
     stereocam_data.fresh = 0;
 
-    /* radio switch */
-    static int8_t nus_switch = 0;
-    static int8_t gate_heading = 0;
-
-    if (radio_control.values[5] < -1000) nus_switch=1; // this should be ELEV D/R
-    else nus_switch=0;
-
     if (win_size > size_thresh && win_fitness > fit_thresh) // valid gate detection
     {
     	// nus_turn_cmd=MAX_PPRZ/100*turn_cmd_max*nus_switch*win_x/64;
     	nus_turn_cmd=0;
 
-    	gate_heading=30*win_x/64+body2cam;
+    	gate_heading = 30*win_x/64+body2cam;
     	nus_gate_detected=nus_switch;
 
     	// nus_climb_cmd=MAX_PPRZ*climb_cmd_max/100*nus_switch*win_y/48*100/(2*win_size); // gate size is 1 meter, win size is half of the gate size in pixels
     	// TODO change climb cmd based on body pitch
     	nus_climb_cmd=0;
-    }
-    else if (win_size < size_thresh && win_fitness > fit_thresh) // incomplete window detected, use previous command
+    } else if (win_size < size_thresh && win_fitness > fit_thresh) // incomplete window detected, use previous command
     {
     	// keeping the same command
     	nus_gate_detected=0;
     	nus_climb_cmd=0;
     	gate_heading=0;
-    }
-    else // no window detected - if (win_fitness < fit_thresh)
+    } else // no window detected - if (win_fitness < fit_thresh)
     {
     	if (cnt_left > cnt_thresh && cnt_right < cnt_thresh) {
-			nus_turn_cmd=nus_switch*MAX_PPRZ/100*turn_cmd_max;
-    	}
-    	else if (cnt_left < cnt_thresh && cnt_right > cnt_thresh) {
+    	  nus_turn_cmd=nus_switch*MAX_PPRZ/100*turn_cmd_max;
+    	}	else if (cnt_left < cnt_thresh && cnt_right > cnt_thresh) {
     		nus_turn_cmd=-nus_switch*MAX_PPRZ/100*turn_cmd_max;
-    	}
-    	else {
-    	  	nus_turn_cmd=0;
+    	}	else {
+    	  nus_turn_cmd=0;
     	}
     	nus_gate_detected=0;
     	nus_climb_cmd=0;
@@ -130,7 +126,6 @@ void stereo_to_state_periodic(void)
 
     /* simple filter */
    	nus_gate_heading=(nus_filter_order-1)*nus_gate_heading/nus_filter_order+gate_heading/nus_filter_order;
-
 
     //autopilot_guided_goto_body_relative(0.0, 0.0, nus_climb_cmd, 0.0)
   } else if (stereocam_data.fresh && stereocam_data.len == 20)
@@ -147,6 +142,7 @@ void stereo_to_state_periodic(void)
     stereocam_to_state();
     stereocam_data.fresh = 0;
   }
+	stereocam_data.fresh = 0;
 }
 
 void stereocam_to_state(void)

@@ -28,17 +28,20 @@
 
 #include "stdint.h"
 
-extern void droplet_init(void );
+void delfly_vel_estimator(void);
+
+extern void droplet_init(void);
 extern void droplet_periodic(void);
 extern void run_droplet(uint32_t disparities_total, uint32_t disparities_high);
 extern void run_droplet_low_texture(uint32_t disparities_high, uint32_t disparities_total, uint32_t histogram_obs,
     uint32_t count_disps_left, uint32_t count_disps_right);
 extern void wall_estimate(float slope_l, float intercept_l, float fit_l, float slope_r, float intercept_r, float fit_r);
 
-extern uint16_t obst_thr_1;      // obstacle threshold for phase 1
+extern uint8_t droplet_active;    // used to active or deactivate the droplet control effectiveness
+extern uint16_t obst_thr_1;       // obstacle threshold for phase 1
 extern uint16_t obst_thr_3;
-extern uint16_t obst_thr_4;      // obstacle threshold for phase 1
+extern uint16_t obst_thr_4;       // obstacle threshold for phase 1
 extern int16_t turn_direction;
-extern float wall_following_trim;// yaw rate trim to force vehicle to follow wall
+extern float wall_following_trim; // yaw rate trim to force vehicle to follow wall
 
 #endif
