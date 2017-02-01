@@ -289,16 +289,16 @@ void stabilization_attitude_run(bool  in_flight)
   stabilization_cmd[COMMAND_YAW] =
     OFFSET_AND_ROUND((stabilization_att_fb_cmd[COMMAND_YAW] + stabilization_att_ff_cmd[COMMAND_YAW]), 8); // was 11 --> gains need to be 8 times smaller to have the same effect
 
-  /* Filtering the commands */
-
-  // int32_t update_second_order_low_pass_int(struct SecondOrderLowPass_int *filter, int32_t value)
-  stabilization_cmd[COMMAND_YAW]=update_second_order_low_pass_int(&filter_yaw, stabilization_cmd[COMMAND_YAW]);
-
-
 
   /* bound the result */
   BoundAbs(stabilization_cmd[COMMAND_ROLL], MAX_PPRZ);
   BoundAbs(stabilization_cmd[COMMAND_PITCH], MAX_PPRZ);
   BoundAbs(stabilization_cmd[COMMAND_YAW], MAX_PPRZ);
+
+  /* Filtering the commands */
+
+    // int32_t update_second_order_low_pass_int(struct SecondOrderLowPass_int *filter, int32_t value)
+     stabilization_cmd[COMMAND_YAW]=update_second_order_low_pass_int(&filter_yaw, stabilization_cmd[COMMAND_YAW]);
+
 
 }

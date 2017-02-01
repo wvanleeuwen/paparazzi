@@ -2253,10 +2253,10 @@
 	<field name="cnt_left" type="uint8"/>
 	<field name="cnt_middle" type="uint8"/>
  	<field name="cnt_right" type="uint8"/>
- 	<field name="course" type="int16"/>
- 	<field name="north" type="int32"/>
- 	<field name="east" type="int32"/>
-  	<field name="alt" type="int32"/>
+ 	<!--field name="course" type="int16"/-->
+ 	<!--field name="north" type="int32"/-->
+ 	<!--field name="east" type="int32"/-->
+  	<!--field name="alt" type="int32"/-->
    </message>
 
    <message name="GPS_SMALL" id="252">
