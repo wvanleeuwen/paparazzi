@@ -163,7 +163,7 @@
 
     <define name="REF_OMEGA_R" value="450" unit="deg/s"/>
     <define name="REF_ZETA_R" value="0.9"/>
-    <define name="REF_MAX_R" value="360." unit="deg/s"/>
+    <define name="REF_MAX_R" value="600." unit="deg/s"/>
     <define name="REF_MAX_RDOT" value="RadOfDeg(8000.)"/>
   </section>
 
@@ -171,7 +171,7 @@
     <!-- control effectiveness -->
     <define name="G1_P" value="0.050111"/>
     <define name="G1_Q" value="0.044712"/>
-    <define name="G1_R" value="0.000321"/>
+    <define name="G1_R" value="0.005000"/>
     <define name="G2_R" value="0.260358"/>
 
     <!-- For the bebop2 we need to filter the roll rate due to the dampers -->

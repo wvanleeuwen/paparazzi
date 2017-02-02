@@ -43,7 +43,7 @@
       !(IndexOfBlock('Holding point') > nav_block) &&
       !(nav_block >= IndexOfBlock('Land here')) &&
       (autopilot_in_flight == true) )" deroute="Standby"/>
-    <!-- Datalink lost -->  
+    <!-- Datalink lost (constant RPM descent) -->  
     <exception cond="((datalink_time > 2) &&
       !(IndexOfBlock('Holding point') > nav_block) &&
       !(nav_block >= IndexOfBlock('Land here')) &&
@@ -58,7 +58,7 @@
       !(IndexOfBlock('Holding point') > nav_block) &&
       !(nav_block >= IndexOfBlock('Land here')) &&
       (autopilot_in_flight == true) )" deroute="Land here"/>
-    <!-- Geofencing Z 4.5 -->
+    <!-- Geofencing Z 4.5 (constant RPM descent)-->
     <exception cond="((GetPosAlt() > 4.5) &&
       !(IndexOfBlock('Holding point') > nav_block) &&
       (autopilot_in_flight == true) )" deroute="Landed"/>
@@ -67,7 +67,7 @@
       !(IndexOfBlock('Holding point') > nav_block) &&
       !(nav_block >= IndexOfBlock('Land here')) &&
       (autopilot_in_flight == true) )" deroute="Land here"/>
-    <!-- Bat critical -->
+    <!-- Bat critical (constant RPM no stabilization)-->
     <exception cond="(electrical.bat_critical &&
       !(IndexOfBlock('Holding point') > nav_block) &&
       !(nav_block >= IndexOfBlock('Land here')) &&
@@ -132,7 +132,7 @@
     <block name="Flare">
       <exception cond="NavDetectGround()" deroute="Holding point"/>
       <exception cond="!nav_is_in_flight()" deroute="Landed"/>
-      <exception cond="0.08 > GetPosAlt()" deroute="Landed"/>
+      <exception cond="0.10 > GetPosAlt()" deroute="Landed"/>
       <call_once fun="NavStartDetectGround()"/>
       <stay climb="nav_descend_vspeed" vmode="climb" wp="TD"/>
     </block>

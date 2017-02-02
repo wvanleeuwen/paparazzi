@@ -30,7 +30,7 @@
 #endif
 
 uint8_t safeToGoForwards        = false;
-int tresholdColorCount          = 0.035 * 124800; // 520 x 240 = 124.800 total pixels
+int tresholdColorCount          = 0.045 * 124800; // 520 x 240 = 124.800 total pixels
 float incrementForAvoidance;
 uint16_t trajectoryConfidence   = 1;
 float maxDistance               = 2.5;
