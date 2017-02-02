@@ -159,7 +159,7 @@
 		<define name="SP_MAX_PHI" value="45." unit="deg"/>
 		<define name="SP_MAX_THETA" value="30." unit="deg"/>
 		<define name="SP_MAX_PSI" value="45." unit="deg"/>
-		<define name="SP_MAX_R" value="90." unit="deg/s"/>
+		<define name="SP_MAX_R" value="180." unit="deg/s"/>
 		<define name="SP_MAX_P" value="90." unit="deg/s"/>
 		<define name="DEADBAND_R" value="250"/>
 		<define name="DEADBAND_A" value="250"/>

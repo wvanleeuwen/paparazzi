@@ -200,8 +200,16 @@ void stabilization_attitude_run(bool  in_flight)
   EULERS_DIFF(att_err, att_ref_euler_f.euler, *att_float);
   FLOAT_ANGLE_NORMALIZE(att_err.psi);
 
+  float rate_cmd = (stab_att_sp_euler.psi - att_float->psi);
+  FLOAT_ANGLE_NORMALIZE(rate_cmd);
+  rate_cmd *= 3;  // results in max rate of 1.5rad/s at 30deg (0.5rad)
+  BoundAbs(rate_cmd, 3.);
+
+  float rate_error = rate_cmd - stateGetBodyRates_f()->r;
+
   if (in_flight) {
     /* update integrator */
+    att_err.psi = rate_error;
     EULERS_ADD(stabilization_att_sum_err, att_err);
     EULERS_BOUND_CUBE(stabilization_att_sum_err, -MAX_SUM_ERR, MAX_SUM_ERR);
   } else {
@@ -214,7 +222,6 @@ void stabilization_attitude_run(bool  in_flight)
   RATES_DIFF(rate_err, att_ref_euler_f.rate, *rate_float);
 
   /*  PID                  */
-
   stabilization_att_fb_cmd[COMMAND_ROLL] =
     stabilization_gains.p.x  * att_err.phi +
     stabilization_gains.d.x  * rate_err.p +
@@ -227,7 +234,7 @@ void stabilization_attitude_run(bool  in_flight)
 
   stabilization_att_fb_cmd[COMMAND_YAW] =
     stabilization_gains.p.z  * att_err.psi +
-    stabilization_gains.d.z  * rate_err.r +
+    stabilization_gains.d.z  * rate_error + //rate_err.r +
     stabilization_gains.i.z  * stabilization_att_sum_err.psi;
 
 

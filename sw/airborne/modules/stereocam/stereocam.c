@@ -94,12 +94,15 @@ extern void stereocam_stop(void)
 {
 }
 
+WEAK void stereo_to_state_cb(void){}
+
 extern void stereocam_periodic(void)
 {
   // read all data from the stereo com link, check that don't overtake extract
   while (linkdev->char_available(linkdev->periph) && stereoprot_add(insert_loc, 1, STEREO_BUF_SIZE) != extract_loc) {
     if (handleStereoPackage(StereoGetch(), STEREO_BUF_SIZE, &insert_loc, &extract_loc, &msg_start, msg_buf, ser_read_buf,
                             &stereocam_data.fresh, &stereocam_data.len, &stereocam_data.matrix_width, &stereocam_data.matrix_height)) {
+      stereo_to_state_cb();
       freq_counter++;
       if ((sys_time.nb_tick - previous_time) > sys_time.ticks_per_sec) {  // 1s has past
         frequency = (uint8_t)((freq_counter * (sys_time.nb_tick - previous_time)) / sys_time.ticks_per_sec);
@@ -113,7 +116,6 @@ extern void stereocam_periodic(void)
       } else {
         DOWNLINK_SEND_STEREO_IMG(DefaultChannel, DefaultDevice, &frequency, &(stereocam_data.len), stereocam_data.len,
                                  stereocam_data.data);
-
       }
 #endif
     }

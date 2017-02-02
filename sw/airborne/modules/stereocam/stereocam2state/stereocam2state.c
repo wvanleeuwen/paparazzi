@@ -67,11 +67,8 @@ void stereo_to_state_init(void)
 	register_periodic_telemetry(DefaultPeriodic, PPRZ_MSG_ID_STEREO_DATA, send_stereo_data);
 }
 
-void stereo_to_state_periodic(void)
+void stereo_to_state_cb(void)
 {
-//	static uint16_t ii=0;
-//	ii++;
-
   /* radio switch */
   static int8_t nus_switch = 0;
   static int8_t gate_heading = 0;
@@ -79,70 +76,66 @@ void stereo_to_state_periodic(void)
   if (radio_control.values[5] < -1000) nus_switch=1; // this should be ELEV D/R
   else nus_switch=0;
 
-	if (stereocam_data.fresh && stereocam_data.len == 8) { // length of NUS window detection code
-	  int8_t* pointer=stereocam_data.data; // to transform uint8 message back to int8
+	if (stereocam_data.fresh){
+	  if (stereocam_data.len == 8 && 0) { // length of NUS window detection code
+      int8_t* pointer=stereocam_data.data; // to transform uint8 message back to int8
 
-	  win_x = pointer[0];
-    win_y = pointer[1];
-    win_size = pointer[2];
-    win_fitness = pointer[3];
-    fps = pointer[4];
-    cnt_left = stereocam_data.data[5];
-    cnt_middle = stereocam_data.data[6];
-    cnt_right = stereocam_data.data[7];
+      win_x = pointer[0];
+      win_y = pointer[1];
+      win_size = pointer[2];
+      win_fitness = pointer[3];
+      fps = pointer[4];
+      cnt_left = stereocam_data.data[5];
+      cnt_middle = stereocam_data.data[6];
+      cnt_right = stereocam_data.data[7];
 
-    stereocam_data.fresh = 0;
+      if (win_size > size_thresh && win_fitness > fit_thresh) // valid gate detection
+      {
+        // nus_turn_cmd=MAX_PPRZ/100*turn_cmd_max*nus_switch*win_x/64;
+        nus_turn_cmd=0;
 
-    if (win_size > size_thresh && win_fitness > fit_thresh) // valid gate detection
-    {
-    	// nus_turn_cmd=MAX_PPRZ/100*turn_cmd_max*nus_switch*win_x/64;
-    	nus_turn_cmd=0;
+        gate_heading = 30*win_x/64+body2cam;
+        nus_gate_detected=nus_switch;
 
-    	gate_heading = 30*win_x/64+body2cam;
-    	nus_gate_detected=nus_switch;
+        // nus_climb_cmd=MAX_PPRZ*climb_cmd_max/100*nus_switch*win_y/48*100/(2*win_size); // gate size is 1 meter, win size is half of the gate size in pixels
+        // TODO change climb cmd based on body pitch
+        nus_climb_cmd=0;
+      } else if (win_size < size_thresh && win_fitness > fit_thresh) // incomplete window detected, use previous command
+      {
+        // keeping the same command
+        nus_gate_detected=0;
+        nus_climb_cmd=0;
+        gate_heading=0;
+      } else // no window detected - if (win_fitness < fit_thresh)
+      {
+        if (cnt_left > cnt_thresh && cnt_right < cnt_thresh) {
+          nus_turn_cmd=nus_switch*MAX_PPRZ/100*turn_cmd_max;
+        }	else if (cnt_left < cnt_thresh && cnt_right > cnt_thresh) {
+          nus_turn_cmd=-nus_switch*MAX_PPRZ/100*turn_cmd_max;
+        }	else {
+          nus_turn_cmd=0;
+        }
+        nus_gate_detected=0;
+        nus_climb_cmd=0;
+        gate_heading=0;
+      }
 
-    	// nus_climb_cmd=MAX_PPRZ*climb_cmd_max/100*nus_switch*win_y/48*100/(2*win_size); // gate size is 1 meter, win size is half of the gate size in pixels
-    	// TODO change climb cmd based on body pitch
-    	nus_climb_cmd=0;
-    } else if (win_size < size_thresh && win_fitness > fit_thresh) // incomplete window detected, use previous command
-    {
-    	// keeping the same command
-    	nus_gate_detected=0;
-    	nus_climb_cmd=0;
-    	gate_heading=0;
-    } else // no window detected - if (win_fitness < fit_thresh)
-    {
-    	if (cnt_left > cnt_thresh && cnt_right < cnt_thresh) {
-    	  nus_turn_cmd=nus_switch*MAX_PPRZ/100*turn_cmd_max;
-    	}	else if (cnt_left < cnt_thresh && cnt_right > cnt_thresh) {
-    		nus_turn_cmd=-nus_switch*MAX_PPRZ/100*turn_cmd_max;
-    	}	else {
-    	  nus_turn_cmd=0;
-    	}
-    	nus_gate_detected=0;
-    	nus_climb_cmd=0;
-    	gate_heading=0;
+      /* simple filter */
+      nus_gate_heading=(nus_filter_order-1)*nus_gate_heading/nus_filter_order+gate_heading/nus_filter_order;
+
+      //autopilot_guided_goto_body_relative(0.0, 0.0, nus_climb_cmd, 0.0)
+    } else if (stereocam_data.len == 20) {
+      //run_droplet((uint32_t)stereocam_data.data[0], (uint32_t)stereocam_data.data[4]);
+      uint32_t* buffer32 = (uint32_t*)stereocam_data.data;
+      run_droplet_low_texture(buffer32[0], buffer32[1], buffer32[2], buffer32[3], buffer32[4]);
+    } else if (stereocam_data.len == 24) {
+      int32_t* buffer32 = (int32_t*)stereocam_data.data;
+      wall_estimate(buffer32[0], buffer32[1], buffer32[2], buffer32[3], buffer32[4], buffer32[5]);
+    } else if (stereocam_data.len == 25) {
+      stereocam_to_state();
     }
-
-    /* simple filter */
-   	nus_gate_heading=(nus_filter_order-1)*nus_gate_heading/nus_filter_order+gate_heading/nus_filter_order;
-
-    //autopilot_guided_goto_body_relative(0.0, 0.0, nus_climb_cmd, 0.0)
-  } else if (stereocam_data.fresh && stereocam_data.len == 20)
-  {
-    //run_droplet((uint32_t)stereocam_data.data[0], (uint32_t)stereocam_data.data[4]);
-    uint32_t* buffer32 = (uint32_t*)stereocam_data.data;
-    run_droplet_low_texture(buffer32[0], buffer32[1], buffer32[2], buffer32[3], buffer32[4]);
-    stereocam_data.fresh = 0;
-  } else if (stereocam_data.fresh && stereocam_data.len == 24) {
-    int32_t* buffer32 = (int32_t*)stereocam_data.data;
-    wall_estimate(buffer32[0], buffer32[1], buffer32[2], buffer32[3], buffer32[4], buffer32[5]);
-    stereocam_data.fresh = 0;
-  } else if (stereocam_data.fresh && stereocam_data.len == 25) {
-    stereocam_to_state();
-    stereocam_data.fresh = 0;
-  }
-	stereocam_data.fresh = 0;
+	  stereocam_data.fresh = 0;
+	}
 }
 
 void stereocam_to_state(void)

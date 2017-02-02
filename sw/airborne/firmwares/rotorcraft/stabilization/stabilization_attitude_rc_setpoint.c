@@ -207,12 +207,18 @@ void stabilization_attitude_read_rc_setpoint_eulers(struct Int32Eulers *sp, bool
     	INT32_ANGLE_NORMALIZE(sp->psi);
     }
 
+    static on_stick_deadband = 1;
     /* do not advance yaw setpoint if within a small deadband around stick center or if throttle is zero */
     if (YAW_DEADBAND_EXCEEDED() && !THROTTLE_STICK_DOWN()) {
       sp->psi += get_rc_yaw() * dt;
 //      counter_switch=0;
       INT32_ANGLE_NORMALIZE(sp->psi);
+      on_stick_deadband = 1;
+    } else if (on_stick_deadband) {
+      on_stick_deadband = 0;
+      sp->psi = stateGetNedToBodyEulers_i()->psi;
     }
+
     if (coordinated_turn) {
       //Coordinated turn
       //feedforward estimate angular rotation omega = g*tan(phi)/v

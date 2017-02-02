@@ -41,9 +41,9 @@ enum {
 };
 
 // parameter setting
-uint16_t obst_thr_1 = 150;//7;      // obstacle threshold for phase 1
-uint16_t disp_thr_1 = 5;//10;     // obstacle count minimum threshold for phase 1
-uint32_t obst_wait_2 = 3000;  // -->1800<-- wait time for phase 2
+uint16_t obst_thr_1 = 60;//7;      // obstacle threshold for phase 1
+uint16_t disp_thr_1 = 2;//10;     // obstacle count minimum threshold for phase 1
+uint32_t obst_wait_2 = 1800;  // -->1800<-- wait time for phase 2
 uint16_t obst_thr_3 = 40;     // obstacle threshold for phase 3
 uint16_t obst_thr_4 = 40;     // obstacle threshold for phase 4
 uint16_t obst_wait_4 = 500;   // wait time for phase 4
@@ -74,7 +74,7 @@ void droplet_init(void)
  *
  */
 void droplet_periodic(void){
-  if (droplet_active){return;}
+  if (!droplet_active){return;}
   if (radio_control.values[5] < 0){nus_turn_cmd = 0; return;} // this should be ELEV D/R
 
   switch(droplet_state){
@@ -179,11 +179,12 @@ void run_droplet(uint32_t disparities_total, uint32_t disparities_high)
 void run_droplet_low_texture(uint32_t disparities_high, uint32_t disparities_total, uint32_t histogram_obs,
     uint32_t count_disps_left, uint32_t count_disps_right)
 {
-  nus_climb_cmd = disparities_high;
+  cnt_left = droplet_state;
+  nus_climb_cmd = (int16_t)disparities_high;
   if (histogram_obs/10 > 127){
     nus_gate_heading = 127;
   } else {
-    nus_gate_heading = histogram_obs/10;
+    nus_gate_heading = (int8_t) (histogram_obs/10);
   }
 
   // => max_Y = 500 mm
@@ -252,5 +253,5 @@ void wall_estimate(float slope_l, float intercept_l, float fit_l, float slope_r,
   float dummyf;
   uint8_t dummy8;
   uint16_t dummy16;
-  DOWNLINK_SEND_RANGEFINDER(DefaultChannel, DefaultDevice, &dummy16, &dist2left, &ang2left, &dist2right, &ang2right, &dummyf, &dummy8);
+  //DOWNLINK_SEND_RANGEFINDER(DefaultChannel, DefaultDevice, &dummy16, &dist2left, &ang2left, &dist2right, &ang2right, &dummyf, &dummy8);
 }
