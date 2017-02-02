@@ -114,6 +114,7 @@ void stereo_to_state_cb(void)
         nus_gate_detected=0;
         nus_climb_cmd=0;
         gate_heading=0;
+    	nus_turn_cmd=0;
       } else // no window detected - if (win_fitness < fit_thresh)
       {
         if (cnt_left > cnt_thresh && cnt_right < cnt_thresh) {

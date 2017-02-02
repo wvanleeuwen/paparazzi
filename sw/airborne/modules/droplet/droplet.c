@@ -41,11 +41,11 @@ enum {
 };
 
 // parameter setting
-uint16_t obst_thr_1 = 60;//7;      // obstacle threshold for phase 1
+uint16_t obst_thr_1 = 35;//7;      // obstacle threshold for phase 1
 uint16_t disp_thr_1 = 2;//10;     // obstacle count minimum threshold for phase 1
 uint32_t obst_wait_2 = 1800;  // -->1800<-- wait time for phase 2
-uint16_t obst_thr_3 = 40;     // obstacle threshold for phase 3
-uint16_t obst_thr_4 = 40;     // obstacle threshold for phase 4
+uint16_t obst_thr_3 = 30;     // obstacle threshold for phase 3
+uint16_t obst_thr_4 = 30;     // obstacle threshold for phase 4
 uint16_t obst_wait_4 = 500;   // wait time for phase 4
 
 uint16_t obst_cons_1 = 3;     // obstacle consistency threshold for phase 1
