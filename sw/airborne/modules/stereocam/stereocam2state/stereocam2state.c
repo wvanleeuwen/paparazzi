@@ -47,17 +47,18 @@ uint8_t turn_cmd_max=50; // percentage of MAX_PPRZ
 uint8_t climb_cmd_max=10; // percentage of MAX_PPRZ
 uint8_t cnt_thresh=80; // threshold for max amount of pixels in a bin (x10)
 uint8_t nus_filter_order=1; // complementary filter setting
+uint8_t Nmsg2skip=0; // number of camera messages to be skipped
 
 
 static void send_stereo_data(struct transport_tx *trans, struct link_device *dev)
  {
-	int16_t course=(DegOfRad(gps_datalink.course) / ((int32_t)1e6)); // sent in deca degrees (0.1 deg)
-	int32_t north=gps_datalink.utm_pos.north;
-	int32_t east=gps_datalink.utm_pos.east;
-	int32_t alt=gps_datalink.utm_pos.alt;
+//	int16_t course=(DegOfRad(gps_datalink.course) / ((int32_t)1e6)); // sent in deca degrees (0.1 deg)
+//	int32_t north=gps_datalink.utm_pos.north;
+//	int32_t east=gps_datalink.utm_pos.east;
+//	int32_t alt=gps_datalink.utm_pos.alt;
 
 	pprz_msg_send_STEREO_DATA(trans, dev, AC_ID,
-                         &win_x, &win_y, &win_size, &win_fitness, &nus_turn_cmd, &nus_climb_cmd, &nus_gate_heading, &fps, &cnt_left, &cnt_middle, &cnt_right, &course, &north, &east, &alt);
+                         &win_x, &win_y, &win_size, &win_fitness, &nus_turn_cmd, &nus_climb_cmd, &nus_gate_heading, &fps, &cnt_left, &cnt_middle, &cnt_right); // , &course, &north, &east, &alt
  }
 
 void stereocam_to_state(void);
@@ -76,8 +77,13 @@ void stereo_to_state_cb(void)
   if (radio_control.values[5] < -1000) nus_switch=1; // this should be ELEV D/R
   else nus_switch=0;
 
-	if (stereocam_data.fresh){
-	  if (stereocam_data.len == 8 && 0) { // length of NUS window detection code
+  static uint8_t msg_counter=0;
+
+    if (stereocam_data.fresh){
+      if (stereocam_data.len == 8 && msg_counter<Nmsg2skip) { // length of NUS window detection code
+        msg_counter++;
+        stereocam_data.fresh = 0;
+    } else if (stereocam_data.fresh && stereocam_data.len == 8 && msg_counter==Nmsg2skip) { // length of NUS window detection code
       int8_t* pointer=stereocam_data.data; // to transform uint8 message back to int8
 
       win_x = pointer[0];
@@ -88,6 +94,8 @@ void stereo_to_state_cb(void)
       cnt_left = stereocam_data.data[5];
       cnt_middle = stereocam_data.data[6];
       cnt_right = stereocam_data.data[7];
+
+      msg_counter = 0;
 
       if (win_size > size_thresh && win_fitness > fit_thresh) // valid gate detection
       {

@@ -5,6 +5,7 @@
     <dl_settings NAME="NUS Stereo">
       <dl_setting var="body2cam" min="-20" step="1" max="20" module="stereocam/stereocam2state/stereocam2state" shortname="Body2Cam" persistent="true"/>
       <dl_setting var="nus_filter_order" min="1" step="1" max="20" module="stereocam/stereocam2state/stereocam2state" shortname="Filter Order" persistent="true"/>
+      <dl_setting var="Nmsg2skip" min="0" step="1" max="25" module="stereocam/stereocam2state/stereocam2state" shortname="Nmsg2skip" persistent="true"/>
       <dl_setting var="pos_thresh" min="0" step="1" max="100" module="stereocam/stereocam2state/stereocam2state" shortname="POS Thresh" persistent="true"/>
       <dl_setting var="size_thresh" min="0" step="1" max="255" module="stereocam/stereocam2state/stereocam2state" shortname="SIZE Thresh" persistent="true"/>
 	  <dl_setting var="fit_thresh" min="0" step="1" max="255" module="stereocam/stereocam2state/stereocam2state" shortname="FIT Thresh" persistent="true"/>
