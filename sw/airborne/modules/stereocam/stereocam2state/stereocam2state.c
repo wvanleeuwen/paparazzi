@@ -77,13 +77,10 @@ void stereo_to_state_cb(void)
   if (radio_control.values[5] < -1000) nus_switch=1; // this should be ELEV D/R
   else nus_switch=0;
 
-  static uint8_t msg_counter=0;
+  static uint8_t msg_counter = 0;
 
-    if (stereocam_data.fresh){
-      if (stereocam_data.len == 8 && msg_counter<Nmsg2skip) { // length of NUS window detection code
-        msg_counter++;
-        stereocam_data.fresh = 0;
-    } else if (stereocam_data.fresh && stereocam_data.len == 8 && msg_counter==Nmsg2skip) { // length of NUS window detection code
+  if (stereocam_data.fresh){
+    if (stereocam_data.len == 8 && msg_counter++ >= Nmsg2skip) { // length of NUS window detection code
       int8_t* pointer=stereocam_data.data; // to transform uint8 message back to int8
 
       win_x = pointer[0];

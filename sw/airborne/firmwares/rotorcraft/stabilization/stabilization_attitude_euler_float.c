@@ -234,7 +234,7 @@ void stabilization_attitude_run(bool  in_flight)
 
   stabilization_att_fb_cmd[COMMAND_YAW] =
     stabilization_gains.p.z  * att_err.psi +
-    stabilization_gains.d.z  * rate_error + //rate_err.r +
+    stabilization_gains.d.z  * rate_err.r + //rate_error + //
     stabilization_gains.i.z  * stabilization_att_sum_err.psi;
 
 
