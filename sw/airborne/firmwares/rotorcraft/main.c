@@ -201,6 +201,14 @@ STATIC_INLINE void main_init(void)
 
   modules_init();
 
+  // call autopilot implementation init after guidance modules init
+  // it will set startup mode
+#if USE_GENERATED_AUTOPILOT
+  autopilot_generated_init();
+#else
+  autopilot_static_init();
+#endif
+
   /* temporary hack:
    * Since INS is now a module, LTP_DEF is not yet initialized when autopilot_init is called
    * This led to the problem that global waypoints were not "localized",
@@ -240,6 +248,7 @@ STATIC_INLINE void main_init(void)
 
   // Do a failsafe check first
   failsafe_check();
+
 }
 
 STATIC_INLINE void handle_periodic_tasks(void)
@@ -331,6 +340,7 @@ STATIC_INLINE void telemetry_periodic(void)
 
 STATIC_INLINE void failsafe_check(void)
 {
+#if !USE_GENERATED_AUTOPILOT
   if (radio_control.status == RC_REALLY_LOST &&
       autopilot_mode != AP_MODE_KILL &&
       autopilot_mode != AP_MODE_HOME &&
@@ -364,6 +374,8 @@ STATIC_INLINE void failsafe_check(void)
     autopilot_set_mode(AP_MODE_FAILSAFE);
   }
 #endif
+
+#endif // !USE_GENERATED_AUTOPILOT
 
   autopilot_check_in_flight(autopilot_motors_on);
 }

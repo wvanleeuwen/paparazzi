@@ -30,10 +30,10 @@
 #endif
 
 uint8_t safeToGoForwards        = false;
-int tresholdColorCount          = 0.045 * 124800; // 520 x 240 = 124.800 total pixels
+int tresholdColorCount          = 0.05 * 124800; // 520 x 240 = 124.800 total pixels
 float incrementForAvoidance;
 uint16_t trajectoryConfidence   = 1;
-float maxDistance               = 2.5;
+float maxDistance               = 2.25;
 
 /*
  * Initialisation function, setting the colour filter, random seed and incrementForAvoidance
@@ -45,7 +45,7 @@ void orange_avoider_init()
   color_lum_max = 255;
   color_cb_min  = 75;
   color_cb_max  = 145;
-  color_cr_min  = 175;
+  color_cr_min  = 167;
   color_cr_max  = 255;
   // Initialise random values
   srand(time(NULL));

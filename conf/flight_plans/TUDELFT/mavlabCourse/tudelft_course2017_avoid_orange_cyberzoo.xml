@@ -54,7 +54,7 @@
       !(nav_block >= IndexOfBlock('Land here')) &&
       (autopilot_in_flight == true) )" deroute="Land here"/>
     <!-- Geofencing Z 2.5 -->
-    <exception cond="((GetPosAlt() > 2.5) &&
+    <exception cond="((GetPosAlt() > 3.5) &&
       !(IndexOfBlock('Holding point') > nav_block) &&
       !(nav_block >= IndexOfBlock('Land here')) &&
       (autopilot_in_flight == true) )" deroute="Land here"/>

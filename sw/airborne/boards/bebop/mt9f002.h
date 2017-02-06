@@ -95,8 +95,6 @@ struct mt9f002_t {
   struct i2c_transaction i2c_trans;   ///< I2C transaction for comminication with CMOS chip
 };
 
-extern struct mt9f002_t mt9f002;
-
 void mt9f002_init(struct mt9f002_t *mt);
 void mt9f002_calc_resolution(struct mt9f002_t *mt);
 void mt9f002_set_resolution(struct mt9f002_t *mt);

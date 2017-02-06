@@ -27,9 +27,9 @@
 #include "std.h"
 #include "mt9f002.h"
 #include "mt9f002_regs.h"
-#include "lib/isp/libisp.h"
 #include "math/pprz_algebra_int.h"
 #include "boards/bebop.h"
+#include "modules/computer_vision/lib/isp/libisp.h"
 
 #include <stdio.h>
 #include <unistd.h>
@@ -67,9 +67,9 @@ struct video_config_t front_camera = {
   },
   .dev_name = "/dev/video1",
   .subdev_name = "/dev/v4l-subdev1",
-  .format = V4L2_PIX_FMT_UYVY, /* V4L2_PIX_FMT_YUV422P V4L2_PIX_FMT_UYVY */
+  .format = V4L2_PIX_FMT_UYVY,
   .subdev_format = V4L2_MBUS_FMT_SGRBG10_1X10,
-  .buf_cnt = 8,
+  .buf_cnt = 5,
   .filters = VIDEO_FILTER_ISP,
   .cv_listener = NULL,
   .fps = MT9F002_TARGET_FPS
@@ -120,21 +120,18 @@ static void write_reg(struct mt9f002_t *mt, uint16_t addr, uint32_t val, uint8_t
   mt->i2c_trans.buf[1] = addr & 0xFF;
 
   // Fix sigdness based on length
-  if(len == 1) {
+  if (len == 1) {
     mt->i2c_trans.buf[2] = val & 0xFF;
-  }
-  else if(len == 2) {
+  } else if (len == 2) {
     mt->i2c_trans.buf[2] = (val >> 8) & 0xFF;
     mt->i2c_trans.buf[3] = val & 0xFF;
-  }
-  else if(len == 4) {
+  } else if (len == 4) {
     mt->i2c_trans.buf[2] = (val >> 24) & 0xFF;
     mt->i2c_trans.buf[3] = (val >> 16) & 0xFF;
     mt->i2c_trans.buf[4] = (val >> 8) & 0xFF;
     mt->i2c_trans.buf[5] = val & 0xFF;
-  }
-  else {
-    PRINT("write_reg with incorrect length %d\r\n", len);
+  } else {
+    printf("[MT9F002] write_reg with incorrect length %d\r\n", len);
   }
 
   // Transmit the buffer
@@ -154,8 +151,8 @@ static uint32_t read_reg(struct mt9f002_t *mt, uint16_t addr, uint8_t len)
   i2c_transceive(mt->i2c_periph, &mt->i2c_trans, MT9F002_ADDRESS, 2, len);
 
   /* Fix sigdness */
-  for(uint8_t i =0; i < len; i++) {
-    ret |= mt->i2c_trans.buf[len-i-1] << (8*i);
+  for (uint8_t i = 0; i < len; i++) {
+    ret |= mt->i2c_trans.buf[len - i - 1] << (8 * i);
   }
   return ret;
 }
@@ -170,10 +167,9 @@ static inline void mt9f002_mipi_stage1(struct mt9f002_t *mt)
 
   uint32_t serialFormat;
   if (mt->interface == MT9F002_HiSPi) {
-    serialFormat = (3<<8) | 2; // 2 Serial lanes
-  }
-  else {
-    serialFormat = (2<<8) | 2; // 2 Serial lanes
+    serialFormat = (3 << 8) | 2; // 2 Serial lanes
+  } else {
+    serialFormat = (2 << 8) | 2; // 2 Serial lanes
   }
   write_reg(mt, MT9F002_SERIAL_FORMAT, serialFormat, 2);
   uint32_t dataFormat = (8 << 8) | 8; // 8 Bits pixel depth
@@ -599,19 +595,19 @@ static inline void mt9f002_set_pll(struct mt9f002_t *mt)
   write_reg(mt, MT9F002_OP_SYS_CLK_DIV , mt->op_sys_clk_div, 2);
 
   uint16_t smia = read_reg(mt, MT9F002_SMIA_TEST, 2);
-  write_reg(mt, MT9F002_SMIA_TEST, (smia & 0xFFBF) | (mt->shift_vt_pix_clk_div<<6), 2); // shift_vt_pix_clk_div
+  write_reg(mt, MT9F002_SMIA_TEST, (smia & 0xFFBF) | (mt->shift_vt_pix_clk_div << 6), 2); // shift_vt_pix_clk_div
 
   uint16_t row_speed = read_reg(mt, MT9F002_ROW_SPEED, 2);
   row_speed = (row_speed & 0xFFF8) | (mt->rowSpeed_2_0 & 0x07); // rowSpeed_2_0
-  row_speed = (row_speed & 0xF8FF) | ((mt->row_speed_10_8 & 0x07)<<8); // row_speed_10_8
-  row_speed = (row_speed&(~0x70)) | (0x2<<4); // Change opclk_delay
+  row_speed = (row_speed & 0xF8FF) | ((mt->row_speed_10_8 & 0x07) << 8); // row_speed_10_8
+  row_speed = (row_speed & (~0x70)) | (0x2 << 4); // Change opclk_delay
   write_reg(mt, MT9F002_ROW_SPEED, row_speed, 2);
 
   // Compute clocks
-  mt->vt_pix_clk = mt->input_clk_freq * (float)mt->pll_multiplier * (float)(1+mt->shift_vt_pix_clk_div)
-            /((float)mt->pre_pll_clk_div * (float)mt->vt_sys_clk_div * (float)mt->vt_pix_clk_div);
+  mt->vt_pix_clk = mt->input_clk_freq * (float)mt->pll_multiplier * (float)(1 + mt->shift_vt_pix_clk_div)
+                   / ((float)mt->pre_pll_clk_div * (float)mt->vt_sys_clk_div * (float)mt->vt_pix_clk_div);
   mt->op_pix_clk = mt->input_clk_freq * (float)mt->pll_multiplier
-       /((float)mt->pre_pll_clk_div * (float)mt->op_sys_clk_div * (float)mt->op_pix_clk_div);
+                   / ((float)mt->pre_pll_clk_div * (float)mt->op_sys_clk_div * (float)mt->op_pix_clk_div);
 }
 
 /**

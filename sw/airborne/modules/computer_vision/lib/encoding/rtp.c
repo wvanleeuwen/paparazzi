@@ -119,6 +119,8 @@ void rtp_frame_send(struct UdpSocket *udp, struct image_t *img, uint8_t format_c
   uint32_t jpeg_size = img->buf_size;
   uint8_t *jpeg_ptr = img->buf;
 
+#define MAX_PACKET_SIZE 1400
+
   if (delta_t <= 0) {
     struct timeval tv;
     gettimeofday(&tv, 0);

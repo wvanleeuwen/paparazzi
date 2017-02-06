@@ -1,22 +1,24 @@
 <!DOCTYPE airframe SYSTEM "../../airframe.dtd">
 
-<airframe name="AvoiderBebop">
+<airframe name="bebop2_avoider">
 
   <firmware name="rotorcraft">
     <target name="ap" board="bebop2"/>
 
+<!-- nps currently needs the motor mixing module
     <target name="nps" board="pc">
       <module name="fdm" type="jsbsim"/>
       <module name="udp"/>
     </target>
-    
+-->
+    <!--  Swarmhub config  -->
    	<configure name="HOST" value="192.168.40.$(AC_ID)" />
    	<configure name="MODEM_HOST" value="192.168.40.255" />
-   	
+   	<!--  Camera parameters  -->
 	<define name="H264_ROTATE" value="TRUE"/>
-    	<define name="MT9F002_INITIAL_OFFSET_X" value="416+2704-480" /> <!-- 480 / 960 / 1920 / 3840  (horion for theta = 0 -> 2704)-->
+    <define name="MT9F002_INITIAL_OFFSET_X" value="416+2704-480" /> <!-- 480 / 960 / 1920 / 3840  (horion for theta = 0 -> 2704)-->
 	<define name="MT9F002_INITIAL_OFFSET_Y" value="1680-1040" /> <!-- 420 / 840 / 1680 / 3360 -->
-    	<define name="MT9F002_SENSOR_WIDTH" value="2*480" /> <!-- 480 / 960 / 1920 / 3840-->
+    <define name="MT9F002_SENSOR_WIDTH" value="2*480" /> <!-- 480 / 960 / 1920 / 3840-->
 	<define name="MT9F002_SENSOR_HEIGHT" value="2*1040" /> <!-- 420 / 840 / 1680 / 3360 -->
 	<define name="MT9F002_OUTPUT_WIDTH" value="240" /> <!-- 480 / 960 / 1920 / 3840-->
 	<define name="MT9F002_OUTPUT_HEIGHT" value="520" /> <!-- 420 / 840 / 1680 / 3360 -->
@@ -29,32 +31,42 @@
 	
     <module name="telemetry" type="transparent_udp"/>
     <module name="radio_control" type="datalink"/>
+    <!-- 
     <module name="motor_mixing"/>
+     -->
     <module name="actuators" type="bebop"/>
     <module name="imu" type="bebop"/>
     <module name="gps" type="datalink"/>
-    <module name="stabilization" type="indi_simple"/>   
-    <!--
-    <module name="stabilization" type="indi"/>
-    <module name="stabilization" type="rate_indi" />
-    -->
+    <!-- 
+    <module name="stabilization" type="indi_simple"/> 
+     -->  
+    <module name="stabilization" type="indi">
+      <define name="INDI_RPM_FEEDBACK" value="TRUE"/>
+    </module>
+    <module name="stabilization" type="rate_indi"/>
+    
     <module name="ahrs" type="int_cmpl_quat">
       <configure name="USE_MAGNETOMETER" value="FALSE"/> <!-- TURN ON OUTSIDE -->
       <define name="AHRS_USE_GPS_HEADING" value="TRUE"/>
     </module>
     <module name="ins" type="extended"/>
+    <!-- Not working for bebop2
+    <module name="guidance" type="indi">
+      <define name="GUIDANCE_INDI_SPECIFIC_FORCE_GAIN" value="-500.0"/>
+      <define name="GUIDANCE_INDI_THRUST_DYNAMICS" value="0.1"/>
+      <define name="GUIDANCE_INDI_RC_DEBUG" value="FALSE"/>
+    </module>
+    -->
   </firmware>
 
   <modules main_freq="512">
     <module name="geo_mag"/>
     <module name="air_data"/>
     <module name="send_imu_mag_current"/>
-    <!--
-    <module name="gps" type="ubx_ucenter"/>
-    -->
     <module name="logger_file">
       <define name="FILE_LOGGER_PATH" value="/data/ftp/internal_000"/>
     </module>
+    
     <module name="video_thread"/>
     <module name="cv_ae_awb">
 	  <define name="CV_AE_AWB_AV" value="1" />
@@ -65,11 +77,7 @@
     </module>
     <module name="orange_avoider"/>
 	<module name="video_rtp_stream">
-		<!--
-		<configure name="VIEWVIDEO_HOST" value="192.168.42.65"/>
-		-->
 		<configure name="VIEWVIDEO_HOST" value="192.168.40.74"/>
-		
 		<configure name="VIEWVIDEO_BROADCAST" value="FALSE" />
 		<define name="VIEWVIDEO_CAMERA" value="front_camera" />
 		<define name="VIEWVIDEO_SHOT_PATH" value="/data/ftp/internal_000" />
@@ -94,6 +102,7 @@
     <servo name="BOTTOM_LEFT" no="3" min="2500" neutral="2500" max="12000"/>
   </servos>
 
+<!-- 
   <section name="MIXING" prefix="MOTOR_MIXING_">
     <define name="TRIM_ROLL" value="0"/>
     <define name="TRIM_PITCH" value="0"/>
@@ -109,6 +118,13 @@
     <set servo="BOTTOM_RIGHT" value="motor_mixing.commands[MOTOR_BACK_RIGHT]"/>
     <set servo="BOTTOM_LEFT" value="motor_mixing.commands[MOTOR_BACK_LEFT]"/>
   </command_laws>
+ -->
+ <command_laws>
+    <set servo="TOP_LEFT"     value="autopilot_motors_on ? actuators_pprz[0] : -MAX_PPRZ"/>
+    <set servo="TOP_RIGHT"    value="autopilot_motors_on ? actuators_pprz[1] : -MAX_PPRZ"/>
+    <set servo="BOTTOM_RIGHT" value="autopilot_motors_on ? actuators_pprz[2] : -MAX_PPRZ"/>
+    <set servo="BOTTOM_LEFT"  value="autopilot_motors_on ? actuators_pprz[3] : -MAX_PPRZ"/>
+  </command_laws>
 
   <section name="AIR_DATA" prefix="AIR_DATA_">
     <define name="CALC_AIRSPEED" value="FALSE"/>
@@ -116,15 +132,20 @@
     <define name="CALC_AMSL_BARO" value="TRUE"/>
   </section>
   
-  <include href="conf/airframes/TUDELFT/calibrations/bebop2_$AC_ID.xml" />
-
+  <section name="IMU" prefix="IMU_">
+    <define name="BODY_TO_IMU_PHI" value="0." unit="deg"/>
+    <define name="BODY_TO_IMU_THETA" value="0." unit="deg"/>
+    <define name="BODY_TO_IMU_PSI" value="0." unit="deg"/>
+  </section>
+  
   <!-- local magnetic field -->
   <!-- http://wiki.paparazziuav.org/wiki/Subsystem/ahrs#Local_Magnetic_Field -->
   <section name="AHRS" prefix="AHRS_">
     <!-- values used if no GPS fix, on 3D fix is update by geo_mag module -->
     <!-- values used if no GPS fix, on 3D fix is update by geo_mag module -->
     <define name="HEADING_UPDATE_GPS_MIN_SPEED" value="0" />
-    <define name="GRAVITY_HEURISTIC_FACTOR" value="0" />   <!-- Fix the noise in INDI guidance for bebop -->
+    <!-- For vibrating airframes -->
+    <define name="GRAVITY_HEURISTIC_FACTOR" value="0" />   
     <!-- Delft -->
     <define name="H_X" value="0.3892503"/>
     <define name="H_Y" value="0.0017972"/>
@@ -143,7 +164,7 @@
     <!-- setpoint limits for attitude stabilization rc flight -->
     <define name="SP_MAX_PHI" value="45" unit="deg"/>
     <define name="SP_MAX_THETA" value="45" unit="deg"/>
-    <define name="SP_MAX_R" value="300" unit="deg/s"/>
+    <define name="SP_MAX_R" value="120" unit="deg/s"/>
     <define name="DEADBAND_A" value="0"/>
     <define name="DEADBAND_E" value="0"/>
     <define name="DEADBAND_R" value="50"/>
@@ -168,42 +189,38 @@
   </section>
 
   <section name="STABILIZATION_ATTITUDE_INDI" prefix="STABILIZATION_INDI_">
-    <!-- control effectiveness -->
-    <define name="G1_P" value="0.050111"/>
-    <define name="G1_Q" value="0.044712"/>
-    <define name="G1_R" value="0.005000"/>
-    <define name="G2_R" value="0.260358"/>
-
-    <!-- For the bebop2 we need to filter the roll rate due to the dampers -->
-    <define name="FILTER_ROLL_RATE" value="TRUE"/>
-    <define name="FILTER_PITCH_RATE" value="FALSE"/>
-    <define name="FILTER_YAW_RATE" value="FALSE"/>
-
+    <!--  Bebop 2 -->
+    <define name="G1_ROLL" value="{20 , -20, -20 , 20 }"/>
+    <define name="G1_PITCH" value="{14 , 14, -14 , -14 }"/>
+    <define name="G1_YAW" value="{1, -1, 1, -1}"/>
+    <define name="G1_THRUST" value="{.5, .5, .5, .5}"/>
+    <define name="G2" value="{61.2093, -65.3670, 65.7419, -65.4516}"/>
+    
     <!-- reference acceleration for attitude control -->
-    <define name="REF_ERR_P" value="170.0"/>
+    <define name="REF_ERR_P" value="600.0"/>
     <define name="REF_ERR_Q" value="600.0"/>
     <define name="REF_ERR_R" value="600.0"/>
-    <define name="REF_RATE_P" value="14.3"/>
+    <define name="REF_RATE_P" value="28.0"/>
     <define name="REF_RATE_Q" value="28.0"/>
     <define name="REF_RATE_R" value="28.0"/>
 
-    <!-- second order filter parameters -->
-    <define name="FILT_CUTOFF" value="3.2"/>
-    <define name="FILT_CUTOFF_R" value="3.2"/>
+    <!--Maxium yaw rate, to avoid instability-->
+    <define name="MAX_R" value="180.0" unit="deg/s"/>
+
+    <define name="ESTIMATION_FILT_CUTOFF" value="4.0"/>
+    <define name="FILT_CUTOFF" value="5.0"/>
 
     <!-- first order actuator dynamics -->
-    <define name="ACT_DYN_P" value="0.06"/>
-    <define name="ACT_DYN_Q" value="0.06"/>
-    <define name="ACT_DYN_R" value="0.06"/>
+    <define name="ACT_DYN" value="0.1"/>
 
     <!-- Adaptive Learning Rate -->
-    <define name="USE_ADAPTIVE" value="FALSE"/>
+    <define name="USE_ADAPTIVE" value="TRUE"/>
     <define name="ADAPTIVE_MU" value="0.0001"/>
   </section>
 
   <section name="GUIDANCE_V" prefix="GUIDANCE_V_">
-    <define name="HOVER_KP" value="350"/>
-    <define name="HOVER_KD" value="85"/>
+    <define name="HOVER_KP" value="283"/>
+    <define name="HOVER_KD" value="82"/>
     <define name="HOVER_KI" value="20"/>
     <define name="NOMINAL_HOVER_THROTTLE" value="0.655"/>
     <define name="ADAPT_THROTTLE_ENABLED" value="TRUE"/>
@@ -215,9 +232,9 @@
     <define name="REF_MAX_SPEED" value="2" unit="m/s"/>
     <!-- Bad weather -->
     <!-- define name="MAX_BANK" value="32" unit="deg"/ -->
-    <define name="PGAIN" value="135"/>
-    <define name="DGAIN" value="270"/>
-    <define name="IGAIN" value="50"/>
+    <define name="PGAIN" value="120"/>
+    <define name="DGAIN" value="230"/>
+    <define name="IGAIN" value="40"/>
   </section>
   
   <section name="NAVIGATION" prefix="NAV_">

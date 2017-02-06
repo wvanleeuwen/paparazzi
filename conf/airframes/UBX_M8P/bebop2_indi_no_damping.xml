@@ -1,45 +1,54 @@
 <!DOCTYPE airframe SYSTEM "../airframe.dtd">
 
-<airframe name="bebop2_indi">
+<!-- And example airframe to be use in the TU DElft Course 2016 -->
+<airframe name="AvoiderBob"> <!-- The name of your airframe -->
 
   <firmware name="rotorcraft">
-    <target name="ap" board="bebop2"/>
-    <!-- Use for swarmhub -->
-    <configure name="HOST" value="192.168.40.$(AC_ID)" />
-    <configure name="MODEM_HOST" value="192.168.40.255" />
-    
-    <target name="nps" board="pc">
-      <module name="fdm" type="jsbsim"/>
-      <module name="udp"/>
-    </target>
-    <define name="USE_GPS_UBX_RTCM" value="TRUE"/>
-    <define name="GPS_TIMEOUT" value="3"/>
+    <target name="ap" board="bebop"/> <!-- The type of Autopilot board hardware one uses -->
+
+    <!--define name="USE_SONAR" value="TRUE"/-->
+
+	<!-- Subsystem section -->
     <module name="telemetry" type="transparent_udp"/>
-    <module name="radio_control" type="datalink"/>
+    <module name="radio_control" type="datalink"/> <!-- We control the bebop through wifi -->
     <module name="motor_mixing"/>
     <module name="actuators" type="bebop"/>
     <module name="imu" type="bebop"/>
-    <module name="gps" type="ublox"/>
-    <module name="stabilization" type="indi"/>
-    <module name="stabilization" type="rate_indi" />
-    <module name="guidance" type="indi">
-      <define name="GUIDANCE_INDI_SPECIFIC_FORCE_GAIN" value="-500.0"/>
-    </module>
+    <module name="gps" type="optitrack"/> <!-- The GPS information also comes over this wifi, as we are sitting in the cyberzoo all the time -->
+    <module name="stabilization" type="indi_simple"/>
     <module name="ahrs" type="int_cmpl_quat">
-      <configure name="USE_MAGNETOMETER" value="TRUE"/>
+      <configure name="USE_MAGNETOMETER" value="FALSE"/> <!-- Heading is from Optitrack, in reguler outside flight case one would use and Magnetometer-->
       <define name="AHRS_USE_GPS_HEADING" value="TRUE"/>
     </module>
     <module name="ins" type="extended"/>
   </firmware>
 
+<!-- This is the place where you add all your modules -->
+<!-- If there is a variable you can define in your module you can add it within the load node-->
+<!-- Note that for vision the order in which modules are loaded is important -->
+<!-- If you place cv_colorfilter before your own module your own module will only get the filtered image-->
   <modules main_freq="512">
     <module name="geo_mag"/>
     <module name="air_data"/>
     <module name="send_imu_mag_current"/>
-    <module name="gps" type="ubx_ucenter"/>
-    <module name="logger_file">
+    <!--module name="logger_file">
       <define name="FILE_LOGGER_PATH" value="/data/ftp/internal_000"/>
+    </module-->
+    <module name="video_thread">
+      <define name="VIDEO_THREAD_FPS" value="4"/>
+      <define name="VIDEO_THREAD_SHOT_PATH" value="/data/ftp/internal_000/images"/>
     </module>
+   <!--
+    <module name="video_rtp_stream">
+      <define name="VIEWVIDEO_CAMERA" value="front_camera"/>
+      <define name="VIEWVIDEO_QUALITY_FACTOR" value="80"/>
+      <define name="VIEWVIDEO_DOWNSIZE_FACTOR" value="1"/>
+    </module>
+    -->
+    <module name="cv_colorfilter">
+        <define name="COLORFILTER_CAMERA" value="front_camera"/>
+    </module>
+    <module name="orange_avoider"/>
   </modules>
 
   <commands>
@@ -50,17 +59,14 @@
   </commands>
 
   <servos driver="Default">
-    <servo name="TOP_LEFT" no="0" min="2500" neutral="2500" max="12000"/>
-    <servo name="TOP_RIGHT" no="1" min="2500" neutral="2500" max="12000"/>
-    <servo name="BOTTOM_RIGHT" no="2" min="2500" neutral="2500" max="12000"/>
-    <servo name="BOTTOM_LEFT" no="3" min="2500" neutral="2500" max="12000"/>
-  </servos>
+    <servo name="TOP_LEFT" no="0" min="3000" neutral="3000" max="12000"/>
+    <servo name="TOP_RIGHT" no="1" min="3000" neutral="3000" max="12000"/>
+    <servo name="BOTTOM_RIGHT" no="2" min="3000" neutral="3000" max="12000"/>
+    <servo name="BOTTOM_LEFT" no="3" min="3000" neutral="3000" max="12000"/>
+</servos>
 
   <section name="MIXING" prefix="MOTOR_MIXING_">
-    <define name="TRIM_ROLL" value="0"/>
-    <define name="TRIM_PITCH" value="0"/>
-    <define name="TRIM_YAW" value="0"/>
-    <define name="REVERSE" value="TRUE"/>
+    <!-- Time cross layout (X), with order NW (CW), NE (CCW), SE (CW), SW (CCW) -->
     <define name="TYPE" value="QUAD_X"/>
   </section>
 
@@ -78,40 +84,53 @@
     <define name="CALC_AMSL_BARO" value="TRUE"/>
   </section>
 
-  <!-- Magnetometer still needs to be calibrated -->
+<!-- The IMU calibration can be quite important -->
+<!-- Follow the MAVLab video to see how you can calibrate it -->
+<!-- If your drone tends to always go forward check your primary flight display -->
+<!-- Put the drone on a table, if the horizon is not perfectly straight you might want -->
+<!-- to adjust your body to imu variables until it is -->
   <section name="IMU" prefix="IMU_">
-<!-- Magneto calibration -->
-<define name="MAG_X_NEUTRAL" value="-33"/> <!-- -83 from calibration + 50 -->
-<define name="MAG_Y_NEUTRAL" value="109"/>
-<define name="MAG_Z_NEUTRAL" value="287"/>
-<define name="MAG_X_SENS" value="7.61887090248" integer="16"/>
-<define name="MAG_Y_SENS" value="7.69470968438" integer="16"/>
-<define name="MAG_Z_SENS" value="7.82064847944" integer="16"/>
+    <!-- Magneto calibration -->
+    <define name="MAG_X_NEUTRAL" value="18"/>
+    <define name="MAG_Y_NEUTRAL" value="157"/>
+    <define name="MAG_Z_NEUTRAL" value="49"/>
+    <define name="MAG_X_SENS" value="10.5007722373" integer="16"/>
+    <define name="MAG_Y_SENS" value="11.1147400462" integer="16"/>
+    <define name="MAG_Z_SENS" value="11.6479371722" integer="16"/>
+
+    <!-- Magneto current calibration -->
+    <define name="MAG_X_CURRENT_COEF" value="0.0"/>
+    <define name="MAG_Y_CURRENT_COEF" value="0.0"/>
+    <define name="MAG_Z_CURRENT_COEF" value="0.0"/>
+
+    <define name="BODY_TO_IMU_PHI" value="0." unit="deg"/>
+    <define name="BODY_TO_IMU_THETA" value="0." unit="deg"/>
+    <define name="BODY_TO_IMU_PSI" value="0." unit="deg"/>
   </section>
 
   <!-- local magnetic field -->
   <!-- http://wiki.paparazziuav.org/wiki/Subsystem/ahrs#Local_Magnetic_Field -->
   <section name="AHRS" prefix="AHRS_">
     <!-- values used if no GPS fix, on 3D fix is update by geo_mag module -->
-    <!-- Delft -->
+    <!-- Delft, The Netherlands 2014 -->
     <define name="H_X" value="0.3892503"/>
     <define name="H_Y" value="0.0017972"/>
     <define name="H_Z" value="0.9211303"/>
+
+    <!-- For vibrating airfames -->
+    <define name="GRAVITY_HEURISTIC_FACTOR" value="0"/>
   </section>
 
   <section name="INS" prefix="INS_">
     <define name="SONAR_MAX_RANGE" value="2.2"/>
     <define name="SONAR_UPDATE_ON_AGL" value="TRUE"/>
-    <define name="USE_GPS_ALT" value="1"/> <!-- does this also work outside? -->
-    <!-- <define name="VFF_R_GPS" value="0.02"/> should this be set for M8P RTK? -->
   </section>
-
 
   <section name="RC_SETPOINT" prefix="STABILIZATION_ATTITUDE_">
     <!-- setpoint limits for attitude stabilization rc flight -->
     <define name="SP_MAX_PHI" value="45" unit="deg"/>
     <define name="SP_MAX_THETA" value="45" unit="deg"/>
-    <define name="SP_MAX_R" value="300" unit="deg/s"/>
+    <define name="SP_MAX_R" value="100" unit="deg/s"/>
     <define name="DEADBAND_A" value="0"/>
     <define name="DEADBAND_E" value="0"/>
     <define name="DEADBAND_R" value="50"/>
@@ -137,19 +156,10 @@
 
   <section name="STABILIZATION_ATTITUDE_INDI" prefix="STABILIZATION_INDI_">
     <!-- control effectiveness -->
-    <define name="G1_P" value="0.05"/>
-    <define name="G1_Q" value="0.04"/>
+    <define name="G1_P" value="0.0639"/>
+    <define name="G1_Q" value="0.0361"/>
     <define name="G1_R" value="0.0022"/>
-    <define name="G2_R" value="0.20"/>
-
-    <!-- Here it is assumed that your removed the damping from your bebop2!
-         The dampers do not really damp, but cause oscillation. By removing/
-         fixing them, the bebop2 will fly much better-->
-    <!-- Not needed for tape fix?
-    <define name="FILTER_ROLL_RATE" value="FALSE"/>
-    <define name="FILTER_PITCH_RATE" value="FALSE"/>
-    <define name="FILTER_YAW_RATE" value="FALSE"/>
-    -->
+    <define name="G2_R" value="0.1450"/>
 
     <!-- reference acceleration for attitude control -->
     <define name="REF_ERR_P" value="600.0"/>
@@ -159,16 +169,17 @@
     <define name="REF_RATE_Q" value="28.0"/>
     <define name="REF_RATE_R" value="28.0"/>
 
+    <!--Maxium yaw rate, to avoid instability-->
+    <define name="MAX_R" value="120.0"/> <!--deg/s-->
+
     <!-- second order filter parameters -->
-    <define name="FILT_OMEGA" value="20.0"/>
-    <define name="FILT_ZETA" value="0.7"/>
-    <define name="FILT_OMEGA_R" value="20.0"/>
-    <define name="FILT_ZETA_R" value="0.7"/>
+    <define name="FILT_CUTOFF" value="8.0"/>
+    <define name="FILT_CUTOFF_R" value="8.0"/>
 
     <!-- first order actuator dynamics -->
-    <define name="ACT_DYN_P" value="0.06"/>
-    <define name="ACT_DYN_Q" value="0.06"/>
-    <define name="ACT_DYN_R" value="0.06"/>
+    <define name="ACT_DYN_P" value="0.1"/>
+    <define name="ACT_DYN_Q" value="0.1"/>
+    <define name="ACT_DYN_R" value="0.1"/>
 
     <!-- Adaptive Learning Rate -->
     <define name="USE_ADAPTIVE" value="FALSE"/>
@@ -176,28 +187,23 @@
   </section>
 
   <section name="GUIDANCE_V" prefix="GUIDANCE_V_">
-    <define name="HOVER_KP" value="350"/>
-    <define name="HOVER_KD" value="85"/>
-    <define name="HOVER_KI" value="20"/>
-    <define name="NOMINAL_HOVER_THROTTLE" value="0.655"/>
-    <define name="ADAPT_THROTTLE_ENABLED" value="TRUE"/>
-    <define name="ADAPT_INITIAL_HOVER_THROTTLE" value="0.55" /> 	<!-- Default = 0.3 // 0.52 almost perfect -->
-    <define name="ADAPT_MIN_HOVER_THROTTLE" value="0.48" /> 		<!-- Default = 0.2 // -->
-    <define name="ADAPT_MAX_HOVER_THROTTLE" value="0.62" /> 		<!-- Default = 0.2 // -->
-    <define name="ADAPT_NOISE_FACTOR" value="0.8" /> 			<!-- default = 1 -->
+    <define name="HOVER_KP" value="283"/>
+    <define name="HOVER_KD" value="82"/>
+    <define name="HOVER_KI" value="70"/>
+    <define name="NOMINAL_HOVER_THROTTLE" value="0.5"/>
+    <define name="ADAPT_THROTTLE_ENABLED" value="FALSE"/>
   </section>
 
   <section name="GUIDANCE_H" prefix="GUIDANCE_H_">
-    <define name="REF_MAX_SPEED" value="2" unit="m/s"/>
     <define name="MAX_BANK" value="32" unit="deg"/>
-    <define name="PGAIN" value="120"/>
+    <define name="PGAIN" value="79"/>
     <define name="DGAIN" value="100"/>
     <define name="IGAIN" value="30"/>
   </section>
 
   <section name="NAVIGATION" prefix="NAV_">
-    <define name="CLIMB_VSPEED" value="1.0"/>
-    <define name="DESCEND_VSPEED" value="-0.55"/>
+    <define  name="CLIMB_VSPEED" value="1.0" />
+    <define  name="DESCEND_VSPEED" value="-1.0" />
   </section>
 
   <section name="SIMULATOR" prefix="NPS_">
@@ -206,6 +212,9 @@
     <define name="SENSORS_PARAMS" value="nps_sensors_params_default.h" type="string"/>
   </section>
 
+<!-- Here you put the modes that your drone can fly in -->
+<!-- If you are using a hobbyking joystick mode_manual and mode_auto2 have to be set-->
+<!-- These settings are probably ok for your project! -->
   <section name="AUTOPILOT">
     <define name="MODE_STARTUP" value="AP_MODE_NAV"/>
     <define name="MODE_MANUAL" value="AP_MODE_ATTITUDE_DIRECT"/>
@@ -214,11 +223,14 @@
     <define name="NO_RC_THRUST_LIMIT" value="TRUE"/>
   </section>
 
+  <section name="MISC">
+    <define name="NO_RC_THRUST_LIMIT" value="TRUE"/>
+</section>
   <section name="BAT">
     <define name="MILLIAMP_AT_FULL_THROTTLE" value="8700"/>
-    <define name="CATASTROPHIC_BAT_LEVEL" value="9.9" unit="V"/>
-    <define name="CRITIC_BAT_LEVEL" value="11.0" unit="V"/>
-    <define name="LOW_BAT_LEVEL" value="11.1" unit="V"/>
+    <define name="CATASTROPHIC_BAT_LEVEL" value="10.5" unit="V"/>
+    <define name="CRITIC_BAT_LEVEL" value="10.8" unit="V"/>
+    <define name="LOW_BAT_LEVEL" value="11.0" unit="V"/>
     <define name="MAX_BAT_LEVEL" value="12.4" unit="V"/>
   </section>
 </airframe>
