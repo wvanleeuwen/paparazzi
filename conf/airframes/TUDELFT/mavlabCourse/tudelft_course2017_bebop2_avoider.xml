@@ -38,9 +38,13 @@
 			<define name="AHRS_USE_GPS_HEADING" value="TRUE" />
 		</module>
 		<module name="ins" type="extended" />
-		<!-- Not working for bebop2 <module name="guidance" type="indi"> <define 
-			name="GUIDANCE_INDI_SPECIFIC_FORCE_GAIN" value="-500.0"/> <define name="GUIDANCE_INDI_THRUST_DYNAMICS" 
-			value="0.1"/> <define name="GUIDANCE_INDI_RC_DEBUG" value="FALSE"/> </module> -->
+		<!-- Not working for bebop2 
+		<module name="guidance" type="indi"> 
+			<define name="GUIDANCE_INDI_SPECIFIC_FORCE_GAIN" value="-500.0"/>
+			<define name="GUIDANCE_INDI_THRUST_DYNAMICS" value="0.1"/>
+			<define name="GUIDANCE_INDI_RC_DEBUG" value="FALSE"/>
+		</module> 
+		-->
 	</firmware>
 
 	<modules main_freq="512">
@@ -197,8 +201,11 @@
 		<define name="HOVER_KP" value="283" />
 		<define name="HOVER_KD" value="82" />
 		<define name="HOVER_KI" value="20" />
-		<define name="NOMINAL_HOVER_THROTTLE" value="0.655" />
+		<define name="NOMINAL_HOVER_THROTTLE" value="0.575" />
 		<define name="ADAPT_THROTTLE_ENABLED" value="TRUE" />
+		<define name="ADAPT_INITIAL_HOVER_THROTTLE" value="0.575" />
+		<define name="ADAPT_MIN_HOVER_THROTTLE" value="0.50" />
+		<define name="ADAPT_MAX_HOVER_THROTTLE" value="0.65" />
 	</section>
 
 	<section name="GUIDANCE_H" prefix="GUIDANCE_H_">
