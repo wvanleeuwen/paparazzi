@@ -23,6 +23,8 @@
 
 #include "modules/droplet/droplet.h"
 
+extern struct Int32Eulers stab_att_sp_euler;
+
 #ifndef STEREOCAM2STATE_SENDER_ID
 #define STEREOCAM2STATE_SENDER_ID ABI_BROADCAST
 #endif
@@ -34,21 +36,20 @@
 float fps;
 int8_t win_x, win_y, win_size, win_fitness;
 uint8_t cnt_left, cnt_middle, cnt_right;
-int16_t nus_turn_cmd=0;
-int16_t nus_climb_cmd=0;
-int8_t nus_gate_heading=0; // gate heading relative to the current heading, in degrees
-int8_t body2cam=0; // offset between heading and camera direction, in degrees
-bool nus_gate_detected = 0;
+int16_t nus_turn_cmd = 0;
+int16_t nus_climb_cmd = 0;
+int8_t nus_gate_heading = 0; // gate heading relative to the current heading, in degrees
+int8_t body2cam = 0; // offset between heading and camera direction, in degrees
+int8_t nus_switch = 0;
 
-uint8_t pos_thresh=10; // steer only if window center is more than pos_thresh of the center
-uint8_t fit_thresh=20; // maximal fitness that is still considered as correct detection
-uint8_t size_thresh=10; // minimal size that is considered to be a window
-uint8_t turn_cmd_max=50; // percentage of MAX_PPRZ
-uint8_t climb_cmd_max=10; // percentage of MAX_PPRZ
-uint8_t cnt_thresh=80; // threshold for max amount of pixels in a bin (x10)
-uint8_t nus_filter_order=1; // complementary filter setting
-uint8_t Nmsg2skip=0; // number of camera messages to be skipped
-
+uint8_t pos_thresh = 10; // steer only if window center is more than pos_thresh of the center
+uint8_t fit_thresh = 20; // maximal fitness that is still considered as correct detection
+uint8_t size_thresh = 10; // minimal size that is considered to be a window
+uint8_t turn_cmd_max = 50; // percentage of MAX_PPRZ
+uint8_t climb_cmd_max = 10; // percentage of MAX_PPRZ
+uint8_t cnt_thresh = 80; // threshold for max amount of pixels in a bin (x10)
+uint8_t nus_filter_order = 1; // complementary filter setting
+uint8_t Nmsg2skip = 0; // number of camera messages to be skipped
 
 static void send_stereo_data(struct transport_tx *trans, struct link_device *dev)
  {
@@ -71,11 +72,15 @@ void stereo_to_state_init(void)
 void stereo_to_state_cb(void)
 {
   /* radio switch */
-  static int8_t nus_switch = 0;
   static int8_t gate_heading = 0;
+  static gate_detected = 0;
 
-  if (radio_control.values[5] < -1000) nus_switch=1; // this should be ELEV D/R
-  else nus_switch=0;
+  if (radio_control.values[5] < 0){ // this should be ELEV D/R
+    nus_switch = 0;
+    nus_turn_cmd = 0;
+  } else {
+    nus_switch = 1;
+  }
 
   static uint8_t msg_counter = 0;
 
@@ -97,23 +102,28 @@ void stereo_to_state_cb(void)
       if (win_size > size_thresh && win_fitness > fit_thresh) // valid gate detection
       {
         // nus_turn_cmd=MAX_PPRZ/100*turn_cmd_max*nus_switch*win_x/64;
-        nus_turn_cmd=0;
+        gate_heading = 30*win_x/64 + body2cam;
+        gate_detected = 1;
 
-        gate_heading = 30*win_x/64+body2cam;
-        nus_gate_detected=nus_switch;
+        // temporarily deactivate droplet
+        droplet_active = 0;
+        nus_turn_cmd = 0;
 
         // nus_climb_cmd=MAX_PPRZ*climb_cmd_max/100*nus_switch*win_y/48*100/(2*win_size); // gate size is 1 meter, win size is half of the gate size in pixels
         // TODO change climb cmd based on body pitch
         nus_climb_cmd=0;
-      } else if (win_size < size_thresh && win_fitness > fit_thresh) // incomplete window detected, use previous command
-      {
+      } else if (win_size < size_thresh && win_fitness > fit_thresh) {// incomplete window detected, use previous command
         // keeping the same command
-        nus_gate_detected=0;
-        nus_climb_cmd=0;
-        gate_heading=0;
-    	nus_turn_cmd=0;
-      } else // no window detected - if (win_fitness < fit_thresh)
-      {
+        nus_climb_cmd = 0;
+        // gate_heading=0;
+        // nus_turn_cmd=0;
+      } else { // no window detected - if (win_fitness < fit_thresh)
+        nus_climb_cmd = 0;
+        gate_heading = 0;
+
+        droplet_active = 1;
+
+        /*
         if (cnt_left > cnt_thresh && cnt_right < cnt_thresh) {
           nus_turn_cmd=nus_switch*MAX_PPRZ/100*turn_cmd_max;
         }	else if (cnt_left < cnt_thresh && cnt_right > cnt_thresh) {
@@ -121,13 +131,18 @@ void stereo_to_state_cb(void)
         }	else {
           nus_turn_cmd=0;
         }
-        nus_gate_detected=0;
-        nus_climb_cmd=0;
-        gate_heading=0;
+        */
       }
 
       /* simple filter */
-      nus_gate_heading=(nus_filter_order-1)*nus_gate_heading/nus_filter_order+gate_heading/nus_filter_order;
+      nus_gate_heading = (nus_filter_order-1)*nus_gate_heading/nus_filter_order + gate_heading/nus_filter_order;
+
+      if (gate_detected && nus_switch){
+        gate_detected = 0;
+        /* add the gate heading to the current heading */
+        stab_att_sp_euler.psi = ANGLE_BFP_OF_REAL(RadOfDeg(nus_gate_heading)) + stabilization_attitude_get_heading_i();
+        INT32_ANGLE_NORMALIZE(stab_att_sp_euler.psi);
+      }
 
       //autopilot_guided_goto_body_relative(0.0, 0.0, nus_climb_cmd, 0.0)
     } else if (stereocam_data.len == 20) {

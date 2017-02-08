@@ -41,11 +41,11 @@ enum {
 };
 
 // parameter setting
-uint16_t obst_thr_1 = 35;//7;      // obstacle threshold for phase 1
-uint16_t disp_thr_1 = 2;//10;     // obstacle count minimum threshold for phase 1
+uint16_t obst_thr_1 = 20;//7;      // obstacle threshold for phase 1
+uint16_t disp_thr_1 = 10;     // obstacle count minimum threshold for phase 1
 uint32_t obst_wait_2 = 1800;  // -->1800<-- wait time for phase 2
-uint16_t obst_thr_3 = 30;     // obstacle threshold for phase 3
-uint16_t obst_thr_4 = 30;     // obstacle threshold for phase 4
+uint16_t obst_thr_3 = 10;     // obstacle threshold for phase 3
+uint16_t obst_thr_4 = 10;     // obstacle threshold for phase 4
 uint16_t obst_wait_4 = 500;   // wait time for phase 4
 
 uint16_t obst_cons_1 = 3;     // obstacle consistency threshold for phase 1
@@ -74,21 +74,23 @@ void droplet_init(void)
  *
  */
 void droplet_periodic(void){
-  if (!droplet_active){return;}
-  if (radio_control.values[5] < 0){nus_turn_cmd = 0; return;} // this should be ELEV D/R
+  if (!droplet_active || !nus_switch){return;}
 
   switch(droplet_state){
     case DROPLET_UNOBSTRUCTED:
-      nus_turn_cmd = (int16_t)(wall_following_trim * turn_direction * MAX_PPRZ / STABILIZATION_ATTITUDE_SP_MAX_R); // go slight left to follow wall
+      // go slight turn to follow wall
+      nus_turn_cmd = (int16_t)(wall_following_trim * turn_direction * MAX_PPRZ / STABILIZATION_ATTITUDE_SP_MAX_R);
       break;
     case DROPLET_WAIT_AFTER_DETECTION:
       nus_turn_cmd = 0; // go straight
       break;
     case DROPLET_AVOID:
-      nus_turn_cmd =  1 * turn_direction * MAX_PPRZ / STABILIZATION_ATTITUDE_SP_MAX_R; // avoid right with 1. m/s
+      // avoid right with 1. rad/s
+      nus_turn_cmd =  1 * turn_direction * MAX_PPRZ / STABILIZATION_ATTITUDE_SP_MAX_R;
       break;
     case DROPLET_UNDEFINED:
-      nus_turn_cmd = 0; // go straight until we are sure there are no obstacles
+      // go straight until we are sure there are no obstacles
+      nus_turn_cmd = 0;
       break;
     default:
       break;
@@ -126,7 +128,6 @@ void run_droplet(uint32_t disparities_total, uint32_t disparities_high)
       } else if (obst_count_1 > 0) {
         obst_count_1--;
       }
-
       if (obst_count_1 > obst_cons_1) { // if true, obstacle is consistent
         droplet_state = DROPLET_WAIT_AFTER_DETECTION;
         obst_count_1 = 0; // set zero for later
@@ -253,5 +254,5 @@ void wall_estimate(float slope_l, float intercept_l, float fit_l, float slope_r,
   float dummyf;
   uint8_t dummy8;
   uint16_t dummy16;
-  //DOWNLINK_SEND_RANGEFINDER(DefaultChannel, DefaultDevice, &dummy16, &dist2left, &ang2left, &dist2right, &ang2right, &dummyf, &dummy8);
+  DOWNLINK_SEND_RANGEFINDER(DefaultChannel, DefaultDevice, &dummy16, &dist2left, &ang2left, &dist2right, &ang2right, &dummyf, &dummy8);
 }
