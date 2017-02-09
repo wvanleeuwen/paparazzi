@@ -306,6 +306,7 @@ void guidance_h_mode_changed(uint8_t new_mode)
 void guidance_h_read_rc(bool  in_flight)
 {
 
+  struct Int32Rates stab_rates_sp_euler;
   switch (guidance_h.mode) {
 
     case GUIDANCE_H_MODE_RC_DIRECT:
@@ -332,7 +333,7 @@ void guidance_h_read_rc(bool  in_flight)
       stabilization_attitude_read_rc(in_flight, FALSE, FALSE);
       break;
     case GUIDANCE_H_MODE_HOVER:
-      stabilization_attitude_read_rc_setpoint_eulers(&guidance_h.rc_sp, in_flight, FALSE, FALSE);
+      stabilization_attitude_read_rc_setpoint_eulers(&guidance_h.rc_sp, &stab_rates_sp_euler, in_flight, FALSE, FALSE);
 #if GUIDANCE_H_USE_SPEED_REF
       read_rc_setpoint_speed_i(&guidance_h.sp.speed, in_flight);
       /* enable x,y velocity setpoints */
@@ -348,7 +349,7 @@ void guidance_h_read_rc(bool  in_flight)
 
     case GUIDANCE_H_MODE_NAV:
       if (radio_control.status == RC_OK) {
-        stabilization_attitude_read_rc_setpoint_eulers(&guidance_h.rc_sp, in_flight, FALSE, FALSE);
+        stabilization_attitude_read_rc_setpoint_eulers(&guidance_h.rc_sp, &stab_rates_sp_euler, in_flight, FALSE, FALSE);
       } else {
         INT_EULERS_ZERO(guidance_h.rc_sp);
       }

@@ -164,7 +164,7 @@ float stabilization_attitude_get_heading_f(void)
  * @param[in]  in_flight         true if in flight
  * @param[out] sp                attitude setpoint as euler angles
  */
-void stabilization_attitude_read_rc_setpoint_eulers(struct Int32Eulers *sp, bool in_flight, bool in_carefree,
+void stabilization_attitude_read_rc_setpoint_eulers(struct Int32Eulers *sp, struct Int32Rates *rate_sp, bool in_flight, bool in_carefree,
     bool coordinated_turn)
 {
   /* last time this function was called, used to calculate yaw setpoint update */
@@ -180,16 +180,18 @@ void stabilization_attitude_read_rc_setpoint_eulers(struct Int32Eulers *sp, bool
     Bound(dt, 0, 0.5);
 
     static uint8_t on_stick_deadband = 1;
+
     /* do not advance yaw setpoint if within a small deadband around stick center or if throttle is zero */
     if (YAW_DEADBAND_EXCEEDED() && !THROTTLE_STICK_DOWN()) {
-      sp->psi += get_rc_yaw() * dt;
+      rate_sp->r = get_rc_yaw();
+      sp->psi += rate_sp->r * dt;
       INT32_ANGLE_NORMALIZE(sp->psi);
       on_stick_deadband = 1;
     } else if (on_stick_deadband) {
       on_stick_deadband = 0;
-      sp->psi = stabilization_attitude_get_heading_i();//stateGetNedToBodyEulers_i()->psi;
+      rate_sp->r = 0;
+      sp->psi = stabilization_attitude_get_heading_i();
       INT32_ANGLE_NORMALIZE(sp->psi);
-      //INT_EULERS_ZERO(stabilization_att_sum_err);
     }
     if (coordinated_turn) {
       //Coordinated turn
@@ -249,7 +251,6 @@ void stabilization_attitude_read_rc_setpoint_eulers(struct Int32Eulers *sp, bool
   /* update timestamp for dt calculation */
   last_ts = get_sys_time_float();
 }
-
 
 void stabilization_attitude_read_rc_setpoint_eulers_f(struct FloatEulers *sp, bool in_flight, bool in_carefree,
     bool coordinated_turn)
@@ -381,7 +382,8 @@ void stabilization_attitude_read_rc_setpoint_quat_f(struct FloatQuat *q_sp, bool
   // FIXME: remove me, do in quaternion directly
   // is currently still needed, since the yaw setpoint integration is done in eulers
 #if defined STABILIZATION_ATTITUDE_TYPE_INT
-  stabilization_attitude_read_rc_setpoint_eulers(&stab_att_sp_euler, in_flight, in_carefree, coordinated_turn);
+  struct Int32Rates stab_rates_sp_euler;
+  stabilization_attitude_read_rc_setpoint_eulers(&stab_att_sp_euler, & stab_rates_sp_euler, in_flight, in_carefree, coordinated_turn);
 #else
   stabilization_attitude_read_rc_setpoint_eulers_f(&stab_att_sp_euler, in_flight, in_carefree, coordinated_turn);
 #endif
@@ -433,7 +435,8 @@ void stabilization_attitude_read_rc_setpoint_quat_earth_bound_f(struct FloatQuat
   // FIXME: remove me, do in quaternion directly
   // is currently still needed, since the yaw setpoint integration is done in eulers
 #if defined STABILIZATION_ATTITUDE_TYPE_INT
-  stabilization_attitude_read_rc_setpoint_eulers(&stab_att_sp_euler, in_flight, in_carefree, coordinated_turn);
+  struct Int32Rates stab_rates_sp_euler;
+  stabilization_attitude_read_rc_setpoint_eulers(&stab_att_sp_euler, &stab_rates_sp_euler, in_flight, in_carefree, coordinated_turn);
 #else
   stabilization_attitude_read_rc_setpoint_eulers_f(&stab_att_sp_euler, in_flight, in_carefree, coordinated_turn);
 #endif

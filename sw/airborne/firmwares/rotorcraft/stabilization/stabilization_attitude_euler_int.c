@@ -65,6 +65,7 @@ int32_t stabilization_att_fb_cmd[COMMANDS_NB];
 int32_t stabilization_att_ff_cmd[COMMANDS_NB];
 
 struct Int32Eulers stab_att_sp_euler;
+struct Int32Rates stab_rate_sp_euler;
 struct AttRefEulerInt att_ref_euler_i;
 
 struct SecondOrderLowPass_int filter_yaw;
@@ -86,7 +87,7 @@ static void send_att(struct transport_tx *trans, struct link_device *dev)
   struct Int32Eulers *att = stateGetNedToBodyEulers_i();
   pprz_msg_send_STAB_ATTITUDE_INT(trans, dev, AC_ID,
                                   &(body_rate->p), &(body_rate->q), &(body_rate->r),
-                                  &(att->phi), &(att->theta), &(att->psi),
+                                  &(att->phi), &(att->theta), &(att->psi)/*,
                                   &stab_att_sp_euler.phi,
                                   &stab_att_sp_euler.theta,
                                   &stab_att_sp_euler.psi,
@@ -101,7 +102,7 @@ static void send_att(struct transport_tx *trans, struct link_device *dev)
                                   &stabilization_att_ff_cmd[COMMAND_YAW],
                                   &stabilization_cmd[COMMAND_ROLL],
                                   &stabilization_cmd[COMMAND_PITCH],
-                                  &stabilization_cmd[COMMAND_YAW]);
+                                  &stabilization_cmd[COMMAND_YAW]*/);
 }
 
 static void send_att_ref(struct transport_tx *trans, struct link_device *dev)
@@ -166,11 +167,12 @@ void stabilization_attitude_init(void)
 
 void stabilization_attitude_read_rc(bool in_flight, bool in_carefree, bool coordinated_turn)
 {
-  stabilization_attitude_read_rc_setpoint_eulers(&stab_att_sp_euler, in_flight, in_carefree, coordinated_turn);
+  stabilization_attitude_read_rc_setpoint_eulers(&stab_att_sp_euler, &stab_rate_sp_euler, in_flight, in_carefree, coordinated_turn);
 }
 
 void stabilization_attitude_enter(void)
 {
+  INT_RATES_ZERO(stab_rate_sp_euler);
   stab_att_sp_euler.psi = stateGetNedToBodyEulers_i()->psi;
   reset_psi_ref_from_body();
   INT_EULERS_ZERO(stabilization_att_sum_err);
@@ -178,6 +180,7 @@ void stabilization_attitude_enter(void)
 
 void stabilization_attitude_set_failsafe_setpoint(void)
 {
+  INT_RATES_ZERO(stab_rate_sp_euler);
   stab_att_sp_euler.phi = 0;
   stab_att_sp_euler.theta = 0;
   stab_att_sp_euler.psi = stateGetNedToBodyEulers_i()->psi;
@@ -213,7 +216,8 @@ void stabilization_attitude_run(bool  in_flight)
   attitude_ref_euler_int_update(&att_ref_euler_i, &stab_att_sp_euler);
 #else
   INT32_EULERS_LSHIFT(att_ref_euler_i.euler, stab_att_sp_euler, (REF_ANGLE_FRAC - INT32_ANGLE_FRAC));
-  INT_RATES_ZERO(att_ref_euler_i.rate);
+  INT_RATES_LSHIFT(att_ref_euler_i.rate, stab_rate_sp_euler, (REF_RATE_FRAC - INT32_RATE_FRAC));
+  //INT_RATES_ZERO(att_ref_euler_i.rate);
   INT_RATES_ZERO(att_ref_euler_i.accel);
 #endif
 

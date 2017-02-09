@@ -1194,7 +1194,7 @@
     <field name="est_phi"       type="int32" alt_unit="deg" alt_unit_coef="0.0139882"/>
     <field name="est_theta"     type="int32" alt_unit="deg" alt_unit_coef="0.0139882"/>
     <field name="est_psi"       type="int32" alt_unit="deg" alt_unit_coef="0.0139882"/>
-    <field name="sp_phi"        type="int32" alt_unit="deg" alt_unit_coef="0.0139882"/>
+    <!--field name="sp_phi"        type="int32" alt_unit="deg" alt_unit_coef="0.0139882"/>
     <field name="sp_theta"      type="int32" alt_unit="deg" alt_unit_coef="0.0139882"/>
     <field name="sp_psi"        type="int32" alt_unit="deg" alt_unit_coef="0.0139882"/>
     <field name="sum_err_phi"   type="int32"/>
@@ -1208,7 +1208,7 @@
     <field name="delta_r_ff"    type="int32" alt_unit_coef="0.0000153"/>
     <field name="delta_a"       type="int32"/>
     <field name="delta_e"       type="int32"/>
-    <field name="delta_r"       type="int32"/>
+    <field name="delta_r"       type="int32"/-->
  </message>
 
  <message name="STAB_ATTITUDE_REF_INT" id="141">
