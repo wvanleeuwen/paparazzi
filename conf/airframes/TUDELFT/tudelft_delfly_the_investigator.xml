@@ -17,6 +17,7 @@
 		<target name="ap" board="lisa_s_1.0">
 			<module name="radio_control" type="superbitrf_rc">
 				<define name="RADIO_KILL_SWITCH" value="6"/>
+				<!--define name="RADIO_MODE" value="RADIO_AUX2"/-->
 			</module>
 			
 			<!-- Comment the above line and uncomment the block below if DelTang is used instead
@@ -29,12 +30,13 @@
 			
 			<configure name="USE_MAGNETOMETER" value="0"/>
 			<configure name="AHRS_PROPAGATE_FREQUENCY" value="500"/>
-			<configure name="LOW_NOISE_TIME" value="50"/> <!--Set the time of the ahrs alignement, 1 = 100 samples = 0.2s at 500 Hz -->
+			<define name="LOW_NOISE_TIME" value="50"/> <!--Set the time of the ahrs alignement, 1 = 100 samples = 0.2s at 500 Hz -->
 			<define name="USE_PERSISTENT_SETTINGS" value="TRUE"/>
 			
 			<define name="USE_BARO_BOARD" value="1"/>
 			<define name="BARO_PERIODIC_FREQUENCY" value="100"/>
-			<define name="USE_ATTITUDE_REF" value="0"/>
+			<define name="USE_ATTITUDE_REF" value="0"/> <!-- disable reference model, directly use setpoint-->
+			<define name="AHRS_ALIGNER_LED" value="2"/>
 		</target>
 		
 		<!-- Necessary to build succesfully, but not used -->
@@ -141,12 +143,12 @@
 	
 	<section name="AUTOPILOT">
 		<define name="MODE_STARTUP" value="AP_MODE_RC_DIRECT"/>
-		<define name="MODE_MANUAL" value="AP_MODE_ATTITUDE_DIRECT"/><!--"AP_MODE_RC_DIRECT"/>
+		<define name="MODE_MANUAL" value="AP_MODE_ATTITUDE_DIRECT"/><!--AP_MODE_RC_DIRECT"/-->
 <!--		<define name="MODE_AUTO1" value="AP_MODE_ATTITUDE_DIRECT"/-->
 <!--		<define name="MODE_AUTO2" value="AP_MODE_ATTITUDE_DIRECT"/-->
 <!--		<define name="MODE_AUTO1" value="AP_MODE_ATTITUDE_Z_HOLD"/-->
 <!--		<define name="MODE_AUTO2" value="AP_MODE_ATTITUDE_Z_HOLD"/-->
-		<define name="MODE_AUTO1" value="AP_MODE_ATTITUDE_RC_CLIMB"/>
+		<define name="MODE_AUTO1" value="AP_MODE_ATTITUDE_DIRECT"/>
 		<define name="MODE_AUTO2" value="AP_MODE_ATTITUDE_RC_CLIMB"/>
 				
 <!--		<define name="USE_THROTTLE_FOR_MOTOR_ARMING" value="TRUE"/-->
@@ -160,7 +162,7 @@
 		<define name="SP_MAX_PHI" value="45." unit="deg"/>
 		<define name="SP_MAX_THETA" value="30." unit="deg"/>
 		<define name="SP_MAX_PSI" value="60." unit="deg"/>
-		<define name="SP_MAX_R" value="120." unit="deg/s"/>
+		<define name="SP_MAX_R" value="90." unit="deg/s"/>
 		<define name="SP_MAX_P" value="90." unit="deg/s"/>
 		<define name="DEADBAND_R" value="250"/>
 		<define name="DEADBAND_A" value="250"/>
@@ -187,7 +189,7 @@
 		<define name="PHI_IGAIN" value="1"/>
 		
 		<define name="THETA_PGAIN" value="500"/> <!--was 8000-->
-		<define name="THETA_DGAIN" value="0"/> <!--was 200-->
+		<define name="THETA_DGAIN" value="350"/> <!--was 200-->
 		<define name="THETA_IGAIN" value="0"/>
 		
 		<define name="PSI_PGAIN" value="1000"/> <!--was 5000-->
