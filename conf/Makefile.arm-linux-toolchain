@@ -26,7 +26,7 @@ ifndef HARD_FLOAT
 endif
 endif
 
-PREFIX=/usr/bin/arm-none-linux-gnueabi
+PREFIX=/opt/arm-2012.03/bin/arm-none-linux-gnueabi
 
 # if toolchain could not be found, print some useful info
 ifeq ($(shell which $(PREFIX)-gcc),)
