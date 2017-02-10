@@ -23,7 +23,7 @@ ifneq ($(V),1)
 Q := @
 endif
 
-PREFIX    ?= /opt/arm-2012.03/bin/arm-linux-gnueabi-gcc
+PREFIX    ?= /opt/arm-2012.03/bin/arm-linux-gnueabi
 CC        = $(PREFIX)-gcc
 CFLAGS    = -Wall
 LDFLAGS   =
