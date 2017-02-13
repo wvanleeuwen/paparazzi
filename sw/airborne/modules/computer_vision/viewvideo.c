@@ -75,7 +75,7 @@ PRINT_CONFIG_VAR(VIEWVIDEO_RTP_TIME_INC)
 #ifdef VIDEO_THREAD_SHOT_PATH
 #define VIEWVIDEO_SHOT_PATH VIDEO_THREAD_SHOT_PATH
 #else
-#define VIEWVIDEO_SHOT_PATH /data/video/images
+#define VIEWVIDEO_SHOT_PATH /data/ftp/internal_000
 #endif
 #endif
 PRINT_CONFIG_VAR(VIEWVIDEO_SHOT_PATH)
@@ -166,69 +166,6 @@ struct image_t *viewvideo_function(struct image_t *img)
                  IMAGE_YUV422);
   if (viewvideo.is_streaming) {
 #if VIEWVIDEO_WRITE_VIDEO || VIEWVIDEO_STREAM_VIDEO
-/*
-
-	  /////////////////////////////////////////////////////
-
-	  static const GLfloat vVertices[] = {
-			  -1.0f, -1.0f,
-			  1.0f, -1.0f,
-			  -1.0f,  1.0f,
-			  1.0f,  1.0f,
-	  };
-	  static const GLfloat textureVertices[] = {
-			  0.0f, 0.0f,
-			  1.0f, 0.0f,
-			  0.0f, 1.0f,
-			  1.0f, 1.0f,
-	  };
-
-	  glUseProgram(opengl.programObject);
-	  glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, mt9f002.output_width, mt9f002.output_height, 0, GL_RGBA, GL_UNSIGNED_BYTE, img->buf);
-
-	  GLint texel_width = glGetUniformLocation(opengl.programObject, "texel_width");
-	  GLint texel_height = glGetUniformLocation(opengl.programObject, "texel_height");
-	  glUniform1f(texel_width, 1.0 / mt9f002.output_width);
-	  glUniform1f(texel_height, 1.0 / mt9f002.output_height);
-
-	  // Set the vertices
-	  glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 0, vVertices);
-	  glEnableVertexAttribArray(0);
-	  glVertexAttribPointer(1, 2, GL_FLOAT, 0, 0, textureVertices);
-	  glEnableVertexAttribArray(1);
-
-	  // Draw the square
-	  glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
-
-	  // Read the image back
-	  glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
-	  glReadPixels(0, 0, mt9f002.output_width, mt9f002.output_height, GL_RGBA, GL_UNSIGNED_BYTE, img->buf);
-
-	  /////////////////////////////////////////////////////
-*/
-	//jpeg_encode_image(img, &img_jpeg, VIEWVIDEO_QUALITY_FACTOR, VIEWVIDEO_USE_NETCAT);
-
-    /*if (viewvideo.use_rtp) {
-
-      // Send image with RTP
-      rtp_frame_send(
-        &video_sock,              // UDP socket
-        &img_jpeg,
-        0,                        // Format 422
-        VIEWVIDEO_QUALITY_FACTOR, // Jpeg-Quality
-        0,                        // DRI Header
-        VIEWVIDEO_RTP_TIME_INC    // 90kHz time increment
-      );
-      // Extra note: when the time increment is set to 0,
-      // it is automaticaly calculated by the send_rtp_frame function
-      // based on gettimeofday value. This seems to introduce some lag or jitter.
-      // An other way is to compute the time increment and set the correct value.
-      // It seems that a lower value is also working (when the frame is received
-      // the timestamp is always "late" so the frame is displayed immediately).
-      // Here, we set the time increment to the lowest possible value
-      // (1 = 1/90000 s) which is probably stupid but is actually working.
-    }*/
-
     P7_H264_releaseInputBuffer(&videoEncoder, img->buf_idx);
 
     while ((h264BufferIndex = P7_H264_find_FreeBuffer(videoEncoder.inputBuffers, BUFFER_TOBE_RELEASED, videoEncoder.numInputBuffers)) != -1){
@@ -321,4 +258,3 @@ void viewvideo_init(void)
   }
 #endif
 }
-
