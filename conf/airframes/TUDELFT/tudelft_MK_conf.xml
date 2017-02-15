@@ -11,6 +11,17 @@
    gui_color="blue"
   />
   <aircraft
+   name="DelFly_Sherlok"
+   ac_id="113"
+   airframe="airframes/TUDELFT/tudelft_delfly_sherlok.xml"
+   radio="radios/cockpitSX.xml"
+   telemetry="telemetry/rotorcraft_with_stereoboard.xml"
+   flight_plan="flight_plans/rotorcraft_optitrack.xml"
+   settings="settings/rotorcraft_basic.xml settings/control/rotorcraft_guidance.xml settings/control/stabilization_att_int.xml settings/persistent_settings.xml settings/superbitrf.xml settings/modules/nus_stereo.xml"
+   settings_modules="modules/imu_common.xml modules/gps.xml modules/ahrs_int_cmpl_quat.xml modules/droplet.xml"
+   gui_color="blue"
+  />
+  <aircraft
    name="DelFly_The_Explorer"
    ac_id="112"
    airframe="airframes/TUDELFT/tudelft_delfly_the_explorer.xml"
@@ -22,9 +33,9 @@
    gui_color="blue"
   />
   <aircraft
-   name="DelFly_The_Investigator"
-   ac_id="113"
-   airframe="airframes/TUDELFT/tudelft_delfly_the_investigator.xml"
+   name="DelFly_Watson"
+   ac_id="114"
+   airframe="airframes/TUDELFT/tudelft_delfly_watson.xml"
    radio="radios/cockpitSX.xml"
    telemetry="telemetry/rotorcraft_with_stereoboard.xml"
    flight_plan="flight_plans/rotorcraft_optitrack.xml"

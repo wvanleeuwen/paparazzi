@@ -41,33 +41,56 @@ enum {
 };
 
 // parameter setting
-uint16_t obst_thr_1 = 20;//7;      // obstacle threshold for phase 1
-uint16_t disp_thr_1 = 10;     // obstacle count minimum threshold for phase 1
-uint32_t obst_wait_2 = 1800;  // -->1800<-- wait time for phase 2
-uint16_t obst_thr_3 = 10;     // obstacle threshold for phase 3
-uint16_t obst_thr_4 = 10;     // obstacle threshold for phase 4
-uint16_t obst_wait_4 = 500;   // wait time for phase 4
+uint16_t obst_thr_1;      // obstacle threshold for phase 1
+static uint16_t disp_thr_1;     // obstacle count minimum threshold for phase 1
+static uint32_t obst_wait_2;  // -->1800<-- wait time for phase 2
+uint16_t obst_thr_3;     // obstacle threshold for phase 3
+uint16_t obst_thr_4;     // obstacle threshold for phase 4
+static uint16_t obst_wait_4;   // wait time for phase 4
 
-uint16_t obst_cons_1 = 3;     // obstacle consistency threshold for phase 1
-uint16_t obst_cons_3 = 1;     // no-obstacle consistency threshold for phase 3
-uint16_t obst_cons_5 = 1;     // obstacle consistency threshold for phase 4
+static uint16_t obst_cons_1;     // obstacle consistency threshold for phase 1
+static uint16_t obst_cons_3;     // no-obstacle consistency threshold for phase 3
+static uint16_t obst_cons_5;     // obstacle consistency threshold for phase 4
 
 // init
-uint16_t obst_count_1 = 0;    // counter for sequential obstacle detections in phase 1
-uint16_t obst_free_3 = 0;     // counter for sequential no-obstacle detections in phase 3
-uint16_t obst_dect_4 = 0;     // counter for sequential obstacle detections in phase 4
-float obst_time = 0;       // timer for phase 2 and 4
+static uint16_t obst_count_1;    // counter for sequential obstacle detections in phase 1
+static uint16_t obst_free_3;     // counter for sequential no-obstacle detections in phase 3
+static uint16_t obst_dect_4;     // counter for sequential obstacle detections in phase 4
+static float obst_time;          // timer for phase 2 and 4
 
-uint8_t droplet_state = DROPLET_UNDEFINED;
-uint32_t prev_time = 0;
+static uint8_t droplet_state;
+static uint32_t prev_time;
 
-float wall_following_trim = 0;   // yaw rate trim to force vehicle to follow wall
-int16_t turn_direction = 1;
-
-uint8_t droplet_active = 1;
+// settings and controls
+float wall_following_trim;   // yaw rate trim to force vehicle to follow wall
+int16_t turn_direction;
+uint8_t droplet_active;
 
 void droplet_init(void)
 {
+  obst_thr_1 = 20;//7;      // obstacle threshold for phase 1
+  disp_thr_1 = 10;     // obstacle count minimum threshold for phase 1
+  obst_wait_2 = 1800;  // -->1800<-- wait time for phase 2
+  obst_thr_3 = 10;     // obstacle threshold for phase 3
+  obst_thr_4 = 10;     // obstacle threshold for phase 4
+  obst_wait_4 = 500;   // wait time for phase 4
+
+  obst_cons_1 = 3;     // obstacle consistency threshold for phase 1
+  obst_cons_3 = 1;     // no-obstacle consistency threshold for phase 3
+  obst_cons_5 = 1;     // obstacle consistency threshold for phase 4
+
+  obst_count_1 = 0;    // counter for sequential obstacle detections in phase 1
+  obst_free_3 = 0;     // counter for sequential no-obstacle detections in phase 3
+  obst_dect_4 = 0;     // counter for sequential obstacle detections in phase 4
+  obst_time = 0;          // timer for phase 2 and 4
+
+  droplet_state = DROPLET_UNDEFINED;
+  prev_time = 0;
+
+  // settings and controls
+  wall_following_trim = 0;   // yaw rate trim to force vehicle to follow wall
+  turn_direction = 1;
+  droplet_active = 1;
 }
 
 /* Set turn command based on current droplet state

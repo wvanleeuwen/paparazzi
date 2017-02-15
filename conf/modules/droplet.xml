@@ -20,7 +20,7 @@
   </header>
   <init fun="droplet_init()"/>
   <periodic fun="droplet_periodic()" freq="10" autorun="TRUE"/>
-  <periodic fun="delfly_vel_estimator()" freq="5" autorun="TRUE"/>
+  <!--periodic fun="delfly_vel_estimator()" freq="5" autorun="TRUE"/-->
   <makefile>
     <file name="droplet.c"/>
   </makefile>
