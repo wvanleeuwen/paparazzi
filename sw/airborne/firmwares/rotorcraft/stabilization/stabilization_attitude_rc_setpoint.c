@@ -185,14 +185,14 @@ void stabilization_attitude_read_rc_setpoint_eulers(struct Int32Eulers *sp, stru
     if (YAW_DEADBAND_EXCEEDED() && !THROTTLE_STICK_DOWN()) {
       rate_sp->r = get_rc_yaw();
       sp->psi += rate_sp->r * dt;
-      INT32_ANGLE_NORMALIZE(sp->psi);
       on_stick_deadband = 1;
     } else if (on_stick_deadband) {
       on_stick_deadband = 0;
       rate_sp->r = 0;
-      sp->psi = stabilization_attitude_get_heading_i();
-      INT32_ANGLE_NORMALIZE(sp->psi);
+      sp->psi = stateGetNedToBodyEulers_i()->psi;
     }
+    INT32_ANGLE_NORMALIZE(sp->psi);
+
     if (coordinated_turn) {
       //Coordinated turn
       //feedforward estimate angular rotation omega = g*tan(phi)/v
@@ -246,6 +246,7 @@ void stabilization_attitude_read_rc_setpoint_eulers(struct Int32Eulers *sp, stru
     }
   } else { /* if not flying, use current yaw as setpoint */
     sp->psi = stateGetNedToBodyEulers_i()->psi;
+    INT_RATES_ZERO(*rate_sp);
   }
 
   /* update timestamp for dt calculation */

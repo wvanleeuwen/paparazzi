@@ -28,6 +28,7 @@
         		<define name="RADIO_YAW" value="RADIO_ROLL"/>
         	</module-->
 			
+			<define name="AUTOPILOT_IN_FLIGHT_MIN_SPEED" value="100."/>
 			<configure name="USE_MAGNETOMETER" value="0"/>
 			<configure name="AHRS_PROPAGATE_FREQUENCY" value="500"/>
 			<define name="LOW_NOISE_TIME" value="50"/> <!--Set the time of the ahrs alignement, 1 = 100 samples = 0.2s at 500 Hz -->
@@ -188,12 +189,12 @@
 		<define name="PHI_DGAIN" value="1"/>
 		<define name="PHI_IGAIN" value="1"/>
 		
-		<define name="THETA_PGAIN" value="500"/> <!--was 8000-->
-		<define name="THETA_DGAIN" value="350"/> <!--was 200-->
+		<define name="THETA_PGAIN" value="1750"/> <!--was 8000-->
+		<define name="THETA_DGAIN" value="300"/> <!--was 200-->
 		<define name="THETA_IGAIN" value="0"/>
 		
 		<define name="PSI_PGAIN" value="1000"/> <!--was 5000-->
-		<define name="PSI_DGAIN" value="250"/> <!--was 4000-->
+		<define name="PSI_DGAIN" value="450"/> <!--was 4000-->
 		<define name="PSI_IGAIN" value="50"/> <!--was 400-->
 		
 		<!-- feedforward -->
