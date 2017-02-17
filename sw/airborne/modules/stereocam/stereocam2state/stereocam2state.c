@@ -73,7 +73,9 @@ void stereo_to_state_cb(void)
 {
   /* radio switch */
   static int8_t gate_heading = 0;
-  static gate_detected = 0;
+  static int8_t gate_detected = 0;
+  static uint8_t gate_count = 0;
+  static float gate_time = 0;
 
   if (radio_control.values[5] < 0){ // this should be ELEV D/R
     nus_switch = 0;
@@ -104,6 +106,8 @@ void stereo_to_state_cb(void)
         // nus_turn_cmd=MAX_PPRZ/100*turn_cmd_max*nus_switch*win_x/64;
         gate_heading = 30*win_x/64 + body2cam;
         gate_detected = 1;
+        gate_count++;
+        gate_time = get_sys_time_float();
 
         // temporarily deactivate droplet
         droplet_active = 0;
@@ -117,9 +121,24 @@ void stereo_to_state_cb(void)
         nus_climb_cmd = 0;
         // gate_heading=0;
         // nus_turn_cmd=0;
+      } else if (gate_count > 100000){//10) {  // substantial gate detection event, assume we passed through door
+        if(get_sys_time_float() - gate_time > 6.){  // wait 6s before reactivating droplet
+          turn_direction = -turn_direction;         // reverse droplet direction
+          droplet_active = 1;                       // reactivate droplet
+          gate_count = 0;                           // reset gate counter
+
+          // turn slightly right to help that we traverse the room correctly
+          nus_gate_heading += 15;
+          gate_detected = 1;
+        }
+        get_sys_time_float();
       } else { // no window detected - if (win_fitness < fit_thresh)
         nus_climb_cmd = 0;
         gate_heading = 0;
+
+        if (gate_count > 0){
+          gate_count--;
+        }
 
         droplet_active = 1;
 
