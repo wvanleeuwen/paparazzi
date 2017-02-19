@@ -49,7 +49,6 @@
 
 float care_free_heading = 0;
 
-
 static int32_t get_rc_roll(void)
 {
   const int32_t max_rc_phi = (int32_t) ANGLE_BFP_OF_REAL(STABILIZATION_ATTITUDE_SP_MAX_PHI);

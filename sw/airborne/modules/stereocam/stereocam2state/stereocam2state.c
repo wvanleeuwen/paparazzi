@@ -33,7 +33,7 @@ extern struct Int32Eulers stab_att_sp_euler;
 #define STEREOCAM2STATE_RECEIVED_DATA_TYPE 0
 #endif
 
-float fps;
+int8_t fps;
 int8_t win_x, win_y, win_size, win_fitness;
 uint8_t cnt_left, cnt_middle, cnt_right;
 int16_t nus_turn_cmd = 0;
@@ -48,8 +48,13 @@ uint8_t size_thresh = 10; // minimal size that is considered to be a window
 uint8_t turn_cmd_max = 50; // percentage of MAX_PPRZ
 uint8_t climb_cmd_max = 10; // percentage of MAX_PPRZ
 uint8_t cnt_thresh = 80; // threshold for max amount of pixels in a bin (x10)
-uint8_t nus_filter_order = 1; // complementary filter setting
+uint8_t nus_filter_order = 0.5; // complementary filter setting
 uint8_t Nmsg2skip = 0; // number of camera messages to be skipped
+
+float redroplet_wait = 4.;
+uint8_t gate_count_thresh = 4;
+
+uint8_t gate_count = 0;
 
 static void send_stereo_data(struct transport_tx *trans, struct link_device *dev)
  {
@@ -59,7 +64,8 @@ static void send_stereo_data(struct transport_tx *trans, struct link_device *dev
 //	int32_t alt=gps_datalink.utm_pos.alt;
 
 	pprz_msg_send_STEREO_DATA(trans, dev, AC_ID,
-                         &win_x, &win_y, &win_size, &win_fitness, &nus_turn_cmd, &nus_climb_cmd, &nus_gate_heading, &fps, &cnt_left, &cnt_middle, &cnt_right); // , &course, &north, &east, &alt
+                         &win_x, &win_y, &win_size, &win_fitness, &nus_turn_cmd, &nus_climb_cmd, &nus_gate_heading,
+                         &fps, &gate_count, &cnt_middle, &cnt_right, &droplet_active); // , &course, &north, &east, &alt
  }
 
 void stereocam_to_state(void);
@@ -74,8 +80,9 @@ void stereo_to_state_cb(void)
   /* radio switch */
   static int8_t gate_heading = 0;
   static int8_t gate_detected = 0;
-  static uint8_t gate_count = 0;
+  //static uint8_t gate_count = 0;
   static float gate_time = 0;
+  static uint8_t through_gate = 0;
 
   if (radio_control.values[5] < 0){ // this should be ELEV D/R
     nus_switch = 0;
@@ -103,40 +110,46 @@ void stereo_to_state_cb(void)
 
       if (win_size > size_thresh && win_fitness > fit_thresh) // valid gate detection
       {
-        // nus_turn_cmd=MAX_PPRZ/100*turn_cmd_max*nus_switch*win_x/64;
-        gate_heading = 30*win_x/64 + body2cam;
-        gate_detected = 1;
-        gate_count++;
-        gate_time = get_sys_time_float();
-
-        // temporarily deactivate droplet
-        droplet_active = 0;
-        nus_turn_cmd = 0;
+        if(++gate_count > gate_count_thresh){
+          // nus_turn_cmd=MAX_PPRZ/100*turn_cmd_max*nus_switch*win_x/64;
+          gate_heading = 30*win_x/64 + body2cam;
+          gate_detected = 1;
+          gate_time = get_sys_time_float();
+          // temporarily deactivate droplet
+          droplet_active = 0;
+          nus_turn_cmd = 0;
+        } else {
+          nus_gate_heading = 30*win_x/64 + body2cam;
+        }
 
         // nus_climb_cmd=MAX_PPRZ*climb_cmd_max/100*nus_switch*win_y/48*100/(2*win_size); // gate size is 1 meter, win size is half of the gate size in pixels
         // TODO change climb cmd based on body pitch
         nus_climb_cmd=0;
-      } else if (win_size < size_thresh && win_fitness > fit_thresh) {// incomplete window detected, use previous command
+      } /*else if (win_size < size_thresh && win_fitness > fit_thresh) {// incomplete window detected, use previous command
         // keeping the same command
         nus_climb_cmd = 0;
         // gate_heading=0;
         // nus_turn_cmd=0;
-      } else if (gate_count > 100000){//10) {  // substantial gate detection event, assume we passed through door
-        if(get_sys_time_float() - gate_time > 6.){  // wait 6s before reactivating droplet
-          turn_direction = -turn_direction;         // reverse droplet direction
+      }*/ else if (gate_count > gate_count_thresh) {  // substantial gate detection event, assume we passed through door
+        if(!through_gate && get_sys_time_float() - gate_time > redroplet_wait){  // wait fixed time before reactivating droplet
+          // turn slightly right to help that we traverse the room correctly
+          gate_heading += 45 * droplet_turn_direction;
+          nus_gate_heading = gate_heading;  // overwrite filter
+          gate_detected = 1;
+          through_gate = 1;
+        } else if(through_gate && get_sys_time_float() - gate_time > redroplet_wait + 1.){  // wait fixed time before reactivating droplet
+          droplet_turn_direction = -droplet_turn_direction;         // reverse droplet direction
           droplet_active = 1;                       // reactivate droplet
           gate_count = 0;                           // reset gate counter
-
-          // turn slightly right to help that we traverse the room correctly
-          nus_gate_heading += 15;
-          gate_detected = 1;
+          through_gate = 0;
         }
-        get_sys_time_float();
       } else { // no window detected - if (win_fitness < fit_thresh)
         nus_climb_cmd = 0;
         gate_heading = 0;
+        nus_gate_heading = 0;
+        through_gate = 0;
 
-        if (gate_count > 0){
+        if(gate_count > 0){
           gate_count--;
         }
 
@@ -193,7 +206,7 @@ void stereocam_to_state(void)
   int16_t flow_y = (int16_t)stereocam_data.data[6] << 8;
   flow_y |= (int16_t)stereocam_data.data[7];
 
-  fps = stereocam_data.data[9];
+  float flow_fps = (float)stereocam_data.data[9];
   //int8_t agl = stereocam_data.data[8]; // in cm
 
   // velocity
@@ -234,7 +247,7 @@ void stereocam_to_state(void)
   int16_t dummy_int16 = 0;
   float dummy_float = 0;
 
-  DOWNLINK_SEND_OPTIC_FLOW_EST(DefaultChannel, DefaultDevice, &fps, &dummy_uint16, &dummy_uint16, &flow_x, &flow_y, &dummy_int16, &dummy_int16,
+  DOWNLINK_SEND_OPTIC_FLOW_EST(DefaultChannel, DefaultDevice, &flow_fps, &dummy_uint16, &dummy_uint16, &flow_x, &flow_y, &dummy_int16, &dummy_int16,
 		  &vel_body_x, &vel_body_y,&dummy_float, &dummy_float, &dummy_float);
 
 }

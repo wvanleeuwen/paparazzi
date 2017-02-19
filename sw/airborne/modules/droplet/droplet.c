@@ -63,16 +63,16 @@ static uint32_t prev_time;
 
 // settings and controls
 float wall_following_trim;   // yaw rate trim to force vehicle to follow wall
-int16_t turn_direction;
+int16_t droplet_turn_direction;
 uint8_t droplet_active;
 
 void droplet_init(void)
 {
-  obst_thr_1 = 45;//7;      // obstacle threshold for phase 1
+  obst_thr_1 = 55;//7;      // obstacle threshold for phase 1
   disp_thr_1 = 10;     // obstacle count minimum threshold for phase 1
   obst_wait_2 = 1800;  // -->1800<-- wait time for phase 2
-  obst_thr_3 = 20;     // obstacle threshold for phase 3
-  obst_thr_4 = 20;     // obstacle threshold for phase 4
+  obst_thr_3 = 25;     // obstacle threshold for phase 3
+  obst_thr_4 = 25;     // obstacle threshold for phase 4
   obst_wait_4 = 500;   // wait time for phase 4
 
   obst_cons_1 = 3;     // obstacle consistency threshold for phase 1
@@ -89,7 +89,7 @@ void droplet_init(void)
 
   // settings and controls
   wall_following_trim = 0;   // yaw rate trim to force vehicle to follow wall
-  turn_direction = 1;
+  droplet_turn_direction = 1;
   droplet_active = 1;
 }
 
@@ -103,14 +103,14 @@ void droplet_periodic(void){
   switch(droplet_state){
     case DROPLET_UNOBSTRUCTED:
       // go slight turn to follow wall
-      nus_turn_cmd = (int16_t)(wall_following_trim * turn_direction * MAX_PPRZ / STABILIZATION_ATTITUDE_SP_MAX_R);
+      nus_turn_cmd = (int16_t)(wall_following_trim * droplet_turn_direction * MAX_PPRZ / STABILIZATION_ATTITUDE_SP_MAX_R);
       break;
     case DROPLET_WAIT_AFTER_DETECTION:
       nus_turn_cmd = 0; // go straight
       break;
     case DROPLET_AVOID:
       // avoid right with 1. rad/s
-      nus_turn_cmd =  1 * turn_direction * MAX_PPRZ / STABILIZATION_ATTITUDE_SP_MAX_R;
+      nus_turn_cmd =  1 * droplet_turn_direction * MAX_PPRZ / STABILIZATION_ATTITUDE_SP_MAX_R;
       break;
     case DROPLET_UNDEFINED:
       // go straight until we are sure there are no obstacles
@@ -204,6 +204,7 @@ void run_droplet(uint32_t disparities_total, uint32_t disparities_high)
 void run_droplet_low_texture(uint32_t disparities_high, uint32_t disparities_total, uint32_t histogram_obs,
     uint32_t count_disps_left, uint32_t count_disps_right)
 {
+  /*
   cnt_left = droplet_state;
   nus_climb_cmd = (int16_t)disparities_high;
   if (histogram_obs/10 > 127){
@@ -211,6 +212,7 @@ void run_droplet_low_texture(uint32_t disparities_high, uint32_t disparities_tot
   } else {
     nus_gate_heading = (int8_t) (histogram_obs/10);
   }
+  */
 
   // => max_Y = 500 mm
   // 35 too sensitive, many turns

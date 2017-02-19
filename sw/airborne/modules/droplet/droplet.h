@@ -41,7 +41,7 @@ extern uint8_t droplet_active;    // used to active or deactivate the droplet co
 extern uint16_t obst_thr_1;       // obstacle threshold for phase 1
 extern uint16_t obst_thr_3;
 extern uint16_t obst_thr_4;       // obstacle threshold for phase 1
-extern int16_t turn_direction;
+extern int16_t droplet_turn_direction;
 extern float wall_following_trim; // yaw rate trim to force vehicle to follow wall
 
 #endif
