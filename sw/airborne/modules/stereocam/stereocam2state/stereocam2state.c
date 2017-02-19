@@ -51,6 +51,8 @@ uint8_t cnt_thresh = 80; // threshold for max amount of pixels in a bin (x10)
 uint8_t nus_filter_order = 0.5; // complementary filter setting
 uint8_t Nmsg2skip = 0; // number of camera messages to be skipped
 
+uint32_t disparities_high, disparities_total, histogram_obs, count_disps_left, count_disps_right;
+
 float redroplet_wait = 4.;
 uint8_t gate_count_thresh = 4;
 
@@ -65,7 +67,10 @@ static void send_stereo_data(struct transport_tx *trans, struct link_device *dev
 
 	pprz_msg_send_STEREO_DATA(trans, dev, AC_ID,
                          &win_x, &win_y, &win_size, &win_fitness, &nus_turn_cmd, &nus_climb_cmd, &nus_gate_heading,
-                         &fps, &gate_count, &cnt_middle, &cnt_right, &droplet_active); // , &course, &north, &east, &alt
+                         &fps, &gate_count, &cnt_middle, &cnt_right, &droplet_active);
+	pprz_msg_send_STEREO_LOW_TEXTURE(trans, dev, AC_ID,
+	                     &disparities_high, &disparities_total, &histogram_obs, &count_disps_left, &count_disps_right);
+						// , &course, &north, &east, &alt
  }
 
 void stereocam_to_state(void);
@@ -181,6 +186,13 @@ void stereo_to_state_cb(void)
       //run_droplet((uint32_t)stereocam_data.data[0], (uint32_t)stereocam_data.data[4]);
       uint32_t* buffer32 = (uint32_t*)stereocam_data.data;
       run_droplet_low_texture(buffer32[0], buffer32[1], buffer32[2], buffer32[3], buffer32[4]);
+
+      disparities_high = buffer32[0];
+      disparities_total = buffer32[1];
+      histogram_obs = buffer32[2];
+      count_disps_left = buffer32[3];
+      count_disps_right = buffer32[4];
+
     } else if (stereocam_data.len == 24) {
       int32_t* buffer32 = (int32_t*)stereocam_data.data;
       wall_estimate(buffer32[0], buffer32[1], buffer32[2], buffer32[3], buffer32[4], buffer32[5]);
@@ -247,7 +259,7 @@ void stereocam_to_state(void)
   int16_t dummy_int16 = 0;
   float dummy_float = 0;
 
-  DOWNLINK_SEND_OPTIC_FLOW_EST(DefaultChannel, DefaultDevice, &flow_fps, &dummy_uint16, &dummy_uint16, &flow_x, &flow_y, &dummy_int16, &dummy_int16,
-		  &vel_body_x, &vel_body_y,&dummy_float, &dummy_float, &dummy_float);
+  //DOWNLINK_SEND_OPTIC_FLOW_EST(DefaultChannel, DefaultDevice, &flow_fps, &dummy_uint16, &dummy_uint16, &flow_x, &flow_y, &dummy_int16, &dummy_int16,
+//		  &vel_body_x, &vel_body_y,&dummy_float, &dummy_float, &dummy_float);
 
 }

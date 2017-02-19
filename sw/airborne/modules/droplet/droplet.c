@@ -97,7 +97,10 @@ void droplet_init(void)
  *
  */
 void droplet_periodic(void){
-  if (!nus_switch){return;}
+  if (!nus_switch){
+	  droplet_turn_direction = 1;	// reset turn direction when
+	  return;
+  }
   if (!droplet_active){return;}
 
   switch(droplet_state){
@@ -277,8 +280,8 @@ void wall_estimate(float slope_l, float intercept_l, float fit_l, float slope_r,
     dist2right += alpha*(-(float)intercept_r/slope_r - dist2right);
     ang2right += alpha*(1.57 - atan(100/slope_r) - ang2right);
   }
-  float dummyf;
-  uint8_t dummy8;
-  uint16_t dummy16;
-  DOWNLINK_SEND_RANGEFINDER(DefaultChannel, DefaultDevice, &dummy16, &dist2left, &ang2left, &dist2right, &ang2right, &dummyf, &dummy8);
+  //float dummyf;
+  //uint8_t dummy8;
+  //uint16_t dummy16;
+  //DOWNLINK_SEND_RANGEFINDER(DefaultChannel, DefaultDevice, &dummy16, &dist2left, &ang2left, &dist2right, &ang2right, &dummyf, &dummy8);
 }

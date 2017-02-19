@@ -1952,7 +1952,13 @@
     <field name="g2_r" type="float"/>
   </message>
 
-  <!--217 is free -->
+  <message name="STEREO_LOW_TEXTURE" id="217">
+    <field name="disparities_high" type="uint32"/>
+	<field name="disparities_total" type="uint32"/>
+	<field name="histogram_obs" type="uint32"/>
+	<field name="count_disps_left" type="uint32"/>
+	<field name="count_disps_right" type="uint32"/>	
+  </message>
 
   <message name="BEBOP_ACTUATORS" id="218">
     <field name="cmd_thrust" type="int32"/>
@@ -2254,7 +2260,7 @@
 	<field name="cnt_middle" type="uint8"/>
  	<field name="cnt_right" type="uint8"/>
  	<field name="droplet_active" type="uint8"/>
- 	<!--field name="course" type="int16"/-->
+	<!--field name="course" type="int16"/-->
  	<!--field name="north" type="int32"/-->
  	<!--field name="east" type="int32"/-->
   	<!--field name="alt" type="int32"/-->
