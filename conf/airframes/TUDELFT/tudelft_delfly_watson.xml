@@ -87,6 +87,13 @@
 	  <module name="stereocam_stereocam2state"/>
 	  <module name="droplet"/>
   </modules>
+  
+  <!-- ACTUATORS & COMMANDS %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%-->
+	<servos driver="Pwm">
+		<servo name="MOTOR" no="4" min="1100" neutral="1100" max="1900"/>
+		<servo name="ELEVATOR" no="0" min="1700" neutral="1500" max="1300"/>
+		<servo name="AILERON" no="5" min="1100" neutral="1500" max="1900"/>
+	</servos>
 
   <commands>
 	  <axis name="PITCH" failsafe_value="0"/>
@@ -102,12 +109,7 @@
 	  <set servo="AILERON" value="@YAW"/>
   </command_laws>
 
-  <!-- ACTUATORS & COMMANDS %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%-->
-	<servos driver="Pwm">
-		<servo name="MOTOR" no="4" min="1100" neutral="1100" max="1900"/>
-		<servo name="ELEVATOR" no="0" min="1700" neutral="1500" max="1300"/>
-		<servo name="AILERON" no="5" min="1100" neutral="1900" max="1300"/>
-	</servos>
+
 	
   <!-- SETTINGS %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%-->
 
