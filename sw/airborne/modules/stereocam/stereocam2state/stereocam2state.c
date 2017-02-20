@@ -71,13 +71,28 @@ static void send_stereo_data(struct transport_tx *trans, struct link_device *dev
 	pprz_msg_send_STEREO_LOW_TEXTURE(trans, dev, AC_ID,
 	                     &disparities_high, &disparities_total, &histogram_obs, &count_disps_left, &count_disps_right);
 						// , &course, &north, &east, &alt
- }
+}
+
+static float vel_body_x, vel_body_y, vel_body_z;
+int16_t flow_x, flow_y, div_x;
+float flow_fps;
+static void send_opticflow(struct transport_tx *trans, struct link_device *dev)
+ {
+  // Reusing the OPTIC_FLOW_EST telemetry messages, with some values replaced by 0
+  uint16_t dummy_uint16 = 0;
+  int16_t dummy_int16 = 0;
+  float dummy_float = 0;
+
+  pprz_msg_send_OPTIC_FLOW_EST(trans, dev, AC_ID, &flow_fps, &dummy_uint16, &dummy_uint16, &flow_x, &flow_y, &dummy_int16, &dummy_int16,
+      &vel_body_x, &vel_body_y,&dummy_float, &dummy_float, &dummy_float);
+}
 
 void stereocam_to_state(void);
 
 void stereo_to_state_init(void)
 {
 	register_periodic_telemetry(DefaultPeriodic, PPRZ_MSG_ID_STEREO_DATA, send_stereo_data);
+	register_periodic_telemetry(DefaultPeriodic, PPRZ_MSG_ID_OPTIC_FLOW_EST, send_opticflow);
 }
 
 void stereo_to_state_cb(void)
@@ -99,7 +114,7 @@ void stereo_to_state_cb(void)
   static uint8_t msg_counter = 0;
 
   if (stereocam_data.fresh){
-    if (stereocam_data.len == 8 && msg_counter++ >= Nmsg2skip) { // length of NUS window detection code
+    if (stereocam_data.len == 8){// && msg_counter++ >= Nmsg2skip) { // length of NUS window detection code
       int8_t* pointer=stereocam_data.data; // to transform uint8 message back to int8
 
       win_x = pointer[0];
@@ -209,57 +224,44 @@ void stereocam_to_state(void)
   // Get info from stereocam data
   // 0 = stereoboard's #define SEND_EDGEFLOW
   // opticflow
-  int16_t div_x = (int16_t)stereocam_data.data[0] << 8;
+  div_x = (int16_t)stereocam_data.data[0] << 8;
   div_x |= (int16_t)stereocam_data.data[1];
-  int16_t flow_x = (int16_t)stereocam_data.data[2] << 8;
+  flow_x = (int16_t)stereocam_data.data[2] << 8;
   flow_x |= (int16_t)stereocam_data.data[3];
   int16_t div_y = (int16_t)stereocam_data.data[4] << 8;
   div_y |= (int16_t)stereocam_data.data[5];
-  int16_t flow_y = (int16_t)stereocam_data.data[6] << 8;
+  flow_y = (int16_t)stereocam_data.data[6] << 8;
   flow_y |= (int16_t)stereocam_data.data[7];
 
-  float flow_fps = (float)stereocam_data.data[9];
+  flow_fps = (float)stereocam_data.data[9];
   //int8_t agl = stereocam_data.data[8]; // in cm
 
   // velocity
   int16_t vel_y_int = (int16_t)stereocam_data.data[12] << 8;
   vel_y_int |= (int16_t)stereocam_data.data[13];
 
-  int16_t vel_x_int = (int16_t)stereocam_data.data[20] << 8;
-  vel_x_int |= (int16_t)stereocam_data.data[21];
-  int16_t vel_z_int = (int16_t)stereocam_data.data[22] << 8;
-  vel_z_int |= (int16_t)stereocam_data.data[23];
+  int16_t vel_x_int = (int16_t)stereocam_data.data[16] << 8;
+  vel_x_int |= (int16_t)stereocam_data.data[17];
+  int16_t vel_z_int = (int16_t)stereocam_data.data[18] << 8;
+  vel_z_int |= (int16_t)stereocam_data.data[19];
 
-  int16_t RES = 100;
+  float RES = 100.;
 
-  float vel_body_x = (float)vel_x_int / RES;
-  float vel_body_y = (float)vel_y_int / RES;
-  float vel_body_z = (float)vel_z_int / RES;
+  vel_body_x = (float)vel_x_int / RES;
+  vel_body_y = (float)vel_y_int / RES;
+  vel_body_z = (float)vel_z_int / RES;
 
   // Derotate velocity and transform from frame to body coordinates
   // TODO: send resolution directly from stereocam
 
   //Send velocity estimate to state
   //TODO:: Make variance dependable on line fit error, after new horizontal filter is made
-  uint32_t now_ts = get_sys_time_usec();
-
-  if (!(abs(vel_body_x) > 5. || abs(vel_body_x) > 5.))
-  {
-    AbiSendMsgVELOCITY_ESTIMATE(STEREOCAM2STATE_SENDER_ID, now_ts,
+  if (0){//abs(vel_body_x) < 5. && abs(vel_body_x) < 5.) {
+    AbiSendMsgVELOCITY_ESTIMATE(STEREOCAM2STATE_SENDER_ID, get_sys_time_usec(),
                                 vel_body_x,
                                 vel_body_y,
                                 vel_body_z,
                                 0.3f
                                );
   }
-
-  // Reusing the OPTIC_FLOW_EST telemetry messages, with some values replaced by 0
-
-  uint16_t dummy_uint16 = 0;
-  int16_t dummy_int16 = 0;
-  float dummy_float = 0;
-
-  //DOWNLINK_SEND_OPTIC_FLOW_EST(DefaultChannel, DefaultDevice, &flow_fps, &dummy_uint16, &dummy_uint16, &flow_x, &flow_y, &dummy_int16, &dummy_int16,
-//		  &vel_body_x, &vel_body_y,&dummy_float, &dummy_float, &dummy_float);
-
 }
