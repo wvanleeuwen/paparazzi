@@ -43,12 +43,12 @@ int8_t body2cam = 0; // offset between heading and camera direction, in degrees
 int8_t nus_switch = 0;
 
 uint8_t pos_thresh = 10; // steer only if window center is more than pos_thresh of the center
-uint8_t fit_thresh = 20; // maximal fitness that is still considered as correct detection
+uint8_t fit_thresh = 12; // maximal fitness that is still considered as correct detection
 uint8_t size_thresh = 10; // minimal size that is considered to be a window
 uint8_t turn_cmd_max = 50; // percentage of MAX_PPRZ
 uint8_t climb_cmd_max = 10; // percentage of MAX_PPRZ
 uint8_t cnt_thresh = 80; // threshold for max amount of pixels in a bin (x10)
-uint8_t nus_filter_order = 0.5; // complementary filter setting
+uint8_t nus_filter_order = 0.4; // complementary filter setting
 uint8_t Nmsg2skip = 0; // number of camera messages to be skipped
 
 uint32_t disparities_high, disparities_total, histogram_obs, count_disps_left, count_disps_right;
@@ -74,8 +74,9 @@ static void send_stereo_data(struct transport_tx *trans, struct link_device *dev
 }
 
 static float vel_body_x, vel_body_y, vel_body_z;
-int16_t flow_x, flow_y, div_x;
+int16_t flow_x, flow_y, div_x, div_y;
 float flow_fps;
+uint16_t agl;
 static void send_opticflow(struct transport_tx *trans, struct link_device *dev)
  {
   // Reusing the OPTIC_FLOW_EST telemetry messages, with some values replaced by 0
@@ -83,8 +84,11 @@ static void send_opticflow(struct transport_tx *trans, struct link_device *dev)
   int16_t dummy_int16 = 0;
   float dummy_float = 0;
 
-  pprz_msg_send_OPTIC_FLOW_EST(trans, dev, AC_ID, &flow_fps, &dummy_uint16, &dummy_uint16, &flow_x, &flow_y, &dummy_int16, &dummy_int16,
-      &vel_body_x, &vel_body_y,&dummy_float, &dummy_float, &dummy_float);
+  float div = (float)div_x / 100.;
+  float speed = sqrtf(vel_body_x*vel_body_x + vel_body_y*vel_body_y + vel_body_z*vel_body_z);
+
+  pprz_msg_send_OPTIC_FLOW_EST(trans, dev, AC_ID, &flow_fps, &agl, &dummy_uint16, &flow_x, &flow_y, &div_x, &div_y,
+      &vel_body_x, &vel_body_y, &speed, &dummy_float, &div);
 }
 
 void stereocam_to_state(void);
@@ -228,13 +232,13 @@ void stereocam_to_state(void)
   div_x |= (int16_t)stereocam_data.data[1];
   flow_x = (int16_t)stereocam_data.data[2] << 8;
   flow_x |= (int16_t)stereocam_data.data[3];
-  int16_t div_y = (int16_t)stereocam_data.data[4] << 8;
+  div_y = (int16_t)stereocam_data.data[4] << 8;
   div_y |= (int16_t)stereocam_data.data[5];
   flow_y = (int16_t)stereocam_data.data[6] << 8;
   flow_y |= (int16_t)stereocam_data.data[7];
 
   flow_fps = (float)stereocam_data.data[9];
-  //int8_t agl = stereocam_data.data[8]; // in cm
+  agl = stereocam_data.data[8]; // in cm
 
   // velocity
   int16_t vel_y_int = (int16_t)stereocam_data.data[12] << 8;

@@ -68,7 +68,7 @@ uint8_t droplet_active;
 
 void droplet_init(void)
 {
-  obst_thr_1 = 55;//7;      // obstacle threshold for phase 1
+  obst_thr_1 = 25;//7;      // obstacle threshold for phase 1
   disp_thr_1 = 10;     // obstacle count minimum threshold for phase 1
   obst_wait_2 = 1800;  // -->1800<-- wait time for phase 2
   obst_thr_3 = 25;     // obstacle threshold for phase 3
@@ -216,16 +216,6 @@ void run_droplet_low_texture(uint32_t disparities_high, uint32_t disparities_tot
     nus_gate_heading = (int8_t) (histogram_obs/10);
   }
   */
-
-  // => max_Y = 500 mm
-  // 35 too sensitive, many turns
-  // 50 little bit less sensitive, but when approaching rich textured wall, still turns too early (cyberzoo sides also detected!)
-  // 60 seems to work better, richly textured stuff is approached more closely. Orange poles are also detected. crashes into the net when background is blue doors
-
-  // => max_Y = 400 mm
-  // 60 works perfectly if sufficient space is available
-  // 40 gives better performance with orange pole in middle of the space
-  // 5 works for pole in middle
 
   // Control logic
   switch(droplet_state){
