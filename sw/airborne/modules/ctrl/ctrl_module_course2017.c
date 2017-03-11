@@ -87,8 +87,8 @@ void ctrl_module_run(bool in_flight)
       double yGain      = position_gain * POS_FLOAT_OF_BFP(position->x - center->x);
       // And rotate these according to our relative waypoint
       // Our NED x and y gains should now be converted to body angles
-      setpoint.theta    = Bound(ANGLE_BFP_OF_REAL( cos(relativeAngle) * xGain - sin(relativeAngle) * yGain ), -BOUND_ANGLE, BOUND_ANGLE);
-      setpoint.phi      = Bound(ANGLE_BFP_OF_REAL( sin(relativeAngle) * xGain + cos(relativeAngle) * yGain ), -BOUND_ANGLE, BOUND_ANGLE);
+      setpoint.theta    = ANGLE_BFP_OF_REAL( Bound(cos(relativeAngle) * xGain - sin(relativeAngle) * yGain, RAD_OF_DEG(-BOUND_ANGLE), RAD_OF_DEG(BOUND_ANGLE)));
+      setpoint.phi      = ANGLE_BFP_OF_REAL( Bound(sin(relativeAngle) * xGain + cos(relativeAngle) * yGain, RAD_OF_DEG(-BOUND_ANGLE), RAD_OF_DEG(BOUND_ANGLE)));
       // Allow the user to steer the drone using RC
       setpoint.theta   += (int32_t) round(ctrl_module_course.rc_y * rc_pitch_gain);
       setpoint.phi     += (int32_t) round(ctrl_module_course.rc_x * rc_roll_gain);
