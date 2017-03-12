@@ -27,13 +27,16 @@
 #include <stdbool.h>
 #include "modules/ctrl/ctrl_module_course2017.h"
 #include "state.h"
-#include "waypoints.h"
+#include "subsystems/navigation/waypoints.h"
 #include "subsystems/radio_control.h"
 #include "firmwares/rotorcraft/stabilization.h"
+#include "firmwares/rotorcraft/stabilization/stabilization_attitude.h"
+
 #include "generated/flight_plan.h"
 
 #define BOUND_ANGLE 15.0
-#define Bound(_x, _min, _max ) ( ( _x ) > ( _max ) ? ( _max ) : ( ( _x ) < ( _min ) ? ( _min ) : ( _x ) ) )
+#define RAD_OF_DEG(d) (d*M_PI/180.)
+#define angleBound(_x, _min, _max ) ( ( _x ) > ( _max ) ? ( _max ) : ( ( _x ) < ( _min ) ? ( _min ) : ( _x ) ) )
 
 struct ctrl_module_course_struct {
   int rc_x;
@@ -75,8 +78,8 @@ void ctrl_module_run(bool in_flight)
       // Get the position of the waypoint we want to center at
       struct EnuCoor_i*     center      = &waypoints[WP_CENTER].enu_i;
       // Calculate the radial coordinates of the waypoint
-      double centerAngle    = atan2(POS_FLOAT_OF_BFP(position.y - center.y), POS_FLOAT_OF_BFP(position.x - center.x));
-      double centerRadius   = hypot(POS_FLOAT_OF_BFP(position.x - center.x), POS_FLOAT_OF_BFP(position.y - center.y));
+      double centerAngle    = atan2(POS_FLOAT_OF_BFP(position->y - center->y), POS_FLOAT_OF_BFP(position->x - center->x));
+      //double centerRadius   = hypot(POS_FLOAT_OF_BFP(position->x - center->x), POS_FLOAT_OF_BFP(position->y - center->y));
       // Determine the body angle to the waypoint
       double relativeAngle  = centerAngle - ANGLE_FLOAT_OF_BFP( orientation->psi );
       if(relativeAngle < -M_PI)     relativeAngle += 2*M_PI;
@@ -87,8 +90,10 @@ void ctrl_module_run(bool in_flight)
       double yGain      = position_gain * POS_FLOAT_OF_BFP(position->x - center->x);
       // And rotate these according to our relative waypoint
       // Our NED x and y gains should now be converted to body angles
-      setpoint.theta    = ANGLE_BFP_OF_REAL( Bound(cos(relativeAngle) * xGain - sin(relativeAngle) * yGain, RAD_OF_DEG(-BOUND_ANGLE), RAD_OF_DEG(BOUND_ANGLE)));
-      setpoint.phi      = ANGLE_BFP_OF_REAL( Bound(sin(relativeAngle) * xGain + cos(relativeAngle) * yGain, RAD_OF_DEG(-BOUND_ANGLE), RAD_OF_DEG(BOUND_ANGLE)));
+      double dTheta     = cos(relativeAngle) * xGain - sin(relativeAngle) * yGain;
+      double dPhi       = sin(relativeAngle) * xGain + cos(relativeAngle) * yGain;
+      setpoint.theta    = (int32_t) ANGLE_BFP_OF_REAL( angleBound(dTheta, RAD_OF_DEG(-BOUND_ANGLE), RAD_OF_DEG(BOUND_ANGLE) ) );
+      setpoint.phi      = (int32_t) ANGLE_BFP_OF_REAL( angleBound(dPhi,   RAD_OF_DEG(-BOUND_ANGLE), RAD_OF_DEG(BOUND_ANGLE) ) );
       // Allow the user to steer the drone using RC
       setpoint.theta   += (int32_t) round(ctrl_module_course.rc_y * rc_pitch_gain);
       setpoint.phi     += (int32_t) round(ctrl_module_course.rc_x * rc_roll_gain);
@@ -138,7 +143,7 @@ void guidance_v_module_enter(void)
   // your code that should be executed when entering this vertical mode goes here
 }
 
-void guidance_v_module_run(__attribute__((UNUSED)) bool in_flight)
+void guidance_v_module_run(__attribute__((unused)) bool in_flight)
 {
   // your vertical controller goes here
 }

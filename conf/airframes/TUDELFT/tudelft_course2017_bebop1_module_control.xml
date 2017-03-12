@@ -3,37 +3,39 @@
 <airframe name="bebop_avoider">
 	<firmware name="rotorcraft">
 		<target name="ap" board="bebop" />
-		<!-- Front Camera parameters -->
+		<!-- Front Camera parameters 
 		<define name="H264_ROTATE" value="TRUE" />
-		<define name="MT9F002_INITIAL_OFFSET_X" value="416+2704-480" /> <!-- 480 / 960 / 1920 / 3840 (horion for theta = 0 -> 2704) -->
-		<define name="MT9F002_INITIAL_OFFSET_Y" value="1680-1040" /> <!-- 420 / 840 / 1680 / 3360 -->
-		<define name="MT9F002_SENSOR_WIDTH" value="2*480" /> <!-- 480 / 960 / 1920 / 3840 -->
-		<define name="MT9F002_SENSOR_HEIGHT" value="2*1040" /> <!-- 420 / 840 / 1680 / 3360 -->
-		<define name="MT9F002_OUTPUT_WIDTH" value="240" /> <!-- 480 / 960 / 1920 / 3840 -->
-		<define name="MT9F002_OUTPUT_HEIGHT" value="520" /> <!-- 420 / 840 / 1680 / 3360 -->
+		<define name="MT9F002_INITIAL_OFFSET_X" value="416+2704-480" /> < !-- 480 / 960 / 1920 / 3840 (horion for theta = 0 -> 2704) -- >
+		<define name="MT9F002_INITIAL_OFFSET_Y" value="1680-1040" /> < !-- 420 / 840 / 1680 / 3360 -- >
+		<define name="MT9F002_SENSOR_WIDTH" value="2*480" /> < !-- 480 / 960 / 1920 / 3840 -- >
+		<define name="MT9F002_SENSOR_HEIGHT" value="2*1040" /> < !-- 420 / 840 / 1680 / 3360 -- >
+		<define name="MT9F002_OUTPUT_WIDTH" value="240" /> < !-- 480 / 960 / 1920 / 3840 -- >
+		<define name="MT9F002_OUTPUT_HEIGHT" value="520" /> < !-- 420 / 840 / 1680 / 3360 -- >
 		<define name="MT9F002_TARGET_FPS" value="30" />
 		<define name="MT9F002_TARGET_EXPOSURE" value="4" />
 		<define name="MT9F002_GAIN_GREEN1" value="8.0" />
 		<define name="MT9F002_GAIN_GREEN2" value="8.0" />
 		<define name="MT9F002_GAIN_RED" value="8.0" />
 		<define name="MT9F002_GAIN_BLUE" value="8.0" />
-
+		-->
 		<module name="telemetry" type="transparent_udp" />
 		<module name="radio_control" type="datalink" />
 		<module name="actuators" type="bebop" />
 		<module name="imu" type="bebop" />
 		<module name="gps" type="datalink" />
-
 		<module name="stabilization" type="indi">
 			<define name="INDI_RPM_FEEDBACK" value="TRUE" />
 		</module>
 		<module name="stabilization" type="rate_indi" />
-
+		
 		<module name="ahrs" type="int_cmpl_quat">
 			<configure name="USE_MAGNETOMETER" value="FALSE" /> <!-- TURN ON OUTSIDE -->
 			<define name="AHRS_USE_GPS_HEADING" value="TRUE" />
 		</module>
 		<module name="ins" type="extended" />
+		<!-- <module name="guidance" type="indi"> <define name="GUIDANCE_INDI_SPECIFIC_FORCE_GAIN" 
+			value="-500.0"/> <define name="GUIDANCE_INDI_THRUST_DYNAMICS" value="0.1"/> 
+			<define name="GUIDANCE_INDI_RC_DEBUG" value="TRUE"/> </module> -->
 	</firmware>
 	<modules main_freq="512">
 		<module name="geo_mag" />
@@ -42,9 +44,11 @@
 		<module name="logger_file">
 			<define name="FILE_LOGGER_PATH" value="/data/ftp/internal_000" />
 		</module>
-		<module name="ctrl_module_course2017"/>
-		<!-- Video/Camera modules
+		<module name="ctrl_module_course2017" />
+		<!-- Video/Camera modules -->
 		<module name="video_thread" />
+		<module name="cv_grass_detector" />
+		<!--
 		<module name="cv_ae_awb">
 			<define name="CV_AE_AWB_AV" value="1" />
 			<define name="CV_AE_AWB_VERBOSE" value="0" />
@@ -53,17 +57,17 @@
 			<define name="COLORFILTER_CAMERA" value="front_camera" />
 		</module>
 		<module name="orange_avoider" />
+		-->
 		<module name="video_rtp_stream">
 			<configure name="VIEWVIDEO_HOST" value="192.168.42.65" />
 			<configure name="VIEWVIDEO_BROADCAST" value="FALSE" />
-			<define name="VIEWVIDEO_CAMERA" value="front_camera" />
+			<define name="VIEWVIDEO_CAMERA" value="bottom_camera" />
 			<define name="VIEWVIDEO_SHOT_PATH" value="/data/ftp/internal_000" />
-			<define name="VIEWVIDEO_FPS" value="18" />
+			<define name="VIEWVIDEO_FPS" value="90" />
 			<define name="VIEWVIDEO_WRITE_VIDEO" value="FALSE" />
 			<define name="VIEWVIDEO_VIDEO_FILE" value="orangeAvoider" />
 			<define name="VIEWVIDEO_STREAM_VIDEO" value="TRUE" />
 		</module>
-		-->
 	</modules>
 
 	<commands>
@@ -212,10 +216,10 @@
 	</section>
 
 	<section name="AUTOPILOT">
-		<define name="MODE_STARTUP" value="AP_MODE_MODULE" />
+		<define name="MODE_STARTUP" value="AP_MODE_NAV" />
 		<define name="MODE_MANUAL" value="AP_MODE_ATTITUDE_DIRECT" />
 		<define name="MODE_AUTO1" value="AP_MODE_ATTITUDE_Z_HOLD" />
-		<define name="MODE_AUTO2" value="AP_MODE_MODULE" />
+		<define name="MODE_AUTO2" value="AP_MODE_NAV" />
 		<define name="NO_RC_THRUST_LIMIT" value="TRUE" />
 	</section>
 
