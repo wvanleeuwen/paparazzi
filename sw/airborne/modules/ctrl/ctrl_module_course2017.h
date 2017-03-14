@@ -35,6 +35,7 @@ extern double rc_yaw_gain;
 extern double rc_pitch_gain;
 extern double rc_roll_gain;
 extern double position_gain;
+extern double settings_grass_gain;
 
 // Demo with own guidance_h
 #define GUIDANCE_H_MODE_MODULE_SETTING GUIDANCE_H_MODE_MODULE

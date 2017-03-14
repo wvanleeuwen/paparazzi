@@ -47,11 +47,6 @@
       !(IndexOfBlock('Holding point') > nav_block) &&
       !(nav_block >= IndexOfBlock('Land here')) &&
       (autopilot_in_flight == true) )" deroute="Land here"/>
-    <!-- Geofencing XY -->
-    <exception cond="(!InsideCyberZoo(GetPosX(), GetPosY()) &&
-      !(IndexOfBlock('Holding point') > nav_block) &&
-      !(nav_block >= IndexOfBlock('Land here')) &&
-      (autopilot_in_flight == true) )" deroute="Land here"/>
     <!-- Geofencing Z 2.5 -->
     <exception cond="((GetPosAlt() > 3.5) &&
       !(IndexOfBlock('Holding point') > nav_block) &&
@@ -73,14 +68,6 @@
       (autopilot_in_flight == true) )" deroute="Land here"/>
   </exceptions>
   <blocks>
-    <block name="Wait GPS">
-      <call_once fun="NavKillThrottle()"/>
-      <while cond="!GpsFixValid()"/>
-    </block>
-    <block name="Geo init">
-      <while cond="LessThan(NavBlockTime(), 2)"/>
-      <call_once fun="NavSetAltitudeReferenceHere()"/>
-    </block>
     <block name="Holding point">
       <call_once fun="NavKillThrottle()"/>
       <attitude pitch="0" roll="0" throttle="0" until="FALSE" vmode="throttle"/>
@@ -96,16 +83,12 @@
       <stay climb="nav_climb_vspeed" vmode="climb" wp="CLIMB"/>
     </block>
     <block key="s" name="Standby" strip_button="Standby" strip_icon="home.png">
-      <call_once fun="NavSetWaypointHere(WP_STDBY)"/>
-      <stay wp="STDBY"/>
+      <attitude pitch="0" roll="0" throttle="0" until="FALSE" vmode="throttle"/>
     </block>
     <block key="l" name="Land here" strip_button="Land Here" strip_icon="land-right.png">
-      <call_once fun="NavSetWaypointHere(WP_TD)"/>
-      <go wp="TD"/>
       <deroute block="Flare"/>
     </block>
     <block name="Land">
-      <go wp="TD"/>
       <deroute block="Flare"/>
     </block>
     <block name="Flare">

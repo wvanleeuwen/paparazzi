@@ -37,17 +37,17 @@
 struct video_listener *listener = NULL;
 
 // Filter Settings
-uint8_t color_lum_min = 35;
-uint8_t color_lum_max = 220;
+uint8_t color_lum_min = 0;
+uint8_t color_lum_max = 255;
 uint8_t color_cb_min  = 0;
-uint8_t color_cb_max  = 137;
+uint8_t color_cb_max  = 118;
 uint8_t color_cr_min  = 0;
-uint8_t color_cr_max  = 127;
+uint8_t color_cr_max  = 140;
 
-double range_threshold = 0.1;
-bool inside_grass = false;
-double grass_correction_body_angle = 0.0;
-double grass_correction_body_range = 0.0;
+grass_detector cv_grass_detector;
+
+double range_threshold          = 0.09;
+double settings_count_threshold = 0.12;
 
 // Result
 int32_t grass_count = 0;
@@ -60,23 +60,32 @@ static uint32_t find_grass_centroid(struct image_t *img, int32_t* x_c, int32_t* 
 
 struct image_t *grass_detector_func(struct image_t *img)
 {
+  uint32_t count_threshold    = (uint32_t) round(settings_count_threshold * img->w * img->h);
   // Filter and find centroid
   grass_count = find_grass_centroid(img, &x_c, &y_c);
-  grass_correction_body_range = hypot(x_c, y_c) / hypot(img->w * 0.5, img->h * 0.5);
-  if(grass_correction_body_range < range_threshold){
-      inside_grass = true;
+  if(grass_count < count_threshold){
+      cv_grass_detector.inside = GRASS_UNSURE;
   }
   else{
-      inside_grass = false;
-      grass_correction_body_angle = atan2(x_c, y_c); // x=y rotate 90deg zo 0 points forward
-      printf("centroid: (%d, %d) r: %4.2f a: %4.2f\n", x_c, y_c, grass_correction_body_range, grass_correction_body_angle / M_PI * 180);
+      cv_grass_detector.range = hypot(x_c, y_c) / hypot(img->w * 0.5, img->h * 0.5);
+      if(cv_grass_detector.range < range_threshold){
+          cv_grass_detector.inside = GRASS_INSIDE;
+      }
+      else{
+          cv_grass_detector.inside = GRASS_OUTSIDE;
+          cv_grass_detector.angle = atan2(x_c, y_c); // x=y rotate 90deg zo 0 points forward
+          //printf("centroid: (%d, %d) r: %4.2f a: %4.2f\n", x_c, y_c, cv_grass_detector.range, cv_grass_detector.angle / M_PI * 180);
+      }
   }
   return NULL;
 }
 
 void grass_detector_init(void)
 {
-  listener = cv_add_to_device(&GRASS_DETECTOR_CAMERA, grass_detector_func);
+    cv_grass_detector.inside    = GRASS_UNSURE;
+    cv_grass_detector.angle     = 0.0;
+    cv_grass_detector.range     = 0.0;
+    listener = cv_add_to_device(&GRASS_DETECTOR_CAMERA, grass_detector_func);
 }
 
 uint32_t find_grass_centroid(struct image_t *img, int32_t* x_c, int32_t* y_c)

@@ -2,7 +2,9 @@
 
 <airframe name="bebop_avoider">
 	<firmware name="rotorcraft">
-		<target name="ap" board="bebop" />
+		<target name="ap" board="bebop2" />
+		<configure name="HOST" value="192.168.40.48" />
+		<configure name="MODEM_HOST" value="192.168.40.255" />
 		<!-- Front Camera parameters 
 		<define name="H264_ROTATE" value="TRUE" />
 		<define name="MT9F002_INITIAL_OFFSET_X" value="416+2704-480" /> < !-- 480 / 960 / 1920 / 3840 (horion for theta = 0 -> 2704) -- >
@@ -54,7 +56,7 @@
 		<module name="orange_avoider" />
 		-->
 		<module name="video_rtp_stream">
-			<configure name="VIEWVIDEO_HOST" value="192.168.42.65" />
+			<configure name="VIEWVIDEO_HOST" value="192.168.40.74" />
 			<configure name="VIEWVIDEO_BROADCAST" value="FALSE" />
 			<define name="VIEWVIDEO_CAMERA" value="bottom_camera" />
 			<define name="VIEWVIDEO_SHOT_PATH" value="/data/ftp/internal_000" />
@@ -73,10 +75,10 @@
 	</commands>
 
 	<servos driver="Default">
-		<servo name="TOP_LEFT" no="0" min="3000" neutral="3000" max="9800" />
-		<servo name="TOP_RIGHT" no="1" min="3000" neutral="3000" max="9800" />
-		<servo name="BOTTOM_RIGHT" no="2" min="3000" neutral="3000" max="9800" />
-		<servo name="BOTTOM_LEFT" no="3" min="3000" neutral="3000" max="9800" />
+		<servo name="TOP_LEFT" no="0" min="2500" neutral="2500" max="12000" />
+		<servo name="TOP_RIGHT" no="1" min="2500" neutral="2500" max="12000" />
+		<servo name="BOTTOM_RIGHT" no="2" min="2500" neutral="2500" max="12000" />
+		<servo name="BOTTOM_LEFT" no="3" min="2500" neutral="2500" max="12000" />
 	</servos>
 
 	<command_laws>
@@ -96,17 +98,19 @@
 		<define name="BODY_TO_IMU_PHI" value="0." unit="deg" />
 		<define name="BODY_TO_IMU_THETA" value="0." unit="deg" />
 		<define name="BODY_TO_IMU_PSI" value="0." unit="deg" />
+		<define name="ACCEL_X_NEUTRAL" value="55"/>
+		<define name="ACCEL_Y_NEUTRAL" value="-72"/>
+    		<define name="ACCEL_Z_NEUTRAL" value="-204"/>
 		<!-- Magneto calibration -->
-    		<define name="MAG_X_NEUTRAL" value="18"/>
-    		<define name="MAG_Y_NEUTRAL" value="157"/>
-    		<define name="MAG_Z_NEUTRAL" value="49"/>
-    		<define name="MAG_X_SENS" value="10.5007722373" integer="16"/>
-    		<define name="MAG_Y_SENS" value="11.1147400462" integer="16"/>
-    		<define name="MAG_Z_SENS" value="11.6479371722" integer="16"/>
+    		<define name="MAG_X_NEUTRAL" value="78"/>
+		<define name="MAG_Y_NEUTRAL" value="-114"/>
+		<define name="MAG_Z_NEUTRAL" value="-253"/>
+		<define name="MAG_X_SENS" value="7.44947044049" integer="16"/>
+		<define name="MAG_Y_SENS" value="7.52762842832" integer="16"/>
+		<define name="MAG_Z_SENS" value="7.98570580991" integer="16"/>
     		<!-- Magneto current calibration -->
     		<define name="MAG_X_CURRENT_COEF" value="0.0"/>
     		<define name="MAG_Y_CURRENT_COEF" value="0.0"/>
-    		
     		<define name="MAG_Z_CURRENT_COEF" value="0.0"/>
 	</section>
 
@@ -155,13 +159,15 @@
 	</section>
 
 	<section name="STABILIZATION_ATTITUDE_INDI" prefix="STABILIZATION_INDI_">
+		<define name="FILTER_ROLL_RATE"  value="TRUE"/>
+    		<define name="FILTER_PITCH_RATE" value="TRUE"/>
+    		<define name="FILTER_YAW_RATE"   value="TRUE"/>
 		<!-- control effectiveness -->
-		<define name="G1_ROLL" value="{20 , -20, -20 , 20 }" />
-		<define name="G1_PITCH" value="{14 , 14, -14 , -14 }" />
-		<define name="G1_YAW" value="{-1, 1, -1, 1}" />
-		<define name="G1_THRUST" value="{-.4, -.4, -.4, -.4}" />
-		<!--Counter torque effect of spinning up a rotor -->
-		<define name="G2" value="{-61.2093,   65.3670,  -65.7419,   65.4516}" />
+		<define name="G1_ROLL" 		value="{17.761, 	-18.726, 	-16.318, 	14.175 }" />
+		<define name="G1_PITCH" 	value="{14.834, 	13.017, 	-14.577, 	-14.674 }" />
+		<define name="G1_YAW" 		value="{0.621, 		-0.844, 	0.992, 		-0.810}" />
+		<define name="G1_THRUST" 	value="{-0.668, 	-0.577, 	-0.677, 	-0.667}" />
+		<define name="G2" 		value="{120.820, 	-128.095, 	89.216, 	-78.116}" />
 		<!-- reference acceleration for attitude control -->
 		<define name="REF_ERR_P" value="600.0" />
 		<define name="REF_ERR_Q" value="600.0" />
@@ -172,11 +178,10 @@
 		<!--Maxium yaw rate, to avoid instability -->
 		<define name="MAX_R" value="120.0" unit="deg/s" />
 		<define name="ESTIMATION_FILT_CUTOFF" value="4.0" />
-		<define name="FILT_CUTOFF" value="5.0" />
-		<!-- first order actuator dynamics -->
-		<define name="ACT_DYN" value="0.1" />
+		<define name="FILT_CUTOFF" value="3.0" />
+		<define name="ACT_DYN" value="{0.1, 0.1, 0.1, 0.1}"/>
 		<!-- Adaptive Learning Rate -->
-		<define name="USE_ADAPTIVE" value="TRUE" />
+		<define name="USE_ADAPTIVE" value="FALSE" />
 		<define name="ADAPTIVE_MU" value="0.0001" />
 	</section>
 

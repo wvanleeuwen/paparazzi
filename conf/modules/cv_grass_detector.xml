@@ -16,6 +16,7 @@
          <dl_setting var="color_cb_max"  min="0" step="1" max="255" shortname="u_max" />
          <dl_setting var="color_cr_min"  min="0" step="1" max="255" shortname="v_min" />
          <dl_setting var="color_cr_max"  min="0" step="1" max="255" shortname="v_max" />
+         <dl_setting var="settings_count_threshold"  min="0" step="0.01" max="1" shortname="count perc" />
       </dl_settings>
     </dl_settings>
   </settings>

@@ -41,9 +41,23 @@ extern uint8_t color_cb_max;
 extern uint8_t color_cr_min;
 extern uint8_t color_cr_max;
 
+extern double settings_count_threshold;
+
 extern int32_t grass_count;
-extern int32_t x_c;
-extern int32_t y_c;
+
+enum grass_status {
+    GRASS_UNSURE,               ///< There aren't enough green pixels to be sure
+    GRASS_OUTSIDE,              ///< We are outside the grass
+    GRASS_INSIDE                ///< We are inside the grass
+};
+
+typedef struct grass_detector_t {
+    enum grass_status inside;   ///< Wether correction is neccesary
+    double angle;               ///< XY body angle towards the grass
+    double range;               ///< Normalized range to grass [0-1]
+} grass_detector;
+
+extern grass_detector cv_grass_detector;
 
 extern struct video_listener *listener;
 
