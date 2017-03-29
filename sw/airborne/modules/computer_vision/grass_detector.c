@@ -40,9 +40,9 @@ struct video_listener *listener = NULL;
 uint8_t color_lum_min = 0;
 uint8_t color_lum_max = 255;
 uint8_t color_cb_min  = 0;
-uint8_t color_cb_max  = 118;
+uint8_t color_cb_max  = 110;
 uint8_t color_cr_min  = 0;
-uint8_t color_cr_max  = 140;
+uint8_t color_cr_max  = 115;
 
 grass_detector cv_grass_detector;
 

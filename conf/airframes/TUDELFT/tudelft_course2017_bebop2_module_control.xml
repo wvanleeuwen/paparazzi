@@ -3,7 +3,7 @@
 <airframe name="bebop_avoider">
 	<firmware name="rotorcraft">
 		<target name="ap" board="bebop2" />
-		<configure name="HOST" value="192.168.40.48" />
+		<configure name="HOST" value="192.168.40.47" />
 		<configure name="MODEM_HOST" value="192.168.40.255" />
 		<!-- Front Camera parameters 
 		<define name="H264_ROTATE" value="TRUE" />
@@ -30,7 +30,8 @@
 			<define name="INDI_RPM_FEEDBACK" value="TRUE" />
 		</module>
 		<module name="ahrs" type="int_cmpl_quat">
-			<configure name="USE_MAGNETOMETER" value="TRUE" />
+			<configure name="USE_MAGNETOMETER" value="FALSE" /> <!-- TURN ON OUTSIDE -->
+			<define name="AHRS_USE_GPS_HEADING" value="TRUE" />
 		</module>
 		<module name="ins" type="extended" />
 	</firmware>
@@ -56,7 +57,7 @@
 		<module name="orange_avoider" />
 		-->
 		<module name="video_rtp_stream">
-			<configure name="VIEWVIDEO_HOST" value="192.168.40.74" />
+			<configure name="VIEWVIDEO_HOST" value="192.168.40.141" />
 			<configure name="VIEWVIDEO_BROADCAST" value="FALSE" />
 			<define name="VIEWVIDEO_CAMERA" value="bottom_camera" />
 			<define name="VIEWVIDEO_SHOT_PATH" value="/data/ftp/internal_000" />
@@ -119,15 +120,19 @@
 	<section name="AHRS" prefix="AHRS_">
 		<!-- For vibrating airframes -->
 		<define name="GRAVITY_HEURISTIC_FACTOR" value="0" />
+		<define name="HEADING_UPDATE_GPS_MIN_SPEED" value="0" />
 		<!-- Delft -->
 		<define name="H_X" value="0.3892503" />
 		<define name="H_Y" value="0.0017972" />
 		<define name="H_Z" value="0.9211303" />
+		
 	</section>
 
 	<section name="INS" prefix="INS_">
 		<define name="SONAR_MAX_RANGE" value="2.2" />
 		<define name="SONAR_UPDATE_ON_AGL" value="TRUE" />
+		<define name="USE_GPS_ALT"         value="1" />     <!-- Use height from the optitrack -->
+		<define name="VFF_R_GPS"           value="0.01" />   <!-- The optitrack has high accuracy -->
 	</section>
 
 	<section name="RC_SETPOINT" prefix="STABILIZATION_ATTITUDE_">
