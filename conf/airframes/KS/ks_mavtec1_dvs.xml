@@ -1,7 +1,7 @@
 <!DOCTYPE airframe SYSTEM "../airframe.dtd">
 
 <!-- this is a quadrotor frame in X-configuration equipped with
-     * Autopilot:   Lisa/M 2.0 with STM32F1  http://wiki.paparazziuav.org/wiki/Lisa/M_v2.0
+     * Autopilot:   Lisa/M 2.1 with STM32F1  http://wiki.paparazziuav.org/wiki/Lisa/M_v2.1
      * IMU:         Aspirin 2.2              http://wiki.paparazziuav.org/wiki/AspirinIMU
      * Actuators:   HobbyKing Afro Slim 20A with BLHeli 14.0
      * GPS:         Datalink                 http://wiki.paparazziuav.org/wiki/Subsystem/gps
@@ -10,13 +10,13 @@
 
 <airframe name="MAVTec1">
   <firmware name="rotorcraft">
-    <target name="ap" board="lisa_m_2.1">
-
-      <define name="UART_RX_BUFFER_SIZE" value="1024" />
+    <target name="ap" board="lisa_mx_2.1">
       <configure name="NO_LUFTBOOT" value="1"/>
       <configure name="USE_BARO_BOARD" value="0"/>
       <configure name="USE_MAGNETOMETER" value="0"/>
       <configure name="FLASH_MODE" value="SWD" />
+      
+      <define name="REMAP_UART3" value="TRUE"/>
       <!-- MPU6000 is configured to output data at 2kHz, but polled at 512Hz PERIODIC_FREQUENCY -->
     </target>
 
@@ -30,7 +30,7 @@
       <define name="SERVO_HZ"    value="400"/>
     </module>
     <module name="telemetry"     type="xbee_api"/>
-    <module name="imu"           type="lisa_m_v2.1"/>
+    <module name="imu"           type="lisa_mx_v2.1"/>
     <module name="gps"           type="optitrack"/>
     <module name="stabilization" type="int_quat"/><!--indi"/-->
     <module name="ahrs"          type="int_cmpl_quat">

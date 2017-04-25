@@ -23,6 +23,7 @@
 # This is the common Makefile for STM32 upload rules
 #
 
+GDB_LOCAL = /home/kirk/mavlab/paparazzi/sw/tools/flash_scripts/arm-none-eabi-gdb
 
 # default: assume the luftboot bootloader is not used
 # if luftboot is used define HAS_LUFTBOOT to a value != 0
@@ -131,9 +132,9 @@ BMP_UPLOAD_SCRIPT ?= $(PAPARAZZI_SRC)/sw/tools/flash_scripts/bmp_jtag_flash.scr
 upload: $(OBJDIR)/$(TARGET).elf
 	@echo "Assuming luftboot bootloader: $(ASSUMING_LUFTBOOT)"
 	@echo "Using Black Magic Probe with JTAG on BMP_PORT $(BMP_PORT)"
-	@echo "Using GDB = $(GDB)"
+	@echo "Using GDB = $(GDB_LOCAL)"
 	@echo "  BMP\t$<"
-	$(Q)$(GDB) --batch \
+	$(Q)$(GDB_LOCAL) --batch \
 		   -ex 'target extended-remote $(BMP_PORT)' \
 		   -x $(BMP_UPLOAD_SCRIPT) \
 		   $<
@@ -147,9 +148,9 @@ BMP_UPLOAD_SCRIPT ?= $(PAPARAZZI_SRC)/sw/tools/flash_scripts/bmp_swd_flash.scr
 upload: $(OBJDIR)/$(TARGET).elf
 	@echo "Assuming luftboot bootloader: $(ASSUMING_LUFTBOOT)"
 	@echo "Using Black Magic Probe with SWD on BMP_PORT $(BMP_PORT)"
-	@echo "Using GDB = $(GDB)"
+	@echo "Using GDB = $(GDB_LOCAL)"
 	@echo "  BMP\t$<"
-	$(Q)$(GDB) --batch \
+	$(Q)$(GDB_LOCAL) --batch \
 		   -ex 'target extended-remote $(BMP_PORT)' \
 		   -x $(BMP_UPLOAD_SCRIPT) \
 		   $<

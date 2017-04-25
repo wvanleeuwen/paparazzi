@@ -212,8 +212,10 @@ static void sbp_vel_ned_callback(uint16_t sender_id __attribute__((unused)),
   gps_piksi.ned_vel.y = (int32_t)(vel_ned.e / 10);
   gps_piksi.ned_vel.z = (int32_t)(vel_ned.d / 10);
   SetBit(gps_piksi.valid_fields, GPS_VALID_VEL_NED_BIT);
-
-  gps_piksi.gspeed = int32_sqrt(gps_piksi.ned_vel.x * gps_piksi.ned_vel.x + gps_piksi.ned_vel.y * gps_piksi.ned_vel.y);
+  
+  gps_piksi.gspeed = (int16_t)INT32_VECT2_NORM(gps_piksi.ned_vel);
+  gps_piksi.speed_3d = (int16_t)INT32_VECT3_NORM(gps_piksi.ned_vel);
+  
   gps_piksi.course = (int32_t)(1e7 * atan2(gps_piksi.ned_vel.y, gps_piksi.ned_vel.x));
   SetBit(gps_piksi.valid_fields, GPS_VALID_COURSE_BIT);
 }

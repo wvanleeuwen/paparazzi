@@ -1,7 +1,7 @@
 # Hey Emacs, this is a -*- makefile -*-
 
-BLACKSPHERE = http://blacksphere.co.nz/builds/archive/2014
-BLACKMAGIC = blackmagic-20141017.bin
+BLACKSPHERE = https://github.com/blacksphere/blackmagic/releases/download/v1.6
+BLACKMAGIC = blackmagic-native-v1.6.bin
 
 Q=@
 

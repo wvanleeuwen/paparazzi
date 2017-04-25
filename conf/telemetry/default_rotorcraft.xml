@@ -27,8 +27,9 @@
       <message name="SURVEY"                 period="2.5"/>
       <message name="OPTIC_FLOW_EST"         period="0.05"/>
       <message name="VECTORNAV_INFO"         period="0.5"/>
-      <message name="EVENT_OPTIC_FLOW_EST"      period="0.2"/>
-      <message name="DIVERGENCE"      		period="0.2"/>
+      <message name="EVENT_OPTIC_FLOW_EST"   period="0.2"/>
+      <message name="DIVERGENCE"      	  	 period="0.2"/>
+      <message name="GPS"      	 			 period="1."/>
     </mode>
 
     <mode name="ppm">
