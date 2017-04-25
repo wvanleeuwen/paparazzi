@@ -13,7 +13,7 @@
     <target name="ap" board="lisa_mx_2.1">
       <configure name="NO_LUFTBOOT" value="1"/>
       <configure name="USE_BARO_BOARD" value="0"/>
-      <configure name="USE_MAGNETOMETER" value="0"/>
+      <configure name="USE_MAGNETOMETER" value="1"/>
       <configure name="FLASH_MODE" value="SWD" />
 
       <define name="REMAP_UART3" value="1"/>
@@ -35,7 +35,7 @@
       <configure name="GPS_PORT" value="UART4"/>
       <define name="USE_PIKSI_EXT_ANTENNA" value="TRUE"/>
     </module>
-    <module name="stabilization" type="int_quat"/><!--indi"/-->
+    <module name="stabilization" type="int_quat"/>
     <module name="ahrs"          type="int_cmpl_quat">
       <!--define name="AHRS_GRAVITY_HEURISTIC_FACTOR" value="30"/-->
     </module>
@@ -43,8 +43,8 @@
     <!--module name="guidance"      type="indi"/-->
     <module name="uart">
       <define name="USE_UART3"/>
-      <define name="UART3_BAUD" value="B921600"/><!--57600, 115200, 230400, 460800, 921600-->
-      <define name="UART_RX_BUFFER_SIZE" value="1024"/><!--max @30Hz:240, 480, 960, 1920, 3840-->
+      <define name="UART3_BAUD" value="B921600"/>
+      <define name="UART_RX_BUFFER_SIZE" value="1024"/>
     </module>
   </firmware>
 
@@ -57,7 +57,12 @@
       <define name="DVS_PORT" value="uart3"/>
       <define name="EOF_DIVERGENCE_CONTROL_PGAIN" value="0.1"/>
     </module>
-    <module name="optical_flow_landing"/>
+    <module name="optical_flow_landing">
+      <define name="OPTICAL_FLOW_LANDING_PGAIN" value="0.2"/>
+      <define name="OPTICAL_FLOW_LANDING_IGAIN" value="0.0"/>
+      <define name="OPTICAL_FLOW_LANDING_DGAIN" value="0.0"/>
+      <define name="OPTICAL_FLOW_LANDING_CONTROL_METHOD" value="0"/>
+    </module>
   </modules>
 
   <servos driver="Pwm">
