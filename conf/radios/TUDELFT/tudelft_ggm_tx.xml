@@ -1,0 +1,11 @@
+<!DOCTYPE radio SYSTEM "../radio.dtd">
+<radio name="TX MX22 RX R620X SBus out" data_min="350" data_max="2500" sync_min ="7000" sync_max ="21000" pulse_type="POSITIVE">
+ <channel ctl="RightStickHorizontal" function="ROLL"     min="1100" neutral="1500" max="1900" average="0"/>
+ <channel ctl="RightStickVertical"   function="PITCH"    min="1100" neutral="1500" max="1900" average="0"/>
+ <channel ctl="LeftStickVertical"    function="THROTTLE" min="1100" neutral="1110" max="1900" average="0"/>
+ <channel ctl="LeftStickHorizontal"  function="YAW"      min="1100" neutral="1500" max="1900" average="0"/>
+ <channel ctl="CONTROL8"             function="MODE"     min="1010" neutral="1500" max="1900" average="0"/>
+ <channel ctl="SW8"                  function="KILL"     min="1900" neutral="1500" max="1100" average="0"/>
+ <channel ctl="SW7"                  function="AUX1"     min="1100" neutral="1500" max="1900" average="0"/>
+ <channel ctl="SW2"                  function="UNUSED2"  min="1100" neutral="1500" max="1900" average="0"/>
+</radio>
