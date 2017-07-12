@@ -129,7 +129,7 @@ static void offset_commands(int32_t offset)
 {
   uint8_t j;
   for (j = 0; j < MOTOR_MIXING_NB_MOTOR; j++) {
-    motor_mixing.commands[j] += (offset);
+    motor_mixing.commands[j] += (offset*thrust_coef[j]/MOTOR_MIXING_SCALE);
   }
 }
 
