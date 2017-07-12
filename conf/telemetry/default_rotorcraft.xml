@@ -28,6 +28,7 @@
       <message name="OPTIC_FLOW_EST"         period="0.05"/>
       <message name="VECTORNAV_INFO"         period="0.5"/>
       <message name="DIVERGENCE"             period="0.05"/>
+      <message name="FBW_STATUS"             period="2.0"/>
     </mode>
 
     <mode name="ppm">
