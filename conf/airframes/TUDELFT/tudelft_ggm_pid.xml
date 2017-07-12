@@ -86,7 +86,7 @@ TAIL_LEFT -> CW
       <configure name="INTERMCU_PORT" value="UART6" />
       <configure name="INTERMCU_BAUD" value="B1500000" /> <!-- This is only during first 10s start up, afterwards it is set to 230400-->
     </module>
-
+      <define name="USE_KILL_SWITCH_FOR_MOTOR_ARMING" value="1" />
   </firmware>
   
   <!-- FWB part in separate firmware -->
@@ -101,9 +101,9 @@ TAIL_LEFT -> CW
     
     <module name="motor_mixing" />
     
-    <define name="AUTOPILOT_DISABLE_AHRS_KILL"/>
+    <!--define name="AUTOPILOT_DISABLE_AHRS_KILL"/-->
     
-    <define name="FBW_MODE_AUTO_ONLY" value="FALSE"/>
+    <define name="FBW_MODE_AUTO_ONLY" value="TRUE"/>
     
     <module name="radio_control" type="sbus">
       <configure name="SBUS_PORT" value="UART3"/>
@@ -193,17 +193,17 @@ TAIL_LEFT -> CW
   <servos driver="Default"><!-- set pulsespeed for reliability not agility -->
     <!-- CW 1,2,3,4,5,6,7,8 Plus additional Yaw 2x -->
         
-    <servo name="FRONT_LEFT_UPPER" no="0"  min="1000" neutral="1120" max="1950" />
-    <servo name="FRONT_LEFT_LOWER" no="1"  min="1000" neutral="1120" max="1950" />
+    <servo name="FRONT_LEFT_UPPER" no="0"  min="1000" neutral="1200" max="1950" />
+    <servo name="FRONT_LEFT_LOWER" no="1"  min="1000" neutral="1200" max="1950" />
     
-    <servo name="YAW_1" no="2"             min="1000" neutral="1120" max="1950" />  
-    <servo name="YAW_2" no="3"             min="1000" neutral="1120" max="1950" />
+    <servo name="YAW_1" no="2"             min="1000" neutral="1200" max="1950" />  
+    <servo name="YAW_2" no="3"             min="1000" neutral="1200" max="1950" />
     
-    <servo name="FRONT_RIGHT_UPPER" no="4" min="1000" neutral="1120" max="1950" />
-    <servo name="FRONT_RIGHT_LOWER" no="5" min="1000" neutral="1120" max="1950" />
+    <servo name="FRONT_RIGHT_UPPER" no="4" min="1000" neutral="1200" max="1950" />
+    <servo name="FRONT_RIGHT_LOWER" no="5" min="1000" neutral="1200" max="1950" />
         
-    <servo name="TAIL_RIGHT" no="6"        min="1000" neutral="1120" max="1950" />  
-    <servo name="TAIL_LEFT" no="7"         min="1000" neutral="1120" max="1950" />
+    <servo name="TAIL_RIGHT" no="6"        min="1000" neutral="1200" max="1950" />  
+    <servo name="TAIL_LEFT" no="7"         min="1000" neutral="1200" max="1950" />
    
     <!--  Via SBUS servo Extender Possible--> 
     <!-- TODO: setting these defines, RC non worky worky anymore, weird-->  
@@ -219,14 +219,14 @@ TAIL_LEFT -> CW
     <define name="TRIM_PITCH" value="0"/>
     <define name="TRIM_YAW" value="0"/>
     
-    <define name="NB_MOTOR" value="8"/>
+    <define name="NB_MOTOR" value="6"/>
     <define name="SCALE" value="256"/>
 
     <!--  First calculated values, to be precised -->
-    <define name="THRUST_COEF" value="{ 255, 255, 0, 0, 255, 255, 255, 255 }"/>
-    <define name="ROLL_COEF"   value="{ 255, 255, 0, 0, -255, -255, -73, 73 }"/>
-    <define name="PITCH_COEF"  value="{ 57, 57, 0, 0, 57, 57, -205, -205 }"/>
-    <define name="YAW_COEF"    value="{ 255, -255, -255, 255, -255, 255, 255, -255 }"/>
+    <define name="THRUST_COEF" value="{ 256, 256, 256, 256, 256, 256 }"/>
+    <define name="ROLL_COEF"   value="{ 256, 256, -256, -256, -73, 73 }"/>
+    <define name="PITCH_COEF"  value="{ 57, 57, 57, 57, -205, -205 }"/>
+    <define name="YAW_COEF"    value="{ 256, -256, -256, 256, 256, -256 }"/>
   
   </section>
   
@@ -235,23 +235,24 @@ TAIL_LEFT -> CW
     
     <!-- EXP <call fun="motor_mixing_run(autopilot_get_motors_on(),FALSE,values)"/>-->  
     <call fun="motor_mixing_run(fbw_motors_on,FALSE,values)" /><!-- TOdo REfactor fbw_motors_on -> fbw_get_motors_on() -->
+    <let var="th_hold"          value="MoreThan(RadioControlValues(RADIO_KILL), -4800)"/>
     <!--  FRONT LEFTSIDE -->   
     <set servo="FRONT_LEFT_UPPER" value="motor_mixing.commands[0]" /><!-- MOTOR_FRONT_LEFT_UPPER -->
     <set servo="FRONT_LEFT_LOWER" value="motor_mixing.commands[1]" /><!-- MOTOR_FRONT_LEFT_LOWER -->
     
     <!--  YAW--> 
-    <set servo="YAW_1" value="motor_mixing.commands[2]" /><!-- MOTOR_YAW_1 -->
-    <set servo="YAW_2" value="motor_mixing.commands[3]" /><!-- MOTOR_YAW_2 -->
+    <set servo="YAW_1" value="($th_hold ? (LessThan(@YAW, 0)? 0 : @YAW) : -MAX_PPRZ)" /><!-- MOTOR_YAW_1 -->
+    <set servo="YAW_2" value="($th_hold ? (LessThan(-@YAW, 0)? 0 : -@YAW) : -MAX_PPRZ)" /><!-- MOTOR_YAW_2 -->
     
     <!--  FRONT RIGHTSIDE --> 
-    <set servo="FRONT_RIGHT_UPPER" value="motor_mixing.commands[4]" /><!-- MOTOR_FRONT_RIGHT_UPPER -->
-    <set servo="FRONT_RIGHT_LOWER" value="motor_mixing.commands[5]" /><!-- MOTOR_FRONT_RIGHT_LOWER -->
+    <set servo="FRONT_RIGHT_UPPER" value="motor_mixing.commands[2]" /><!-- MOTOR_FRONT_RIGHT_UPPER -->
+    <set servo="FRONT_RIGHT_LOWER" value="motor_mixing.commands[3]" /><!-- MOTOR_FRONT_RIGHT_LOWER -->
     
     <!--  TAIL RIGHTSIDE--> 
-    <set servo="TAIL_RIGHT" value="motor_mixing.commands[6]" /><!-- MOTOR_TAIL_RIGHT -->
+    <set servo="TAIL_RIGHT" value="motor_mixing.commands[4]" /><!-- MOTOR_TAIL_RIGHT -->
     
     <!-- TAIL LEFTSIDE --> 
-    <set servo="TAIL_LEFT" value="motor_mixing.commands[7]" /><!-- MOTOR_TAIL_LEFT -->
+    <set servo="TAIL_LEFT" value="motor_mixing.commands[5]" /><!-- MOTOR_TAIL_LEFT -->
 
   </command_laws>
   
