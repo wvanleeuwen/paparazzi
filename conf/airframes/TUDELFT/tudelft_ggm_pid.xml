@@ -223,7 +223,7 @@ TAIL_LEFT -> CW
     <define name="SCALE" value="256"/>
 
     <!--  First calculated values, to be precised -->
-    <define name="THRUST_COEF" value="{ 256, 256, 256, 256, 256, 256 }"/>
+    <define name="THRUST_COEF" value="{ 256, 256, 256, 256, 135, 135 }"/>
     <define name="ROLL_COEF"   value="{ 256, 256, -256, -256, -73, 73 }"/>
     <define name="PITCH_COEF"  value="{ 57, 57, 57, 57, -205, -205 }"/>
     <define name="YAW_COEF"    value="{ 256, -256, -256, 256, 256, -256 }"/>
@@ -241,8 +241,8 @@ TAIL_LEFT -> CW
     <set servo="FRONT_LEFT_LOWER" value="motor_mixing.commands[1]" /><!-- MOTOR_FRONT_LEFT_LOWER -->
     
     <!--  YAW--> 
-    <set servo="YAW_1" value="($th_hold ? (LessThan(@YAW, 0)? 0 : @YAW) : -MAX_PPRZ)" /><!-- MOTOR_YAW_1 -->
-    <set servo="YAW_2" value="($th_hold ? (LessThan(-@YAW, 0)? 0 : -@YAW) : -MAX_PPRZ)" /><!-- MOTOR_YAW_2 -->
+    <set servo="YAW_1" value="($th_hold ? (LessThan(-@YAW, 0)? 0 : -@YAW) : -MAX_PPRZ)" /><!-- MOTOR_YAW_1 -->
+    <set servo="YAW_2" value="($th_hold ? (LessThan(@YAW, 0)? 0 : @YAW) : -MAX_PPRZ)" /><!-- MOTOR_YAW_2 -->
     
     <!--  FRONT RIGHTSIDE --> 
     <set servo="FRONT_RIGHT_UPPER" value="motor_mixing.commands[2]" /><!-- MOTOR_FRONT_RIGHT_UPPER -->
@@ -309,8 +309,8 @@ TAIL_LEFT -> CW
     <define name="REF_MAX_RDOT" value="RadOfDeg(3000.)"/>
 
     <!-- feedback -->
-    <define name="PHI_PGAIN" value="800"/>
-    <define name="PHI_DGAIN" value="400"/>
+    <define name="PHI_PGAIN" value="1025"/>
+    <define name="PHI_DGAIN" value="522"/>
     <define name="PHI_IGAIN" value="0"/>
 
     <define name="THETA_PGAIN" value="800"/>
