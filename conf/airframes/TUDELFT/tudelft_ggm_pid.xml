@@ -169,9 +169,11 @@ TAIL_LEFT -> CW
     <define name="MAG_X_SENS" value="4.0" integer="16"/>
     <define name="MAG_Y_SENS" value="4.0" integer="16"/>
     <define name="MAG_Z_SENS" value="4.0" integer="16"/>
+
+    <define name="TO_MAG_PSI"   value="180." unit="deg"/>
     
-    <define name="BODY_TO_IMU_PHI" value="6.7" unit="deg"/>
-    <define name="BODY_TO_IMU_THETA" value="-4.6" unit="deg"/>
+    <define name="BODY_TO_IMU_PHI" value="4.2" unit="deg"/>
+    <define name="BODY_TO_IMU_THETA" value="-11.1" unit="deg"/>
     <define name="BODY_TO_IMU_PSI" value="180." unit="deg"/>
   </section>
      
@@ -416,7 +418,7 @@ TAIL_LEFT -> CW
     <define name="HOVER_KP" value="400" />
     <define name="HOVER_KD" value="90" />
     <define name="HOVER_KI" value="30" />
-    <define name="NOMINAL_HOVER_THROTTLE" value="0.3" />
+    <define name="NOMINAL_HOVER_THROTTLE" value="0.73" />
     <define name="ADAPT_THROTTLE_ENABLED" value="FALSE" />
   </section>
   
