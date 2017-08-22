@@ -20,7 +20,7 @@
     <file name="stereocam.h"/>
   </header>
   <init fun="stereocam_init()"/>
-  <periodic fun="state2stereocam()" autorun="TRUE" freq="25"/>
+  <periodic fun="state2stereocam()" autorun="TRUE" freq="30"/>
   <event fun="stereocam_event()"/>
   <makefile>
   	<!-- Configure default UART port and baudrate -->

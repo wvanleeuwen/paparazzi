@@ -37,6 +37,7 @@
 #include "subsystems/abi.h"
 
 #include "stereocam_follow_me/follow_me.h"
+#include "modules/imav2017/imav2017.h"
 
 
 // forward received image to ground station
@@ -91,7 +92,7 @@ static uint8_t stereocam_msg_buf[256]  __attribute__((aligned));   ///< The mess
 #endif
 
 #ifndef STEREOCAM_USE_MEDIAN_FILTER
-#define STEREOCAM_USE_MEDIAN_FILTER 0
+#define STEREOCAM_USE_MEDIAN_FILTER 1
 #endif
 
 #include "filters/median_filter.h"
@@ -126,7 +127,7 @@ static void stereocam_parse_msg(void)
     camera_vel.y = (float)DL_STEREOCAM_VELOCITY_vely(stereocam_msg_buf)/res;
     camera_vel.z = (float)DL_STEREOCAM_VELOCITY_velz(stereocam_msg_buf)/res;
 
-    float noise = 1-(float)DL_STEREOCAM_VELOCITY_vRMS(stereocam_msg_buf)/res;
+    float noise = 2*(1.1-(float)DL_STEREOCAM_VELOCITY_vRMS(stereocam_msg_buf)/res);
 
     // Rotate camera frame to body frame
     struct FloatVect3 body_vel;
@@ -137,6 +138,8 @@ static void stereocam_parse_msg(void)
       // Use a slight median filter to filter out the large outliers before sending it to state
       UpdateMedianFilterVect3Float(medianfilter, body_vel);
     }
+
+    DOWNLINK_SEND_TEMP_ADC(DOWNLINK_TRANSPORT, DOWNLINK_DEVICE, &body_vel.x, &body_vel.y, &noise);
 
     //Send velocities to state
     AbiSendMsgVELOCITY_ESTIMATE(STEREOCAM2STATE_SENDER_ID, now_ts,
@@ -196,14 +199,33 @@ static void stereocam_parse_msg(void)
   }
 #endif
 
+  case DL_STEREOCAM_GATE: {
+    uint8_t q = DL_STEREOCAM_GATE_quality(stereocam_msg_buf);
+    float w = DL_STEREOCAM_GATE_width(stereocam_msg_buf);
+    float h = DL_STEREOCAM_GATE_hieght(stereocam_msg_buf);
+    float d = DL_STEREOCAM_GATE_depth(stereocam_msg_buf);
+
+    // rotate angles to body frame
+    static struct FloatEulers camera_bearing;
+    camera_bearing.phi = DL_STEREOCAM_GATE_phi(stereocam_msg_buf);
+    camera_bearing.theta = DL_STEREOCAM_GATE_theta(stereocam_msg_buf);
+    camera_bearing.psi = 0;
+
+    static struct FloatEulers body_bearing;
+    float_rmat_transp_mult(&body_bearing, &stereocam.body_to_cam, &camera_bearing);
+
+    imav2017_set_gate(q, w, h, body_bearing.psi, body_bearing.theta, d);
+    break;
+  }
+
     default:
       break;
   }
 }
 
-/* We need to wait for incomming messages */
+/* We need to wait for incoming messages */
 void stereocam_event(void) {
-  // Check if we got some message from the Magneto or Pitot
+  // Check if we got some message from the stereocamera
   pprz_check_and_parse(stereocam.device, &stereocam.transport, stereocam_msg_buf, &stereocam.msg_available);
 
   // If we have a message we should parse it

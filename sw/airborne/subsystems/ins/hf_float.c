@@ -469,7 +469,7 @@ static void b2_hff_propagate_past(struct HfilterFloat *hff_past)
 
 void b2_hff_propagate(void)
 {
-  if (b2_hff_lost_counter < b2_hff_lost_limit) {
+  if (b2_hff_lost_counter && b2_hff_lost_counter < b2_hff_lost_limit) {
     b2_hff_lost_counter++;
   }
 
@@ -531,7 +531,7 @@ void b2_hff_propagate(void)
 
 void b2_hff_update_gps(struct FloatVect2 *pos_ned, struct FloatVect2 *speed_ned)
 {
-  b2_hff_lost_counter = 0;
+  b2_hff_lost_counter = 1;
 
 #if USE_GPS_ACC4R
   Rgps_pos = (float) gps.pacc / 100.;
