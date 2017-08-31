@@ -50,12 +50,17 @@
 #include "subsystems/abi.h"
 
 // for launch
-#include "firmwares/fixedwing/autopilot.h"
+#include "autopilot.h"
 
 // for datalink_time hack
 #include "subsystems/datalink/datalink.h"
 
-struct NpsAutopilot autopilot;
+#if USE_SONAR
+// for sonar/lidar agl
+#include "subsystems/datalink/downlink.h"
+#endif
+
+struct NpsAutopilot nps_autopilot;
 bool nps_bypass_ahrs;
 bool nps_bypass_ins;
 
@@ -75,9 +80,11 @@ bool nps_bypass_ins;
 void nps_autopilot_init(enum NpsRadioControlType type_rc, int num_rc_script, char *rc_dev)
 {
 
-  autopilot.launch = FALSE;
+  nps_autopilot.launch = FALSE;
 
-  nps_radio_control_init(type_rc, num_rc_script, rc_dev);
+  if (rc_dev != NULL)  {
+    nps_radio_control_init(type_rc, num_rc_script, rc_dev);
+  }
   nps_electrical_init();
 
   nps_bypass_ahrs = NPS_BYPASS_AHRS;
@@ -131,7 +138,7 @@ void nps_autopilot_run_step(double time)
     AbiSendMsgTEMPERATURE(BARO_SIM_SENDER_ID, (float)sensors.temp.value);
   }
 
-#if USE_AIRSPEED
+#if USE_AIRSPEED || USE_NPS_AIRSPEED
   if (nps_sensors_airspeed_available()) {
     stateSetAirspeed_f((float)sensors.airspeed.value);
     Fbw(event_task);
@@ -144,6 +151,35 @@ void nps_autopilot_run_step(double time)
     Fbw(event_task);
     Ap(event_task);
   }
+
+#if USE_SONAR
+  if (nps_sensors_sonar_available()) {
+    float dist = (float) sensors.sonar.value;
+    AbiSendMsgAGL(AGL_SONAR_NPS_ID, dist);
+
+    uint16_t foo = 0;
+    DOWNLINK_SEND_SONAR(DefaultChannel, DefaultDevice, &foo, &dist);
+
+    Fbw(event_task);
+    Ap(event_task);
+  }
+#endif
+
+#if USE_NPS_AOA
+  if (nps_sensors_aoa_available()) {
+    stateSetAngleOfAttack_f((float)sensors.aoa.value);
+    Fbw(event_task);
+    Ap(event_task);
+  }
+#endif
+
+#if USE_NPS_SIDESLIP
+  if (nps_sensors_sideslip_available()) {
+    stateSetSideslip_f((float)sensors.sideslip.value);
+    Fbw(event_task);
+    Ap(event_task);
+  }
+#endif
 
   if (nps_bypass_ahrs) {
     sim_overwrite_ahrs();
@@ -163,32 +199,30 @@ void nps_autopilot_run_step(double time)
   //PRINT_CONFIG_VAR(NPS_ACTUATOR_NAMES)
 
   for (uint8_t i = 0; i < NPS_COMMANDS_NB; i++) {
-    autopilot.commands[i] = (double)commands[i] / MAX_PPRZ;
+    nps_autopilot.commands[i] = (double)commands[i] / MAX_PPRZ;
   }
   // hack: invert pitch to fit most JSBSim models
-  autopilot.commands[COMMAND_PITCH] = -(double)commands[COMMAND_PITCH] / MAX_PPRZ;
+  nps_autopilot.commands[COMMAND_PITCH] = -(double)commands[COMMAND_PITCH] / MAX_PPRZ;
 #else
   PRINT_CONFIG_MSG("Using throttle, roll, pitch, yaw commands instead of explicit actuators.")
   PRINT_CONFIG_VAR(COMMAND_THROTTLE)
   PRINT_CONFIG_VAR(COMMAND_ROLL)
   PRINT_CONFIG_VAR(COMMAND_PITCH)
 
-  autopilot.commands[COMMAND_THROTTLE] = (double)commands[COMMAND_THROTTLE] / MAX_PPRZ;
-  autopilot.commands[COMMAND_ROLL] = (double)commands[COMMAND_ROLL] / MAX_PPRZ;
+  nps_autopilot.commands[COMMAND_THROTTLE] = (double)commands[COMMAND_THROTTLE] / MAX_PPRZ;
+  nps_autopilot.commands[COMMAND_ROLL] = (double)commands[COMMAND_ROLL] / MAX_PPRZ;
   // hack: invert pitch to fit most JSBSim models
-  autopilot.commands[COMMAND_PITCH] = -(double)commands[COMMAND_PITCH] / MAX_PPRZ;
+  nps_autopilot.commands[COMMAND_PITCH] = -(double)commands[COMMAND_PITCH] / MAX_PPRZ;
 #ifdef COMMAND_YAW
   PRINT_CONFIG_VAR(COMMAND_YAW)
-  autopilot.commands[COMMAND_YAW] = (double)commands[COMMAND_YAW] / MAX_PPRZ;
-#else
-  autopilot.commands[3] = 0.;
-#endif
-#endif
+  nps_autopilot.commands[COMMAND_YAW] = (double)commands[COMMAND_YAW] / MAX_PPRZ;
+#endif /* COMMAND_YAW */
+#endif /* NPS_ACTUATOR_NAMES */
 
   // do the launch when clicking launch in GCS
-  autopilot.launch = launch && !kill_throttle;
-  if (!launch) {
-    autopilot.commands[COMMAND_THROTTLE] = 0;
+  nps_autopilot.launch = autopilot.launch && !autopilot.kill_throttle;
+  if (!autopilot.launch) {
+    nps_autopilot.commands[COMMAND_THROTTLE] = 0;
   }
 }
 

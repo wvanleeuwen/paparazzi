@@ -26,20 +26,22 @@
  * handling of stm32 PWM input using a timer with capture.
  */
 #include "mcu_periph/pwm_input_arch.h"
+#include "mcu_periph/pwm_input.h"
 #include "mcu_periph/gpio.h"
-#include "hal.h"
+#include <hal.h>
+#include BOARD_CONFIG
 
 #define ONE_MHZ_CLK 1000000
 
 #ifdef USE_PWM_INPUT1
 static void input1_period_cb(ICUDriver *icup) {
   pwm_input_period_tics[PWM_INPUT1] = icuGetPeriodX(icup);
-  pwm_input_period_valid[PWM_INPUT1] = TRUE;
+  pwm_input_period_valid[PWM_INPUT1] = true;
 }
 
 static void input1_width_cb(ICUDriver *icup) {
   pwm_input_duty_tics[PWM_INPUT1] = icuGetWidthX(icup);
-  pwm_input_duty_valid[PWM_INPUT1] = TRUE;
+  pwm_input_duty_valid[PWM_INPUT1] = true;
 }
 
 static ICUConfig pwm_input1_cfg = {
@@ -50,7 +52,7 @@ static ICUConfig pwm_input1_cfg = {
 #else
 #error "Unknown PWM_INPUT1_PULSE_TYPE"
 #endif
-  PWM_INPUT_TICKS_PER_USEC * ONE_MHZ_CLK,
+  PWM_INPUT1_TICKS_PER_USEC * ONE_MHZ_CLK,
   input1_width_cb,
   input1_period_cb,
   NULL,
@@ -62,12 +64,12 @@ static ICUConfig pwm_input1_cfg = {
 #ifdef USE_PWM_INPUT2
 static void input2_period_cb(ICUDriver *icup) {
   pwm_input_period_tics[PWM_INPUT2] = icuGetPeriodX(icup);
-  pwm_input_period_valid[PWM_INPUT2] = TRUE;
+  pwm_input_period_valid[PWM_INPUT2] = true;
 }
 
 static void input2_width_cb(ICUDriver *icup) {
   pwm_input_duty_tics[PWM_INPUT2] = icuGetWidthX(icup);
-  pwm_input_duty_valid[PWM_INPUT2] = TRUE;
+  pwm_input_duty_valid[PWM_INPUT2] = true;
 }
 
 static ICUConfig pwm_input2_cfg = {
@@ -78,7 +80,7 @@ static ICUConfig pwm_input2_cfg = {
 #else
 #error "Unknown PWM_INPUT2_PULSE_TYPE"
 #endif
-  PWM_INPUT_TICKS_PER_USEC * ONE_MHZ_CLK,
+  PWM_INPUT2_TICKS_PER_USEC * ONE_MHZ_CLK,
   input2_width_cb,
   input2_period_cb,
   NULL,
@@ -100,25 +102,17 @@ void pwm_input_init(void)
 
 #ifdef USE_PWM_INPUT1
   icuStart(&PWM_INPUT1_ICU, &pwm_input1_cfg);
-  gpio_setup_pin_af(PWM_INPUT1_GPIO_PORT, PWM_INPUT1_GPIO_PIN, PWM_INPUT1_GPIO_AF);
+  gpio_setup_pin_af(PWM_INPUT1_GPIO_PORT, PWM_INPUT1_GPIO_PIN, PWM_INPUT1_GPIO_AF, false);
   icuStartCapture(&PWM_INPUT1_ICU);
   icuEnableNotifications(&PWM_INPUT1_ICU);
 #endif
 
 #ifdef USE_PWM_INPUT2
   icuStart(&PWM_INPUT2_ICU, &pwm_input2_cfg);
-  gpio_setup_pin_af(PWM_INPUT2_GPIO_PORT, PWM_INPUT2_GPIO_PIN, PWM_INPUT2_GPIO_AF);
+  gpio_setup_pin_af(PWM_INPUT2_GPIO_PORT, PWM_INPUT2_GPIO_PIN, PWM_INPUT2_GPIO_AF, false);
   icuStartCapture(&PWM_INPUT2_ICU);
   icuEnableNotifications(&PWM_INPUT2_ICU);
 #endif
 
-}
-
-uint32_t get_pwm_input_duty_in_usec(uint32_t channel) {
-  return pwm_input_duty_tics[channel] / PWM_INPUT_TICKS_PER_USEC;
-}
-
-uint32_t get_pwm_input_period_in_usec(uint32_t channel) {
-  return pwm_input_period_tics[channel] / PWM_INPUT_TICKS_PER_USEC;
 }
 

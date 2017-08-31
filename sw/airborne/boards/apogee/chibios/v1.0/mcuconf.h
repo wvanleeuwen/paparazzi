@@ -194,11 +194,7 @@
  * ICU driver system settings.
  */
 #define STM32_ICU_USE_TIM1                  TRUE
-#ifdef USE_PWM_INPUT2
-#define STM32_ICU_USE_TIM2                  TRUE
-#else
 #define STM32_ICU_USE_TIM2                  FALSE
-#endif
 #define STM32_ICU_USE_TIM3                  FALSE
 #define STM32_ICU_USE_TIM4                  FALSE
 #define STM32_ICU_USE_TIM5                  FALSE
@@ -383,14 +379,17 @@
 #define STM32_SDC_SDIO_UNALIGNED_SUPPORT    FALSE
 #define STM32_SDC_WRITE_TIMEOUT_MS          250
 #define STM32_SDC_READ_TIMEOUT_MS           15
-#define SDLOG_ALL_BUFFERS_SIZE              8192
-#define SDLOG_MAX_MESSAGE_LEN               252
-#define SDLOG_QUEUE_BUCKETS                 1024
+
 
 /*
- * workaround hardware bug in REV.A revision of old STM32F4 (sold in 2012, early 2013)
+  sdlog message buffer and queue configuration
  */
+#define SDLOG_QUEUE_BUCKETS  1024
+#define SDLOG_MAX_MESSAGE_LEN 300
+#define SDLOG_NUM_FILES 2
+#define SDLOG_ALL_BUFFERS_SIZE (SDLOG_NUM_FILES*8*1024)
 
-#define STM32_USE_REVISION_A_FIX 1
+
+
 
 #endif /* _MCUCONF_H_ */

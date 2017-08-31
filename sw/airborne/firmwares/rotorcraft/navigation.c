@@ -35,7 +35,7 @@
 #include "subsystems/ins.h"
 #include "state.h"
 
-#include "firmwares/rotorcraft/autopilot.h"
+#include "autopilot.h"
 #include "generated/modules.h"
 #include "generated/flight_plan.h"
 
@@ -48,43 +48,7 @@
 #include "pprzlink/messages.h"
 #include "mcu_periph/uart.h"
 
-struct EnuCoor_i navigation_target;
-struct EnuCoor_i navigation_carrot;
 
-struct EnuCoor_i nav_last_point;
-
-uint8_t last_wp UNUSED;
-
-/** Maximum distance from HOME waypoint before going into failsafe mode */
-#ifndef FAILSAFE_MODE_DISTANCE
-#define FAILSAFE_MODE_DISTANCE (1.5*MAX_DIST_FROM_HOME)
-#endif
-
-const float max_dist_from_home = MAX_DIST_FROM_HOME;
-const float max_dist2_from_home = MAX_DIST_FROM_HOME * MAX_DIST_FROM_HOME;
-float failsafe_mode_dist2 = FAILSAFE_MODE_DISTANCE * FAILSAFE_MODE_DISTANCE;
-float dist2_to_home;
-bool too_far_from_home;
-
-bool exception_flag[10] = {0}; //exception flags that can be used in the flight plan
-
-float dist2_to_wp;
-
-uint8_t horizontal_mode;
-struct EnuCoor_i nav_segment_start, nav_segment_end;
-struct EnuCoor_i nav_circle_center;
-int32_t nav_circle_radius, nav_circle_qdr, nav_circle_radians;
-
-int32_t nav_leg_progress;
-uint32_t nav_leg_length;
-
-bool nav_survey_active;
-
-int32_t nav_roll, nav_pitch;
-int32_t nav_heading;
-int32_t nav_cmd_roll, nav_cmd_pitch, nav_cmd_yaw;
-float nav_radius;
-float nav_climb_vspeed, nav_descend_vspeed;
 
 /** default nav_circle_radius in meters */
 #ifndef DEFAULT_CIRCLE_RADIUS
@@ -99,20 +63,64 @@ float nav_climb_vspeed, nav_descend_vspeed;
 #define NAV_DESCEND_VSPEED -0.8
 #endif
 
+/** minimum horizontal distance to waypoint to mark as arrived */
+#ifndef ARRIVED_AT_WAYPOINT
+#define ARRIVED_AT_WAYPOINT 3.0
+#endif
+
+/** Maximum distance from HOME waypoint before going into failsafe mode */
+#ifndef FAILSAFE_MODE_DISTANCE
+#define FAILSAFE_MODE_DISTANCE (1.5*MAX_DIST_FROM_HOME)
+#endif
+
+#define CLOSE_TO_WAYPOINT (15 << INT32_POS_FRAC)
+#define CARROT_DIST (12 << INT32_POS_FRAC)
+
+const float max_dist_from_home = MAX_DIST_FROM_HOME;
+const float max_dist2_from_home = MAX_DIST_FROM_HOME * MAX_DIST_FROM_HOME;
+float failsafe_mode_dist2 = FAILSAFE_MODE_DISTANCE * FAILSAFE_MODE_DISTANCE;
+float dist2_to_home;
+bool too_far_from_home;
+
+float dist2_to_wp;
+
+struct EnuCoor_i navigation_target;
+struct EnuCoor_i navigation_carrot;
+
+struct EnuCoor_i nav_last_point;
+
+uint8_t last_wp UNUSED;
+
+bool exception_flag[10] = {0}; //exception flags that can be used in the flight plan
+
+uint8_t horizontal_mode;
+
+int32_t nav_leg_progress;
+uint32_t nav_leg_length;
+
+bool nav_survey_active;
+
+int32_t nav_roll, nav_pitch;
+int32_t nav_heading;
+int32_t nav_cmd_roll, nav_cmd_pitch, nav_cmd_yaw;
+float nav_radius;
+float nav_climb_vspeed, nav_descend_vspeed;
+
 uint8_t vertical_mode;
 uint32_t nav_throttle;
 int32_t nav_climb, nav_altitude, nav_flight_altitude;
 float flight_altitude;
 
+/* nav_circle variables */
+struct EnuCoor_i nav_circle_center;
+int32_t nav_circle_radius, nav_circle_qdr, nav_circle_radians;
+
+/* nav_route variables */
+struct EnuCoor_i nav_segment_start, nav_segment_end;
+
+
 static inline void nav_set_altitude(void);
 
-#define CLOSE_TO_WAYPOINT (15 << INT32_POS_FRAC)
-#define CARROT_DIST (12 << INT32_POS_FRAC)
-
-/** minimum horizontal distance to waypoint to mark as arrived */
-#ifndef ARRIVED_AT_WAYPOINT
-#define ARRIVED_AT_WAYPOINT 3.0
-#endif
 
 #if PERIODIC_TELEMETRY
 #include "subsystems/datalink/telemetry.h"
@@ -120,6 +128,23 @@ static inline void nav_set_altitude(void);
 void set_exception_flag(uint8_t flag_num)
 {
   exception_flag[flag_num] = 1;
+}
+
+static void send_segment(struct transport_tx *trans, struct link_device *dev)
+{
+  float sx = POS_FLOAT_OF_BFP(nav_segment_start.x);
+  float sy = POS_FLOAT_OF_BFP(nav_segment_start.y);
+  float ex = POS_FLOAT_OF_BFP(nav_segment_end.x);
+  float ey = POS_FLOAT_OF_BFP(nav_segment_end.y);
+  pprz_msg_send_SEGMENT(trans, dev, AC_ID, &sx, &sy, &ex, &ey);
+}
+
+static void send_circle(struct transport_tx *trans, struct link_device *dev)
+{
+  float cx = POS_FLOAT_OF_BFP(nav_circle_center.x);
+  float cy = POS_FLOAT_OF_BFP(nav_circle_center.y);
+  float r = POS_FLOAT_OF_BFP(nav_circle_radius);
+  pprz_msg_send_CIRCLE(trans, dev, AC_ID, &cx, &cy, &r);
 }
 
 static void send_nav_status(struct transport_tx *trans, struct link_device *dev)
@@ -132,16 +157,9 @@ static void send_nav_status(struct transport_tx *trans, struct link_device *dev)
                                       &nav_block, &nav_stage,
                                       &horizontal_mode);
   if (horizontal_mode == HORIZONTAL_MODE_ROUTE) {
-    float sx = POS_FLOAT_OF_BFP(nav_segment_start.x);
-    float sy = POS_FLOAT_OF_BFP(nav_segment_start.y);
-    float ex = POS_FLOAT_OF_BFP(nav_segment_end.x);
-    float ey = POS_FLOAT_OF_BFP(nav_segment_end.y);
-    pprz_msg_send_SEGMENT(trans, dev, AC_ID, &sx, &sy, &ex, &ey);
+    send_segment(trans, dev);
   } else if (horizontal_mode == HORIZONTAL_MODE_CIRCLE) {
-    float cx = POS_FLOAT_OF_BFP(nav_circle_center.x);
-    float cy = POS_FLOAT_OF_BFP(nav_circle_center.y);
-    float r = POS_FLOAT_OF_BFP(nav_circle_radius);
-    pprz_msg_send_CIRCLE(trans, dev, AC_ID, &cx, &cy, &r);
+    send_circle(trans, dev);
   }
 }
 
@@ -195,6 +213,9 @@ void nav_init(void)
   register_periodic_telemetry(DefaultPeriodic, PPRZ_MSG_ID_ROTORCRAFT_NAV_STATUS, send_nav_status);
   register_periodic_telemetry(DefaultPeriodic, PPRZ_MSG_ID_WP_MOVED, send_wp_moved);
 #endif
+
+  // generated init function
+  auto_nav_init();
 }
 
 static inline void UNUSED nav_advance_carrot(void)
@@ -231,6 +252,288 @@ void nav_run(void)
 
   nav_set_altitude();
 }
+
+
+bool nav_approaching_from(struct EnuCoor_i *wp, struct EnuCoor_i *from, int16_t approaching_time)
+{
+  float dist_to_point;
+  struct Int32Vect2 diff;
+  struct EnuCoor_i *pos = stateGetPositionEnu_i();
+
+  /* if an approaching_time is given, estimate diff after approching_time secs */
+  if (approaching_time > 0) {
+    struct Int32Vect2 estimated_pos;
+    struct Int32Vect2 estimated_progress;
+    struct EnuCoor_i *speed = stateGetSpeedEnu_i();
+    VECT2_SMUL(estimated_progress, *speed, approaching_time);
+    INT32_VECT2_RSHIFT(estimated_progress, estimated_progress, (INT32_SPEED_FRAC - INT32_POS_FRAC));
+    VECT2_SUM(estimated_pos, *pos, estimated_progress);
+    VECT2_DIFF(diff, *wp, estimated_pos);
+  }
+  /* else use current position */
+  else {
+    VECT2_DIFF(diff, *wp, *pos);
+  }
+  /* compute distance of estimated/current pos to target wp
+   * POS_FRAC resolution
+   * convert to float to compute the norm without overflow in 32bit
+   */
+  struct FloatVect2 diff_f = {POS_FLOAT_OF_BFP(diff.x), POS_FLOAT_OF_BFP(diff.y)};
+  dist_to_point = float_vect2_norm(&diff_f);
+
+  /* return TRUE if we have arrived */
+  if (dist_to_point < ARRIVED_AT_WAYPOINT) {
+    return true;
+  }
+
+  /* if coming from a valid waypoint */
+  if (from != NULL) {
+    /* return TRUE if normal line at the end of the segment is crossed */
+    struct Int32Vect2 from_diff;
+    VECT2_DIFF(from_diff, *wp, *from);
+    struct FloatVect2 from_diff_f = {POS_FLOAT_OF_BFP(from_diff.x), POS_FLOAT_OF_BFP(from_diff.y)};
+    return (diff_f.x * from_diff_f.x + diff_f.y * from_diff_f.y < 0);
+  }
+
+  return false;
+}
+
+bool nav_check_wp_time(struct EnuCoor_i *wp, uint16_t stay_time)
+{
+  uint16_t time_at_wp;
+  float dist_to_point;
+  static uint16_t wp_entry_time = 0;
+  static bool wp_reached = false;
+  static struct EnuCoor_i wp_last = { 0, 0, 0 };
+  struct Int32Vect2 diff;
+
+  if ((wp_last.x != wp->x) || (wp_last.y != wp->y)) {
+    wp_reached = false;
+    wp_last = *wp;
+  }
+
+  VECT2_DIFF(diff, *wp, *stateGetPositionEnu_i());
+  struct FloatVect2 diff_f = {POS_FLOAT_OF_BFP(diff.x), POS_FLOAT_OF_BFP(diff.y)};
+  dist_to_point = float_vect2_norm(&diff_f);
+  if (dist_to_point < ARRIVED_AT_WAYPOINT) {
+    if (!wp_reached) {
+      wp_reached = true;
+      wp_entry_time = autopilot.flight_time;
+      time_at_wp = 0;
+    } else {
+      time_at_wp = autopilot.flight_time - wp_entry_time;
+    }
+  } else {
+    time_at_wp = 0;
+    wp_reached = false;
+  }
+  if (time_at_wp > stay_time) {
+    INT_VECT3_ZERO(wp_last);
+    return true;
+  }
+  return false;
+}
+
+static inline void nav_set_altitude(void)
+{
+  static int32_t last_nav_alt = 0;
+  if (abs(nav_altitude - last_nav_alt) > (POS_BFP_OF_REAL(0.2))) {
+    nav_flight_altitude = nav_altitude;
+    last_nav_alt = nav_altitude;
+  }
+}
+
+
+/** Reset the geographic reference to the current GPS fix */
+void nav_reset_reference(void)
+{
+  ins_reset_local_origin();
+  /* update local ENU coordinates of global waypoints */
+  waypoints_localize_all();
+}
+
+void nav_reset_alt(void)
+{
+  ins_reset_altitude_ref();
+  waypoints_localize_all();
+}
+
+void nav_init_stage(void)
+{
+  VECT3_COPY(nav_last_point, *stateGetPositionEnu_i());
+  stage_time = 0;
+  nav_circle_radians = 0;
+}
+
+#include <stdio.h>
+void nav_periodic_task(void)
+{
+  RunOnceEvery(NAV_FREQ, { stage_time++;  block_time++; });
+
+  nav_survey_active = false;
+
+  dist2_to_wp = 0;
+
+  /* from flight_plan.h */
+  auto_nav();
+
+  /* run carrot loop */
+  nav_run();
+}
+
+void navigation_update_wp_from_speed(uint8_t wp, struct Int16Vect3 speed_sp, int16_t heading_rate_sp)
+{
+  //  MY_ASSERT(wp < nb_waypoint); FIXME
+  int32_t s_heading, c_heading;
+  PPRZ_ITRIG_SIN(s_heading, nav_heading);
+  PPRZ_ITRIG_COS(c_heading, nav_heading);
+  // FIXME : scale POS to SPEED
+  struct Int32Vect3 delta_pos;
+  VECT3_SDIV(delta_pos, speed_sp, NAV_FREQ); /* fixme :make sure the division is really a >> */
+  INT32_VECT3_RSHIFT(delta_pos, delta_pos, (INT32_SPEED_FRAC - INT32_POS_FRAC));
+  waypoints[wp].enu_i.x += (s_heading * delta_pos.x + c_heading * delta_pos.y) >> INT32_TRIG_FRAC;
+  waypoints[wp].enu_i.y += (c_heading * delta_pos.x - s_heading * delta_pos.y) >> INT32_TRIG_FRAC;
+  waypoints[wp].enu_i.z += delta_pos.z;
+  int32_t delta_heading = heading_rate_sp / NAV_FREQ;
+  delta_heading = delta_heading >> (INT32_SPEED_FRAC - INT32_POS_FRAC);
+  nav_heading += delta_heading;
+
+  INT32_COURSE_NORMALIZE(nav_heading);
+  RunOnceEvery(10, DOWNLINK_SEND_WP_MOVED_ENU(DefaultChannel, DefaultDevice, &wp,
+               &(waypoints[wp].enu_i.x),
+               &(waypoints[wp].enu_i.y),
+               &(waypoints[wp].enu_i.z)));
+}
+
+bool nav_detect_ground(void)
+{
+  if (!autopilot.ground_detected) { return false; }
+  autopilot.ground_detected = false;
+  return true;
+}
+
+bool nav_is_in_flight(void)
+{
+  return autopilot_in_flight();
+}
+
+/** Home mode navigation */
+void nav_home(void)
+{
+  horizontal_mode = HORIZONTAL_MODE_WAYPOINT;
+  VECT3_COPY(navigation_target, waypoints[WP_HOME].enu_i);
+
+  vertical_mode = VERTICAL_MODE_ALT;
+  nav_altitude = waypoints[WP_HOME].enu_i.z;
+  nav_flight_altitude = nav_altitude;
+
+  dist2_to_wp = dist2_to_home;
+
+  /* run carrot loop */
+  nav_run();
+}
+
+/** Set manual roll, pitch and yaw without stabilization
+ *
+ * @param[in] roll command in pprz scale (int32_t)
+ * @param[in] pitch command in pprz scale (int32_t)
+ * @param[in] yaw command in pprz scale (int32_t)
+ *
+ * This function allows to directly set commands from the flight plan,
+ * if in nav_manual mode.
+ * This is for instance useful for helicopters during the spinup
+ */
+void nav_set_manual(int32_t roll, int32_t pitch, int32_t yaw)
+{
+  horizontal_mode = HORIZONTAL_MODE_MANUAL;
+  nav_cmd_roll = roll;
+  nav_cmd_pitch = pitch;
+  nav_cmd_yaw = yaw;
+}
+
+/** Returns squared horizontal distance to given point */
+float get_dist2_to_point(struct EnuCoor_i *p)
+{
+  struct EnuCoor_f *pos = stateGetPositionEnu_f();
+  struct FloatVect2 pos_diff;
+  pos_diff.x = POS_FLOAT_OF_BFP(p->x) - pos->x;
+  pos_diff.y = POS_FLOAT_OF_BFP(p->y) - pos->y;
+  return pos_diff.x * pos_diff.x + pos_diff.y * pos_diff.y;
+}
+
+/** Returns squared horizontal distance to given waypoint */
+float get_dist2_to_waypoint(uint8_t wp_id)
+{
+  return get_dist2_to_point(&waypoints[wp_id].enu_i);
+}
+
+/** Computes squared distance to the HOME waypoint potentially sets
+ * #too_far_from_home
+ */
+void compute_dist2_to_home(void)
+{
+  dist2_to_home = get_dist2_to_waypoint(WP_HOME);
+  too_far_from_home = dist2_to_home > max_dist2_from_home;
+#ifdef InGeofenceSector
+  struct EnuCoor_f *pos = stateGetPositionEnu_f();
+  too_far_from_home = too_far_from_home || !(InGeofenceSector(pos->x, pos->y));
+#endif
+}
+
+/** Set nav_heading in radians. */
+void nav_set_heading_rad(float rad)
+{
+  nav_heading = ANGLE_BFP_OF_REAL(rad);
+  INT32_COURSE_NORMALIZE(nav_heading);
+}
+
+/** Set nav_heading in degrees. */
+void nav_set_heading_deg(float deg)
+{
+  nav_set_heading_rad(RadOfDeg(deg));
+}
+
+/** Set heading to point towards x,y position in local coordinates */
+void nav_set_heading_towards(float x, float y)
+{
+  struct FloatVect2 target = {x, y};
+  struct FloatVect2 pos_diff;
+  VECT2_DIFF(pos_diff, target, *stateGetPositionEnu_f());
+  // don't change heading if closer than 0.5m to target
+  if (VECT2_NORM2(pos_diff) > 0.25) {
+    float heading_f = atan2f(pos_diff.x, pos_diff.y);
+    nav_heading = ANGLE_BFP_OF_REAL(heading_f);
+  }
+}
+
+/** Set heading in the direction of a waypoint */
+void nav_set_heading_towards_waypoint(uint8_t wp)
+{
+  nav_set_heading_towards(WaypointX(wp), WaypointY(wp));
+}
+
+/** Set heading in the direction of the target*/
+void nav_set_heading_towards_target(void)
+{
+  nav_set_heading_towards(POS_FLOAT_OF_BFP(navigation_target.x),
+                          POS_FLOAT_OF_BFP(navigation_target.y));
+}
+
+/** Set heading to the current yaw angle */
+void nav_set_heading_current(void)
+{
+  nav_heading = stateGetNedToBodyEulers_i()->psi;
+}
+
+void nav_set_failsafe(void)
+{
+  autopilot_set_mode(AP_MODE_FAILSAFE);
+}
+
+
+/***********************************************************
+ * built in navigation routines
+ **********************************************************/
 
 void nav_circle(struct EnuCoor_i *wp_center, int32_t radius)
 {
@@ -305,285 +608,8 @@ void nav_route(struct EnuCoor_i *wp_start, struct EnuCoor_i *wp_end)
   dist2_to_wp = get_dist2_to_point(wp_end);
 }
 
-bool nav_approaching_from(struct EnuCoor_i *wp, struct EnuCoor_i *from, int16_t approaching_time)
-{
-  int32_t dist_to_point;
-  struct Int32Vect2 diff;
-  struct EnuCoor_i *pos = stateGetPositionEnu_i();
-
-  /* if an approaching_time is given, estimate diff after approching_time secs */
-  if (approaching_time > 0) {
-    struct Int32Vect2 estimated_pos;
-    struct Int32Vect2 estimated_progress;
-    struct EnuCoor_i *speed = stateGetSpeedEnu_i();
-    VECT2_SMUL(estimated_progress, *speed, approaching_time);
-    INT32_VECT2_RSHIFT(estimated_progress, estimated_progress, (INT32_SPEED_FRAC - INT32_POS_FRAC));
-    VECT2_SUM(estimated_pos, *pos, estimated_progress);
-    VECT2_DIFF(diff, *wp, estimated_pos);
-  }
-  /* else use current position */
-  else {
-    VECT2_DIFF(diff, *wp, *pos);
-  }
-  /* compute distance of estimated/current pos to target wp
-   * distance with half metric precision (6.25 cm)
-   */
-  INT32_VECT2_RSHIFT(diff, diff, INT32_POS_FRAC / 2);
-  dist_to_point = int32_vect2_norm(&diff);
-
-  /* return TRUE if we have arrived */
-  if (dist_to_point < BFP_OF_REAL(ARRIVED_AT_WAYPOINT, INT32_POS_FRAC / 2)) {
-    return true;
-  }
-
-  /* if coming from a valid waypoint */
-  if (from != NULL) {
-    /* return TRUE if normal line at the end of the segment is crossed */
-    struct Int32Vect2 from_diff;
-    VECT2_DIFF(from_diff, *wp, *from);
-    INT32_VECT2_RSHIFT(from_diff, from_diff, INT32_POS_FRAC / 2);
-    return (diff.x * from_diff.x + diff.y * from_diff.y < 0);
-  }
-
-  return false;
-}
-
-bool nav_check_wp_time(struct EnuCoor_i *wp, uint16_t stay_time)
-{
-  uint16_t time_at_wp;
-  uint32_t dist_to_point;
-  static uint16_t wp_entry_time = 0;
-  static bool wp_reached = false;
-  static struct EnuCoor_i wp_last = { 0, 0, 0 };
-  struct Int32Vect2 diff;
-
-  if ((wp_last.x != wp->x) || (wp_last.y != wp->y)) {
-    wp_reached = false;
-    wp_last = *wp;
-  }
-  VECT2_DIFF(diff, *wp, *stateGetPositionEnu_i());
-  INT32_VECT2_RSHIFT(diff, diff, INT32_POS_FRAC / 2);
-  dist_to_point = int32_vect2_norm(&diff);
-  if (dist_to_point < BFP_OF_REAL(ARRIVED_AT_WAYPOINT, INT32_POS_FRAC / 2)) {
-    if (!wp_reached) {
-      wp_reached = true;
-      wp_entry_time = autopilot_flight_time;
-      time_at_wp = 0;
-    } else {
-      time_at_wp = autopilot_flight_time - wp_entry_time;
-    }
-  } else {
-    time_at_wp = 0;
-    wp_reached = false;
-  }
-  if (time_at_wp > stay_time) {
-    INT_VECT3_ZERO(wp_last);
-    return true;
-  }
-  return false;
-}
-
-static inline void nav_set_altitude(void)
-{
-  static int32_t last_nav_alt = 0;
-  if (abs(nav_altitude - last_nav_alt) > (POS_BFP_OF_REAL(0.2))) {
-    nav_flight_altitude = nav_altitude;
-    last_nav_alt = nav_altitude;
-  }
-}
-
-
-/** Reset the geographic reference to the current GPS fix */
-unit_t nav_reset_reference(void)
-{
-  ins_reset_local_origin();
-  /* update local ENU coordinates of global waypoints */
-  waypoints_localize_all();
-  return 0;
-}
-
-unit_t nav_reset_alt(void)
-{
-  ins_reset_altitude_ref();
-  waypoints_localize_all();
-  return 0;
-}
-
-void nav_init_stage(void)
-{
-  VECT3_COPY(nav_last_point, *stateGetPositionEnu_i());
-  stage_time = 0;
-  nav_circle_radians = 0;
-}
-
-#include <stdio.h>
-void nav_periodic_task(void)
-{
-  RunOnceEvery(NAV_FREQ, { stage_time++;  block_time++; });
-
-  nav_survey_active = false;
-
-  dist2_to_wp = 0;
-
-  /* from flight_plan.h */
-  auto_nav();
-
-  /* run carrot loop */
-  nav_run();
-}
-
-void navigation_update_wp_from_speed(uint8_t wp, struct Int16Vect3 speed_sp, int16_t heading_rate_sp)
-{
-  //  MY_ASSERT(wp < nb_waypoint); FIXME
-  int32_t s_heading, c_heading;
-  PPRZ_ITRIG_SIN(s_heading, nav_heading);
-  PPRZ_ITRIG_COS(c_heading, nav_heading);
-  // FIXME : scale POS to SPEED
-  struct Int32Vect3 delta_pos;
-  VECT3_SDIV(delta_pos, speed_sp, NAV_FREQ); /* fixme :make sure the division is really a >> */
-  INT32_VECT3_RSHIFT(delta_pos, delta_pos, (INT32_SPEED_FRAC - INT32_POS_FRAC));
-  waypoints[wp].enu_i.x += (s_heading * delta_pos.x + c_heading * delta_pos.y) >> INT32_TRIG_FRAC;
-  waypoints[wp].enu_i.y += (c_heading * delta_pos.x - s_heading * delta_pos.y) >> INT32_TRIG_FRAC;
-  waypoints[wp].enu_i.z += delta_pos.z;
-  int32_t delta_heading = heading_rate_sp / NAV_FREQ;
-  delta_heading = delta_heading >> (INT32_SPEED_FRAC - INT32_POS_FRAC);
-  nav_heading += delta_heading;
-
-  INT32_COURSE_NORMALIZE(nav_heading);
-  RunOnceEvery(10, DOWNLINK_SEND_WP_MOVED_ENU(DefaultChannel, DefaultDevice, &wp,
-               &(waypoints[wp].enu_i.x),
-               &(waypoints[wp].enu_i.y),
-               &(waypoints[wp].enu_i.z)));
-}
-
-bool nav_detect_ground(void)
-{
-  if (!autopilot_ground_detected) { return false; }
-  autopilot_ground_detected = false;
-  return true;
-}
-
-bool nav_is_in_flight(void)
-{
-  return autopilot_in_flight;
-}
-
-/** Home mode navigation */
-void nav_home(void)
-{
-  horizontal_mode = HORIZONTAL_MODE_WAYPOINT;
-  VECT3_COPY(navigation_target, waypoints[WP_HOME].enu_i);
-
-  vertical_mode = VERTICAL_MODE_ALT;
-  nav_altitude = waypoints[WP_HOME].enu_i.z;
-  nav_flight_altitude = nav_altitude;
-
-  dist2_to_wp = dist2_to_home;
-
-  /* run carrot loop */
-  nav_run();
-}
-
-/** Set manual roll, pitch and yaw without stabilization
- *
- * @param[in] roll command in pprz scale (int32_t)
- * @param[in] pitch command in pprz scale (int32_t)
- * @param[in] yaw command in pprz scale (int32_t)
- *
- * This function allows to directly set commands from the flight plan,
- * if in nav_manual mode.
- * This is for instance useful for helicopters during the spinup
- */
-void nav_set_manual(int32_t roll, int32_t pitch, int32_t yaw)
-{
-  horizontal_mode = HORIZONTAL_MODE_MANUAL;
-  nav_cmd_roll = roll;
-  nav_cmd_pitch = pitch;
-  nav_cmd_yaw = yaw;
-}
-
-/** Returns squared horizontal distance to given point */
-float get_dist2_to_point(struct EnuCoor_i *p)
-{
-  struct EnuCoor_f *pos = stateGetPositionEnu_f();
-  struct FloatVect2 pos_diff;
-  pos_diff.x = POS_FLOAT_OF_BFP(p->x) - pos->x;
-  pos_diff.y = POS_FLOAT_OF_BFP(p->y) - pos->y;
-  return pos_diff.x * pos_diff.x + pos_diff.y * pos_diff.y;
-}
-
-/** Returns squared horizontal distance to given waypoint */
-float get_dist2_to_waypoint(uint8_t wp_id)
-{
-  return get_dist2_to_point(&waypoints[wp_id].enu_i);
-}
-
-/** Computes squared distance to the HOME waypoint potentially sets
- * #too_far_from_home
- */
-void compute_dist2_to_home(void)
-{
-  dist2_to_home = get_dist2_to_waypoint(WP_HOME);
-  too_far_from_home = dist2_to_home > max_dist2_from_home;
-#ifdef InGeofenceSector
-  struct EnuCoor_f *pos = stateGetPositionEnu_f();
-  too_far_from_home = too_far_from_home || !(InGeofenceSector(pos->x, pos->y));
-#endif
-}
-
-/** Set nav_heading in radians. */
-bool nav_set_heading_rad(float rad)
-{
-  nav_heading = ANGLE_BFP_OF_REAL(rad);
-  INT32_COURSE_NORMALIZE(nav_heading);
-  return false;
-}
-
-/** Set nav_heading in degrees. */
-bool nav_set_heading_deg(float deg)
-{
-  return nav_set_heading_rad(RadOfDeg(deg));
-}
-
-/** Set heading to point towards x,y position in local coordinates */
-bool nav_set_heading_towards(float x, float y)
-{
-  struct FloatVect2 target = {x, y};
-  struct FloatVect2 pos_diff;
-  VECT2_DIFF(pos_diff, target, *stateGetPositionEnu_f());
-  // don't change heading if closer than 0.5m to target
-  if (VECT2_NORM2(pos_diff) > 0.25) {
-    float heading_f = atan2f(pos_diff.x, pos_diff.y);
-    nav_heading = ANGLE_BFP_OF_REAL(heading_f);
-  }
-  // return false so it can be called from the flightplan
-  // meaning it will continue to the next stage
-  return false;
-}
-
-/** Set heading in the direction of a waypoint */
-bool nav_set_heading_towards_waypoint(uint8_t wp)
-{
-  return nav_set_heading_towards(WaypointX(wp), WaypointY(wp));
-}
-
-/** Set heading to the current yaw angle */
-bool nav_set_heading_current(void)
-{
-  nav_heading = stateGetNedToBodyEulers_i()->psi;
-  return false;
-}
 
 /************** Oval Navigation **********************************************/
-
-/** Navigation along a figure O. One side leg is defined by waypoints [p1] and
-    [p2].
-    The navigation goes through 4 states: OC1 (half circle next to [p1]),
-    OR21 (route [p2] to [p1], OC2 (half circle next to [p2]) and OR12
-    (opposite leg).
-
-    Initial state is the route along the desired segment (OC2).
-*/
 
 #ifndef LINE_START_FUNCTION
 #define LINE_START_FUNCTION {}
@@ -592,6 +618,7 @@ bool nav_set_heading_current(void)
 #define LINE_STOP_FUNCTION {}
 #endif
 
+enum oval_status { OR12, OC2, OR21, OC1 };
 enum oval_status oval_status;
 uint8_t nav_oval_count;
 
@@ -601,6 +628,12 @@ void nav_oval_init(void)
   nav_oval_count = 0;
 }
 
+/**
+ * Navigation along a figure O. One side leg is defined by waypoints [p1] and [p2].
+ * The navigation goes through 4 states: OC1 (half circle next to [p1]),
+ * OR21 (route [p2] to [p1], OC2 (half circle next to [p2]) and OR12 (opposite leg).
+ * Initial state is the route along the desired segment (OC2).
+ */
 void nav_oval(uint8_t p1, uint8_t p2, float radius)
 {
   radius = - radius; /* Historical error ? */

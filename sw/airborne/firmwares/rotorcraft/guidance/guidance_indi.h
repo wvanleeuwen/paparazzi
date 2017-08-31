@@ -35,10 +35,10 @@
 #include "math/pprz_algebra_float.h"
 
 extern void guidance_indi_enter(void);
-extern void guidance_indi_run(bool in_flight, int32_t heading);
-extern void guidance_indi_filter_attitude(void);
-extern void guidance_indi_calcG(struct FloatMat33 *Gmat);
-extern void guidance_indi_filter_accel(void);
-extern void stabilization_attitude_set_setpoint_rp_quat_f(bool in_flight, int32_t heading);
+extern void guidance_indi_run(bool in_flight, float heading_sp);
+extern void stabilization_attitude_set_setpoint_rp_quat_f(struct FloatEulers* indi_rp_cmd, bool in_flight, float heading);
+
+extern float guidance_indi_thrust_specific_force_gain;
+extern struct FloatVect3 euler_cmd;
 
 #endif /* GUIDANCE_INDI_H */

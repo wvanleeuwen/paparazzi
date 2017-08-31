@@ -75,9 +75,11 @@ PRINT_CONFIG_VAR(SECONDARY_GPS)
 struct GpsState gps;
 
 struct GpsTimeSync gps_time_sync;
+struct GpsRelposNED gps_relposned;
+struct RtcmMan rtcm_man;
 
 #ifdef SECONDARY_GPS
-static uint8_t current_gps_id = 0;
+static uint8_t current_gps_id = GpsId(PRIMARY_GPS);
 #endif
 
 uint8_t multi_gps_mode;
@@ -132,7 +134,19 @@ static void send_gps(struct transport_tx *trans, struct link_device *dev)
   int16_t climb = -gps.ned_vel.z;
   int16_t course = (DegOfRad(gps.course) / ((int32_t)1e6));
   struct UtmCoor_i utm = utm_int_from_gps(&gps, 0);
-  pprz_msg_send_GPS(trans, dev, AC_ID, &gps.fix,
+#if PPRZLINK_DEFAULT_VER == 2 && GPS_POS_BROADCAST
+  // broadcast GPS message
+  struct pprzlink_msg msg;
+  msg.trans = trans;
+  msg.dev = dev;
+  msg.sender_id = AC_ID;
+  msg.receiver_id = PPRZLINK_MSG_BROADCAST;
+  msg.component_id = 0;
+  pprzlink_msg_send_GPS(&msg,
+#else
+  pprz_msg_send_GPS(trans, dev, AC_ID,
+#endif
+                    &gps.fix,
                     &utm.east, &utm.north,
                     &course, &gps.hmsl, &gps.gspeed, &climb,
                     &gps.week, &gps.tow, &utm.zone, &zero);
@@ -140,9 +154,45 @@ static void send_gps(struct transport_tx *trans, struct link_device *dev)
   send_svinfo_available(trans, dev);
 }
 
+static void send_gps_rtk(struct transport_tx *trans, struct link_device *dev)
+{
+  pprz_msg_send_GPS_RTK(trans, dev, AC_ID,
+                        &gps_relposned.iTOW,
+                        &gps_relposned.refStationId,
+                        &gps_relposned.relPosN, &gps_relposned.relPosE, &gps_relposned.relPosD,
+                        &gps_relposned.relPosHPN, &gps_relposned.relPosHPE, &gps_relposned.relPosHPD,
+                        &gps_relposned.accN, &gps_relposned.accE, &gps_relposned.accD,
+                        &gps_relposned.carrSoln,
+                        &gps_relposned.relPosValid,
+                        &gps_relposned.diffSoln,
+                        &gps_relposned.gnssFixOK);
+}
+
+static void send_gps_rxmrtcm(struct transport_tx *trans, struct link_device *dev)
+{
+  pprz_msg_send_GPS_RXMRTCM(trans, dev, AC_ID,
+                            &rtcm_man.Cnt105,
+                            &rtcm_man.Cnt177,
+                            &rtcm_man.Cnt187,
+                            &rtcm_man.Crc105,
+                            &rtcm_man.Crc177,
+                            &rtcm_man.Crc187);
+}
+
 static void send_gps_int(struct transport_tx *trans, struct link_device *dev)
 {
+#if PPRZLINK_DEFAULT_VER == 2 && GPS_POS_BROADCAST
+  // broadcast GPS message
+  struct pprzlink_msg msg;
+  msg.trans = trans;
+  msg.dev = dev;
+  msg.sender_id = AC_ID;
+  msg.receiver_id = PPRZLINK_MSG_BROADCAST;
+  msg.component_id = 0;
+  pprzlink_msg_send_GPS_INT(&msg,
+#else
   pprz_msg_send_GPS_INT(trans, dev, AC_ID,
+#endif
                         &gps.ecef_pos.x, &gps.ecef_pos.y, &gps.ecef_pos.z,
                         &gps.lla_pos.lat, &gps.lla_pos.lon, &gps.lla_pos.alt,
                         &gps.hmsl,
@@ -162,7 +212,18 @@ static void send_gps_lla(struct transport_tx *trans, struct link_device *dev)
   uint8_t err = 0;
   int16_t climb = -gps.ned_vel.z;
   int16_t course = (DegOfRad(gps.course) / ((int32_t)1e6));
+#if PPRZLINK_DEFAULT_VER == 2 && GPS_POS_BROADCAST
+  // broadcast GPS message
+  struct pprzlink_msg msg;
+  msg.trans = trans;
+  msg.dev = dev;
+  msg.sender_id = AC_ID;
+  msg.receiver_id = PPRZLINK_MSG_BROADCAST;
+  msg.component_id = 0;
+  pprzlink_msg_send_GPS_LLA(&msg,
+#else
   pprz_msg_send_GPS_LLA(trans, dev, AC_ID,
+#endif
                         &gps.lla_pos.lat, &gps.lla_pos.lon, &gps.lla_pos.alt,
                         &gps.hmsl, &course, &gps.gspeed, &climb,
                         &gps.week, &gps.tow,
@@ -175,12 +236,6 @@ static void send_gps_sol(struct transport_tx *trans, struct link_device *dev)
 }
 #endif
 
-void gps_periodic_check(struct GpsState *gps_s)
-{
-  if (sys_time.nb_sec - gps_s->last_msg_time > GPS_TIMEOUT) {
-    gps_s->fix = GPS_FIX_NONE;
-  }
-}
 
 #ifdef SECONDARY_GPS
 static uint8_t gps_multi_switch(struct GpsState *gps_s) {
@@ -210,6 +265,24 @@ static uint8_t gps_multi_switch(struct GpsState *gps_s) {
   return current_gps_id;
 }
 #endif /*SECONDARY_GPS*/
+
+
+void gps_periodic_check(struct GpsState *gps_s)
+{
+  if (sys_time.nb_sec - gps_s->last_msg_time > GPS_TIMEOUT) {
+    gps_s->fix = GPS_FIX_NONE;
+  }
+
+#ifdef SECONDARY_GPS
+  current_gps_id = gps_multi_switch(gps_s);
+  if (gps_s->comp_id == current_gps_id) {
+    gps = *gps_s;
+  }
+#else
+  gps = *gps_s;
+#endif
+}
+
 
 static abi_event gps_ev;
 static void gps_cb(uint8_t sender_id,
@@ -270,7 +343,18 @@ void gps_init(void)
   register_periodic_telemetry(DefaultPeriodic, PPRZ_MSG_ID_GPS_LLA, send_gps_lla);
   register_periodic_telemetry(DefaultPeriodic, PPRZ_MSG_ID_GPS_SOL, send_gps_sol);
   register_periodic_telemetry(DefaultPeriodic, PPRZ_MSG_ID_SVINFO, send_svinfo);
+  register_periodic_telemetry(DefaultPeriodic, PPRZ_MSG_ID_GPS_RTK, send_gps_rtk);
+  register_periodic_telemetry(DefaultPeriodic, PPRZ_MSG_ID_GPS_RXMRTCM, send_gps_rxmrtcm);
 #endif
+
+  // Initializing counter variables to count the number of Rtcm msgs in the input stream(for each msg type)
+  rtcm_man.Cnt105 = 0;
+  rtcm_man.Cnt177 = 0;
+  rtcm_man.Cnt187 = 0;
+  // Initializing counter variables to count the number of messages that failed Crc Check
+  rtcm_man.Crc105 = 0;
+  rtcm_man.Crc177 = 0;
+  rtcm_man.Crc187 = 0;
 }
 
 uint32_t gps_tow_from_sys_ticks(uint32_t sys_ticks)

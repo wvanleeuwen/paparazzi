@@ -29,7 +29,6 @@
 #include "subsystems/ahrs/ahrs_float_invariant.h"
 
 #include "subsystems/ahrs/ahrs_int_utils.h"
-#include "subsystems/ahrs/ahrs_aligner.h"
 
 #include "generated/airframe.h"
 
@@ -196,7 +195,7 @@ void ahrs_float_invariant_propagate(struct FloatRates* gyro, float dt)
   ahrs_float_inv.state = new_state;
 
   // normalize quaternion
-  FLOAT_QUAT_NORMALIZE(ahrs_float_inv.state.quat);
+  float_quat_normalize(&ahrs_float_inv.state.quat);
 
   //------------------------------------------------------------//
 

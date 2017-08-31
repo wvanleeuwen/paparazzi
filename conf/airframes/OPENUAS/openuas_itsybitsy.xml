@@ -34,7 +34,7 @@
 
 <airframe name="itsybitsy">
 
-<!-- The no= value is the phisycal connector on the autopilot board --> 
+<!-- The no= value is the phisycal connector on the autopilot board -->
   <servos driver="Pwm">
     <servo name="NE" no="0" min="0" neutral="50" max="1000"/>
     <servo name="SE" no="1" min="0" neutral="50" max="1000"/>
@@ -50,7 +50,7 @@
   </commands>
 
   <command_laws>
-    <call fun="motor_mixing_run(autopilot_motors_on,FALSE,values)"/>
+    <call fun="motor_mixing_run(autopilot_get_motors_on(),FALSE,values)"/>
     <set servo="NE" value="motor_mixing.commands[0]"/>
     <set servo="SE" value="motor_mixing.commands[1]"/>
     <set servo="SW" value="motor_mixing.commands[2]"/>

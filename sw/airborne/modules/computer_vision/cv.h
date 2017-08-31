@@ -39,30 +39,30 @@
 typedef struct image_t *(*cv_function)(struct image_t *img);
 
 struct cv_async {
-    pthread_t thread_id;
-    volatile bool thread_running;
-    volatile int thread_priority;
-    pthread_mutex_t img_mutex;
-    pthread_cond_t img_available;
-    volatile bool img_processed;
-    struct image_t img_copy;
+  pthread_t thread_id;
+  volatile bool thread_running;
+  volatile int thread_priority;
+  pthread_mutex_t img_mutex;
+  pthread_cond_t img_available;
+  volatile bool img_processed;
+  struct image_t img_copy;
 };
 
 struct video_listener {
-    struct video_listener *next;
-    struct cv_async *async;
-    struct timeval ts;
-    cv_function func;
+  struct video_listener *next;
+  struct cv_async *async;
+  struct timeval ts;
+  cv_function func;
 
-    // Can be set by user
-    uint16_t maximum_fps;
-    volatile bool active;
+  // Can be set by user
+  uint16_t maximum_fps;
+  volatile bool active;
 };
 
 extern bool add_video_device(struct video_config_t *device);
 
-extern struct video_listener *cv_add_to_device(struct video_config_t *device, cv_function func);
-extern struct video_listener *cv_add_to_device_async(struct video_config_t *device, cv_function func, int nice_level);
+extern struct video_listener *cv_add_to_device(struct video_config_t *device, cv_function func, uint16_t fps);
+extern struct video_listener *cv_add_to_device_async(struct video_config_t *device, cv_function func, int nice_level, uint16_t fps);
 
 extern void cv_run_device(struct video_config_t *device, struct image_t *img);
 

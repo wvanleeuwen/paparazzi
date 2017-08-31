@@ -146,7 +146,20 @@ let log_and_parse = fun ac_name (a:Aircraft.aircraft) msg values ->
   if not (msg.PprzLink.name = "DOWNLINK_STATUS") then
     a.last_msg_date <- U.gettimeofday ();
   match msg.PprzLink.name with
-      "ROTORCRAFT_FP" ->
+      "ROTORCRAFT_FP_MIN" ->
+        begin match a.nav_ref with
+            None -> (); (* No nav_ref yet *)
+          | Some nav_ref ->
+            let north = foi32value "north" /. pos_frac
+            and east  = foi32value "east" /. pos_frac
+            and up    = foi32value "up" /. pos_frac in
+            let (geo, h) = geo_hmsl_of_ltp (LL.make_ned [| north; east; -. up |]) nav_ref a.d_hmsl in
+            a.pos <- geo;
+            a.alt <- h
+        end;
+        a.gspeed  <- fvalue "gspeed" /. 100.;
+        a.agl     <- a.alt -. (try float (Srtm.of_wgs84 a.pos) with _ -> a.ground_alt)
+    | "ROTORCRAFT_FP" ->
         begin match a.nav_ref with
             None -> (); (* No nav_ref yet *)
           | Some nav_ref ->
@@ -186,7 +199,7 @@ let log_and_parse = fun ac_name (a:Aircraft.aircraft) msg values ->
       a.fbw.rc_status <- get_rc_status (ivalue "rc_status");
       a.fbw.rc_rate   <- ivalue "frame_rate";
       a.gps_mode      <- check_index (ivalue "gps_status") gps_modes "GPS_MODE";
-      a.ap_mode       <- check_index (ivalue "ap_mode") rotorcraft_ap_modes "ROTORCRAFT_AP_MODE";
+      a.ap_mode       <- check_index (ivalue "ap_mode") (modes_of_aircraft a) "ROTORCRAFT_AP_MODE";
       a.kill_mode     <- ivalue "ap_motors_on" == 0;
       a.bat           <- fvalue "vsupply" /. 10.
     | "STATE_FILTER_STATUS" ->

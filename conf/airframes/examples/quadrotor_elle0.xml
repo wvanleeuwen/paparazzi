@@ -44,8 +44,6 @@
     <!--define name="KILL_ON_GROUND_DETECT" value="TRUE"/-->
   </firmware>
 
-  <autopilot name="rotorcraft_autopilot.xml" freq="512"/>
-
   <modules>
     <module name="gps" type="ubx_ucenter"/>
     <module name="geo_mag"/>
@@ -72,7 +70,7 @@
   </section>
 
   <command_laws>
-    <call fun="motor_mixing_run(autopilot_motors_on,FALSE,values)"/>
+    <call fun="motor_mixing_run(autopilot_get_motors_on(),FALSE,values)"/>
     <set servo="FR" value="motor_mixing.commands[MOTOR_FRONT_RIGHT]"/>
     <set servo="BR" value="motor_mixing.commands[MOTOR_BACK_RIGHT]"/>
     <set servo="BL" value="motor_mixing.commands[MOTOR_BACK_LEFT]"/>

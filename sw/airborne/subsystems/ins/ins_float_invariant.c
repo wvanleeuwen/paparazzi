@@ -29,7 +29,6 @@
 #include "subsystems/ins/ins_float_invariant.h"
 
 #include "subsystems/ahrs/ahrs_int_utils.h"
-#include "subsystems/ahrs/ahrs_aligner.h"
 
 #include "subsystems/ins.h"
 #include "subsystems/gps.h"
@@ -335,6 +334,10 @@ void ins_float_invariant_propagate(struct FloatRates* gyro, struct FloatVect3* a
   struct FloatRMat *body_to_imu_rmat = orientationGetRMat_f(&ins_float_inv.body_to_imu);
   float_rmat_transp_ratemult(&ins_float_inv.cmd.rates, body_to_imu_rmat, gyro);
   float_rmat_transp_vmult(&ins_float_inv.cmd.accel, body_to_imu_rmat, accel);
+
+  struct Int32Vect3 body_accel_i;
+  ACCELS_BFP_OF_REAL(body_accel_i, ins_float_inv.cmd.accel);
+  stateSetAccelBody_i(&body_accel_i);
 
   // update correction gains
   error_output(&ins_float_inv);

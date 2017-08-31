@@ -11,7 +11,13 @@
 <airframe name="TeensyFly Quad Elle0 v1_2">
 
   <firmware name="rotorcraft">
+
+    <configure name="RADIO_CONTROL_LED" value="none"/>
+    <configure name="GPS_LED" value="3"/>
+
     <target name="ap" board="elle0_1.2">
+      <define name="LOW_NOISE_THRESHOLD" value="3500"/>
+      <define name="LOW_NOISE_TIME"      value="10"/>
     </target>
 
     <target name="nps" board="pc">
@@ -76,7 +82,7 @@
   </section>
 
   <command_laws>
-    <call fun="motor_mixing_run(autopilot_motors_on,FALSE,values)"/>
+    <call fun="motor_mixing_run(autopilot_get_motors_on(),FALSE,values)"/>
     <set servo="FRONT_LEFT"  value="motor_mixing.commands[0]"/>
     <set servo="FRONT_RIGHT" value="motor_mixing.commands[1]"/>
     <set servo="BACK_RIGHT"  value="motor_mixing.commands[2]"/>
@@ -158,7 +164,7 @@
   <section name="NAVIGATION" prefix="NAV_">
     <define name="CLIMB_VSPEED"   value="1.5" />
     <define name="DESCEND_VSPEED" value="-1.0" />
-  </section>    
+  </section>
 
   <section name="SIMULATOR" prefix="NPS_">
     <define name="ACTUATOR_NAMES"  value="nw_motor, ne_motor, se_motor, sw_motor" type="string[]"/>

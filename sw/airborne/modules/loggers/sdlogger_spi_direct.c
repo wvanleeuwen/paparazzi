@@ -31,6 +31,7 @@
 
 #include "modules/loggers/sdlogger_spi_direct.h"
 #include "subsystems/datalink/downlink.h"
+#include "modules/loggers/pprzlog_tp.h"
 #include "subsystems/datalink/telemetry.h"
 #include "led.h"
 
@@ -111,7 +112,7 @@ void sdlogger_spi_direct_periodic(void)
   sdcard_spi_periodic(&sdcard1);
 
 #if SDLOGGER_ON_ARM
-  if(autopilot_motors_on) {
+  if(autopilot_get_motors_on()) {
     sdlogger_spi.do_log = 1;
   } else {
     sdlogger_spi.do_log = 0;

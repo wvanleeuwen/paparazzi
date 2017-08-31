@@ -99,9 +99,7 @@ static void guidance_h_update_reference(void);
 #if !GUIDANCE_INDI
 static void guidance_h_traj_run(bool in_flight);
 #endif
-static void guidance_h_hover_enter(void);
-static void guidance_h_nav_enter(void);
-static inline void transition_run(void);
+static inline void transition_run(bool to_forward);
 static void read_rc_setpoint_speed_i(struct Int32Vect2 *speed_sp, bool in_flight);
 
 #if PERIODIC_TELEMETRY
@@ -175,9 +173,9 @@ void guidance_h_init(void)
 
   INT_VECT2_ZERO(guidance_h.sp.pos);
   INT_VECT2_ZERO(guidance_h_trim_att_integrator);
-  INT_EULERS_ZERO(guidance_h.rc_sp);
-  guidance_h.sp.heading = 0;
-  guidance_h.sp.heading_rate = 0;
+  FLOAT_EULERS_ZERO(guidance_h.rc_sp);
+  guidance_h.sp.heading = 0.0;
+  guidance_h.sp.heading_rate = 0.0;
   guidance_h.gains.p = GUIDANCE_H_PGAIN;
   guidance_h.gains.i = GUIDANCE_H_IGAIN;
   guidance_h.gains.d = GUIDANCE_H_DGAIN;
@@ -199,13 +197,6 @@ void guidance_h_init(void)
   register_periodic_telemetry(DefaultPeriodic, PPRZ_MSG_ID_ROTORCRAFT_TUNE_HOVER, send_tune_hover);
 #endif
 
-#if GUIDANCE_INDI
-  guidance_indi_enter();
-#endif
-
-#if HYBRID_NAVIGATION
-  guidance_hybrid_init();
-#endif
 }
 
 
@@ -223,11 +214,6 @@ void guidance_h_mode_changed(uint8_t new_mode)
 {
   if (new_mode == guidance_h.mode) {
     return;
-  }
-
-  if (new_mode != GUIDANCE_H_MODE_FORWARD && new_mode != GUIDANCE_H_MODE_RATE) {
-    transition_percentage = 0;
-    transition_theta_offset = 0;
   }
 
 #if HYBRID_NAVIGATION
@@ -332,7 +318,7 @@ void guidance_h_read_rc(bool  in_flight)
       stabilization_attitude_read_rc(in_flight, FALSE, FALSE);
       break;
     case GUIDANCE_H_MODE_HOVER:
-      stabilization_attitude_read_rc_setpoint_eulers(&guidance_h.rc_sp, in_flight, FALSE, FALSE);
+      stabilization_attitude_read_rc_setpoint_eulers_f(&guidance_h.rc_sp, in_flight, FALSE, FALSE );
 #if GUIDANCE_H_USE_SPEED_REF
       read_rc_setpoint_speed_i(&guidance_h.sp.speed, in_flight);
       /* enable x,y velocity setpoints */
@@ -348,9 +334,9 @@ void guidance_h_read_rc(bool  in_flight)
 
     case GUIDANCE_H_MODE_NAV:
       if (radio_control.status == RC_OK) {
-        stabilization_attitude_read_rc_setpoint_eulers(&guidance_h.rc_sp, in_flight, FALSE, FALSE);
+        stabilization_attitude_read_rc_setpoint_eulers_f(&guidance_h.rc_sp, in_flight, FALSE, FALSE);
       } else {
-        INT_EULERS_ZERO(guidance_h.rc_sp);
+        FLOAT_EULERS_ZERO(guidance_h.rc_sp);
       }
       break;
     case GUIDANCE_H_MODE_FLIP:
@@ -378,10 +364,13 @@ void guidance_h_run(bool  in_flight)
 
     case GUIDANCE_H_MODE_FORWARD:
       if (transition_percentage < (100 << INT32_PERCENTAGE_FRAC)) {
-        transition_run();
+        transition_run(true);
       }
     case GUIDANCE_H_MODE_CARE_FREE:
     case GUIDANCE_H_MODE_ATTITUDE:
+      if ((!(guidance_h.mode == GUIDANCE_H_MODE_FORWARD)) && transition_percentage > 0) {
+        transition_run(false);
+      }
       stabilization_attitude_run(in_flight);
       break;
 
@@ -391,72 +380,11 @@ void guidance_h_run(bool  in_flight)
       /* fall trough to GUIDED to update ref, run traj and set final attitude setpoint */
 
     case GUIDANCE_H_MODE_GUIDED:
-      /* guidance_h.sp.pos and guidance_h.sp.heading need to be set from external source */
-      if (!in_flight) {
-        guidance_h_hover_enter();
-      }
-
-      guidance_h_update_reference();
-
-#if GUIDANCE_INDI
-      guidance_indi_run(in_flight, guidance_h.sp.heading);
-#else
-      /* compute x,y earth commands */
-      guidance_h_traj_run(in_flight);
-      /* set final attitude setpoint */
-      stabilization_attitude_set_earth_cmd_i(&guidance_h_cmd_earth, guidance_h.sp.heading);
-#endif
-      stabilization_attitude_run(in_flight);
+      guidance_h_guided_run(in_flight);
       break;
 
     case GUIDANCE_H_MODE_NAV:
-      if (!in_flight) {
-        guidance_h_nav_enter();
-      }
-
-      if (horizontal_mode == HORIZONTAL_MODE_MANUAL) {
-        stabilization_cmd[COMMAND_ROLL]  = nav_cmd_roll;
-        stabilization_cmd[COMMAND_PITCH] = nav_cmd_pitch;
-        stabilization_cmd[COMMAND_YAW]   = nav_cmd_yaw;
-      } else if (horizontal_mode == HORIZONTAL_MODE_ATTITUDE) {
-        struct Int32Eulers sp_cmd_i;
-        sp_cmd_i.phi = nav_roll;
-        sp_cmd_i.theta = nav_pitch;
-        sp_cmd_i.psi = nav_heading;
-        stabilization_attitude_set_rpy_setpoint_i(&sp_cmd_i);
-        stabilization_attitude_run(in_flight);
-
-#if HYBRID_NAVIGATION
-        //make sure the heading is right before leaving horizontal_mode attitude
-        guidance_hybrid_reset_heading(&sp_cmd_i);
-#endif
-      } else {
-
-#if HYBRID_NAVIGATION
-        INT32_VECT2_NED_OF_ENU(guidance_h.sp.pos, navigation_target);
-        guidance_hybrid_run();
-#else
-        INT32_VECT2_NED_OF_ENU(guidance_h.sp.pos, navigation_carrot);
-
-        guidance_h_update_reference();
-
-        /* set psi command */
-        guidance_h.sp.heading = nav_heading;
-        INT32_ANGLE_NORMALIZE(guidance_h.sp.heading);
-
-#if GUIDANCE_INDI
-        guidance_indi_run(in_flight, guidance_h.sp.heading);
-#else
-        /* compute x,y earth commands */
-        guidance_h_traj_run(in_flight);
-        /* set final attitude setpoint */
-        stabilization_attitude_set_earth_cmd_i(&guidance_h_cmd_earth,
-                                               guidance_h.sp.heading);
-#endif
-
-#endif
-        stabilization_attitude_run(in_flight);
-      }
+      guidance_h_from_nav(in_flight);
       break;
 
 #if GUIDANCE_H_MODE_MODULE_SETTING == GUIDANCE_H_MODE_MODULE
@@ -506,8 +434,8 @@ static void guidance_h_update_reference(void)
 
   /* update heading setpoint from rate */
   if (bit_is_set(guidance_h.sp.mask, 7)) {
-    guidance_h.sp.heading += (guidance_h.sp.heading_rate >> (INT32_ANGLE_FRAC - INT32_RATE_FRAC)) / PERIODIC_FREQUENCY;
-    INT32_ANGLE_NORMALIZE(guidance_h.sp.heading);
+    guidance_h.sp.heading += guidance_h.sp.heading_rate / PERIODIC_FREQUENCY;
+    FLOAT_ANGLE_NORMALIZE(guidance_h.sp.heading);
   }
 }
 
@@ -593,7 +521,7 @@ static void guidance_h_traj_run(bool in_flight)
 }
 #endif
 
-static void guidance_h_hover_enter(void)
+void guidance_h_hover_enter(void)
 {
   /* reset speed setting */
   guidance_h.sp.speed.x = 0;
@@ -612,11 +540,11 @@ static void guidance_h_hover_enter(void)
   reset_guidance_reference_from_current_position();
 
   /* set guidance to current heading and position */
-  guidance_h.rc_sp.psi = stateGetNedToBodyEulers_i()->psi;
+  guidance_h.rc_sp.psi = stateGetNedToBodyEulers_f()->psi;
   guidance_h.sp.heading = guidance_h.rc_sp.psi;
 }
 
-static void guidance_h_nav_enter(void)
+void guidance_h_nav_enter(void)
 {
   ClearBit(guidance_h.sp.mask, 5);
   ClearBit(guidance_h.sp.mask, 7);
@@ -627,12 +555,70 @@ static void guidance_h_nav_enter(void)
   reset_guidance_reference_from_current_position();
 
   nav_heading = stateGetNedToBodyEulers_i()->psi;
+  guidance_h.sp.heading = stateGetNedToBodyEulers_f()->psi;
 }
 
-static inline void transition_run(void)
+void guidance_h_from_nav(bool in_flight)
 {
-  //Add 0.00625%
-  transition_percentage += 1 << (INT32_PERCENTAGE_FRAC - 4);
+  if (!in_flight) {
+    guidance_h_nav_enter();
+  }
+
+  if (horizontal_mode == HORIZONTAL_MODE_MANUAL) {
+    stabilization_cmd[COMMAND_ROLL]  = nav_cmd_roll;
+    stabilization_cmd[COMMAND_PITCH] = nav_cmd_pitch;
+    stabilization_cmd[COMMAND_YAW]   = nav_cmd_yaw;
+  } else if (horizontal_mode == HORIZONTAL_MODE_ATTITUDE) {
+    struct Int32Eulers sp_cmd_i;
+    sp_cmd_i.phi = nav_roll;
+    sp_cmd_i.theta = nav_pitch;
+    sp_cmd_i.psi = nav_heading;
+    stabilization_attitude_set_rpy_setpoint_i(&sp_cmd_i);
+    stabilization_attitude_run(in_flight);
+
+#if HYBRID_NAVIGATION
+    //make sure the heading is right before leaving horizontal_mode attitude
+    guidance_hybrid_reset_heading(&sp_cmd_i);
+#endif
+  } else {
+
+#if HYBRID_NAVIGATION
+    INT32_VECT2_NED_OF_ENU(guidance_h.sp.pos, navigation_target);
+    guidance_hybrid_run();
+#else
+    INT32_VECT2_NED_OF_ENU(guidance_h.sp.pos, navigation_carrot);
+
+    guidance_h_update_reference();
+
+    /* set psi command */
+    guidance_h.sp.heading = ANGLE_FLOAT_OF_BFP(nav_heading);
+    FLOAT_ANGLE_NORMALIZE(guidance_h.sp.heading);
+
+#if GUIDANCE_INDI
+    guidance_indi_run(in_flight, guidance_h.sp.heading);
+#else
+    /* compute x,y earth commands */
+    guidance_h_traj_run(in_flight);
+    /* set final attitude setpoint */
+    int32_t heading_sp_i = ANGLE_BFP_OF_REAL(guidance_h.sp.heading);
+    stabilization_attitude_set_earth_cmd_i(&guidance_h_cmd_earth,
+        heading_sp_i);
+#endif
+
+#endif
+    stabilization_attitude_run(in_flight);
+  }
+}
+
+static inline void transition_run(bool to_forward)
+{
+  if (to_forward) {
+    //Add 0.00625%
+    transition_percentage += 1 << (INT32_PERCENTAGE_FRAC - 4);
+  } else {
+    //Subtract 0.00625%
+    transition_percentage -= 1 << (INT32_PERCENTAGE_FRAC - 4);
+  }
 
 #ifdef TRANSITION_MAX_OFFSET
   const int32_t max_offset = ANGLE_BFP_OF_REAL(TRANSITION_MAX_OFFSET);
@@ -678,6 +664,28 @@ void guidance_h_set_igain(uint32_t igain)
   INT_VECT2_ZERO(guidance_h_trim_att_integrator);
 }
 
+
+void guidance_h_guided_run(bool in_flight)
+{
+  /* guidance_h.sp.pos and guidance_h.sp.heading need to be set from external source */
+  if (!in_flight) {
+    guidance_h_hover_enter();
+  }
+
+  guidance_h_update_reference();
+
+#if GUIDANCE_INDI
+  guidance_indi_run(in_flight, guidance_h.sp.heading);
+#else
+  /* compute x,y earth commands */
+  guidance_h_traj_run(in_flight);
+  /* set final attitude setpoint */
+  int32_t heading_sp_i = ANGLE_BFP_OF_REAL(guidance_h.sp.heading);
+  stabilization_attitude_set_earth_cmd_i(&guidance_h_cmd_earth, heading_sp_i);
+#endif
+  stabilization_attitude_run(in_flight);
+}
+
 bool guidance_h_set_guided_pos(float x, float y)
 {
   if (guidance_h.mode == GUIDANCE_H_MODE_GUIDED) {
@@ -693,8 +701,8 @@ bool guidance_h_set_guided_heading(float heading)
 {
   if (guidance_h.mode == GUIDANCE_H_MODE_GUIDED) {
     ClearBit(guidance_h.sp.mask, 7);
-    guidance_h.sp.heading = ANGLE_BFP_OF_REAL(heading);
-    INT32_ANGLE_NORMALIZE(guidance_h.sp.heading);
+    guidance_h.sp.heading = heading;
+    FLOAT_ANGLE_NORMALIZE(guidance_h.sp.heading);
     return true;
   }
   return false;
@@ -723,7 +731,7 @@ bool guidance_h_set_guided_heading_rate(float rate)
 {
   if (guidance_h.mode == GUIDANCE_H_MODE_GUIDED) {
     SetBit(guidance_h.sp.mask, 7);
-    guidance_h.sp.heading_rate = RATE_BFP_OF_REAL(rate);
+    guidance_h.sp.heading_rate = rate;
     return true;
   }
   return false;

@@ -48,14 +48,7 @@
 PRINT_CONFIG_VAR(KROOZ_SMPLRT_DIV)
 PRINT_CONFIG_VAR(KROOZ_LOWPASS_FILTER)
 
-#ifndef KROOZ_GYRO_RANGE
-#define KROOZ_GYRO_RANGE MPU60X0_GYRO_RANGE_250
-#endif
 PRINT_CONFIG_VAR(KROOZ_GYRO_RANGE)
-
-#ifndef KROOZ_ACCEL_RANGE
-#define KROOZ_ACCEL_RANGE MPU60X0_ACCEL_RANGE_2G
-#endif
 PRINT_CONFIG_VAR(KROOZ_ACCEL_RANGE)
 
 struct ImuKrooz imu_krooz;
@@ -81,9 +74,9 @@ void imu_krooz_init(void)
 
   // Init median filters
 #if IMU_KROOZ_USE_ACCEL_MEDIAN_FILTER
-  InitMedianFilterVect3Int(median_accel);
+  InitMedianFilterVect3Int(median_accel, MEDIAN_DEFAULT_SIZE);
 #endif
-  InitMedianFilterVect3Int(median_mag);
+  InitMedianFilterVect3Int(median_mag, MEDIAN_DEFAULT_SIZE);
 
   RATES_ASSIGN(imu_krooz.rates_sum, 0, 0, 0);
   VECT3_ASSIGN(imu_krooz.accel_sum, 0, 0, 0);

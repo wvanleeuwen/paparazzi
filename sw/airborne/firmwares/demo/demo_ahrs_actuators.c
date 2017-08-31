@@ -48,7 +48,6 @@
 #include "state.h"
 #include "subsystems/imu.h"
 #include "subsystems/ahrs.h"
-#include "subsystems/ahrs/ahrs_aligner.h"
 
 #include "subsystems/commands.h"
 #include "subsystems/actuators.h"
@@ -94,9 +93,7 @@ static inline void main_init(void)
   actuators_init();
 
   modules_init();
-#if USE_AHRS_ALIGNER
-  ahrs_aligner_init();
-#endif
+
   ahrs_init();
 
   settings_init();
@@ -104,6 +101,8 @@ static inline void main_init(void)
   mcu_int_enable();
 
   downlink_init();
+
+  modules_init();
 
   register_periodic_telemetry(DefaultPeriodic, PPRZ_MSG_ID_AUTOPILOT_VERSION, send_autopilot_version);
   register_periodic_telemetry(DefaultPeriodic, PPRZ_MSG_ID_ALIVE, send_alive);
@@ -131,13 +130,14 @@ static inline void main_periodic_task(void)
   RunOnceEvery(10, { LED_PERIODIC();});
   RunOnceEvery(PERIODIC_FREQUENCY, { datalink_time++; });
   periodic_telemetry_send_Main(DefaultPeriodic, &(DefaultChannel).trans_tx, &(DefaultDevice).device);
+
+  modules_periodic_task();
 }
 
 static inline void main_event_task(void)
 {
   mcu_event();
   modules_event_task();
-  DatalinkEvent();
 }
 
 static void send_alive(struct transport_tx *trans, struct link_device *dev)

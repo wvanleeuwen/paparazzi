@@ -124,6 +124,26 @@ void float_rmat_transp_vmult(struct FloatVect3 *vb, struct FloatRMat *m_b2a, str
   vb->z = m_b2a->m[2] * va->x + m_b2a->m[5] * va->y + m_b2a->m[8] * va->z;
 }
 
+/** rotate angle by rotation matrix.
+ * rb = m_a2b * ra
+ */
+void float_rmat_mult(struct FloatEulers *rb, struct FloatRMat *m_a2b, struct FloatEulers *ra)
+{
+  rb->phi = m_a2b->m[0] * ra->phi + m_a2b->m[1] * ra->theta + m_a2b->m[2] * ra->psi;
+  rb->theta = m_a2b->m[3] * ra->phi + m_a2b->m[4] * ra->theta + m_a2b->m[5] * ra->psi;
+  rb->psi = m_a2b->m[6] * ra->phi + m_a2b->m[7] * ra->theta + m_a2b->m[8] * ra->psi;
+}
+
+/** rotate angle by transposed rotation matrix.
+ * rb = m_b2a^T * ra
+ */
+void float_rmat_transp_mult(struct FloatEulers *rb, struct FloatRMat *m_b2a, struct FloatEulers *ra)
+{
+  rb->phi = m_b2a->m[0] * ra->phi + m_b2a->m[3] * ra->theta + m_b2a->m[6] * ra->psi;
+  rb->theta = m_b2a->m[1] * ra->phi + m_b2a->m[4] * ra->theta + m_b2a->m[7] * ra->psi;
+  rb->psi = m_b2a->m[2] * ra->phi + m_b2a->m[5] * ra->theta + m_b2a->m[8] * ra->psi;
+}
+
 /** rotate anglular rates by rotation matrix.
  * rb = m_a2b * ra
  */
@@ -577,4 +597,64 @@ void float_eulers_of_quat(struct FloatEulers *e, struct FloatQuat *q)
   e->phi = atan2f(dcm12, dcm22);
   e->theta = -asinf(dcm02);
   e->psi = atan2f(dcm01, dcm00);
+}
+
+/*
+ * 4x4 Matrix inverse.
+ * obtained from: http://rodolphe-vaillant.fr/?e=7
+ */
+float float_mat_minor_4d(float m[16], int r0, int r1, int r2, int c0, int c1, int c2);
+void float_mat_adjoint_4d(float m[16], float adjOut[16]);
+float float_mat_det_4d(float m[16]);
+
+float float_mat_minor_4d(float m[16], int r0, int r1, int r2, int c0, int c1, int c2)
+{
+    return m[4*r0+c0] * (m[4*r1+c1] * m[4*r2+c2] - m[4*r2+c1] * m[4*r1+c2]) -
+           m[4*r0+c1] * (m[4*r1+c0] * m[4*r2+c2] - m[4*r2+c0] * m[4*r1+c2]) +
+           m[4*r0+c2] * (m[4*r1+c0] * m[4*r2+c1] - m[4*r2+c0] * m[4*r1+c1]);
+}
+
+
+void float_mat_adjoint_4d(float m[16], float adjOut[16])
+{
+  adjOut[ 0] =  float_mat_minor_4d(m,1,2,3,1,2,3);
+  adjOut[ 1] = -float_mat_minor_4d(m,0,2,3,1,2,3);
+  adjOut[ 2] =  float_mat_minor_4d(m,0,1,3,1,2,3);
+  adjOut[ 3] = -float_mat_minor_4d(m,0,1,2,1,2,3);
+  adjOut[ 4] = -float_mat_minor_4d(m,1,2,3,0,2,3);
+  adjOut[ 5] =  float_mat_minor_4d(m,0,2,3,0,2,3);
+  adjOut[ 6] = -float_mat_minor_4d(m,0,1,3,0,2,3);
+  adjOut[ 7] =  float_mat_minor_4d(m,0,1,2,0,2,3);
+  adjOut[ 8] =  float_mat_minor_4d(m,1,2,3,0,1,3);
+  adjOut[ 9] = -float_mat_minor_4d(m,0,2,3,0,1,3);
+  adjOut[10] =  float_mat_minor_4d(m,0,1,3,0,1,3);
+  adjOut[11] = -float_mat_minor_4d(m,0,1,2,0,1,3);
+  adjOut[12] = -float_mat_minor_4d(m,1,2,3,0,1,2);
+  adjOut[13] =  float_mat_minor_4d(m,0,2,3,0,1,2);
+  adjOut[14] = -float_mat_minor_4d(m,0,1,3,0,1,2);
+  adjOut[15] =  float_mat_minor_4d(m,0,1,2,0,1,2);
+}
+
+float float_mat_det_4d(float m[16])
+{
+    return m[0] * float_mat_minor_4d(m, 1, 2, 3, 1, 2, 3) -
+           m[1] * float_mat_minor_4d(m, 1, 2, 3, 0, 2, 3) +
+           m[2] * float_mat_minor_4d(m, 1, 2, 3, 0, 1, 3) -
+           m[3] * float_mat_minor_4d(m, 1, 2, 3, 0, 1, 2);
+}
+
+/**
+ * 4x4 Matrix inverse
+ *
+ * @param invOut output array, inverse of mat_in
+ * @param mat_in input array
+ */
+void float_mat_inv_4d(float invOut[16], float mat_in[16])
+{
+    float_mat_adjoint_4d(mat_in, invOut);
+
+    float inv_det = 1.0f / float_mat_det_4d(mat_in);
+    int i;
+    for(i = 0; i < 16; ++i)
+        invOut[i] = invOut[i] * inv_det;
 }

@@ -58,10 +58,28 @@ void gpio_setup_input_pulldown(ioportid_t port, uint16_t gpios)
   chSysUnlock();
 }
 
-void gpio_setup_pin_af(ioportid_t port, uint16_t pin, uint8_t af)
+void gpio_setup_pin_af(ioportid_t port, uint16_t pin, uint8_t af, bool is_output)
 {
   chSysLock();
-  palSetPadMode(port, pin, PAL_MODE_ALTERNATE(af));
+// architecture dependent settings
+#if defined(STM32F1)
+// FIXME: STM32F1xx doesn't support several alternate modes, is it needed for drivers?
+  (void)port;
+  (void)pin;
+  (void)af;
+  (void)is_output;
+#elif defined(STM32F4) || defined(STM32F7)
+// STM32F4xx and STM32F7xx
+  if (af) {
+    palSetPadMode(port, pin, PAL_MODE_ALTERNATE(af));
+  } else {
+    if (is_output) {
+      palSetPadMode(port, pin, PAL_MODE_OUTPUT_PUSHPULL);
+    } else {
+      palSetPadMode(port, pin, PAL_MODE_INPUT);
+    }
+  }
+#endif
   chSysUnlock();
 }
 

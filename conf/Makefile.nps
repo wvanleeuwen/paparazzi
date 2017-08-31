@@ -23,7 +23,6 @@
 #
 # This is the common Makefile for the nps target.
 #
-
 SRC_ARCH = arch/sim
 
 OPT ?= 2
@@ -45,12 +44,13 @@ CFLAGS += $(shell pkg-config --cflags-only-I ivy-glib)
 CXXFLAGS  = -W -Wall
 CXXFLAGS += $(INCLUDES)
 CXXFLAGS += $($(TARGET).CFLAGS)
+CXXFLAGS += $($(TARGET).CXXFLAGS)
 CXXFLAGS += $(USER_CFLAGS) $(BOARD_CFLAGS)
 CXXFLAGS += -O$(OPT)
 CXXFLAGS += $(DEBUG_FLAGS)
 CXXFLAGS += $(shell pkg-config --cflags-only-I ivy-glib)
 
-LDFLAGS	+= $($(TARGET).LDFLAGS) -pthread
+LDFLAGS	+= $($(TARGET).LDFLAGS)
 LDFLAGS += $(BOARD_LDFLAGS)
 
 # x86/64 and armv7 allow unaligned access
@@ -69,7 +69,7 @@ all compile: check_jsbsim $(OBJDIR)/simsitl
 
 
 check_jsbsim:
-	@echo Paparazzi jsbsim package found: $(JSBSIM_PKG)
+	@echo Paparazzi jsbsim package found: $(FIND_JSBSIM_VIA_PKG_CONFIG)
 
 
 $(OBJDIR)/simsitl : $($(TARGET).objs)

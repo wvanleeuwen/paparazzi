@@ -48,7 +48,8 @@ enum MissionInsertMode {
   Append,         ///< add at the last position
   Prepend,        ///< add before the current element
   ReplaceCurrent, ///< replace current element
-  ReplaceAll      ///< remove all elements and add the new one
+  ReplaceAll,     ///< remove all elements and add the new one
+  ReplaceNexts    ///< replace the next element and remove all the others
 };
 
 struct _mission_wp {
@@ -100,6 +101,7 @@ struct _mission_element {
   } element;
 
   float duration; ///< time to spend in the element (<= 0 to disable)
+  uint8_t index;      ///< index of mission element
 };
 
 /** Max number of elements in the tasks' list

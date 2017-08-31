@@ -229,8 +229,8 @@ extern "C" {
 /*  */
 #define VECT3_BOUND_BOX(_v, _v_min, _v_max) {       \
     if ((_v).x > (_v_max).x) (_v).x = (_v_max).x; else if ((_v).x < (_v_min).x) (_v).x = (_v_min).x; \
-    if ((_v).y > (_v_max).y) (_v).y = (_v_max).y; else if ((_v).y < (_v_min).y) (_v).y = (_v_min).z; \
-    if ((_v).z > (_v_max).y) (_v).z = (_v_max).z; else if ((_v).z < (_v_min).z) (_v).z = (_v_min).z; \
+    if ((_v).y > (_v_max).y) (_v).y = (_v_max).y; else if ((_v).y < (_v_min).y) (_v).y = (_v_min).y; \
+    if ((_v).z > (_v_max).z) (_v).z = (_v_max).z; else if ((_v).z < (_v_min).z) (_v).z = (_v_min).z; \
   }
 
 /*  */
@@ -446,6 +446,17 @@ extern "C" {
     MAT33_ELMT((_mat1),2,2) = MAT33_ELMT((_mat2),2,2);  \
   }
 
+#define MAT33_MULT_SCALAR(_mat1,_scalar) {     \
+    MAT33_ELMT((_mat1),0,0) = MAT33_ELMT((_mat1),0,0)*_scalar;  \
+    MAT33_ELMT((_mat1),0,1) = MAT33_ELMT((_mat1),0,1)*_scalar;  \
+    MAT33_ELMT((_mat1),0,2) = MAT33_ELMT((_mat1),0,2)*_scalar;  \
+    MAT33_ELMT((_mat1),1,0) = MAT33_ELMT((_mat1),1,0)*_scalar;  \
+    MAT33_ELMT((_mat1),1,1) = MAT33_ELMT((_mat1),1,1)*_scalar;  \
+    MAT33_ELMT((_mat1),1,2) = MAT33_ELMT((_mat1),1,2)*_scalar;  \
+    MAT33_ELMT((_mat1),2,0) = MAT33_ELMT((_mat1),2,0)*_scalar;  \
+    MAT33_ELMT((_mat1),2,1) = MAT33_ELMT((_mat1),2,1)*_scalar;  \
+    MAT33_ELMT((_mat1),2,2) = MAT33_ELMT((_mat1),2,2)*_scalar;  \
+  }
 
 /* multiply _vin by _mat, store in _vout */
 #define MAT33_VECT3_MUL(_vout, _mat, _vin) {    \

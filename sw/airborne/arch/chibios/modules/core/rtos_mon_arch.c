@@ -24,11 +24,8 @@
  * ChibiOS implementation
  */
 
-#include "modules/core/rtos_mon.h"
-#include "modules/core/rtos_mon_arch.h"
-#include "subsystems/datalink/downlink.h"
+#include "modules/core/sys_mon_rtos.h"
 #include <ch.h>
-#include <string.h>
 
 #if !CH_DBG_THREADS_PROFILING
 #error CH_DBG_THREADS_PROFILING should be defined to TRUE to use this monitoring tool
@@ -62,8 +59,8 @@ void rtos_mon_periodic_arch(void)
   tp = chRegFirstThread();
   do {
     // add beginning of thread name to buffer
-    for (i = 0; i < RTOS_MON_NAME_LEN-1 && tp->p_name[i] != '\0'; i++) {
-      rtos_mon.thread_names[rtos_mon.thread_name_idx++] = tp->p_name[i];
+    for (i = 0; i < RTOS_MON_NAME_LEN-1 && tp->name[i] != '\0'; i++) {
+      rtos_mon.thread_names[rtos_mon.thread_name_idx++] = tp->name[i];
     }
     rtos_mon.thread_names[rtos_mon.thread_name_idx++] = ';';
 
@@ -71,12 +68,12 @@ void rtos_mon_periodic_arch(void)
     rtos_mon.thread_free_stack[i] = get_stack_free(tp);
 
     // store time spend in thread
-    thread_p_time[rtos_mon.thread_counter] = tp->p_time;
-    sum += (float)(tp->p_time);
+    thread_p_time[rtos_mon.thread_counter] = tp->time;
+    sum += (float)(tp->time);
 
     // if current thread is 'idle' thread, store its value separately
     if (tp == chSysGetIdleThreadX()) {
-      idle_counter = (uint32_t)tp->p_time;
+      idle_counter = (uint32_t)tp->time;
     }
     // get next thread
     tp = chRegNextThread(tp);
@@ -91,11 +88,9 @@ void rtos_mon_periodic_arch(void)
 
   // assume we call the counter once a second
   // so the difference in seconds is always one
-  // NOTE: not perfectly precise
-  // FIXME: add finer resolution than seconds?
+  // NOTE: not perfectly precise, +-5% on average so take it into consideration
   rtos_mon.cpu_load = (1 - (float)(idle_counter - last_idle_counter) / CH_CFG_ST_FREQUENCY) * 100;
   last_idle_counter = idle_counter;
-
 }
 
 static uint16_t get_stack_free(const thread_t *tp)

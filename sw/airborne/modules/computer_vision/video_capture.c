@@ -32,6 +32,12 @@
 
 #include "lib/encoding/jpeg.h"
 
+// Note: this define is set automatically when the video_exif module is included,
+// and exposes functions to write data in the image exif headers.
+#if JPEG_WITH_EXIF_HEADER
+#include "lib/exif/exif_module.h"
+#endif
+
 #ifndef VIDEO_CAPTURE_PATH
 #define VIDEO_CAPTURE_PATH /data/video/images
 #endif
@@ -39,6 +45,11 @@
 #ifndef VIDEO_CAPTURE_JPEG_QUALITY
 #define VIDEO_CAPTURE_JPEG_QUALITY 99
 #endif
+
+#ifndef VIDEO_CAPTURE_FPS
+#define VIDEO_CAPTURE_FPS 0       ///< Default FPS (zero means run at camera fps)
+#endif
+PRINT_CONFIG_VAR(VIDEO_CAPTURE_FPS)
 
 // Module settings
 bool video_capture_take_shot = false;
@@ -60,7 +71,7 @@ void video_capture_init(void)
   }
 
   // Add function to computer vision pipeline
-  cv_add_to_device(&VIDEO_CAPTURE_CAMERA, video_capture_func);
+  cv_add_to_device(&VIDEO_CAPTURE_CAMERA, video_capture_func, VIDEO_CAPTURE_FPS);
 }
 
 
@@ -101,6 +112,14 @@ void video_capture_save(struct image_t *img)
 
     printf("[video_capture] Saving image to %s.\n", save_name);
 
+    // Create jpg image from raw frame
+    struct image_t img_jpeg;
+    image_create(&img_jpeg, img->w, img->h, IMAGE_JPEG);
+    jpeg_encode_image(img, &img_jpeg, VIDEO_CAPTURE_JPEG_QUALITY, true);
+
+#if JPEG_WITH_EXIF_HEADER
+    write_exif_jpeg(save_name, img_jpeg.buf, img_jpeg.buf_size, img_jpeg.w, img_jpeg.h);
+#else
     // Open file
     FILE *fp = fopen(save_name, "w");
     if (fp == NULL) {
@@ -108,14 +127,10 @@ void video_capture_save(struct image_t *img)
       break;
     }
 
-    // Create jpg image from raw frame
-    struct image_t img_jpeg;
-    image_create(&img_jpeg, img->w, img->h, IMAGE_JPEG);
-    jpeg_encode_image(img, &img_jpeg, VIDEO_CAPTURE_JPEG_QUALITY, true);
-
     // Save it to the file and close it
     fwrite(img_jpeg.buf, sizeof(uint8_t), img_jpeg.buf_size, fp);
     fclose(fp);
+#endif
 
     // Free image
     image_free(&img_jpeg);

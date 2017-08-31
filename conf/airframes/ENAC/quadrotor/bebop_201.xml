@@ -5,7 +5,6 @@
   <firmware name="rotorcraft">
 
     <target name="ap" board="bebop">
-      <module name="telemetry" type="transparent_udp"/>
       <module name="radio_control" type="datalink"/>
     </target>
 
@@ -16,6 +15,7 @@
 
     <!--define name="USE_SONAR" value="TRUE"/-->
 
+    <module name="telemetry" type="transparent_udp"/>
     <!-- Subsystem section -->
     <module name="motor_mixing"/>
     <module name="actuators" type="bebop"/>
@@ -78,7 +78,7 @@
   </section>
 
   <command_laws>
-    <call fun="motor_mixing_run(autopilot_motors_on,FALSE,values)"/>
+    <call fun="motor_mixing_run(autopilot_get_motors_on(),FALSE,values)"/>
     <set servo="TOP_LEFT" value="motor_mixing.commands[0]"/>
     <set servo="TOP_RIGHT" value="motor_mixing.commands[1]"/>
     <set servo="BOTTOM_RIGHT" value="motor_mixing.commands[2]"/>

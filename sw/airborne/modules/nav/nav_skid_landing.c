@@ -57,7 +57,7 @@
 #include "generated/airframe.h"
 #include "state.h"
 #include "modules/nav/nav_skid_landing.h"
-#include "firmwares/fixedwing/autopilot.h"
+#include "autopilot.h"
 #include "firmwares/fixedwing/nav.h"
 #include "firmwares/fixedwing/stabilization/stabilization_attitude.h"
 
@@ -91,7 +91,7 @@ static inline float distance_equation(struct FloatVect2 p1,struct FloatVect2 p2)
   return sqrtf((p1.x-p2.x)*(p1.x-p2.x)+(p1.y-p2.y)*(p1.y-p2.y));
 }
 
-bool nav_skid_landing_setup(uint8_t afwp, uint8_t tdwp, float radius)
+void nav_skid_landing_setup(uint8_t afwp, uint8_t tdwp, float radius)
 {
   aw_waypoint = afwp;
   td_waypoint = tdwp;
@@ -122,8 +122,6 @@ bool nav_skid_landing_setup(uint8_t afwp, uint8_t tdwp, float radius)
     approach_quadrant = land_circle_quadrant + RadOfDeg(90);
     land_circle_quadrant = land_circle_quadrant + RadOfDeg(45);
   }
-
-  return FALSE;
 }
 
 bool nav_skid_landing_run(void)
@@ -166,10 +164,10 @@ bool nav_skid_landing_run(void)
     case Final:
       if ((stateGetPositionUtm_f()->alt - waypoints[td_waypoint].a)
           < v_ctl_landing_alt_throttle_kill) {
-        kill_throttle = 1;
+        autopilot_set_kill_throttle(true);
       }
       nav_skid_landing_glide(aw_waypoint, td_waypoint);
-      if (!kill_throttle) {
+      if (!autopilot_throttle_killed()) {
         nav_route_xy(waypoints[aw_waypoint].x, waypoints[aw_waypoint].y,
             waypoints[td_waypoint].x, waypoints[td_waypoint].y);
       }

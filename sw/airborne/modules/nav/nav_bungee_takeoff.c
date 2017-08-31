@@ -62,7 +62,7 @@
 #include "state.h"
 #include "paparazzi.h"
 #include "firmwares/fixedwing/nav.h"
-#include "firmwares/fixedwing/autopilot.h"
+#include "autopilot.h"
 #include "generated/flight_plan.h"
 #include "generated/airframe.h"
 #include "math/pprz_algebra_float.h"
@@ -142,20 +142,17 @@ static void compute_points_from_bungee(void)
   VECT2_SUM(throttle_point, bungee_point, throttle_point);
 }
 
-bool nav_bungee_takeoff_setup(uint8_t bungee_wp)
+void nav_bungee_takeoff_setup(uint8_t bungee_wp)
 {
-  // Store bungee point (from WP id, altitude should be ground alt)
-  // FIXME use current alt instead ?
-  VECT3_ASSIGN(bungee_point, WaypointX(bungee_wp), WaypointY(bungee_wp), WaypointAlt(bungee_wp));
+  // Store bungee point (from WP id, altitude is current hmsl (e.g. ground alt))
+  VECT3_ASSIGN(bungee_point, WaypointX(bungee_wp), WaypointY(bungee_wp), stateGetPositionUtm_f()->alt);
 
   // Compute other points
   compute_points_from_bungee();
 
   // Enable Launch Status and turn kill throttle on
   CTakeoffStatus = Launch;
-  kill_throttle = 1;
-
-  return false;
+  autopilot_set_kill_throttle(true);
 }
 
 bool nav_bungee_takeoff_run(void)
@@ -180,7 +177,7 @@ bool nav_bungee_takeoff_run(void)
       //NavVerticalAltitudeMode(bungee_point.z + BUNGEE_TAKEOFF_HEIGHT, 0.);
       nav_route_xy(init_point.x, init_point.y, throttle_point.x, throttle_point.y);
 
-      kill_throttle = 1;
+      autopilot_set_kill_throttle(true);
 
       // Find out if UAV has crossed the line
       VECT2_DIFF(pos, pos, throttle_point); // position local to throttle_point
@@ -188,7 +185,7 @@ bool nav_bungee_takeoff_run(void)
 
       if (cross > 0. && stateGetHorizontalSpeedNorm_f() > BUNGEE_TAKEOFF_MIN_SPEED) {
         CTakeoffStatus = Throttle;
-        kill_throttle = 0;
+        autopilot_set_kill_throttle(false);
         nav_init_stage();
       } else {
         // If not crossed stay in this status
@@ -200,7 +197,7 @@ bool nav_bungee_takeoff_run(void)
       NavVerticalAutoThrottleMode(BUNGEE_TAKEOFF_PITCH);
       NavVerticalThrottleMode(MAX_PPRZ * (BUNGEE_TAKEOFF_THROTTLE));
       nav_route_xy(init_point.x, init_point.y, throttle_point.x, throttle_point.y);
-      kill_throttle = 0;
+      autopilot_set_kill_throttle(false);
 
       if ((stateGetPositionUtm_f()->alt > bungee_point.z + BUNGEE_TAKEOFF_HEIGHT)
 #if USE_AIRSPEED

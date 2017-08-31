@@ -56,7 +56,6 @@
 
 
 /** Fly by wire modes */
-typedef enum {FBW_MODE_MANUAL = 0, FBW_MODE_AUTO = 1, FBW_MODE_FAILSAFE = 2} fbw_mode_enum;
 fbw_mode_enum fbw_mode;
 bool fbw_motors_on = false;
 
@@ -71,21 +70,9 @@ tid_t radio_control_tid; ///< id for radio_control_periodic_task() timer
 tid_t electrical_tid;    ///< id for electrical_periodic() timer
 tid_t telemetry_tid;     ///< id for telemetry_periodic() timer
 
-/** Real main function handling initialization, periodic- and event functions */
-int main(void)
-{
-  main_init();
-
-  while (1) {
-    handle_periodic_tasks();
-    main_event();
-  }
-
-  return 0;
-}
 
 /** Main initialization */
-STATIC_INLINE void main_init(void)
+void main_init(void)
 {
   // Set startup mode to Failsafe
   fbw_mode = FBW_MODE_FAILSAFE;
@@ -120,7 +107,7 @@ STATIC_INLINE void main_init(void)
 //////////////////////////
 // PERIODIC
 
-STATIC_INLINE void handle_periodic_tasks(void)
+void handle_periodic_tasks(void)
 {
   if (sys_time_check_and_ack_timer(main_periodic_tid)) {
     main_periodic();
@@ -139,7 +126,7 @@ STATIC_INLINE void handle_periodic_tasks(void)
   }
 }
 
-STATIC_INLINE void telemetry_periodic(void)
+void telemetry_periodic(void)
 {
   /* Send status to AP */
   intermcu_send_status(fbw_mode);
@@ -149,7 +136,7 @@ STATIC_INLINE void telemetry_periodic(void)
 }
 
 /* Checks the different safety cases and sets the correct FBW mode */
-STATIC_INLINE void fbw_safety_check(void)
+static void fbw_safety_check(void)
 {
   /* Safety logic */
   bool ap_lost = (intermcu.status == INTERMCU_LOST);
@@ -185,7 +172,7 @@ STATIC_INLINE void fbw_safety_check(void)
 }
 
 /* Sets the actual actuator commands */
-STATIC_INLINE void main_periodic(void)
+void main_periodic(void)
 {
   /* Inter-MCU watchdog */
   intermcu_periodic();
@@ -230,7 +217,7 @@ STATIC_INLINE void main_periodic(void)
   }
 
   /* Set actuators */
-  SetActuatorsFromCommands(commands, autopilot_mode);
+  SetActuatorsFromCommands(commands, autopilot_get_mode());
 
   /* Periodic blinking */
   RunOnceEvery(10, LED_PERIODIC());
@@ -244,8 +231,23 @@ STATIC_INLINE void main_periodic(void)
 static void fbw_on_rc_frame(void)
 {
   /* get autopilot fbw mode as set by RADIO_MODE 3-way switch */
-  if (radio_control.values[RADIO_FBW_MODE] < (MIN_PPRZ / 2)) {
-    fbw_mode = FBW_MODE_MANUAL;
+  if (radio_control.values[RADIO_FBW_MODE] < (MIN_PPRZ / 2) && !FBW_MODE_AUTO_ONLY) {
+
+#ifdef RADIO_KILL_SWITCH
+    static bool  kill_state_init = false; // require a kill == off before enabling engines with kill == on
+    if (radio_control.values[RADIO_KILL_SWITCH] < (MIN_PPRZ / 2)) {
+      fbw_mode = FBW_MODE_FAILSAFE;
+      kill_state_init = true;
+    } else {
+      if (kill_state_init)
+        fbw_mode = FBW_MODE_MANUAL;
+      else
+        fbw_mode = FBW_MODE_FAILSAFE;
+    }
+#else
+      fbw_mode = FBW_MODE_MANUAL;
+#endif
+
   } else {
     fbw_mode = FBW_MODE_AUTO;
   }
@@ -280,7 +282,7 @@ static void fbw_on_ap_command(void)
   }
 }
 
-STATIC_INLINE void main_event(void)
+void main_event(void)
 {
   /* Event functions for mcu peripherals: i2c, usb_serial.. */
   mcu_event();

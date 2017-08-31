@@ -35,7 +35,6 @@ uint8_t ir_estim_mode;
 uint8_t vertical_mode;
 uint8_t inflight_calib_mode;
 bool rc_event_1, rc_event_2;
-bool launch;
 uint8_t gps_nb_ovrn, link_fbw_fbw_nb_err, link_fbw_nb_err;
 float alt_roll_pgain;
 float roll_rate_pgain;
@@ -63,7 +62,11 @@ value sim_sys_time_task(value unit)
 value sim_periodic_task(value unit)
 {
   sensors_task();
+#if USE_GENERATED_AUTOPILOT
+  autopilot_periodic();
+#else
   attitude_loop();
+#endif
   reporting_task();
   modules_periodic_task();
   periodic_task_fbw();
@@ -81,7 +84,9 @@ value sim_monitor_task(value unit)
 
 value sim_nav_task(value unit)
 {
+#if !USE_GENERATED_AUTOPILOT
   navigation_task();
+#endif
   return unit;
 }
 
@@ -138,7 +143,7 @@ value set_datalink_message(value s)
   }
 
   dl_msg_available = true;
-  DlCheckAndParse();
+  DlCheckAndParse(&(DOWNLINK_DEVICE).device, &ivy_tp.trans_tx, dl_buffer, &dl_msg_available);
 
   return Val_unit;
 }

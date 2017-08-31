@@ -29,7 +29,7 @@
 #include "state.h"
 #include "firmwares/fixedwing/nav.h"
 #include "generated/airframe.h"
-#include "firmwares/fixedwing/autopilot.h"
+#include "autopilot.h"
 #include "firmwares/fixedwing/stabilization/stabilization_attitude.h" //> allow for roll control during landing final flare
 
 /* mode */
@@ -262,6 +262,45 @@ void v_ctl_init(void)
 #endif
 }
 
+void v_ctl_guidance_loop(void)
+{
+  if (v_ctl_mode == V_CTL_MODE_AUTO_ALT) {
+    v_ctl_altitude_loop();
+  }
+#if CTRL_VERTICAL_LANDING
+  if (v_ctl_mode == V_CTL_MODE_LANDING) {
+    v_ctl_landing_loop();
+  } else {
+#endif
+    if (v_ctl_mode == V_CTL_MODE_AUTO_THROTTLE) {
+      v_ctl_throttle_setpoint = nav_throttle_setpoint;
+      v_ctl_pitch_setpoint = nav_pitch;
+    } else {
+      if (v_ctl_mode >= V_CTL_MODE_AUTO_CLIMB) {
+        v_ctl_climb_loop();
+      } /* v_ctl_mode >= V_CTL_MODE_AUTO_CLIMB */
+    } /* v_ctl_mode == V_CTL_MODE_AUTO_THROTTLE */
+#if CTRL_VERTICAL_LANDING
+  } /* v_ctl_mode == V_CTL_MODE_LANDING */
+#endif
+
+#if defined V_CTL_THROTTLE_IDLE
+  Bound(v_ctl_throttle_setpoint, TRIM_PPRZ(V_CTL_THROTTLE_IDLE * MAX_PPRZ), MAX_PPRZ);
+#endif
+
+#ifdef V_CTL_POWER_CTL_BAT_NOMINAL
+  if (vsupply > 0.) {
+    v_ctl_throttle_setpoint *= 10. * V_CTL_POWER_CTL_BAT_NOMINAL / (float)vsupply;
+    v_ctl_throttle_setpoint = TRIM_UPPRZ(v_ctl_throttle_setpoint);
+  }
+#endif
+
+  if (autopilot.kill_throttle || (!autopilot.flight_time && !autopilot.launch)) {
+    v_ctl_throttle_setpoint = 0;
+  }
+}
+
+
 /**
  * outer loop
  * \brief Computes v_ctl_climb_setpoint and sets v_ctl_auto_throttle_submode
@@ -324,7 +363,7 @@ void v_ctl_landing_loop(void)
   float land_speed_err = v_ctl_landing_desired_speed - stateGetHorizontalSpeedNorm_f();
   float land_alt_err = v_ctl_altitude_setpoint - stateGetPositionUtm_f()->alt;
 
-  if (kill_throttle
+  if (autopilot_throttle_killed()
       && (kill_alt - v_ctl_altitude_setpoint)
           > (v_ctl_landing_alt_throttle_kill - v_ctl_landing_alt_flare)) {
     v_ctl_throttle_setpoint = 0.0;  // Throttle is already in KILL (command redundancy)
@@ -350,7 +389,7 @@ void v_ctl_landing_loop(void)
 
     // update kill_alt until final kill throttle is initiated - allows for mode switch to first part of if statement above
     // eliminates the need for knowing the altitude of TD
-    if (!kill_throttle) {
+    if (!autopilot_throttle_killed()) {
       kill_alt = v_ctl_altitude_setpoint;  //
       if (land_alt_err > 0.0) {
         nav_pitch = 0.01;  //  if below desired alt close to ground command level pitch

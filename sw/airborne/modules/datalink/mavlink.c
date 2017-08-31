@@ -49,6 +49,8 @@
 #include "subsystems/electrical.h"
 #include "state.h"
 #include "pprz_version.h"
+#include "autopilot.h"
+#include "autopilot_guided.h"
 
 #if defined RADIO_CONTROL
 #include "subsystems/radio_control.h"
@@ -321,7 +323,7 @@ void mavlink_common_message_handler(const mavlink_message_t *msg)
             result = MAV_RESULT_FAILED;
             if (cmd.param1 > 0.5) {
               autopilot_set_mode(AP_MODE_GUIDED);
-              if (autopilot_mode == AP_MODE_GUIDED) {
+              if (autopilot_get_mode() == AP_MODE_GUIDED) {
                 result = MAV_RESULT_ACCEPTED;
               }
             }
@@ -336,12 +338,12 @@ void mavlink_common_message_handler(const mavlink_message_t *msg)
             result = MAV_RESULT_FAILED;
             if (cmd.param1 > 0.5) {
               autopilot_set_motors_on(TRUE);
-              if (autopilot_motors_on)
+              if (autopilot_get_motors_on())
                 result = MAV_RESULT_ACCEPTED;
             }
             else {
               autopilot_set_motors_on(FALSE);
-              if (!autopilot_motors_on)
+              if (!autopilot_get_motors_on())
                 result = MAV_RESULT_ACCEPTED;
             }
             break;
@@ -438,17 +440,17 @@ static void mavlink_send_heartbeat(struct transport_tx *trans, struct link_devic
   uint8_t mav_mode = 0;
 #ifdef AP
   uint8_t mav_type = MAV_TYPE_FIXED_WING;
-  switch (pprz_mode) {
-    case PPRZ_MODE_MANUAL:
+  switch (autopilot_get_mode()) {
+    case AP_MODE_MANUAL:
       mav_mode |= MAV_MODE_FLAG_MANUAL_INPUT_ENABLED;
       break;
-    case PPRZ_MODE_AUTO1:
+    case AP_MODE_AUTO1:
       mav_mode |= MAV_MODE_FLAG_STABILIZE_ENABLED | MAV_MODE_FLAG_MANUAL_INPUT_ENABLED;
       break;
-    case PPRZ_MODE_AUTO2:
+    case AP_MODE_AUTO2:
       mav_mode |= MAV_MODE_FLAG_AUTO_ENABLED;
       break;
-    case PPRZ_MODE_HOME:
+    case AP_MODE_HOME:
       mav_mode |= MAV_MODE_FLAG_GUIDED_ENABLED | MAV_MODE_FLAG_AUTO_ENABLED;
       break;
     default:
@@ -456,7 +458,7 @@ static void mavlink_send_heartbeat(struct transport_tx *trans, struct link_devic
   }
 #else
   uint8_t mav_type = MAV_TYPE_QUADROTOR;
-  switch (autopilot_mode) {
+  switch (autopilot_get_mode()) {
     case AP_MODE_HOME:
       mav_mode |= MAV_MODE_FLAG_AUTO_ENABLED;
       break;
@@ -486,7 +488,7 @@ static void mavlink_send_heartbeat(struct transport_tx *trans, struct link_devic
   }
 #endif
   if (stateIsAttitudeValid()) {
-    if (kill_throttle) {
+    if (autopilot_throttle_killed()) {
       mav_state = MAV_STATE_STANDBY;
     } else {
       mav_state = MAV_STATE_ACTIVE;

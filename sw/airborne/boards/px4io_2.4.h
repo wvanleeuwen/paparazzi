@@ -60,16 +60,21 @@
 #define UART2_GPIO_RX GPIO3
 #define UART2_GPIO_PORT_TX GPIOA
 #define UART2_GPIO_TX GPIO2
-
+// SBUS
+#define UART3_GPIO_AF 0
+#define UART3_GPIO_PORT_RX GPIOB
+#define UART3_GPIO_RX GPIO11
+#define UART3_GPIO_PORT_TX GPIOB
+#define UART3_GPIO_TX GPIO10
 
 /*
  * Spektrum
  */
 /* The line that is pulled low at power up to initiate the bind process */
-#define RADIO_CONTROL_POWER GPIOC
+#define RADIO_CONTROL_POWER_PORT GPIOC
 #define RADIO_CONTROL_POWER_PIN GPIO13
-#define RADIO_CONTROL_POWER_ON gpio_clear
-#define RADIO_CONTROL_POWER_OFF gpio_set
+#define RADIO_CONTROL_POWER_ON gpio_set
+#define RADIO_CONTROL_POWER_OFF gpio_clear
 
 #define SPEKTRUM_TIMER 3
 

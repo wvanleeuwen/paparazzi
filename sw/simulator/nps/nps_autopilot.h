@@ -15,21 +15,16 @@
 #if defined MOTOR_MIXING_NB_MOTOR
 #define NPS_COMMANDS_NB MOTOR_MIXING_NB_MOTOR
 #else
-#ifdef NPS_ACTUATOR_NAMES
 #define NPS_COMMANDS_NB COMMANDS_NB
-#else
-/* not using explicitly set NPS_ACTUATOR_NAMES -> throttle,roll,pitch,yaw commands */
-#define NPS_COMMANDS_NB 4
-#endif
-#endif
-#endif
+#endif /* #if defined MOTOR_MIXING_NB_MOTOR */
+#endif /* #ifndef NPS_COMMANDS_NB */
 
 struct NpsAutopilot {
   double commands[NPS_COMMANDS_NB];
   bool launch;
 };
 
-extern struct NpsAutopilot autopilot;
+extern struct NpsAutopilot nps_autopilot;
 
 extern bool nps_bypass_ahrs;
 extern bool nps_bypass_ins;

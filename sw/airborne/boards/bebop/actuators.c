@@ -26,11 +26,11 @@
  */
 
 #include "subsystems/actuators.h"
-#include "subsystems/actuators/motor_mixing.h"
 #include "subsystems/electrical.h"
 #include "actuators.h"
 #include "led_hw.h"
 #include "autopilot.h"
+#include "subsystems/abi.h"
 
 #if PERIODIC_TELEMETRY
 #include "subsystems/datalink/telemetry.h"
@@ -91,7 +91,7 @@ void actuators_bebop_commit(void)
   }
 
   // Start the motors
-  if (actuators_bebop.i2c_trans.buf[10] != 4 && actuators_bebop.i2c_trans.buf[10] != 2 && autopilot_motors_on) {
+  if (actuators_bebop.i2c_trans.buf[10] != 4 && actuators_bebop.i2c_trans.buf[10] != 2 && autopilot_get_motors_on()) {
     // Reset the error
     actuators_bebop.i2c_trans.buf[0] = ACTUATORS_BEBOP_CLEAR_ERROR;
     i2c_transmit(&i2c1, &actuators_bebop.i2c_trans, actuators_bebop.i2c_trans.slave_addr, 1);
@@ -107,10 +107,10 @@ void actuators_bebop_commit(void)
     i2c_transmit(&i2c1, &actuators_bebop.i2c_trans, actuators_bebop.i2c_trans.slave_addr, 2);
   }
   // Stop the motors
-  else if (actuators_bebop.i2c_trans.buf[10] == 4 && !autopilot_motors_on) {
+  else if (actuators_bebop.i2c_trans.buf[10] == 4 && !autopilot_get_motors_on()) {
     actuators_bebop.i2c_trans.buf[0] = ACTUATORS_BEBOP_STOP_PROP;
     i2c_transmit(&i2c1, &actuators_bebop.i2c_trans, actuators_bebop.i2c_trans.slave_addr, 1);
-  } else if (actuators_bebop.i2c_trans.buf[10] == 4 && autopilot_motors_on) {
+  } else if (actuators_bebop.i2c_trans.buf[10] == 4 && autopilot_get_motors_on()) {
     // Send the commands
     actuators_bebop.i2c_trans.buf[0] = ACTUATORS_BEBOP_SET_REF_SPEED;
     actuators_bebop.i2c_trans.buf[1] = actuators_bebop.rpm_ref[0] >> 8;
@@ -137,6 +137,8 @@ void actuators_bebop_commit(void)
 
     actuators_bebop.led = led_hw_values & 0x3;
   }
+  // Send ABI message
+  AbiSendMsgRPM(RPM_SENSOR_ID, actuators_bebop.rpm_obs, 4);
 }
 
 static uint8_t actuators_bebop_checksum(uint8_t *bytes, uint8_t size)

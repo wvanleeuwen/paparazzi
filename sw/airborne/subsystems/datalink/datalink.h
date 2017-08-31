@@ -36,10 +36,6 @@
 #include "std.h"
 #include "pprzlink/dl_protocol.h"
 
-/* Message id helpers */
-#define SenderIdOfPprzMsg(x) (x[0])
-#define IdOfPprzMsg(x) (x[1])
-
 /** Datalink kinds */
 #define PPRZ 1
 #define XBEE 2
@@ -56,14 +52,14 @@ EXTERN uint16_t datalink_time;
 /** number of datalink/uplink messages received */
 EXTERN uint16_t datalink_nb_msgs;
 
-#define MSG_SIZE 128
+#define MSG_SIZE 256
 EXTERN uint8_t dl_buffer[MSG_SIZE]  __attribute__((aligned));
 
 /** Should be called when chars are available in dl_buffer */
-EXTERN void dl_parse_msg(void);
+EXTERN void dl_parse_msg(struct link_device *dev, struct transport_tx *trans, uint8_t *buf);
 
 /** Firmware specfic msg handler */
-EXTERN void firmware_parse_msg(void);
+EXTERN void firmware_parse_msg(struct link_device *dev, struct transport_tx *trans, uint8_t *buf);
 
 #if USE_NPS
 EXTERN bool datalink_enabled;
@@ -79,7 +75,7 @@ EXTERN bool datalink_enabled;
 }
 
 /** Check for new message and parse */
-static inline void DlCheckAndParse(void)
+static inline void DlCheckAndParse(struct link_device *dev, struct transport_tx *trans, uint8_t *buf, bool *msg_available)
 {
   // make it possible to disable datalink in NPS sim
 #if USE_NPS
@@ -88,54 +84,12 @@ static inline void DlCheckAndParse(void)
   }
 #endif
 
-  if (dl_msg_available) {
+  if (*msg_available) {
     datalink_time = 0;
     datalink_nb_msgs++;
-    dl_parse_msg();
-    dl_msg_available = false;
+    dl_parse_msg(dev, trans, buf);
+    *msg_available = false;
   }
 }
-
-#if defined DATALINK && DATALINK == PPRZ
-
-#define DatalinkEvent() {                       \
-    pprz_check_and_parse(&(PPRZ_UART).device, &pprz_tp, dl_buffer, &dl_msg_available);      \
-    DlCheckAndParse();                          \
-  }
-
-#elif defined DATALINK && DATALINK == XBEE
-
-#define DatalinkEvent() {                       \
-    xbee_check_and_parse(&(XBEE_UART).device, &xbee_tp, dl_buffer, &dl_msg_available);      \
-    DlCheckAndParse();                          \
-  }
-
-#elif defined DATALINK && DATALINK == W5100
-
-#define DatalinkEvent() {                       \
-    W5100CheckAndParse(W5100, pprz_tp);         \
-    DlCheckAndParse();                          \
-  }
-
-#elif defined DATALINK && DATALINK == SUPERBITRF
-
-#define DatalinkEvent() {                       \
-    SuperbitRFCheckAndParse();                  \
-    DlCheckAndParse();                          \
-  }
-
-#elif defined DATALINK && DATALINK == BLUEGIGA
-
-#define DatalinkEvent() {                       \
-    pprz_check_and_parse(&(DOWNLINK_DEVICE).device, &pprz_tp, dl_buffer, &dl_msg_available);      \
-    DlCheckAndParse();                          \
-  }
-
-#else
-
-// Unknown DATALINK
-#define DatalinkEvent() {}
-
-#endif /* DATALINK == */
 
 #endif /* DATALINK_H */

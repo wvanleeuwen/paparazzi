@@ -41,7 +41,7 @@
 
 #if USE_HARD_FAULT_RECOVERY
 
-#ifdef STM32F4
+#if defined STM32F4 || defined STM32F7
 #define BCKP_SECTION ".ram5"
 #define IN_BCKP_SECTION(var) var __attribute__ ((section(BCKP_SECTION), aligned(8)))
 #else
@@ -85,23 +85,32 @@ CH_IRQ_HANDLER(UsageFault_Handler)
 }
 
 bool recovering_from_hard_fault;
+
+// select correct register
+#if defined STM32F4
+#define __PWR_CSR PWR->CSR
+#define __PWR_CSR_BRE PWR_CSR_BRE
+#define __PWR_CSR_BRR PWR_CSR_BRR
+#elif defined STM32F7
+#define __PWR_CSR PWR->CSR1
+#define __PWR_CSR_BRE PWR_CSR1_BRE
+#define __PWR_CSR_BRR PWR_CSR1_BRR
+#else
+#error Hard fault recovery not supported
+#endif
+
 #endif
 
 
 /*
  * SCB_VTOR has to be relocated if Luftboot is used
+ * The new SCB_VTOR location is defined in the board makefile
  */
 void mcu_arch_init(void)
 {
 #if LUFTBOOT
   PRINT_CONFIG_MSG("We are running luftboot, the interrupt vector is being relocated.")
-#if defined STM32F4
-  PRINT_CONFIG_MSG("STM32F4")
-  SCB_VTOR = 0x00004000;
-#else
-  PRINT_CONFIG_MSG("STM32F1")
-  SCB_VTOR = 0x00002000;
-#endif
+  SCB->VTOR = CORTEX_VTOR_INIT;
 #endif
 
   /*
@@ -116,11 +125,11 @@ void mcu_arch_init(void)
 
 #if USE_HARD_FAULT_RECOVERY
   /* Backup domain SRAM enable, and with it, the regulator */
-#if STM32F4
+#if defined STM32F4  || defined STM32F7
   RCC->AHB1ENR |= RCC_AHB1ENR_BKPSRAMEN;
-  PWR->CSR |= PWR_CSR_BRE;
-  while ((PWR->CSR & PWR_CSR_BRR) == 0) ; /* Waits until the regulator is stable */
-#endif
+  __PWR_CSR |= __PWR_CSR_BRE;
+  while ((__PWR_CSR & __PWR_CSR_BRR) == 0) ; /* Waits until the regulator is stable */
+#endif /* STM32F4 | STM32F7*/
 
   // test if last reset was a 'real' hard fault
   recovering_from_hard_fault = false;
@@ -138,7 +147,7 @@ void mcu_arch_init(void)
   // *MANDATORY* clear of rcc bits
   RCC->CSR = RCC_CSR_RMVF;
   // end of reset bit probing
-#endif
+#endif /* USE_HARD_FAULT_RECOVERY */
 
 }
 

@@ -85,7 +85,7 @@
   </section>
 
   <command_laws>
-    <call fun="motor_mixing_run(autopilot_motors_on,FALSE,values)"/>
+    <call fun="motor_mixing_run(autopilot_get_motors_on(),FALSE,values)"/>
     <set servo="FL_1"  value="motor_mixing.commands[0]"/>
     <set servo="FR_2"  value="motor_mixing.commands[1]"/>
     <set servo="FR_3"  value="motor_mixing.commands[2]"/>
@@ -187,7 +187,7 @@
   <section name="NAVIGATION" prefix="NAV_">
     <define name="CLIMB_VSPEED"   value="1.5" />
     <define name="DESCEND_VSPEED" value="-1.0" />
-  </section>    
+  </section>
 
   <section name="SIMULATOR" prefix="NPS_">
     <define name="ACTUATOR_NAMES"  value="fl1_motor, fr2_motor, fr3_motor, br4_motor, br5_motor, bl6_motor, bl7_motor, fl8_motor" type="string[]"/>

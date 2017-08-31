@@ -37,6 +37,8 @@
 #include <ch.h>
 #include "led.h"
 
+static MUTEX_DECL(sys_time_mtx);
+
 /*
  * Sys_tick handler thread
  */
@@ -47,7 +49,7 @@ static void sys_tick_handler(void);
 void sys_time_arch_init(void)
 {
 
-  sys_time.cpu_ticks_per_sec = STM32_SYSCLK;
+  sys_time.cpu_ticks_per_sec = CH_CFG_ST_FREQUENCY;
 
   /* cpu ticks per desired sys_time timer step */
   sys_time.resolution_cpu_ticks = (uint32_t)(sys_time.resolution * sys_time.cpu_ticks_per_sec + 0.5);
@@ -65,16 +67,22 @@ void sys_time_arch_init(void)
  */
 uint32_t get_sys_time_usec(void)
 {
-  return sys_time.nb_sec * 1000000 +
-         usec_of_sys_time_ticks(sys_time.nb_sec_rem) +
-         usec_of_sys_time_ticks(chVTGetSystemTime() - sys_time.nb_tick);
+  chMtxLock(&sys_time_mtx);
+  uint32_t t = sys_time.nb_sec * 1000000 +
+    usec_of_sys_time_ticks(sys_time.nb_sec_rem) +
+    usec_of_sys_time_ticks(chVTGetSystemTime() - sys_time.nb_tick);
+  chMtxUnlock(&sys_time_mtx);
+  return t;
 }
 
 uint32_t get_sys_time_msec(void)
 {
-  return sys_time.nb_sec * 1000 +
-         msec_of_sys_time_ticks(sys_time.nb_sec_rem) +
-         msec_of_sys_time_ticks(chVTGetSystemTime() - sys_time.nb_tick);
+  chMtxLock(&sys_time_mtx);
+  uint32_t t = sys_time.nb_sec * 1000 +
+    msec_of_sys_time_ticks(sys_time.nb_sec_rem) +
+    msec_of_sys_time_ticks(chVTGetSystemTime() - sys_time.nb_tick);
+  chMtxUnlock(&sys_time_mtx);
+  return t;
 }
 
 /**
@@ -117,6 +125,7 @@ static __attribute__((noreturn)) void thd_sys_tick(void *arg)
 
 static void sys_tick_handler(void)
 {
+  chMtxLock(&sys_time_mtx);
   /* current time in sys_ticks */
   sys_time.nb_tick = chVTGetSystemTime();
   /* max time is 2^32 / CH_CFG_ST_FREQUENCY, i.e. around 10 days at 10kHz */
@@ -141,5 +150,6 @@ static void sys_tick_handler(void)
       }
     }
   }
+  chMtxUnlock(&sys_time_mtx);
 }
 

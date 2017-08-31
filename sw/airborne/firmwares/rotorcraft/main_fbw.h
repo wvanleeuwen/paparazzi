@@ -36,12 +36,6 @@
 #ifndef MAIN_H
 #define MAIN_H
 
-#ifdef SITL
-#define STATIC_INLINE extern
-#else
-#define STATIC_INLINE static inline
-#endif
-
 /** mode to enter when RC is lost while using a mode with RC input */
 #ifndef RC_LOST_FBW_MODE
 #define RC_LOST_FBW_MODE FBW_MODE_FAILSAFE
@@ -57,17 +51,23 @@
 #define AP_LOST_FBW_MODE FBW_MODE_FAILSAFE
 #endif
 
-
+/** holds whether the aircraft can only be flown with the AP and not RC-Direct/FBW-mode */
+#ifndef FBW_MODE_AUTO_ONLY
+#define FBW_MODE_AUTO_ONLY false
+#endif
 
 /** Switching between FBW and autopilot is done with RADIO_FBW_MODE: default is to re-use RADIO_MODE */
 #ifndef RADIO_FBW_MODE
 #define RADIO_FBW_MODE RADIO_MODE
 #endif
 
-STATIC_INLINE void main_init(void);
-STATIC_INLINE void main_event(void);
-STATIC_INLINE void handle_periodic_tasks(void);
-STATIC_INLINE void main_periodic(void);
-STATIC_INLINE void telemetry_periodic(void);
+typedef enum {FBW_MODE_MANUAL = 0, FBW_MODE_AUTO = 1, FBW_MODE_FAILSAFE = 2} fbw_mode_enum;
+
+
+extern void main_init(void);
+extern void main_event(void);
+extern void handle_periodic_tasks(void);
+extern void main_periodic(void);
+extern void telemetry_periodic(void);
 
 #endif /* MAIN_H */

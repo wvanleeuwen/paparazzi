@@ -80,7 +80,7 @@ endif
 # Math functions
 #
 ifneq ($(TARGET), fbw)
-$(TARGET).srcs += math/pprz_geodetic_int.c math/pprz_geodetic_float.c math/pprz_geodetic_double.c math/pprz_trig_int.c math/pprz_orientation_conversion.c math/pprz_algebra_int.c math/pprz_algebra_float.c math/pprz_algebra_double.c
+$(TARGET).srcs += math/pprz_geodetic_int.c math/pprz_geodetic_float.c math/pprz_geodetic_double.c math/pprz_trig_int.c math/pprz_orientation_conversion.c math/pprz_algebra_int.c math/pprz_algebra_float.c math/pprz_algebra_double.c math/pprz_stat.c
 
 $(TARGET).srcs += subsystems/settings.c
 $(TARGET).srcs += $(SRC_ARCH)/subsystems/settings_arch.c
@@ -98,17 +98,6 @@ $(TARGET).srcs += state.c
 include $(CFG_SHARED)/baro_board.makefile
 
 
-$(TARGET).srcs += $(SRC_FIRMWARE)/stabilization.c
-$(TARGET).srcs += $(SRC_FIRMWARE)/stabilization/stabilization_none.c
-
-$(TARGET).srcs += $(SRC_FIRMWARE)/guidance/guidance_h.c
-$(TARGET).srcs += $(SRC_FIRMWARE)/guidance/guidance_h_ref.c
-$(TARGET).srcs += $(SRC_FIRMWARE)/guidance/guidance_v.c
-$(TARGET).srcs += $(SRC_FIRMWARE)/guidance/guidance_v_ref.c
-$(TARGET).srcs += $(SRC_FIRMWARE)/guidance/guidance_v_adapt.c
-$(TARGET).srcs += $(SRC_FIRMWARE)/guidance/guidance_flip.c
-
-include $(CFG_ROTORCRAFT)/navigation.makefile
 else
 $(TARGET).CFLAGS += -DFBW=1
 endif
@@ -117,15 +106,25 @@ endif
 # Main
 #
 ifeq ($(RTOS), chibios)
- ns_srcs += $(SRC_FIRMWARE)/main_chibios.c
-else
-ifneq ($(TARGET), fbw)
+$(TARGET).srcs += $(SRC_FIRMWARE)/main_chibios.c
+else # No RTOS
 $(TARGET).srcs += $(SRC_FIRMWARE)/main.c
-$(TARGET).srcs += $(SRC_FIRMWARE)/autopilot.c
+endif # RTOS
+ifneq ($(TARGET), fbw)
+$(TARGET).srcs += $(SRC_FIRMWARE)/main_ap.c
+$(TARGET).srcs += autopilot.c
+$(TARGET).srcs += $(SRC_FIRMWARE)/autopilot_firmware.c
+$(TARGET).srcs += $(SRC_FIRMWARE)/autopilot_utils.c
+$(TARGET).srcs += $(SRC_FIRMWARE)/autopilot_guided.c
+ifeq ($(USE_GENERATED_AUTOPILOT), TRUE)
+$(TARGET).srcs += $(SRC_FIRMWARE)/autopilot_generated.c
+$(TARGET).CFLAGS += -DUSE_GENERATED_AUTOPILOT=1
+else
+$(TARGET).srcs += $(SRC_FIRMWARE)/autopilot_static.c
+endif
 else
 $(TARGET).srcs += $(SRC_FIRMWARE)/main_fbw.c
 endif # TARGET == fbw
-endif # RTOS == ChibiOS
 
 
 
@@ -219,7 +218,10 @@ fbw.srcs 		+= $(ns_srcs)
 ##
 ## include firmware independent nps makefile and add rotorcraft specifics
 ##
-include $(CFG_SHARED)/nps.makefile
+ifneq ($(TARGET), hitl)
+  include $(CFG_SHARED)/nps.makefile
+else
+  include $(CFG_SHARED)/hitl.makefile
+endif
+
 nps.srcs += nps/nps_autopilot_rotorcraft.c
-nps.srcs += $(SRC_FIRMWARE)/rotorcraft_telemetry.c
-nps.srcs += subsystems/datalink/datalink.c $(SRC_FIRMWARE)/rotorcraft_datalink.c

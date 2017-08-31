@@ -79,6 +79,11 @@ LOGALIZER=sw/logalizer
 SUBDIRS = $(PPRZCENTER) $(MISC) $(LOGALIZER) sw/tools
 
 #
+# Communication protocol version
+#
+PPRZLINK_LIB_VERSION ?= 1.0
+
+#
 # xml files used as input for header generation
 #
 CUSTOM_MESSAGES_XML = $(CONF)/messages.xml
@@ -91,7 +96,7 @@ XSENS_XML = $(CONF)/xsens_MTi-G.xml
 # generated header files
 #
 PPRZLINK_DIR=sw/ext/pprzlink
-PPRZLINK_INSTALL=$(PAPARAZZI_HOME)/var/lib/ocaml
+PPRZLINK_INSTALL=$(PAPARAZZI_HOME)/var/lib
 MESSAGES_INSTALL=$(PAPARAZZI_HOME)/var
 UBX_PROTOCOL_H=$(STATICINCLUDE)/ubx_protocol.h
 MTK_PROTOCOL_H=$(STATICINCLUDE)/mtk_protocol.h
@@ -137,7 +142,7 @@ static: cockpit tmtc generators sim_static joystick static_h
 
 libpprzlink:
 	$(MAKE) -C $(EXT) pprzlink.update
-	$(Q)Q=$(Q) DESTDIR=$(PPRZLINK_INSTALL) $(MAKE) -C $(PPRZLINK_DIR) libpprzlink-install
+	$(Q)Q=$(Q) DESTDIR=$(PPRZLINK_INSTALL) PPRZLINK_LIB_VERSION=${PPRZLINK_LIB_VERSION} $(MAKE) -C $(PPRZLINK_DIR) libpprzlink-install
 
 libpprz: libpprzlink _save_build_version
 	$(MAKE) -C $(LIB)/ocaml
@@ -191,10 +196,10 @@ pprzlink_protocol :
 	$(Q)test -d $(STATICLIB) || mkdir -p $(STATICLIB)
 ifeq ("$(wildcard $(CUSTOM_MESSAGES_XML))","")
 	@echo GENERATE $@ with default messages
-	$(Q)Q=$(Q) MESSAGES_INSTALL=$(MESSAGES_INSTALL) VALIDATE_XML=FALSE $(MAKE) -C $(PPRZLINK_DIR) pymessages
+	$(Q)Q=$(Q) MESSAGES_INSTALL=$(MESSAGES_INSTALL) VALIDATE_XML=FALSE PPRZLINK_LIB_VERSION=${PPRZLINK_LIB_VERSION} $(MAKE) -C $(PPRZLINK_DIR) pymessages
 else
 	@echo GENERATE $@ with custome messages from $(CUSTOM_MESSAGES_XML)
-	$(Q)Q=$(Q) MESSAGES_XML=$(CUSTOM_MESSAGES_XML) MESSAGES_INSTALL=$(MESSAGES_INSTALL) $(MAKE) -C $(PPRZLINK_DIR) pymessages
+	$(Q)Q=$(Q) MESSAGES_XML=$(CUSTOM_MESSAGES_XML) MESSAGES_INSTALL=$(MESSAGES_INSTALL) PPRZLINK_LIB_VERSION=${PPRZLINK_LIB_VERSION} $(MAKE) -C $(PPRZLINK_DIR) pymessages
 endif
 
 
@@ -279,8 +284,8 @@ clean:
 	$(Q)find . -name '*.pyc' -exec rm -f {} \;
 
 cleanspaces:
-	find sw -path sw/ext -prune -o -name '*.[ch]' -exec sed -i {} -e 's/[ \t]*$$//' \;
-	find sw -path sw/ext -prune -o -name '*.py' -exec sed -i {} -e 's/[ \t]*$$//' \;
+	find sw -path sw/ext -prune -o -type f -name '*.[ch]' -exec sed -i {} -e 's/[ \t]*$$//' \;
+	find sw -path sw/ext -prune -o -type f -name '*.py' -exec sed -i {} -e 's/[ \t]*$$//' \;
 	find conf -name '*.makefile' -exec sed -i {} -e 's/[ \t]*$$//' ';'
 	find . -path ./sw/ext -prune -o -name Makefile -exec sed -i {} -e 's/[ \t]*$$//' ';'
 	find sw -name '*.ml' -o -name '*.mli' -exec sed -i {} -e 's/[ \t]*$$//' ';'
@@ -307,6 +312,18 @@ test: test_math test_examples
 # subset of airframes for coverity test to pass the limited build time on travis
 test_coverity: all
 	CONF_XML=conf/conf_tests_coverity.xml prove tests/aircrafts/
+
+# test AggieAir conf
+test_aggieair: all
+	CONF_XML=conf/airframes/AGGIEAIR/aggieair_conf.xml prove tests/aircrafts/
+	
+# test Open UAS conf
+test_openuas: all
+	CONF_XML=conf/userconf/OPENUAS/openuas_conf.xml prove tests/aircrafts/
+	
+# test TU Delft conf
+test_tudelft: all
+	CONF_XML=conf/userconf/TUDELFT/tudelft_flyable_conf.xml prove tests/aircrafts/
 
 # compiles all aircrafts in conf_tests.xml
 test_examples: all

@@ -76,9 +76,11 @@ int32_t   msgqueue_send(MsgQueue *que, void *msg, const uint16_t msgLen,
 int32_t   msgqueue_send_timeout(MsgQueue *que, void *msg, const uint16_t msgLen,
                                 const MsgQueueUrgency urgency, const systime_t timout)
 {
-  const MsgPtrLen mpl = {.ptrOfst = (uint32_t) msg - (uint32_t) tlsf_get_heap_addr(&MSGQ_HEAP),
-                         .len = msgLen
-                        };
+  // this code prevents compiler warning about a missing initializer of mpl
+  MsgPtrLen m;
+  m.len = msgLen;
+  m.ptrOfst = (uint32_t) msg - (uint32_t) tlsf_get_heap_addr(&MSGQ_HEAP);
+  const MsgPtrLen mpl = m;
 
 #if CH_DBG_ENABLE_CHECKS
   if (((uint32_t) msg < (uint32_t) tlsf_get_heap_addr(&MSGQ_HEAP)) ||
@@ -138,7 +140,11 @@ int32_t msgqueue_pop_timeout(MsgQueue *que, void **msgPtr, const systime_t timou
 {
   MsgPtrLen mpl = {.ptrOfst = 0, .len = 0};
 
-  const msg_t status = chMBFetch(&que->mb, (msg_t *) &mpl.msg_ptr_len, timout);
+  msg_t status;
+  do  {
+    status = chMBFetch(&que->mb, (msg_t *) &mpl.msg_ptr_len, timout);
+  } while (status == MSG_RESET);
+
   if (status != MSG_OK) {
     return MsgQueue_MAILBOX_TIMEOUT;
   }

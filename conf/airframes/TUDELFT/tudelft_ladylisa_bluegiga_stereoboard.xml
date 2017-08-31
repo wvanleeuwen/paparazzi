@@ -48,7 +48,7 @@
   </commands>
 
   <command_laws>
-    <call fun="motor_mixing_run(autopilot_motors_on,FALSE,values)"/>
+    <call fun="motor_mixing_run(autopilot_get_motors_on(),FALSE,values)"/>
     <set servo="NE" value="motor_mixing.commands[0]"/>
     <set servo="SE" value="motor_mixing.commands[1]"/>
     <set servo="SW" value="motor_mixing.commands[2]"/>
@@ -202,13 +202,8 @@
    <module name="stereocam">
      <configure name="STEREO_UART" value="UART1"/>
      <configure name="STEREO_BAUD" value="B115200"/>
-     <define name="SEND_STEREO" value="TRUE"/>
+     <define name="FORWARD_IMAGE_DATA" value="TRUE"/>
    </module>
-   <module name="stereocam_state2camera">
-     <configure name="STEREO_UART" value="UART1"/>
-     <configure name="STEREO_BAUD" value="B115200"/>
-   </module>
-   <module name="stereocam_stereocam2state"/>
  </modules>
 
   <firmware name="rotorcraft">
@@ -240,7 +235,7 @@
     <module name="imu" type="lisa_s_v1.0">
       <define name="LISA_S_UPSIDE_DOWN"/> <!-- Upside down is a relative term. :) -->
     </module>
-	
+
     <module name="gps" type="datalink"/>
     <module name="stabilization" type="int_quat"/>
     <module name="ahrs" type="int_cmpl_quat"/>

@@ -24,6 +24,8 @@
  *  @brief Rotorcraft Inter-MCU on FlyByWire
  */
 
+#define ABI_C
+
 #include "intermcu_fbw.h"
 #include "pprzlink/intermcu_msg.h"
 #include "subsystems/radio_control.h"
@@ -66,12 +68,28 @@ static void intermcu_parse_msg(void (*commands_frame_handler)(void));
 static void checkPx4RebootCommand(unsigned char b);
 #endif
 
+#ifdef USE_GPS
+
+#ifndef IMCU_GPS_ID
+#define IMCU_GPS_ID GPS_MULTI_ID
+#endif
+
+#include "subsystems/abi.h"
+#include "subsystems/gps.h"
+static abi_event gps_ev;
+static void gps_cb(uint8_t sender_id, uint32_t stamp, struct GpsState *gps_s);
+#endif
+
 void intermcu_init(void)
 {
   pprz_transport_init(&intermcu.transport);
 
+#if USE_GPS
+  AbiBindMsgGPS(IMCU_GPS_ID, &gps_ev, gps_cb);
+#endif
+
 #ifdef BOARD_PX4IO
-  px4bl_tid = sys_time_register_timer(10.0, NULL);
+  px4bl_tid = sys_time_register_timer(20.0, NULL); //bootloader time out. After this intermcu will be set to slow baud.
 #endif
 }
 
@@ -97,15 +115,15 @@ void intermcu_on_rc_frame(uint8_t fbw_mode)
   values[INTERMCU_RADIO_MODE] = radio_control.values[RADIO_MODE];
 #endif
 #ifdef RADIO_KILL_SWITCH
-  values[INTERMCU_RADIO_KILL_SWITCH] = radio_control.values[RADIO_KILL];
-#endif
-
-#if defined (RADIO_AUX1) && defined (RADIO_KILL_SWITCH)
-#warning "RC AUX1 and KILL_SWITCH are on the same channel."
+  values[INTERMCU_RADIO_KILL_SWITCH] = radio_control.values[RADIO_KILL_SWITCH];
 #endif
 
 #ifdef RADIO_AUX1
+#ifdef RADIO_KILL_SWITCH
+#warning "RC AUX1 and KILL_SWITCH are on the same channel. AUX1 is discarded."
+#else
   values[INTERMCU_RADIO_AUX1] = radio_control.values[RADIO_AUX1];
+#endif
 #endif
 #ifdef RADIO_AUX2
   values[INTERMCU_RADIO_AUX2] = radio_control.values[RADIO_AUX2];
@@ -205,6 +223,33 @@ void InterMcuEvent(void (*frame_handler)(void))
   }
 }
 
+#if USE_GPS
+static void gps_cb(uint8_t sender_id __attribute__((unused)),
+                   uint32_t stamp __attribute__((unused)),
+                   struct GpsState *gps_s) {
+  pprz_msg_send_IMCU_REMOTE_GPS(&(intermcu.transport.trans_tx), intermcu.device, INTERMCU_FBW,
+    &gps_s->ecef_pos.x,
+    &gps_s->ecef_pos.y,
+    &gps_s->ecef_pos.z,
+    &gps_s->lla_pos.alt,
+    &gps_s->hmsl,
+    &gps_s->ecef_vel.x,
+    &gps_s->ecef_vel.y,
+    &gps_s->ecef_vel.z,
+    &gps_s->course,
+    &gps_s->gspeed,
+    &gps_s->pacc,
+    &gps_s->sacc,
+    &gps_s->num_sv,
+    &gps_s->fix);
+}
+
+void gps_periodic_check(struct GpsState *gps_s) {
+  if (sys_time.nb_sec - gps_s->last_msg_time > GPS_TIMEOUT) {
+    gps_s->fix = GPS_FIX_NONE;
+  }
+}
+#endif
 
 /* SOME STUFF FOR PX4IO BOOTLOADER (TODO: move this code) */
 #ifdef BOARD_PX4IO
@@ -221,7 +266,7 @@ static void checkPx4RebootCommand(uint8_t b)
       sys_time_cancel_timer(px4bl_tid);
       //for unknown reasons, 1500000 baud does not work reliably after prolonged times.
       //I suspect a temperature related issue, combined with the fbw f1 crystal which is out of specs
-      //After a initial period on 1500000, revert to 230400
+      //After an initial period on 1500000, revert to 230400
       //We still start at 1500000 to remain compatible with original PX4 firmware. (which always runs at 1500000)
       uart_periph_set_baudrate(intermcu.device->periph, B230400);
       intermcu.stable_px4_baud = CHANGING_BAUD;

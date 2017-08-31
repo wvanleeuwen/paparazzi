@@ -29,6 +29,17 @@
 
 #include "modules/computer_vision/lib/vision/image.h"
 
+#ifndef COLORFILTER_FPS
+#define COLORFILTER_FPS 0       ///< Default FPS (zero means run at camera fps)
+#endif
+PRINT_CONFIG_VAR(COLORFILTER_FPS)
+
+
+#ifndef COLORFILTER_SEND_OBSTACLE
+#define COLORFILTER_SEND_OBSTACLE FALSE    ///< Default sonar/agl to use in opticflow visual_estimator
+#endif
+PRINT_CONFIG_VAR(COLORFILTER_SEND_OBSTACLE)
+
 struct video_listener *listener = NULL;
 
 // Filter Settings
@@ -42,6 +53,10 @@ uint8_t color_cr_max  = 255;
 // Result
 int color_count = 0;
 
+#include "subsystems/abi.h"
+
+
+
 // Function
 struct image_t *colorfilter_func(struct image_t *img);
 struct image_t *colorfilter_func(struct image_t *img)
@@ -53,10 +68,21 @@ struct image_t *colorfilter_func(struct image_t *img)
                                        color_cr_min, color_cr_max
                                       );
 
+
+  if (COLORFILTER_SEND_OBSTACLE) {
+    if (color_count > 20)
+      AbiSendMsgOBSTACLE_DETECTION(CV_COLORDETECTION, 1,
+                                   0);
+    else
+      AbiSendMsgOBSTACLE_DETECTION(CV_COLORDETECTION, 10,
+                                   0);
+
+  }
+
   return img; // Colorfilter did not make a new image
 }
 
 void colorfilter_init(void)
 {
-  listener = cv_add_to_device(&COLORFILTER_CAMERA, colorfilter_func);
+  listener = cv_add_to_device(&COLORFILTER_CAMERA, colorfilter_func, COLORFILTER_FPS);
 }

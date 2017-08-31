@@ -103,6 +103,26 @@
 #define AGL_SONAR_NPS_ID 3
 #endif
 
+#ifndef AGL_SONAR_PX4FLOW_ID
+#define AGL_SONAR_PX4FLOW_ID 4
+#endif
+
+#ifndef AGL_TERARANGER_ONE_ID
+#define AGL_TERARANGER_ONE_ID 5
+#endif
+
+#ifndef AGL_LIDAR_LITE_ID
+#define AGL_LIDAR_LITE_ID 6
+#endif
+
+#ifndef AGL_PX4FLOW_ID
+#define AGL_PX4FLOW_ID 7
+#endif
+
+#ifndef AGL_LIDAR_SF11_ID
+#define AGL_LIDAR_SF11_ID 8
+#endif
+
 /*
  * IDs of magnetometer sensors (including IMUs with mag)
  */
@@ -168,6 +188,14 @@
 
 #ifndef GPS_VECTORNAV_ID
 #define GPS_VECTORNAV_ID 13
+#endif
+
+#ifndef GPS_IMCU_ID
+#define GPS_IMCU_ID 14
+#endif
+
+#ifndef GPS_DW1000_ID
+#define GPS_DW1000_ID 15
 #endif
 
 /*
@@ -241,8 +269,12 @@
 #define PX4FLOW_VELOCITY_ID 17
 #endif
 
-#ifndef IMU_PX4
+#ifndef IMU_PX4_ID
 #define IMU_PX4_ID 18
+#endif
+
+#ifndef IMU_VECTORNAV_ID
+#define IMU_VECTORNAV_ID 19
 #endif
 
 /*
@@ -258,5 +290,26 @@
 #ifndef RPM_SENSOR_ID
 #define RPM_SENSOR_ID 1
 #endif
+
+/*
+ * IDs of THRUST increment calculation (message 16)
+ */
+#ifndef THRUST_INCREMENT_ID
+#define THRUST_INCREMENT_ID 1
+#endif
+
+#ifndef MAG_CALIB_UKF_ID
+#define MAG_CALIB_UKF_ID 20
+#endif
+
+
+/*
+ * IDs of Computer Vision Calculated variables
+ */
+
+#ifndef CV_COLORDETECTION
+#define CV_COLORDETECTION 1
+#endif
+
 
 #endif /* ABI_SENDER_IDS_H */
