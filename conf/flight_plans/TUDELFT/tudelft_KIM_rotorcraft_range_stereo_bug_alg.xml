@@ -75,45 +75,6 @@ Remember to choose AP_MODE_GUIDED or else it won't work!!!
     </block>
 
 
-    <block name="Turn to heading">
-      <call_once fun="autopilot_guided_update(GUIDED_FLAG_XY_VEL_BODY_YAW_OFFSET,0.,0.,-nominal_alt,0.)"/>
-      <while cond="LessThan(stage_time,1)"/>
-      <set var="save_heading" value="desired_heading"/>
-      <set var="diff_heading" value="desired_heading-stateGetNedToBodyEulers_f()->psi"/>
-      <call_once fun="autopilot_guided_update(GUIDED_FLAG_XY_VEL_BODY_YAW_RATE,0.,0.,-nominal_alt,0.2*diff_heading/fabs(diff_heading))"/>
-      <while cond="!CloseDegAngles(DegOfRad(stateGetNedToBodyEulers_f()->psi),DegOfRad(save_heading))"/>
-      <call_once fun="autopilot_guided_update(GUIDED_FLAG_XY_VEL_BODY,0.,0.,-nominal_alt,save_heading)"/>
-      <while cond="LessThan(stage_time,1)"/> 
-     <deroute block="Go Forward"/>
-    </block>
-
-    <block name="Go_forward_to_heading">
-        <call_once fun="autopilot_guided_update(GUIDED_FLAG_XY_VEL_BODY,0,0,-nominal_alt,desired_heading)"/>
-      <while cond="LessThan(stage_time,1)"/> 
-      <while cond="1">
-        <call_once fun="autopilot_guided_update(GUIDED_FLAG_XY_VEL_BODY,forward_vel + vel_body_x_FF,vel_body_y_FF,-nominal_alt,desired_heading)"/>
-      </while>
-      <exception cond="1.2>distance_obstacle_FP" deroute="Turn Left"/> 
-      <!--exception cond="1.2>distance_obstacle_FP" deroute="Turn Right"/--> 
-    </block>
-
-
-   <block name="Turn Left">
-        <call_once fun="autopilot_guided_update(GUIDED_FLAG_XY_VEL_BODY_YAW_RATE,0,distance_obstacle_FP-1.0,-nominal_alt,0)"/>
-      <while cond="LessThan(stage_time,1)"/> 
-      <call_once fun="autopilot_guided_update(GUIDED_FLAG_XY_VEL_BODY_YAW_RATE,0,0.,-nominal_alt,-0.2)"/>
-      <exception cond="distance_obstacle_FP>1.2" deroute="Go Forward"/> 
-      <while cond="1"/>
-    </block>
-
-   <block name="Turn Right">
-        <call_once fun="autopilot_guided_update(GUIDED_FLAG_XY_VEL_BODY_YAW_RATE,0,distance_obstacle_FP-1.0,-nominal_alt,0)"/>
-      <while cond="LessThan(stage_time,1)"/> 
-      <call_once fun="autopilot_guided_update(GUIDED_FLAG_XY_VEL_BODY_YAW_RATE,0,0.,-nominal_alt,0.2)"/>
-      <exception cond="distance_obstacle_FP>1.2" deroute="Go Forward"/> 
-      <while cond="1"/>
-    </block>
-
     <block name="Go Forward">
          <set var="save_heading" value="0"/>
         <call_once fun="autopilot_guided_update(GUIDED_FLAG_XY_VEL_BODY_YAW_RATE,0,0,-nominal_alt,0)"/>
@@ -131,46 +92,23 @@ Remember to choose AP_MODE_GUIDED or else it won't work!!!
     </block>
 
 
- 
-
-
-    <block name="Turn Left 2">
-      <call_once fun="autopilot_guided_update(GUIDED_FLAG_XY_VEL_BODY_YAW_OFFSET,0.,0.,-nominal_alt,0.)"/>
-      <while cond="LessThan(stage_time,1)"/>
-      <set var="save_heading" value="stateGetNedToBodyEulers_f()->psi - RadOfDeg(75)"/>
-      <call_once fun="autopilot_guided_update(GUIDED_FLAG_XY_VEL_BODY_YAW_RATE,0.,0.,-nominal_alt,-0.2)"/>
-      <while cond="!CloseDegAngles(DegOfRad(stateGetNedToBodyEulers_f()->psi),DegOfRad(save_heading))"/>
-      <call_once fun="autopilot_guided_update(GUIDED_FLAG_XY_VEL_BODY,0.,0.,-nominal_alt,save_heading)"/>
+   <block name="Turn Left">
+        <call_once fun="autopilot_guided_update(GUIDED_FLAG_XY_VEL_BODY_YAW_RATE,distance_obstacle_FP-1,0,-nominal_alt,0)"/>
       <while cond="LessThan(stage_time,1)"/> 
-      <set var="turned_left" value="TRUE"/>
-      <set var="turned_right" value="FALSE"/>
-     <deroute block="FW_change_heading"/>
+      <call_once fun="autopilot_guided_update(GUIDED_FLAG_XY_VEL_BODY_YAW_RATE,0,0,-nominal_alt,-0.3)"/>
+      <exception cond="distance_obstacle_FP>1.2" deroute="Go Forward"/> 
+      <while cond="1"/>
     </block>
 
-    <block name="Turn Right 2">
-      <call_once fun="autopilot_guided_update(GUIDED_FLAG_XY_VEL_BODY_YAW_OFFSET,0.,0.,-nominal_alt,0.)"/>
-      <while cond="LessThan(stage_time,1)"/>
-      <set var="save_heading" value="stateGetNedToBodyEulers_f()->psi + RadOfDeg(75)"/>
-      <call_once fun="autopilot_guided_update(GUIDED_FLAG_XY_VEL_BODY_YAW_RATE,0.,0.,-nominal_alt,0.2)"/>
-      <while cond="!CloseDegAngles(DegOfRad(stateGetNedToBodyEulers_f()->psi),DegOfRad(save_heading))"/>
-      <call_once fun="autopilot_guided_update(GUIDED_FLAG_XY_VEL_BODY,0.,0.,-nominal_alt,save_heading)"/>
-      <while cond="LessThan(stage_time,1)"/>
-      <set var="turned_left" value="FALSE"/>
-      <set var="turned_right" value="TRUE"/>
-     <deroute block="FW_change_heading"/>
+   <block name="Turn Right">
+        <call_once fun="autopilot_guided_update(GUIDED_FLAG_XY_VEL_BODY_YAW_RATE,distance_obstacle_FP-1,0,-nominal_alt,0)"/>
+      <while cond="LessThan(stage_time,1)"/> 
+      <call_once fun="autopilot_guided_update(GUIDED_FLAG_XY_VEL_BODY_YAW_RATE,0,0,-nominal_alt,0.3)"/>
+      <exception cond="distance_obstacle_FP>1.2" deroute="Go Forward"/> 
+      <while cond="1"/>
     </block>
 
 
-    <block name="FW_change_heading">
-
-      <while cond="range_sensor_detect_WF&&turned_left" >
-        <call_once fun="autopilot_guided_update(GUIDED_FLAG_XY_VEL_BODY_YAW_RATE,forward_vel + 0,0,-nominal_alt,gain_heading*heading_leftturn_WF)"/>
-      </while>
-      <while cond="range_sensor_detect_WF&&turned_right" >
-        <call_once fun="autopilot_guided_update(GUIDED_FLAG_XY_VEL_BODY_YAW_RATE,forward_vel + 0,0,-nominal_alt,gain_heading*heading_rightturn_WF)"/>
-      </while>
-     <deroute block="Turn to heading"/>
-    </block>
 
     <block name="Land">
       <call_once fun="autopilot_guided_update(GUIDED_FLAG_XY_OFFSET_Z_VEL_YAW_OFFSET,0.,0.,climb_descent_vel,0.)"/>

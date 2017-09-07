@@ -803,6 +803,8 @@ static void gazebo_init_stereo_camera(void)
 
 static void gazebo_read_stereo_camera(void)
 {
+
+
   gazebo::sensors::MultiCameraSensorPtr &stereocam = gazebo_stereocam.stereocam;
 
 
@@ -829,12 +831,13 @@ static void gazebo_read_stereo_camera(void)
 
 
 /******************************************EDGEFLOW*******************************/
-    // set angles for derotation
+    // set angles for derotation 
+    // TODO: is this done in stereoboa
     float_rmat_mult(&cam_angles, &body_to_cam, stateGetNedToBodyEulers_f());
     img.eulerAngles = &cam_angles;
 
     //////RUN EDGEFLOW//////
-    edgeflow_total(&img, 0);
+    edgeflow_total(&img, 0); //TODO: check if timing is going okay
     /////////////////////////
 
     ///PLOT STUFF
@@ -949,4 +952,3 @@ static void read_stereoimage(
 #endif
 
 #pragma GCC diagnostic pop // Ignore -Wdeprecated-declarations
-
