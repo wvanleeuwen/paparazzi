@@ -586,7 +586,7 @@ bool guidance_v_set_guided_th(float th)
 
     /* reset guidance reference */
     GuidanceVSetRef(stateGetPositionNed_i()->z, stateGetSpeedNed_i()->z, 0);
-    guidance_v_th_sp = ((float)MAX_PPRZ) * th;
+    guidance_v_th_sp = (int32_t)(MAX_PPRZ * th);
     Bound(guidance_v_th_sp, 0, MAX_PPRZ);
     return true;
   }
