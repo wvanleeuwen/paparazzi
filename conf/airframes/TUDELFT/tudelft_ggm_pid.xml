@@ -310,8 +310,8 @@ TAIL_LEFT -> CW
     <define name="REF_MAX_RDOT" value="RadOfDeg(3000.)"/>
 
     <!-- feedback -->
-    <define name="PHI_PGAIN" value="780"/>
-    <define name="PHI_DGAIN" value="130"/>
+    <define name="PHI_PGAIN" value="700"/>
+    <define name="PHI_DGAIN" value="230"/>
     <define name="PHI_IGAIN" value="0"/>
 
     <define name="THETA_PGAIN" value="2350"/>
