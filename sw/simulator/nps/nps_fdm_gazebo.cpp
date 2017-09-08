@@ -454,7 +454,6 @@ static void gazebo_read(void)
   } else {
     fdm.body_accel = to_pprz_body(
                      pose.rot.RotateVectorReverse(accel.Ign() - world->Gravity()));
-  }
 
   /* attitude */
   // ecef_to_body_quat: unused
@@ -798,6 +797,7 @@ static void gazebo_init_stereo_camera(void)
   float_rmat_of_eulers(&body_to_cam, &euler);
 
   /******************************************************************/
+
 
 }
 

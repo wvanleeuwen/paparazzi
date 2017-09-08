@@ -59,3 +59,107 @@ void imav2017_set_gate(uint8_t quality, float w, float h,
   float q = (float)quality;
   DOWNLINK_SEND_TEMP_ADC(DOWNLINK_TRANSPORT, DOWNLINK_DEVICE, &psi_f, &gate_y_offset, &gate_distance);
 }
+
+
+
+void imav2017_histogram_obstacle_detection(uint8_t *stereo_distance_per_column, uint8_t *stereo_distance_filtered,
+                                   int32_t *closest_average_distance, int32_t *pixel_location_of_closest_object, int32_t size)
+{
+
+  int32_t x, c;
+  int32_t max_distance_obstacle = 255; // in [cm]
+  uint8_t obstc_thres = 5;
+
+
+
+
+  // Measure where obstacles are within detection range and turn it into a booleean
+  for (x = 0; x < size; x++) {
+
+    if (stereo_distance_per_column[x] < max_distance_obstacle && stereo_distance_per_column[x] != 0) {
+      stereo_distance_filtered[x] = 1;
+    } else {
+      stereo_distance_filtered[x] = 0;
+    }
+
+  }
+  // Erosion of binary array
+  uint8_t min_value;
+  uint8_t morph_value = 10;
+  uint8_t stereo_distance_filtered_temp[128] = {0};
+
+
+
+  //Dilation
+  uint8_t max_value;
+  for (x = morph_value; x < size -morph_value-1; x++) {
+
+    max_value = 0;
+    for (c = -morph_value; c <= morph_value; c++) {
+      if (max_value < stereo_distance_filtered[x + c]) {
+        max_value = stereo_distance_filtered[x + c];
+      }
+    }
+    stereo_distance_filtered_temp[x] =  max_value;
+
+  }
+  memcpy(stereo_distance_filtered, stereo_distance_filtered_temp, sizeof(stereo_distance_filtered_temp));
+
+
+  for (x = morph_value; x < size - morph_value-1; x++) {
+
+    min_value = 1;
+    for (c = -morph_value; c <= morph_value; c++) {
+      if (min_value > stereo_distance_filtered[x + c]) {
+        min_value = stereo_distance_filtered[x + c];
+      }
+    }
+    stereo_distance_filtered_temp[x] =  min_value;
+  }
+
+  memcpy(stereo_distance_filtered, stereo_distance_filtered_temp, sizeof(stereo_distance_filtered_temp));
+
+
+
+  /*
+      // Seperate obstacles with a large distance difference
+      for (x = border; x < size - border; x++) {
+
+        if (stereo_distance_per_column[x]!=0&&stereo_distance_per_column[x+2]!=0&&abs(stereo_distance_per_column[x] - stereo_distance_per_column[x + 1]) > 55) {
+          stereo_distance_filtered[x] = 0;
+        }
+      }
+  */
+
+
+  //calculate the distance of the closest obstacle
+  int32_t counter = 0;
+  int32_t distance_sum = 0;
+  int32_t average_distance = 0;
+
+
+  int32_t start_pixel = 0;
+  int8_t first_hit = 0;
+
+  for (x = 0; x < size - 0; x++) {
+    //if obstacle is detected, start counting how many you see in a row, sum op the distances
+    if (stereo_distance_filtered[x] == 1) {
+      counter ++;
+      distance_sum += stereo_distance_per_column[x];
+      if (first_hit == 0) {start_pixel = x; first_hit = 1;}
+
+      if (counter > obstc_thres) {
+        average_distance = distance_sum / counter;
+        if (*closest_average_distance > average_distance) {
+          *closest_average_distance = average_distance;
+          *pixel_location_of_closest_object = start_pixel - obstc_thres + counter / 2;
+        }
+
+      }
+    } else {
+      counter = 0;
+      distance_sum = 0;
+      first_hit = 0;
+    }
+  }
+}
