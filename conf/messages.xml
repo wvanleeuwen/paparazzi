@@ -2831,14 +2831,16 @@
     
     
     <message name="STEREOCAM_ARRAY" id="80">
+      <description>Raw data fromt the stereocamera. Type defines what kind of data it is. This can be raw image, disparity map, obstacle histogram, ect.</description>
       <field name="type" type="uint8" values="DIST_MATRIX|HISTOGRAM|DISPARITY_MAP|RAW"/>
       <field name="width" type="uint8">array size parameters</field>
       <field name="height" type="uint8"/>
-      <field name="package_nb" type="uint8"/>
+      <field name="package_nb" type="uint8">If the data being sent is too large for one message (e.g when sending a full image) this will indicate which package of the total data is contained in this message</field>
       <field name="image_data" type="uint8[]"/>
     </message>
     
     <message name="STEREOCAM_VELOCITY" id="81">
+      <description>Velocity measured using optical flow and stereovision. All parameters are in the camera frame</description>
       <field name="resolution" type="uint8">Resolution of the vel and pos messages</field>
       <field name="dt_frame"   type="uint8">Time difference to previous frame</field>
       <field name="dt"         type="uint8">Time difference to previous message, not strictly required</field>
@@ -2854,10 +2856,11 @@
     </message>
     
     <message name="STEREOCAM_STATE" id="82">
+      <description>Estimated state of the camera. As the stereocamera has no inertial sensors, this data should be sent to the stereocamera to enable onboard derotation of the optical flow</description>
       <field name="phi" 	type="float" unit="rad">Pitch, roll and yaw angles of the camera</field>
       <field name="theta"   type="float" unit="rad"/>
       <field name="psi"     type="float" unit="rad"/>
-      <field name="agl"     type="float" unit="m">Altitude above the ground, if not looking down set to 0</field>
+      <field name="agl"     type="float" unit="m">Altitude above the ground. If not looking down, set to 0</field>
     </message>
     
     <message name="STEREOCAM_FOLLOW_ME" id="83">
@@ -2897,4 +2900,3 @@
   </msg_class>
   
 </protocol>
-
