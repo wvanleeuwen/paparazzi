@@ -58,7 +58,7 @@ struct point_t {
   uint32_t x;             ///< The x coordinate of the point
   uint32_t y;             ///< The y coordinate of the point
   uint16_t count;         ///< Number of times the point has been tracked successfully
-  uint16_t x_sub;     ///< The x subpixel coordinate of the point
+  uint16_t x_sub;         ///< The x subpixel coordinate of the point
   uint16_t y_sub;         ///< The y subpixel coordinate of the point
 };
 
@@ -105,5 +105,8 @@ void image_draw_line(struct image_t *img, struct point_t *from, struct point_t *
 void image_draw_line_color(struct image_t *img, struct point_t *from, struct point_t *to, uint8_t *color);
 void pyramid_next_level(struct image_t *input, struct image_t *output, uint8_t border_size);
 void pyramid_build(struct image_t *input, struct image_t *output_array, uint8_t pyr_level, uint8_t border_size);
+
+void image_2d_gradients(struct image_t *input, struct image_t *d);
+void image_2d_sobel(struct image_t *input, struct image_t *d);
 
 #endif

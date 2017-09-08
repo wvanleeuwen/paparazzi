@@ -211,7 +211,7 @@ void ins_int_init(void)
   /* init vertical and horizontal filters */
   vff_init_zero();
 #if USE_HFF
-  b2_hff_init(0., 0., 0., 0.);
+  hff_init(0., 0., 0., 0.);
 #endif
 
   INT32_VECT3_ZERO(ins_int.ltp_pos);
@@ -297,8 +297,10 @@ void ins_int_propagate(struct Int32Vect3 *accel, float dt)
   }
 
 #if USE_HFF
+  struct Int32Vect2 accel_ltp;
+  VECT2_ASSIGN(accel_ltp, accel_meas_ltp.x, accel_meas_ltp.y);
   /* propagate horizontal filter */
-  b2_hff_propagate();
+  hff_propagate(accel_ltp, dt);
   /* convert and copy result to ins_int */
   ins_update_from_hff();
 #else
@@ -406,15 +408,14 @@ void ins_int_update_gps(struct GpsState *gps_s)
 
   struct FloatVect2 gps_speed_m_s_ned;
   VECT2_ASSIGN(gps_speed_m_s_ned, gps_speed_cm_s_ned.x, gps_speed_cm_s_ned.y);
-  VECT2_SDIV(gps_speed_m_s_ned, gps_speed_m_s_ned, 100.);
+  VECT2_SDIV(gps_speed_m_s_ned, gps_speed_m_s_ned, 100.f);
 
   if (ins_int.hf_realign) {
     ins_int.hf_realign = false;
-    const struct FloatVect2 zero = {0.0f, 0.0f};
-    b2_hff_realign(gps_pos_m_ned, zero);
+    hff_realign(gps_pos_m_ned, gps_speed_m_s_ned);
   }
   // run horizontal filter
-  b2_hff_update_gps(&gps_pos_m_ned, &gps_speed_m_s_ned);
+  hff_update_gps(&gps_pos_m_ned, &gps_speed_m_s_ned);
   // convert and copy result to ins_int
   ins_update_from_hff();
 
@@ -489,12 +490,12 @@ static void ins_update_from_vff(void)
 /** update ins state from horizontal filter */
 static void ins_update_from_hff(void)
 {
-  ins_int.ltp_accel.x = ACCEL_BFP_OF_REAL(b2_hff_state.xdotdot);
-  ins_int.ltp_accel.y = ACCEL_BFP_OF_REAL(b2_hff_state.ydotdot);
-  ins_int.ltp_speed.x = SPEED_BFP_OF_REAL(b2_hff_state.xdot);
-  ins_int.ltp_speed.y = SPEED_BFP_OF_REAL(b2_hff_state.ydot);
-  ins_int.ltp_pos.x   = POS_BFP_OF_REAL(b2_hff_state.x);
-  ins_int.ltp_pos.y   = POS_BFP_OF_REAL(b2_hff_state.y);
+  ins_int.ltp_accel.x = ACCEL_BFP_OF_REAL(hff.xdotdot);
+  ins_int.ltp_accel.y = ACCEL_BFP_OF_REAL(hff.ydotdot);
+  ins_int.ltp_speed.x = SPEED_BFP_OF_REAL(hff.xdot);
+  ins_int.ltp_speed.y = SPEED_BFP_OF_REAL(hff.ydot);
+  ins_int.ltp_pos.x   = POS_BFP_OF_REAL(hff.x);
+  ins_int.ltp_pos.y   = POS_BFP_OF_REAL(hff.y);
 }
 #endif
 
@@ -537,7 +538,7 @@ static void vel_est_cb(uint8_t sender_id __attribute__((unused)),
   struct FloatVect2 vel = {vel_ned.x, vel_ned.y};
   struct FloatVect2 Rvel = {noise, noise};
 
-  b2_hff_update_vel(vel,  Rvel);
+  hff_update_vel(vel,  Rvel);
   ins_update_from_hff();
 #else
   ins_int.ltp_speed.x = SPEED_BFP_OF_REAL(vel_ned.x);

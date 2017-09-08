@@ -31,6 +31,12 @@
 					</box>
 				</geometry>
 			</visual>
+			
+			<sensor name="contactsensor" type="contact">
+				<contact>
+					<collision>collision</collision>
+				</contact>
+			</sensor>
 		</link>
 
 <!-- MOTORS -->

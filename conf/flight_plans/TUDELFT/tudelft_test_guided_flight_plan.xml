@@ -61,15 +61,19 @@ Remember to choose AP_MODE_GUIDED or else it won't work!!!
 
 
     <block name="Start Engine">
-			<call_once fun="guidance_v_set_guided_th(0.2)"/>
+	  <call_once fun="autopilot_guided_update(GUIDED_FLAG_XY_VEL_BODY_YAW_OFFSET,0.,0.,-nominal_alt,DegOfRad(0))"/>
+	  <call_once fun="guidance_v_set_guided_th(0.2)"/>
       <call_once fun="autopilot_set_motors_on(TRUE)"/>
       <while cond="1"/>
     </block>
     
     <block name="Take off">
-      <call_once fun="guidance_v_set_guided_th(0.75)"/>
+      <call_once fun="guidance_v_set_guided_th(0.80)"/>
       <while cond="LessThan(stateGetPositionEnu_f()->z,nominal_alt)"/>
-      <call_once fun="autopilot_guided_update(GUIDED_FLAG_XY_OFFSET_YAW_OFFSET,0.,0.,-nominal_alt,DegOfRad(0))"/> 
+    </block>
+
+    <block name="Hover Here">
+      <call_once fun="autopilot_guided_update(GUIDED_FLAG_XY_VEL_BODY_YAW_OFFSET,0.,0.,-nominal_alt,DegOfRad(0))"/> 
       <while cond="1"/>  
     </block>
 

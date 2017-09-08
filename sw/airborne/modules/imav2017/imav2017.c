@@ -57,5 +57,5 @@ void imav2017_set_gate(uint8_t quality, float w, float h,
   gate_y_offset = gate_distance * sinf(psi_f);
 
   float q = (float)quality;
-  //DOWNLINK_SEND_TEMP_ADC(DOWNLINK_TRANSPORT, DOWNLINK_DEVICE, &psi_f, &gate_y_offset, &gate_distance);
+  DOWNLINK_SEND_TEMP_ADC(DOWNLINK_TRANSPORT, DOWNLINK_DEVICE, &psi_f, &gate_y_offset, &gate_distance);
 }

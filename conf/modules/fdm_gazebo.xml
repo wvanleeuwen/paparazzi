@@ -89,12 +89,16 @@
   	</raw>
     <file name="nps_fdm_gazebo.cpp" dir="nps"/>
 
-<!--EDGEFLOW-->
-    <file name="edgeflow.c" dir="/home/knmcguire/stereoboard/stereoboard/"/>
-    <include name="/home/knmcguire/stereoboard/common/"/>
-    <include name="/home/knmcguire/stereoboard/stereoboard/"/>
-    <file name="filter.c" dir="/home/knmcguire/stereoboard/stereoboard/math/"/>
-    <file name="stats.c" dir="/home/knmcguire/stereoboard/stereoboard/math/"/>
+    <!--EDGEFLOW-->
+    <define name="COMPILE_ON_LINUX"/>
+    <include name="$(STEREO_PATH)/common"/>
+    <include name="$(STEREO_PATH)/stereoboard"/>
+    <file name="edgeflow.c" dir="$(STEREO_PATH)/stereoboard"/>
+    <file name="gate_detection.c" dir="$(STEREO_PATH)/stereoboard"/>
+    <file name="stereo_image.c" dir="$(STEREO_PATH)/stereoboard"/>
+    <file name="filter.c" dir="$(STEREO_PATH)/stereoboard/math"/>
+    <file name="stats.c" dir="$(STEREO_PATH)/stereoboard/math"/>
+    <include name="$(STEREO_PATH)/ext/drone_vision/cv"/>
     <include name="modules/computer_vision"/>
     <file name="image.c" dir="modules/computer_vision/lib/vision"/>
     <file name="jpeg.c" dir="modules/computer_vision/lib/encoding"/>
@@ -105,8 +109,6 @@
     <flag name="LDFLAGS" value="lopencv_core" />
     <include name="/usr/include/python2.7"/>
     <flag name="LDFLAGS" value="lpython2.7" />
-
-<!--                    --> 
   </makefile>
 </module>
 
