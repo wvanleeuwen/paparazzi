@@ -81,31 +81,37 @@ Remember to choose AP_MODE_GUIDED or else it won't work!!!
       <while cond="LessThan(stage_time,1)"/> 
         <call_once fun="autopilot_guided_update(GUIDED_FLAG_XY_VEL_BODY_YAW_RATE,forward_vel,0,-nominal_alt,0)"/>
 
-      <while cond="1">
+      <!--while cond="1">
          <set var="diff_heading" value="stateGetNedToBodyEulers_f()->psi-desired_heading"/>
          <call_once fun="FLOAT_ANGLE_NORMALIZE(diff_heading)"/>
          <set var="save_heading" value="diff_heading"/>
       </while>
-
       <exception cond="1.2>distance_obstacle_FP&&0>save_heading" deroute="Turn Right"/> 
-      <exception cond="1.2>distance_obstacle_FP&&save_heading>0" deroute="Turn Left"/> 
+      <exception cond="1.2>distance_obstacle_FP&&save_heading>0" deroute="Turn Left"/--> 
+
+      <exception cond="1.2>distance_obstacle_FP&&turned_left == TRUE" deroute="Turn Right"/> 
+      <exception cond="1.2>distance_obstacle_FP&&turned_right == TRUE" deroute="Turn Left"/> 
     </block>
 
 
    <block name="Turn Left">
-        <call_once fun="autopilot_guided_update(GUIDED_FLAG_XY_VEL_BODY_YAW_RATE,distance_obstacle_FP-1,0,-nominal_alt,0)"/>
+        <call_once fun="autopilot_guided_update(GUIDED_FLAG_XY_VEL_BODY_YAW_RATE,0,0,-nominal_alt,0)"/>
       <while cond="LessThan(stage_time,1)"/> 
       <call_once fun="autopilot_guided_update(GUIDED_FLAG_XY_VEL_BODY_YAW_RATE,0,0,-nominal_alt,-0.3)"/>
-      <exception cond="distance_obstacle_FP>1.2" deroute="Go Forward"/> 
-      <while cond="1"/>
+      <while cond="1.2>distance_obstacle_FP"/>
+      <set var="turned_left" value="TRUE"/>
+      <set var="turned_right" value="FALSE"/>
+      <deroute block="Go Forward"/>
     </block>
 
    <block name="Turn Right">
-        <call_once fun="autopilot_guided_update(GUIDED_FLAG_XY_VEL_BODY_YAW_RATE,distance_obstacle_FP-1,0,-nominal_alt,0)"/>
+        <call_once fun="autopilot_guided_update(GUIDED_FLAG_XY_VEL_BODY_YAW_RATE,0,0,-nominal_alt,0)"/>
       <while cond="LessThan(stage_time,1)"/> 
       <call_once fun="autopilot_guided_update(GUIDED_FLAG_XY_VEL_BODY_YAW_RATE,0,0,-nominal_alt,0.3)"/>
-      <exception cond="distance_obstacle_FP>1.2" deroute="Go Forward"/> 
-      <while cond="1"/>
+      <while cond="1.2>distance_obstacle_FP"/>
+      <set var="turned_right" value="TRUE"/>
+      <set var="turned_left" value="FALSE"/>
+      <deroute block="Go Forward"/>
     </block>
 
 

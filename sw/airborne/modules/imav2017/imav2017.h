@@ -34,6 +34,6 @@ extern void imav2017_init(void);
 extern void imav2017_set_gate(uint8_t quality, float w, float h,
     float psi, float theta, float depth);
 extern void imav2017_histogram_obstacle_detection(uint8_t *stereo_distance_per_column, uint8_t *stereo_distance_filtered,
-        int32_t *closest_average_distance, int32_t *pixel_location_of_closest_object, int32_t size);
+		uint8_t *closest_average_distance, uint8_t *pixel_location_of_closest_object, int32_t size);
 #endif
 

@@ -63,7 +63,7 @@ void imav2017_set_gate(uint8_t quality, float w, float h,
 
 
 void imav2017_histogram_obstacle_detection(uint8_t *stereo_distance_per_column, uint8_t *stereo_distance_filtered,
-                                   int32_t *closest_average_distance, int32_t *pixel_location_of_closest_object, int32_t size)
+		uint8_t *closest_average_distance, uint8_t *pixel_location_of_closest_object, int32_t size)
 {
 
   int32_t x, c;
@@ -151,8 +151,8 @@ void imav2017_histogram_obstacle_detection(uint8_t *stereo_distance_per_column, 
       if (counter > obstc_thres) {
         average_distance = distance_sum / counter;
         if (*closest_average_distance > average_distance) {
-          *closest_average_distance = average_distance;
-          *pixel_location_of_closest_object = start_pixel - obstc_thres + counter / 2;
+          *closest_average_distance = (uint8_t)average_distance;
+          *pixel_location_of_closest_object = (uint8_t)(start_pixel - obstc_thres + counter / 2);
         }
 
       }

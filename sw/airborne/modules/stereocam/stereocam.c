@@ -46,6 +46,10 @@
 #define FORWARD_IMAGE_DATA FALSE
 #endif
 
+#ifndef STEREO_ARRAY_DATA
+#define STEREO_ARRAY_DATA TRUE
+#endif
+
 
 /* This defines the location of the stereocamera with respect to the body fixed coordinates.
  *
@@ -201,16 +205,34 @@ static void stereocam_parse_msg(void)
   }
 
   case DL_STEREOCAM_ARRAY: {
+	    uint8_t type = DL_STEREOCAM_ARRAY_type(stereocam_msg_buf);
+	    uint8_t w = DL_STEREOCAM_ARRAY_width(stereocam_msg_buf);
+	    uint8_t h = DL_STEREOCAM_ARRAY_height(stereocam_msg_buf);
+	    uint8_t nb = DL_STEREOCAM_ARRAY_package_nb(stereocam_msg_buf);
+	    uint8_t l = DL_STEREOCAM_ARRAY_image_data_length(stereocam_msg_buf);
 #if FORWARD_IMAGE_DATA
     // forward image to ground station
-    uint8_t type = DL_STEREOCAM_ARRAY_type(stereocam_msg_buf);
-    uint8_t w = DL_STEREOCAM_ARRAY_width(stereocam_msg_buf);
-    uint8_t h = DL_STEREOCAM_ARRAY_height(stereocam_msg_buf);
-    uint8_t nb = DL_STEREOCAM_ARRAY_package_nb(stereocam_msg_buf);
-    uint8_t l = DL_STEREOCAM_ARRAY_image_data_length(stereocam_msg_buf);
-
     DOWNLINK_SEND_STEREO_IMG(DefaultChannel, DefaultDevice, &type, &w, &h, &nb,
         l, DL_STEREOCAM_ARRAY_image_data(stereocam_msg_buf));
+#endif
+#if   STEREO_ARRAY_DATA
+    const uint8_t width = w;
+    uint8_t stereo_distance_filtered[width];
+    memset( stereo_distance_filtered, 0, width*sizeof(uint8_t) );
+    uint8_t closest_average_distance = 1500;
+    uint8_t pixel_location_of_closest_object = 0;
+
+    //TODO: do this for each stereo image column
+    imav2017_histogram_obstacle_detection(DL_STEREOCAM_ARRAY_image_data(stereocam_msg_buf), stereo_distance_filtered,
+    		&closest_average_distance, &pixel_location_of_closest_object, width);
+
+    //TODO: automatically get FOV
+    float pxtorad=(float)RadOfDeg(59) / 128;
+    float heading = (float)(pixel_location_of_closest_object)*pxtorad;
+    float distance = (float)(closest_average_distance)/100;
+
+    AbiSendMsgOBSTACLE_DETECTION(AGL_RANGE_SENSORS_GAZEBO_ID, distance, heading);
+
 #endif
     break;
   }

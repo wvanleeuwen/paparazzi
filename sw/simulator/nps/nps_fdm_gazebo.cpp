@@ -896,19 +896,23 @@ static void gazebo_read_stereo_camera(void)
     uint8_t stereo_distance_per_column_uint8[IMAGE_WIDTH] = {0};
     for(int x=0;x<img.w;x++)stereo_distance_per_column_uint8[x]= bounduint8(edgeflow.stereo_distance_per_column[x]);
 
-    uint8_t stereo_distance_filtered[IMAGE_WIDTH] = {0};
-    int32_t closest_average_distance = 1500;
-    int32_t pixel_location_of_closest_object = 0;
+    const uint8_t width = img.w;
+    uint8_t stereo_distance_filtered[width];
+    memset( stereo_distance_filtered, 0, width*sizeof(uint8_t) );
+    uint8_t closest_average_distance = 255;
+    uint8_t pixel_location_of_closest_object = 0;
+
+    //TODO: do this for each stereo image column
     imav2017_histogram_obstacle_detection(stereo_distance_per_column_uint8, stereo_distance_filtered,
     		&closest_average_distance, &pixel_location_of_closest_object, img.w);
 
-    uint8_t distance_closest_obstacle = bounduint8(closest_average_distance);
-    uint8_t px_loc_closest_obstacle = bounduint8(pixel_location_of_closest_object);
+    /*Copied from stereocam.c*/
 
-    printf("distance_closest_obstacle: %d\n",distance_closest_obstacle);
+
+    //TODO: automatically get FOV
     float pxtorad=(float)RadOfDeg(59) / 128;
-    float heading = (float)(px_loc_closest_obstacle)*pxtorad;
-    float distance = (float)(distance_closest_obstacle)/100;
+    float heading = (float)(pixel_location_of_closest_object)*pxtorad;
+    float distance = (float)(closest_average_distance)/100;
 
     AbiSendMsgOBSTACLE_DETECTION(AGL_RANGE_SENSORS_GAZEBO_ID, distance, heading);
     /////////////////////////////////
