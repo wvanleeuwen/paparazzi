@@ -130,6 +130,7 @@ static inline void mag_pitot_parse_msg(void)
       uint8_t dummy_uint8 = 0;
       uint8_t data_size = 4;
 
+      //DOWNLINK_SEND_ENOSE_STATUS(DefaultChannel, DefaultDevice, &tel_buf[0],  &tel_buf[1],  &tel_buf[2],  &tel_buf[3],1,&dummy_uint8);
 
 
       AbiSendMsgRANGE_SENSORS(RANGE_SENSORS_ID, dummy_range, tel_buf[2], dummy_range, tel_buf[0], tel_buf[3], tel_buf[1]);
