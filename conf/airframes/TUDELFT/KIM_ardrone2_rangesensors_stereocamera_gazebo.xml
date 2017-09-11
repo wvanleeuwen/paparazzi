@@ -12,7 +12,7 @@
     </target>
 
     <define name="USE_SONAR" value="TRUE"/>
-	<configure name="STEREO_PATH" value="/home/kirk/mavlab/stereoboard"/>
+	<configure name="STEREO_PATH" value="/home/knmcguire/stereoboard"/>
 
 	<!-- Subsystem section -->
     <module name="telemetry" type="transparent_udp"/>

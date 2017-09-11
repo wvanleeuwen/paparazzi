@@ -454,7 +454,7 @@ static void gazebo_read(void)
   } else {
     fdm.body_accel = to_pprz_body(
                      pose.rot.RotateVectorReverse(accel.Ign() - world->Gravity()));
-
+  }
   /* attitude */
   // ecef_to_body_quat: unused
   fdm.ltp_to_body_eulers = to_pprz_eulers(local_to_global_quat * pose.rot);
@@ -890,11 +890,22 @@ static void gazebo_read_stereo_camera(void)
 
     imav2017_set_gate(gate.q, w, h, body_bearing.psi, body_bearing.theta, 0);
 
-    // GET obstacle
-    ///copied from edgeflow.c
-    uint8_t distance_closest_obstacle = boundint8(edgeflow.distance_closest_obstacle);
-    uint8_t px_loc_closest_obstacle = 64;//boundint8(edgeflow.px_loc_closest_obstacle);
 
+    // GET obstacle
+    /////////////////////////////////
+    uint8_t stereo_distance_per_column_uint8[IMAGE_WIDTH] = {0};
+    for(int x=0;x<img.w;x++)stereo_distance_per_column_uint8[x]= bounduint8(edgeflow.stereo_distance_per_column[x]);
+
+    uint8_t stereo_distance_filtered[IMAGE_WIDTH] = {0};
+    int32_t closest_average_distance = 1500;
+    int32_t pixel_location_of_closest_object = 0;
+    imav2017_histogram_obstacle_detection(stereo_distance_per_column_uint8, stereo_distance_filtered,
+    		&closest_average_distance, &pixel_location_of_closest_object, img.w);
+
+    uint8_t distance_closest_obstacle = bounduint8(closest_average_distance);
+    uint8_t px_loc_closest_obstacle = bounduint8(pixel_location_of_closest_object);
+
+    printf("distance_closest_obstacle: %d\n",distance_closest_obstacle);
     float pxtorad=(float)RadOfDeg(59) / 128;
     float heading = (float)(px_loc_closest_obstacle)*pxtorad;
     float distance = (float)(distance_closest_obstacle)/100;
