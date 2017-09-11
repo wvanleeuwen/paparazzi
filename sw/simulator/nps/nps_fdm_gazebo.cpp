@@ -62,6 +62,7 @@ extern "C" {
 
 #include "subsystems/abi.h"
 #include "subsystems/datalink/telemetry.h"
+#include "math/pprz_isa.h"
 
 /**********************EDGEFLOW*************************/
 #include "math/stereo_math.h"
@@ -488,10 +489,8 @@ static void gazebo_read(void)
   fdm.wind = {.x = 0, .y = 0, .z = 0};
   fdm.pressure_sl = 101325; // Pa
 
-  static const double pressure_scaler = -9.80665 * 0.0289644 / (8.31447 * 288.15);
-
   fdm.airspeed = 0;
-  fdm.pressure = fdm.pressure_sl * exp(fdm.hmsl * pressure_scaler); // Pa
+  fdm.pressure = pprz_isa_pressure_of_height(fdm.hmsl, fdm.pressure_sl);
   fdm.dynamic_pressure = fdm.pressure_sl; // Pa
   fdm.temperature = 20.0; // C
   fdm.aoa = 0; // rad
