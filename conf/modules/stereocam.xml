@@ -35,5 +35,6 @@
     <!-- Sources and PPRZLink for transport -->
     <file name="stereocam.c"/>
     <file name="pprz_transport.c" dir="pprzlink/src"/>
+    <file name="imav2017.c" dir="modules/imav2017"/>
   </makefile>
  </module>

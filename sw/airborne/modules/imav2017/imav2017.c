@@ -144,9 +144,11 @@ void imav2017_histogram_obstacle_detection(uint8_t *stereo_distance_per_column, 
   for (x = 0; x < size - 0; x++) {
     //if obstacle is detected, start counting how many you see in a row, sum op the distances
     if (stereo_distance_filtered[x] == 1) {
+    	if(stereo_distance_per_column[x]!=0){
       counter ++;
-      distance_sum += stereo_distance_per_column[x];
-      if (first_hit == 0) {start_pixel = x; first_hit = 1;}
+      distance_sum += (int32_t)stereo_distance_per_column[x];
+    	}
+    	if (first_hit == 0) {start_pixel = x; first_hit = 1;}
 
       if (counter > obstc_thres) {
         average_distance = distance_sum / counter;

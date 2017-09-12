@@ -840,14 +840,7 @@ static void gazebo_read_stereo_camera(void)
     edgeflow_total(&img, 0); //TODO: check if timing is going okay
     /////////////////////////
 
-    ///PLOT STUFF
-/*    plt::clf();
-    plot_matlab(edgeflow.edge_hist[edgeflow.current_frame_nr].x,128,1, "edge_histogram");
-    plot_matlab(edgeflow.edge_hist[edgeflow.prev_frame_x].x,128,1, "edge_histogram");
-    plot_matlab(edgeflow.disp.x,128,10, "edge_histogram");
-    plot_matlab((int32_t*)edgeflow.disp.confidence_x,128,0.05, "edge_histogram");
-    plt::pause(0.0001);*/
-    /////
+
 
     static struct FloatVect3 camera_vel;
 
@@ -916,6 +909,19 @@ static void gazebo_read_stereo_camera(void)
 
     AbiSendMsgOBSTACLE_DETECTION(AGL_RANGE_SENSORS_GAZEBO_ID, distance, heading);
     /////////////////////////////////
+    int32_t stereo_distance_filtered_int32[128];
+    for(int x=0;x<img.w;x++)stereo_distance_filtered_int32[x]= (int32_t)stereo_distance_filtered[x];
+
+    DOWNLINK_SEND_SETTINGS(DOWNLINK_TRANSPORT, DOWNLINK_DEVICE, &distance, &heading);
+
+    ///PLOT STUFF
+    /*   plt::clf();
+    plot_matlab(edgeflow.stereo_distance_per_column,128,1, "edge_histogram");
+    plot_matlab(edgeflow.edge_hist[edgeflow.prev_frame_x].x,128,1, "edge_histogram");
+    plot_matlab(edgeflow.disp.x,128,10, "edge_histogram");
+    plot_matlab((int32_t*)stereo_distance_filtered_int32,128,100, "edge_histogram");
+    plt::pause(0.0001);*/
+    /////
 
 /*********************************************************************************/
 

@@ -143,7 +143,7 @@ void stereocam_parse_vel(struct FloatVect3 camera_vel, float R2)
     update_median_filter_f(&medianfilter_noise, noise);
   }
 
-  DOWNLINK_SEND_IMU_MAG(DOWNLINK_TRANSPORT, DOWNLINK_DEVICE, &body_vel.x, &body_vel.y, &noise);
+  //DOWNLINK_SEND_IMU_MAG(DOWNLINK_TRANSPORT, DOWNLINK_DEVICE, &body_vel.x, &body_vel.y, &body_vel.z);
 
   if(stateGetPositionEnu_f()->z > 0.4 && body_vel.x < 2.f && body_vel.y < 2.f)
   {
@@ -216,20 +216,26 @@ static void stereocam_parse_msg(void)
         l, DL_STEREOCAM_ARRAY_image_data(stereocam_msg_buf));
 #endif
 #if   STEREO_ARRAY_DATA
-    const uint8_t width = w;
-    uint8_t stereo_distance_filtered[width];
-    memset( stereo_distance_filtered, 0, width*sizeof(uint8_t) );
-    uint8_t closest_average_distance = 1500;
+    uint8_t stereo_distance_filtered[128] ={0};
+    //memset(stereo_distance_filtered, 0, width*sizeof(uint8_t) );
+    uint8_t closest_average_distance = 255;
     uint8_t pixel_location_of_closest_object = 0;
 
     //TODO: do this for each stereo image column
     imav2017_histogram_obstacle_detection(DL_STEREOCAM_ARRAY_image_data(stereocam_msg_buf), stereo_distance_filtered,
-    		&closest_average_distance, &pixel_location_of_closest_object, width);
+    		&closest_average_distance, &pixel_location_of_closest_object, 128);
+
+    /*DOWNLINK_SEND_STEREO_IMG(DefaultChannel, DefaultDevice, &type, &w, &h, &nb,
+         100, DL_STEREOCAM_ARRAY_image_data(stereocam_msg_buf));*/
+
 
     //TODO: automatically get FOV
     float pxtorad=(float)RadOfDeg(59) / 128;
     float heading = (float)(pixel_location_of_closest_object)*pxtorad;
     float distance = (float)(closest_average_distance)/100;
+
+    //DOWNLINK_SEND_SETTINGS(DOWNLINK_TRANSPORT, DOWNLINK_DEVICE, &distance, &heading);
+
 
     AbiSendMsgOBSTACLE_DETECTION(AGL_RANGE_SENSORS_GAZEBO_ID, distance, heading);
 
