@@ -234,7 +234,7 @@ static void stereocam_parse_msg(void)
     float heading = (float)(pixel_location_of_closest_object)*pxtorad;
     float distance = (float)(closest_average_distance)/100;
 
-    //DOWNLINK_SEND_SETTINGS(DOWNLINK_TRANSPORT, DOWNLINK_DEVICE, &distance, &heading);
+    DOWNLINK_SEND_SETTINGS(DOWNLINK_TRANSPORT, DOWNLINK_DEVICE, &distance, &heading);
 
 
     AbiSendMsgOBSTACLE_DETECTION(AGL_RANGE_SENSORS_GAZEBO_ID, distance, heading);
