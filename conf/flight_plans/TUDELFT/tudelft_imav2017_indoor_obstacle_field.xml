@@ -97,12 +97,12 @@
       <exception cond="!(gate_detected)" deroute="Find Window"/> 
     </block>
 
-    <block name="Go Through Window"/>
+    <block name="Go Through Window">
       <call_once fun="autopilot_guided_update(GUIDED_FLAG_XY_OFFSET_BODY_YAW_OFFSET,gate_distance,0,-nominal_alt,0)"/>
       <while cond="LessThan(stage_time,1)"/>
     </block>
 
-    <block name="Check Window"/>
+    <block name="Check Window">
       <call_once fun="autopilot_guided_update(GUIDED_FLAG_XY_OFFSET_BODY_YAW_OFFSET,0,0,-nominal_alt,0)"/>
       <while cond="LessThan(stage_time,1)"/>
       <exception cond="(gate_detected)" deroute="Align with window"/> 
