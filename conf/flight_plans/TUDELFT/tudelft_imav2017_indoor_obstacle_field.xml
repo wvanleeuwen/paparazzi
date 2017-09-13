@@ -87,7 +87,7 @@
     <block name="Find Window">
       <call_once fun="autopilot_guided_update(GUIDED_FLAG_XY_VEL_BODY_YAW_OFFSET,0,0.3,-nominal_alt,0)"/>
       <while cond="!(gate_detected)"/>
-      <call_once fun="autopilot_guided_update(GUIDED_FLAG_XY_VEL_BODY_YAW_OFFSET,0,-nominal_alt,0)"/>
+      <call_once fun="autopilot_guided_update(GUIDED_FLAG_XY_VEL_BODY_YAW_OFFSET,0,0,-nominal_alt,0)"/>
       <while cond="LessThan(stage_time,1)"/>
     </block>
 
