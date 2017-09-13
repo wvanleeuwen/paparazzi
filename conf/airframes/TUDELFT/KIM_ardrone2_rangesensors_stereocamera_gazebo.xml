@@ -7,7 +7,7 @@
 
     <target name="nps" board="pc">
       <module name="fdm" type="gazebo">
-      <define name="NPS_NO_GPS"/>
+      <!--define name="NPS_NO_GPS"/-->
       </module>
     </target>
 
@@ -27,7 +27,7 @@
     <module name="ins" type="hff_extended">
       <define name="HFF_R_POS" value="0.1"/>
       <define name="HFF_R_SPEED" value="0.1"/>
-      <define name="HFF_UPDATE_GPS_SPEED" value="false"/>
+      <!--define name="HFF_UPDATE_GPS_SPEED" value="false"/-->
     </module>
 
     <module name="bat_voltage_ardrone2"/>

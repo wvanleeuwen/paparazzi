@@ -28,8 +28,10 @@
 #include "filters/median_filter.h"
 #include "subsystems/datalink/downlink.h"
 
+#include "subsystems/abi.h"
+
 // output
-float gate_distance, gate_y_offset;
+float gate_distance, gate_x_offset, gate_y_offset;
 
 // median filter
 struct MedianFilterFloat psi_filter, theta_filter, depth_filter, w_filter;
@@ -45,7 +47,7 @@ void imav2017_init(void)
 
 static const float gate_size_m = 1.1f;
 void imav2017_set_gate(uint8_t quality, float w, float h,
-    float psi, float theta, float depth)
+    float psi, float theta, float depth, uint8_t gate_detected)
 {
   // filter incoming angles and depth
   psi_f = update_median_filter_f(&psi_filter, psi);
@@ -54,7 +56,10 @@ void imav2017_set_gate(uint8_t quality, float w, float h,
   w_f = update_median_filter_f(&depth_filter, w);
 
   gate_distance = gate_size_m / w_f;
+  gate_x_offset = gate_distance * sinf(theta_f);
   gate_y_offset = gate_distance * sinf(psi_f);
+
+  AbiSendMsgGATE_DETECTION(ABI_BROADCAST, gate_detected, gate_x_offset, gate_y_offset,gate_distance);
 
   float q = (float)quality;
   DOWNLINK_SEND_TEMP_ADC(DOWNLINK_TRANSPORT, DOWNLINK_DEVICE, &psi_f, &gate_y_offset, &gate_distance);

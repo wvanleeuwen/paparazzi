@@ -268,7 +268,10 @@ static void stereocam_parse_msg(void)
     static struct FloatEulers body_bearing;
     float_rmat_transp_mult(&body_bearing, &stereocam.body_to_cam, &camera_bearing);
 
-    imav2017_set_gate(q, w, h, body_bearing.psi, body_bearing.theta, d);
+    uint8_t gate_detected=0;
+    if(q>15)
+    	gate_detected = 1;
+    imav2017_set_gate(q, w, h, body_bearing.psi, body_bearing.theta, d,gate_detected);
     break;
   }
 

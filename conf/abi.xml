@@ -119,6 +119,13 @@
       <field name="range_sensors_detect" type="bool" />
     </message>
 
+    <message name="GATE_DETECTION" id="21">
+      <field name="gate_detected" type="uint8_t"/>
+      <field name="gate_x_offset" type="float" unit="m"/>
+      <field name="gate_y_offset" type="float" unit="m"/>
+      <field name="gate_distance" type="float" unit="m"/>
+    </message>
+
   </msg_class>
 
 </protocol>

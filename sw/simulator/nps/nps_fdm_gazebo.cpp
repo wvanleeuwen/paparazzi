@@ -867,7 +867,8 @@ static void gazebo_read_stereo_camera(void)
     roi[0].x=0; roi[0].y=0; roi[1].x=IMAGE_WIDTH; roi[1].y=IMAGE_HEIGHT;
 
     static struct gate_t gate;
-    snake_gate_detection(&gradient, &gate, false, NULL, roi, NULL);
+    bool gate_detected = false;
+    gate_detected = snake_gate_detection(&gradient, &gate, false, NULL, roi, NULL);
 
     float w = 2.f * gate.sz * FOVX / IMAGE_WIDTH;
     float h = 2.f * (float)(gate.sz_left > gate.sz_right ? gate.sz_left : gate.sz_right)
@@ -881,7 +882,7 @@ static void gazebo_read_stereo_camera(void)
     static struct FloatEulers body_bearing;
     float_rmat_transp_mult(&body_bearing, &body_to_cam, &camera_bearing);
 
-    imav2017_set_gate(gate.q, w, h, body_bearing.psi, body_bearing.theta, 0);
+    imav2017_set_gate(gate.q, w, h, body_bearing.psi, body_bearing.theta, 0,(uint8_t)gate_detected);
 
 
     // GET obstacle
