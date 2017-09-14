@@ -130,7 +130,8 @@ void stereocam_init(void)
 void stereocam_parse_vel(struct FloatVect3 camera_vel, float R2)
 {
   uint32_t now_ts = get_sys_time_usec();
-  float noise = 1.5*(1.1 - R2);
+  float noise = 0.5*(1.1 - R2);
+  //float noise = 1.5*(1.1 - R2);
 
   // Rotate camera frame to body frame
   static struct FloatVect3 body_vel;

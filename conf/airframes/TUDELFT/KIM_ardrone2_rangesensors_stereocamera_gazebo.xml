@@ -213,6 +213,7 @@
     <define name="PGAIN" value="100"/>
     <define name="DGAIN" value="100"/>
     <define name="IGAIN" value="30"/>
+    <define name="REF_MAX_SPEED" value="0.3"/>
   </section>
 
   <section name="SIMULATOR" prefix="NPS_">

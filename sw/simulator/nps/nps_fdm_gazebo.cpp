@@ -739,6 +739,9 @@ static void gazebo_read_range_sensors(void)
 ////////////COPIED FROM main.c
 struct FloatRMat body_to_cam;
 struct FloatEulers cam_angles;
+
+#include "filters/median_filter.h"
+struct MedianFilterFloat medianfilter_distance;
 //////////////////////////////////////
 /******************************************************************/
 
@@ -795,6 +798,8 @@ static void gazebo_init_stereo_camera(void)
   struct FloatEulers euler = {0, 0, 0};
 #endif
   float_rmat_of_eulers(&body_to_cam, &euler);
+
+  init_median_filter_f(&medianfilter_distance, MEDIAN_DEFAULT_SIZE);
 
   /******************************************************************/
 
@@ -902,18 +907,25 @@ static void gazebo_read_stereo_camera(void)
 
     /*Copied from stereocam.c*/
 
-
     //TODO: automatically get FOV
     float pxtorad=(float)RadOfDeg(59) / 128;
-    float heading = (float)(pixel_location_of_closest_object)*pxtorad;
+
+    float heading = (float)(pixel_location_of_closest_object-49)*pxtorad;
     float distance = (float)(closest_average_distance)/100;
+
+   DOWNLINK_SEND_SETTINGS(DOWNLINK_TRANSPORT, DOWNLINK_DEVICE, &distance, &heading);
+
+    //float x_offset_collision = tanf(heading)*distance;
+
+    //AbiSendMsgSTEREO_FORCEFIELD(ABI_BROADCAST, 0, 0,0);
 
     AbiSendMsgOBSTACLE_DETECTION(AGL_RANGE_SENSORS_GAZEBO_ID, distance, heading);
     /////////////////////////////////
+/*
     int32_t stereo_distance_filtered_int32[128];
     for(int x=0;x<img.w;x++)stereo_distance_filtered_int32[x]= (int32_t)stereo_distance_filtered[x];
+*/
 
-    DOWNLINK_SEND_SETTINGS(DOWNLINK_TRANSPORT, DOWNLINK_DEVICE, &distance, &heading);
 
     ///PLOT STUFF
     /*   plt::clf();
