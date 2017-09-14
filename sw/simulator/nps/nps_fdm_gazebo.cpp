@@ -847,7 +847,7 @@ static void gazebo_read_stereo_camera(void)
 
 
 
-    static struct FloatVect3 camera_vel;
+    static struct FloatVect3 camera_vel, camera_dist;
 
     float res = (float)(edgeflow_params.RES);
 
@@ -855,9 +855,16 @@ static void gazebo_read_stereo_camera(void)
     camera_vel.y = edgeflow.vel.y / res;
     camera_vel.z = edgeflow.vel.z / res;
 
-    float R2 = edgeflow.flow_quality / res;
+    float R2 = (float)edgeflow.flow_quality / res;
+    if(guidance_h.sp.heading_rate!=0){
+    camera_dist.x = (float)edgeflow_snapshot.dist_traveled.x/res;
+    camera_dist.y = (float)edgeflow_snapshot.dist_traveled.y/res;
+    camera_dist.z = (float)edgeflow_snapshot.dist_traveled.z/res;
+    }else{
+    	camera_dist.x =0; camera_dist.y=0; camera_dist.z=0;};
+    float distance_R2 = (float)edgeflow_snapshot.quality/res;
 
-    stereocam_parse_vel(camera_vel, R2);
+    stereocam_parse_vel(camera_vel, R2,camera_dist,distance_R2);
 
 
     //////Gate Detector//////
@@ -913,7 +920,7 @@ static void gazebo_read_stereo_camera(void)
     float heading = (float)(pixel_location_of_closest_object-49)*pxtorad;
     float distance = (float)(closest_average_distance)/100;
 
-   DOWNLINK_SEND_SETTINGS(DOWNLINK_TRANSPORT, DOWNLINK_DEVICE, &distance, &heading);
+  // DOWNLINK_SEND_SETTINGS(DOWNLINK_TRANSPORT, DOWNLINK_DEVICE, &distance, &heading);
 
     //float x_offset_collision = tanf(heading)*distance;
 

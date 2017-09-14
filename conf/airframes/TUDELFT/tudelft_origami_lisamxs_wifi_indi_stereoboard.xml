@@ -214,7 +214,7 @@
    <define name="DGAIN" value="145"/><!--260-->
    <define name="IGAIN" value="0"/>
    <define name="MAX_BANK" value="RadOfDeg(15)"/>
-   <define name="REF_MAX_SPEED" value="0.5"/>
+   <define name="REF_MAX_SPEED" value="0.3"/>
    <define name="USE_SPEED_REF" value="TRUE"/>
 
  </section>

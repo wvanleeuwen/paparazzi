@@ -72,6 +72,10 @@
       <field name="y" type="float" unit="m/s"/>
       <field name="z" type="float" unit="m/s"/>
       <field name="noise" type="float"/>
+      <field name="distance_x" type="float" unit="m"/>
+      <field name="distance_y" type="float" unit="m"/>
+      <field name="distance_z" type="float" unit="m"/>
+      <field name="distance_noise" type="float"/>
     </message>
 
     <message name="RSSI" id="13">

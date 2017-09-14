@@ -127,15 +127,16 @@ void stereocam_init(void)
   init_median_filter_f(&medianfilter_noise, MEDIAN_DEFAULT_SIZE);
 }
 
-void stereocam_parse_vel(struct FloatVect3 camera_vel, float R2)
+void stereocam_parse_vel(struct FloatVect3 camera_vel, float R2, struct FloatVect3 camera_dist, float distance_R2)
 {
   uint32_t now_ts = get_sys_time_usec();
   float noise = 0.5*(1.1 - R2);
-  //float noise = 1.5*(1.1 - R2);
+  float distance_noise = 1.5*(1.1 - distance_R2);
 
   // Rotate camera frame to body frame
-  static struct FloatVect3 body_vel;
+  static struct FloatVect3 body_vel,body_dist;
   float_rmat_transp_vmult(&body_vel, &stereocam.body_to_cam, &camera_vel);
+  float_rmat_transp_vmult(&body_dist, &stereocam.body_to_cam, &camera_dist);
 
   //todo make setting
   if (STEREOCAM_USE_MEDIAN_FILTER) {
@@ -144,7 +145,7 @@ void stereocam_parse_vel(struct FloatVect3 camera_vel, float R2)
     update_median_filter_f(&medianfilter_noise, noise);
   }
 
-  //DOWNLINK_SEND_IMU_MAG(DOWNLINK_TRANSPORT, DOWNLINK_DEVICE, &body_vel.x, &body_vel.y, &body_vel.z);
+  DOWNLINK_SEND_IMU_MAG(DOWNLINK_TRANSPORT, DOWNLINK_DEVICE, &body_vel.x, &body_vel.y, &body_vel.z);
 
   if(stateGetPositionEnu_f()->z > 0.4 && body_vel.x < 2.f && body_vel.y < 2.f)
   {
@@ -153,7 +154,11 @@ void stereocam_parse_vel(struct FloatVect3 camera_vel, float R2)
                                 body_vel.x,
                                 body_vel.y,
                                 body_vel.z,
-                                noise
+                                noise,
+								body_dist.x,
+								body_dist.y,
+								body_dist.z,
+								distance_noise
                                );
   }
 
@@ -192,6 +197,8 @@ static void stereocam_parse_msg(void)
 
   case DL_STEREOCAM_VELOCITY: {
     static struct FloatVect3 camera_vel;
+    static struct FloatVect3 camera_dist;
+
 
     float res = (float)DL_STEREOCAM_VELOCITY_resolution(stereocam_msg_buf);
 
@@ -199,9 +206,14 @@ static void stereocam_parse_msg(void)
     camera_vel.y = (float)DL_STEREOCAM_VELOCITY_vely(stereocam_msg_buf)/res;
     camera_vel.z = (float)DL_STEREOCAM_VELOCITY_velz(stereocam_msg_buf)/res;
 
-    float R2 = (float)DL_STEREOCAM_VELOCITY_vRMS(stereocam_msg_buf)/res;
+    camera_dist.x = (float)DL_STEREOCAM_VELOCITY_dposx(stereocam_msg_buf)/res;
+    camera_dist.y = (float)DL_STEREOCAM_VELOCITY_dposy(stereocam_msg_buf)/res;
+    camera_dist.z = (float)DL_STEREOCAM_VELOCITY_dposz(stereocam_msg_buf)/res;
 
-    stereocam_parse_vel(camera_vel, R2);
+    float R2 = (float)DL_STEREOCAM_VELOCITY_vRMS(stereocam_msg_buf)/res;
+    float distance_R2 = (float)DL_STEREOCAM_VELOCITY_posRMS(stereocam_msg_buf)/res;
+
+    stereocam_parse_vel(camera_vel, R2,camera_dist,distance_R2);
     break;
   }
 
@@ -232,7 +244,7 @@ static void stereocam_parse_msg(void)
 
     //TODO: automatically get FOV
     float pxtorad=(float)RadOfDeg(59) / 128;
-    float heading = (float)(pixel_location_of_closest_object)*pxtorad;
+    float heading = (float)(pixel_location_of_closest_object-54)*pxtorad;
     float distance = (float)(closest_average_distance)/100;
 
     DOWNLINK_SEND_SETTINGS(DOWNLINK_TRANSPORT, DOWNLINK_DEVICE, &distance, &heading);

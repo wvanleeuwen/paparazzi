@@ -143,8 +143,12 @@ static void gps_cb(uint8_t sender_id, uint32_t stamp, struct GpsState *gps_s);
 #define INS_INT_VEL_ID ABI_BROADCAST
 #endif
 static abi_event vel_est_ev;
-static void vel_est_cb(uint8_t sender_id, uint32_t stamp, float x, float y, float z, float noise);
-
+static void vel_est_cb(uint8_t sender_id __attribute__((unused)),
+                       uint32_t stamp,
+                       float x, float y, float z,
+                       float noise __attribute__((unused)),
+					   float dx, float dy, float dz
+					   ,float dnoise);
 struct InsInt ins_int;
 
 #if PERIODIC_TELEMETRY
@@ -524,21 +528,30 @@ static void gps_cb(uint8_t sender_id __attribute__((unused)),
 static void vel_est_cb(uint8_t sender_id __attribute__((unused)),
                        uint32_t stamp,
                        float x, float y, float z,
-                       float noise __attribute__((unused)))
+                       float noise __attribute__((unused)),
+					   float dx, float dy, float dz
+					   ,float dnoise)
 {
   struct FloatVect3 vel_body = {x, y, z};
+  struct FloatVect3 dist_body = {dx, dy, dz};
 
   /* rotate velocity estimate to nav/ltp frame */
   struct FloatQuat q_b2n = *stateGetNedToBodyQuat_f();
   QUAT_INVERT(q_b2n, q_b2n);
-  struct FloatVect3 vel_ned;
+  struct FloatVect3 vel_ned, dist_ned;
   float_quat_vmult(&vel_ned, &q_b2n, &vel_body);
+  float_quat_vmult(&dist_ned, &q_b2n, &dist_body);
 
 #if USE_HFF
   struct FloatVect2 vel = {vel_ned.x, vel_ned.y};
   struct FloatVect2 Rvel = {noise, noise};
 
+  struct FloatVect2 dist = {dist_ned.x, dist_ned.y};
+  struct FloatVect2 Rdist = {dnoise, dnoise};
+
+
   hff_update_vel(vel,  Rvel);
+  hff_update_pos(dist,Rdist);
   ins_update_from_hff();
 #else
   ins_int.ltp_speed.x = SPEED_BFP_OF_REAL(vel_ned.x);
