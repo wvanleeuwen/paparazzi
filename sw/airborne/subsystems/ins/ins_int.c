@@ -109,6 +109,10 @@ PRINT_CONFIG_MSG("INS_SONAR_UPDATE_ON_AGL defaulting to FALSE")
 PRINT_CONFIG_MSG("USE_INS_NAV_INIT defaulting to TRUE")
 #endif
 
+#ifndef HFF_UPDATE_SNAPSHOT_POS
+#define HFF_UPDATE_SNAPSHOT_POS FALSE
+#endif
+
 /** default barometer to use in INS */
 #ifndef INS_INT_BARO_ID
 #if USE_BARO_BOARD
@@ -551,7 +555,9 @@ static void vel_est_cb(uint8_t sender_id __attribute__((unused)),
 
 
   hff_update_vel(vel,  Rvel);
+#if HFF_UPDATE_SNAPSHOT_POS
   hff_update_pos(dist,Rdist);
+#endif
   ins_update_from_hff();
 #else
   ins_int.ltp_speed.x = SPEED_BFP_OF_REAL(vel_ned.x);

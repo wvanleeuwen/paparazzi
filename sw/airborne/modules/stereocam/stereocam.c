@@ -247,6 +247,28 @@ static void stereocam_parse_msg(void)
     float heading = (float)(pixel_location_of_closest_object-54)*pxtorad;
     float distance = (float)(closest_average_distance)/100;
 
+    float x_offset_collision = tanf(heading)*distance;
+
+    float vel_x_FF=0, vel_y_FF=0;
+    if(pixel_location_of_closest_object !=0&&distance<1.5)
+    {
+      if(fabs(heading)<0.2)
+      {
+    	  vel_x_FF = -0.3;
+      }
+
+    	  vel_y_FF = -0.2 * heading/fabs(heading);
+
+
+    }else{
+        AbiSendMsgSTEREO_FORCEFIELD(ABI_BROADCAST, vel_x_FF, vel_y_FF,0);
+
+    }
+
+    AbiSendMsgSTEREO_FORCEFIELD(ABI_BROADCAST, 0, 0,0);
+
+
+
     DOWNLINK_SEND_SETTINGS(DOWNLINK_TRANSPORT, DOWNLINK_DEVICE, &distance, &heading);
 
 
