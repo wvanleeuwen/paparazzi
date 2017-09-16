@@ -1,10 +1,12 @@
-<!DOCTYPE flight_plan SYSTEM "../flight_plan.dtd">
+<!DOCTYPE flight_plan SYSTEM "../../flight_plan.dtd">
 
 <flight_plan alt="1.0" ground_alt="0" lat0="51.990634" lon0="4.376789" max_dist_from_home="20" name="Rotorcraft Optitrack (Delft)" security_height="0.3">
   <header>
   	#include "autopilot_guided.h"
-#include "autopilot.h"
- #include "subsystems/datalink/datalink.h"
+		#include "autopilot.h"
+ 		#include "subsystems/datalink/datalink.h"
+		#include "subsystems/datalink/telemetry.h"
+		#include "firmwares/rotorcraft/guidance/guidance_h.h"
 
 		// Useful Combination of the flags fir the autopilot_guided_update
 		#define GUIDED_FLAG_XY_VEL_BODY GUIDED_FLAG_XY_BODY|GUIDED_FLAG_XY_VEL
@@ -14,6 +16,7 @@
 		#define GUIDED_FLAG_XY_OFFSET_YAW_OFFSET GUIDED_FLAG_XY_OFFSET|GUIDED_FLAG_YAW_OFFSET
 		#define GUIDED_FLAG_XY_VEL_YAW_RATE GUIDED_FLAG_XY_OFFSET|GUIDED_FLAG_YAW_RATE
     #define GUIDED_FLAG_XY_OFFSET_BODY_YAW_OFFSET GUIDED_FLAG_XY_OFFSET|GUIDED_FLAG_XY_BODY|GUIDED_FLAG_YAW_OFFSET
+    #define GUIDED_FLAG_XY_OFFSET_BODY_YAW_RATE GUIDED_FLAG_XY_OFFSET|GUIDED_FLAG_XY_BODY|GUIDED_FLAG_YAW_RATE
 
   </header>
   <waypoints>
@@ -21,6 +24,7 @@
     <waypoint name="STDBY" x="0.0" y="0.0"/>
     <waypoint name="CLIMB" x="0" y="0"/>
   </waypoints>
+
   <variables>
 	  <variable var="desired_heading" init="0.0f" type="float"/>
 	  <variable var="save_heading" init="0.0f" type="float"/>
@@ -40,13 +44,23 @@
 	  <variable var="gain_wall" init="0.1" type="float" min="0." max="1." step="0.01"/>
     <variable var="turned_left" init="FALSE" type="bool"/>
     <variable var="turned_right" init="TRUE" type="bool"/>
+    <variable var="x_offset_collision" init="0.45" type="float"/>
+    <variable var="save_offset" init="0.5" type="float" min=" 0.1" max="2.5" step="0.1"/>
+
     <abi_binding name="OBSTACLE_DETECTION" vars="distance_obstacle_FP, heading_obstacle_FP"/>
     <abi_binding name="RANGE_FORCEFIELD" vars="vel_body_x_FF, vel_body_y_FF, vel_body_z_FF"/>
     <abi_binding name="RANGE_WALLFOLLOWING" vars="heading_leftturn_WF,heading_rightturn_WF,range_sensor_detect_WF"/>
-  <abi_binding name="GATE_DETECTION" vars="gate_detected,gate_x_offset,gate_y_offset,gate_distance"/>
+    <abi_binding name="GATE_DETECTION" vars="gate_detected,gate_x_offset,gate_y_offset,gate_distance"/>
+    <abi_binding name="STEREO_FORCEFIELD" vars="vel_body_x_FF_stereo, vel_body_y_FF_stereo, vel_body_z_FF_stereo"/>
 	</variables>
-
-
+  <includes>
+     <include name="avoid_pillars" procedure="avoid_pillars_v2.xml"/>
+     <include name="go_through_gate" procedure="go_through_gate.xml"/>
+  </includes>
+  <exceptions>
+      <!--exception cond="datalink_time>3" deroute="Land"/--> 
+      <!--exception cond="autopilot_get_mode() == AP_MODE_ATTITUDE_DIRECT" deroute="Wait for Guided"/--> 
+  </exceptions>
 
   <blocks>
     <block name="FPInit">
@@ -77,6 +91,7 @@
       <while cond="1"/>
     </block>
 
+
 <!--For Manual Take-off -->
     <!--block name="Wait for Guided">
       <while cond="!(autopilot_get_mode() == AP_MODE_GUIDED)"/>
@@ -85,80 +100,6 @@
      <deroute block="Go Forward"/>   
     </block-->
 
-<!--
-           Go through window
- -->
-<!--Find window (maybe turning is better than moving sideways?) -->
-    <block name="Find Window">
-      <call_once fun="autopilot_guided_update(GUIDED_FLAG_XY_VEL_BODY_YAW_OFFSET,0,0.3,-nominal_alt,0)"/>
-      <while cond="!(gate_detected)"/>
-      <call_once fun="autopilot_guided_update(GUIDED_FLAG_XY_VEL_BODY_YAW_OFFSET,0,0,-nominal_alt,0)"/>
-      <while cond="LessThan(stage_time,1)"/>
-    </block>
-
-    <block name="Align with window">
-      <call_once fun="autopilot_guided_update(GUIDED_FLAG_XY_OFFSET_BODY_YAW_OFFSET,0,gate_y_offset,-nominal_alt,0)"/>
-      <while cond="LessThan(stage_time,1)"/>
-      <exception cond="!(gate_detected)" deroute="Find Window"/> 
-    </block>
-
-    <block name="Go Through Window">
-      <call_once fun="autopilot_guided_update(GUIDED_FLAG_XY_OFFSET_BODY_YAW_OFFSET,gate_distance,0,-nominal_alt,0)"/>
-      <while cond="LessThan(stage_time,1)"/>
-    </block>
-
-    <block name="Check Window">
-      <call_once fun="autopilot_guided_update(GUIDED_FLAG_XY_OFFSET_BODY_YAW_OFFSET,0,0,-nominal_alt,0)"/>
-      <while cond="LessThan(stage_time,1)"/>
-      <exception cond="(gate_detected)" deroute="Align with window"/> 
-    </block>
-
-
-<!--Obstacle Field Navigation -->
-    <block name="Go Forward">
-         <set var="save_heading" value="0"/>
-        <call_once fun="autopilot_guided_update(GUIDED_FLAG_XY_VEL_BODY_YAW_RATE,0,0,-nominal_alt,0)"/>
-      <while cond="LessThan(stage_time,1)"/> 
-        <call_once fun="autopilot_guided_update(GUIDED_FLAG_XY_VEL_BODY_YAW_RATE,forward_vel,0,-nominal_alt,0)"/>
-
-      <!--while cond="1">
-         <set var="diff_heading" value="stateGetNedToBodyEulers_f()->psi-desired_heading"/>
-         <call_once fun="FLOAT_ANGLE_NORMALIZE(diff_heading)"/>
-         <set var="save_heading" value="diff_heading"/>
-      </while>
-      <exception cond="1.2>distance_obstacle_FP&&0>save_heading" deroute="Turn Right"/> 
-      <exception cond="1.2>distance_obstacle_FP&&save_heading>0" deroute="Turn Left"/--> 
-      <while cond="1"/>
-      <exception cond="1.2>distance_obstacle_FP&&turned_left == TRUE" deroute="Turn Right"/> 
-      <exception cond="1.2>distance_obstacle_FP&&turned_right == TRUE" deroute="Turn Left"/> 
-    </block>
-
-
-   <block name="Turn Left">
-        <call_once fun="autopilot_guided_update(GUIDED_FLAG_XY_VEL_BODY_YAW_RATE,-0.1,0,-nominal_alt,0)"/>
-      <while cond="1.0>distance_obstacle_FP"/>
-      <call_once fun="autopilot_guided_update(GUIDED_FLAG_XY_VEL_BODY_YAW_RATE,0,0,-nominal_alt,0)"/>
-      <while cond="fabs(stateGetSpeedNed_f()->x)>0.05||fabs(stateGetSpeedNed_f()->x)>0.05||fabs(stateGetNedToBodyEulers_f()->theta)>0.05||fabs(stateGetNedToBodyEulers_f()->phi)>0.05"/>
-      <call_once fun="autopilot_guided_update(GUIDED_FLAG_XY_VEL_BODY_YAW_RATE,0,0,-nominal_alt,0.3)"/>
-      <while cond="1.2>distance_obstacle_FP"/>
-     <while cond="LessThan(stage_time,1)"/>
-      <set var="turned_left" value="TRUE"/>
-      <set var="turned_right" value="FALSE"/>
-      <deroute block="Go Forward"/>
-    </block>
-
-   <block name="Turn Right">
-        <call_once fun="autopilot_guided_update(GUIDED_FLAG_XY_VEL_BODY_YAW_RATE,-0.1,0,-nominal_alt,0)"/>
-      <while cond="1.0>distance_obstacle_FP"/>
-      <call_once fun="autopilot_guided_update(GUIDED_FLAG_XY_VEL_BODY_YAW_RATE,0,0,-nominal_alt,0)"/>
-      <while cond="fabs(stateGetSpeedNed_f()->x)>0.05||fabs(stateGetNedToBodyEulers_f()->theta)>0.05||fabs(stateGetNedToBodyEulers_f()->phi)>0.05"/>
-      <call_once fun="autopilot_guided_update(GUIDED_FLAG_XY_VEL_BODY_YAW_RATE,0,0,-nominal_alt,-0.3)"/>
-      <while cond="1.2>distance_obstacle_FP"/>
-     <while cond="LessThan(stage_time,1)"/>
-      <set var="turned_right" value="TRUE"/>
-      <set var="turned_left" value="FALSE"/>
-      <deroute block="Go Forward"/>
-    </block>
 
 
 
