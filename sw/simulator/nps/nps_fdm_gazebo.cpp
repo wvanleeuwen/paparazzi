@@ -878,13 +878,13 @@ static void gazebo_read_stereo_camera(void)
     struct point_t roi[2];
     roi[0].x=0; roi[0].y=0; roi[1].x=IMAGE_WIDTH; roi[1].y=IMAGE_HEIGHT;
 
-    gate_set_intensity(0,255);
+    gate_set_intensity(50,250);
     static struct gate_t gate;
     bool gate_detected = false;
 
-/* For debugging gate detection
- *   gate_detected = snake_gate_detection(&gradient, &gate, false, NULL, roi, NULL);
-    cv::Mat gradient_cv(96,128,CV_8UC1,(uint8_t *)gradient.buf);
+ //For debugging gate detection
+    gate_detected = snake_gate_detection(&gradient, &gate, false, NULL, roi, NULL);
+/*    cv::Mat gradient_cv(96,128,CV_8UC1,(uint8_t *)gradient.buf);
     cv::imshow("gradient", gradient_cv);
     cv::waitKey(1);*/
 

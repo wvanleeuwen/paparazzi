@@ -553,12 +553,20 @@ static void vel_est_cb(uint8_t sender_id __attribute__((unused)),
   struct FloatVect2 dist = {dist_ned.x, dist_ned.y};
   struct FloatVect2 Rdist = {dnoise, dnoise};
 
-
   hff_update_vel(vel,  Rvel);
 #if HFF_UPDATE_SNAPSHOT_POS
+  static struct EnuCoor_f prev_pos = {0};
+  // add position increment to prev position est
+  dist.x += prev_pos.x;
+  dist.y += prev_pos.y;
+  dist.z += prev_pos.z;
   hff_update_pos(dist,Rdist);
 #endif
   ins_update_from_hff();
+#if HFF_UPDATE_SNAPSHOT_POS
+  // get current filtered position for next pass
+  prevPos = *stateGetPositionEnu_f();
+#endif
 #else
   ins_int.ltp_speed.x = SPEED_BFP_OF_REAL(vel_ned.x);
   ins_int.ltp_speed.y = SPEED_BFP_OF_REAL(vel_ned.y);
