@@ -161,8 +161,12 @@ void opticflow_module_run(void)
       AbiSendMsgVELOCITY_ESTIMATE(OPTICFLOW_SEND_ABI_ID, now_ts,
                                   opticflow_result.vel_body_x,
                                   opticflow_result.vel_body_y,
+                                  0.0f, // WHY?!
+                                  opticflow_result.noise_measurement,
                                   0.0f,
-                                  opticflow_result.noise_measurement
+                                  0.0f,
+                                  0.0f,
+                                  0.0f
                                  );
     }
     opticflow_got_result = false;
@@ -183,18 +187,16 @@ struct image_t *opticflow_module_calc(struct image_t *img)
   // TODO : put accelerometer values at pose of img timestamp
   struct opticflow_state_t temp_state;
   struct pose_t pose = get_rotation_at_timestamp(img->pprz_ts);
-  temp_state = opticflow_state;
-  temp_state.rates = pose.rates;
+  img->eulers = pose.eulers;
 
   // Do the optical flow calculation
   static struct opticflow_result_t temp_result = {}; // static so that the number of corners is kept between frames
-  opticflow_calc_frame(&opticflow, &temp_state, img, &temp_result);
+  bool flow_successful = opticflow_calc_frame(&opticflow, img, &temp_result);
 
   // Copy the result if finished
   pthread_mutex_lock(&opticflow_mutex);
   opticflow_result = temp_result;
-  opticflow_got_result = true;
-
+  opticflow_got_result = flow_successful;
 
   // release the mutex as we are done with editing the opticflow result
   pthread_mutex_unlock(&opticflow_mutex);

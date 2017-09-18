@@ -45,25 +45,24 @@ float agl_dist_value_filtered;
 #define AGL_DIST_SONAR_MIN_RANGE 0.001
 #endif
 #ifndef AGL_DIST_SONAR_FILTER
-#define AGL_DIST_SONAR_FILTER 5
+#define AGL_DIST_SONAR_FILTER 5.f
 #endif
 
-abi_event sonar_ev;
+abi_event agl_ev;
 
-static void sonar_cb(uint8_t sender_id, float distance);
+static void agl_cb(uint8_t sender_id, float distance);
 
 void agl_dist_init(void)
 {
   agl_dist_valid = false;
-  agl_dist_value = 0.;
-  agl_dist_value_filtered = 0.;
+  agl_dist_value = 0.f;
+  agl_dist_value_filtered = 0.f;
 
   // Bind to AGL message
-  AbiBindMsgAGL(AGL_DIST_SONAR_ID, &sonar_ev, sonar_cb);
+  AbiBindMsgAGL(AGL_DIST_SONAR_ID, &agl_ev, agl_cb);
 }
 
-
-static void sonar_cb(uint8_t __attribute__((unused)) sender_id, float distance)
+static void agl_cb(uint8_t __attribute__((unused)) sender_id, float distance)
 {
   if (distance < AGL_DIST_SONAR_MAX_RANGE && distance > AGL_DIST_SONAR_MIN_RANGE) {
     agl_dist_value = distance;

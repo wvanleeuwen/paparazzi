@@ -305,10 +305,8 @@ void ins_int_propagate(struct Int32Vect3 *accel, float dt)
   }
 
 #if USE_HFF
-  struct Int32Vect2 accel_ltp;
-  VECT2_ASSIGN(accel_ltp, accel_meas_ltp.x, accel_meas_ltp.y);
   /* propagate horizontal filter */
-  hff_propagate(accel_ltp, dt);
+  hff_propagate();
   /* convert and copy result to ins_int */
   ins_update_from_hff();
 #else
@@ -547,15 +545,16 @@ static void vel_est_cb(uint8_t sender_id __attribute__((unused)),
   float_quat_vmult(&dist_ned, &q_b2n, &dist_body);
 
 #if USE_HFF
-  struct FloatVect2 vel = {vel_ned.x, vel_ned.y};
-  struct FloatVect2 Rvel = {noise, noise};
+    struct FloatVect2 vel = {vel_ned.x, vel_ned.y};
+    struct FloatVect2 Rvel = {noise, noise};
+
+    hff_update_vel(vel,  Rvel);
+#if HFF_UPDATE_SNAPSHOT_POS
+  static struct EnuCoor_f prev_pos = {0};
 
   struct FloatVect2 dist = {dist_ned.x, dist_ned.y};
   struct FloatVect2 Rdist = {dnoise, dnoise};
 
-  hff_update_vel(vel,  Rvel);
-#if HFF_UPDATE_SNAPSHOT_POS
-  static struct EnuCoor_f prev_pos = {0};
   // add position increment to prev position est
   dist.x += prev_pos.x;
   dist.y += prev_pos.y;

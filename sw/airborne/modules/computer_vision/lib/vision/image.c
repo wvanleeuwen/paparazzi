@@ -84,6 +84,8 @@ void image_copy(struct image_t *input, struct image_t *output)
   output->h = input->h;
   output->buf_size = input->buf_size;
   output->ts = input->ts;
+  output->eulers = input->eulers;
+  output->pprz_ts = input->pprz_ts;
   memcpy(output->buf, input->buf, input->buf_size);
 }
 
