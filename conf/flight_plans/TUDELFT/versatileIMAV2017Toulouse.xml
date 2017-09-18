@@ -1,6 +1,6 @@
 <!DOCTYPE flight_plan SYSTEM "../flight_plan.dtd">
 
-<flight_plan alt="200" ground_alt="163" home_mode_height="50" lat0="43.54337" lon0="1.3580" max_dist_from_home="1500" name="Imav2017ToulouseOutdoor" qfu="270" security_height="25" geofence_sector="GREEN1" geofence_max_alt="300">
+<flight_plan alt="200" ground_alt="163" home_mode_height="50" lat0="43.54337" lon0="1.3580" max_dist_from_home="1500" name="Imav2017ToulouseOutdoor" qfu="270" security_height="25">
   <header>
 #include "subsystems/datalink/datalink.h"
 </header>
@@ -38,7 +38,7 @@
       <corner name="_3"/>
       <corner name="_2"/>
     </sector>
-    <sector color="green" name="GREEN1">
+    <sector color="green" name="GREEN">
       <corner name="FA1"/>
       <corner name="FA4"/>
       <corner name="FA3"/>
@@ -54,8 +54,14 @@
   <variables>
     <variable init="15." max="50." min="0." step="1.0" var="roll_step"/>
   </variables>
-  <exceptions/>
+    <exceptions>
+     <exception cond="datalink_time > 22" deroute="Standby"/>
+     <exception cond="Or(! InsideGREEN(GetPosX(), GetPosY()), GetPosAlt() > GetAltRef() + 150)" deroute="Center"/>
+    </exceptions>
   <blocks>
+    <block name="Center" pre_call="if (!InsideSquare(GetPosX(), GetPosY())) NavKillThrottle();">
+      <circle wp="HOME" radius="DEFAULT_CIRCLE_RADIUS"/>
+    </block>
     <block name="Wait GPS">
       <set value="1" var="autopilot.kill_throttle"/>
       <while cond="!GpsFixValid()"/>
@@ -192,7 +198,7 @@
       <go from="STDBY" hmode="route" wp="2"/>
       <go from="2" hmode="route" wp="STDBY"/>
     </block>
-    <block name="Fly in Square">
+<!--    <block name="Fly in Square">
       <exception cond="! InsideSquare(GetPosX(), GetPosY())" deroute="Come back wp 1"/>
       <attitude alt="GetAltRef()+75" roll="0" vmode="alt"/>
     </block>
@@ -200,6 +206,6 @@
       <exception cond="InsideSquare(GetPosX(), GetPosY())" deroute="Fly in Square"/>
       <go wp="1"/>
       <deroute block="Fly in Square"/>
-    </block>
+    </block> -->
   </blocks>
 </flight_plan>
