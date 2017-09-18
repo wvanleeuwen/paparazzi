@@ -1,18 +1,18 @@
 <!DOCTYPE flight_plan SYSTEM "../flight_plan.dtd">
 
-<flight_plan alt="260" ground_alt="185" home_mode_height="50" lat0="43.54337" lon0="1.3580" max_dist_from_home="1500" name="Versatile" qfu="270" security_height="25">
+<flight_plan alt="200" ground_alt="163" home_mode_height="50" lat0="43.54337" lon0="1.3580" max_dist_from_home="1500" name="Imav2017ToulouseOutdoor" qfu="270" security_height="25" geofence_sector="GREEN1" geofence_max_alt="300">
   <header>
 #include "subsystems/datalink/datalink.h"
 </header>
   <waypoints>
     <waypoint name="HOME" x="-30.1" y="-4.2"/>
-    <waypoint name="STDBY" x="-31.0" y="-10.3"/>
+    <waypoint name="STDBY" x="-38.1" y="-84.7"/>
     <waypoint alt="215.0" name="AF" x="86.4" y="102.7"/>
     <waypoint alt="185.0" name="TD" x="9.0" y="4.8"/>
     <waypoint name="BASELEG" x="26.9" y="-23.0"/>
-    <waypoint name="CLIMB" x="-23.8" y="21.6"/>
+    <waypoint name="CLIMB" x="-29.1" y="-76.2"/>
     <waypoint name="MOB" x="-11.5" y="-21.2"/>
-    <waypoint lat="43.542580" lon="1.357045" name="1"/>
+    <waypoint lat="43.542628" lon="1.357239" name="1"/>
     <waypoint lat="43.544564" lon="1.358101" name="2"/>
     <waypoint lat="43.54186137484808" lon="1.35803816024604" name="_1"/>
     <waypoint lat="43.54486611900425" lon="1.360391560903072" name="_2"/>
@@ -32,11 +32,23 @@
     <waypoint lat="43.54289009468191" lon="1.357408650983151" name="GROUND_STATION"/>
   </waypoints>
   <sectors>
-    <sector name="Square">
+    <sector color="red" name="Square">
       <corner name="_1"/>
-      <corner name="_2"/>
-      <corner name="_3"/>
       <corner name="_4"/>
+      <corner name="_3"/>
+      <corner name="_2"/>
+    </sector>
+    <sector color="green" name="GREEN1">
+      <corner name="FA1"/>
+      <corner name="FA4"/>
+      <corner name="FA3"/>
+      <corner name="FA2"/>
+    </sector>
+    <sector color="yellow" name="MAP">
+      <corner name="MAP1"/>
+      <corner name="MAP2"/>
+      <corner name="MAP3"/>
+      <corner name="MAP4"/>
     </sector>
   </sectors>
   <variables>
