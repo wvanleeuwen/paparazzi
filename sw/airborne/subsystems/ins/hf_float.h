@@ -34,17 +34,18 @@
 #include "math/pprz_algebra_int.h"
 #include "generated/airframe.h"
 
-#define HFF_STATE_SIZE 2
+// X = [ z zdot bias ]
+#define HFF_STATE_SIZE 3
 
 struct HfilterFloat {
   float x;
-  /* float xbias; */
   float xdot;
   float xdotdot;
+  float xbias;
   float y;
-  /* float ybias; */
   float ydot;
   float ydotdot;
+  float ybias;
   float xP[HFF_STATE_SIZE][HFF_STATE_SIZE];
   float yP[HFF_STATE_SIZE][HFF_STATE_SIZE];
   uint16_t lag_counter;

@@ -79,14 +79,13 @@ float Rgps_pos, Rgps_vel;
 
 /*
 
-  X_x = [ x xdot]
-  X_y = [ y ydot]
+  X_x = [ x xdot xbias ]
+  X_y = [ y ydot ybias ]
 
 
 */
 /* output filter states */
 struct HfilterFloat hff;
-
 
 /* last acceleration measurement */
 static float hff_xdd_meas;
@@ -100,10 +99,11 @@ static float hff_yd_meas;
 static float hff_x_meas;
 static float hff_y_meas;
 
+/* default parameters */
+#define Qbiasbias 1e-7
+
 /*
  * For GPS lag compensation
- *
- *
  *
  */
 #ifdef GPS_LAG
@@ -178,17 +178,17 @@ static void hff_rb_drop_last(void);
 static void hff_set_state(struct HfilterFloat *dest, struct HfilterFloat *source);
 #endif
 
-static void hff_init_x(float init_x, float init_xdot);
-static void hff_init_y(float init_y, float init_ydot);
+static void hff_init_x(float init_x, float init_xdot, float init_xbias);
+static void hff_init_y(float init_y, float init_ydot, float init_ybias);
 
-static void hff_propagate_x(struct HfilterFloat *hff, float dt);
-static void hff_propagate_y(struct HfilterFloat *hff, float dt);
+static void hff_propagate_x(struct HfilterFloat *filt, float dt);
+static void hff_propagate_y(struct HfilterFloat *filt, float dt);
 
-static void hff_update_x(struct HfilterFloat *hff, float x_meas, float Rpos);
-static void hff_update_y(struct HfilterFloat *hff, float y_meas, float Rpos);
+static void hff_update_x(struct HfilterFloat *filt, float x_meas, float Rpos);
+static void hff_update_y(struct HfilterFloat *filt, float y_meas, float Rpos);
 
-static void hff_update_xdot(struct HfilterFloat *hff, float vel, float Rvel);
-static void hff_update_ydot(struct HfilterFloat *hff, float vel, float Rvel);
+static void hff_update_xdot(struct HfilterFloat *filt, float vel, float Rvel);
+static void hff_update_ydot(struct HfilterFloat *filt, float vel, float Rvel);
 
 #if PERIODIC_TELEMETRY
 #include "subsystems/datalink/telemetry.h"
@@ -201,7 +201,9 @@ static void send_hff(struct transport_tx *trans, struct link_device *dev)
                     &hff.xdot,
                     &hff.ydot,
                     &hff.xdotdot,
-                    &hff.ydotdot);
+                    &hff.ydotdot,
+                    &hff.xbias,
+                    &hff.ybias);
 }
 
 static void send_hff_debug(struct transport_tx *trans, struct link_device *dev)
@@ -214,7 +216,9 @@ static void send_hff_debug(struct transport_tx *trans, struct link_device *dev)
                         &hff.xP[0][0],
                         &hff.yP[0][0],
                         &hff.xP[1][1],
-                        &hff.yP[1][1]);
+                        &hff.yP[1][1],
+                        &hff.xP[2][2],
+                        &hff.yP[2][2]);
 }
 
 #ifdef GPS_LAG
@@ -233,8 +237,8 @@ void hff_init(float init_x, float init_xdot, float init_y, float init_ydot)
 {
   Rgps_pos = HFF_R_POS;
   Rgps_vel = HFF_R_SPEED;
-  hff_init_x(init_x, init_xdot);
-  hff_init_y(init_y, init_ydot);
+  hff_init_x(init_x, init_xdot, 0.f);
+  hff_init_y(init_y, init_ydot, 0.f);
 #ifdef GPS_LAG
   /* init buffer for past mean accel values */
   acc_buf_r = 0;
@@ -272,10 +276,11 @@ void hff_init(float init_x, float init_xdot, float init_y, float init_ydot)
 #endif
 }
 
-static void hff_init_x(float init_x, float init_xdot)
+static void hff_init_x(float init_x, float init_xdot, float init_xbias)
 {
   hff.x     = init_x;
   hff.xdot  = init_xdot;
+  hff.xbias = init_xbias;
   int i, j;
   for (i = 0; i < HFF_STATE_SIZE; i++) {
     for (j = 0; j < HFF_STATE_SIZE; j++) {
@@ -285,10 +290,11 @@ static void hff_init_x(float init_x, float init_xdot)
   }
 }
 
-static void hff_init_y(float init_y, float init_ydot)
+static void hff_init_y(float init_y, float init_ydot, float init_ybias)
 {
   hff.y     = init_y;
   hff.ydot  = init_ydot;
+  hff.ybias = init_ybias;
   int i, j;
   for (i = 0; i < HFF_STATE_SIZE; i++) {
     for (j = 0; j < HFF_STATE_SIZE; j++) {
@@ -383,7 +389,7 @@ static void hff_set_state(struct HfilterFloat *dest, struct HfilterFloat *source
   }
 }
 
-static void hff_propagate_past(struct HfilterFloat *hff_past)
+static void hff_propagate_past(struct HfilterFloat *filt_past)
 {
   PRINT_DBG(1, ("enter propagate past: %d\n", hff_past->lag_counter));
   /* run max MAX_PP_STEPS propagation steps */
@@ -536,6 +542,8 @@ void hff_realign(struct FloatVect2 pos, struct FloatVect2 vel)
   hff.y = pos.y;
   hff.xdot = vel.x;
   hff.ydot = vel.y;
+  hff.xbias = 0.f;
+  hff.ybias = 0.f;
 #ifdef GPS_LAG
   while (hff_rb_n > 0) {
     hff_rb_drop_last();
@@ -546,131 +554,171 @@ void hff_realign(struct FloatVect2 pos, struct FloatVect2 vel)
 }
 
 
-/*
+/**
+ * Propagate the filter in time.
  *
- * Propagation
+ * F = [ 1 dt -dt^2/2
+ *       0  1 -dt
+ *       0  0   1     ];
  *
+ * B = [ dt^2/2 dt 0]';
  *
-
- F = [ 1 dt
-       0  1 ];
-
- B = [ dt^2/2 dt]';
-
- Q = [ 0.01  0
-       0     0.01];
-
- Xk1 = F * Xk0 + B * accel;
-
- Pk1 = F * Pk0 * F' + Q;
-
-*/
-static void hff_propagate_x(struct HfilterFloat *hff, float dt)
+ * Q = [ Q     0       0
+ *       0     Qdotdot 0
+ *       0     0       Qbiasbias ];
+ *
+ * Xk1 = F * Xk0 + B * accel;
+ *
+ * Pk1 = F * Pk0 * F' + Q;
+ *
+ */
+static void hff_propagate_x(struct HfilterFloat *filt, float dt)
 {
   /* update state */
-  hff->xdotdot = hff_xdd_meas;
-  hff->x = hff->x + hff->xdot * dt;// + hff->xdotdot * dt * dt / 2;
-  hff->xdot = hff->xdot + dt * hff->xdotdot;
+  filt->xdotdot = hff_xdd_meas - filt->xbias;
+  filt->x = filt->x + filt->xdot * dt;// + filt->xdotdot * dt * dt / 2;
+  filt->xdot = filt->xdot + dt * filt->xdotdot;
   /* update covariance */
-  const float FPF00 = hff->xP[0][0] + dt * (hff->xP[1][0] + hff->xP[0][1] + dt * hff->xP[1][1]);
-  const float FPF01 = hff->xP[0][1] + dt * hff->xP[1][1];
-  const float FPF10 = hff->xP[1][0] + dt * hff->xP[1][1];
-  const float FPF11 = hff->xP[1][1];
+  const float FPF00 = filt->xP[0][0] + dt * (filt->xP[1][0] + filt->xP[0][1] + dt * filt->xP[1][1]);
+  const float FPF01 = filt->xP[0][1] + dt * (filt->xP[1][1] - filt->xP[0][2] - dt * filt->xP[1][2]);
+  const float FPF02 = filt->xP[0][2] + dt * (filt->xP[1][2]);
+  const float FPF10 = filt->xP[1][0] + dt * (-filt->xP[2][0] + filt->xP[1][1] - dt * filt->xP[2][1]);
+  const float FPF11 = filt->xP[1][1] + dt * (-filt->xP[2][1] - filt->xP[1][2] + dt * filt->xP[2][2]);
+  const float FPF12 = filt->xP[1][2] + dt * (-filt->xP[2][2]);
+  const float FPF20 = filt->xP[2][0] + dt * (filt->xP[2][1]);
+  const float FPF21 = filt->xP[2][1] + dt * (-filt->xP[2][2]);
+  const float FPF22 = filt->xP[2][2];
 
-  hff->xP[0][0] = FPF00 + Q * dt * dt/2.;
-  hff->xP[0][1] = FPF01;
-  hff->xP[1][0] = FPF10;
-  hff->xP[1][1] = FPF11 + Qdotdot * dt;
+  filt->xP[0][0] = FPF00 + Q * dt * dt / 2.;
+  filt->xP[0][1] = FPF01;
+  filt->xP[0][2] = FPF02;
+  filt->xP[1][0] = FPF10;
+  filt->xP[1][1] = FPF11 + Qdotdot * dt;
+  filt->xP[1][2] = FPF12;
+  filt->xP[2][0] = FPF20;
+  filt->xP[2][1] = FPF21;
+  filt->xP[2][2] = FPF22 + Qbiasbias;
 }
 
-static void hff_propagate_y(struct HfilterFloat *hff, float dt)
+static void hff_propagate_y(struct HfilterFloat *filt, float dt)
 {
   /* update state */
-  hff->ydotdot = hff_ydd_meas;
-  hff->y = hff->y + dt * hff->ydot;// + hff->ydotdot * dt * dt / 2;
-  hff->ydot = hff->ydot + dt * hff->ydotdot;
+  filt->ydotdot = hff_ydd_meas - filt->ybias;
+  filt->y = filt->y + dt * filt->ydot;// + filt->ydotdot * dt * dt / 2;
+  filt->ydot = filt->ydot + dt * filt->ydotdot;
   /* update covariance */
-  const float FPF00 = hff->yP[0][0] + dt * (hff->yP[1][0] + hff->yP[0][1] + dt * hff->yP[1][1]);
-  const float FPF01 = hff->yP[0][1] + dt * hff->yP[1][1];
-  const float FPF10 = hff->yP[1][0] + dt * hff->yP[1][1];
-  const float FPF11 = hff->yP[1][1];
+  const float FPF00 = filt->yP[0][0] + dt * (filt->yP[1][0] + filt->yP[0][1] + dt * filt->yP[1][1]);
+  const float FPF01 = filt->yP[0][1] + dt * (filt->yP[1][1] - filt->yP[0][2] - dt * filt->yP[1][2]);
+  const float FPF02 = filt->yP[0][2] + dt * (filt->yP[1][2]);
+  const float FPF10 = filt->yP[1][0] + dt * (-filt->yP[2][0] + filt->yP[1][1] - dt * filt->yP[2][1]);
+  const float FPF11 = filt->yP[1][1] + dt * (-filt->yP[2][1] - filt->yP[1][2] + dt * filt->yP[2][2]);
+  const float FPF12 = filt->yP[1][2] + dt * (-filt->yP[2][2]);
+  const float FPF20 = filt->yP[2][0] + dt * (filt->yP[2][1]);
+  const float FPF21 = filt->yP[2][1] + dt * (-filt->yP[2][2]);
+  const float FPF22 = filt->yP[2][2];
 
-  hff->yP[0][0] = FPF00 + Q * dt * dt/2.;
-  hff->yP[0][1] = FPF01;
-  hff->yP[1][0] = FPF10;
-  hff->yP[1][1] = FPF11 + Qdotdot * dt;
+  filt->yP[0][0] = FPF00 + Q * dt * dt / 2.;
+  filt->yP[0][1] = FPF01;
+  filt->yP[0][2] = FPF02;
+  filt->yP[1][0] = FPF10;
+  filt->yP[1][1] = FPF11 + Qdotdot * dt;
+  filt->yP[1][2] = FPF12;
+  filt->yP[2][0] = FPF20;
+  filt->yP[2][1] = FPF21;
+  filt->yP[2][2] = FPF22 + Qbiasbias;
 }
 
 
-/*
- *
+/**
  * Update position
  *
- *
-
- H = [1 0];
- R = 0.1;
- // state residual
- y = pos_measurement - H * Xm;
- // covariance residual
- S = H*Pm*H' + R;
- // kalman gain
- K = Pm*H'*inv(S);
- // update state
- Xp = Xm + K*y;
- // update covariance
- Pp = Pm - K*H*Pm;
-*/
+ * H = [1 0 0];
+ * R = 0.1;
+ * // state residual
+ * y = rangemeter - H * Xm;
+ * // covariance residual
+ * S = H*Pm*H' + R;
+ * // kalman gain
+ * K = Pm*H'*inv(S);
+ * // update state
+ * Xp = Xm + K*y;
+ * // update covariance
+ * Pp = Pm - K*H*Pm;
+ */
 void hff_update_pos(struct FloatVect2 pos, struct FloatVect2 Rpos)
 {
   hff_update_x(&hff, pos.x, Rpos.x);
   hff_update_y(&hff, pos.y, Rpos.y);
 }
 
-static void hff_update_x(struct HfilterFloat *hff, float x_meas, float Rpos)
+static void hff_update_x(struct HfilterFloat *filt, float x_meas, float Rpos)
 {
   hff_x_meas = x_meas;
 
-  const float y  = x_meas - hff->x;
-  const float S  = hff->xP[0][0] + Rpos;
-  const float K1 = hff->xP[0][0] * 1 / S;
-  const float K2 = hff->xP[1][0] * 1 / S;
+  const float y  = x_meas - filt->x;
+  const float S  = filt->xP[0][0] + Rpos;
+  const float K1 = filt->xP[0][0] * 1 / S;
+  const float K2 = filt->xP[1][0] * 1 / S;
+  const float K3 = filt->xP[2][0] * 1 / S;
 
-  hff->x     = hff->x     + K1 * y;
-  hff->xdot  = hff->xdot  + K2 * y;
+  filt->x     = filt->x     + K1 * y;
+  filt->xdot  = filt->xdot  + K2 * y;
+  filt->xbias = filt->xbias + K3 * y;
 
-  const float P11 = (1. - K1) * hff->xP[0][0];
-  const float P12 = (1. - K1) * hff->xP[0][1];
-  const float P21 = -K2 * hff->xP[0][0] + hff->xP[1][0];
-  const float P22 = -K2 * hff->xP[0][1] + hff->xP[1][1];
+  const float P11 = (1. - K1) * filt->xP[0][0];
+  const float P12 = (1. - K1) * filt->xP[0][1];
+  const float P13 = (1. - K1) * filt->xP[0][2];
+  const float P21 = -K2 * filt->xP[0][0] + filt->xP[1][0];
+  const float P22 = -K2 * filt->xP[0][1] + filt->xP[1][1];
+  const float P23 = -K2 * filt->xP[0][2] + filt->xP[1][2];
+  const float P31 = -K3 * filt->xP[0][0] + filt->xP[2][0];
+  const float P32 = -K3 * filt->xP[0][1] + filt->xP[2][1];
+  const float P33 = -K3 * filt->xP[0][2] + filt->xP[2][2];
 
-  hff->xP[0][0] = P11;
-  hff->xP[0][1] = P12;
-  hff->xP[1][0] = P21;
-  hff->xP[1][1] = P22;
+  filt->xP[0][0] = P11;
+  filt->xP[0][1] = P12;
+  filt->xP[0][2] = P13;
+  filt->xP[1][0] = P21;
+  filt->xP[1][1] = P22;
+  filt->xP[1][2] = P23;
+  filt->xP[2][0] = P31;
+  filt->xP[2][1] = P32;
+  filt->xP[2][2] = P33;
 }
 
-static void hff_update_y(struct HfilterFloat *hff, float y_meas, float Rpos)
+static void hff_update_y(struct HfilterFloat *filt, float y_meas, float Rpos)
 {
   hff_y_meas = y_meas;
 
-  const float y  = y_meas - hff->y;
-  const float S  = hff->yP[0][0] + Rpos;
-  const float K1 = hff->yP[0][0] * 1 / S;
-  const float K2 = hff->yP[1][0] * 1 / S;
+  const float y  = y_meas - filt->y;
+  const float S  = filt->yP[0][0] + Rpos;
+  const float K1 = filt->yP[0][0] * 1 / S;
+  const float K2 = filt->yP[1][0] * 1 / S;
+  const float K3 = filt->yP[2][0] * 1 / S;
 
-  hff->y     = hff->y     + K1 * y;
-  hff->ydot  = hff->ydot  + K2 * y;
+  filt->y     = filt->y     + K1 * y;
+  filt->ydot  = filt->ydot  + K2 * y;
+  filt->ybias = filt->ybias + K3 * y;
 
-  const float P11 = (1. - K1) * hff->yP[0][0];
-  const float P12 = (1. - K1) * hff->yP[0][1];
-  const float P21 = -K2 * hff->yP[0][0] + hff->yP[1][0];
-  const float P22 = -K2 * hff->yP[0][1] + hff->yP[1][1];
+  const float P11 = (1. - K1) * filt->yP[0][0];
+  const float P12 = (1. - K1) * filt->yP[0][1];
+  const float P13 = (1. - K1) * filt->yP[0][2];
+  const float P21 = -K2 * filt->yP[0][0] + filt->yP[1][0];
+  const float P22 = -K2 * filt->yP[0][1] + filt->yP[1][1];
+  const float P23 = -K2 * filt->yP[0][2] + filt->yP[1][2];
+  const float P31 = -K3 * filt->yP[0][0] + filt->yP[2][0];
+  const float P32 = -K3 * filt->yP[0][1] + filt->yP[2][1];
+  const float P33 = -K3 * filt->yP[0][2] + filt->yP[2][2];
 
-  hff->yP[0][0] = P11;
-  hff->yP[0][1] = P12;
-  hff->yP[1][0] = P21;
-  hff->yP[1][1] = P22;
+  filt->yP[0][0] = P11;
+  filt->yP[0][1] = P12;
+  filt->yP[0][2] = P13;
+  filt->yP[1][0] = P21;
+  filt->yP[1][1] = P22;
+  filt->yP[1][2] = P23;
+  filt->yP[2][0] = P31;
+  filt->yP[2][1] = P32;
+  filt->yP[2][2] = P33;
 }
 
 
@@ -678,20 +726,18 @@ static void hff_update_y(struct HfilterFloat *hff, float y_meas, float Rpos)
  *
  * Update velocity
  *
- *
-
- H = [0 1];
- R = 0.1;
- // state residual
- yd = vx - H * Xm;
- // covariance residual
- S = H*Pm*H' + R;
- // kalman gain
- K = Pm*H'*inv(S);
- // update state
- Xp = Xm + K*yd;
- // update covariance
- Pp = Pm - K*H*Pm;
+ * H = [0 1 0];
+ * R = 0.1;
+ * // state residual
+ * yd = vx - H * Xm;
+ * // covariance residual
+ * S = H*Pm*H' + R;
+ * // kalman gain
+ * K = Pm*H'*inv(S);
+ * // update state
+ * Xp = Xm + K*yd;
+ * // update covariance
+ * Pp = Pm - K*H*Pm;
 */
 void hff_update_vel(struct FloatVect2 vel, struct FloatVect2 Rvel)
 {
@@ -699,48 +745,72 @@ void hff_update_vel(struct FloatVect2 vel, struct FloatVect2 Rvel)
   hff_update_ydot(&hff, vel.y, Rvel.y);
 }
 
-static void hff_update_xdot(struct HfilterFloat *hff, float vel, float Rvel)
+static void hff_update_xdot(struct HfilterFloat *filt, float vel, float Rvel)
 {
   hff_xd_meas = vel;
 
-  const float yd = vel - hff->xdot;
-  const float S  = hff->xP[1][1] + Rvel;
-  const float K1 = hff->xP[0][1] * 1 / S;
-  const float K2 = hff->xP[1][1] * 1 / S;
+  const float yd = vel - filt->xdot;
+  const float S  = filt->xP[1][1] + Rvel;
+  const float K1 = filt->xP[0][1] * 1 / S;
+  const float K2 = filt->xP[1][1] * 1 / S;
+  const float K3 = filt->xP[2][1] * 1 / S;
 
-  hff->x     = hff->x     + K1 * yd;
-  hff->xdot  = hff->xdot  + K2 * yd;
+  filt->x     = filt->x     + K1 * yd;
+  filt->xdot  = filt->xdot  + K2 * yd;
+  filt->xbias = filt->xbias + K3 * yd;
 
-  const float P11 = -K1 * hff->xP[1][0] + hff->xP[0][0];
-  const float P12 = -K1 * hff->xP[1][1] + hff->xP[0][1];
-  const float P21 = (1. - K2) * hff->xP[1][0];
-  const float P22 = (1. - K2) * hff->xP[1][1];
+  const float P11 = -K1 * filt->xP[1][0] + filt->xP[0][0];
+  const float P12 = -K1 * filt->xP[1][1] + filt->xP[0][1];
+  const float P13 = -K1 * filt->xP[1][2] + filt->xP[0][2];
+  const float P21 = (1. - K2) * filt->xP[1][0];
+  const float P22 = (1. - K2) * filt->xP[1][1];
+  const float P23 = (1. - K2) * filt->xP[1][2];
+  const float P31 = -K3 * filt->xP[1][0] + filt->xP[2][0];
+  const float P32 = -K3 * filt->xP[1][1] + filt->xP[2][1];
+  const float P33 = -K3 * filt->xP[1][2] + filt->xP[2][2];
 
-  hff->xP[0][0] = P11;
-  hff->xP[0][1] = P12;
-  hff->xP[1][0] = P21;
-  hff->xP[1][1] = P22;
+  filt->xP[0][0] = P11;
+  filt->xP[0][1] = P12;
+  filt->xP[0][2] = P13;
+  filt->xP[1][0] = P21;
+  filt->xP[1][1] = P22;
+  filt->xP[1][2] = P23;
+  filt->xP[2][0] = P31;
+  filt->xP[2][1] = P32;
+  filt->xP[2][2] = P33;
 }
 
-static void hff_update_ydot(struct HfilterFloat *hff, float vel, float Rvel)
+static void hff_update_ydot(struct HfilterFloat *filt, float vel, float Rvel)
 {
   hff_yd_meas = vel;
 
-  const float yd = vel - hff->ydot;
-  const float S  = hff->yP[1][1] + Rvel;
-  const float K1 = hff->yP[0][1] * 1 / S;
-  const float K2 = hff->yP[1][1] * 1 / S;
+  const float yd = vel - filt->ydot;
+  const float S  = filt->yP[1][1] + Rvel;
+  const float K1 = filt->yP[0][1] * 1 / S;
+  const float K2 = filt->yP[1][1] * 1 / S;
+  const float K3 = filt->yP[2][1] * 1 / S;
 
-  hff->y     = hff->y     + K1 * yd;
-  hff->ydot  = hff->ydot  + K2 * yd;
+  filt->y     = filt->y     + K1 * yd;
+  filt->ydot  = filt->ydot  + K2 * yd;
+  filt->ybias = filt->ybias + K3 * yd;
 
-  const float P11 = -K1 * hff->yP[1][0] + hff->yP[0][0];
-  const float P12 = -K1 * hff->yP[1][1] + hff->yP[0][1];
-  const float P21 = (1. - K2) * hff->yP[1][0];
-  const float P22 = (1. - K2) * hff->yP[1][1];
+  const float P11 = -K1 * filt->yP[1][0] + filt->yP[0][0];
+  const float P12 = -K1 * filt->yP[1][1] + filt->yP[0][1];
+  const float P13 = -K1 * filt->yP[1][2] + filt->yP[0][2];
+  const float P21 = (1. - K2) * filt->yP[1][0];
+  const float P22 = (1. - K2) * filt->yP[1][1];
+  const float P23 = (1. - K2) * filt->yP[1][2];
+  const float P31 = -K3 * filt->yP[1][0] + filt->yP[2][0];
+  const float P32 = -K3 * filt->yP[1][1] + filt->yP[2][1];
+  const float P33 = -K3 * filt->yP[1][2] + filt->yP[2][2];
 
-  hff->yP[0][0] = P11;
-  hff->yP[0][1] = P12;
-  hff->yP[1][0] = P21;
-  hff->yP[1][1] = P22;
+  filt->yP[0][0] = P11;
+  filt->yP[0][1] = P12;
+  filt->yP[0][2] = P13;
+  filt->yP[1][0] = P21;
+  filt->yP[1][1] = P22;
+  filt->yP[1][2] = P23;
+  filt->yP[2][0] = P31;
+  filt->yP[2][1] = P32;
+  filt->yP[2][2] = P33;
 }
