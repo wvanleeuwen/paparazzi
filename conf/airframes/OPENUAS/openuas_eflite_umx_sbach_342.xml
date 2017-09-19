@@ -65,7 +65,7 @@ NOTES:
        <module name="rpm_sensor.xml">
          <define name="RPM_PULSE_PER_RND" value="18"/><!-- TODO: determine correct value for this specific setup -->
        </module> 
-       <module name="ins"/>     
+       <module name="ins" type="gps_passthrough"/>
      </target>
     
 <!-- *********************** For simulation of the flight ****************************-->  
@@ -81,7 +81,7 @@ NOTES:
       <!-- For various parameter info here  https://wiki.paparazziuav.org/wiki/Subsystem/ahrs -->
       <module name="ahrs" type="int_cmpl_quat">
       </module>
-      <module name="ins" type="alt_float"/>
+      <module name="ins" type="gps_passthrough"/>
     </target>
 
 <!-- *********************** Another way for simulation of the flight ****************************-->  
