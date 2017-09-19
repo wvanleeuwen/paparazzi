@@ -55,8 +55,8 @@
     <variable init="15." max="50." min="0." step="1.0" var="roll_step"/>
   </variables>
   <exceptions>
-    <exception cond="(Or(! InsideGREEN(GetPosX(), GetPosY()), GetPosAlt() > GetAltRef() + 150) && !(nav_block == IndexOfBlock('Holding point')))" deroute="Center"/>
-    <exception cond="radio_control.status == RC_REALLY_LOST" deroute="Holding point"/>
+    <exception cond="(Or(! InsideGREEN(GetPosX(), GetPosY()), GetPosAlt() > GetAltRef() + 150) && !(nav_block == IndexOfBlock('kill_and_fall')))" deroute="Center"/>
+    <exception cond="radio_control.status == RC_REALLY_LOST" deroute="kill_and_fall"/>
   </exceptions>
   <blocks>
     <block name="Center" pre_call="if (!InsideSquare(GetPosX(), GetPosY())) NavKillThrottle();">
@@ -72,7 +72,7 @@
     </block>
     <block name="Holding point">
       <set value="1" var="autopilot.kill_throttle"/>
-      <attitude roll="0" throttle="0" vmode="throttle"/>
+      <attitude roll="0" throttle="0" vmode="throttle" until="true"/>
     </block>
     <block name="Takeoff" strip_button="Takeoff (wp CLIMB)" strip_icon="takeoff.png">
       <exception cond="GetPosAlt() > GetAltRef()+25" deroute="Oval 1-2"/>
@@ -198,9 +198,9 @@
       <go from="STDBY" hmode="route" wp="2"/>
       <go from="2" hmode="route" wp="STDBY"/>
     </block>
-  </blocks>
     <block name="kill_and_fall">
       <set value="1" var="autopilot.kill_throttle"/>
       <attitude roll="0" throttle="0" vmode="throttle"/>
     </block>
+  </blocks>
 </flight_plan>
