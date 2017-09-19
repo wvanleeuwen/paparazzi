@@ -550,7 +550,6 @@ void process_command(char *command)
 /* Main function */
 int main ( int argc, char** argv)
 {
-
   /* Default settings for serial connection */
   char *port = "/dev/ttyUSB0";
   int baud = 57600;
@@ -587,7 +586,7 @@ int main ( int argc, char** argv)
 
   /* Obtain sd2log directory */
   char *pprz_home;
-  pprz_home = getenv( "PAPARAZZI_HOME" );
+  pprz_home = getenv( "PAPARAZZI_HOME" );//FIXME if not set a segfault :(
 
   char *sd2log_home = "/sw/logalizer/sd2log temp.tlm";
 
@@ -603,13 +602,11 @@ int main ( int argc, char** argv)
     exit(-1);
   }
 
-
-
   /* Get the setting ID with a python script */
   /* TODO: would be nicer to have a C xml parser */
   FILE *in = NULL;
   //strcat(pycommand, pprz_home);
-  //strcat(pycommand, "/sw/logalizer/sdlogger_get_setting_id.py %u sdlogger_spi.command");
+  //strcat(pycommand, "/sw/logalizer/sdlogger_get_setting_id.py %u sdlogger_spi.comman\nd");
   char new_command[256];
   strcat(pycommand, "python sdlogger_get_setting_id.py %u sdlogger_spi.command");
   sprintf(new_command, pycommand, ac_id);

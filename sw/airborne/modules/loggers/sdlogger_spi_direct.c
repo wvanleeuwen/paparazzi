@@ -47,19 +47,27 @@
 #define LOGGER_LED_OFF {}
 #endif
 
-#ifndef TELEMETRY_MODE_Main_empty
-#warning You need to define a main telemetry mode named "empty" without any \
-  messages in your config file in /conf/telemetry/<your_config.xml>. \
-  \
-  Add <mode name="empty"></mode> to your main telemetry process.
+#if !defined(TELEMETRY_MODE_Main_empty) && !defined(TELEMETRY_MODE_Ap_empty)
+#warning ("You need to define a telemetry mode named \"empty\" without any messages in your config file in /conf/telemetry/<your_config.xml>. Add <mode name=\"empty\"></mode> to your Main/Ap telemetry process.")
 #endif
 
 #ifndef TELEMETRY_PROCESS_Logger
-#error "You need to use a telemetry xml file with Logger process!"
+#error "You need to use a telemetry xml file whare you have a \"Logger\" process defined!"
+/* For example:
+ *  <process name=\"Logger\"> \
+    <mode name=\"default\"> \
+      <message name=\"DL_VALUE\"        period=\"0.5\"/> \
+      <message name=\"ALIVE\"           period=\"2.1\"/> \
+      <message name=\"IMU_GYRO\"        period=\"0.017\"/> \
+      <message name=\"IMU_ACCEL\"       period=\"0.017\"/> \
+      <message name=\"IMU_MAG\"         period=\"0.1\"/> \
+    </mode> \
+  </process>"
+*/
 #endif
 
 #ifndef DOWNLINK_DEVICE
-#warning This module can only be used with uart downlink for now.
+#warning This module can only be used with uart downlink, so no other goodness for now. Feel free to add this functionality
 #endif
 
 struct sdlogger_spi_periph sdlogger_spi;
@@ -351,7 +359,16 @@ void sdlogger_spi_direct_command(void)
     sdlogger_spi.status = SDLogger_GettingIndexForDownload;
   }
   else if (sdcard1.status == SDCard_Idle && sdlogger_spi.command == 255) {
-    telemetry_mode_Main = TELEMETRY_MODE_Main_empty;
+    //Currently Rotorcraft
+	#ifdef TELEMETRY_MODE_Main_empty
+      telemetry_mode_Main = TELEMETRY_MODE_Main_empty;
+    #endif
+
+      //Currently Fixedwing
+    #ifdef TELEMETRY_MODE_Ap_empty
+      telemetry_mode_Ap = TELEMETRY_MODE_Ap_empty;
+    #endif
+
     LOGGER_LED_ON;
     sdcard_spi_read_block(&sdcard1, 0x00002000, NULL);
     sdlogger_spi.download_length = 0;
