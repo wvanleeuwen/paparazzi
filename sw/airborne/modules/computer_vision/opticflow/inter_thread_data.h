@@ -61,6 +61,7 @@ struct opticflow_result_t {
 /* The state of the drone when it took an image */
 struct opticflow_state_t {
   struct FloatRates rates;   ///< Body rates
+  struct FloatEulers eulers;   ///< Body euler angles
   float agl;                 ///< height above ground [m]
   struct FloatQuat imu_to_body_quat;   ///< imu to body quaternion
   struct Int32Vect3 accel_imu_meas;    ///< imu acceleration in imu's coordinates

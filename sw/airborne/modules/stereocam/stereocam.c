@@ -151,10 +151,10 @@ void stereocam_parse_vel(struct FloatVect3 camera_vel, float R2, struct FloatVec
   {
     //Send velocities to state
     AbiSendMsgVELOCITY_ESTIMATE(STEREOCAM2STATE_SENDER_ID, now_ts,
-                                body_vel.x,
-                                body_vel.y,
-                                body_vel.z,
-                                noise,
+                body_vel.x,
+                body_vel.y,
+                body_vel.z,
+                noise,
 								body_dist.x,
 								body_dist.y,
 								body_dist.z,
@@ -228,7 +228,7 @@ static void stereocam_parse_msg(void)
     DOWNLINK_SEND_STEREO_IMG(DefaultChannel, DefaultDevice, &type, &w, &h, &nb,
         l, DL_STEREOCAM_ARRAY_image_data(stereocam_msg_buf));
 #endif
-#if   STEREO_ARRAY_DATA
+#if STEREO_ARRAY_DATA
     uint8_t stereo_distance_filtered[128] ={0};
     //memset(stereo_distance_filtered, 0, width*sizeof(uint8_t) );
     uint8_t closest_average_distance = 255;
@@ -241,39 +241,30 @@ static void stereocam_parse_msg(void)
     /*DOWNLINK_SEND_STEREO_IMG(DefaultChannel, DefaultDevice, &type, &w, &h, &nb,
          100, DL_STEREOCAM_ARRAY_image_data(stereocam_msg_buf));*/
 
-
-    //TODO: automatically get FOV
+    // TODO: automatically get FOV
     float pxtorad=(float)RadOfDeg(59) / 128;
     float heading = (float)(pixel_location_of_closest_object-54)*pxtorad;
     float distance = (float)(closest_average_distance)/100;
 
-    float x_offset_collision = tanf(heading)*distance;
+    float x_offset_collision = tanf(heading) * distance;
 
-    float vel_x_FF=0, vel_y_FF=0;
+    float vel_x_FF = 0, vel_y_FF = 0;
     if(pixel_location_of_closest_object !=0&&distance<1.5)
     {
-      if(fabs(heading)<0.2)
+      if(fabsf(heading) < 0.2)
       {
     	  vel_x_FF = -0.3;
       }
-
-    	  vel_y_FF = -0.2 * heading/fabs(heading);
-
-
+    	vel_y_FF = -0.2 * heading/fabs(heading);
     }else{
-        AbiSendMsgSTEREO_FORCEFIELD(ABI_BROADCAST, vel_x_FF, vel_y_FF,0);
-
+      AbiSendMsgSTEREO_FORCEFIELD(ABI_BROADCAST, vel_x_FF, vel_y_FF, 0);
     }
 
     AbiSendMsgSTEREO_FORCEFIELD(ABI_BROADCAST, 0, 0,0);
 
-
-
     DOWNLINK_SEND_SETTINGS(DOWNLINK_TRANSPORT, DOWNLINK_DEVICE, &distance, &heading);
 
-
     AbiSendMsgOBSTACLE_DETECTION(AGL_RANGE_SENSORS_GAZEBO_ID, distance, heading);
-
 #endif
     break;
   }
@@ -304,9 +295,11 @@ static void stereocam_parse_msg(void)
     float_rmat_transp_mult(&body_bearing, &stereocam.body_to_cam, &camera_bearing);
 
     uint8_t gate_detected=0;
-    if(q>15)
+    if(q > 15)
+    {
     	gate_detected = 1;
-    imav2017_set_gate(q, w, h, body_bearing.psi, body_bearing.theta, d,gate_detected);
+    	imav2017_set_gate(q, w, h, body_bearing.psi, body_bearing.theta, d,gate_detected);
+    }
     break;
   }
 

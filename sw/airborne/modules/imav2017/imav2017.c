@@ -70,35 +70,26 @@ void imav2017_set_gate(uint8_t quality, float w, float h,
 void imav2017_histogram_obstacle_detection(uint8_t *stereo_distance_per_column, uint8_t *stereo_distance_filtered,
 		uint8_t *closest_average_distance, uint8_t *pixel_location_of_closest_object, int32_t size)
 {
-
   int32_t x, c;
   int32_t max_distance_obstacle = 255; // in [cm]
   uint8_t obstc_thres = 5;
 
-
-
-
   // Measure where obstacles are within detection range and turn it into a booleean
   for (x = 0; x < size; x++) {
-
     if (stereo_distance_per_column[x] < max_distance_obstacle && stereo_distance_per_column[x] != 0) {
       stereo_distance_filtered[x] = 1;
     } else {
       stereo_distance_filtered[x] = 0;
     }
-
   }
   // Erosion of binary array
   uint8_t min_value;
-  uint8_t morph_value = 10;
+  const uint8_t morph_value = 10;
   uint8_t stereo_distance_filtered_temp[128] = {0};
 
-
-
-  //Dilation
+  // Dilation
   uint8_t max_value;
-  for (x = morph_value; x < size -morph_value-1; x++) {
-
+  for (x = morph_value; x < size - morph_value - 1; x++) {
     max_value = 0;
     for (c = -morph_value; c <= morph_value; c++) {
       if (max_value < stereo_distance_filtered[x + c]) {
@@ -106,13 +97,10 @@ void imav2017_histogram_obstacle_detection(uint8_t *stereo_distance_per_column, 
       }
     }
     stereo_distance_filtered_temp[x] =  max_value;
-
   }
   memcpy(stereo_distance_filtered, stereo_distance_filtered_temp, sizeof(stereo_distance_filtered_temp));
 
-
   for (x = morph_value; x < size - morph_value-1; x++) {
-
     min_value = 1;
     for (c = -morph_value; c <= morph_value; c++) {
       if (min_value > stereo_distance_filtered[x + c]) {
@@ -124,8 +112,6 @@ void imav2017_histogram_obstacle_detection(uint8_t *stereo_distance_per_column, 
 
   memcpy(stereo_distance_filtered, stereo_distance_filtered_temp, sizeof(stereo_distance_filtered_temp));
 
-
-
   /*
       // Seperate obstacles with a large distance difference
       for (x = border; x < size - border; x++) {
@@ -136,12 +122,10 @@ void imav2017_histogram_obstacle_detection(uint8_t *stereo_distance_per_column, 
       }
   */
 
-
   //calculate the distance of the closest obstacle
   int32_t counter = 0;
   int32_t distance_sum = 0;
   int32_t average_distance = 0;
-
 
   int32_t start_pixel = 0;
   int8_t first_hit = 0;
@@ -161,7 +145,6 @@ void imav2017_histogram_obstacle_detection(uint8_t *stereo_distance_per_column, 
           *closest_average_distance = (uint8_t)average_distance;
           *pixel_location_of_closest_object = (uint8_t)(start_pixel - obstc_thres + counter / 2);
         }
-
       }
     } else {
       counter = 0;

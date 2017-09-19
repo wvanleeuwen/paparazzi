@@ -23,17 +23,16 @@
  * Find a colored item and track its geo-location and update a waypoint to it
  */
 
-#ifndef BLOB_LOCATOR_FPS
-#define BLOB_LOCATOR_FPS 0       ///< Default FPS (zero means run at camera fps)
-#endif
-PRINT_CONFIG_VAR(BLOB_LOCATOR_FPS)
-
 #include "modules/computer_vision/cv_blob_locator.h"
 #include "modules/computer_vision/cv.h"
 #include "modules/computer_vision/blob/blob_finder.h"
 #include "modules/computer_vision/blob/imavmarker.h"
 #include "modules/computer_vision/detect_window.h"
 
+#ifndef BLOB_LOCATOR_FPS
+#define BLOB_LOCATOR_FPS 0       ///< Default FPS (zero means run at camera fps)
+#endif
+PRINT_CONFIG_VAR(BLOB_LOCATOR_FPS)
 
 uint8_t color_lum_min;
 uint8_t color_lum_max;
@@ -50,6 +49,8 @@ uint8_t cv_blob_locator_type;
 int geofilter_length = 5;
 int marker_size = 18;
 int record_video = 0;
+int min_blob_size = 100;
+int blob_found = 0;
 
 volatile uint32_t blob_locator = 0;
 
@@ -58,8 +59,7 @@ volatile bool marker_enabled = false;
 volatile bool window_enabled = false;
 
 // Computer vision thread
-struct image_t *cv_marker_func(struct image_t *img);
-struct image_t *cv_marker_func(struct image_t *img)
+static struct image_t *cv_marker_func(struct image_t *img)
 {
 
   if (!marker_enabled) {
@@ -80,14 +80,11 @@ struct image_t *cv_marker_func(struct image_t *img)
 
 
 // Computer vision thread
-struct image_t *cv_window_func(struct image_t *img);
-struct image_t *cv_window_func(struct image_t *img)
+static struct image_t *cv_window_func(struct image_t *img)
 {
-
   if (!window_enabled) {
     return NULL;
   }
-
 
   uint16_t coordinate[2] = {0, 0};
   uint16_t response = 0;
@@ -127,14 +124,11 @@ struct image_t *cv_window_func(struct image_t *img)
 }
 
 
-struct image_t *cv_blob_locator_func(struct image_t *img);
-struct image_t *cv_blob_locator_func(struct image_t *img)
+static struct image_t *cv_blob_locator_func(struct image_t *img)
 {
-
   if (!blob_enabled) {
     return NULL;
   }
-
 
   // Color Filter
   struct image_filter_t filter[2];
@@ -173,7 +167,7 @@ struct image_t *cv_blob_locator_func(struct image_t *img)
     }
   }
 
-  if (largest_id >= 0) {
+  if (largest_id >= 0 && largest_size > min_blob_size) {
     uint8_t *p = (uint8_t *) img->buf;
     uint16_t *l = (uint16_t *) dst.buf;
     for (int y = 0; y < dst.h; y++) {
@@ -215,6 +209,13 @@ struct image_t *cv_blob_locator_func(struct image_t *img)
     temp = temp << 16;
     temp += cgy;
     blob_locator = temp;
+    blob_found++;
+  } else
+  {
+    if (blob_found > 0)
+    {
+      blob_found--;
+    }
   }
 
   image_free(&dst);
@@ -229,21 +230,23 @@ struct image_t *cv_blob_locator_func(struct image_t *img)
 
 void cv_blob_locator_init(void)
 {
+  cv_blob_locator_type = 1;
+
   // Red board in sunlight
-  color_lum_min = 100;
-  color_lum_max = 200;
-  color_cb_min = 140;
-  color_cb_max = 255;
-  color_cr_min = 140;
-  color_cr_max = 255;
+  color_lum_min = 20;//100
+  color_lum_max = 160;//200
+  color_cb_min = 80;//140;
+  color_cb_max = 150;//255;
+  color_cr_min = 150;//140;
+  color_cr_max = 190;//255;
 
   // Lamp during night
-  color_lum_min = 180;
+  /*color_lum_min = 180;
   color_lum_max = 255;
   color_cb_min = 100;
   color_cb_max = 150;
   color_cr_min = 100;
-  color_cr_max = 150;
+  color_cr_max = 150;*/
 
   cv_blob_locator_reset = 0;
 
@@ -299,9 +302,9 @@ void cv_blob_locator_event(void)
     struct camera_frame_t cam;
     cam.px = x / 2;
     cam.py = y / 2;
-    cam.f = 400;
-    cam.h = 240;
-    cam.w = 320;
+    cam.f = 347.22;//400;
+    cam.h = BLOB_LOCATOR_CAMERA.output_size.h;
+    cam.w = BLOB_LOCATOR_CAMERA.output_size.w;
 
 #ifdef WP_p1
     georeference_project(&cam, WP_p1);
