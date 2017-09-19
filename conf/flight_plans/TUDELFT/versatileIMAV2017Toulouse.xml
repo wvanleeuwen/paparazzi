@@ -1,19 +1,19 @@
 <!DOCTYPE flight_plan SYSTEM "../flight_plan.dtd">
 
-<flight_plan alt="200" ground_alt="163" home_mode_height="50" lat0="43.54337" lon0="1.3580" max_dist_from_home="1500" name="Imav2017ToulouseOutdoor" qfu="270" security_height="25">
+<flight_plan alt="190" ground_alt="163" home_mode_height="50" lat0="43.54337" lon0="1.3580" max_dist_from_home="1500" name="Imav2017ToulouseOutdoor" qfu="270" security_height="25">
   <header>
 #include "subsystems/datalink/datalink.h"
 </header>
   <waypoints>
     <waypoint name="HOME" x="-30.1" y="-4.2"/>
-    <waypoint name="STDBY" x="-38.1" y="-84.7"/>
-    <waypoint alt="215.0" name="AF" x="86.4" y="102.7"/>
-    <waypoint alt="185.0" name="TD" x="9.0" y="4.8"/>
+    <waypoint alt="190.0" lat="43.543083" lon="1.356840" name="STDBY"/>
+    <waypoint alt="190.0" lat="43.5441600" lon="1.3583363" name="AF"/>
+    <waypoint alt="163.0" lat="43.5435428" lon="1.3577522" name="TD"/>
     <waypoint name="BASELEG" x="26.9" y="-23.0"/>
-    <waypoint name="CLIMB" x="-29.1" y="-76.2"/>
+    <waypoint lat="43.5428987" lon="1.3569293" name="CLIMB"/>
     <waypoint name="MOB" x="-11.5" y="-21.2"/>
-    <waypoint lat="43.542628" lon="1.357239" name="1"/>
-    <waypoint lat="43.544564" lon="1.358101" name="2"/>
+    <waypoint lat="43.543170" lon="1.356667" name="1"/>
+    <waypoint lat="43.544517" lon="1.358297" name="2"/>
     <waypoint lat="43.54186137484808" lon="1.35803816024604" name="_1"/>
     <waypoint lat="43.54486611900425" lon="1.360391560903072" name="_2"/>
     <waypoint lat="43.54583752229846" lon="1.358162396943372" name="_3"/>
@@ -26,9 +26,9 @@
     <waypoint lat="43.54481761812786" lon="1.358082431183946" name="MAP2"/>
     <waypoint lat="43.54279276303417" lon="1.356325307796358" name="MAP3"/>
     <waypoint lat="43.54247904378586" lon="1.357110912977799" name="MAP4"/>
-    <waypoint lat="43.54243788619632" lon="1.357452611131448" name="S1"/>
-    <waypoint lat="43.54447020370085" lon="1.358467630713427" name="S2"/>
-    <waypoint lat="43.54337997254169" lon="1.358078541442278" name="FW_LAND"/>
+    <waypoint lat="43.5428987" lon="1.3569293" name="S1"/>
+    <waypoint lat="43.5444201" lon="1.3588119" name="S2"/>
+    <waypoint lat="43.5435428" lon="1.3577522" name="FW_LAND"/>
     <waypoint lat="43.54289009468191" lon="1.357408650983151" name="GROUND_STATION"/>
   </waypoints>
   <sectors>
@@ -54,13 +54,13 @@
   <variables>
     <variable init="15." max="50." min="0." step="1.0" var="roll_step"/>
   </variables>
-    <exceptions>
-     <exception cond="datalink_time > 22" deroute="Standby"/>
-     <exception cond="Or(! InsideGREEN(GetPosX(), GetPosY()), GetPosAlt() > GetAltRef() + 150)" deroute="Center"/>
-    </exceptions>
+  <exceptions>
+    <exception cond="(Or(! InsideGREEN(GetPosX(), GetPosY()), GetPosAlt() > GetAltRef() + 150) && !(nav_block == IndexOfBlock('Holding point')))" deroute="Center"/>
+    <exception cond="radio_control.status == RC_REALLY_LOST" deroute="Holding point"/>
+  </exceptions>
   <blocks>
     <block name="Center" pre_call="if (!InsideSquare(GetPosX(), GetPosY())) NavKillThrottle();">
-      <circle wp="HOME" radius="DEFAULT_CIRCLE_RADIUS"/>
+      <circle radius="DEFAULT_CIRCLE_RADIUS" wp="HOME"/>
     </block>
     <block name="Wait GPS">
       <set value="1" var="autopilot.kill_throttle"/>
@@ -75,7 +75,7 @@
       <attitude roll="0" throttle="0" vmode="throttle"/>
     </block>
     <block name="Takeoff" strip_button="Takeoff (wp CLIMB)" strip_icon="takeoff.png">
-      <exception cond="GetPosAlt() > GetAltRef()+25" deroute="Standby"/>
+      <exception cond="GetPosAlt() > GetAltRef()+25" deroute="Oval 1-2"/>
       <set value="0" var="autopilot.kill_throttle"/>
       <go wp="CLIMB"/>
     </block>
@@ -198,14 +198,9 @@
       <go from="STDBY" hmode="route" wp="2"/>
       <go from="2" hmode="route" wp="STDBY"/>
     </block>
-<!--    <block name="Fly in Square">
-      <exception cond="! InsideSquare(GetPosX(), GetPosY())" deroute="Come back wp 1"/>
-      <attitude alt="GetAltRef()+75" roll="0" vmode="alt"/>
-    </block>
-    <block name="Come back wp 1">
-      <exception cond="InsideSquare(GetPosX(), GetPosY())" deroute="Fly in Square"/>
-      <go wp="1"/>
-      <deroute block="Fly in Square"/>
-    </block> -->
   </blocks>
+    <block name="kill_and_fall">
+      <set value="1" var="autopilot.kill_throttle"/>
+      <attitude roll="0" throttle="0" vmode="throttle"/>
+    </block>
 </flight_plan>

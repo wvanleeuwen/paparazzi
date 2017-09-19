@@ -41,7 +41,7 @@ the order of the functon in the list
   <channel ctl="RightStickVertical"   function="PITCH"         min="1910" neutral="1555" max="1130" average="0"/>
   <channel ctl="LeftStickHorizontal"  function="YAW"           min="1986" neutral="1540" max="1050" average="0"/>
   <channel ctl="CONTROL8"             function="GEAR"          min="1000" neutral="1500" max="2000" average="1"/>
-  <channel ctl="SW8"                  function="FLAPS"		  min="1000" neutral="1000" max="2000" average="1"/>
-  <channel ctl="CONTROL5"             function="AUX1"         min="1000" neutral="1500" max="1900" average="0"/>
+  <channel ctl="SW8"                  function="FLAPS"	       min="1000" neutral="1000" max="2000" average="1"/>
+  <channel ctl="CONTROL5"             function="AUX1"          min="1000" neutral="1500" max="1900" average="0"/>
 </radio>
 
