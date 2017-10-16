@@ -38,6 +38,8 @@
       <define name="COLORFILTER_CAMERA" value="front_camera"/>
     </module>
 
+    <module name="orange_avoider" />
+
     <module name="video_rtp_stream">
       <define name="VIEWVIDEO_CAMERA" value="front_camera"/>
       <define name="VIEWVIDEO_DOWNSIZE_FACTOR" value="4"/>
