@@ -102,7 +102,7 @@
     </block>
     <block key="g" name="START" strip_button="Go" strip_icon="lookfore.png">
       <call_once fun="NavSetWaypointHere(WP_GOAL)"/>
-      <set var="trajectoryConfidence" value="1"/>
+      <!--set var="trajectoryConfidence" value="1"/ -->
     </block>
     <block name="StayGoal">
       <stay wp="GOAL"/>

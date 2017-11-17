@@ -55,6 +55,7 @@
 			<define name="COLORFILTER_CAMERA" value="front_camera" />
 		</module>
 		<module name="orange_avoider" />
+		<module name="green_checker" />
 		<module name="video_rtp_stream">
 			<configure name="VIEWVIDEO_HOST" value="192.168.42.65" />
 			<configure name="VIEWVIDEO_BROADCAST" value="FALSE" />

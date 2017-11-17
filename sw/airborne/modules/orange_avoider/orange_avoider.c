@@ -29,7 +29,7 @@
 #define VERBOSE_PRINT(...)
 #endif
 
-uint8_t safeToGoForwards        = false;
+uint8_t safeToGoForward        = false;
 int tresholdColorCount          = 0.05 * 124800; // 520 x 240 = 124.800 total pixels
 float incrementForAvoidance;
 uint16_t trajectoryConfidence   = 1;
@@ -59,10 +59,10 @@ void orange_avoider_periodic()
 {
   // Check the amount of orange. If this is above a threshold
   // you want to turn a certain amount of degrees
-  safeToGoForwards = color_count < tresholdColorCount;
-  VERBOSE_PRINT("Color_count: %d  threshold: %d safe: %d \n", color_count, tresholdColorCount, safeToGoForwards);
+  safeToGoForward = color_count < tresholdColorCount;
+  VERBOSE_PRINT("Color_count: %d  threshold: %d safe: %d \n", color_count, tresholdColorCount, safeToGoForward);
   float moveDistance = fmin(maxDistance, 0.05 * trajectoryConfidence);
-  if(safeToGoForwards){
+  if(safeToGoForward){
       moveWaypointForward(WP_GOAL, moveDistance);
       moveWaypointForward(WP_TRAJECTORY, 1.25 * moveDistance);
       nav_set_heading_towards_waypoint(WP_GOAL);

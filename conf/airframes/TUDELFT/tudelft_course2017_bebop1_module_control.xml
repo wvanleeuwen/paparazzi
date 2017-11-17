@@ -43,7 +43,7 @@
 		<!-- Video/Camera modules -->
 		<module name="video_thread" />
 		<module name="cv_grass_detector" />
-		<!--
+		
 		<module name="cv_ae_awb">
 			<define name="CV_AE_AWB_AV" value="1" />
 			<define name="CV_AE_AWB_VERBOSE" value="0" />
@@ -52,7 +52,8 @@
 			<define name="COLORFILTER_CAMERA" value="front_camera" />
 		</module>
 		<module name="orange_avoider" />
-		-->
+		<module name="green_checker" />
+		
 		<module name="video_rtp_stream">
 			<configure name="VIEWVIDEO_HOST" value="192.168.42.65" />
 			<configure name="VIEWVIDEO_BROADCAST" value="FALSE" />
