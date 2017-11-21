@@ -56,7 +56,8 @@
 		</module>
 		<module name="orange_avoider" />
 		<module name="green_checker" />
-		
+		<module name="opticalflow_calculation" />
+		<module name="kmeans_clustering" />
 		<module name="video_rtp_stream">
 			<configure name="VIEWVIDEO_HOST" value="192.168.40.141" />
 			<configure name="VIEWVIDEO_BROADCAST" value="FALSE" />

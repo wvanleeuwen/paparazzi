@@ -32,16 +32,16 @@ void green_checker_init()
   color_cr_min = 0;
   color_cr_max = 120;
   // Initialise random values
-  srand(time(NULL));
-  chooseRandomIncrementAvoidance();
+  //srand(time(NULL));
+  //chooseRandomIncrementAvoidance();
+  printf("green_checker_init; init green color only.\n");
 }
 void green_checker_periodic()
 {
   // Check the amount of orange. If this is above a threshold
   // you want to turn a certain amount of degrees
-  safeToGoForwards = color_count < tresholdColorCounter;
-  printf("Checking if this function is called %d threshold: %d now: %d \n", color_count, tresholdColorCounter,
-         safeToGoForwards);
+  //safeToGoForwards = color_count < tresholdColorCounter;
+  printf("green_checker_periodic; doing nothing yet.\n");
 }
 
 

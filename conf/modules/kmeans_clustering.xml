@@ -1,0 +1,22 @@
+<!DOCTYPE module SYSTEM "module.dtd">
+
+<module name="kmeans_clustering">
+  <doc>
+    <description>
+	idx = kmeans(X,k) performs k-means clustering to partition the observations of the n-by-p data matrix X into k clusters, and returns an n-by-1 vector (idx) containing cluster indices of each observation. Rows of X correspond to points and columns correspond to variables.
+	By default, kmeans uses the squared Euclidean distance measure and the k-means++ algorithm for cluster center initialization.
+	Link: https://nl.mathworks.com/help/stats/kmeans.html?requestedDomain=www.mathworks.com
+	By adding this module to your flightplan and flying in the cyberzoo with the flightplan TUDELFT/tudelft_course2016_avoid_orange_cyberzoo.xml you will avoid every obstacle that is orange.
+    </description>
+  </doc>
+  <!-- depends>cv_colorfilter.xml</depends>  -->
+  <header>
+    <file name="kmeans_clustering.h"/>
+  </header>
+  <init fun="kmeans_clustering_init()"/>
+  <periodic fun="kmeans_clustering_periodic()" freq="4"/>
+  <makefile >
+    <file name="kmeans_clustering.c"/>
+  </makefile>
+</module>
+
