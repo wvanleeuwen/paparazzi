@@ -25,8 +25,8 @@ int32_t incrementForAvoidanceObjects;
 void green_checker_init()
 {
   // Initialise the variables of the colorfilter to accept green
-  color_lum_min = 20;
-  color_lum_max = 255;
+  color_lum_min = 0;
+  color_lum_max = 150;
   color_cb_min = 0;
   color_cb_max = 120;
   color_cr_min = 0;

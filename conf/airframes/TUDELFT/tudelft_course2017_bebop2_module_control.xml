@@ -55,6 +55,7 @@
 			<define name="COLORFILTER_CAMERA" value="front_camera" />
 		</module>
 		<module name="orange_avoider" />
+		<module name="black_avoider" />
 		<module name="green_checker" />
 		<module name="opticalflow_calculation" />
 		<module name="kmeans_clustering" />
