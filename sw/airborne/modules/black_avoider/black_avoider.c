@@ -60,9 +60,9 @@ void black_avoider_periodic()
   // Check the amount of orange. If this is above a threshold
   // you want to turn a certain amount of degrees
   safeToGoForwardBlack = color_count < tresholdColorCountBlack;
-  VERBOSE_PRINT("Color_count: %d  threshold: %d safe: %d \n", color_count, tresholdColorCountBlack, safeToGoForward);
+  VERBOSE_PRINT("Color_count: %d  threshold: %d safe: %d \n", color_count, tresholdColorCountBlack, safeToGoForwardBlack);
   float moveDistance = fmin(maxDistanceBlack, 0.05 * trajectoryConfidenceBlack);
-  if(safeToGoForward){
+  if(safeToGoForwardBlack){
       moveWaypointForwardBlack(WP_GOAL, moveDistance);
       moveWaypointForwardBlack(WP_TRAJECTORY, 1.25 * moveDistance);
       nav_set_heading_towards_waypoint(WP_GOAL);

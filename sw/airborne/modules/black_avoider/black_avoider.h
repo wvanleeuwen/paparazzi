@@ -24,6 +24,7 @@ extern uint8_t moveWaypointForwardBlack(uint8_t, float);
 extern uint8_t moveWaypointBlack(uint8_t, struct EnuCoor_i *);
 extern uint8_t increase_nav_headingBlack(int32_t *, float);
 extern uint8_t chooseRandomIncrementAvoidanceBlack(void);
+extern uint8_t calculateForwardsBlack(struct EnuCoor_i *, float);
 
 #endif
 
