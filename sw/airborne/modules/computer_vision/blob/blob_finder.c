@@ -33,6 +33,7 @@
 void image_labeling(struct image_t *input, struct image_t *output, struct image_filter_t *filters, uint8_t filters_cnt,
                     struct image_label_t *labels, uint16_t *labels_count)
 {
+	printf("BLOB_FINDER: image_labeling");
   uint8_t *input_buf = (uint8_t *)input->buf;
   uint16_t *output_buf = (uint16_t *)output->buf;
 

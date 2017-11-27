@@ -69,7 +69,7 @@ void image_free(struct image_t *img)
 }
 
 /**
- * Copy an image from inut to output
+ * Copy an image from input to output
  * This will only work if the formats are the same
  * @param[in] *input The input image to copy from
  * @param[out] *output The out image to copy to
@@ -137,7 +137,6 @@ void image_to_grayscale(struct image_t *input, struct image_t *output)
 /**
  * Filter colors in an YUV422 image
  * @param[in] *input The input image to filter
- * @param[out] *output The filtered output image
  * @param[in] y_m The Y minimum value
  * @param[in] y_M The Y maximum value
  * @param[in] u_m The U minimum value
@@ -146,35 +145,37 @@ void image_to_grayscale(struct image_t *input, struct image_t *output)
  * @param[in] v_M The V maximum value
  * @return The amount of filtered pixels
  */
-uint16_t image_yuv422_colorfilt(struct image_t *input, struct image_t *output, uint8_t y_m, uint8_t y_M, uint8_t u_m,
+uint16_t image_yuv422_colorfilt(struct image_t *input, uint8_t y_m, uint8_t y_M, uint8_t u_m,
                                 uint8_t u_M, uint8_t v_m, uint8_t v_M)
 {
   uint16_t cnt = 0;
   uint8_t *source = input->buf;
-  uint8_t *dest = output->buf;
+  //uint8_t *dest = output->buf;
 
   // Copy the creation timestamp (stays the same)
-  output->ts = input->ts;
+  //output->ts = input->ts;
 
   // Go trough all the pixels
-  for (uint16_t y = 0; y < output->h; y++) {
-    for (uint16_t x = 0; x < output->w; x += 2) {
+  for (uint16_t y = 0; y < source; y++) {
+    for (uint16_t x = 0; x < source; x += 2) {
       // Check if the color is inside the specified values
       if (
-        (dest[1] >= y_m)
-        && (dest[1] <= y_M)
-        && (dest[0] >= u_m)
-        && (dest[0] <= u_M)
-        && (dest[2] >= v_m)
-        && (dest[2] <= v_M)
+        (source[1] >= y_m)
+        && (source[1] <= y_M)
+        && (source[0] >= u_m)
+        && (source[0] <= u_M)
+        && (source[2] >= v_m)
+        && (source[2] <= v_M)
       ) {
         cnt ++;
+        /*
         // UYVY
         dest[0] = 64;        // U
         dest[1] = source[1];  // Y
         dest[2] = 255;        // V
         dest[3] = source[3];  // Y
-      } else {
+*/
+      } /*else {
         // UYVY
         char u = source[0] - 127;
         u /= 4;
@@ -184,10 +185,10 @@ uint16_t image_yuv422_colorfilt(struct image_t *input, struct image_t *output, u
         u /= 4;
         dest[2] = 127;        // V
         dest[3] = source[3];  // Y
-      }
+      }*/
 
       // Go to the next 2 pixels
-      dest += 4;
+      //dest += 4;
       source += 4;
     }
   }

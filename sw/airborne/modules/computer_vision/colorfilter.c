@@ -32,26 +32,52 @@
 struct video_listener *listener = NULL;
 
 // Filter Settings
-uint8_t color_lum_min = 105;
-uint8_t color_lum_max = 205;
-uint8_t color_cb_min  = 52;
-uint8_t color_cb_max  = 140;
-uint8_t color_cr_min  = 180;
-uint8_t color_cr_max  = 255;
+uint8_t orange_color_lum_min = 105;
+uint8_t orange_color_lum_max = 205;
+uint8_t orange_color_cb_min  = 52;
+uint8_t orange_color_cb_max  = 140;
+uint8_t orange_color_cr_min  = 180;
+uint8_t orange_color_cr_max  = 255;
+
+uint8_t black_color_lum_min = 105;
+uint8_t black_color_lum_max = 205;
+uint8_t black_color_cb_min  = 52;
+uint8_t black_color_cb_max  = 140;
+uint8_t black_color_cr_min  = 180;
+uint8_t black_color_cr_max  = 255;
+
+uint8_t green_color_lum_min = 105;
+uint8_t green_color_lum_max = 205;
+uint8_t green_color_cb_min  = 52;
+uint8_t green_color_cb_max  = 140;
+uint8_t green_color_cr_min  = 180;
+uint8_t green_color_cr_max  = 255;
 
 // Result
-int color_count = 0;
+int orange_color_count = 0;
+int black_color_count = 0;
+int green_color_count = 0;
 
 // Function
-struct image_t *colorfilter_func(struct image_t *img);
 struct image_t *colorfilter_func(struct image_t *img)
 {
   // Filter
-  color_count = image_yuv422_colorfilt(img, img,
-                                       color_lum_min, color_lum_max,
-                                       color_cb_min, color_cb_max,
-                                       color_cr_min, color_cr_max
+  orange_color_count = image_yuv422_colorfilt(img,
+		  orange_color_lum_min, orange_color_lum_max,
+		  orange_color_cb_min, orange_color_cb_max,
+		  orange_color_cr_min, orange_color_cr_max
                                       );
+  black_color_count = image_yuv422_colorfilt(img,
+		  black_color_lum_min, black_color_lum_max,
+		  black_color_cb_min, black_color_cb_max,
+		  black_color_cr_min, black_color_cr_max
+                                      );
+  green_color_count = image_yuv422_colorfilt(img,
+		  green_color_lum_min, green_color_lum_max,
+		  green_color_cb_min, green_color_cb_max,
+		  green_color_cr_min, green_color_cr_max
+                                      );
+
 
   return img; // Colorfilter did not make a new image
 }

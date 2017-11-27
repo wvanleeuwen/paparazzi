@@ -47,16 +47,16 @@ void green_checker_init()
   // Initialise random values
   srand(time(NULL));
   chooseRandomIncrementAcceptance_green();
-  printf("green_checker_init; init green color only.\n");
+  //printf("green_checker_init; init green color only.\n");
 }
 void green_checker_periodic()
 {
-	printf("### green_checker_periodic ####\n");
+	//printf("### green_checker_periodic ####\n");
   // Check the amount of green. If this is under the threshold
   // you want to turn a certain amount of degrees
 	safeToGoForwardsGreen = color_count > tresholdColorCounterGreen;
 
-  VERBOSE_PRINT("Color_count: %d  threshold: %d safe: %d \n", color_count, tresholdColorCounterGreen, safeToGoForwardsGreen);
+  //VERBOSE_PRINT("Color_count: %d  threshold: %d safe: %d \n", color_count, tresholdColorCounterGreen, safeToGoForwardsGreen);
     float moveDistance = fmin(maxDistanceGreen, 0.05 * trajectoryConfidenceGreen);
     if(safeToGoForwardsGreen){
     	moveWaypointForwards_green(WP_GOAL, moveDistance);
@@ -91,7 +91,7 @@ uint8_t increase_nav_heading_green(int32_t *heading, int32_t incrementDegrees)
 	  // Check if your turn made it go out of bounds...
 	  INT32_ANGLE_NORMALIZE(newHeading); // HEADING HAS INT32_ANGLE_FRAC....
 	  *heading = newHeading;
-	  VERBOSE_PRINT("Increasing heading to %f\n", ANGLE_FLOAT_OF_BFP(*heading) * 180 / M_PI);
+	  //VERBOSE_PRINT("Increasing heading to %f\n", ANGLE_FLOAT_OF_BFP(*heading) * 180 / M_PI);
 	  return false;
 }
 
@@ -108,7 +108,7 @@ uint8_t calculateForwardsGreen(struct EnuCoor_i *new_coor, float distanceMeters)
   // Now determine where to place the waypoint you want to go to
   new_coor->x                       = pos->x + POS_BFP_OF_REAL(sin_heading * (distanceMeters));
   new_coor->y                       = pos->y + POS_BFP_OF_REAL(cos_heading * (distanceMeters));
-  VERBOSE_PRINT("Calculated %f m forward position. x: %f  y: %f based on pos(%f, %f) and heading(%f)\n", distanceMeters, POS_FLOAT_OF_BFP(new_coor->x), POS_FLOAT_OF_BFP(new_coor->y), POS_FLOAT_OF_BFP(pos->x), POS_FLOAT_OF_BFP(pos->y), ANGLE_FLOAT_OF_BFP(eulerAngles->psi)*180/M_PI);
+  //VERBOSE_PRINT("Calculated %f m forward position. x: %f  y: %f based on pos(%f, %f) and heading(%f)\n", distanceMeters, POS_FLOAT_OF_BFP(new_coor->x), POS_FLOAT_OF_BFP(new_coor->y), POS_FLOAT_OF_BFP(pos->x), POS_FLOAT_OF_BFP(pos->y), ANGLE_FLOAT_OF_BFP(eulerAngles->psi)*180/M_PI);
   return false;
 }
 
@@ -117,7 +117,7 @@ uint8_t calculateForwardsGreen(struct EnuCoor_i *new_coor, float distanceMeters)
  */
 uint8_t moveWaypointGreen(uint8_t waypoint, struct EnuCoor_i *new_coor)
 {
-  VERBOSE_PRINT("Moving waypoint %d to x:%f y:%f\n", waypoint, POS_FLOAT_OF_BFP(new_coor->x), POS_FLOAT_OF_BFP(new_coor->y));
+  //VERBOSE_PRINT("Moving waypoint %d to x:%f y:%f\n", waypoint, POS_FLOAT_OF_BFP(new_coor->x), POS_FLOAT_OF_BFP(new_coor->y));
   waypoint_set_xy_i(waypoint, new_coor->x, new_coor->y);
   return false;
 }

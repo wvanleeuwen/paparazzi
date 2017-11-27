@@ -51,15 +51,15 @@
 		<module name="cv_colorfilter">
 			<define name="COLORFILTER_CAMERA" value="front_camera" />
 		</module>
-				<module name="orange_avoider" />
-		<module name="black_avoider" />
-		<module name="green_checker" /> <!-- needs critical review -->
+		<module name="orange_avoider" />
+		<!--  module name="black_avoider" /> integrated into orange_avoider (new name?) -->
+		<!--  module name="green_checker" /> integrated into orange_avoider (new name?) -->
 		<module name="cv_blob_locator" > <!-- replaced by cv_opticflow? now using both... -->
 			<define name="BLOB_LOCATOR_CAMERA" value="front_camera"/>
-			<define name="WP_p1" value="0"/> <!-- let's ask Christophe (mail sent) -->
-			<define name="WP_p2" value="0"/> <!-- let's ask Christophe (mail sent) -->
-			<define name="WP_p3" value="0"/> <!-- let's ask Christophe (mail sent) -->
-			<define name="WP_p4" value="0"/> <!-- let's ask Christophe (mail sent) -->
+			<define name="WP_p1" value="0"/> 
+			<define name="WP_p2" value="0"/> 
+			<define name="WP_p3" value="0"/> 
+			<define name="WP_p4" value="0"/> 
 			<define name="WP_CAM" value="0"/>
 		</module>
 		<module name="pose_history"/>
@@ -67,8 +67,8 @@
       		<define name="OPTICFLOW_CAMERA" value="front_camera"/> <!-- flow-vectors not configured yet -->
     	</module>
     	<module name="opticflow_hover"/>
-		<!-- module name="opticalflow_calculation" --> <!-- cv_optical flow already there -->
-		<module name="kmeans_clustering" /> <!-- not implemented yet -->
+		<!-- <module name="opticalflow_calculation" / --> <!-- cv_optical flow already there, although not configured yet -->
+		<!-- <module name="kmeans_clustering" / -->  <!-- not implemented yet -->
 		<module name="video_rtp_stream">
 			<configure name="VIEWVIDEO_HOST" value="192.168.42.65" />
 			<configure name="VIEWVIDEO_BROADCAST" value="FALSE" />

@@ -24,7 +24,7 @@ void kmeans_clustering_init()
   // Initialise random values
   //srand(time(NULL));
   //chooseRandomIncrementAvoidance();
-	printf("Initialized kmeans_clustering: on this moment this module is doing nothing yet.\n");
+	//printf("Initialized kmeans_clustering: on this moment this module is doing nothing yet.\n");
 }
 void kmeans_clustering_periodic()
 {
@@ -33,5 +33,5 @@ void kmeans_clustering_periodic()
   //safeToGoaForwards = color_count < tresholdColorCounter;
   //printf("Checking if this function is called %d threshold: %d now: %d \n", color_count, tresholdColorCounter,
   //       safeToGoForwards);
-	printf("Periodically called kmeans_clustering: on this moment this module is doing nothing yet.\n");
+	//printf("Periodically called kmeans_clustering: on this moment this module is doing nothing yet.\n");
 }
