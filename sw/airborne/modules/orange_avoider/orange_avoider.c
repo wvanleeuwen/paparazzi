@@ -66,7 +66,7 @@ void orange_avoider_init()
 
   // Initialise random values
   srand(time(NULL));
-  chooseRandomIncrementAvoidance();
+  chooseIncrementAvoidanceAccordingToCurrentPosition();
 }
 
 /*
@@ -95,7 +95,7 @@ void orange_avoider_periodic()
       moveWaypointForward(WP_GOAL, moveDistance);
       moveWaypointForward(WP_TRAJECTORY, 1.25 * moveDistance);
       nav_set_heading_towards_waypoint(WP_GOAL);
-      chooseRandomIncrementAvoidance();
+      chooseIncrementAvoidanceAccordingToCurrentPosition();
       trajectoryConfidence += 1;
   }
   else{
@@ -161,6 +161,22 @@ uint8_t moveWaypointForward(uint8_t waypoint, float distanceMeters)
   struct EnuCoor_i new_coor;
   calculateForwards(&new_coor, distanceMeters);
   moveWaypoint(waypoint, &new_coor);
+  return false;
+}
+
+/*
+ * Sets the variable 'incrementForAvoidance' positive/negative according to current position
+ */
+uint8_t chooseIncrementAvoidanceAccordingToCurrentPosition()
+{
+  struct EnuCoor_i *pos = stateGetPositionEnu_i(); // Get your current position
+  if(((pos->x) < 0) || ((pos->y)<0)){
+    incrementForAvoidance = 10.0;
+    //VERBOSE_PRINT("Set avoidance increment to: %f\n", incrementForAvoidance);
+  } else {
+    incrementForAvoidance = -10.0;
+    //VERBOSE_PRINT("Set avoidance increment to: %f\n", incrementForAvoidance);
+  }
   return false;
 }
 
