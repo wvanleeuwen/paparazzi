@@ -95,14 +95,20 @@ void orange_avoider_periodic()
       moveWaypointForward(WP_TRAJECTORY, 1.25 * moveDistance);
       nav_set_heading_towards_waypoint(WP_GOAL);
       //chooseIncrementAvoidanceAccordingToCurrentPosition();
-      chooseRandomIncrementAvoidance();
+      // chooseRandomIncrementAvoidance();
       trajectoryConfidence += 1;
+
+      incrementForAvoidance = (float)(rand() % 360) - 180.0f;
+      if(incrementForAvoidance > -45 && incrementForAvoidance < 0) incrementForAvoidance = -45;
+      else if(incrementForAvoidance < 45 && incrementForAvoidance >= 0) incrementForAvoidance = 45;
   }
 
   else{
       waypoint_set_here_2d(WP_GOAL);
       waypoint_set_here_2d(WP_TRAJECTORY);
+      
       increase_nav_heading(&nav_heading, incrementForAvoidance);
+      //  set_nav_heading
       if(trajectoryConfidence > 5){
           trajectoryConfidence -= 4;
       }
