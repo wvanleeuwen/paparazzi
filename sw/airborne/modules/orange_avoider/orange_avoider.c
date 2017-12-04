@@ -83,8 +83,9 @@ void orange_avoider_periodic()
   printf("THRESHOLD color count: %d\n", tresholdColorCount);
 
   safeToGoForward = (orange_color_count < tresholdColorCount &&
-		  	  	  	  black_color_count < tresholdColorCount &&
-					  	  green_color_count > tresholdColorCount); // probably tresholdColorCount to high for green
+		  	  	  	  black_color_count < tresholdColorCount);
+ //&&
+//					  	  green_color_count > tresholdColorCount); // probably tresholdColorCount to high for green
 
   if(!safeToGoForward){
 	  printf("not safe to go forward");
@@ -95,9 +96,11 @@ void orange_avoider_periodic()
       moveWaypointForward(WP_GOAL, moveDistance);
       moveWaypointForward(WP_TRAJECTORY, 1.25 * moveDistance);
       nav_set_heading_towards_waypoint(WP_GOAL);
-      chooseIncrementAvoidanceAccordingToCurrentPosition();
+      //chooseIncrementAvoidanceAccordingToCurrentPosition();
+      chooseRandomIncrementAvoidance();
       trajectoryConfidence += 1;
   }
+
   else{
       waypoint_set_here_2d(WP_GOAL);
       waypoint_set_here_2d(WP_TRAJECTORY);

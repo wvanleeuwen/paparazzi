@@ -39,6 +39,13 @@ extern uint8_t green_color_cb_max;
 extern uint8_t green_color_cr_min;
 extern uint8_t green_color_cr_max;
 
+extern uint8_t color_lum_min;
+extern uint8_t color_lum_max;
+extern uint8_t color_cb_min;
+extern uint8_t color_cb_max;
+extern uint8_t color_cr_min;
+extern uint8_t color_cr_max;
+
 extern uint8_t orange_color_lum_min;
 extern uint8_t orange_color_lum_max;
 extern uint8_t orange_color_cb_min;

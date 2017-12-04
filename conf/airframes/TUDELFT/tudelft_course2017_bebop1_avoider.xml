@@ -73,8 +73,8 @@
 		<!-- <module name="opticalflow_calculation" / --> <!-- cv_optical flow already there, although not configured yet -->
 		<!-- <module name="kmeans_clustering" / -->  <!-- not implemented yet -->
 		<module name="video_rtp_stream">
-			<configure name="VIEWVIDEO_HOST" value="192.168.42.65" />
-			<configure name="VIEWVIDEO_BROADCAST" value="FALSE" />
+			<configure name="VIEWVIDEO_HOST" value="192.168.42.55" />
+			<configure name="VIEWVIDEO_BROADCAST" value="TRUE" />
 			<define name="VIEWVIDEO_CAMERA" value="front_camera" />
 			<define name="VIEWVIDEO_SHOT_PATH" value="/data/ftp/internal_000" />
 			<define name="VIEWVIDEO_FPS" value="18" />
