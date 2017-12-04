@@ -145,7 +145,7 @@ void image_to_grayscale(struct image_t *input, struct image_t *output)
  * @param[in] v_M The V maximum value
  * @return The amount of filtered pixels
  */
-#define FILL_DEST 1
+#define FILL_DEST 0
 uint16_t image_yuv422_colorfilt(struct image_t *input, struct image_t *output, uint8_t y_m, uint8_t y_M, uint8_t u_m,
                                 uint8_t u_M, uint8_t v_m, uint8_t v_M)
 {
@@ -170,7 +170,8 @@ uint16_t image_yuv422_colorfilt(struct image_t *input, struct image_t *output, u
       ) {
         cnt ++;
 
-#if FILL_DEST        
+#if FILL_DEST    
+        printf("Ditmoet je nooit zien\n");    
         // UYVY
         dest[0] = 64;        // U
         dest[1] = source[1];  // Y

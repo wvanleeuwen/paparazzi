@@ -30,7 +30,8 @@
 #endif
 
 uint8_t safeToGoForward        = false;
-int tresholdColorCount          = 0.05 * 124800; // 520 x 240 = 124.800 total pixels
+int tresholdColorCount          = 10000; //0.05 * 124800; // 520 x 240 = 124.800 total pixels
+int tresholdGreen = 30;
 float incrementForAvoidance;
 uint16_t trajectoryConfidence   = 1;
 float maxDistance               = 2.25;
@@ -41,28 +42,26 @@ float maxDistance               = 2.25;
 void orange_avoider_init()
 {
   // Initialise the variables of the colorfilter to accept orange
-  orange_color_lum_min = 20;
-  orange_color_lum_max = 255;
-  orange_color_cb_min  = 75;
-  orange_color_cb_max  = 145;
-  orange_color_cr_min  = 167;
-  orange_color_cr_max  = 255;
+ orange_color_lum_min = 20;
+ orange_color_lum_max = 255;
+ orange_color_cb_min  = 75;
+ orange_color_cb_max  = 145;
+ orange_color_cr_min  = 158;
+ orange_color_cr_max  = 255;
 
-  // Initialise the variables of the colorfilter to accept black
-  black_color_lum_min = 0;
-  black_color_lum_max = 10;
-  black_color_cb_min  = 105;
-  black_color_cb_max  = 135;
-  black_color_cr_min  = 115;
-  black_color_cr_max  = 146;
+ black_color_lum_min = 0;
+ black_color_lum_max = 51;
+ black_color_cb_min  = 105;
+ black_color_cb_max  = 135;
+ black_color_cr_min  = 115;
+ black_color_cr_max  = 145;
 
-  // Initialise the variables of the colorfilter to accept green
-  green_color_lum_min = 0;
-  green_color_lum_max = 150;
-  green_color_cb_min = 0;
-  green_color_cb_max = 120;
-  green_color_cr_min = 0;
-  green_color_cr_max = 120;
+ green_color_lum_min = 0;
+ green_color_lum_max = 142;
+ green_color_cb_min  = 0;
+ green_color_cb_max  = 110;
+ green_color_cr_min  = 0;
+ green_color_cr_max  = 143;
 
   // Initialise random values
   srand(time(NULL));
@@ -82,10 +81,9 @@ void orange_avoider_periodic()
   printf("GREEN color_count:%d\n ", green_color_count);
   printf("THRESHOLD color count: %d\n", tresholdColorCount);
 
-  safeToGoForward = (orange_color_count < tresholdColorCount &&
-		  	  	  	  black_color_count < tresholdColorCount);
- //&&
-//					  	  green_color_count > tresholdColorCount); // probably tresholdColorCount to high for green
+  safeToGoForward = (orange_color_count < tresholdColorCount && green_color_count > tresholdGreen); // probably tresholdColorCount to high for green
+//		  	  	  	  black_color_count < tresholdColorCount &&
+					  	  
 
   if(!safeToGoForward){
 	  printf("not safe to go forward");

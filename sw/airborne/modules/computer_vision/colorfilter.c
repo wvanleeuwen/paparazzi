@@ -40,26 +40,26 @@ uint8_t color_cb_max  = 140;
 uint8_t color_cr_min  = 180;
 uint8_t color_cr_max  = 255;
 
-uint8_t orange_color_lum_min = 105;
-uint8_t orange_color_lum_max = 205;
-uint8_t orange_color_cb_min  = 52;
-uint8_t orange_color_cb_max  = 140;
-uint8_t orange_color_cr_min  = 180;
+uint8_t orange_color_lum_min = 20;
+uint8_t orange_color_lum_max = 255;
+uint8_t orange_color_cb_min  = 75;
+uint8_t orange_color_cb_max  = 145;
+uint8_t orange_color_cr_min  = 158;
 uint8_t orange_color_cr_max  = 255;
 
-uint8_t black_color_lum_min = 105;
-uint8_t black_color_lum_max = 205;
-uint8_t black_color_cb_min  = 52;
-uint8_t black_color_cb_max  = 140;
-uint8_t black_color_cr_min  = 180;
-uint8_t black_color_cr_max  = 255;
+uint8_t black_color_lum_min = 0;
+uint8_t black_color_lum_max = 80;
+uint8_t black_color_cb_min  = 105;
+uint8_t black_color_cb_max  = 135;
+uint8_t black_color_cr_min  = 115;
+uint8_t black_color_cr_max  = 145;
 
-uint8_t green_color_lum_min = 105;
-uint8_t green_color_lum_max = 205;
-uint8_t green_color_cb_min  = 52;
-uint8_t green_color_cb_max  = 140;
-uint8_t green_color_cr_min  = 180;
-uint8_t green_color_cr_max  = 255;
+uint8_t green_color_lum_min = 0;
+uint8_t green_color_lum_max = 142;
+uint8_t green_color_cb_min  = 0;
+uint8_t green_color_cb_max  = 110;
+uint8_t green_color_cr_min  = 0;
+uint8_t green_color_cr_max  = 143;
 
 // Result
 int orange_color_count = 0;
@@ -71,31 +71,31 @@ struct image_t *colorfilter_func(struct image_t *img);
 
 struct image_t *colorfilter_func(struct image_t *img)
 {
- orange_color_lum_min = color_lum_min;
+ /*orange_color_lum_min = color_lum_min;
  orange_color_lum_max = color_lum_max;
  orange_color_cb_min  = color_cb_min;
  orange_color_cb_max  = color_cb_max;
  orange_color_cr_min  = color_cr_min;
  orange_color_cr_max  = color_cr_max;
-
+*/
   // Filter
   orange_color_count = image_yuv422_colorfilt(img, img,
 		  orange_color_lum_min, orange_color_lum_max,
 		  orange_color_cb_min, orange_color_cb_max,
 		  orange_color_cr_min, orange_color_cr_max
-                                      );
-  /*black_color_count = image_yuv422_colorfilt(img, img,
+                                      ); 
+  /*
+black_color_count = image_yuv422_colorfilt(img, img,
 		  black_color_lum_min, black_color_lum_max,
 		  black_color_cb_min, black_color_cb_max,
 		  black_color_cr_min, black_color_cr_max
                                       );
+*/
   green_color_count = image_yuv422_colorfilt(img, img,
 		  green_color_lum_min, green_color_lum_max,
 		  green_color_cb_min, green_color_cb_max,
 		  green_color_cr_min, green_color_cr_max
                                       );
-*/
-
   return img; // Colorfilter did not make a new image
 }
 
